@@ -1,0 +1,15 @@
+{
+  "name": "prototype-studio",
+  "owner": {
+    "name": "Rafael Cespedes"
+  },
+  "description": "A design-tool harness for the prototype you already have.",
+  "plugins": [
+    {
+      "name": "prototype-studio",
+      "source": "./",
+      "description": "Inspector, timeline, layers, presets and export — dropped in around any prototype, in any runtime, installed component by component and kept up to date. Ships as an agent skill, a Claude Code plugin and a component registry.",
+      "version": "0.1.0"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+name: New shell or control
+description: Propose a kind of tool the kit should cover, or a control it's missing.
+labels: [proposal]
+body:
+  - type: textarea
+    id: tool
+    attributes:
+      label: What kind of tool
+      description: What gets designed in it, and who uses it (the designer tuning it, a client, an engineer).
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference tools
+      description: Which pro tools do this well, and which specific behaviour should we borrow? Links or screenshots.
+  - type: textarea
+    id: gap
+    attributes:
+      label: What the kit can't do today
+      description: The control, layout or surface that's missing.

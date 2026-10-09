@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Kit guide
+    url: https://github.com/OWNER/prototype-studio/blob/main/docs/KIT.md
+    about: The full kit API — check here before asking how something works.

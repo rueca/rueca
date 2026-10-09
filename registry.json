@@ -1,0 +1,445 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "prototype-studio",
+  "homepage": "https://OWNER.github.io/prototype-studio",
+  "items": [
+    {
+      "name": "studio",
+      "type": "registry:block",
+      "title": "Studio kit (everything)",
+      "description": "The whole harness: schema → inspector, clock, surfaces, layout, stage, timeline, layers, palette, toasts and theme.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/actions.json",
+        "https://OWNER.github.io/prototype-studio/r/button.json",
+        "https://OWNER.github.io/prototype-studio/r/color.json",
+        "https://OWNER.github.io/prototype-studio/r/controls.json",
+        "https://OWNER.github.io/prototype-studio/r/core.json",
+        "https://OWNER.github.io/prototype-studio/r/inspector.json",
+        "https://OWNER.github.io/prototype-studio/r/layers.json",
+        "https://OWNER.github.io/prototype-studio/r/palette.json",
+        "https://OWNER.github.io/prototype-studio/r/scrub.json",
+        "https://OWNER.github.io/prototype-studio/r/slider.json",
+        "https://OWNER.github.io/prototype-studio/r/special.json",
+        "https://OWNER.github.io/prototype-studio/r/stage.json",
+        "https://OWNER.github.io/prototype-studio/r/studio-layout.json",
+        "https://OWNER.github.io/prototype-studio/r/theme.json",
+        "https://OWNER.github.io/prototype-studio/r/timeline.json",
+        "https://OWNER.github.io/prototype-studio/r/toast.json",
+        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/index.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/index.ts"
+        }
+      ]
+    },
+    {
+      "name": "actions",
+      "type": "registry:component",
+      "title": "Actions",
+      "description": "Actions — part of the Prototype Studio kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0",
+        "zustand@^5.0.15"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/button.json",
+        "https://OWNER.github.io/prototype-studio/r/controls.json",
+        "https://OWNER.github.io/prototype-studio/r/core.json",
+        "https://OWNER.github.io/prototype-studio/r/toast.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/system/actions.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/system/actions.tsx"
+        }
+      ]
+    },
+    {
+      "name": "bridge",
+      "type": "registry:file",
+      "title": "Studio bridge",
+      "description": "2 KB script that lets the harness drive any page inside an iframe via postMessage.",
+      "dependencies": [],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "public/studio-bridge.js",
+          "type": "registry:file",
+          "target": "~/public/studio-bridge.js"
+        }
+      ]
+    },
+    {
+      "name": "button",
+      "type": "registry:component",
+      "title": "Button",
+      "description": "Button — part of the Prototype Studio kit.",
+      "dependencies": [
+        "class-variance-authority@^0.7.1"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/core.json",
+        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/button.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "color",
+      "type": "registry:component",
+      "title": "Colour",
+      "description": "Colour field, panel and swatches with OKLCH.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/controls.json",
+        "https://OWNER.github.io/prototype-studio/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/color.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/color.tsx"
+        }
+      ]
+    },
+    {
+      "name": "controls",
+      "type": "registry:component",
+      "title": "Controls",
+      "description": "Controls — part of the Prototype Studio kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/core.json",
+        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/controls.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/controls.tsx"
+        }
+      ]
+    },
+    {
+      "name": "core",
+      "type": "registry:lib",
+      "title": "Core",
+      "description": "Schema, param store (undo, presets, A/B, share), clock, hotkeys, IO and theme hook. Framework-agnostic.",
+      "dependencies": [
+        "clsx@^2.1.1",
+        "tailwind-merge@^3.7.0",
+        "zustand@^5.0.15"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/theme.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/core/clock.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/clock.ts"
+        },
+        {
+          "path": "src/kit/core/cn.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/cn.ts"
+        },
+        {
+          "path": "src/kit/core/hotkeys.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/hotkeys.ts"
+        },
+        {
+          "path": "src/kit/core/io.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/io.ts"
+        },
+        {
+          "path": "src/kit/core/params.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/params.ts"
+        },
+        {
+          "path": "src/kit/core/schema.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/schema.ts"
+        },
+        {
+          "path": "src/kit/core/theme.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/theme.ts"
+        }
+      ]
+    },
+    {
+      "name": "inspector",
+      "type": "registry:component",
+      "title": "Inspector",
+      "description": "Turns a schema into sections and rows with reset, hints and the changed-from-default cue.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/button.json",
+        "https://OWNER.github.io/prototype-studio/r/color.json",
+        "https://OWNER.github.io/prototype-studio/r/controls.json",
+        "https://OWNER.github.io/prototype-studio/r/core.json",
+        "https://OWNER.github.io/prototype-studio/r/scrub.json",
+        "https://OWNER.github.io/prototype-studio/r/slider.json",
+        "https://OWNER.github.io/prototype-studio/r/special.json",
+        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/inspector/Inspector.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/inspector/Inspector.tsx"
+        }
+      ]
+    },
+    {
+      "name": "layers",
+      "type": "registry:component",
+      "title": "Layer tree",
+      "description": "Layers with eye/lock, rename, drag to reorder, and tree helpers.",
+      "dependencies": [
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/layers/Layers.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/layers/Layers.tsx"
+        }
+      ]
+    },
+    {
+      "name": "palette",
+      "type": "registry:component",
+      "title": "Palette",
+      "description": "Palette — part of the Prototype Studio kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "cmdk@^1.1.1",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/button.json",
+        "https://OWNER.github.io/prototype-studio/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/system/palette.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/system/palette.tsx"
+        }
+      ]
+    },
+    {
+      "name": "scrub",
+      "type": "registry:component",
+      "title": "Scrub value",
+      "description": "Drag, type or write expressions into a number. Shift ×10, Alt ×0.1.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/scrub.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/scrub.tsx"
+        }
+      ]
+    },
+    {
+      "name": "slider",
+      "type": "registry:component",
+      "title": "Slider",
+      "description": "Slider — part of the Prototype Studio kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/slider.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/slider.tsx"
+        }
+      ]
+    },
+    {
+      "name": "special",
+      "type": "registry:component",
+      "title": "Special",
+      "description": "Special — part of the Prototype Studio kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/color.json",
+        "https://OWNER.github.io/prototype-studio/r/core.json",
+        "https://OWNER.github.io/prototype-studio/r/scrub.json",
+        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/special.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/special.tsx"
+        }
+      ]
+    },
+    {
+      "name": "stage",
+      "type": "registry:component",
+      "title": "Stage and surfaces",
+      "description": "Pan/zoom canvas camera, artboards, and Canvas / Mount / Frame surfaces for any runtime.",
+      "dependencies": [
+        "lucide-react@^1.54.0",
+        "zustand@^5.0.15"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/controls.json",
+        "https://OWNER.github.io/prototype-studio/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/stage/Stage.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/stage/Stage.tsx"
+        },
+        {
+          "path": "src/kit/stage/Surface.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/stage/Surface.tsx"
+        }
+      ]
+    },
+    {
+      "name": "studio-layout",
+      "type": "registry:component",
+      "title": "Studio layout",
+      "description": "Islands, overlay and docked layouts, toolbar, brand, clusters, tool dock, panels.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/core.json",
+        "https://OWNER.github.io/prototype-studio/r/toast.json",
+        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/layout/Studio.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/layout/Studio.tsx"
+        },
+        {
+          "path": "src/kit/layout/Toolbar.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/layout/Toolbar.tsx"
+        }
+      ]
+    },
+    {
+      "name": "theme",
+      "type": "registry:style",
+      "title": "Studio theme",
+      "description": "Contrast-audited dark + light tokens via @theme inline. Import it as the last line of your main CSS.",
+      "extends": "none",
+      "dependencies": [
+        "@fontsource-variable/inter@^5.3.0"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "src/kit/theme.css",
+          "type": "registry:file",
+          "target": "@components/studio/theme.css"
+        }
+      ]
+    },
+    {
+      "name": "timeline",
+      "type": "registry:component",
+      "title": "Timeline",
+      "description": "Ruler, lanes, keys, markers and a playhead driven by the clock.",
+      "dependencies": [
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/button.json",
+        "https://OWNER.github.io/prototype-studio/r/controls.json",
+        "https://OWNER.github.io/prototype-studio/r/core.json",
+        "https://OWNER.github.io/prototype-studio/r/studio-layout.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/timeline/Timeline.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/timeline/Timeline.tsx"
+        }
+      ]
+    },
+    {
+      "name": "toast",
+      "type": "registry:component",
+      "title": "Toast",
+      "description": "Toast — part of the Prototype Studio kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "src/kit/system/toast.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/system/toast.tsx"
+        }
+      ]
+    },
+    {
+      "name": "tooltip",
+      "type": "registry:component",
+      "title": "Tooltip",
+      "description": "Tooltip — part of the Prototype Studio kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0"
+      ],
+      "registryDependencies": [
+        "https://OWNER.github.io/prototype-studio/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/tooltip.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/tooltip.tsx"
+        }
+      ]
+    }
+  ]
+}

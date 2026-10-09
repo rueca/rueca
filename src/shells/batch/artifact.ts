@@ -1,0 +1,532 @@
+/* ---------------------------------------------------------------------------
+   The template. A pure function of (values, row, size) → pixels on a Canvas
+   2D context, in LOGICAL size units (the caller sets the transform for
+   preview resolution or export scale). The studio never reaches in here.
+
+   Layout rules (per size, overridable):
+     stack  tall formats — logo, headline, subhead, product, button
+     hero   square — copy top-left, product large bottom-right
+     split  wide — copy column left, product right
+   Copy is fitted, not cropped: a long headline shrinks to its line budget,
+   and anything that had to give is reported back as an issue.
+--------------------------------------------------------------------------- */
+import type { DataRow, SizeSpec, V } from './model'
+
+export const FONTS: Record<string, string> = {
+  inter: '"Inter Variable", Inter, system-ui, sans-serif',
+  serif: 'ui-serif, "New York", Georgia, "Times New Roman", serif',
+  rounded: 'ui-rounded, "SF Pro Rounded", system-ui, sans-serif',
+  mono: 'ui-monospace, "SF Mono", Menlo, monospace',
+}
+
+export interface DrawResult { issues: string[]; mode: 'stack' | 'hero' | 'split' }
+
+/* --- small maths --- */
+export function mulberry32(seed: number) {
+  let a = seed >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+const rgb = (hex: string): [number, number, number] => {
+  const h = /^#?[0-9a-f]{6}/i.test(hex) ? hex.replace('#', '').slice(0, 6) : '888888'
+  const n = parseInt(h, 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+export const mix = (a: string, b: string, k: number) => {
+  const [r1, g1, b1] = rgb(a), [r2, g2, b2] = rgb(b)
+  const m = (x: number, y: number) => Math.round(x + (y - x) * k)
+  return `rgb(${m(r1, r2)},${m(g1, g2)},${m(b1, b2)})`
+}
+const lum = (hex: string) => {
+  const f = (c: number) => { const s = c / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4 }
+  const [r, g, b] = rgb(hex)
+  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+}
+const contrast = (a: string, b: string) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
+/** whichever of ink / paper reads better on bg */
+export const textOn = (bg: string, ink: string, paper: string) => (contrast(bg, ink) >= contrast(bg, paper) ? ink : paper)
+
+/* --- text fitting --- */
+function wrap(ctx: CanvasRenderingContext2D, text: string, maxW: number) {
+  const words = text.split(/\s+/).filter(Boolean)
+  const lines: string[] = []
+  let line = ''
+  for (const w of words) {
+    const test = line ? `${line} ${w}` : w
+    if (ctx.measureText(test).width <= maxW || !line) line = test
+    else { lines.push(line); line = w }
+  }
+  if (line) lines.push(line)
+  return lines
+}
+
+interface Fitted { lines: string[]; size: number; lh: number; shrunk: number; truncated: boolean; width: number }
+
+function fit(ctx: CanvasRenderingContext2D, text: string, o: { size: number; min: number; maxW: number; maxLines: number; font: (s: number) => string; tracking?: number; lh?: number }): Fitted {
+  let size = o.size
+  const set = (s: number) => {
+    ctx.font = o.font(s)
+    ;(ctx as any).letterSpacing = `${((o.tracking ?? 0) / 100) * s}px`
+  }
+  let lines: string[] = []
+  for (let i = 0; i < 40; i++) {
+    set(size)
+    lines = wrap(ctx, text, o.maxW)
+    const widest = Math.max(0, ...lines.map((l) => ctx.measureText(l).width))
+    if ((lines.length <= o.maxLines && widest <= o.maxW) || size <= o.min) break
+    size = Math.max(o.min, size * 0.94)
+  }
+  let truncated = false
+  if (lines.length > o.maxLines) {
+    truncated = true
+    lines = lines.slice(0, o.maxLines)
+    let last = lines[o.maxLines - 1]
+    while (last.length > 1 && ctx.measureText(`${last}…`).width > o.maxW) last = last.slice(0, -1)
+    lines[o.maxLines - 1] = `${last.trimEnd()}…`
+  }
+  const width = Math.max(0, ...lines.map((l) => ctx.measureText(l).width))
+  return { lines, size, lh: size * (o.lh ?? 1.04), shrunk: size / o.size, truncated, width }
+}
+
+/** When true, layout runs without painting — used to place the product before the copy is drawn over it. */
+let DRY = false
+
+function drawLines(ctx: CanvasRenderingContext2D, f: Fitted, x: number, y: number, align: 'left' | 'center', font: (s: number) => string, color: string, tracking = 0) {
+  const height = f.lines.length ? (f.lines.length - 1) * f.lh + f.size * 1.02 : 0
+  if (DRY) return height
+  ctx.font = font(f.size)
+  ;(ctx as any).letterSpacing = `${(tracking / 100) * f.size}px`
+  ctx.fillStyle = color
+  ctx.textAlign = align
+  ctx.textBaseline = 'alphabetic'
+  f.lines.forEach((l, i) => ctx.fillText(l, x, y + f.size * 0.8 + i * f.lh))
+  ;(ctx as any).letterSpacing = '0px'
+  return height
+}
+
+/* --- procedural pieces --- */
+const metal = (ctx: CanvasRenderingContext2D, x0: number, x1: number) => {
+  const g = ctx.createLinearGradient(x0, 0, x1, 0)
+  ;[[0, '#7d8288'], [0.18, '#e6e9ec'], [0.34, '#b9bec4'], [0.55, '#f7f8f9'], [0.8, '#9ba1a7'], [1, '#666b71']].forEach(([s, c]) => g.addColorStop(s as number, c as string))
+  return g
+}
+
+export function drawSlice(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, color: string, rot: number) {
+  ctx.save()
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = mix(color, '#000000', 0.12); ctx.fill()
+  ctx.beginPath(); ctx.arc(x, y, r * 0.9, 0, Math.PI * 2); ctx.fillStyle = mix(color, '#ffffff', 0.78); ctx.fill()
+  const n = 9, gap = 0.07
+  for (let i = 0; i < n; i++) {
+    const a0 = rot + (i * Math.PI * 2) / n + gap, a1 = rot + ((i + 1) * Math.PI * 2) / n - gap
+    const am = (a0 + a1) / 2
+    ctx.beginPath()
+    ctx.moveTo(x + Math.cos(am) * r * 0.1, y + Math.sin(am) * r * 0.1)
+    ctx.arc(x, y, r * 0.8, a0, a1)
+    ctx.closePath()
+    const g = ctx.createRadialGradient(x, y, r * 0.1, x, y, r * 0.8)
+    g.addColorStop(0, mix(color, '#ffffff', 0.35)); g.addColorStop(1, mix(color, '#ffffff', 0.08))
+    ctx.fillStyle = g
+    ctx.fill()
+  }
+  ctx.restore()
+}
+
+function drawCan(ctx: CanvasRenderingContext2D, cx: number, bottom: number, H: number, row: DataRow, v: V, rnd: () => number) {
+  const W = H * 0.5, rx = W / 2, ry = W * 0.11
+  const x0 = cx - rx, top = bottom - H
+  const color = row.color
+  const shoulder = top + H * 0.085
+
+  // contact shadow
+  ctx.save()
+  ctx.translate(cx, bottom - ry * 0.4)
+  ctx.scale(1, 0.2)
+  const sg = ctx.createRadialGradient(0, 0, 0, 0, 0, W * 1.05)
+  sg.addColorStop(0, 'rgba(0,0,0,0.32)'); sg.addColorStop(0.6, 'rgba(0,0,0,0.1)'); sg.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = sg
+  ctx.fillRect(-W * 1.1, -W * 1.1, W * 2.2, W * 2.2)
+  ctx.restore()
+
+  const body = new Path2D()
+  body.moveTo(x0, shoulder)
+  body.lineTo(x0, bottom - ry)
+  body.ellipse(cx, bottom - ry, rx, ry, 0, Math.PI, 0, true)
+  body.lineTo(x0 + W, shoulder)
+  body.quadraticCurveTo(x0 + W, top + H * 0.045, cx + rx * 0.84, top + H * 0.03)
+  body.lineTo(cx - rx * 0.84, top + H * 0.03)
+  body.quadraticCurveTo(x0, top + H * 0.045, x0, shoulder)
+  body.closePath()
+
+  ctx.save()
+  ctx.fillStyle = color
+  ctx.fill(body)
+  ctx.clip(body)
+
+  // printed label
+  const ink = textOn(color, v.ink, v.paper)
+  const disp = FONTS[v.displayFont] ?? FONTS.inter, bodyF = FONTS[v.bodyFont] ?? FONTS.inter
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'alphabetic'
+  ctx.fillStyle = ink
+  ctx.font = `800 ${W * 0.34}px ${disp}`
+  ;(ctx as any).letterSpacing = `${-W * 0.012}px`
+  ctx.fillText(v.brandName || 'oro', cx, top + H * 0.36)
+  ;(ctx as any).letterSpacing = '0px'
+  ctx.globalAlpha = 0.5
+  ctx.fillRect(cx - W * 0.16, top + H * 0.395, W * 0.32, Math.max(1, W * 0.008))
+  ctx.globalAlpha = 1
+  ctx.font = `600 ${W * 0.075}px ${bodyF}`
+  let name = row.name || ''
+  while (name.length > 2 && ctx.measureText(name).width > W * 0.82) name = name.slice(0, -1)
+  ctx.fillText(name !== row.name ? `${name.trimEnd()}…` : name, cx, top + H * 0.46)
+  drawSlice(ctx, cx, top + H * 0.63, W * 0.17, mix(color, ink, 0.25), 0.3)
+  ctx.globalAlpha = 0.7
+  ctx.font = `500 ${W * 0.048}px ${bodyF}`
+  ctx.fillText('sparkling botanical water · 330ml', cx, top + H * 0.84)
+  ctx.globalAlpha = 1
+
+  // aluminium shoulder + base
+  ctx.fillStyle = metal(ctx, x0, x0 + W)
+  ctx.fillRect(x0, top, W, shoulder - top + H * 0.006)
+  ctx.fillRect(x0, bottom - H * 0.035, W, H * 0.04)
+
+  // cylindrical shading
+  const sh = ctx.createLinearGradient(x0, 0, x0 + W, 0)
+  ;[[0, 'rgba(0,0,0,0.42)'], [0.12, 'rgba(0,0,0,0.08)'], [0.24, 'rgba(255,255,255,0.32)'], [0.31, 'rgba(255,255,255,0.06)'], [0.62, 'rgba(0,0,0,0)'], [0.86, 'rgba(0,0,0,0.2)'], [1, 'rgba(0,0,0,0.5)']].forEach(([s, c]) => sh.addColorStop(s as number, c as string))
+  ctx.fillStyle = sh
+  ctx.fillRect(x0, top, W, H)
+
+  // condensation
+  for (let i = 0; i < 26; i++) {
+    const dx = x0 + W * (0.08 + rnd() * 0.84), dy = shoulder + (bottom - shoulder) * (0.05 + rnd() * 0.9)
+    const r = W * (0.006 + rnd() * 0.014)
+    ctx.beginPath(); ctx.ellipse(dx, dy, r, r * 1.25, 0, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.32)'; ctx.fill()
+    ctx.beginPath(); ctx.arc(dx - r * 0.3, dy - r * 0.4, r * 0.35, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fill()
+  }
+  ctx.restore()
+
+  // lid
+  const ly = top + H * 0.03
+  ctx.beginPath(); ctx.ellipse(cx, ly, rx * 0.84, ry * 0.84, 0, 0, Math.PI * 2)
+  ctx.fillStyle = metal(ctx, cx - rx, cx + rx); ctx.fill()
+  ctx.beginPath(); ctx.ellipse(cx, ly + ry * 0.05, rx * 0.72, ry * 0.68, 0, 0, Math.PI * 2)
+  ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fill()
+  ctx.beginPath(); ctx.ellipse(cx + rx * 0.05, ly - ry * 0.05, rx * 0.26, ry * 0.3, 0, 0, Math.PI * 2)
+  ctx.fillStyle = '#c9cdd1'; ctx.fill()
+  ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = Math.max(0.5, W * 0.006); ctx.stroke()
+  return { left: x0, right: x0 + W, top, bottom, w: W }
+}
+
+/* --- logo --- */
+function logoWidth(ctx: CanvasRenderingContext2D, v: V, h: number, img: HTMLImageElement | null) {
+  if (img) return (img.naturalWidth / Math.max(1, img.naturalHeight)) * h * 1.15
+  ctx.font = `800 ${h * 1.05}px ${FONTS[v.displayFont] ?? FONTS.inter}`
+  const word = ctx.measureText(v.brandName || 'oro').width
+  return v.logoStyle === 'mark' ? h : v.logoStyle === 'word' ? word : h + h * 0.32 + word
+}
+function drawLogo(ctx: CanvasRenderingContext2D, v: V, x: number, y: number, h: number, color: string, img: HTMLImageElement | null) {
+  if (DRY) return
+  if (img) { const w = logoWidth(ctx, v, h, img); ctx.drawImage(img, x, y - h * 0.075, w, h * 1.15); return }
+  ctx.save()
+  let cx = x
+  if (v.logoStyle !== 'word') {
+    const r = h / 2
+    ctx.beginPath(); ctx.arc(x + r, y + r, r * 0.8, 0, Math.PI * 2)
+    ctx.strokeStyle = color; ctx.lineWidth = h * 0.2; ctx.stroke()
+    ctx.beginPath(); ctx.arc(x + r + r * 0.56, y + r - r * 0.56, r * 0.26, 0, Math.PI * 2)
+    ctx.fillStyle = color; ctx.fill()
+    cx = x + h + h * 0.32
+  }
+  if (v.logoStyle !== 'mark') {
+    ctx.font = `800 ${h * 1.05}px ${FONTS[v.displayFont] ?? FONTS.inter}`
+    ;(ctx as any).letterSpacing = `${-h * 0.03}px`
+    ctx.fillStyle = color
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'alphabetic'
+    ctx.fillText(v.brandName || 'oro', cx, y + h * 0.86)
+    ;(ctx as any).letterSpacing = '0px'
+  }
+  ctx.restore()
+}
+
+/* --- button + price --- */
+function ctaWidth(ctx: CanvasRenderingContext2D, v: V, text: string, h: number) {
+  ctx.font = `650 ${h * 0.36}px ${FONTS[v.bodyFont] ?? FONTS.inter}`
+  const tw = ctx.measureText(text).width
+  return v.ctaStyle === 'link' ? tw + h * 0.5 : tw + h * 1.1
+}
+function drawCta(ctx: CanvasRenderingContext2D, v: V, text: string, x: number, y: number, h: number, fg: string, bg: string) {
+  const w = ctaWidth(ctx, v, text, h)
+  if (DRY) return w
+  ctx.save()
+  ctx.font = `650 ${h * 0.36}px ${FONTS[v.bodyFont] ?? FONTS.inter}`
+  ctx.textBaseline = 'middle'
+  if (v.ctaStyle === 'link') {
+    ctx.fillStyle = fg; ctx.textAlign = 'left'
+    ctx.fillText(`${text}  →`, x, y + h / 2)
+    ctx.fillRect(x, y + h / 2 + h * 0.26, w - h * 0.1, Math.max(1, h * 0.035))
+  } else {
+    ctx.beginPath(); ctx.roundRect(x, y, w, h, h / 2)
+    if (v.ctaStyle === 'pill') { ctx.fillStyle = fg; ctx.fill(); ctx.fillStyle = bg }
+    else { ctx.lineWidth = Math.max(1, h * 0.045); ctx.strokeStyle = fg; ctx.stroke(); ctx.fillStyle = fg }
+    ctx.textAlign = 'center'
+    ctx.fillText(text, x + w / 2, y + h / 2 + h * 0.02)
+  }
+  ctx.restore()
+  return w
+}
+
+function drawBadge(ctx: CanvasRenderingContext2D, v: V, text: string, x: number, y: number, r: number, bg: string, fg: string) {
+  ctx.save()
+  ctx.translate(x, y)
+  ctx.rotate(-0.21)
+  ctx.beginPath()
+  const n = 22
+  for (let i = 0; i <= n * 2; i++) {
+    const a = (i / (n * 2)) * Math.PI * 2, rr = i % 2 ? r * 0.93 : r
+    i ? ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : ctx.moveTo(rr, 0)
+  }
+  ctx.closePath()
+  ctx.fillStyle = bg; ctx.fill()
+  let size = r * 0.42
+  ctx.font = `800 ${size}px ${FONTS[v.displayFont] ?? FONTS.inter}`
+  while (ctx.measureText(text).width > r * 1.45 && size > r * 0.18) { size *= 0.92; ctx.font = `800 ${size}px ${FONTS[v.displayFont] ?? FONTS.inter}` }
+  ctx.fillStyle = fg; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  ctx.fillText(text, 0, size * 0.04)
+  ctx.restore()
+}
+
+let grainCanvas: HTMLCanvasElement | null = null
+function grainPattern(ctx: CanvasRenderingContext2D) {
+  if (!grainCanvas) {
+    grainCanvas = document.createElement('canvas')
+    grainCanvas.width = grainCanvas.height = 192
+    const g = grainCanvas.getContext('2d')!
+    const img = g.createImageData(192, 192)
+    const rnd = mulberry32(42)
+    for (let i = 0; i < img.data.length; i += 4) { const n = rnd() * 255; img.data[i] = img.data[i + 1] = img.data[i + 2] = n; img.data[i + 3] = 255 }
+    g.putImageData(img, 0, 0)
+  }
+  return ctx.createPattern(grainCanvas, 'repeat')
+}
+
+type Rect = { x: number; y: number; w: number; h: number }
+const hit = (a: Rect, b: Rect) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
+
+/* --- the template --- */
+/**
+ * Paint one asset. `dryOnly` runs the layout without painting and returns the
+ * issues — cheap enough to check every row × size on every change.
+ */
+export function drawPost(ctx: CanvasRenderingContext2D, w: number, h: number, row: DataRow, v: V, size: SizeSpec, logo: HTMLImageElement | null = null, dryOnly = false): DrawResult {
+  const S = Math.min(w, h)
+  const pad = (v.padding / 100) * S
+  const L = size.safe.l + pad, T = size.safe.t + pad, R = w - size.safe.r - pad, B = h - size.safe.b - pad
+  const cw = Math.max(1, R - L), ch = Math.max(1, B - T)
+  const aspect = w / h
+  let mode: DrawResult['mode'] = v.layout === 'auto' ? (aspect < 0.82 ? 'stack' : aspect > 1.3 ? 'split' : 'hero') : (v.layout as DrawResult['mode'])
+  if (mode === 'hero' && v.align === 'center') mode = 'stack'
+  const align = v.align as 'left' | 'center'
+  const color = /^#[0-9a-f]{6}/i.test(row.color) ? row.color.slice(0, 7) : '#888888'
+  const disp = FONTS[v.displayFont] ?? FONTS.inter, bodyF = FONTS[v.bodyFont] ?? FONTS.inter
+  const headFont = (s: number) => `${v.headlineWeight} ${s}px ${disp}`
+  const subFont = (s: number) => `450 ${s}px ${bodyF}`
+
+  const bg = v.bgStyle === 'flavour' ? color : v.paper
+  const fg = textOn(bg, v.ink, v.paper)
+  const splitRect: Rect | null = v.bgStyle !== 'split' ? null
+    : mode === 'split' ? { x: w * 0.56, y: 0, w: w * 0.44, h } : mode === 'stack' ? { x: 0, y: h * 0.56, w, h: h * 0.44 } : { x: w * 0.6, y: 0, w: w * 0.4, h }
+  const ctaText = row.cta || 'Shop now'
+  const sub = v.showSubhead && row.subhead.trim()
+
+  /* The copy block. Run once DRY to place the product, then again to paint on top of it. */
+  const copy = () => {
+    const issues: string[] = []
+    const texts: Rect[] = []
+    let can = { cx: 0, bottom: 0, H: 0 }
+    const price = (x: number, y: number, ctaH: number) => {
+      ctx.font = `650 ${ctaH * 0.4}px ${bodyF}`
+      if (!DRY) { ctx.fillStyle = fg; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(row.price, x, y + ctaH / 2) }
+    }
+    if (mode === 'stack') {
+      const logoH = cw * 0.058
+      const logoW = logoWidth(ctx, v, logoH, logo)
+      const lx = align === 'center' ? L + cw / 2 - logoW / 2 : L
+      drawLogo(ctx, v, lx, T, logoH, fg, logo)
+      texts.push({ x: lx, y: T, w: logoW, h: logoH })
+      let y = T + logoH + cw * 0.075
+      const base = cw * 0.105 * (v.headlineScale / 100)
+      const head = fit(ctx, row.headline, { size: base, min: base * 0.55, maxW: cw, maxLines: 4, font: headFont, tracking: v.tracking, lh: 1.02 })
+      const hx = align === 'center' ? L + cw / 2 : L
+      const hh = drawLines(ctx, head, hx, y, align, headFont, fg, v.tracking)
+      texts.push({ x: align === 'center' ? hx - head.width / 2 : L, y, w: head.width, h: hh })
+      if (head.truncated) issues.push('Headline truncated')
+      else if (head.shrunk < 0.9) issues.push(`Headline shrunk to ${Math.round(head.shrunk * 100)}%`)
+      y += hh
+      if (sub) {
+        y += base * 0.32
+        const sb = cw * 0.036 * (v.subheadScale / 100)
+        const f = fit(ctx, row.subhead, { size: sb, min: sb * 0.8, maxW: cw * 0.86, maxLines: 3, font: subFont, lh: 1.32 })
+        ctx.globalAlpha = 0.78
+        const sh = drawLines(ctx, f, hx, y, align, subFont, fg)
+        ctx.globalAlpha = 1
+        texts.push({ x: align === 'center' ? hx - f.width / 2 : L, y, w: f.width, h: sh })
+        if (f.truncated) issues.push('Subhead truncated')
+        y += sh
+      }
+      const ctaH = cw * 0.1
+      const ctaY = B - ctaH
+      const top = y + cw * 0.05, bottom = ctaY - cw * 0.05
+      const avail = bottom - top
+      if (avail < cw * 0.42) issues.push('Product squeezed by copy')
+      const H = Math.max(cw * 0.2, Math.min(avail, cw * 1.3)) * (v.imageScale / 100)
+      can = { cx: L + cw / 2, bottom: bottom - Math.max(0, (avail - H) * 0.15), H }
+      const cwid = ctaWidth(ctx, v, ctaText, ctaH)
+      ctx.font = `650 ${ctaH * 0.4}px ${bodyF}`
+      const pw = v.showPrice && row.price ? ctx.measureText(row.price).width + ctaH * 0.45 : 0
+      const cx0 = align === 'center' ? L + cw / 2 - (cwid + pw) / 2 : L
+      drawCta(ctx, v, ctaText, cx0, ctaY, ctaH, fg, bg)
+      if (pw) price(cx0 + cwid + ctaH * 0.45, ctaY, ctaH)
+      texts.push({ x: cx0, y: ctaY, w: cwid + pw, h: ctaH })
+    } else {
+      const isSplit = mode === 'split'
+      const colW = cw * (isSplit ? 0.5 : 0.5)
+      const logoH = isSplit ? Math.min(ch * 0.075, cw * 0.035) : cw * 0.055
+      const logoW = logoWidth(ctx, v, logoH, logo)
+      drawLogo(ctx, v, L, T, logoH, fg, logo)
+      texts.push({ x: L, y: T, w: logoW, h: logoH })
+      const base = (isSplit ? Math.min(ch * 0.14, cw * 0.062) : cw * 0.094) * (v.headlineScale / 100)
+      const head = fit(ctx, row.headline, { size: base, min: base * 0.55, maxW: colW, maxLines: isSplit ? 3 : 4, font: headFont, tracking: v.tracking, lh: 1.02 })
+      if (head.truncated) issues.push('Headline truncated')
+      else if (head.shrunk < 0.9) issues.push(`Headline shrunk to ${Math.round(head.shrunk * 100)}%`)
+      const sb = (isSplit ? Math.min(ch * 0.05, cw * 0.022) : cw * 0.034) * (v.subheadScale / 100)
+      const subF = sub ? fit(ctx, row.subhead, { size: sb, min: sb * 0.8, maxW: colW * 0.92, maxLines: isSplit ? 2 : 3, font: subFont, lh: 1.32 }) : null
+      if (subF?.truncated) issues.push('Subhead truncated')
+      const ctaH = isSplit ? Math.min(ch * 0.13, cw * 0.05) : cw * 0.095
+      const headH = (head.lines.length - 1) * head.lh + head.size * 1.02
+      const subH = subF ? base * 0.3 + (subF.lines.length - 1) * subF.lh + subF.size * 1.02 : 0
+      const blockH = headH + subH + ctaH * 1.6
+      // split: centre the copy below the logo; hero: copy hangs from the logo, button sits on the bottom margin
+      let y = isSplit ? Math.max(T + logoH + ch * 0.08, T + logoH + (ch - logoH - blockH) / 2) : T + logoH + cw * 0.07
+      if (isSplit && y + blockH > B + ctaH * 0.2) issues.push('Copy taller than the format')
+      drawLines(ctx, head, L, y, 'left', headFont, fg, v.tracking)
+      texts.push({ x: L, y, w: head.width, h: headH })
+      y += headH
+      if (subF) {
+        y += base * 0.3
+        ctx.globalAlpha = 0.78
+        const h2 = drawLines(ctx, subF, L, y, 'left', subFont, fg)
+        ctx.globalAlpha = 1
+        texts.push({ x: L, y, w: subF.width, h: h2 })
+        y += h2
+      }
+      const ctaY = isSplit ? y + ctaH * 0.6 : B - ctaH
+      const cwid = drawCta(ctx, v, ctaText, L, ctaY, ctaH, fg, bg)
+      let pw = 0
+      if (v.showPrice && row.price) { price(L + cwid + ctaH * 0.45, ctaY, ctaH); pw = ctx.measureText(row.price).width + ctaH * 0.45 }
+      texts.push({ x: L, y: ctaY, w: cwid + pw, h: ctaH })
+      if (!isSplit && y > ctaY - ctaH * 0.3) issues.push('Copy runs into the button')
+      if (isSplit) {
+        const areaL = splitRect ? splitRect.x : L + cw * 0.56
+        const H = Math.min(ch * 1.02, (R - areaL) * 1.5) * (v.imageScale / 100)
+        can = { cx: (areaL + (splitRect ? w : R)) / 2, bottom: T + ch / 2 + H / 2, H }
+      } else {
+        const H = ch * 0.8 * (v.imageScale / 100)
+        can = { cx: R - H * 0.25 - cw * 0.03, bottom: B, H }
+        if (L + Math.max(head.width, subF?.width ?? 0) > can.cx - H * 0.25 && y > B - H) issues.push('Product overlaps the copy')
+      }
+    }
+    return { issues, texts, can }
+  }
+
+  DRY = true
+  let plan: ReturnType<typeof copy>
+  try { plan = copy() } finally { DRY = false }
+  if (dryOnly) return { issues: plan.issues, mode }
+  const { can, texts } = plan
+  const rnd = mulberry32(v.seed * 7919 + row.name.length * 31)
+
+  // scenery first: background, split block, sun, slices, product
+  ctx.fillStyle = bg
+  ctx.fillRect(0, 0, w, h)
+  if (splitRect) { ctx.fillStyle = color; ctx.fillRect(splitRect.x, splitRect.y, splitRect.w, splitRect.h) }
+  const canW = can.H * 0.5, canTop = can.bottom - can.H
+  if (v.bgStyle !== 'split') {
+    ctx.beginPath(); ctx.arc(can.cx, canTop + can.H * 0.48, can.H * 0.5, 0, Math.PI * 2)
+    ctx.fillStyle = v.bgStyle === 'paper' ? mix(color, v.paper, 0.45) : mix(color, '#ffffff', 0.18)
+    ctx.fill()
+  }
+  const slices: { x: number; y: number; r: number; rot: number; front: boolean }[] = []
+  if (v.decor) {
+    const anchors: [number, number, number, boolean][] = [[-1.05, 0.86, 0.42, false], [0.98, 0.3, 0.3, false], [0.9, 0.97, 0.46, true], [-0.95, 0.24, 0.22, false], [-0.55, 1.02, 0.26, true], [1.15, 0.62, 0.2, false]]
+    for (const [ax, ay, ar, front] of anchors) {
+      const r = canW * ar * (0.85 + rnd() * 0.3)
+      const s = { x: can.cx + ax * canW * (0.95 + rnd() * 0.15), y: canTop + ay * can.H + (rnd() - 0.5) * canW * 0.2, r, rot: rnd() * Math.PI * 2, front }
+      const box = { x: s.x - r, y: s.y - r, w: r * 2, h: r * 2 }
+      if (texts.some((t) => hit(t, box))) continue
+      slices.push(s)
+    }
+    for (const s of slices) if (!s.front) drawSlice(ctx, s.x, s.y, s.r, color, s.rot)
+  }
+  const c = drawCan(ctx, can.cx, can.bottom, can.H, { ...row, color }, v, rnd)
+  for (const s of slices) if (s.front) drawSlice(ctx, s.x, s.y, s.r, color, s.rot)
+
+  // copy on top
+  copy()
+
+  const issues = plan.issues
+  if (v.showBadge && row.badge.trim()) {
+    const r = Math.max(S * 0.065, c.w * 0.32)
+    const right = { x: c.right - r * 0.95, y: c.top + c.w * 0.3 - r, w: r * 2, h: r * 2 }
+    const left = { x: c.left - r * 1.15, y: right.y, w: r * 2, h: r * 2 }
+    const fits = (b: Rect) => b.x >= 0 && b.x + b.w <= w && !texts.some((t) => hit(t, b))
+    const at = fits(right) ? right : fits(left) ? left : right
+    drawBadge(ctx, v, row.badge.trim(), at.x + r, at.y + r, r, v.ink, v.paper)
+  }
+  if (c.right > w + 1 || c.left < -1 || c.top < -1) issues.push('Product bleeds off the edge')
+
+  if (v.grain > 0) {
+    const pat = grainPattern(ctx)
+    if (pat) {
+      ctx.save()
+      ctx.globalCompositeOperation = 'overlay'
+      ctx.globalAlpha = v.grain * 0.22
+      ctx.fillStyle = pat
+      ctx.fillRect(0, 0, w, h)
+      ctx.restore()
+    }
+  }
+  return { issues, mode }
+}
+
+
+/* --- assets the template needs --- */
+const imgCache = new Map<string, HTMLImageElement>()
+export function loadImage(src: string) {
+  return new Promise<HTMLImageElement>((res, rej) => {
+    const hitImg = imgCache.get(src)
+    if (hitImg?.complete && hitImg.naturalWidth) return res(hitImg)
+    const img = hitImg ?? new Image()
+    img.onload = () => res(img)
+    img.onerror = rej
+    if (!hitImg) { img.src = src; imgCache.set(src, img) }
+  })
+}
+/** returns the decoded image or null (and starts loading it) */
+export function peekImage(src: string | null, onReady?: () => void) {
+  if (!src) return null
+  const img = imgCache.get(src)
+  if (img?.complete && img.naturalWidth) return img
+  loadImage(src).then(() => onReady?.()).catch(() => {})
+  return null
+}
+
+let fontsReady: Promise<unknown> | null = null
+export const ensureFonts = () =>
+  (fontsReady ??= Promise.all([400, 450, 500, 600, 650, 700, 750, 800, 900].map((wt) => document.fonts.load(`${wt} 40px "Inter Variable"`))).catch(() => {}))

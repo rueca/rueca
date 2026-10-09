@@ -1,0 +1,127 @@
+/* ---------------------------------------------------------------------------
+   Getting it out: stills re-rendered at the true output size (never an
+   upscale of the screen), frame-accurate seamless loops, and the shader
+   itself as code. Plus the look thumbnails, rendered by the same shader.
+--------------------------------------------------------------------------- */
+import { copyText, download, recordCanvas, stamp, toast, toastManager } from '@kit'
+import { ShaderRenderer } from './renderer'
+import { buildShader, uniformValues } from './codegen'
+import { clock, getLayers, params, type V } from './state'
+import { recordFrames } from './local/recordFrames'
+import type { Layer } from './layers'
+
+export const ASPECTS: Record<string, number> = { '16:9': 16 / 9, '1:1': 1, '9:16': 9 / 16 }
+
+/** Output size for a long edge, at the document aspect (or the live frame's aspect for Fill). */
+export function sizeFor(long: number, aspect: number) {
+  const even = (n: number) => Math.max(2, Math.round(n / 2) * 2)
+  return aspect >= 1 ? { w: even(long), h: even(long / aspect) } : { w: even(long * aspect), h: even(long) }
+}
+
+let exportRenderer: ShaderRenderer | null = null
+const getExportRenderer = (w: number, h: number) => {
+  if (!exportRenderer) exportRenderer = new ShaderRenderer(document.createElement('canvas'), { preserve: true })
+  const c = exportRenderer.canvas as HTMLCanvasElement
+  if (c.width !== w || c.height !== h) { c.width = w; c.height = h }
+  return exportRenderer
+}
+
+const docAt = (v: V, tMs: number) => ({ time: tMs / 1000, loop: v.loop, seed: v.seed, bg: v.bg })
+const slug = () => (params.getState().presets.find((p) => p.values.layers === params.values().layers)?.name ?? 'gradient').toLowerCase().replace(/\s+/g, '-')
+
+export async function exportStill(w: number, h: number) {
+  const v = params.values()
+  const r = getExportRenderer(w, h)
+  r.render(getLayers(v), docAt(v, clock.time()))
+  if (r.error) { toast('Could not render', { type: 'error', description: r.error.slice(0, 120) }); return }
+  const c = r.canvas as HTMLCanvasElement
+  await new Promise<void>((res) => c.toBlob((b) => { if (b) download(b, `${slug()}-${w}x${h}-${stamp()}.png`); res() }, 'image/png'))
+  toast(`PNG exported · ${w} × ${h}`, { type: 'success' })
+}
+
+let recording: AbortController | null = null
+export const isRecording = () => !!recording
+
+/** One seamless loop, frame by frame. Falls back to real-time capture of the live canvas. */
+export async function exportLoop(w: number, h: number, live: HTMLCanvasElement | null, fps = 60) {
+  if (recording) { recording.abort(); return }
+  const v = params.values()
+  const speed = v.speed > 0 ? v.speed : 1
+  const seconds = v.loop / speed
+  const frames = Math.round(seconds * fps)
+  const layers = getLayers(v)
+  const r = getExportRenderer(w, h)
+  const ctrl = (recording = new AbortController())
+  const id = toast(`Rendering loop · ${w} × ${h}`, { type: 'loading', timeout: 0, description: `0 / ${frames} frames`, action: { label: 'Cancel', onClick: () => ctrl.abort() } })
+  const t0 = performance.now()
+  try {
+    const blob = await recordFrames({
+      canvas: r.canvas, fps, frames, stepMs: (1000 / fps) * speed, signal: ctrl.signal,
+      name: `${slug()}-loop-${w}x${h}.mp4`,
+      draw: (t) => r.render(layers, docAt(v, t)),
+      onProgress: (pr) => { const i = Math.round(pr * frames); if (i % 6 === 0 || i === frames) toastManager.update(id, { description: `${i} / ${frames} frames · ${Math.round(pr * 100)}%` }) },
+    })
+    if (blob) {
+      toastManager.update(id, { title: 'Loop exported', type: 'success', description: `${seconds.toFixed(1)}s · ${(blob.size / 1e6).toFixed(1)} MB · ${((performance.now() - t0) / 1000).toFixed(1)}s to render`, timeout: 4000, actionProps: undefined })
+    } else if (ctrl.signal.aborted) {
+      toastManager.update(id, { title: 'Recording cancelled', type: 'default', description: undefined, timeout: 2000, actionProps: undefined })
+    } else if (live) {
+      // No WebCodecs: real-time capture of the live canvas, one loop long.
+      toastManager.update(id, { title: 'Recording in real time…', description: 'This browser can’t encode frame by frame.' })
+      clock.seek(0); clock.play()
+      await recordCanvas(live, seconds * 1000, fps, `${slug()}-loop.webm`)
+      toastManager.update(id, { title: 'Loop exported', type: 'success', description: 'Real-time capture', timeout: 3000, actionProps: undefined })
+    }
+  } catch (e) {
+    toastManager.update(id, { title: 'Export failed', type: 'error', description: (e as Error).message.slice(0, 140), timeout: 5000, actionProps: undefined })
+  } finally {
+    recording = null
+  }
+}
+
+/** The whole stack as a self-contained fragment shader + the uniforms to feed it. */
+export function shaderSource(layers: Layer[] = getLayers(), v: V = params.values()) {
+  const { fragment } = buildShader(layers)
+  const uniforms = uniformValues(layers, { ...docAt(v, clock.time()), width: 1920, height: 1080 })
+  const round = (x: number) => Math.round(x * 1e5) / 1e5
+  const json = JSON.stringify(Object.fromEntries(Object.entries(uniforms).map(([k, x]) => [k, Array.isArray(x) ? x.map(round) : round(x)])), null, 2)
+  const header = `// ${slug()} — generated by Gradient studio
+// GLSL ES 3.00 (WebGL2). Draw one full-screen triangle and set every frame:
+//   uRes   = output size in px      uTime = seconds into the loop
+//   uPhase = uTime / ${v.loop} * 2π  (loop length ${v.loop}s — all motion is periodic in it)
+// Colour arrays are OKLab. Uniform values below are a snapshot at ${(clock.time() / 1000).toFixed(2)}s, 1920×1080.
+`
+  // #version must stay the very first line
+  const [first, ...rest] = fragment.split('\n')
+  return { fragment: [first, header, ...rest].join('\n'), json }
+}
+
+export async function copyShader() {
+  const { fragment, json } = shaderSource()
+  const ok = await copyText(`${fragment}\n\n/* uniforms.json\n${json}\n*/\n`)
+  toast(ok ? 'Shader copied' : 'Clipboard blocked', { type: ok ? 'success' : 'error', description: ok ? 'Fragment shader + uniforms JSON' : undefined })
+}
+
+export function downloadShader() {
+  const { fragment, json } = shaderSource()
+  download(new Blob([fragment], { type: 'text/plain' }), `${slug()}.frag`)
+  setTimeout(() => download(new Blob([json], { type: 'application/json' }), `${slug()}.uniforms.json`), 150)
+}
+
+/* ---------- thumbnails ---------- */
+let thumbRenderer: ShaderRenderer | null = null
+const thumbCache = new Map<string, string>()
+
+/** Render a look to a data URL with the same shader. Cached by content. */
+export function renderThumb(look: { layers: Layer[]; bg: string; seed: number }, loop: number, w = 336, h = 224) {
+  const key = JSON.stringify([look, w, h])
+  const hit = thumbCache.get(key)
+  if (hit) return hit
+  if (!thumbRenderer) thumbRenderer = new ShaderRenderer(document.createElement('canvas'), { preserve: true })
+  const c = thumbRenderer.canvas as HTMLCanvasElement
+  c.width = w; c.height = h
+  thumbRenderer.render(look.layers, { time: loop * 0.18, loop, seed: look.seed, bg: look.bg })
+  const url = c.toDataURL('image/jpeg', 0.86)
+  thumbCache.set(key, url)
+  return url
+}

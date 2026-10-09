@@ -1,0 +1,33 @@
+name: Bug
+description: Something in the kit, a shell, the skill or the site behaves wrongly.
+labels: [bug]
+body:
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where
+      options: [Kit component, Example tool (shell), Skill / agent output, Plugin or registry install, Landing page]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you saw. A screenshot or short recording helps most.
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Component or shell
+      placeholder: e.g. Inspector, ScrubValue, #/motion
+  - type: dropdown
+    id: theme
+    attributes:
+      label: Theme
+      options: [Dark, Light, Both]
+  - type: input
+    id: env
+    attributes:
+      label: Browser and OS (or agent, for skill issues)
+      placeholder: e.g. Chrome 141 / macOS 26, or Claude Code 2.x

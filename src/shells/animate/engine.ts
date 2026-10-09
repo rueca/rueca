@@ -1,0 +1,287 @@
+/* ---------------------------------------------------------------------------
+   Keyframe engine — pure, renderer-agnostic. Everything the stage, the
+   timeline, the exporters and the state-machine runtime need is a function
+   of (doc, animation, t). Nothing here touches React or the DOM.
+--------------------------------------------------------------------------- */
+import { interpolate, formatHex8, formatHex } from 'culori'
+
+/* ---------- model ---------- */
+export type Bezier = [number, number, number, number]
+export type Ease =
+  | { kind: 'bezier'; p: Bezier }
+  /** Apple / Framer style: perceptual duration (ms) + bounce (0 = no overshoot) */
+  | { kind: 'spring'; duration: number; bounce: number }
+  | { kind: 'hold' }
+export type Val = number | string
+export interface Key { id: string; t: number; v: Val; ease: Ease }
+
+export type PropKey = 'x' | 'y' | 'rotation' | 'scale' | 'opacity' | 'w' | 'h' | 'radius' | 'fill' | 'stroke' | 'strokeWidth'
+export type ObjKind = 'group' | 'rect' | 'ellipse' | 'path' | 'text'
+
+export interface Obj {
+  id: string
+  name: string
+  kind: ObjKind
+  parent: string | null
+  visible: boolean
+  locked: boolean
+  base: Partial<Record<PropKey, Val>>
+  /** path data, centred on the origin */
+  d?: string
+  /** text content; `{likes}` binds to a state-machine number input */
+  text?: string
+  fontSize?: number
+  fontWeight?: number
+  align?: 'start' | 'middle'
+  shadow?: boolean
+}
+
+export type LoopMode = 'loop' | 'once' | 'pingpong'
+export interface Anim { id: string; name: string; duration: number; loop: LoopMode; tracks: Record<string, Key[]> }
+
+export type InputType = 'trigger' | 'boolean' | 'number'
+export interface SMInput { id: string; name: string; type: InputType; value: boolean | number }
+export interface Condition { input: string; op: 'fired' | 'is' | 'gt' | 'lt'; value?: boolean | number }
+/** from = animation id or 'any'; `exit` waits for a one-shot animation to finish */
+export interface Transition { id: string; from: string; to: string; conds: Condition[]; exit?: boolean; mix: number }
+export interface StateMachine { entry: string; inputs: SMInput[]; transitions: Transition[] }
+
+export interface Doc { width: number; height: number; objects: Obj[]; anims: Anim[]; sm: StateMachine }
+
+/* ---------- property table ---------- */
+export interface PropDef { key: PropKey; label: string; short?: string; type: 'number' | 'color'; step: number; min?: number; max?: number; unit?: string; group: 'Transform' | 'Shape' | 'Fill' | 'Stroke'; fmt?: (v: number) => string }
+export const PROPS: Record<PropKey, PropDef> = {
+  x: { key: 'x', label: 'Position X', short: 'X', type: 'number', step: 1, group: 'Transform' },
+  y: { key: 'y', label: 'Position Y', short: 'Y', type: 'number', step: 1, group: 'Transform' },
+  rotation: { key: 'rotation', label: 'Rotation', type: 'number', step: 1, unit: '°', group: 'Transform' },
+  scale: { key: 'scale', label: 'Scale', type: 'number', step: 0.01, min: 0, max: 10, group: 'Transform', fmt: (v) => `${Math.round(v * 100)}%` },
+  opacity: { key: 'opacity', label: 'Opacity', type: 'number', step: 0.01, min: 0, max: 1, group: 'Transform', fmt: (v) => `${Math.round(v * 100)}%` },
+  w: { key: 'w', label: 'Width', short: 'W', type: 'number', step: 1, min: 0, group: 'Shape' },
+  h: { key: 'h', label: 'Height', short: 'H', type: 'number', step: 1, min: 0, group: 'Shape' },
+  radius: { key: 'radius', label: 'Corner radius', type: 'number', step: 1, min: 0, group: 'Shape' },
+  fill: { key: 'fill', label: 'Fill', type: 'color', step: 0, group: 'Fill' },
+  stroke: { key: 'stroke', label: 'Stroke', type: 'color', step: 0, group: 'Stroke' },
+  strokeWidth: { key: 'strokeWidth', label: 'Stroke width', type: 'number', step: 0.5, min: 0, group: 'Stroke' },
+}
+const T: PropKey[] = ['x', 'y', 'rotation', 'scale', 'opacity']
+export const PROPS_FOR: Record<ObjKind, PropKey[]> = {
+  group: T,
+  rect: [...T, 'w', 'h', 'radius', 'fill'],
+  ellipse: [...T, 'w', 'h', 'fill', 'stroke', 'strokeWidth'],
+  path: [...T, 'fill'],
+  text: [...T, 'fill'],
+}
+export const DEFAULTS: Record<PropKey, Val> = { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, w: 40, h: 40, radius: 0, fill: '#ffffff', stroke: '#00000000', strokeWidth: 0 }
+
+export const trackKey = (obj: string, prop: PropKey) => `${obj}.${prop}`
+export const parseTrack = (k: string) => { const i = k.lastIndexOf('.'); return { obj: k.slice(0, i), prop: k.slice(i + 1) as PropKey } }
+
+/* ---------- easing ---------- */
+export const EASE_PRESETS: Record<string, Ease> = {
+  Linear: { kind: 'bezier', p: [0, 0, 1, 1] },
+  'Ease in': { kind: 'bezier', p: [0.42, 0, 1, 1] },
+  'Ease out': { kind: 'bezier', p: [0, 0, 0.58, 1] },
+  'Ease in out': { kind: 'bezier', p: [0.42, 0, 0.58, 1] },
+  Back: { kind: 'bezier', p: [0.34, 1.56, 0.64, 1] },
+  Hold: { kind: 'hold' },
+}
+export const BEZIER_PRESETS: Record<string, Bezier> = {
+  Linear: [0, 0, 1, 1], 'Ease in': [0.42, 0, 1, 1], 'Ease out': [0, 0, 0.58, 1], 'Ease in out': [0.42, 0, 0.58, 1],
+  Back: [0.34, 1.56, 0.64, 1], 'Out expo': [0.16, 1, 0.3, 1], Anticipate: [0.36, -0.4, 0.6, 1],
+}
+export const SPRING_PRESETS: Record<string, { duration: number; bounce: number }> = {
+  Gentle: { duration: 700, bounce: 0.1 }, Quick: { duration: 300, bounce: 0.15 }, Bouncy: { duration: 500, bounce: 0.45 }, Slow: { duration: 1000, bounce: 0.2 },
+}
+
+export function bezier([x1, y1, x2, y2]: Bezier) {
+  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx
+  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by
+  const sx = (t: number) => ((ax * t + bx) * t + cx) * t
+  const sy = (t: number) => ((ay * t + by) * t + cy) * t
+  return (x: number) => {
+    if (x <= 0) return 0
+    if (x >= 1) return 1
+    let t = x
+    for (let i = 0; i < 8; i++) {
+      const d = (3 * ax * t + 2 * bx) * t + cx
+      if (Math.abs(d) < 1e-6) break
+      t -= (sx(t) - x) / d
+    }
+    let lo = 0, hi = 1
+    if (Math.abs(sx(t) - x) > 1e-4) { // bisection fallback
+      t = x
+      for (let i = 0; i < 30; i++) { const v = sx(t); if (Math.abs(v - x) < 1e-5) break; if (v < x) lo = t; else hi = t; t = (lo + hi) / 2 }
+    }
+    return sy(t)
+  }
+}
+
+/** Spring response 0→1 at τ ms. ω0 = 2π/duration, ζ = 1 − bounce (bounce < 0 → overdamped). */
+export function spring(duration: number, bounce: number) {
+  const w0 = (2 * Math.PI) / Math.max(0.05, duration / 1000)
+  const b = Math.max(-0.9, Math.min(0.95, bounce))
+  const z = b >= 0 ? 1 - b : 1 / (1 + b)
+  return (ms: number) => {
+    const t = ms / 1000
+    if (z < 1) {
+      const wd = w0 * Math.sqrt(1 - z * z)
+      return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + ((z * w0) / wd) * Math.sin(wd * t))
+    }
+    if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t)
+    const s = Math.sqrt(z * z - 1), r1 = -w0 * (z - s), r2 = -w0 * (z + s)
+    return 1 - (r2 * Math.exp(r1 * t) - r1 * Math.exp(r2 * t)) / (r2 - r1)
+  }
+}
+/** physics ↔ perceptual conversions, for the "Physics" view of a spring */
+export const springToPhysics = (duration: number, bounce: number, mass = 1) => {
+  const w0 = (2 * Math.PI) / (duration / 1000)
+  const z = bounce >= 0 ? 1 - bounce : 1 / (1 + bounce)
+  return { stiffness: Math.round(w0 * w0 * mass), damping: Math.round(2 * z * w0 * mass * 10) / 10, mass }
+}
+export const physicsToSpring = (k: number, d: number, m: number) => {
+  const w0 = Math.sqrt(k / m), z = d / (2 * Math.sqrt(k * m))
+  return { duration: Math.round(((2 * Math.PI) / w0) * 1000), bounce: Math.round((z <= 1 ? 1 - z : 1 / z - 1) * 100) / 100 }
+}
+
+/** eased progress for segment progress p ∈ [0,1] of a segment `seg` ms long */
+export function easeAt(e: Ease, p: number, seg: number): number {
+  if (e.kind === 'hold') return p >= 1 ? 1 : 0
+  if (e.kind === 'bezier') return bezier(e.p)(p)
+  return spring(e.duration, e.bounce)(p * seg)
+}
+
+/* ---------- interpolation ---------- */
+const mixers = new Map<string, (t: number) => unknown>()
+export function lerpVal(a: Val, b: Val, k: number): Val {
+  if (typeof a === 'number' && typeof b === 'number') return a + (b - a) * k
+  if (typeof a === 'string' && typeof b === 'string') {
+    if (k <= 0) return a
+    if (k >= 1) return b
+    const id = a + b
+    let m = mixers.get(id)
+    if (!m) { m = interpolate([a, b], 'oklab'); if (mixers.size > 400) mixers.clear(); mixers.set(id, m) }
+    const c = m(Math.max(0, Math.min(1, k))) as Parameters<typeof formatHex8>[0]
+    return (c && (c as { alpha?: number }).alpha !== undefined && (c as { alpha?: number }).alpha! < 1 ? formatHex8(c) : formatHex(c)) ?? b
+  }
+  return k < 0.5 ? a : b
+}
+
+export function sample(keys: Key[], t: number): Val {
+  if (!keys.length) return 0
+  if (t <= keys[0].t) return keys[0].v
+  const last = keys[keys.length - 1]
+  if (t >= last.t) return last.v
+  let i = 0
+  while (i < keys.length - 1 && keys[i + 1].t <= t) i++
+  const a = keys[i], b = keys[i + 1]
+  const seg = b.t - a.t
+  return lerpVal(a.v, b.v, easeAt(a.ease, (t - a.t) / seg, seg))
+}
+
+export type Resolved = Record<string, Record<PropKey, Val>>
+
+/** Every object's props at time t of an animation (base values where unanimated). */
+export function resolve(doc: Doc, anim: Anim | undefined, t: number, overrides?: Record<string, Val>): Resolved {
+  const out: Resolved = {}
+  for (const o of doc.objects) {
+    const r = {} as Record<PropKey, Val>
+    for (const p of PROPS_FOR[o.kind]) r[p] = o.base[p] ?? DEFAULTS[p]
+    out[o.id] = r
+  }
+  if (anim) for (const [k, keys] of Object.entries(anim.tracks)) {
+    const { obj, prop } = parseTrack(k)
+    if (out[obj] && keys.length) out[obj][prop] = sample(keys, t)
+  }
+  if (overrides) for (const [k, v] of Object.entries(overrides)) { const { obj, prop } = parseTrack(k); if (out[obj]) out[obj][prop] = v }
+  return out
+}
+
+export function blendResolved(a: Resolved, b: Resolved, k: number): Resolved {
+  if (k >= 1) return b
+  const out: Resolved = {}
+  for (const id of Object.keys(b)) {
+    const r = {} as Record<PropKey, Val>
+    for (const p of Object.keys(b[id]) as PropKey[]) r[p] = lerpVal(a[id]?.[p] ?? b[id][p], b[id][p], k)
+    out[id] = r
+  }
+  return out
+}
+
+/** Time inside an animation for a running clock, honouring loop mode. */
+export function localTime(anim: Anim, elapsed: number) {
+  const d = Math.max(1, anim.duration)
+  if (anim.loop === 'once') return Math.min(elapsed, d)
+  if (anim.loop === 'loop') return elapsed % d
+  const c = elapsed % (2 * d)
+  return c <= d ? c : 2 * d - c
+}
+
+/* ---------- helpers ---------- */
+let uid = 0
+export const newId = (p = 'k') => `${p}${Date.now().toString(36)}${(uid++).toString(36)}`
+
+export const childrenOf = (doc: Doc, parent: string | null) => doc.objects.filter((o) => o.parent === parent)
+export const isAnimated = (anim: Anim | undefined, obj: string, prop: PropKey) => !!anim?.tracks[trackKey(obj, prop)]?.length
+export const keyAt = (keys: Key[] | undefined, t: number, tol = 0.5) => keys?.find((k) => Math.abs(k.t - t) <= tol)
+export const objHasKeys = (anim: Anim | undefined, obj: string) => !!anim && Object.keys(anim.tracks).some((k) => k.startsWith(obj + '.') && anim.tracks[k].length > 0)
+
+export const fmtSec = (ms: number) => `${(ms / 1000).toFixed(2)}s`
+
+/** Text bindings: `{name}` → the state-machine input of that name. */
+export const bindText = (s: string, inputs: SMInput[]) =>
+  s.replace(/\{(\w+)\}/g, (_, n) => { const i = inputs.find((x) => x.name === n); return i ? String(typeof i.value === 'number' ? Math.round(i.value) : i.value) : `{${n}}` })
+
+/* ---------- CSS export ---------- */
+function cssEase(e: Ease, seg: number) {
+  if (e.kind === 'hold') return 'steps(1, end)'
+  if (e.kind === 'bezier') return `cubic-bezier(${e.p.join(', ')})`
+  // CSS linear() approximates a spring with sampled points.
+  const f = spring(e.duration, e.bounce)
+  const n = 24
+  return `linear(${Array.from({ length: n + 1 }, (_, i) => Number(f((i / n) * seg).toFixed(4))).join(', ')})`
+}
+
+/** One @keyframes per CSS property (individual `translate` / `rotate` / `scale`
+    transforms), so every property keeps its own key times and easing — no
+    resampling. Springs become `linear()` easings. */
+export function toCSSKeyframes(doc: Doc, anim: Anim, objId: string): string {
+  const obj = doc.objects.find((o) => o.id === objId)
+  if (!obj) return ''
+  const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+  const base = `${slug(anim.name)}-${slug(obj.name)}`
+  const res = (t: number) => resolve(doc, anim, t)[objId]
+  const n = (v: Val, d = 2) => Number(Number(v).toFixed(d))
+  const groups: { css: string; props: PropKey[]; value: (r: Record<PropKey, Val>) => string }[] = [
+    { css: 'translate', props: ['x', 'y'], value: (r) => `${n(r.x, 1)}px ${n(r.y, 1)}px` },
+    { css: 'rotate', props: ['rotation'], value: (r) => `${n(r.rotation, 1)}deg` },
+    { css: 'scale', props: ['scale'], value: (r) => `${n(r.scale, 3)}` },
+    { css: 'opacity', props: ['opacity'], value: (r) => `${n(r.opacity, 3)}` },
+    { css: obj.kind === 'rect' ? 'background-color' : 'fill', props: ['fill'], value: (r) => String(r.fill) },
+    { css: 'width', props: ['w'], value: (r) => `${n(r.w, 1)}px` },
+    { css: 'height', props: ['h'], value: (r) => `${n(r.h, 1)}px` },
+    { css: 'border-radius', props: ['radius'], value: (r) => `${n(r.radius, 1)}px` },
+    { css: 'stroke', props: ['stroke'], value: (r) => String(r.stroke) },
+    { css: 'stroke-width', props: ['strokeWidth'], value: (r) => `${n(r.strokeWidth, 2)}` },
+  ]
+  const blocks: string[] = []
+  const uses: string[] = []
+  for (const g of groups) {
+    const tracks = g.props.filter((p) => PROPS_FOR[obj.kind].includes(p) && isAnimated(anim, objId, p)).map((p) => anim.tracks[trackKey(objId, p)])
+    if (!tracks.length) continue
+    const times = [...new Set([0, anim.duration, ...tracks.flatMap((ks) => ks.map((k) => k.t))])].sort((a, b) => a - b)
+    const lines = times.map((t) => {
+      const owner = tracks.map((ks) => ({ ks, i: ks.findIndex((k) => Math.abs(k.t - t) <= 0.5) })).find((x) => x.i >= 0)
+      const k = owner ? owner.ks[owner.i] : null
+      const next = owner ? owner.ks[owner.i + 1] : null
+      const ease = k && next ? ` animation-timing-function: ${cssEase(k.ease, next.t - k.t)};` : ''
+      return `  ${+((t / anim.duration) * 100).toFixed(2)}% { ${g.css}: ${g.value(res(t))};${ease} }`
+    })
+    const name = `${base}-${g.css}`
+    blocks.push(`@keyframes ${name} {\n${lines.join('\n')}\n}`)
+    uses.push(name)
+  }
+  const iter = anim.loop === 'once' ? '1' : 'infinite'
+  const dir = anim.loop === 'pingpong' ? ' alternate' : ''
+  const animation = uses.map((u) => `${u} ${anim.duration}ms linear ${iter}${dir} both`).join(',\n    ')
+  return `/* ${obj.name} — “${anim.name}”, exported from Tween.\n   One animation per property keeps each property's own keys and easing. */\n${blocks.join('\n\n')}\n\n.${slug(obj.name)} {\n  animation:\n    ${animation};\n  transform-box: fill-box;\n  transform-origin: center;\n}\n`
+}

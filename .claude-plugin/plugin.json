@@ -1,0 +1,21 @@
+{
+  "name": "prototype-studio",
+  "displayName": "Prototype Studio",
+  "version": "0.1.0",
+  "description": "Inspector, timeline, layers, presets and export — dropped in around any prototype, in any runtime, installed component by component and kept up to date. Ships as an agent skill, a Claude Code plugin and a component registry.",
+  "author": {
+    "name": "Rafael Cespedes"
+  },
+  "homepage": "https://OWNER.github.io/prototype-studio",
+  "repository": "https://github.com/OWNER/prototype-studio",
+  "license": "MIT",
+  "keywords": [
+    "design-tools",
+    "prototyping",
+    "inspector",
+    "timeline",
+    "motion",
+    "shadcn",
+    "skills"
+  ]
+}

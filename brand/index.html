@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Brand board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700&family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Instrument+Serif&family=Inter:wght@400;500;600&family=Young+Serif&family=Schibsted+Grotesk:wght@800&family=Fraunces:opsz,wght@9..144,600&family=Marcellus&display=swap" />
+<script>
+  try {
+    var t = localStorage.getItem('studio:theme');
+    var dark = t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  } catch (e) { document.documentElement.dataset.theme = 'dark'; }
+</script>
+<style>
+  /* Board chrome mirrors the kit's neutral tokens (src/kit/theme.css). The candidates bring their own colour. */
+  :root {
+    --field: #ececec; --panel: #ffffff; --well: #e3e3e3; --input: #f2f2f2;
+    --fg: #1a1a1a; --muted: #5e5e5e; --faint: #7e7e7e;
+    --line: rgba(0,0,0,.08); --line-strong: rgba(0,0,0,.16); --hover: rgba(0,0,0,.04);
+    --accent: #0b84e0; --ok: #1fa971; --warn: #c98a00; --bad: #e5383b;
+    --shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.07);
+    --r: 12px;
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --field: #131313; --panel: #1e1e1e; --well: #161616; --input: #2a2a2a;
+    --fg: #fff; --muted: #a8a8a8; --faint: #7a7a7a;
+    --line: rgba(255,255,255,.07); --line-strong: rgba(255,255,255,.13); --hover: rgba(255,255,255,.05);
+    --accent: #0d99ff; --ok: #3ccf8e; --warn: #f5b400; --bad: #ff4d4d;
+    --shadow: 0 8px 32px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--field); color: var(--fg); }
+  body { font: 400 14px/1.55 "Inter", ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 120px; }
+  @media (min-width: 720px) { .wrap { padding: 32px 32px 140px; } }
+
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 5;
+    margin: -24px -16px 0; padding: 12px 16px; background: color-mix(in srgb, var(--field) 86%, transparent); backdrop-filter: blur(12px); }
+  @media (min-width: 720px) { .top { margin: -32px -32px 0; padding: 14px 32px; } }
+  .crumb { font-size: 13px; font-weight: 500; display: flex; gap: 8px; align-items: center; }
+  .crumb span { color: var(--faint); font-weight: 400; }
+  .nav { display: none; gap: 2px; }
+  @media (min-width: 900px) { .nav { display: flex; } }
+  .nav a, .btn { height: 28px; padding: 0 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); text-decoration: none; border: 0; background: none; cursor: pointer; }
+  .nav a:hover, .btn:hover { background: var(--hover); color: var(--fg); }
+  .btn.solid { background: var(--panel); box-shadow: var(--shadow); color: var(--fg); }
+
+  h1 { font-size: 32px; line-height: 1.15; letter-spacing: -0.025em; font-weight: 600; margin: 56px 0 12px; }
+  h2 { font-size: 22px; letter-spacing: -0.02em; font-weight: 600; margin: 0; }
+  h3 { font-size: 13px; font-weight: 500; margin: 0 0 8px; }
+  .lede { color: var(--muted); max-width: 640px; font-size: 15px; margin: 0; }
+  section { margin-top: 88px; scroll-margin-top: 72px; }
+  .sh { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; }
+  .sh .n { font: 500 12px "Geist Mono", ui-monospace, monospace; color: var(--faint); }
+  .sh p { margin: 0 0 0 auto; color: var(--faint); font-size: 12.5px; text-align: right; }
+  .panel { background: var(--panel); border-radius: var(--r); box-shadow: var(--shadow); }
+  .muted { color: var(--muted); } .faint { color: var(--faint); }
+  .mono { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12.5px; }
+
+  /* decision callout */
+  .calls { margin-top: 28px; display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+  .call { padding: 16px 18px; }
+  .call b { display: block; font-weight: 500; margin-bottom: 4px; }
+  .call p { margin: 0; color: var(--muted); font-size: 13px; }
+  .call .k { font: 500 11px "Geist Mono", monospace; color: var(--faint); margin-bottom: 10px; display: block; }
+
+  /* positioning */
+  .promise { font-size: clamp(26px, 4.2vw, 44px); line-height: 1.12; letter-spacing: -0.03em; font-weight: 600; max-width: 900px; margin: 0 0 28px; text-wrap: balance; }
+  .pitch { display: grid; gap: 24px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .pitch { grid-template-columns: 1.1fr 1fr; } }
+  .pitch .body p { margin: 0 0 12px; color: var(--muted); font-size: 15px; max-width: 560px; }
+  .pitch .body p:first-child { color: var(--fg); }
+  .aud { padding: 6px; display: grid; gap: 2px; }
+  .aud div { padding: 12px 14px; border-radius: 8px; }
+  .aud div:hover { background: var(--hover); }
+  .aud b { font-weight: 500; display: flex; gap: 8px; align-items: center; }
+  .aud p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  .tag { font-size: 11px; font-weight: 500; padding: 1px 7px; border-radius: 99px; background: var(--hover); color: var(--muted); white-space: nowrap; }
+  .vs { margin-top: 24px; overflow: hidden; }
+  .vs-row { display: grid; grid-template-columns: 1fr; gap: 4px 24px; padding: 14px 18px; border-top: 1px solid var(--line); }
+  .vs-row:first-child { border-top: 0; }
+  @media (min-width: 760px) { .vs-row { grid-template-columns: 170px 1fr 1fr; } }
+  .vs-row .who { font-weight: 500; }
+  .vs-row .them { color: var(--muted); font-size: 13px; }
+  .vs-row .us { font-size: 13px; }
+  .vs-row .us::before { content: "Ours  "; color: var(--faint); font-size: 11.5px; }
+  .vs-head { color: var(--faint); font-size: 11.5px; padding-top: 12px; padding-bottom: 6px; }
+  .vs-head .us::before { content: none; }
+  @media (max-width: 759px) { .vs-head { display: none; } }
+
+  /* names table */
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .chip { height: 28px; border-radius: 99px; padding: 0 12px; font-size: 12px; font-weight: 500; border: 0; cursor: pointer; background: var(--panel); color: var(--muted); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .chip[aria-pressed="true"] { background: var(--fg); color: var(--field); }
+  .tbl { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; min-width: 900px; font-size: 13px; }
+  th { text-align: left; font-weight: 500; color: var(--faint); font-size: 11.5px; padding: 12px 12px 8px; white-space: nowrap; }
+  td { padding: 11px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+  tr.short td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+  td.nm b { font-weight: 600; display: block; }
+  td.nm span { color: var(--muted); font-size: 12px; display: block; max-width: 240px; line-height: 1.4; margin-top: 2px; }
+  .st { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; font-size: 12px; }
+  .st::before { content: ""; width: 6px; height: 6px; border-radius: 99px; background: currentColor; flex: none; }
+  .st.free { color: var(--ok); } .st.taken { color: var(--bad); } .st.part { color: var(--warn); }
+  .st em { font-style: normal; color: var(--muted); white-space: normal; }
+  .dom { display: flex; flex-wrap: wrap; gap: 3px; max-width: 220px; }
+  .dom span { font: 11.5px "Geist Mono", monospace; padding: 1px 6px; border-radius: 4px; }
+  .dom .f { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+  .dom .t { background: var(--hover); color: var(--faint); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--faint) 60%, transparent); }
+  .verdict { font-size: 11.5px; font-weight: 500; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+  .v-short { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+  .v-reserve { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+  .v-pass { background: color-mix(in srgb, var(--warn) 16%, transparent); color: var(--warn); }
+  .v-taken { background: var(--hover); color: var(--faint); }
+  td.web { color: var(--muted); font-size: 12.5px; max-width: 260px; }
+  .note { color: var(--faint); font-size: 12.5px; margin: 14px 2px 0; }
+
+  /* shortlist */
+  .cands { display: grid; gap: 28px; }
+  .cand { overflow: hidden; }
+  .cand-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 18px 20px 0; }
+  .cand-head .idx { font: 500 12px "Geist Mono", monospace; color: var(--faint); }
+  .cand-head .short { color: var(--muted); font-size: 13px; }
+  .rec { font-size: 11.5px; font-weight: 500; padding: 2px 9px; border-radius: 99px; background: var(--accent); color: #fff; }
+  .say { margin-left: auto; font: 12px "Geist Mono", monospace; color: var(--faint); }
+  .heroes { display: grid; grid-template-columns: 1fr; gap: 8px; padding: 16px; }
+  @media (min-width: 760px) { .heroes { grid-template-columns: 1fr 1fr; } }
+  .hero { border-radius: 10px; min-height: 220px; display: grid; place-items: center; padding: 32px 16px; position: relative; }
+  .hero .lbl { position: absolute; left: 12px; top: 10px; font-size: 11px; opacity: .5; }
+  .lockup { display: flex; align-items: center; gap: 14px; }
+  .wm { line-height: 1; white-space: nowrap; }
+  .cand-body { display: grid; grid-template-columns: 1fr; gap: 0; border-top: 1px solid var(--line); }
+  @media (min-width: 980px) { .cand-body { grid-template-columns: 1.25fr 1fr; } }
+  .cell { padding: 18px 20px; }
+  .cand-body > .cell + .cell { border-top: 1px solid var(--line); }
+  @media (min-width: 980px) { .cand-body > .cell + .cell { border-top: 0; border-left: 1px solid var(--line); } }
+  .cell p { margin: 0 0 14px; font-size: 13.5px; }
+  .cell p.w { color: var(--muted); }
+  .sizes { display: flex; align-items: flex-end; gap: 18px; flex-wrap: wrap; padding: 4px 0 2px; }
+  .sizes figure { margin: 0; display: grid; justify-items: center; gap: 6px; }
+  .sizes figcaption { font: 10.5px "Geist Mono", monospace; color: var(--faint); }
+  .icon { border-radius: 22%; display: grid; place-items: center; }
+  .pal { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 6px; }
+  .sw { border: 0; padding: 0; cursor: pointer; text-align: left; background: none; }
+  .sw i { display: block; height: 44px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--line); }
+  .sw b { display: block; font-weight: 500; font-size: 11.5px; margin-top: 6px; }
+  .sw span { font: 11px "Geist Mono", monospace; color: var(--faint); }
+  .ctx { display: grid; gap: 8px; margin-top: 4px; }
+  .toolbar { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 10px; border-radius: 10px; background: var(--well); }
+  .toolbar .doc { color: var(--faint); font-size: 12.5px; }
+  .toolbar .doc::before { content: "/ "; opacity: .6; }
+  .toolbar .sp { flex: 1; }
+  .toolbar .pill { height: 26px; padding: 0 10px; border-radius: 6px; background: var(--accent); color: #fff; font-size: 12px; font-weight: 500; display: grid; place-items: center; }
+  .toolbar .ghost { width: 26px; height: 26px; border-radius: 6px; background: var(--hover); }
+  .brandmark { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; flex: none; }
+  .install { font: 12px/1.5 "Geist Mono", monospace; padding: 10px 12px; border-radius: 8px; background: var(--well); color: var(--muted); overflow-x: auto; white-space: nowrap; }
+  .install b { color: var(--fg); font-weight: 500; }
+  .tl { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+  .tl li { font-size: 15px; letter-spacing: -0.01em; }
+  .avail { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 2px; }
+  .fontnote { font-size: 12px; color: var(--faint); margin-top: 10px; }
+
+  /* voice */
+  .voice { display: grid; gap: 16px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .voice { grid-template-columns: 1fr 1fr; } }
+  .rules { padding: 8px 0; }
+  .rule { display: grid; grid-template-columns: 26px 1fr; gap: 2px 10px; padding: 10px 18px; }
+  .rule .i { font: 500 11.5px "Geist Mono", monospace; color: var(--faint); padding-top: 2px; }
+  .rule b { font-weight: 500; }
+  .rule p { margin: 0; grid-column: 2; color: var(--muted); font-size: 13px; }
+  .pairs { display: grid; gap: 10px; align-content: start; }
+  .pair { display: grid; grid-template-columns: 1fr; overflow: hidden; }
+  @media (min-width: 600px) { .pair { grid-template-columns: 1fr 1fr; } }
+  .pair div { padding: 14px 16px; font-size: 13.5px; }
+  .pair div + div { border-top: 1px solid var(--line); }
+  @media (min-width: 600px) { .pair div + div { border-top: 0; border-left: 1px solid var(--line); } }
+  .pair .no s { color: var(--faint); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--bad) 55%, transparent); }
+  .pair small { display: block; font-size: 11px; color: var(--faint); margin-bottom: 4px; text-decoration: none; }
+  .vsum { font-size: 18px; letter-spacing: -0.015em; max-width: 720px; margin: 0 0 20px; text-wrap: pretty; }
+  .taglines { margin-top: 16px; display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+  .taglines .panel { padding: 16px 18px; }
+
+  /* next */
+  ol.steps { margin: 0; padding: 6px 0; list-style: none; counter-reset: s; }
+  ol.steps li { counter-increment: s; display: grid; grid-template-columns: 26px 1fr; gap: 10px; padding: 12px 18px; border-top: 1px solid var(--line); font-size: 13.5px; }
+  ol.steps li:first-child { border-top: 0; }
+  ol.steps li::before { content: counter(s); font: 500 11.5px "Geist Mono", monospace; color: var(--faint); padding-top: 2px; }
+  code { font: 12.5px "Geist Mono", monospace; background: var(--hover); padding: 1px 5px; border-radius: 4px; }
+
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 12px); opacity: 0; transition: .18s; background: var(--fg); color: var(--field);
+    font-size: 12.5px; padding: 8px 14px; border-radius: 8px; pointer-events: none; }
+  .toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+  @media (max-width: 640px) {
+    .crumb span { display: none; }
+    .toolbar .doc, .toolbar .ghost { display: none; }
+    .hero { min-height: 160px; }
+    .hero .wm { font-size: clamp(28px, 9vw, 46px) !important; }
+    .hero svg { width: 44px; height: 44px; }
+    .lockup { gap: 10px; }
+  }
+  .sw { align-self: start; display: block; }
+  .toolbar > * { white-space: nowrap; }
+  .sub { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; margin: 40px 0 14px; }
+  .lenses { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+  .lenses .panel { padding: 16px 18px; }
+  .lenses b { display: block; font-weight: 500; margin-bottom: 4px; }
+  .lenses p { margin: 0; color: var(--muted); font-size: 13px; }
+  .stories { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  .stories .panel { padding: 16px 18px; }
+  .stories b { font-weight: 500; display: block; }
+  .stories .era { font: 11.5px "Geist Mono", monospace; color: var(--faint); display: block; margin: 2px 0 8px; }
+  .stories p { margin: 0; color: var(--muted); font-size: 13px; }
+  .lens { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="crumb">Brand board <span>Prototype Studio · working name</span></div>
+    <nav class="nav" aria-label="Sections">
+      <a href="#round2">Round 2</a><a href="#positioning">Positioning</a><a href="#names">Names</a><a href="#shortlist">Round 1</a><a href="#voice">Voice</a><a href="#next">Next</a>
+    </nav>
+    <button class="btn solid" id="theme" type="button" aria-label="Toggle theme (T)">Theme</button>
+  </header>
+
+  <h1>Naming and brand</h1>
+  <p class="lede">Two rounds, 93 names, all checked against npm, GitHub, domains and the web. Round 2 went looking in Spanish and Latin, in the history of tools, and in pop culture. Each shortlist has drawn marks, a wordmark and a palette. The final name and look are your call.</p>
+
+  <div class="calls">
+    <div class="panel call"><span class="k">Your call · 1</span><b>Pick the name</b><p>From round 2, my pick is <strong>Cruceta</strong>, the marionette’s control bar. We don’t make your prototype, we make it move. Thumbwheel is still the safest English pick. Tramoya is the richest story.</p></div>
+    <div class="panel call"><span class="k">Your call · 2</span><b>Pick the look</b><p>The marks are first drafts on a 32-unit grid, drawn to survive 16px. Push on the forms, the type and the palette. These are the places your eye beats mine.</p></div>
+    <div class="panel call"><span class="k">Your call · 3</span><b>Approve the voice</b><p>Seven rules and the do/don’t pairs. If one doesn’t sound like you, cut it.</p></div>
+  </div>
+
+  <section id="round2">
+    <div class="sh"><span class="n">R2</span><h2>Round 2: Spanish, Latin, history, pop culture</h2><p>Checked 9 Oct 2026</p></div>
+    <div class="lenses" id="lenses"></div>
+    <h3 class="sub">Shortlist</h3>
+    <div class="cands" id="cands2"></div>
+    <h3 class="sub">Every name in round 2</h3>
+    <div class="panel tbl"><table><thead><tr>
+      <th>Name</th><th>Lens</th><th>npm</th><th>@scope</th><th>GitHub handle</th><th>Repo clashes</th><th>Domains</th><th>Already out there</th><th>Verdict</th>
+    </tr></thead><tbody id="rows2"></tbody></table></div>
+    <p class="note" id="also2"></p>
+    <h3 class="sub">Stories worth borrowing</h3>
+    <p class="note" style="margin:-6px 2px 14px">These work as launch-post material, motifs or copy, whatever the name ends up being.</p>
+    <div class="stories" id="stories"></div>
+  </section>
+
+  <section id="positioning">
+    <div class="sh"><span class="n">01</span><h2>Positioning</h2></div>
+    <p class="promise" id="promise"></p>
+    <div class="pitch">
+      <div class="body" id="pitch"></div>
+      <div class="panel aud" id="aud"></div>
+    </div>
+    <div class="panel vs" id="vs"></div>
+  </section>
+
+  <section id="names">
+    <div class="sh"><span class="n">02</span><h2>Round 1 names</h2><p id="checked"></p></div>
+    <div class="filters" role="group" aria-label="Filter names" id="filters"></div>
+    <div class="panel tbl"><table><thead><tr>
+      <th>Name</th><th>npm</th><th>@scope</th><th>GitHub handle</th><th>Repo clashes</th><th>Domains</th><th>Already out there</th><th>Verdict</th>
+    </tr></thead><tbody id="rows"></tbody></table></div>
+    <p class="note" id="also"></p>
+    <p class="note">How it was checked: npm package and <code>@scope</code> on the registry, GitHub user/org handle, a GitHub search for repos with the name, live registrar availability for domains (taken ones opened to see what’s there), and a web search for existing software. Trademarks were only spot-checked, so get a proper search before launch.</p>
+  </section>
+
+  <section id="shortlist">
+    <div class="sh"><span class="n">03</span><h2>Round 1 shortlist</h2><p>Click a swatch to copy its hex</p></div>
+    <div class="cands" id="cands"></div>
+  </section>
+
+  <section id="voice">
+    <div class="sh"><span class="n">04</span><h2>Voice</h2></div>
+    <p class="vsum" id="vsum"></p>
+    <div class="voice">
+      <div class="panel rules" id="rules"></div>
+      <div class="pairs" id="pairs"></div>
+    </div>
+    <h3 style="margin-top:32px">Taglines</h3>
+    <div class="taglines" id="taglines"></div>
+  </section>
+
+  <section id="next">
+    <div class="sh"><span class="n">05</span><h2>Once you pick</h2></div>
+    <div class="panel"><ol class="steps">
+      <li><span>Claim the handles the same day: the GitHub org, the npm <code>@scope</code> (free to create) and the domain. Free things go fast once a repo is public.</span></li>
+      <li><span>Rename in one place: edit <code>src/site.config.ts</code> (name, slug, tagline, repo, url), then run <code>npm run sync</code>. The skill, plugin, registry and README follow.</span></li>
+      <li><span>Swap the placeholder <code>Mark</code> in <code>src/landing/parts.tsx</code> for the chosen SVG from <code>brand/marks.js</code>. The product chrome stays neutral, and the brand colour lives on the site and the mark only.</span></li>
+      <li><span>Get a quick trademark search (USPTO / EUIPO, class 9 and 42) before the public launch.</span></li>
+    </ol></div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module">
+  import { marks } from './marks.js'
+  import { names, alsoChecked, shortlist, positioning, voice, checkedOn, round2Lenses, names2, alsoChecked2, shortlist2, stories } from './data.js'
+
+  const $ = (id) => document.getElementById(id)
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+  const isDark = () => document.documentElement.dataset.theme === 'dark'
+
+  /* theme */
+  const setTheme = (t) => { document.documentElement.dataset.theme = t; try { localStorage.setItem('studio:theme', t) } catch (e) {} ; renderAll() }
+  $('theme').onclick = () => setTheme(isDark() ? 'light' : 'dark')
+  addEventListener('keydown', (e) => { if (e.key.toLowerCase() === 't' && !e.metaKey && !e.ctrlKey && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) setTheme(isDark() ? 'light' : 'dark') })
+
+  /* positioning */
+  $('promise').textContent = positioning.promise
+  $('pitch').innerHTML = positioning.pitch.map((p) => `<p>${esc(p)}</p>`).join('')
+  $('aud').innerHTML = positioning.audiences.map((a) => `<div><b>${esc(a.who)}${a.primary ? '<span class="tag">Primary</span>' : ''}</b><p>${esc(a.need)}</p></div>`).join('')
+  $('vs').innerHTML = `<div class="vs-row vs-head"><span>Alternative</span><span>What it is</span><span class="us">How we differ</span></div>` +
+    positioning.versus.map((v) => `<div class="vs-row"><span class="who">${esc(v.them)}</span><span class="them">${esc(v.what)}</span><span class="us">${esc(v.us)}</span></div>`).join('')
+
+  /* names */
+  $('checked').textContent = `Checked ${checkedOn}`
+  /* status chip: green free, red taken, amber when taken but a variant is free */
+  const st = (v, prefix = '') => {
+    const [head, ...rest] = String(v).split(' · ')
+    const cls = head.startsWith('free') ? 'free' : head.startsWith('taken') ? (rest.length ? 'part' : 'taken') : 'part'
+    return `<span class="st ${cls}">${esc(prefix + head)}${rest.length ? ` <em>· ${esc(rest.join(' · '))}</em>` : ''}</span>`
+  }
+  const VERDICT = { short: 'Shortlist', reserve: 'Reserve', pass: 'Pass', taken: 'Taken' }
+  const FILTERS = [['all', 'All'], ['short', 'Shortlist'], ['clear', 'npm + GitHub free'], ['taken', 'Taken']]
+  let filter = 'all'
+  const renderRows = () => {
+    const list = names.filter((n) => filter === 'all' || (filter === 'clear' ? n.npm === 'free' && n.gh === 'free' : n.verdict === filter))
+    $('rows').innerHTML = list.map((n) => rowHTML(n)).join('')
+    $('filters').innerHTML = FILTERS.map(([k, l]) => `<button class="chip" type="button" data-f="${k}" aria-pressed="${filter === k}">${l}</button>`).join('')
+  }
+  function rowHTML(n, lens = false) {
+    return `<tr class="${n.verdict}">
+      <td class="nm"><b>${esc(n.name)}</b><span>${esc(n.idea)}</span></td>${lens ? `<td class="lens">${esc(n.lens)}</td>` : ''}
+      <td>${st(n.npm)}</td><td>${st(n.scope)}</td><td>${st(n.gh)}</td>
+      <td class="web">${esc(n.repos)}</td>
+      <td><div class="dom">${n.domains.free.map((d) => `<span class="f">${esc(d)}</span>`).join('')}${n.domains.taken.map((d) => `<span class="t">${esc(d)}</span>`).join('')}${!n.domains.free.length && !n.domains.taken.length ? '<span class="faint">not checked</span>' : ''}</div></td>
+      <td class="web">${esc(n.web)}</td>
+      <td><span class="verdict v-${n.verdict}">${VERDICT[n.verdict]}</span></td></tr>`
+  }
+  $('filters').onclick = (e) => { const b = e.target.closest('[data-f]'); if (b) { filter = b.dataset.f; renderRows() } }
+  renderRows()
+  $('also').textContent = `Also checked and dropped because they’re taken on npm and GitHub: ${alsoChecked.join(', ')}.`
+
+  /* shortlist */
+  const wordmark = (c, px, color) => {
+    const f = c.font
+    const text = f.case === 'lower' ? c.name.toLowerCase() : c.name
+    return `<span class="wm" style="font-family:${f.family.replace(/"/g, "'")};font-weight:${f.weight};letter-spacing:${f.tracking};font-size:${px}px;color:${color};${f.stretch ? `font-stretch:${f.stretch};` : ''}">${esc(text)}</span>`
+  }
+  const lockup = (c, scheme, markPx, textPx) => `<div class="lockup">${marks[c.id](c.colors[scheme], markPx)}${wordmark(c, textPx, c.colors[scheme].ink)}</div>`
+  function renderCands(list = shortlist, pool = names, el = 'cands') {
+    const scheme = isDark() ? 'dark' : 'light'
+    $(el).innerHTML = list.map((c, i) => {
+      const L = c.colors.light, D = c.colors.dark, cur = c.colors[scheme]
+      const n = pool.find((x) => x.name === c.name)
+      const slug = c.name.toLowerCase()
+      return `<article class="panel cand" id="c-${c.id}" aria-labelledby="h-${c.id}">
+        <div class="cand-head">
+          <span class="idx">0${i + 1}</span>
+          <span id="h-${c.id}">${wordmark(c, 26, 'var(--fg)')}</span>
+          <span class="short">${esc(c.short)}</span>
+          ${c.recommended ? '<span class="rec">Recommended</span>' : ''}
+          <span class="say">${esc(c.say)}</span>
+        </div>
+        <div class="heroes">
+          <div class="hero" style="background:${L.bg}"><span class="lbl" style="color:${L.ink}">Light</span>${lockup(c, 'light', 56, 46)}</div>
+          <div class="hero" style="background:${D.bg}"><span class="lbl" style="color:${D.ink}">Dark</span>${lockup(c, 'dark', 56, 46)}</div>
+        </div>
+        <div class="cand-body">
+          <div class="cell">
+            <h3>Why it works</h3><p>${esc(c.why)}</p>
+            <h3>Watch out for</h3><p class="w">${esc(c.watch)}</p>
+            <h3>Availability</h3>
+            <div class="avail">${st(n.npm, 'npm ')} ${st(n.scope, '@' + slug + ' ')} ${st(n.gh, 'GitHub ')}</div>
+            <div class="dom" style="max-width:none;margin-top:8px">${n.domains.free.map((d) => `<span class="f">${slug}${esc(d)}</span>`).join('')}${n.domains.taken.map((d) => `<span class="t">${esc(d)}</span>`).join('')}</div>
+            <h3 style="margin-top:18px">Taglines</h3>
+            <ul class="tl">${c.taglines.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>
+          </div>
+          <div class="cell">
+            <h3>Mark at size</h3>
+            <div class="sizes">
+              ${[96, 48, 32, 20, 16].map((s) => `<figure>${marks[c.id](cur, s)}<figcaption>${s}</figcaption></figure>`).join('')}
+              <figure><div class="icon" style="width:64px;height:64px;background:${D.bg}">${marks[c.id](D, 40)}</div><figcaption>app icon</figcaption></figure>
+            </div>
+            <h3 style="margin-top:18px">In the product</h3>
+            <div class="ctx">
+              <div class="toolbar"><span class="brandmark" style="background:${D.bg}">${marks[c.id](D, 16)}</span><span style="font-size:13px;font-weight:500">${esc(c.name)}</span><span class="doc">Hero shader</span><span class="sp"></span><span class="ghost"></span><span class="ghost"></span><span class="pill">Export</span></div>
+              <div class="install">npx skills add <b>${esc(c.handle)}/${slug}</b></div>
+              <div class="install">${esc(c.domain)}</div>
+            </div>
+            <h3 style="margin-top:18px">Palette</h3>
+            <div class="pal">${c.palette.map((p) => `<button class="sw" type="button" data-hex="${p.hex}" aria-label="Copy ${esc(p.name)} ${p.hex}"><i style="background:${p.hex}"></i><b>${esc(p.name)}</b><span>${p.hex}</span></button>`).join('')}</div>
+            <p class="fontnote">Wordmark: ${esc(c.font.label)}, free on Google Fonts. The product chrome stays Inter and neutral.</p>
+          </div>
+        </div>
+      </article>`
+    }).join('')
+  }
+  const renderAll = () => { renderCands(); renderCands(shortlist2, names2, 'cands2') }
+  renderAll()
+
+  /* round 2 */
+  $('lenses').innerHTML = round2Lenses.map((l) => `<div class="panel"><b>${esc(l.title)}</b><p>${esc(l.body)}</p></div>`).join('')
+  $('rows2').innerHTML = names2.map((n) => rowHTML(n, true)).join('')
+  $('also2').textContent = `Also checked and dropped (taken on npm or GitHub, or weak): ${alsoChecked2.join(', ')}.`
+  $('stories').innerHTML = stories.map((x) => `<div class="panel"><b>${esc(x.title)}</b><span class="era">${esc(x.era)}</span><p>${esc(x.body)}</p></div>`).join('')
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => { try { if (localStorage.getItem('studio:theme')) return } catch (_) {} ; document.documentElement.dataset.theme = e.matches ? 'dark' : 'light'; renderAll() })
+
+  /* copy swatch */
+  let tt
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest('.sw'); if (!b) return
+    try { await navigator.clipboard.writeText(b.dataset.hex) } catch (_) {}
+    const t = $('toast'); t.textContent = `Copied ${b.dataset.hex}`; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 1400)
+  })
+
+  /* voice */
+  $('vsum').textContent = voice.summary
+  $('rules').innerHTML = voice.rules.map(([b, p], i) => `<div class="rule"><span class="i">${i + 1}</span><b>${esc(b)}</b><p>${esc(p)}</p></div>`).join('')
+  $('pairs').innerHTML = voice.pairs.map(([y, n]) => `<div class="panel pair"><div><small>Say</small>${esc(y)}</div><div class="no"><small>Not</small><s>${esc(n)}</s></div></div>`).join('')
+  $('taglines').innerHTML = shortlist.map((c) => `<div class="panel"><div style="margin-bottom:10px">${wordmark(c, 17, 'var(--fg)')}</div><ul class="tl">${c.taglines.map((t) => `<li>${esc(t)}</li>`).join('')}</ul></div>`).join('')
+</script>
+</body>
+</html>
