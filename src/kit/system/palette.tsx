@@ -11,7 +11,7 @@ import { Command as Cmdk } from 'cmdk'
 import { Dialog } from '@base-ui/react/dialog'
 import { useState, type ComponentType } from 'react'
 import { Search } from 'lucide-react'
-import { useHotkeys, prettyCombo } from '../core/hotkeys'
+import { useHotkeys, useHotkeyRegistry, prettyCombo } from '../core/hotkeys'
 import { Kbd } from '../ui/button'
 
 export interface Command { id: string; label: string; group?: string; shortcut?: string; icon?: ComponentType<{ size?: number; strokeWidth?: number }>; run: () => void; keywords?: string[] }
@@ -19,8 +19,15 @@ export interface Command { id: string; label: string; group?: string; shortcut?:
 export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Command[]; extraShortcuts?: { keys: string; label: string; group?: string }[] }) {
   const [open, setOpen] = useState(false)
   const [sheet, setSheet] = useState(false)
-  const bound = Object.fromEntries(commands.filter((c) => c.shortcut).map((c) => [c.shortcut!, () => c.run()]))
-  useHotkeys({ 'mod+k': () => setOpen((o) => !o), 'shift+/': () => setSheet((s) => !s), ...bound }, [commands])
+  // Commands carry their shortcuts: bound here at shell priority, labelled for the ? sheet.
+  const bound = Object.fromEntries(commands.filter((c) => c.shortcut).map((c) => [c.shortcut!, { run: () => c.run(), label: c.label, group: c.group }]))
+  const sig = commands.map((c) => `${c.id}:${c.shortcut ?? ''}`).join('|')
+  useHotkeys(bound, [sig])
+  useHotkeys({
+    'mod+k': { run: () => setOpen((o) => !o), label: 'Command palette', group: 'Help' },
+    '?': { run: () => setSheet((s) => !s), label: 'Keyboard shortcuts', group: 'Help' },
+  }, [], { priority: 0 })
+  const registry = useHotkeyRegistry()
   const groups = [...new Set(commands.map((c) => c.group ?? 'Actions'))]
 
   return (
@@ -30,21 +37,33 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
           <Dialog.Backdrop className="fixed inset-0 z-[150] bg-black/30 transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
           <Dialog.Popup className="pop fixed top-[14vh] left-1/2 z-[151] w-[560px] max-w-[calc(100vw-32px)] -translate-x-1/2 overflow-hidden outline-none transition-[opacity,transform] duration-150 data-[ending-style]:opacity-0 data-[starting-style]:scale-[.98] data-[starting-style]:opacity-0">
             <Dialog.Title className="sr-only">Command palette</Dialog.Title>
-            <Cmdk loop label="Commands" className="flex flex-col">
+            <Cmdk loop label="Commands" className="flex flex-col"
+              // exact / prefix matches on the label outrank fuzzy keyword hits ("css" → Export CSS, not "Back 10 frames")
+              filter={(value, search, keywords) => {
+                const q = search.toLowerCase().trim(), label = value.toLowerCase()
+                if (!q) return 1
+                if (label === q) return 1
+                if (label.startsWith(q)) return 0.9
+                if (label.split(/\s+/).some((w) => w.startsWith(q))) return 0.8
+                if (label.includes(q)) return 0.6
+                if (keywords?.some((k) => k.toLowerCase().includes(q))) return 0.4
+                let i = 0; for (const ch of label) if (ch === q[i]) i++
+                return i === q.length ? 0.1 : 0
+              }}>
               <div className="flex h-11 items-center gap-2 border-b border-line px-3.5">
-                <Search size={14} className="text-faint" />
-                <Cmdk.Input autoFocus placeholder="Search commands…" className="h-full flex-1 bg-transparent text-[13px] text-fg outline-none placeholder:text-faint" />
+                <Search size={14} className="text-fg-faint" />
+                <Cmdk.Input autoFocus placeholder="Search commands…" className="h-full flex-1 bg-transparent text-[13px] text-fg outline-none placeholder:text-fg-faint" />
                 <Kbd>esc</Kbd>
               </div>
               <Cmdk.List className="max-h-[360px] overflow-y-auto p-1.5">
-                <Cmdk.Empty className="px-3 py-6 text-center text-[12px] text-muted">No matching commands</Cmdk.Empty>
+                <Cmdk.Empty className="px-3 py-6 text-center text-[12px] text-fg-muted">No matching commands</Cmdk.Empty>
                 {groups.map((g) => (
-                  <Cmdk.Group key={g} heading={g} className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-2 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:text-faint">
+                  <Cmdk.Group key={g} heading={g} className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-2 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:text-fg-faint">
                     {commands.filter((c) => (c.group ?? 'Actions') === g).map((c) => {
                       const Icon = c.icon
                       return (
-                        <Cmdk.Item key={c.id} value={`${c.label} ${c.keywords?.join(' ') ?? ''}`} onSelect={() => { setOpen(false); setTimeout(c.run, 0) }}
-                          className="flex h-8 cursor-default items-center gap-2.5 rounded-[6px] px-2 text-[12.5px] text-fg data-[selected=true]:bg-accent-strong data-[selected=true]:text-accent-fg">
+                        <Cmdk.Item key={c.id} value={`${c.label}`} keywords={c.keywords} onSelect={() => { setOpen(false); setTimeout(c.run, 0) }}
+                          className="flex h-8 cursor-default items-center gap-2.5 rounded-[6px] px-2 text-[12.5px] text-fg data-[selected=true]:bg-signal-strong data-[selected=true]:text-signal-fg">
                           <span className="flex w-4 justify-center opacity-70">{Icon && <Icon size={14} strokeWidth={1.5} />}</span>
                           <span className="flex-1">{c.label}</span>
                           {c.shortcut && <span className="text-[11px] opacity-60">{prettyCombo(c.shortcut)}</span>}
@@ -62,27 +81,34 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
       <Dialog.Root open={sheet} onOpenChange={setSheet}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-[150] bg-black/30" />
-          <Dialog.Popup className="pop fixed top-1/2 left-1/2 z-[151] max-h-[80vh] w-[520px] max-w-[calc(100vw-32px)] -translate-1/2 overflow-y-auto p-5 outline-none">
+          <Dialog.Popup className="pop fixed top-1/2 left-1/2 z-[151] max-h-[80vh] w-[600px] max-w-[calc(100vw-32px)] -translate-1/2 overflow-y-auto p-5 outline-none">
             <Dialog.Title className="mb-3 text-[13px] font-semibold">Keyboard shortcuts</Dialog.Title>
-            <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-              {[
-                ...commands.filter((c) => c.shortcut).map((c) => ({ keys: c.shortcut!, label: c.label })),
-                { keys: 'mod+k', label: 'Command palette' },
-                { keys: 'mod+z', label: 'Undo' },
-                { keys: 'shift+mod+z', label: 'Redo' },
-                { keys: 'mod+\\', label: 'Hide interface' },
-                { keys: 't', label: 'Toggle theme' },
-                ...extraShortcuts,
-              ].map((s) => (
-                <div key={s.keys + s.label} className="flex h-7 items-center justify-between gap-3 text-[12px]">
-                  <span className="text-muted">{s.label}</span>
-                  <Kbd>{prettyCombo(s.keys)}</Kbd>
-                </div>
-              ))}
-            </div>
+            <ShortcutSheet entries={[...registry.map((b) => ({ keys: b.combo, label: b.label!, group: b.group })), ...extraShortcuts]} />
           </Dialog.Popup>
         </Dialog.Portal>
       </Dialog.Root>
     </>
+  )
+}
+
+/** Grouped list of shortcuts — fed by the live hotkey registry, so it can't drift. */
+function ShortcutSheet({ entries }: { entries: { keys: string; label: string; group?: string }[] }) {
+  const seen = new Set<string>()
+  const list = entries.filter((e) => { const k = e.keys + e.label; if (seen.has(k)) return false; seen.add(k); return true })
+  const groups = [...new Set(list.map((e) => e.group ?? 'General'))]
+  return (
+    <div className="columns-2 gap-x-8">
+      {groups.map((g) => (
+        <div key={g} className="mb-3 break-inside-avoid">
+          <div className="mb-1 text-[11px] text-fg-faint">{g}</div>
+          {list.filter((e) => (e.group ?? 'General') === g).map((s) => (
+            <div key={s.keys + s.label} className="flex h-7 items-center justify-between gap-3 text-[12px]">
+              <span className="truncate text-fg-muted">{s.label}</span>
+              <Kbd>{prettyCombo(s.keys)}</Kbd>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
   )
 }

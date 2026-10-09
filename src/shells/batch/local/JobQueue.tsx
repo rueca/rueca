@@ -32,7 +32,7 @@ export function Progress({ value, className, tone = 'accent' }: { value: number;
   return (
     <div role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct)}
       className={cn('h-[3px] w-full overflow-hidden rounded-full bg-track', className)}>
-      <div className={cn('h-full rounded-full transition-[width] duration-200', tone === 'ok' ? 'bg-ok' : tone === 'rec' ? 'bg-rec' : 'bg-accent')} style={{ width: `${pct}%` }} />
+      <div className={cn('h-full rounded-full transition-[width] duration-200', tone === 'ok' ? 'bg-ok' : tone === 'rec' ? 'bg-rec' : 'bg-signal')} style={{ width: `${pct}%` }} />
     </div>
   )
 }
@@ -57,22 +57,22 @@ export function JobQueue({ jobs, onOpen, className }: { jobs: Job[]; onOpen?: (j
       {jobs.map((j) => (
         <div key={j.id} data-job={j.id} role="listitem"
           className={cn('group/job flex h-10 shrink-0 items-center gap-2.5 rounded-[6px] px-2', j.status === 'running' && 'bg-hover')}>
-          <div className="flex h-7 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-input shadow-[inset_0_0_0_1px_var(--line)]">
+          <div className="flex h-7 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-control shadow-[inset_0_0_0_1px_var(--line)]">
             {j.thumb ? (
               <img src={j.thumb} alt="" className="max-h-full max-w-full object-contain" style={{ aspectRatio: j.aspect }} />
             ) : j.status === 'running' ? (
-              <span className="size-3 animate-spin rounded-full border-[1.5px] border-line-strong border-t-accent" />
+              <span className="size-3 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" />
             ) : null}
           </div>
           <div className="min-w-0 flex-1">
-            <div className={cn('truncate text-[12px]', j.status === 'queued' || j.status === 'cancelled' ? 'text-faint' : 'text-fg', j.status === 'cancelled' && 'line-through')}>{j.label}</div>
-            {j.detail && <div className="truncate text-[11px] text-faint">{j.detail}</div>}
+            <div className={cn('truncate text-[12px]', j.status === 'queued' || j.status === 'cancelled' ? 'text-fg-faint' : 'text-fg', j.status === 'cancelled' && 'line-through')}>{j.label}</div>
+            {j.detail && <div className="truncate text-[11px] text-fg-faint">{j.detail}</div>}
           </div>
-          <div className="flex shrink-0 items-center gap-1 text-[11px] tabular text-faint">
+          <div className="flex shrink-0 items-center gap-1 text-[11px] tabular text-fg-faint">
             {j.status === 'done' && j.meta && <span className="group-hover/job:hidden">{j.meta}</span>}
             {j.status === 'done' && onOpen && (
               <button type="button" aria-label={`Download ${j.label}`} onClick={() => onOpen(j)}
-                className="hidden size-6 items-center justify-center rounded-[5px] text-muted outline-none hover:bg-hover hover:text-fg group-hover/job:flex focus-visible:flex">
+                className="hidden size-6 items-center justify-center rounded-[5px] text-fg-muted outline-none hover:bg-hover hover:text-fg group-hover/job:flex focus-visible:flex">
                 <Download size={13} strokeWidth={1.5} />
               </button>
             )}

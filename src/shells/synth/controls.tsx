@@ -3,7 +3,7 @@
    Inspector uses, just laid out as an instrument panel. */
 import { Segmented, humanize, useValues, type NumberDef, type SelectDef } from '@kit'
 import { params } from './params'
-import { Knob } from './local/Knob'
+import { Knob } from '@kit'
 
 /** Params whose perceptual scale is exponential. (The kit's NumberDef has no taper field yet.) */
 const LOG = new Set(['cutoff', 'delayTone', 'attack', 'decay', 'release', 'kickDecay', 'snareDecay', 'hatDecay', 'glide'])

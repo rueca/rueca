@@ -104,6 +104,18 @@ export const marks = {
     )
   },
 
+  /* A clockwork winding key set into the work: wind it up, watch it go. Juanelo's automata ran on springs and cams. */
+  juanelo({ ink, acc, bg }, size = 32) {
+    return svg(
+      `<ellipse cx="10" cy="7" rx="5.5" ry="4.5" fill="${ink}"/><ellipse cx="22" cy="7" rx="5.5" ry="4.5" fill="${ink}"/>` +
+        `<circle cx="9.5" cy="7" r="1.7" fill="${bg}"/><circle cx="22.5" cy="7" r="1.7" fill="${bg}"/>` +
+        `<rect x="14" y="5" width="4" height="12" rx="1" fill="${ink}"/>` +
+        `<rect x="7" y="17" width="18" height="12" rx="2" fill="${acc}"/>`,
+      size,
+      'Juanelo mark',
+    )
+  },
+
   /* A periaktos from above: a three-sided turning prism. The lit face is the scene the audience sees. */
   periaktos({ ink, acc }, size = 32) {
     return svg(
@@ -112,6 +124,57 @@ export const marks = {
         `<circle cx="16" cy="17.5" r="2" fill="${ink}"/>`,
       size,
       'Periaktos mark',
+    )
+  },
+
+  /* Round 3 ---------------------------------------------------------------- */
+
+  /* A trompo: the Latin American spinning top. Wound with string, thrown, alive. */
+  trompo({ ink, acc }, size = 32, small = size < 24) {
+    return svg(
+      `<rect x="14.4" y="2.5" width="3.2" height="6" rx="1.2" fill="${ink}"/>` +
+        `<path d="M5.5 12.5 C5.5 9 10 7.5 16 7.5 C22 7.5 26.5 9 26.5 12.5 C26.5 17.5 20 23.5 16 29.5 C12 23.5 5.5 17.5 5.5 12.5 Z" fill="${ink}"/>` +
+        `<path d="M5.7 11.2 H26.3 C26.5 12 26.5 13 26.3 14 H5.7 C5.5 13 5.5 12 5.7 11.2 Z" fill="${acc}"/>` +
+        (small ? '' : `<path d="M2.5 20 Q4 24 7.5 25.5" fill="none" stroke="${acc}" stroke-width="1.6" stroke-linecap="round"/><path d="M29.5 20 Q28 24 24.5 25.5" fill="none" stroke="${acc}" stroke-width="1.6" stroke-linecap="round"/>`),
+      size,
+      'Trompo mark',
+    )
+  },
+
+  /* Ruedita, “lil wheel”: a toy wheel with a hub and one bright grip to roll it by. */
+  ruedita({ ink, acc, bg }, size = 32) {
+    return svg(
+      `<circle cx="16" cy="17" r="11.5" fill="${ink}"/>` +
+        `<circle cx="16" cy="17" r="4" fill="${bg}"/>` +
+        `<circle cx="16" cy="17" r="1.6" fill="${ink}"/>` +
+        `<circle cx="16" cy="5.5" r="3.4" fill="${acc}"/>`,
+      size,
+      'Ruedita mark',
+    )
+  },
+
+  /* Lilknob: a stubby knob with its pointer, and two dots on the scale that make it smile back. */
+  lilknob({ ink, acc, bg }, size = 32) {
+    return svg(
+      `<circle cx="16" cy="18" r="10.5" fill="${ink}"/>` +
+        `<line x1="16" x2="16" y1="18" y2="9.5" stroke="${acc}" stroke-width="2.8" stroke-linecap="round"/>` +
+        `<circle cx="12" cy="20.5" r="1.5" fill="${bg}"/><circle cx="20" cy="20.5" r="1.5" fill="${bg}"/>` +
+        `<circle cx="6" cy="5.5" r="1.6" fill="${ink}"/><circle cx="16" cy="3" r="1.6" fill="${ink}"/><circle cx="26" cy="5.5" r="1.6" fill="${ink}"/>`,
+      size,
+      'Lilknob mark',
+    )
+  },
+
+  /* Tornasol: the shimmer of colour that shifts as you turn something. A disc with a turning sheen. */
+  tornasol({ ink, acc, acc2, bg }, size = 32) {
+    const id = 'tg' + Math.random().toString(36).slice(2, 8)
+    return svg(
+      `<defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${acc}"/><stop offset="1" stop-color="${acc2}"/></linearGradient></defs>` +
+        `<circle cx="16" cy="16" r="12.5" fill="url(#${id})"/>` +
+        `<path d="M16 3.5 C9 9 9 23 16 28.5 C11 28 4.5 23 4.5 16 C4.5 9 11 4 16 3.5 Z" fill="${ink}" opacity=".9"/>` +
+        '',
+      size,
+      'Tornasol mark',
     )
   },
 }

@@ -41,9 +41,9 @@ export function Modal({
           <div className="flex items-start gap-3 px-4 pt-4 pb-3">
             <div className="min-w-0 flex-1">
               <Dialog.Title className="text-[13px] font-semibold text-fg">{title}</Dialog.Title>
-              {description && <Dialog.Description className="mt-1 text-[11.5px] leading-relaxed text-muted">{description}</Dialog.Description>}
+              {description && <Dialog.Description className="mt-1 text-[11.5px] leading-relaxed text-fg-muted">{description}</Dialog.Description>}
             </div>
-            <Dialog.Close aria-label="Close" className="flex size-6 items-center justify-center rounded-[5px] text-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+            <Dialog.Close aria-label="Close" className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
               <X size={14} strokeWidth={1.5} />
             </Dialog.Close>
           </div>

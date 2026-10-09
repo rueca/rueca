@@ -30,7 +30,7 @@ export function StackList<T extends StackItem>({
   const [drag, setDrag] = useState<{ id: string; to: number } | null>(null)
   const list = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ id: string; to: number } | null>(null)
-  if (mixed) return <div className="px-3 pb-1 text-[11.5px] text-faint">{mixedHint}</div>
+  if (mixed) return <div className="px-3 pb-1 text-[11.5px] text-fg-faint">{mixedHint}</div>
   if (!items.length) return null
   const shown = [...items].reverse()
   const setAt = (id: string, patch: Partial<T>, final = true) => onChange(items.map((x) => (x.id === id ? { ...x, ...patch } : x)), final)
@@ -73,21 +73,21 @@ export function StackList<T extends StackItem>({
             if (e.key === 'ArrowDown' && i < shown.length - 1) { e.preventDefault(); move(it.id, i + 2) }
           }}
           className={cn('group/stack relative flex h-[var(--row)] items-center gap-1 pr-2 pl-1', drag?.id === it.id && 'opacity-50', !it.visible && '[&_[data-stack-body]]:opacity-45')}>
-          {drag && drag.to === i && drag.id !== it.id && <div className="pointer-events-none absolute -top-px right-2 left-3 h-0.5 rounded-full bg-accent" />}
-          {drag && drag.to === shown.length && i === shown.length - 1 && <div className="pointer-events-none absolute right-2 -bottom-px left-3 h-0.5 rounded-full bg-accent" />}
+          {drag && drag.to === i && drag.id !== it.id && <div className="pointer-events-none absolute -top-px right-2 left-3 h-0.5 rounded-full bg-signal" />}
+          {drag && drag.to === shown.length && i === shown.length - 1 && <div className="pointer-events-none absolute right-2 -bottom-px left-3 h-0.5 rounded-full bg-signal" />}
           <button type="button" aria-label="Drag to reorder (⌥↑ ⌥↓)" onPointerDown={(e) => onGrip(e, it.id)}
-            className={cn('flex h-6 w-3 shrink-0 cursor-grab items-center justify-center text-faint opacity-0 outline-none group-hover/stack:opacity-100 focus-visible:opacity-100', shown.length < 2 && 'invisible')}>
+            className={cn('flex h-6 w-3 shrink-0 cursor-grab items-center justify-center text-fg-faint opacity-0 outline-none group-hover/stack:opacity-100 focus-visible:opacity-100', shown.length < 2 && 'invisible')}>
             <GripVertical size={12} strokeWidth={1.5} />
           </button>
           <div data-stack-body className="flex min-w-0 flex-1 items-center gap-1.5">{renderRow(it, (patch, final) => setAt(it.id, patch, final), items.indexOf(it))}</div>
           {toggle && (
             <button type="button" aria-label={it.visible ? 'Hide' : 'Show'} aria-pressed={!it.visible} onClick={() => setAt(it.id, { visible: !it.visible } as Partial<T>)}
-              className="flex size-6 shrink-0 items-center justify-center rounded-[5px] text-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+              className="flex size-6 shrink-0 items-center justify-center rounded-[5px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
               {it.visible ? <Eye size={13} strokeWidth={1.5} /> : <EyeOff size={13} strokeWidth={1.5} />}
             </button>
           )}
           <button type="button" aria-label="Remove" onClick={() => onChange(items.filter((x) => x.id !== it.id), true)}
-            className="flex size-6 shrink-0 items-center justify-center rounded-[5px] text-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+            className="flex size-6 shrink-0 items-center justify-center rounded-[5px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
             <Minus size={13} strokeWidth={1.5} />
           </button>
         </div>

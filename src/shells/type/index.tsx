@@ -71,13 +71,13 @@ export default function TypeShell() {
     const name = (L: (typeof T)[number]) => `${L.ch === ' ' ? '␣' : L.ch}  · ${L.i + 1}`
     if (v.effect === 'wave')
       return [
-        { id: 'cycle', label: 'Cycle', start: 0, end: v.duration, color: 'var(--accent)' },
+        { id: 'cycle', label: 'Cycle', start: 0, end: v.duration, color: 'var(--signal)' },
         ...pick.map((L) => ({ id: `l${L.i}`, label: name(L), kind: 'keys' as const, depth: 1, keys: L.crests.map((t) => ({ t, value: 'crest' })) })),
       ]
     const inEnd = Math.max(...T.map((L) => L.inEnd))
     const out: Lane[] = [
-      { id: 'in', label: 'In', start: 0, end: inEnd, color: 'var(--accent)' },
-      ...pick.map((L) => ({ id: `l${L.i}`, label: name(L), start: L.inStart, end: L.inEnd, depth: 1, color: 'var(--accent)' })),
+      { id: 'in', label: 'In', start: 0, end: inEnd, color: 'var(--signal)' },
+      ...pick.map((L) => ({ id: `l${L.i}`, label: name(L), start: L.inStart, end: L.inEnd, depth: 1, color: 'var(--signal)' })),
     ]
     if (v.outro) {
       const o0 = Math.min(...T.map((L) => L.outStart)), o1 = Math.max(...T.map((L) => L.outEnd))
@@ -194,8 +194,8 @@ export default function TypeShell() {
           return (
             <button key={p.name} type="button" aria-label={p.name} title={`${p.name} · ${contrastRatio(p.fg, p.bg).toFixed(1)}:1 ${wcagGrade(contrastRatio(p.fg, p.bg))}`}
               aria-pressed={on} onClick={() => params.patch({ fg: p.fg, bg: p.bg })}
-              className={cn('flex aspect-square items-center justify-center rounded-[7px] text-[13px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                on ? 'shadow-[0_0_0_1.5px_var(--accent)]' : 'shadow-[inset_0_0_0_1px_var(--line-strong)]')}
+              className={cn('flex aspect-square items-center justify-center rounded-[7px] text-[13px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-signal',
+                on ? 'shadow-[0_0_0_1.5px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line-strong)]')}
               style={{ background: p.bg, color: p.fg, fontFamily: `"${SPECIMEN_FAMILY}", sans-serif` }}>
               Aa
             </button>
@@ -209,7 +209,7 @@ export default function TypeShell() {
     <Section title="Code" first={false}
       actions={<IconButton size="icon-sm" icon={Copy} label="Copy CSS variables" onClick={() => copy(scaleCSS(v, steps), 'CSS variables')} />}>
       <div className="px-3">
-        <pre className="max-h-[220px] overflow-auto rounded-[6px] bg-input p-2 font-mono text-[10.5px] leading-[1.55] text-muted select-text">{scaleCSS(v, steps)}</pre>
+        <pre className="max-h-[220px] overflow-auto rounded-[6px] bg-control p-2 font-mono text-[10.5px] leading-[1.55] text-fg-muted select-text">{scaleCSS(v, steps)}</pre>
         <div className="mt-2 grid grid-cols-2 gap-1">
           <Button size="sm" variant="default" onClick={() => copy(scaleTailwind4(v, steps), 'Tailwind theme')}>Tailwind v4</Button>
           <Button size="sm" variant="default" onClick={() => copy(scaleTailwind3(v, steps), 'Tailwind config')}>Tailwind v3</Button>
@@ -220,20 +220,20 @@ export default function TypeShell() {
 
   const right = (
     <Panel header={<PanelHeader title={mode === 'specimen' ? 'Specimen' : mode === 'kinetic' ? 'Kinetic' : 'Type scale'}>
-      <span className="truncate text-[11px] text-faint">{fam.label}</span>
+      <span className="truncate text-[11px] text-fg-faint">{fam.label}</span>
     </PanelHeader>}>
       {mode === 'specimen' && (
         <>
           <Inspector params={params} folders={['font', 'axes', 'setting', 'colour', 'artboard']} />
           {pairs}
-          <Row className="pb-3"><span className="text-[11px] leading-relaxed text-faint">{fam.note}{!fam.axes.opsz ? ' — optical size is unavailable for this face.' : ''}</span></Row>
+          <Row className="pb-3"><span className="text-[11px] leading-relaxed text-fg-faint">{fam.note}{!fam.axes.opsz ? ' — optical size is unavailable for this face.' : ''}</span></Row>
         </>
       )}
       {mode === 'kinetic' && (
         <>
           <Inspector params={params} folders={['kinetic', 'motion', 'colour']} />
           {pairs}
-          {v.effect === 'weight' && !fam.axes.wght && <Row className="pb-3"><span className="text-[11px] text-faint">{fam.label} has static weights, so the weight effect steps instead of morphing. Switch to Inter for a smooth wght animation.</span></Row>}
+          {v.effect === 'weight' && !fam.axes.wght && <Row className="pb-3"><span className="text-[11px] text-fg-faint">{fam.label} has static weights, so the weight effect steps instead of morphing. Switch to Inter for a smooth wght animation.</span></Row>}
         </>
       )}
       {mode === 'scale' && (

@@ -21,9 +21,12 @@
    Taper: 'log' maps the arc exponentially (frequencies, times); 'linear'
    otherwise. `bipolar` fills from the centre (pan, detune ±).
    Sizes: sm 28 · md 36 · lg 48 px. Accent only on the value arc.
+   (Promoted from shells/synth/local/Knob.tsx.)
 --------------------------------------------------------------------------- */
 import { useEffect, useRef, useState } from 'react'
-import { ScrubValue, Tip, clamp, cn, roundTo } from '@kit'
+import { clamp, cn, roundTo } from '../core/cn'
+import { ScrubValue } from './scrub'
+import { Tip } from './tooltip'
 
 export interface KnobProps {
   value: number
@@ -164,12 +167,12 @@ export function Knob({
       onPointerCancel={onPointerUp}
       onDoubleClick={() => defaultValue !== undefined && onChange(defaultValue, true)}
       onKeyDown={onKeyDown}
-      className={cn('group/knob relative shrink-0 cursor-ns-resize touch-none rounded-full outline-none no-select', 'focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-panel')}
+      className={cn('group/knob relative shrink-0 cursor-ns-resize touch-none rounded-full outline-none no-select', 'focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-panel')}
       style={{ width: px, height: px }}
     >
       <svg viewBox="0 0 100 100" width={px} height={px} className="block overflow-visible" aria-hidden>
         <path d={arc(0, 1)} fill="none" stroke="var(--track)" strokeWidth={stroke} strokeLinecap="round" />
-        <path d={arc(Math.min(from, norm), Math.max(from, norm))} fill="none" stroke="var(--accent)" strokeWidth={stroke} strokeLinecap="round"
+        <path d={arc(Math.min(from, norm), Math.max(from, norm))} fill="none" stroke="var(--signal)" strokeWidth={stroke} strokeLinecap="round"
           className={cn(!changed && changed !== undefined && 'opacity-70')} />
         <circle cx={cx} cy={cy} r={r * 0.68} fill="var(--raised)" className="transition-[fill] group-hover/knob:fill-[var(--active)] group-data-[dragging]/knob:fill-[var(--active)]" />
         <circle cx={cx} cy={cy} r={r * 0.68} fill="none" stroke="var(--line-strong)" strokeWidth={1} vectorEffect="non-scaling-stroke" />
@@ -183,11 +186,11 @@ export function Knob({
       {hint ? <Tip label={hint} side="top">{dialEl}</Tip> : dialEl}
       {!hideLabel && (
         <span onDoubleClick={() => defaultValue !== undefined && onChange(defaultValue, true)}
-          className={cn('max-w-full truncate text-[10.5px] leading-tight no-select', changed ? 'text-fg' : 'text-muted')}>{label}</span>
+          className={cn('max-w-full truncate text-[10.5px] leading-tight no-select', changed ? 'text-fg' : 'text-fg-muted')}>{label}</span>
       )}
       {!hideValue && (
         <ScrubValue value={value} onChange={onChange} min={min} max={max} step={step} defaultValue={defaultValue} fmt={fmt} unit={unit}
-          label={`${label} value`} changed={changed} align="left" className={cn('h-[18px] justify-center px-0.5 text-[10.5px] [&>span]:text-center', dragging && 'text-accent')} />
+          label={`${label} value`} changed={changed} align="left" className={cn('h-[18px] justify-center px-0.5 text-[10.5px] [&>span]:text-center', dragging && 'text-signal')} />
       )}
     </div>
   )

@@ -42,7 +42,7 @@ function Rail({ value, min, max, onChange, background, label, marks = [] }: {
         if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); onChange(clamp(value + step, min, max), true) }
         if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); onChange(clamp(value - step, min, max), true) }
       }}
-      className="relative h-3.5 min-w-0 flex-1 cursor-pointer rounded-full shadow-[inset_0_0_0_1px_var(--line)] outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="relative h-3.5 min-w-0 flex-1 cursor-pointer rounded-full shadow-[inset_0_0_0_1px_var(--line)] outline-none focus-visible:ring-2 focus-visible:ring-signal"
       style={{ background }}
     >
       {marks.map((m) => (
@@ -72,7 +72,7 @@ export function OklchField({ value, onChange, className }: { value: Oklch; onCha
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span className="truncate font-mono text-[11px] text-fg select-text">{css}</span>
-          <span className="flex items-center gap-1.5 text-[11px] text-faint">
+          <span className="flex items-center gap-1.5 text-[11px] text-fg-faint">
             <span className="tabular uppercase select-text">{hex}</span>
             <Tip label={gamut === 'sRGB' ? 'Displays everywhere' : gamut === 'P3' ? 'Wide-gamut screens only — sRGB screens see the hex' : 'Beyond Display P3 — shown and exported chroma-clamped'}>
               <span><Badge tone={gamut === 'sRGB' ? 'ok' : gamut === 'P3' ? 'accent' : 'rec'}>{gamut}</Badge></span>
@@ -81,19 +81,19 @@ export function OklchField({ value, onChange, className }: { value: Oklch; onCha
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <span className="w-3 text-[10.5px] text-faint">L</span>
+        <span className="w-3 text-[10.5px] text-fg-faint">L</span>
         <Rail label="Lightness" value={l} min={0} max={1} onChange={(v, f) => set({ l: Math.round(v * 100) / 100 }, f)} background={`linear-gradient(to right in oklch, ${stops((t) => `oklch(${t} ${c} ${h})`)})`} />
         <ScrubValue boxed value={Math.round(l * 100)} min={0} max={100} step={1} unit="%" label="Lightness" onChange={(v, f) => set({ l: v / 100 }, f)} className="w-[52px] shrink-0" />
       </div>
       <div className="flex items-center gap-2">
-        <span className="w-3 text-[10.5px] text-faint">C</span>
+        <span className="w-3 text-[10.5px] text-fg-faint">C</span>
         <Rail label="Chroma" value={c} min={0} max={0.37} onChange={(v, f) => set({ c: Math.round(v * 1000) / 1000 }, f)}
           background={`linear-gradient(to right in oklch, ${stops((t) => `oklch(${l} ${t * 0.37} ${h})`)})`}
           marks={[{ at: srgbMax, label: `sRGB limit · ${srgbMax.toFixed(3)}` }, ...(p3Max - srgbMax > 0.005 ? [{ at: p3Max, label: `P3 limit · ${p3Max.toFixed(3)}` }] : [])]} />
         <ScrubValue boxed value={c} min={0} max={0.37} step={0.005} label="Chroma" onChange={(v, f) => set({ c: v }, f)} className="w-[52px] shrink-0" />
       </div>
       <div className="flex items-center gap-2">
-        <span className="w-3 text-[10.5px] text-faint">H</span>
+        <span className="w-3 text-[10.5px] text-fg-faint">H</span>
         <Rail label="Hue" value={h} min={0} max={360} onChange={(v, f) => set({ h: Math.round(v) }, f)} background={`linear-gradient(to right in oklch longer hue, oklch(${l} ${Math.max(c, 0.08)} 0), oklch(${l} ${Math.max(c, 0.08)} 359))`} />
         <ScrubValue boxed value={h} min={0} max={360} step={1} unit="°" label="Hue" onChange={(v, f) => set({ h: v }, f)} className="w-[52px] shrink-0" />
       </div>

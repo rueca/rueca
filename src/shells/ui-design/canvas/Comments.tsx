@@ -27,7 +27,7 @@ export function CommentPins({ sc }: { sc: (b: Box) => Box }) {
             <button type="button" aria-label={`Comment by ${c.author}`}
               onPointerDown={(e) => { e.stopPropagation(); S.design.setState({ openComment: open === c.id ? null : c.id }) }}
               className={cn('pointer-events-auto absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-[10.5px] font-semibold shadow-[var(--shadow-cluster)] transition-transform hover:scale-110',
-                open === c.id ? 'bg-accent-strong text-accent-fg' : 'bg-panel text-fg')}>
+                open === c.id ? 'bg-signal-strong text-signal-fg' : 'bg-panel text-fg')}>
               {initials(c.author)}
             </button>
             {open === c.id && <Thread c={c} />}
@@ -57,7 +57,7 @@ function Thread({ c }: { c: Comment }) {
         <div className="mb-2 flex items-start gap-2">
           <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-active text-[10px] font-semibold text-fg">{initials(c.author)}</div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 text-[11.5px]"><span className="font-medium text-fg">{c.author}</span><span className="text-faint">{ago(c.at)}</span></div>
+            <div className="flex items-center gap-1.5 text-[11.5px]"><span className="font-medium text-fg">{c.author}</span><span className="text-fg-faint">{ago(c.at)}</span></div>
             <p className="mt-0.5 text-[12px] leading-relaxed text-fg select-text">{c.text}</p>
           </div>
           <IconButton icon={Check} label={c.resolved ? 'Reopen' : 'Resolve'} size="icon-sm" active={c.resolved}
@@ -68,7 +68,7 @@ function Thread({ c }: { c: Comment }) {
       )}
       <textarea autoFocus={isNew} value={draft} onChange={(e) => setDraft(e.target.value)} rows={isNew ? 3 : 2} placeholder={isNew ? 'Add a comment' : 'Edit comment'}
         onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); save() } if (e.key === 'Escape') S.design.setState({ openComment: null }) }}
-        className="w-full resize-none rounded-[6px] bg-input px-2 py-1.5 text-[12px] text-fg outline-none placeholder:text-faint focus:shadow-[inset_0_0_0_1px_var(--accent)]" />
+        className="w-full resize-none rounded-[6px] bg-control px-2 py-1.5 text-[12px] text-fg outline-none placeholder:text-fg-faint focus:shadow-[inset_0_0_0_1px_var(--signal)]" />
       <div className="mt-2 flex justify-end gap-1.5">
         <Button size="sm" variant="ghost" onClick={() => S.design.setState({ openComment: null })}>Cancel</Button>
         <Button size="sm" variant="primary" onClick={save} disabled={!draft.trim() || draft === c.text}>{isNew ? 'Post' : 'Save'}</Button>

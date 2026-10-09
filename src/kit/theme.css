@@ -31,11 +31,11 @@
   --track: #353535;
   --raised: #3d3d3d;
   --active: #333333;
-  --input: #2a2a2a;   /* text/number field fill */
+  --control: #2a2a2a;   /* text/number field fill */
 
   --fg: #ffffff;
   --fg-muted: #a8a8a8;
-  --fg-faint: #7a7a7a; /* #707070 was 2.9:1 on --input */
+  --fg-faint: #858585; /* #707070 was 2.9:1 on --control, #7a7a7a 2.94 on --active (selected rows) */
 
   --line: rgba(255, 255, 255, 0.07);
   --line-strong: rgba(255, 255, 255, 0.13);
@@ -44,10 +44,10 @@
 
   /* Two accents. Bright for fills, tracks, playheads, indicators.
      Strong for accent SURFACES that carry text: white on #0d99ff is 2.99:1. */
-  --accent: #0d99ff;
-  --accent-strong: #0a72c6;
-  --accent-fg: #ffffff;
-  --accent-soft: rgba(13, 153, 255, 0.16); /* selection wash */
+  --signal: #0d99ff;
+  --signal-strong: #0a72c6;
+  --signal-fg: #ffffff;
+  --signal-soft: rgba(13, 153, 255, 0.16); /* selection wash */
 
   /* semantic, used sparingly: keyframes, recording, errors */
   --key: #f5b400;      /* keyframed / animated field */
@@ -55,6 +55,12 @@
   --ok: #3ccf8e;
 
   --lane: #474747;     /* idle timeline lane */
+  /* categorical — node ports, lanes, tags, series. Distinct in hue AND lightness,
+     ≥3:1 on --panel. Use for identity, never for state (state is --signal). */
+  --cat-1: #5b9cff; --cat-2: #f2a03d; --cat-3: #3fcf8e; --cat-4: #e46de0;
+  --cat-5: #f06464; --cat-6: #46c7d9; --cat-7: #b59cff; --cat-8: #c9c25a;
+  /* scrim for controls laid over images and video */
+  --scrim: rgba(0, 0, 0, 0.55);
   --grid: rgba(255, 255, 255, 0.04);
 
   /* depth. Panels carry a 1px top highlight — that reads as raised without a bevel. */
@@ -84,7 +90,7 @@
   --track: #d9d9d9;
   --raised: #ffffff;
   --active: #e6e6e6;   /* NOT --raised: white on a white panel is invisible */
-  --input: #f2f2f2;
+  --control: #f2f2f2;
 
   --fg: #1a1a1a;
   --fg-muted: #5e5e5e;
@@ -95,16 +101,19 @@
   --hover: rgba(0, 0, 0, 0.04);
   --press: rgba(0, 0, 0, 0.07);
 
-  --accent: #0b84e0;
-  --accent-strong: #0a6fc0;
-  --accent-fg: #ffffff;
-  --accent-soft: rgba(11, 132, 224, 0.12);
+  --signal: #0b84e0;
+  --signal-strong: #0a6fc0;
+  --signal-fg: #ffffff;
+  --signal-soft: rgba(11, 132, 224, 0.12);
 
   --key: #c98a00;
   --rec: #e5383b;
   --ok: #1fa971;
 
   --lane: #c6c6c6;
+  --cat-1: #2f6fe0; --cat-2: #c26a00; --cat-3: #12965c; --cat-4: #b43fb0;
+  --cat-5: #d23a3a; --cat-6: #0f8fa3; --cat-7: #7354e0; --cat-8: #8a8100;
+  --scrim: rgba(0, 0, 0, 0.45);
   --grid: rgba(0, 0, 0, 0.05);
 
   /* light shadows must be far softer or they read as dirt */
@@ -122,10 +131,10 @@
 :root[data-density="comfortable"] { --row: 32px; --gutter: 14px; --inspector-w: 300px; }
 
 @theme inline {
-  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
+  --font-ui: "Inter Variable", Inter, ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  /* the artboard's own faces — override per project, never fold into --font-sans */
-  --font-artboard: var(--artboard-font, var(--font-sans));
+  /* the artboard's own faces — override per project, never fold into --font-ui */
+  --font-artboard: var(--artboard-font, var(--font-ui));
 
   --color-field: var(--field);
   --color-panel: var(--panel);
@@ -134,24 +143,27 @@
   --color-track: var(--track);
   --color-raised: var(--raised);
   --color-active: var(--active);
-  --color-input: var(--input);
+  --color-control: var(--control);
 
   --color-fg: var(--fg);
-  --color-muted: var(--fg-muted);
-  --color-faint: var(--fg-faint);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-hover: var(--hover);
   --color-press: var(--press);
 
-  --color-accent: var(--accent);
-  --color-accent-strong: var(--accent-strong);
-  --color-accent-fg: var(--accent-fg);
-  --color-accent-soft: var(--accent-soft);
+  --color-signal: var(--signal);
+  --color-signal-strong: var(--signal-strong);
+  --color-signal-fg: var(--signal-fg);
+  --color-signal-soft: var(--signal-soft);
   --color-key: var(--key);
   --color-rec: var(--rec);
   --color-ok: var(--ok);
   --color-lane: var(--lane);
+  --color-cat-1: var(--cat-1); --color-cat-2: var(--cat-2); --color-cat-3: var(--cat-3); --color-cat-4: var(--cat-4);
+  --color-cat-5: var(--cat-5); --color-cat-6: var(--cat-6); --color-cat-7: var(--cat-7); --color-cat-8: var(--cat-8);
+  --color-scrim: var(--scrim);
 
   --radius-panel: var(--radius-panel);
   --radius-control: var(--radius-control);
@@ -163,7 +175,7 @@
     margin: 0;
     background: var(--field);
     color: var(--fg);
-    font-family: var(--font-sans);
+    font-family: var(--font-ui);
     font-size: 12px;
     line-height: 1.4;
     -webkit-font-smoothing: antialiased;
@@ -184,8 +196,8 @@
   }
   ::-webkit-scrollbar-thumb:hover { background: var(--fg-faint); background-clip: content-box; }
 
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  ::selection { background: var(--accent-soft); }
+  :focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; }
+  ::selection { background: var(--signal-soft); }
 }
 
 @utility tabular { font-variant-numeric: tabular-nums; }

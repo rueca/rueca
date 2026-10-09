@@ -46,96 +46,50 @@ export const installs = [
 /** Shells offered in the hero switcher, in order; missing ones are skipped. */
 export const HERO_SHELLS = ['shader', 'motion', 'scene', 'dropin', 'present', 'animate', 'nodes', 'type']
 
-export const chrome = [
-  'Inspector', 'Scrub fields', 'Timeline', 'Layers', 'Presets', 'Undo / redo', 'A/B compare',
-  'Share link', 'Export PNG · SVG · video', 'Command palette', 'Dark + light', 'Client view',
-]
-
 export const steps = [
   {
     n: 1,
-    title: 'Describe the knobs',
-    body: 'One schema is the inspector, the defaults, undo, presets, A/B, the share link and the JSON an engineer receives. Every hint is a tooltip — the schema is the documentation.',
-    file: 'artifact.ts',
-    code: `export const params = createParams(defineSchema({
-  shape: folder('Shape', {
-    count:  p.number(24, { min: 3, max: 96, step: 1 }),
-    radius: p.number(72, { min: 10, max: 140, unit: 'px' }),
-    mode:   p.select('radial', ['radial', 'grid', 'spiral']),
-    tint:   p.color('#5b8cff'),
-    spin:   p.boolean(true, { hint: 'Rotate over time.' }),
-  }),
-}), { id: 'dots' })`,
+    short: 'Describe',
+    title: 'Name what you want to tune',
+    body: 'Tell the agent what should be adjustable: size, colour, speed, mood. Each becomes a control, with undo, presets, before/after and a shareable link already included.',
   },
   {
     n: 2,
-    title: 'Plug in the artifact',
-    body: 'Draw as a pure function of values and time, so scrubbing, slow-mo and frame-accurate export work for free. Or hand a DOM node to three.js, or an iframe to the bridge.',
-    file: 'surface.tsx',
-    code: `<CanvasSurface params={params} clock={clock}
-  draw={(ctx, { v, t, w, h }) => {
-    for (let i = 0; i < v.count; i++) {
-      const [x, y] = place(v.mode, i, v, t)
-      dot(ctx, x, y, v.tint)
-    }
-  }} />`,
+    short: 'Drop in',
+    title: 'Bring the thing you are designing',
+    body: 'An animation, a shader, a 3D scene, a page you already built. The agent connects it to the controls without rebuilding it.',
   },
   {
     n: 3,
-    title: 'Wrap it in a shell',
-    body: 'Islands, overlay or docked. The toolbar, inspector, timeline, palette and shortcuts are the kit’s; the artboard is yours, and so is the brand inside it.',
-    file: 'index.tsx',
-    code: `<Studio
-  toolbar={<Toolbar start={<Brand name="Dots" />}
-    end={<ParamActions params={params} />} />}
-  right={<Panel><Inspector params={params} /></Panel>}
-  bottom={<Timeline clock={clock} lanes={lanes} />}>
-  <Stage><Artboard width={390} height={844}>…</Artboard></Stage>
-</Studio>`,
+    short: 'Tune',
+    title: 'Get a tool that feels like a real one',
+    body: 'Inspector, timeline, layers, command palette and export, laid out the way Figma, Framer and Rive do it. Keep tuning, or hand it to a client.',
   },
 ]
 
 export const environments = [
   {
     id: 'canvas',
-    title: 'Canvas & WebGL',
-    body: 'Canvas 2D, raw WebGL2, shaders. DPR, resize and redraw-on-change handled; the draw stays pure.',
-    api: 'CanvasSurface',
-    code: `<CanvasSurface params={params} clock={clock}
-  draw={(ctx, { v, t }) => render(ctx, v, t)} />`,
+    title: 'Animations and shaders',
+    body: 'Motion studies, gradients, generative art. Scrub through time, slow it down, export stills or video.',
     shells: ['motion', 'shader'],
   },
   {
     id: 'three',
-    title: 'Vanilla three.js',
-    body: 'Any renderer that wants a DOM node. Mount once, read live values from the store — no React in the render loop.',
-    api: 'MountSurface',
-    code: `<MountSurface params={params} mount={(el, api) => {
-  const scene = createScene(el)
-  return api.params.subscribe(() => scene.update(api.values()))
-}} />`,
+    title: '3D scenes',
+    body: 'Tune lights, materials and camera on a live scene, with an outliner like the 3D tools you know.',
     shells: ['scene'],
   },
   {
     id: 'bridge',
-    title: 'Any existing prototype',
-    body: 'Plain HTML, Svelte, a Webflow export, a p5 sketch. Add a 2 KB script; values arrive as callbacks or CSS variables. No rewrite.',
-    api: 'FrameSurface + studio-bridge.js',
-    code: `<script src="studio-bridge.js"></script>
-<script>
-  studio.cssVars()          // --headline-size: 76px …
-  studio.on((v) => apply(v))
-</script>`,
+    title: 'A page you already built',
+    body: 'Plain HTML, a Webflow export, a sketch made in anything else. It plugs in as it is — no rewrite.',
     shells: ['dropin'],
   },
   {
     id: 'client',
-    title: 'Client view, on a phone',
-    body: 'Mark the params a client may touch with publish: true. They get full-bleed art, a touch sheet and Download — you keep the inspector.',
-    api: 'Inspector published',
-    code: `p.select('Harbour', PALETTES, { publish: true })
-
-<Inspector params={params} published />`,
+    title: 'A client’s phone',
+    body: 'Choose which controls a client can touch. They get the artwork full screen with a simple panel; you keep everything else.',
     shells: ['present'],
   },
 ]

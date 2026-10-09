@@ -21,11 +21,11 @@ import {
 } from './store'
 
 const KIND_COLOR: Record<ClipKind, string> = {
-  text: 'var(--accent)',
+  text: 'var(--signal)',
   shape: 'var(--key)',
   image: 'var(--ok)',
   bg: 'var(--fg-faint)',
-  progress: 'color-mix(in oklab, var(--accent) 45%, var(--rec))',
+  progress: 'color-mix(in oklab, var(--signal) 45%, var(--rec))',
 }
 const KIND_ICON = { text: Type, shape: Shapes, image: ImageIcon, bg: Square, progress: Minus }
 const ASPECT_ICON = { '9:16': Smartphone, '4:5': RectangleVertical, '1:1': Square, '16:9': RectangleHorizontal }
@@ -59,7 +59,7 @@ function LibraryPanel() {
           <div className="grid grid-cols-2 gap-1.5 px-3">
             {g.items.map((it) => (
               <button key={it.label} type="button" onClick={() => { addClip(it.kind, it.patch); toast(`Added ${it.label.toLowerCase()} at ${fmtTime(clock.time())}`) }}
-                className="group/lib flex h-14 flex-col items-center justify-center gap-1 rounded-[8px] bg-input text-muted outline-none transition-colors hover:text-fg hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-accent">
+                className="group/lib flex h-14 flex-col items-center justify-center gap-1 rounded-[8px] bg-control text-fg-muted outline-none transition-colors hover:text-fg hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal">
                 <span className="flex h-5 items-center text-fg">{it.preview}</span>
                 <span className="text-[11px]">{it.label}</span>
               </button>
@@ -71,13 +71,13 @@ function LibraryPanel() {
         <div className="grid grid-cols-2 gap-1.5 px-3">
           {IMAGES.map(([gen, label]) => (
             <button key={gen} type="button" onClick={() => { addClip('image', { name: label, image: gen, seed: Math.floor(Math.random() * 9999), ...(gen === 'app' ? { w: 0.72, h: 1.28, radius: 0.06 } : {}) }); toast(`Added ${label} image`) }}
-              className="group/lib relative h-16 overflow-hidden rounded-[8px] outline-none focus-visible:ring-2 focus-visible:ring-accent">
+              className="group/lib relative h-16 overflow-hidden rounded-[8px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
               <img src={thumbURL(gen, 7)} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover/lib:scale-105" />
               <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 pt-3 pb-1 text-left text-[11px] text-white">{label}</span>
             </button>
           ))}
         </div>
-        <p className="px-3 pt-2 text-[11px] leading-relaxed text-faint">Generated on the device — reroll with the seed.</p>
+        <p className="px-3 pt-2 text-[11px] leading-relaxed text-fg-faint">Generated on the device — reroll with the seed.</p>
       </Section>
       <Section title="Overlays">
         <div className="flex flex-col gap-1 px-3 pb-1">
@@ -105,8 +105,8 @@ function Transport() {
       <IconButton icon={StepForward} label="Next frame" shortcut="." tipSide="top" onClick={() => clock.step(1)} />
       <IconButton icon={SkipForward} label="Go to end" shortcut="end" tipSide="top" onClick={() => clock.seek(duration)} />
       <div className="ml-1 flex h-7 items-baseline gap-1 rounded-[6px] px-2 tabular text-[12px] text-fg">
-        {fmtTime(t, 'timecode', fps)}<span className="text-[11px] text-faint">/ {fmtTime(duration, 'timecode', fps)}</span>
-        <span className="ml-1 text-[10.5px] text-faint">{fps} fps</span>
+        {fmtTime(t, 'timecode', fps)}<span className="text-[11px] text-fg-faint">/ {fmtTime(duration, 'timecode', fps)}</span>
+        <span className="ml-1 text-[10.5px] text-fg-faint">{fps} fps</span>
       </div>
       <div className="mx-1 h-4 w-px bg-line" />
       <IconButton icon={Scissors} label="Split at playhead" shortcut="mod+b" tipSide="top" disabled={!sel.length} onClick={() => { const n = splitAt(ui.getState().sel); if (!n) toast('Put the playhead inside a selected clip to split') }} />
@@ -192,12 +192,12 @@ function CanvasOverlay({ W, H }: { W: number; H: number }) {
       {guides.x && <div className="pointer-events-none absolute top-0 bottom-0" style={{ left: W / 2 - lw / 2, width: lw, background: 'var(--rec)' }} />}
       {guides.y && <div className="pointer-events-none absolute right-0 left-0" style={{ top: H / 2 - lw / 2, height: lw, background: 'var(--rec)' }} />}
       {c && b && (
-        <div className="pointer-events-none absolute" style={{ left: b.cx - b.w / 2, top: b.cy - b.h / 2, width: b.w, height: b.h, transform: `rotate(${b.rotation}deg)`, outline: `${lw}px ${live ? 'solid' : 'dashed'} var(--accent)` }}>
-          <div className="absolute bottom-full left-0 flex origin-bottom-left items-center gap-1 rounded-[4px] bg-accent-strong px-1.5 py-0.5 text-[11px] whitespace-nowrap text-accent-fg" style={{ transform: `scale(${1 / zoom}) translateY(-4px)` }}>
+        <div className="pointer-events-none absolute" style={{ left: b.cx - b.w / 2, top: b.cy - b.h / 2, width: b.w, height: b.h, transform: `rotate(${b.rotation}deg)`, outline: `${lw}px ${live ? 'solid' : 'dashed'} var(--signal)` }}>
+          <div className="absolute bottom-full left-0 flex origin-bottom-left items-center gap-1 rounded-[4px] bg-signal-strong px-1.5 py-0.5 text-[11px] whitespace-nowrap text-signal-fg" style={{ transform: `scale(${1 / zoom}) translateY(-4px)` }}>
             {c.name}{!live && <span className="opacity-70">· not at playhead</span>}
           </div>
           {live && [[0, 0], [1, 0], [0, 1], [1, 1]].map(([x, y], i) => (
-            <div key={i} className="absolute bg-white" style={{ left: `${x * 100}%`, top: `${y * 100}%`, width: 7 / zoom, height: 7 / zoom, transform: 'translate(-50%,-50%)', outline: `${1 / zoom}px solid var(--accent)` }} />
+            <div key={i} className="absolute bg-white" style={{ left: `${x * 100}%`, top: `${y * 100}%`, width: 7 / zoom, height: 7 / zoom, transform: 'translate(-50%,-50%)', outline: `${1 / zoom}px solid var(--signal)` }} />
           ))}
         </div>
       )}
@@ -362,7 +362,7 @@ export default function VideoShell() {
                 <Segmented label="Aspect" value={v.aspect} onChange={(a) => setAspect(a as Aspect)}
                   options={(Object.keys(ASPECTS) as Aspect[]).map((a) => ({ value: a, label: a, icon: ASPECT_ICON[a], hint: `${ASPECTS[a].label} · ${ASPECTS[a].w} × ${ASPECTS[a].h}` }))} />
               </div>
-              <span className="tabular text-[11.5px] text-faint">{W} × {H}</span>
+              <span className="tabular text-[11.5px] text-fg-faint">{W} × {H}</span>
             </Cluster>
           }
           end={

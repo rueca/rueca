@@ -11,8 +11,8 @@ truthfully. If the prototype is for a specific brand, use that brand's skills an
 apply them **inside the artboard only**.
 
 > **Trap:** give the artboard its own font token (`--font-artboard`, or
-> `--font-brand` / `--font-display`) separate from the chrome's `--font-sans`. If the
-> artboard's body text reads `var(--font-sans)` and you later point that at Inter for
+> `--font-brand` / `--font-display`) separate from the chrome's `--font-ui`. If the
+> artboard's body text reads `var(--font-ui)` and you later point that at Inter for
 > the chrome, the prototype silently loses its brand face and nothing errors.
 
 The only legal homes for a hex value are the artifact (inside the artboard / canvas)
@@ -36,7 +36,7 @@ distinct control surfaces; conflating any two makes a control vanish.
 - **In a light theme the active pill is white**, which is also the panel colour. A
   toggled icon button on a white panel needs `--active` (grey), not `--raised`
   (white). Same token, two jobs, one invisible control.
-- Text and number fields get their own fill (`--input`), distinct from the well.
+- Text and number fields get their own fill (`--control`), distinct from the well.
 
 ## 3. Theming with `@theme inline`
 

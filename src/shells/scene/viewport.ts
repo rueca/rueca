@@ -204,7 +204,7 @@ export function mountViewport(el: HTMLDivElement): () => void {
   composer.addPass(output)
 
   const setAccent = () => {
-    const a = new THREE.Color(cssVar('--accent', '#0d99ff'))
+    const a = new THREE.Color(cssVar('--signal', '#0d99ff'))
     outline.visibleEdgeColor.copy(a)
     outline.hiddenEdgeColor.copy(a).multiplyScalar(0.35)
     dirty = true
@@ -317,7 +317,7 @@ export function mountViewport(el: HTMLDivElement): () => void {
     const kind = selected ? OBJ[selected]?.kind : null
     const locked = selected ? params.values()[`${selected}_locked`] : false
     outline.selectedObjects = node && (kind === 'mesh' || kind === 'group') ? [node] : []
-    const accent = cssVar('--accent', '#0d99ff')
+    const accent = cssVar('--signal', '#0d99ff')
     for (const [id, s] of lightSlots) {
       const on = id === selected
       s.beam.visible = on && s.rig.visible && s.type !== 'point'

@@ -42,7 +42,7 @@ designed reads truthfully inside the artboard.
 
 - **Neutral chrome, brand inside the artboard.** Never hardcode a colour in chrome —
   tokens only. The artboard gets its own font token (`--font-artboard`), separate
-  from the chrome's `--font-sans`.
+  from the chrome's `--font-ui`.
 - **Four control surfaces** — well, track, raised, active — never conflated. This is
   the #1 cause of "the active state looks wrong" → `references/visual-rules.md`
 - **Radius and shadow, not borders.** Sentence case, never micro-caps. Hierarchy by

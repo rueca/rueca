@@ -28,11 +28,11 @@ export function PersonasPanel() {
           return (
             <div key={x.id} role="option" aria-selected={on} tabIndex={0}
               onClick={() => switchPersona(x.id)} onKeyDown={(e) => e.key === 'Enter' && switchPersona(x.id)}
-              className={cn('group/row flex items-center gap-2.5 rounded-[8px] p-2 outline-none focus-visible:ring-2 focus-visible:ring-accent', on ? 'bg-active' : 'hover:bg-hover')}>
+              className={cn('group/row flex items-center gap-2.5 rounded-[8px] p-2 outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-active' : 'hover:bg-hover')}>
               <Avatar p={x} size={30} />
               <div className="min-w-0 flex-1">
                 <div className={cn('truncate text-[12.5px] font-medium', on ? 'text-fg' : 'text-fg/90')}>{x.name}</div>
-                <div className="truncate text-[11px] text-faint">{x.role} · {x.stages.length} stages</div>
+                <div className="truncate text-[11px] text-fg-faint">{x.role} · {x.stages.length} stages</div>
               </div>
               {i < 9 && <Kbd className="group-hover/row:hidden group-focus-within/row:hidden">{i + 1}</Kbd>}
               <div className="hidden group-hover/row:block group-focus-within/row:block" onClick={(e) => e.stopPropagation()}>
@@ -53,19 +53,19 @@ export function PersonasPanel() {
           <Avatar p={p} size={56} />
           <div className="w-full">
             <InlineText value={p.name} onCommit={(name) => set({ name }, 'Rename persona')} className="block truncate text-[14px] font-semibold" title="Persona name" />
-            <InlineText value={p.role} onCommit={(role) => set({ role })} className="block truncate text-[11.5px] text-muted" title="Role" />
+            <InlineText value={p.role} onCommit={(role) => set({ role })} className="block truncate text-[11.5px] text-fg-muted" title="Role" />
           </div>
           <div className="flex gap-1">
             {['#8b5cf6', '#f97316', '#14b8a6', '#ec4899', '#0ea5e9', '#84cc16'].map((h) => (
               <button key={h} type="button" aria-label={`Colour ${h}`} onClick={() => set({ hue: h }, 'Persona colour')}
-                className="size-4 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent" style={{ background: h, boxShadow: p.hue === h ? '0 0 0 2px var(--panel), 0 0 0 3.5px var(--fg-muted)' : undefined }} />
+                className="size-4 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-signal" style={{ background: h, boxShadow: p.hue === h ? '0 0 0 2px var(--panel), 0 0 0 3.5px var(--fg-muted)' : undefined }} />
             ))}
           </div>
         </div>
         <Row label="Age"><ScrubValue boxed value={p.age} min={12} max={99} onChange={(age, f) => editPersona((x) => ({ ...x, age }), { commit: f, label: 'Age' })} className="flex-1" label="Age" /></Row>
         <div className="px-3 pt-2">
           <div className="relative rounded-[10px] bg-well px-3 py-2.5 text-[12px] leading-relaxed text-fg italic">
-            <span aria-hidden className="absolute -top-1 left-2 text-[22px] leading-none text-faint not-italic">“</span>
+            <span aria-hidden className="absolute -top-1 left-2 text-[22px] leading-none text-fg-faint not-italic">“</span>
             <InlineText value={p.quote} multiline onCommit={(quote) => set({ quote })} placeholder="Add a quote in their words" className="block whitespace-pre-wrap" title="Quote" />
           </div>
         </div>
@@ -74,7 +74,7 @@ export function PersonasPanel() {
       <ListSection title="Goals" items={p.goals} onChange={(goals) => set({ goals }, 'Edit goals')} add="Add goal" />
       <ListSection title="Frustrations" items={p.frustrations} onChange={(frustrations) => set({ frustrations }, 'Edit frustrations')} add="Add frustration" />
       <Section title="Scenario">
-        <div className="px-3 pb-1 text-[12px] leading-relaxed text-muted">
+        <div className="px-3 pb-1 text-[12px] leading-relaxed text-fg-muted">
           <InlineText value={p.scenario} multiline onCommit={(scenario) => set({ scenario })} placeholder="When, where, with whom?" className="block whitespace-pre-wrap" title="Scenario" />
         </div>
       </Section>
@@ -85,13 +85,13 @@ export function PersonasPanel() {
 function ListSection({ title, items, onChange, add }: { title: string; items: string[]; onChange: (v: string[]) => void; add: string }) {
   return (
     <Section title={title} actions={<IconButton icon={Plus} size="icon-sm" label={add} onClick={() => onChange([...items, 'New item'])} />}>
-      {!items.length && <div className="px-3 text-[11.5px] text-faint">None yet.</div>}
+      {!items.length && <div className="px-3 text-[11.5px] text-fg-faint">None yet.</div>}
       {items.map((g, i) => (
         <div key={i} className="group/item flex items-start gap-2 px-3 py-1">
-          <span className="mt-[7px] size-1 shrink-0 rounded-full bg-faint" />
+          <span className="mt-[7px] size-1 shrink-0 rounded-full bg-fg-faint" />
           <InlineText value={g} multiline onCommit={(s) => onChange(s ? items.map((x, j) => (j === i ? s : x)) : items.filter((_, j) => j !== i))} className="block min-w-0 flex-1 text-[12px] leading-relaxed text-fg" title={title} />
           <button type="button" aria-label="Remove" onClick={() => onChange(items.filter((_, j) => j !== i))}
-            className="mt-0.5 flex size-5 items-center justify-center rounded-[4px] text-faint opacity-0 hover:bg-hover hover:text-fg group-hover/item:opacity-100 focus-visible:opacity-100"><X size={11} /></button>
+            className="mt-0.5 flex size-5 items-center justify-center rounded-[4px] text-fg-faint opacity-0 hover:bg-hover hover:text-fg group-hover/item:opacity-100 focus-visible:opacity-100"><X size={11} /></button>
         </div>
       ))}
     </Section>

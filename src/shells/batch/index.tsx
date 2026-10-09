@@ -21,11 +21,8 @@ import { runExport, cancelExport, exporter, plannedJobs, slug } from './exporter
 const camera = createCamera()
 const measure = typeof document !== 'undefined' ? document.createElement('canvas').getContext('2d')! : (null as unknown as CanvasRenderingContext2D)
 
-const Mark = () => (
-  <a href="#/" aria-label="All shells" className="contents">
-    <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1" /><rect x="9" y="1.5" width="5.5" height="8" rx="1" /><rect x="1.5" y="9" width="5.5" height="5.5" rx="1" /><rect x="9" y="11.5" width="5.5" height="3" rx="1" /></svg>
-  </a>
-)
+// Brand links the mark home itself.
+const Mark = () => <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1" /><rect x="9" y="1.5" width="5.5" height="8" rx="1" /><rect x="1.5" y="9" width="5.5" height="5.5" rx="1" /><rect x="9" y="11.5" width="5.5" height="3" rx="1" /></svg>
 
 /** Layout checks for every row × size — dry runs of the same drawPost the stage paints with. */
 function useIssues() {
@@ -125,10 +122,10 @@ export default function BatchShell() {
               <IconButton icon={ChevronLeft} label="Previous row" shortcut="arrowleft" onClick={prevRow} disabled={rows.length < 2} />
               <Menu align="center" trigger={
                 <Button size="md" className="min-w-[180px] max-w-[260px] justify-between gap-2 px-2">
-                  <span className="tabular text-faint">{rows.length ? row + 1 : 0}/{rows.length}</span>
+                  <span className="tabular text-fg-faint">{rows.length ? row + 1 : 0}/{rows.length}</span>
                   <span className="min-w-0 flex-1 truncate text-left text-fg">{current?.name ?? 'No rows'}</span>
                   {rowIssueCount[row] ? <span className="text-key"><Badge tone="key">{rowIssueCount[row]}</Badge></span> : null}
-                  <ChevronDown size={12} className="text-faint" />
+                  <ChevronDown size={12} className="text-fg-faint" />
                 </Button>
               } items={[
                 { type: 'label', label: 'Preview row' },
@@ -168,7 +165,7 @@ export default function BatchShell() {
         <Panel scroll={tab !== 'export'} className={tab === 'export' ? 'h-full' : undefined} header={
           <PanelHeader>
             <PanelTabs value={tab} onChange={(t) => ui.setState({ tab: t })} tabs={[{ value: 'design', label: 'Design' }, { value: 'brand', label: 'Brand' }, { value: 'export', label: 'Export' }]} />
-            {tab === 'brand' && locked && <Tip label="Brand locked"><span className="text-accent"><Lock size={13} strokeWidth={1.5} /></span></Tip>}
+            {tab === 'brand' && locked && <Tip label="Brand locked"><span className="text-signal"><Lock size={13} strokeWidth={1.5} /></span></Tip>}
             {tab === 'design' && <Menu align="end" trigger={<IconButton icon={Plus} label="Add size" size="icon-sm" />} items={addSizeItems(() => setCustom(true))} />}
           </PanelHeader>
         }>

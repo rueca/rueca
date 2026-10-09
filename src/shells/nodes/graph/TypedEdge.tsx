@@ -19,7 +19,7 @@ export function TypedEdge({ id, sourceX, sourceY, targetX, targetY, sourcePositi
       id={id}
       path={path}
       interactionWidth={18}
-      style={{ stroke: selected ? 'var(--accent)' : `var(--port-${data?.ptype ?? 'image'})`, strokeWidth: selected ? 2.25 : 1.75, strokeOpacity: selected ? 1 : 0.8 }}
+      style={{ stroke: selected ? 'var(--signal)' : `var(--port-${data?.ptype ?? 'image'})`, strokeWidth: selected ? 2.25 : 1.75, strokeOpacity: selected ? 1 : 0.8 }}
     />
   )
 }

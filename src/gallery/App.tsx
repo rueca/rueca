@@ -23,7 +23,7 @@ export function App() {
   if (route === 'shells') return <Gallery shells={SHELLS} />
   if (!Comp) return <Landing shells={SHELLS} />
   return (
-    <Suspense fallback={<div className="flex h-full items-center justify-center text-[12px] text-faint">Loading {shell!.name}…</div>}>
+    <Suspense fallback={<div className="flex h-full items-center justify-center text-[12px] text-fg-faint">Loading {shell!.name}…</div>}>
       <Comp />
     </Suspense>
   )

@@ -17,14 +17,16 @@ export async function copyText(text: string) {
   try { await navigator.clipboard.writeText(text); return true } catch { return false }
 }
 
-export function exportCanvasPNG(canvas: HTMLCanvasElement, name = `export-${stamp()}.png`, scale = 1) {
+/** PNG of a canvas. `smoothing: false` keeps pixel art crisp when scaling up. Prefer re-rendering at size when you can. */
+export function exportCanvasPNG(canvas: HTMLCanvasElement, name = `export-${stamp()}.png`, scale = 1, opts: { smoothing?: boolean } = {}) {
   return new Promise<void>((res) => {
     let src = canvas
     if (scale !== 1) {
       src = document.createElement('canvas')
-      src.width = canvas.width * scale
-      src.height = canvas.height * scale
+      src.width = Math.round(canvas.width * scale)
+      src.height = Math.round(canvas.height * scale)
       const ctx = src.getContext('2d')!
+      ctx.imageSmoothingEnabled = opts.smoothing !== false
       ctx.imageSmoothingQuality = 'high'
       ctx.drawImage(canvas, 0, 0, src.width, src.height)
     }
@@ -32,10 +34,12 @@ export function exportCanvasPNG(canvas: HTMLCanvasElement, name = `export-${stam
   })
 }
 
-export function exportSVG(svg: SVGSVGElement, name = `export-${stamp()}.svg`) {
-  const clone = svg.cloneNode(true) as SVGSVGElement
-  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
-  download(new Blob([clone.outerHTML], { type: 'image/svg+xml' }), name)
+/** Download an SVG element or SVG markup. */
+export function exportSVG(svg: SVGSVGElement | string, name = `export-${stamp()}.svg`) {
+  let text: string
+  if (typeof svg === 'string') text = svg.includes('xmlns=') ? svg : svg.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
+  else { const clone = svg.cloneNode(true) as SVGSVGElement; clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg'); text = clone.outerHTML }
+  download(new Blob([text], { type: 'image/svg+xml' }), name)
 }
 
 export function exportJSON(data: unknown, name = `params-${stamp()}.json`) {
@@ -44,8 +48,8 @@ export function exportJSON(data: unknown, name = `params-${stamp()}.json`) {
 
 /**
  * Real-time capture of a canvas with MediaRecorder. Fine for a quick share.
- * For frame-accurate, dropped-frame-free output, step the clock manually and
- * encode with WebCodecs (see recordFrames).
+ * For frame-accurate, dropped-frame-free output use recordFrames (./video.ts),
+ * which steps your render per frame and encodes with WebCodecs.
  */
 export async function recordCanvas(canvas: HTMLCanvasElement, ms: number, fps = 60, name = `capture-${stamp()}.webm`) {
   const stream = canvas.captureStream(fps)

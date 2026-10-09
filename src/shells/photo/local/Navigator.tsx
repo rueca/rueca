@@ -69,7 +69,7 @@ export function Navigator({ camera, content, image, height = 132 }: { camera: Ca
       <div className="flex items-center gap-2">
         <Segmented size="sm" label="Zoom" value={preset} onChange={(z) => (z === 'fit' ? camera.fit() : camera.zoomTo(Number(z)))}
           options={[{ value: 'fit', label: 'Fit' }, { value: '0.5', label: '50%' }, { value: '1', label: '100%' }, { value: '2', label: '200%' }]} />
-        <span className="w-10 shrink-0 text-right text-[11px] tabular text-faint">{Math.round(zoom * 100)}%</span>
+        <span className="w-10 shrink-0 text-right text-[11px] tabular text-fg-faint">{Math.round(zoom * 100)}%</span>
       </div>
     </div>
   )

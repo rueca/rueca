@@ -32,11 +32,11 @@
   --track: #353535;
   --raised: #3d3d3d;
   --active: #333333;
-  --input: #2a2a2a;   /* text/number field fill */
+  --control: #2a2a2a;   /* text/number field fill */
 
   --fg: #ffffff;
   --fg-muted: #a8a8a8;
-  --fg-faint: #7a7a7a; /* #707070 was 2.9:1 on --input */
+  --fg-faint: #7a7a7a; /* #707070 was 2.9:1 on --control */
 
   --line: rgba(255, 255, 255, 0.07);
   --line-strong: rgba(255, 255, 255, 0.13);
@@ -45,10 +45,10 @@
 
   /* Two accents. Bright for fills, tracks, playheads, indicators.
      Strong for accent SURFACES that carry text: white on #0d99ff is 2.99:1. */
-  --accent: #0d99ff;
-  --accent-strong: #0a72c6;
-  --accent-fg: #ffffff;
-  --accent-soft: rgba(13, 153, 255, 0.16); /* selection wash */
+  --signal: #0d99ff;
+  --signal-strong: #0a72c6;
+  --signal-fg: #ffffff;
+  --signal-soft: rgba(13, 153, 255, 0.16); /* selection wash */
 
   /* semantic, used sparingly: keyframes, recording, errors */
   --key: #f5b400;      /* keyframed / animated field */
@@ -85,7 +85,7 @@
   --track: #d9d9d9;
   --raised: #ffffff;
   --active: #e6e6e6;   /* NOT --raised: white on a white panel is invisible */
-  --input: #f2f2f2;
+  --control: #f2f2f2;
 
   --fg: #1a1a1a;
   --fg-muted: #5e5e5e;
@@ -96,10 +96,10 @@
   --hover: rgba(0, 0, 0, 0.04);
   --press: rgba(0, 0, 0, 0.07);
 
-  --accent: #0b84e0;
-  --accent-strong: #0a6fc0;
-  --accent-fg: #ffffff;
-  --accent-soft: rgba(11, 132, 224, 0.12);
+  --signal: #0b84e0;
+  --signal-strong: #0a6fc0;
+  --signal-fg: #ffffff;
+  --signal-soft: rgba(11, 132, 224, 0.12);
 
   --key: #c98a00;
   --rec: #e5383b;
@@ -123,10 +123,10 @@
 :root[data-density="comfortable"] { --row: 32px; --gutter: 14px; --inspector-w: 300px; }
 
 @theme inline {
-  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
+  --font-ui: "Inter Variable", Inter, ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
-  /* the artboard's own faces — override per project, never fold into --font-sans */
-  --font-artboard: var(--artboard-font, var(--font-sans));
+  /* the artboard's own faces — override per project, never fold into --font-ui */
+  --font-artboard: var(--artboard-font, var(--font-ui));
 
   --color-field: var(--field);
   --color-panel: var(--panel);
@@ -135,20 +135,20 @@
   --color-track: var(--track);
   --color-raised: var(--raised);
   --color-active: var(--active);
-  --color-input: var(--input);
+  --color-control: var(--control);
 
   --color-fg: var(--fg);
-  --color-muted: var(--fg-muted);
-  --color-faint: var(--fg-faint);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-faint: var(--fg-faint);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-hover: var(--hover);
   --color-press: var(--press);
 
-  --color-accent: var(--accent);
-  --color-accent-strong: var(--accent-strong);
-  --color-accent-fg: var(--accent-fg);
-  --color-accent-soft: var(--accent-soft);
+  --color-signal: var(--signal);
+  --color-signal-strong: var(--signal-strong);
+  --color-signal-fg: var(--signal-fg);
+  --color-signal-soft: var(--signal-soft);
   --color-key: var(--key);
   --color-rec: var(--rec);
   --color-ok: var(--ok);
@@ -164,7 +164,7 @@
     margin: 0;
     background: var(--field);
     color: var(--fg);
-    font-family: var(--font-sans);
+    font-family: var(--font-ui);
     font-size: 12px;
     line-height: 1.4;
     -webkit-font-smoothing: antialiased;
@@ -185,8 +185,8 @@
   }
   ::-webkit-scrollbar-thumb:hover { background: var(--fg-faint); background-clip: content-box; }
 
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-  ::selection { background: var(--accent-soft); }
+  :focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; }
+  ::selection { background: var(--signal-soft); }
 }
 
 @utility tabular { font-variant-numeric: tabular-nums; }

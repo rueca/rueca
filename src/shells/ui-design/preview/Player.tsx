@@ -95,9 +95,9 @@ export function Player({ onClose }: { onClose: () => void }) {
         <IconButton icon={RotateCcw} label="Restart" shortcut="r" onClick={restart} />
         <div className="flex min-w-0 flex-1 items-center justify-center gap-2 text-[12.5px]">
           <span className="truncate font-medium">{frame?.name ?? 'No frames'}</span>
-          <span className="text-faint tabular">{stack.length > 1 ? `${stack.length} deep` : ''}</span>
+          <span className="text-fg-faint tabular">{stack.length > 1 ? `${stack.length} deep` : ''}</span>
         </div>
-        <span className="hidden items-center gap-1 text-[11px] text-faint sm:flex">Click anywhere to see hotspots <Kbd>esc</Kbd></span>
+        <span className="hidden items-center gap-1 text-[11px] text-fg-faint sm:flex">Click anywhere to see hotspots <Kbd>esc</Kbd></span>
         <IconButton icon={X} label="Close preview" shortcut="esc" onClick={onClose} />
       </div>
       <div ref={box} className="relative flex min-h-0 flex-1 items-center justify-center" onClick={() => setFlash(true)}>
@@ -110,7 +110,7 @@ export function Player({ onClose }: { onClose: () => void }) {
               </div>
             </div>
           </div>
-        ) : <div className="text-[12px] text-muted">Draw a frame to preview it.</div>}
+        ) : <div className="text-[12px] text-fg-muted">Draw a frame to preview it.</div>}
       </div>
     </div>
   )

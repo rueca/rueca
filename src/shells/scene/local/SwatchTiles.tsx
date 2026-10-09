@@ -56,8 +56,8 @@ export function SwatchTiles({
               onBlur={() => onPreview?.(null)}
               onKeyDown={(e) => onKey(e, i)}
               className={cn(
-                'flex size-7 items-center justify-center rounded-full outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-accent',
-                value === o.value ? 'shadow-[inset_0_0_0_1.5px_var(--accent)]' : 'hover:shadow-[inset_0_0_0_1px_var(--line-strong)]',
+                'flex size-7 items-center justify-center rounded-full outline-none transition-shadow focus-visible:ring-2 focus-visible:ring-signal',
+                value === o.value ? 'shadow-[inset_0_0_0_1.5px_var(--signal)]' : 'hover:shadow-[inset_0_0_0_1px_var(--line-strong)]',
               )}
             >
               <span className="size-[18px] rounded-full shadow-[inset_0_0_0_1px_var(--line-strong)]" style={{ background: fill(o.colors) }} />
@@ -81,12 +81,12 @@ export function SwatchTiles({
             onBlur={() => onPreview?.(null)}
             onKeyDown={(e) => onKey(e, i)}
             className={cn(
-              'flex min-w-0 flex-col items-center gap-1 rounded-[7px] pt-1.5 pb-1 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent',
-              value === o.value ? 'bg-accent-soft shadow-[inset_0_0_0_1px_var(--accent)]' : 'bg-input hover:shadow-[inset_0_0_0_1px_var(--line-strong)]',
+              'flex min-w-0 flex-col items-center gap-1 rounded-[7px] pt-1.5 pb-1 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
+              value === o.value ? 'bg-signal-soft shadow-[inset_0_0_0_1px_var(--signal)]' : 'bg-control hover:shadow-[inset_0_0_0_1px_var(--line-strong)]',
             )}
           >
             <span className="size-6 rounded-full shadow-[inset_0_0_0_1px_var(--line-strong),0_1px_2px_rgba(0,0,0,.2)]" style={{ background: fill(o.colors) }} />
-            <span className={cn('w-full truncate px-0.5 text-center text-[10.5px]', value === o.value ? 'text-fg' : 'text-muted')}>{o.label}</span>
+            <span className={cn('w-full truncate px-0.5 text-center text-[10.5px]', value === o.value ? 'text-fg' : 'text-fg-muted')}>{o.label}</span>
           </button>
         </Tip>
       ))}

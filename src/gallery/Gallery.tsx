@@ -11,8 +11,8 @@ export function CategoryChips({ shells, value, onChange }: { shells: ShellMeta[]
     <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by category">
       {categoriesOf(shells).map((c) => (
         <button key={c} type="button" onClick={() => onChange(c)} aria-pressed={value === c}
-          className={cn('h-7 rounded-full px-3 text-[12px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-accent',
-            value === c ? 'bg-fg text-field' : 'bg-panel text-muted shadow-[var(--shadow-cluster)] hover:text-fg')}>
+          className={cn('h-7 rounded-full px-3 text-[12px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-signal',
+            value === c ? 'bg-fg text-field' : 'bg-panel text-fg-muted shadow-[var(--shadow-cluster)] hover:text-fg')}>
           {c}
           <span className="ml-1.5 opacity-60">{c === 'All' ? shells.length : shells.filter((s) => s.category === c).length}</span>
         </button>
@@ -31,16 +31,16 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
       <div className="h-full overflow-y-auto bg-field text-fg">
         <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-24 sm:px-8 sm:pt-8">
           <header className="flex items-center justify-between gap-4">
-            <a href="#/" className="flex items-center gap-2 rounded-[6px] text-[13px] font-medium text-fg outline-none focus-visible:ring-2 focus-visible:ring-accent">
+            <a href="#/" className="flex items-center gap-2 rounded-[6px] text-[13px] font-medium text-fg outline-none focus-visible:ring-2 focus-visible:ring-signal">
               <Mark />{site.name}
             </a>
             <ThemeButton />
           </header>
-          <a href="#/" className="mt-10 inline-flex items-center gap-1.5 text-[12.5px] text-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+          <a href="#/" className="mt-10 inline-flex items-center gap-1.5 text-[12.5px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
             <ArrowLeft size={13} strokeWidth={1.5} />Overview
           </a>
           <h1 className="mt-3 text-[28px] font-semibold tracking-[-0.02em]">Shells</h1>
-          <p className="mt-2 max-w-[600px] text-[13.5px] leading-relaxed text-muted">
+          <p className="mt-2 max-w-[600px] text-[13.5px] leading-relaxed text-fg-muted">
             One kit, many instruments. Each shell is a different kind of tool built from the same components, to prove
             the harness holds up across environments. Press <span className="text-fg">⌘K</span> inside any shell for
             commands, <span className="text-fg">?</span> for shortcuts.

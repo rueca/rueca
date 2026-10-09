@@ -180,13 +180,13 @@ export function GlyphPanel({ v }: { v: V }) {
             onFocus={() => setHover(g)}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => insertAtCaret(g)}
-            className="flex aspect-square items-center justify-center rounded-[6px] bg-input text-fg outline-none transition-colors hover:bg-hover hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex aspect-square items-center justify-center rounded-[6px] bg-control text-fg outline-none transition-colors hover:bg-hover hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal"
           >
             <span style={{ ...style, color: undefined, textTransform: 'none', letterSpacing: 0, lineHeight: 1 }}>{g}</span>
           </button>
         ))}
       </div>
-      <p className="px-0.5 text-[11px] leading-relaxed text-faint">Click a glyph to insert it at the caret. Rendered with the current axes.</p>
+      <p className="px-0.5 text-[11px] leading-relaxed text-fg-faint">Click a glyph to insert it at the caret. Rendered with the current axes.</p>
     </div>
   )
 }
@@ -198,7 +198,7 @@ export function WaterfallPanel({ v }: { v: V }) {
     <div className="flex flex-col py-1">
       {WATERFALL.map((s) => (
         <div key={s} className="flex items-baseline gap-2 border-b border-line px-3 py-2 last:border-b-0">
-          <span className="w-6 shrink-0 tabular text-[10.5px] text-faint">{s}</span>
+          <span className="w-6 shrink-0 tabular text-[10.5px] text-fg-faint">{s}</span>
           <span className="min-w-0 truncate text-fg" style={{ ...headlineStyle(v, s), color: undefined, lineHeight: 1.15 }}>{sample}</span>
         </div>
       ))}

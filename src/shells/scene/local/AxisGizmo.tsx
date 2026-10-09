@@ -90,7 +90,7 @@ export function AxisGizmo({
           onFocus={() => setHover(t.id)}
           onBlur={() => setHover(null)}
           onClick={() => onSnap(t.id)}
-          className="absolute size-5 -translate-1/2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="absolute size-5 -translate-1/2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-signal"
           style={{ left: t.sx, top: t.sy }}
         />
       ))}

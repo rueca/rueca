@@ -31,7 +31,7 @@ export function PortDots({ kind }: { kind: string }) {
   return (
     <span className="flex items-center gap-1">
       <span className="flex gap-[3px]">{s.inputs.map((p, i) => dot(p.type, i, true))}</span>
-      {s.outputs.length > 0 && <span className="text-faint">→</span>}
+      {s.outputs.length > 0 && <span className="text-fg-faint">→</span>}
       <span className="flex gap-[3px]">{s.outputs.map((p, i) => dot(p.type, i))}</span>
     </span>
   )
@@ -175,7 +175,7 @@ export function GraphCanvas() {
       {nodes.length <= 1 && (
         <div className="pointer-events-none absolute inset-x-0 top-[38%] flex flex-col items-center gap-2 text-center">
           <div className="text-[13px] font-medium text-fg">Start by adding a generator</div>
-          <div className="flex items-center gap-1.5 text-[12px] text-muted">Press <Kbd>Tab</Kbd> or double-click the canvas, or drag one in from the library</div>
+          <div className="flex items-center gap-1.5 text-[12px] text-fg-muted">Press <Kbd>Tab</Kbd> or double-click the canvas, or drag one in from the library</div>
         </div>
       )}
 
@@ -189,7 +189,7 @@ function FlowZoom() {
   const rf = useReactFlow()
   const { zoom } = useViewport()
   const busy = useFlowStore((s) => s.connection.inProgress)
-  const btn = 'flex size-6 items-center justify-center rounded-[5px] text-muted hover:bg-hover hover:text-fg outline-none focus-visible:ring-2 focus-visible:ring-accent'
+  const btn = 'flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg outline-none focus-visible:ring-2 focus-visible:ring-signal'
   return (
     <div className="cluster absolute right-3 bottom-3 z-10 flex h-8 items-center gap-0.5 px-1" style={{ opacity: busy ? 0.4 : 1 }}>
       <button type="button" aria-label="Zoom out" className={btn} onClick={() => rf.zoomOut({ duration: 150 })}><Minus size={13} strokeWidth={1.5} /></button>

@@ -54,7 +54,7 @@ export function SoundMenu() {
       <Button size="sm" className="max-w-[130px] gap-1 px-1.5">
         <Bookmark size={12} strokeWidth={1.5} />
         <span className="truncate">{active ?? 'Custom'}</span>
-        <ChevronDown size={11} className="text-faint" />
+        <ChevronDown size={11} className="text-fg-faint" />
       </Button>
     } items={[
       { type: 'label', label: 'Sounds' },
@@ -136,7 +136,7 @@ function bassMarker() {
 function useInk() {
   const read = (): Ink => {
     const cs = getComputedStyle(document.documentElement)
-    return { line: cs.getPropertyValue('--line').trim(), accent: cs.getPropertyValue('--accent').trim(), faint: cs.getPropertyValue('--fg-faint').trim(), well: cs.getPropertyValue('--well').trim() }
+    return { line: cs.getPropertyValue('--line').trim(), accent: cs.getPropertyValue('--signal').trim(), faint: cs.getPropertyValue('--fg-faint').trim(), well: cs.getPropertyValue('--well').trim() }
   }
   const ink = useRef<Ink | null>(null)
   useEffect(() => {
@@ -192,19 +192,19 @@ export function MonitorPanel() {
   return (
     <div className="flex flex-col">
       <div className="flex flex-col gap-1.5 px-3 pt-3 pb-2">
-        <div className="flex items-center justify-between text-[11px] text-muted"><span>Oscilloscope</span><span className="text-faint">{started ? 'master' : 'no signal'}</span></div>
-        <canvas ref={scope} className="h-[84px] w-full rounded-[6px] bg-input" aria-label="Oscilloscope" role="img" />
-        <div className="mt-1 flex items-center justify-between text-[11px] text-muted"><span>Spectrum</span><span className="text-faint">20 Hz – 20 kHz</span></div>
-        <canvas ref={spec} className="h-[84px] w-full rounded-[6px] bg-input" aria-label="Spectrum analyser" role="img" />
+        <div className="flex items-center justify-between text-[11px] text-fg-muted"><span>Oscilloscope</span><span className="text-fg-faint">{started ? 'master' : 'no signal'}</span></div>
+        <canvas ref={scope} className="h-[84px] w-full rounded-[6px] bg-control" aria-label="Oscilloscope" role="img" />
+        <div className="mt-1 flex items-center justify-between text-[11px] text-fg-muted"><span>Spectrum</span><span className="text-fg-faint">20 Hz – 20 kHz</span></div>
+        <canvas ref={spec} className="h-[84px] w-full rounded-[6px] bg-control" aria-label="Spectrum analyser" role="img" />
         <div className="mt-1 flex items-center gap-2">
-          <span className="w-10 text-[11px] text-muted">Level</span>
+          <span className="w-10 text-[11px] text-fg-muted">Level</span>
           <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-track">
             <div ref={meter} className="absolute inset-y-0 left-0 rounded-full bg-ok transition-[width] duration-75 data-[hot=true]:bg-rec" style={{ width: 0 }} />
           </div>
         </div>
       </div>
       <KSection id="mixer" title="Mixer" hint="Level and post-fader sends per track. Mute and solo sit on the sequencer rows.">
-        <div className="grid grid-cols-[52px_1fr_1fr_1fr] items-end gap-x-1 px-2 pb-1 text-center text-[10.5px] text-faint">
+        <div className="grid grid-cols-[52px_1fr_1fr_1fr] items-end gap-x-1 px-2 pb-1 text-center text-[10.5px] text-fg-faint">
           <span />
           <span>Level</span><span>Delay</span><span>Reverb</span>
         </div>
@@ -221,7 +221,7 @@ export function MonitorPanel() {
         ))}
         <div className="mt-1 flex items-center gap-3 border-t border-line px-3 pt-3">
           <PKnob k="volume" />
-          <p className="text-[11px] leading-relaxed text-faint">Master runs through a gentle bus compressor before the analysers and the WAV bounce.</p>
+          <p className="text-[11px] leading-relaxed text-fg-faint">Master runs through a gentle bus compressor before the analysers and the WAV bounce.</p>
         </div>
       </KSection>
     </div>

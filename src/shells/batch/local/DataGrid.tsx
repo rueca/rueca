@@ -123,7 +123,7 @@ export function DataGrid({
     >
       <div className="min-w-max">
         {/* header */}
-        <div role="row" className="sticky top-0 z-10 grid h-7 items-center border-b border-line bg-panel text-[11px] text-faint" style={{ gridTemplateColumns: template }}>
+        <div role="row" className="sticky top-0 z-10 grid h-7 items-center border-b border-line bg-panel text-[11px] text-fg-faint" style={{ gridTemplateColumns: template }}>
           <div className="pl-3 tabular">#</div>
           {columns.map((c) => (
             <Tip key={c.key} label={c.hint}>
@@ -138,11 +138,11 @@ export function DataGrid({
           const isActive = r === activeRow
           return (
             <div key={r} role="row" aria-selected={isActive}
-              className={cn('group/row relative grid h-7 items-center border-b border-line text-[12px]', isActive ? 'bg-accent-soft' : 'hover:bg-hover')}
+              className={cn('group/row relative grid h-7 items-center border-b border-line text-[12px]', isActive ? 'bg-signal-soft' : 'hover:bg-hover')}
               style={{ gridTemplateColumns: template }}>
-              {isActive && <span className="absolute inset-y-0 left-0 w-[2px] bg-accent" />}
+              {isActive && <span className="absolute inset-y-0 left-0 w-[2px] bg-signal" />}
               <button type="button" tabIndex={-1} onClick={() => { onActiveRow(r); setSel({ r, c: sel?.c ?? 0 }); root.current?.focus() }}
-                className={cn('flex h-full items-center gap-1 pl-3 text-left tabular text-[11px]', isActive ? 'text-accent' : 'text-faint hover:text-fg')}>
+                className={cn('flex h-full items-center gap-1 pl-3 text-left tabular text-[11px]', isActive ? 'text-signal' : 'text-fg-faint hover:text-fg')}>
                 {rowLabel ? rowLabel(r) : r + 1}
                 {issues?.length ? (
                   <Tip label={issues.join(' · ')}><span className="text-key"><AlertTriangle size={11} strokeWidth={1.75} /></span></Tip>
@@ -159,7 +159,7 @@ export function DataGrid({
                     aria-selected={selected}
                     onPointerDown={(e) => { if (selected && editing) return; e.preventDefault(); if (editing) commit(); select(r, c); root.current?.focus() }}
                     onDoubleClick={() => { select(r, c); setDraft(value); setEditing(true) }}
-                    className={cn('relative flex h-full min-w-0 items-center gap-1.5 px-2', selected && 'z-[1] rounded-[3px] shadow-[inset_0_0_0_1.5px_var(--accent)]')}
+                    className={cn('relative flex h-full min-w-0 items-center gap-1.5 px-2', selected && 'z-[1] rounded-[3px] shadow-[inset_0_0_0_1.5px_var(--signal)]')}
                   >
                     {col.kind === 'color' && <ColorCell value={value} onChange={(v, f) => onEdit(r, col.key, v, f)} />}
                     {selected && editing ? (
@@ -174,10 +174,10 @@ export function DataGrid({
                           if (e.key === 'Tab') { e.preventDefault(); commit(e.shiftKey ? 'left' : 'right') }
                           if (e.key === 'Escape') { e.preventDefault(); setEditing(false); root.current?.focus() }
                         }}
-                        className={cn('h-6 w-full min-w-0 rounded-[4px] bg-input px-1 text-[12px] text-fg outline-none', col.mono && 'font-mono text-[11.5px]', col.align === 'right' && 'text-right')}
+                        className={cn('h-6 w-full min-w-0 rounded-[4px] bg-control px-1 text-[12px] text-fg outline-none', col.mono && 'font-mono text-[11.5px]', col.align === 'right' && 'text-right')}
                       />
                     ) : (
-                      <span className={cn('min-w-0 flex-1 truncate', !value && 'text-faint', col.mono && 'font-mono text-[11.5px] uppercase', col.align === 'right' && 'text-right tabular')}>
+                      <span className={cn('min-w-0 flex-1 truncate', !value && 'text-fg-faint', col.mono && 'font-mono text-[11.5px] uppercase', col.align === 'right' && 'text-right tabular')}>
                         {value || col.placeholder || ''}
                       </span>
                     )}
@@ -186,7 +186,7 @@ export function DataGrid({
               })}
               <Tip label="Delete row">
                 <button type="button" aria-label={`Delete row ${r + 1}`} onClick={() => onRemoveRow(r)}
-                  className="flex size-6 items-center justify-center rounded-[5px] text-faint opacity-0 outline-none hover:bg-hover hover:text-rec group-hover/row:opacity-100 focus-visible:opacity-100">
+                  className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint opacity-0 outline-none hover:bg-hover hover:text-rec group-hover/row:opacity-100 focus-visible:opacity-100">
                   <Trash2 size={12} strokeWidth={1.5} />
                 </button>
               </Tip>
@@ -197,7 +197,7 @@ export function DataGrid({
         {!rows.length && empty}
 
         <button type="button" onClick={onAddRow}
-          className="flex h-7 w-full items-center gap-1.5 pl-3 text-left text-[11.5px] text-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+          className="flex h-7 w-full items-center gap-1.5 pl-3 text-left text-[11.5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
           <Plus size={12} strokeWidth={1.75} /> Add row
         </button>
       </div>
@@ -210,7 +210,7 @@ function ColorCell({ value, onChange }: { value: string; onChange: (v: string, f
   return (
     <Popover.Root>
       <Popover.Trigger aria-label="Pick colour" onPointerDown={(e) => e.stopPropagation()}
-        className="flex shrink-0 rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-accent">
+        className="flex shrink-0 rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
         <Swatch color={valid ? value : '#00000000'} size={14} />
       </Popover.Trigger>
       <Popover.Portal>

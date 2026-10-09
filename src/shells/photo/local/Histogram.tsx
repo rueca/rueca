@@ -82,7 +82,7 @@ export function Histogram({
         aria-pressed={clip[which]}
         aria-label={`Show ${which} clipping`}
         onClick={() => onClip(which)}
-        className={cn('absolute top-1 flex size-5 items-center justify-center rounded-[4px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent', which === 'shadows' ? 'left-1' : 'right-1', clip[which] && 'bg-active')}
+        className={cn('absolute top-1 flex size-5 items-center justify-center rounded-[4px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', which === 'shadows' ? 'left-1' : 'right-1', clip[which] && 'bg-active')}
       >
         <svg width="10" height="8" viewBox="0 0 10 8" style={{ transform: which === 'shadows' ? 'scaleX(-1)' : undefined }}>
           <path d="M1 7 L9 7 L9 1 Z" fill={t.on ? t.color : 'none'} stroke={t.on ? t.color : 'var(--fg-faint)'} strokeWidth="1.2" strokeLinejoin="round" />

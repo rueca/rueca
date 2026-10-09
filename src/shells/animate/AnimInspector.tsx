@@ -71,7 +71,7 @@ function ObjectSections({ o, first }: { o: Obj; first: boolean }) {
     const control = d.type === 'color'
       ? <ColorField value={String(v)} onChange={(c, f) => editProp(o.id, p, c, f)} />
       : <NumField d={d} value={Number(v)} boxed align="left" label={d.label} prefix={d.short}
-          className={cn('flex-1', st !== 'none' && animate && 'text-accent', st === 'edited' && 'text-key')}
+          className={cn('flex-1', st !== 'none' && animate && 'text-signal', st === 'edited' && 'text-key')}
           onChange={(n, f) => editProp(o.id, p, n, f)} />
     return (
       <Row key={p} label={d.label} className={cn('group/row', st === 'edited' && animate && 'bg-key/10')}
@@ -104,7 +104,7 @@ function ObjectSections({ o, first }: { o: Obj; first: boolean }) {
         return <Section key={g} title={g}>{ps.map(row)}</Section>
       })}
       {animate && (
-        <div className="border-t border-line px-3 py-2.5 text-[11px] leading-relaxed text-faint">
+        <div className="border-t border-line px-3 py-2.5 text-[11px] leading-relaxed text-fg-faint">
           {autoKey
             ? 'Auto-key is on: every change writes a key at the playhead.'
             : 'Changes to animated properties turn amber until you key them (K). Unanimated properties change the base value.'}
@@ -146,8 +146,8 @@ function KeysSection({ ids }: { ids: string[] }) {
       )}
       <Row label="Easing" hint="The easing of the segment that starts at this key.">
         <Popover.Root>
-          <Popover.Trigger className="flex h-6 w-full min-w-0 items-center gap-2 rounded-[5px] bg-input px-1.5 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-accent data-[popup-open]:shadow-[inset_0_0_0_1px_var(--accent)]">
-            <EaseGlyph ease={ease} className="size-4 text-accent" />
+          <Popover.Trigger className="flex h-6 w-full min-w-0 items-center gap-2 rounded-[5px] bg-control px-1.5 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
+            <EaseGlyph ease={ease} className="size-4 text-signal" />
             <span className="truncate text-[11px] text-fg">{eases.length > 1 ? 'Mixed' : easeName(ease)}</span>
           </Popover.Trigger>
           <Popover.Portal>

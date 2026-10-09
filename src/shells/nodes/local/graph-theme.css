@@ -4,7 +4,7 @@
 
    Kit candidate: the kit has no categorical tokens yet. These are tuned to
    sit on --panel in both themes (≥3:1 against it) and stay distinct from
-   --accent (selection) and --rec (errors).
+   --signal (selection) and --rec (errors).
 --------------------------------------------------------------------------- */
 
 :root {
@@ -39,22 +39,22 @@
 .studio-graph.react-flow {
   --xy-background-color: transparent;
   --xy-edge-stroke: var(--wire);
-  --xy-edge-stroke-selected: var(--accent);
-  --xy-connectionline-stroke: var(--accent);
-  --xy-selection-background-color: var(--accent-soft);
-  --xy-selection-border: 1px solid var(--accent);
+  --xy-edge-stroke-selected: var(--signal);
+  --xy-connectionline-stroke: var(--signal);
+  --xy-selection-background-color: var(--signal-soft);
+  --xy-selection-border: 1px solid var(--signal);
   --xy-minimap-background-color: var(--panel);
   --xy-minimap-mask-background-color: color-mix(in srgb, var(--field) 70%, transparent);
   --xy-minimap-node-background-color: var(--lane);
   --xy-attribution-background-color: transparent;
-  font-family: var(--font-sans);
+  font-family: var(--font-ui);
 }
 .studio-graph .react-flow__pane { cursor: default; }
 .studio-graph .react-flow__pane.dragging { cursor: grabbing; }
 .studio-graph .react-flow__node { cursor: default; }
 .studio-graph .react-flow__node.dragging { cursor: grabbing; }
 .studio-graph .react-flow__node:focus-visible { outline: none; }
-.studio-graph .react-flow__node:focus-visible > .gnode { box-shadow: 0 0 0 2px var(--accent), var(--shadow-panel); }
+.studio-graph .react-flow__node:focus-visible > .gnode { box-shadow: 0 0 0 2px var(--signal), var(--shadow-panel); }
 .studio-graph .react-flow__minimap { border-radius: 10px; box-shadow: var(--shadow-cluster); overflow: hidden; }
 .studio-graph .react-flow__background-pattern.dots { fill: var(--grid); }
 
@@ -80,7 +80,7 @@
 .studio-graph .react-flow__handle.gport.valid { transform: translate(var(--tx), -50%) scale(1.35); background: var(--port); }
 
 .studio-graph .react-flow__edge-path { stroke-linecap: round; }
-.studio-graph .react-flow__edge.selected .react-flow__edge-path { stroke: var(--accent) !important; }
+.studio-graph .react-flow__edge.selected .react-flow__edge-path { stroke: var(--signal) !important; }
 .studio-graph .react-flow__edge:hover .react-flow__edge-path { stroke-width: 2.5; }
 
 /* React Flow's attribution stays (MIT, but they ask), quietly in the corner */

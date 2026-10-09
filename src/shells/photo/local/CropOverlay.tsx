@@ -149,7 +149,7 @@ export function CropOverlay({
         aria-label={`Crop box ${Math.round(rect.w * frame.w)} by ${Math.round(rect.h * frame.h)} pixels. Arrow keys move it.`}
         onKeyDown={onKey}
         onPointerDown={down('move')}
-        className="absolute cursor-move outline-none focus-visible:outline-2 focus-visible:outline-accent"
+        className="absolute cursor-move outline-none focus-visible:outline-2 focus-visible:outline-signal"
         style={{
           left: `${rect.x * 100}%`, top: `${rect.y * 100}%`, width: `${rect.w * 100}%`, height: `${rect.h * 100}%`,
           boxShadow: `0 0 0 100000px rgba(0,0,0,${dim}), inset 0 0 0 ${bw}px rgba(255,255,255,.9)`,

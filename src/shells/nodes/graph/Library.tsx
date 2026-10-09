@@ -27,10 +27,10 @@ function NodeList() {
   return (
     <div className="flex flex-col pb-2">
       <div className="px-2 pt-2 pb-1">
-        <label className="flex h-7 items-center gap-2 rounded-[6px] bg-input px-2 focus-within:shadow-[inset_0_0_0_1px_var(--accent)]">
-          <Search size={13} strokeWidth={1.5} className="text-faint" />
+        <label className="flex h-7 items-center gap-2 rounded-[6px] bg-control px-2 focus-within:shadow-[inset_0_0_0_1px_var(--signal)]">
+          <Search size={13} strokeWidth={1.5} className="text-fg-faint" />
           <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Escape') setQ('') }} placeholder="Filter nodes" aria-label="Filter nodes"
-            className="h-full min-w-0 flex-1 bg-transparent text-[12px] text-fg outline-none placeholder:text-faint" />
+            className="h-full min-w-0 flex-1 bg-transparent text-[12px] text-fg outline-none placeholder:text-fg-faint" />
         </label>
       </div>
       {CATEGORIES.map((c) => {
@@ -51,7 +51,7 @@ function NodeList() {
                   onDragStart={(e) => { e.dataTransfer.setData(LIB_MIME, d.kind); e.dataTransfer.effectAllowed = 'copy' }}
                   onClick={() => add(d.kind)}
                   title={d.description}
-                  className="group/lib mx-1 flex h-8 w-[calc(100%-8px)] items-center gap-2 rounded-[6px] px-2 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent"
+                  className="group/lib mx-1 flex h-8 w-[calc(100%-8px)] items-center gap-2 rounded-[6px] px-2 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal"
                 >
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-[5px]" style={{ background: `color-mix(in srgb, ${catVar(c)} 16%, transparent)`, color: catVar(c) }}>
                     <Icon size={13} strokeWidth={1.5} />
@@ -64,7 +64,7 @@ function NodeList() {
           </section>
         )
       })}
-      <p className="px-3 pt-3 text-[11px] leading-relaxed text-faint">Click to add at the centre, drag to place, or press Tab over the canvas to search.</p>
+      <p className="px-3 pt-3 text-[11px] leading-relaxed text-fg-faint">Click to add at the centre, drag to place, or press Tab over the canvas to search.</p>
     </div>
   )
 }
@@ -80,9 +80,9 @@ function Samples() {
     <div className="flex flex-col gap-1 p-2">
       {SAMPLES.map((s) => (
         <button key={s.id} type="button" onClick={() => open(s.graph, s.name)}
-          className={cn('flex flex-col gap-0.5 rounded-[8px] px-2.5 py-2 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent', current === s.name && 'bg-active')}>
-          <span className="flex items-center justify-between text-[12px] font-medium text-fg">{s.name}<span className="tabular text-[11px] font-normal text-faint">{s.graph.nodes.length} nodes</span></span>
-          <span className="text-[11.5px] leading-snug text-muted">{s.description}</span>
+          className={cn('flex flex-col gap-0.5 rounded-[8px] px-2.5 py-2 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', current === s.name && 'bg-active')}>
+          <span className="flex items-center justify-between text-[12px] font-medium text-fg">{s.name}<span className="tabular text-[11px] font-normal text-fg-faint">{s.graph.nodes.length} nodes</span></span>
+          <span className="text-[11.5px] leading-snug text-fg-muted">{s.description}</span>
         </button>
       ))}
       <Button variant="outline" size="md" className="mt-2" onClick={() => open(BLANK, 'Untitled')}><FilePlus2 size={14} strokeWidth={1.5} />New empty graph</Button>

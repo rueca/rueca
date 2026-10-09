@@ -1,6 +1,6 @@
 /* Journey — PNG (DOM snapshot of the board), CSV, Markdown, JSON. */
 import { copyText, download, exportCanvasPNG, exportJSON, toast, toastManager } from '@kit'
-import { snapshotElement } from '../flows/local/snapshot'
+import { snapshotElement } from '@kit'
 import { CHANNELS, LANES, emoji, fmtEmotion, type JourneyDoc, type Persona } from './model'
 import { doc, persona, ui, history } from './store'
 import { LEVEL } from './map/Card'

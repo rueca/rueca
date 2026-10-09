@@ -22,14 +22,14 @@ export function ZoomSteps({ className }: { className?: string }) {
     if (next) cam.zoomTo(next)
   }
   useHotkeys({ '=': () => step(1), '-': () => step(-1) }, [zoom])
-  const btn = 'flex size-6 items-center justify-center rounded-[5px] text-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent'
+  const btn = 'flex size-6 items-center justify-center rounded-[5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal'
   return (
     <div className={cn('cluster absolute right-3 bottom-3 z-10 flex h-8 items-center gap-0.5 px-1', className)}>
       <button type="button" aria-label="Zoom out" title="Zoom out (−)" onClick={() => step(-1)} className={btn}><Minus size={13} strokeWidth={1.5} /></button>
       <Menu
         side="top"
         align="end"
-        trigger={<button type="button" aria-label="Zoom level" className="h-6 min-w-[50px] rounded-[5px] px-1 tabular text-[11.5px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent">{Math.round(zoom * 100)}%</button>}
+        trigger={<button type="button" aria-label="Zoom level" className="h-6 min-w-[50px] rounded-[5px] px-1 tabular text-[11.5px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">{Math.round(zoom * 100)}%</button>}
         items={[
           { label: 'Zoom to fit', shortcut: 'shift+1', onClick: () => cam.fit() },
           { type: 'separator' },

@@ -157,8 +157,8 @@ export default function DitherLab() {
           <div className="flex flex-col gap-2 px-3 pt-3 pb-3">
             <ImageDrop value={img.url} onChange={(url) => (url ? take(dataURLBlob(url), 'Untitled image') : loadSample())} />
             <div className="flex items-center justify-between gap-2 text-[11.5px]">
-              <span className="min-w-0 truncate text-muted" title={img.name}>{img.sample ? 'Sample photo' : img.name}</span>
-              <span className="shrink-0 tabular text-faint">{img.w} × {img.h}</span>
+              <span className="min-w-0 truncate text-fg-muted" title={img.name}>{img.sample ? 'Sample photo' : img.name}</span>
+              <span className="shrink-0 tabular text-fg-faint">{img.w} × {img.h}</span>
             </div>
           </div>
           <div className="border-t border-line">
@@ -191,8 +191,8 @@ export default function DitherLab() {
           <Canvas result={result} split={split} grid={grid} />
         </Stage>
         {intake.over && (
-          <div className="pointer-events-none absolute inset-2 z-20 flex items-center justify-center rounded-[var(--radius-panel)] bg-accent-soft shadow-[inset_0_0_0_2px_var(--accent)]">
-            <div className="pop flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-fg"><ImageUp size={14} strokeWidth={1.5} className="text-accent" />Drop to dither this image</div>
+          <div className="pointer-events-none absolute inset-2 z-20 flex items-center justify-center rounded-[var(--radius-panel)] bg-signal-soft shadow-[inset_0_0_0_2px_var(--signal)]">
+            <div className="pop flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-fg"><ImageUp size={14} strokeWidth={1.5} className="text-signal" />Drop to dither this image</div>
           </div>
         )}
       </div>
@@ -234,7 +234,7 @@ function PaletteSection({ extract }: { extract: () => void }) {
           <PalettePicker value={name} options={PALETTES} onChange={(n, colors) => params.patch({ palette: colors, paletteName: n })} />
         </div>
         <Row label="Colours" hint="Click a swatch to edit, + to add (up to 16). Editing makes it a custom palette." stacked changed={changed}
-          trailing={<span className="text-[11px] text-faint">{PALETTES.some((p) => p.name === name) ? `${palette.length}` : `${name} · ${palette.length}`}</span>}>
+          trailing={<span className="text-[11px] text-fg-faint">{PALETTES.some((p) => p.name === name) ? `${palette.length}` : `${name} · ${palette.length}`}</span>}>
           <PaletteField value={palette} max={16} onChange={(c, final) => params.patch({ palette: c, paletteName: PALETTES.some((p) => p.name === name && equal(p.colors, c)) ? name : 'Custom' }, { commit: final })} />
         </Row>
       </Section>
@@ -327,14 +327,14 @@ function StatusPill() {
   return (
     <div className="cluster absolute bottom-3 left-3 z-10 flex h-8 max-w-[calc(50%-120px)] items-center gap-2 overflow-hidden px-2.5 text-[11.5px] no-select" aria-live="polite">
       {error ? <span className="size-1.5 shrink-0 rounded-full bg-rec" />
-        : busy ? <span className="size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-line-strong border-t-accent" />
+        : busy ? <span className="size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" />
         : <span className="size-1.5 shrink-0 rounded-full bg-ok" />}
       <span className="truncate text-fg">{error ? error : preview ? `Preview: ${preview}` : effectLabel(effect)}</span>
-      <span className="shrink-0 tabular text-muted">{detail}</span>
-      {r && <span className="shrink-0 tabular text-faint" title={threaded ? 'Processed in a worker' : 'Processed on the main thread'}>{Math.round(r.ms)} ms</span>}
+      <span className="shrink-0 tabular text-fg-muted">{detail}</span>
+      {r && <span className="shrink-0 tabular text-fg-faint" title={threaded ? 'Processed in a worker' : 'Processed on the main thread'}>{Math.round(r.ms)} ms</span>}
       {r?.draft && <Badge tone="key">Draft</Badge>}
       {hover && (
-        <span className="flex shrink-0 items-center gap-1.5 border-l border-line pl-2 tabular text-muted">
+        <span className="flex shrink-0 items-center gap-1.5 border-l border-line pl-2 tabular text-fg-muted">
           {hover.x}, {hover.y}
           {hover.hex && <><span className="size-2.5 rounded-[3px] shadow-[inset_0_0_0_1px_var(--line-strong)]" style={{ background: hover.hex }} /><span className="uppercase">{hover.hex}</span></>}
         </span>

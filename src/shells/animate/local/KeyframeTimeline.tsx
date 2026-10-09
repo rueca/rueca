@@ -278,8 +278,8 @@ export function KeyframeTimeline(props: KeyframeTimelineProps) {
 
       {/* ruler */}
       <div className="flex h-7 flex-none border-t border-line">
-        <div className="flex flex-none items-center border-r border-line px-3 text-[11px] text-faint" style={{ width: LABEL_W }}>
-          <button type="button" onClick={fit} className="rounded-[4px] px-1 outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-accent" title="Zoom to fit (⌘wheel zooms)">
+        <div className="flex flex-none items-center border-r border-line px-3 text-[11px] text-fg-faint" style={{ width: LABEL_W }}>
+          <button type="button" onClick={fit} className="rounded-[4px] px-1 outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal" title="Zoom to fit (⌘wheel zooms)">
             {lanes.filter((l) => l.kind === 'prop').length} animated {lanes.filter((l) => l.kind === 'prop').length === 1 ? 'property' : 'properties'}
           </button>
         </div>
@@ -291,7 +291,7 @@ export function KeyframeTimeline(props: KeyframeTimelineProps) {
             return (
               <div key={m} className="pointer-events-none absolute bottom-0" style={{ left: X(m) }}>
                 <div className={cn('w-px', major ? 'h-2 bg-line-strong' : 'h-1 bg-line')} />
-                {major && <div className="absolute bottom-2.5 left-1 tabular text-[10px] text-faint">{m >= 1000 ? `${+(m / 1000).toFixed(2)}s` : `${m}ms`}</div>}
+                {major && <div className="absolute bottom-2.5 left-1 tabular text-[10px] text-fg-faint">{m >= 1000 ? `${+(m / 1000).toFixed(2)}s` : `${m}ms`}</div>}
               </div>
             )
           })}
@@ -316,17 +316,17 @@ export function KeyframeTimeline(props: KeyframeTimelineProps) {
             <div className="flex-none border-r border-line" style={{ width: LABEL_W }}>
               {lanes.map((l) => (
                 <div key={l.id}
-                  className={cn('group/row flex items-center gap-1 pr-1 text-[11.5px] no-select', l.kind === 'group' ? 'text-fg' : 'text-muted', l.highlight && 'bg-accent-soft')}
+                  className={cn('group/row flex items-center gap-1 pr-1 text-[11.5px] no-select', l.kind === 'group' ? 'text-fg' : 'text-fg-muted', l.highlight && 'bg-signal-soft')}
                   style={{ height: ROW, paddingLeft: 6 + (l.depth ?? 0) * 12 }}>
                   {l.kind === 'group' ? (
                     <button type="button" aria-label={l.open ? 'Collapse' : 'Expand'} aria-expanded={l.open} onClick={() => props.onToggleLane?.(l.id)}
-                      className="flex size-4 shrink-0 items-center justify-center rounded-[3px] text-faint outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+                      className="flex size-4 shrink-0 items-center justify-center rounded-[3px] text-fg-faint outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
                       <ChevronRight size={11} strokeWidth={2} className={cn('transition-transform', l.open && 'rotate-90')} />
                     </button>
                   ) : <span className="w-4 shrink-0" />}
-                  {l.icon && <l.icon size={13} strokeWidth={1.5} className={cn('shrink-0', l.highlight ? 'text-accent' : 'text-faint')} />}
+                  {l.icon && <l.icon size={13} strokeWidth={1.5} className={cn('shrink-0', l.highlight ? 'text-signal' : 'text-fg-faint')} />}
                   <button type="button" onClick={() => props.onLaneClick?.(l.id)} className={cn('min-w-0 flex-1 truncate text-left outline-none focus-visible:underline', l.kind === 'group' && 'font-medium')}>{l.label}</button>
-                  {l.value !== undefined && <span className="shrink-0 tabular text-[11px] text-faint">{l.value}</span>}
+                  {l.value !== undefined && <span className="shrink-0 tabular text-[11px] text-fg-faint">{l.value}</span>}
                   {l.trailing}
                 </div>
               ))}
@@ -336,7 +336,7 @@ export function KeyframeTimeline(props: KeyframeTimelineProps) {
               {/* past-the-end shade */}
               <div className="pointer-events-none absolute inset-y-0 right-0 bg-well/50" style={{ left: Math.max(0, tEnd) }} />
               {lanes.map((l, i) => (
-                <div key={l.id} className={cn('pointer-events-none absolute inset-x-0', l.kind === 'group' ? 'bg-hover' : '', l.highlight && 'bg-accent-soft/60')} style={{ top: i * ROW, height: ROW }}>
+                <div key={l.id} className={cn('pointer-events-none absolute inset-x-0', l.kind === 'group' ? 'bg-hover' : '', l.highlight && 'bg-signal-soft/60')} style={{ top: i * ROW, height: ROW }}>
                   {l.kind === 'prop' && l.keys.slice(0, -1).map((a, j) => {
                     const b = l.keys[j + 1]
                     const x0 = X(a.t), x1 = X(b.t), w = x1 - x0
@@ -345,13 +345,13 @@ export function KeyframeTimeline(props: KeyframeTimelineProps) {
                       <button key={a.id} type="button" aria-label="Edit easing"
                         onPointerDown={(e) => e.stopPropagation()}
                         onClick={(e) => props.onSegmentClick?.(l.id, a.id, (e.currentTarget as HTMLElement).getBoundingClientRect())}
-                        className="group/seg pointer-events-auto absolute top-0 flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                        className="group/seg pointer-events-auto absolute top-0 flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-signal"
                         style={{ left: x0 + 6, width: Math.max(0, w - 12), height: ROW }}>
                         <span className={cn('absolute inset-x-0 top-1/2 -translate-y-1/2',
                           a.out === 'hold' ? 'border-t border-dashed' : 'h-[2px] rounded-full',
-                          active ? (a.out === 'hold' ? 'border-accent' : 'bg-accent') : a.out === 'hold' ? 'border-faint group-hover/seg:border-fg' : 'bg-line-strong group-hover/seg:bg-fg/50')} />
+                          active ? (a.out === 'hold' ? 'border-signal' : 'bg-signal') : a.out === 'hold' ? 'border-fg-faint group-hover/seg:border-fg' : 'bg-line-strong group-hover/seg:bg-fg/50')} />
                         {w > 44 && a.glyph && (
-                          <span className={cn('relative rounded-[4px] bg-panel px-0.5', active ? 'text-accent' : 'text-faint group-hover/seg:text-fg')}>{a.glyph}</span>
+                          <span className={cn('relative rounded-[4px] bg-panel px-0.5', active ? 'text-signal' : 'text-fg-faint group-hover/seg:text-fg')}>{a.glyph}</span>
                         )}
                       </button>
                     )
@@ -367,19 +367,19 @@ export function KeyframeTimeline(props: KeyframeTimelineProps) {
                         style={{ left: X(k.t) }}>
                         <span className={cn('block rotate-45 rounded-[1.5px] transition-colors',
                           group ? 'size-[7px]' : 'size-[9px]',
-                          sel ? 'bg-accent shadow-[0_0_0_1.5px_var(--panel)]' : group ? 'bg-muted' : 'bg-fg/85 hover:bg-fg')} />
+                          sel ? 'bg-signal shadow-[0_0_0_1.5px_var(--panel)]' : group ? 'bg-fg-muted' : 'bg-fg/85 hover:bg-fg')} />
                       </button>
                     )
                   })}
                 </div>
               ))}
               {guide && (
-                <div className="pointer-events-none absolute inset-y-0 z-10 w-px bg-accent" style={{ left: guide.x }}>
-                  <div className="absolute top-1 left-1.5 rounded-[4px] bg-accent-strong px-1 tabular text-[10px] text-accent-fg">{(guide.t / 1000).toFixed(3)}s</div>
+                <div className="pointer-events-none absolute inset-y-0 z-10 w-px bg-signal" style={{ left: guide.x }}>
+                  <div className="absolute top-1 left-1.5 rounded-[4px] bg-signal-strong px-1 tabular text-[10px] text-signal-fg">{(guide.t / 1000).toFixed(3)}s</div>
                 </div>
               )}
               {mq && (
-                <div className="pointer-events-none absolute z-10 rounded-[2px] bg-accent-soft shadow-[inset_0_0_0_1px_var(--accent)]"
+                <div className="pointer-events-none absolute z-10 rounded-[2px] bg-signal-soft shadow-[inset_0_0_0_1px_var(--signal)]"
                   style={{ left: Math.min(mq.x0, mq.x1), top: Math.min(mq.y0, mq.y1), width: Math.abs(mq.x1 - mq.x0), height: Math.abs(mq.y1 - mq.y0) }} />
               )}
               <div ref={head} className="pointer-events-none absolute top-0 bottom-0 left-0 z-20">

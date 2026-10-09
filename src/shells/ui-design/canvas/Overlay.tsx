@@ -113,7 +113,7 @@ export function Overlay() {
               <g key={i}>
                 <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--rec)" strokeWidth={1} shapeRendering="crispEdges" />
                 <foreignObject x={(x1 + x2) / 2 - 30} y={(y1 + y2) / 2 - 9} width={60} height={18}>
-                  <div className="flex h-full items-center justify-center"><span className="rounded-[3px] bg-rec px-1 tabular text-[10.5px] font-medium text-accent-fg">{fmt(m.value)}</span></div>
+                  <div className="flex h-full items-center justify-center"><span className="rounded-[3px] bg-rec px-1 tabular text-[10.5px] font-medium text-signal-fg">{fmt(m.value)}</span></div>
                 </foreignObject>
               </g>
             )
@@ -123,10 +123,10 @@ export function Overlay() {
       {measuring && bb && hoverBox && <Outline b={sc(hoverBox)} width={1} tone="var(--rec)" />}
 
       {/* marquee */}
-      {marquee && <div className="absolute rounded-[1px] bg-accent-soft" style={{ ...pos(sc(marquee)), boxShadow: 'inset 0 0 0 1px var(--accent)' }} />}
+      {marquee && <div className="absolute rounded-[1px] bg-signal-soft" style={{ ...pos(sc(marquee)), boxShadow: 'inset 0 0 0 1px var(--signal)' }} />}
 
       {/* auto-layout insertion */}
-      {insertion && <div className="absolute rounded-full bg-accent" style={pos(sc(insertion))} />}
+      {insertion && <div className="absolute rounded-full bg-signal" style={pos(sc(insertion))} />}
 
       {tab === 'prototype' && v.showConnectors && <Connectors nodes={nodes} L={L} sc={sc} selection={selection} />}
       {v.showComments && <CommentPins sc={sc} />}
@@ -138,7 +138,7 @@ export function Overlay() {
 
 const pos = (b: Box) => ({ left: b.x, top: b.y, width: b.w, height: b.h })
 
-function Outline({ b, width = 1, rotation = 0, tone = 'var(--accent)' }: { b: Box; width?: number; rotation?: number; tone?: string }) {
+function Outline({ b, width = 1, rotation = 0, tone = 'var(--signal)' }: { b: Box; width?: number; rotation?: number; tone?: string }) {
   return <div className="absolute" style={{ ...pos(b), boxShadow: `0 0 0 ${width}px ${tone}`, transform: rotation ? `rotate(${-rotation}deg)` : undefined }} />
 }
 
@@ -159,7 +159,7 @@ function LayoutHints({ n, L, sc }: { n: Node; L: LayoutMap; sc: (b: Box) => Box 
   ]
   return (
     <>
-      {pads.filter((p) => p.w > 0 && p.h > 0).map((p, i) => <div key={`p${i}`} className="absolute bg-accent-soft opacity-60" style={pos(sc(p))} />)}
+      {pads.filter((p) => p.w > 0 && p.h > 0).map((p, i) => <div key={`p${i}`} className="absolute bg-signal-soft opacity-60" style={pos(sc(p))} />)}
       {gaps.filter((g) => g.w > 0 && g.h > 0).map((g, i) => <div key={`g${i}`} className="absolute opacity-70" style={{ ...pos(sc(g)), background: 'repeating-linear-gradient(45deg, color-mix(in srgb, var(--rec) 45%, transparent) 0 1px, transparent 1px 5px)' }} />)}
     </>
   )
@@ -191,24 +191,24 @@ function Connectors({ nodes, L, sc, selection }: { nodes: Node[]; L: LayoutMap; 
     <>
       <svg className="absolute inset-0 size-full overflow-visible">
         <defs>
-          <marker id="ui-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--accent)" /></marker>
+          <marker id="ui-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="var(--signal)" /></marker>
         </defs>
         {links.map((l) => {
           const c = curve(l.from, l.to)
           return (
             <g key={l.key} opacity={l.on || !selection.length ? 1 : 0.35}>
-              <path d={c.d} fill="none" stroke="var(--accent)" strokeWidth={l.on ? 2 : 1.5} markerEnd="url(#ui-arrow)" />
-              <circle cx={c.x1} cy={c.y1} r={3.5} fill="var(--accent)" />
+              <path d={c.d} fill="none" stroke="var(--signal)" strokeWidth={l.on ? 2 : 1.5} markerEnd="url(#ui-arrow)" />
+              <circle cx={c.x1} cy={c.y1} r={3.5} fill="var(--signal)" />
             </g>
           )
         })}
-        {drag.p && sb && (() => { const p = { x: drag.p.x * cam.zoom + cam.x, y: drag.p.y * cam.zoom + cam.y, w: 0, h: 0 }; const c = curve(sb, p); return <path d={c.d} fill="none" stroke="var(--accent)" strokeWidth={2} strokeDasharray="4 3" markerEnd="url(#ui-arrow)" /> })()}
+        {drag.p && sb && (() => { const p = { x: drag.p.x * cam.zoom + cam.x, y: drag.p.y * cam.zoom + cam.y, w: 0, h: 0 }; const c = curve(sb, p); return <path d={c.d} fill="none" stroke="var(--signal)" strokeWidth={2} strokeDasharray="4 3" markerEnd="url(#ui-arrow)" /> })()}
       </svg>
       {drag.target && L.get(drag.target) && <Outline b={sc(L.get(drag.target)!)} width={2} />}
       {start && L.get(start.id) && (() => {
         const b = sc(L.get(start.id)!)
         return (
-          <div className="absolute flex items-center gap-1 rounded-[5px] bg-accent-strong px-1.5 py-0.5 text-[10.5px] font-medium text-accent-fg" style={{ left: b.x, top: b.y - 46 }}>
+          <div className="absolute flex items-center gap-1 rounded-[5px] bg-signal-strong px-1.5 py-0.5 text-[10.5px] font-medium text-signal-fg" style={{ left: b.x, top: b.y - 46 }}>
             <Play size={10} strokeWidth={2} fill="currentColor" />Flow 1
           </div>
         )
@@ -216,7 +216,7 @@ function Connectors({ nodes, L, sc, selection }: { nodes: Node[]; L: LayoutMap; 
       {sb && single && (
         <button type="button" aria-label="Drag to link to a frame"
           onPointerDown={(e) => startConnect(e, single, (p, target) => setDrag({ p, target }))}
-          className="pointer-events-auto absolute flex size-[18px] -translate-1/2 items-center justify-center rounded-full bg-accent text-[13px] leading-none font-semibold text-accent-fg shadow-[0_1px_3px_rgba(0,0,0,.3)] hover:scale-110"
+          className="pointer-events-auto absolute flex size-[18px] -translate-1/2 items-center justify-center rounded-full bg-signal text-[13px] leading-none font-semibold text-signal-fg shadow-[0_1px_3px_rgba(0,0,0,.3)] hover:scale-110"
           style={{ left: sb.x + sb.w, top: sb.y + sb.h / 2, cursor: 'crosshair' }}>+</button>
       )}
     </>

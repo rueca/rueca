@@ -37,7 +37,7 @@ export function PreviewPane() {
           options={[{ value: 'output', label: 'Output', hint: 'Show the Output node' }, { value: 'selection', label: 'Selection', hint: 'Show the selected node (P)' }]} />
       </div>
       <div className="pointer-events-none absolute top-3 right-3 z-10 flex items-center gap-1.5">
-        {busy && <span className="size-3 animate-spin rounded-full border-[1.5px] border-line-strong border-t-accent" aria-label="Cooking" />}
+        {busy && <span className="size-3 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" aria-label="Cooking" />}
         {preview?.draft && <Badge tone="key">Draft</Badge>}
         {preview && !error && <Badge className="bg-panel shadow-[var(--shadow-cluster)]">{preview.res}px · {preview.ms < 10 ? preview.ms.toFixed(1) : Math.round(preview.ms)} ms</Badge>}
       </div>
@@ -51,9 +51,9 @@ export function PreviewPane() {
           <div className={cn('absolute inset-0', backdrop)} style={{ background: bg }} />
           <canvas ref={canvas} className={cn('absolute inset-0 h-full w-full', (error || !preview?.image) && 'opacity-0')} />
           {error && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-panel p-8 text-center font-sans">
-              <AlertTriangle size={28} strokeWidth={1.5} className="text-faint" />
-              <div className="max-w-[70%] text-[22px] leading-snug text-muted" style={{ fontSize: Math.max(13, res / 36) }}>{error}</div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-panel p-8 text-center font-ui">
+              <AlertTriangle size={28} strokeWidth={1.5} className="text-fg-faint" />
+              <div className="max-w-[70%] text-[22px] leading-snug text-fg-muted" style={{ fontSize: Math.max(13, res / 36) }}>{error}</div>
               {!hasOutput && (
                 <Button variant="primary" size="lg" style={{ transform: `scale(${res / 512})` }}
                   onClick={() => { const c = canvasApi.center(); addNode('output', { x: c.x + 120, y: c.y - 60 }) }}>

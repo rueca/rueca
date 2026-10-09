@@ -44,7 +44,7 @@ export function Filmstrip({
       {items.map((it, i) => (
         <div key={it.id} className="group/film relative shrink-0">
           {it.group && (i === 0 || items[i - 1].group !== it.group) && (
-            <div className="absolute -top-0.5 left-0.5 -translate-y-full text-[10.5px] text-faint">{it.group}</div>
+            <div className="absolute -top-0.5 left-0.5 -translate-y-full text-[10.5px] text-fg-faint">{it.group}</div>
           )}
           <button
             ref={(n) => { refs.current[i] = n }}
@@ -62,15 +62,15 @@ export function Filmstrip({
               e.stopPropagation()
               refs.current[Math.max(0, Math.min(items.length - 1, i + d))]?.focus()
             }}
-            className="flex flex-col gap-1 rounded-[8px] p-1 text-left outline-none transition-colors hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent"
+            className="flex flex-col gap-1 rounded-[8px] p-1 text-left outline-none transition-colors hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal"
           >
             <div
-              className={cn('overflow-hidden rounded-[5px] bg-input transition-shadow', active === it.id ? 'shadow-[0_0_0_2px_var(--accent)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}
+              className={cn('overflow-hidden rounded-[5px] bg-control transition-shadow', active === it.id ? 'shadow-[0_0_0_2px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}
               style={{ width: thumbW, height: thumbH }}
             >
               {it.thumb && <img src={it.thumb} alt="" draggable={false} className="size-full object-cover" />}
             </div>
-            <span className={cn('truncate px-0.5 text-[11.5px]', active === it.id ? 'text-fg' : 'text-muted')} style={{ maxWidth: thumbW }}>{it.name}</span>
+            <span className={cn('truncate px-0.5 text-[11.5px]', active === it.id ? 'text-fg' : 'text-fg-muted')} style={{ maxWidth: thumbW }}>{it.name}</span>
           </button>
           {it.user && onDelete && (
             <button type="button" aria-label={`Delete ${it.name}`} onClick={() => onDelete(it.id)}

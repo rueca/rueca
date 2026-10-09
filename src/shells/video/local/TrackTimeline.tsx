@@ -26,7 +26,7 @@ export interface TTClip {
   start: number
   dur: number
   label: string
-  /** any CSS colour; token expressions like var(--accent) recommended */
+  /** any CSS colour; token expressions like var(--signal) recommended */
   color: string
   icon?: ComponentType<{ size?: number; strokeWidth?: number; className?: string }>
   detail?: string
@@ -247,7 +247,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
         <div className="relative" style={{ width: HEAD_W + contentW, minHeight: '100%' }}>
           {/* ruler */}
           <div className="sticky top-0 z-20 flex border-b border-line bg-panel" style={{ height: RULER }}>
-            <div className="sticky left-0 z-30 flex flex-none items-center border-r border-line bg-panel px-3 text-[11px] text-faint" style={{ width: HEAD_W }}>
+            <div className="sticky left-0 z-30 flex flex-none items-center border-r border-line bg-panel px-3 text-[11px] text-fg-faint" style={{ width: HEAD_W }}>
               {tracks.length} tracks · {clips.length} clips
             </div>
             <div className="relative flex-none cursor-ew-resize no-select" style={{ width: contentW }} onPointerDown={onRulerDown} onPointerMove={onRulerMove} onPointerUp={onRulerUp}>
@@ -257,7 +257,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
                 return (
                   <div key={m} className="pointer-events-none absolute bottom-0" style={{ left: X(m) }}>
                     <div className={cn('w-px', major ? 'h-2 bg-line-strong' : 'h-1 bg-line')} />
-                    {major && <div className="absolute bottom-2.5 left-1 tabular text-[10px] text-faint">{fmtTick(m)}</div>}
+                    {major && <div className="absolute bottom-2.5 left-1 tabular text-[10px] text-fg-faint">{fmtTick(m)}</div>}
                   </div>
                 )
               })}
@@ -271,23 +271,23 @@ export function TrackTimeline(props: TrackTimelineProps) {
 
           {tracks.map((tr) => (
             <div key={tr.id} className="flex border-b border-line" style={{ height: ROW }}>
-              <div className={cn('group/track sticky left-0 z-[18] flex flex-none items-center gap-1 border-r border-line bg-panel pr-1 pl-3', tr.muted && 'text-faint')} style={{ width: HEAD_W }}>
+              <div className={cn('group/track sticky left-0 z-[18] flex flex-none items-center gap-1 border-r border-line bg-panel pr-1 pl-3', tr.muted && 'text-fg-faint')} style={{ width: HEAD_W }}>
                 {renaming === tr.id ? (
                   <input autoFocus defaultValue={tr.name}
                     onBlur={(e) => { props.onTrackRename?.(tr.id, e.target.value || tr.name); setRenaming(null) }}
                     onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setRenaming(null) }}
-                    className="h-6 min-w-0 flex-1 rounded-[4px] bg-input px-1.5 text-[11.5px] text-fg outline-none shadow-[inset_0_0_0_1px_var(--accent)]" />
+                    className="h-6 min-w-0 flex-1 rounded-[4px] bg-control px-1.5 text-[11.5px] text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
                 ) : (
                   <span onDoubleClick={() => setRenaming(tr.id)} className="min-w-0 flex-1 truncate text-[11.5px] text-fg">{tr.name}</span>
                 )}
                 {props.onTrackToggle && (
                   <>
                     <button type="button" aria-label={tr.muted ? 'Show track' : 'Hide track'} aria-pressed={tr.muted} onClick={() => props.onTrackToggle!(tr.id, 'muted')}
-                      className={cn('flex size-6 items-center justify-center rounded-[5px] text-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent', !tr.muted && 'opacity-0 group-hover/track:opacity-100')}>
+                      className={cn('flex size-6 items-center justify-center rounded-[5px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.muted && 'opacity-0 group-hover/track:opacity-100')}>
                       {tr.muted ? <EyeOff size={13} strokeWidth={1.5} /> : <Eye size={13} strokeWidth={1.5} />}
                     </button>
                     <button type="button" aria-label={tr.locked ? 'Unlock track' : 'Lock track'} aria-pressed={tr.locked} onClick={() => props.onTrackToggle!(tr.id, 'locked')}
-                      className={cn('flex size-6 items-center justify-center rounded-[5px] text-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent', !tr.locked && 'opacity-0 group-hover/track:opacity-100')}>
+                      className={cn('flex size-6 items-center justify-center rounded-[5px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.locked && 'opacity-0 group-hover/track:opacity-100')}>
                       {tr.locked ? <Lock size={13} strokeWidth={1.5} /> : <LockOpen size={13} strokeWidth={1.5} />}
                     </button>
                   </>
@@ -307,7 +307,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
                       style={{
                         left: X(c.start), width: w,
                         background: mix(c.selected ? 34 : 24),
-                        boxShadow: c.selected ? `0 0 0 1.5px var(--accent), inset 0 0 0 1px ${mix(60)}` : `inset 0 0 0 1px ${mix(46)}`,
+                        boxShadow: c.selected ? `0 0 0 1.5px var(--signal), inset 0 0 0 1px ${mix(60)}` : `inset 0 0 0 1px ${mix(46)}`,
                       }}>
                       {c.thumb && <div className="pointer-events-none absolute inset-y-0 right-0 w-[70%] opacity-60" style={{ backgroundImage: `url(${c.thumb})`, backgroundSize: 'auto 100%', backgroundRepeat: 'repeat-x', backgroundPosition: 'right center', maskImage: 'linear-gradient(to right, transparent, black 60%)', WebkitMaskImage: 'linear-gradient(to right, transparent, black 60%)' }} />}
                       <div className="absolute inset-x-0 top-0 h-[2px]" style={{ background: c.color }} />
@@ -316,7 +316,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
                       <div className="relative flex h-full min-w-0 items-center gap-1.5 px-2">
                         {Icon && w > 34 && <Icon size={12} strokeWidth={1.75} className="shrink-0 text-fg/80" />}
                         {w > 52 && <span className="truncate text-[11px] font-medium text-fg">{c.label}</span>}
-                        {c.detail && w > 140 && <span className="truncate text-[10.5px] text-muted">{c.detail}</span>}
+                        {c.detail && w > 140 && <span className="truncate text-[10.5px] text-fg-muted">{c.detail}</span>}
                       </div>
                       {!tr.locked && (
                         <>
@@ -340,7 +340,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
           {/* playhead + snap guide over the tracks */}
           <div className="pointer-events-none absolute top-0 bottom-0 z-[15]" style={{ left: HEAD_W, width: contentW }}>
             <div ref={head} className="absolute top-0 bottom-0 left-0"><div className="absolute top-0 bottom-0 w-px -translate-x-1/2 bg-rec" /></div>
-            {guide !== null && <div className="absolute top-0 bottom-0 w-px bg-accent" style={{ left: X(guide) }} />}
+            {guide !== null && <div className="absolute top-0 bottom-0 w-px bg-signal" style={{ left: X(guide) }} />}
           </div>
         </div>
       </div>

@@ -63,7 +63,7 @@ function JobGroup({ job, ahead, col }: { job: Job; ahead: number; col: number })
 function ParentChip({ rec }: { rec: ImageRec }) {
   const pix = usePix(rec.id, rec.params, 'thumb')
   return (
-    <button type="button" onClick={() => select([rec.id])} className="flex items-center gap-1.5 rounded-[6px] py-0.5 pr-1.5 pl-0.5 text-[11px] text-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+    <button type="button" onClick={() => select([rec.id])} className="flex items-center gap-1.5 rounded-[6px] py-0.5 pr-1.5 pl-0.5 text-[11px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
       <span className="size-5 overflow-hidden rounded-[4px] bg-well">{pix && <img src={pix.url} alt="" className="h-full w-full object-cover" />}</span>
       from #{rec.id.slice(-4)}
     </button>
@@ -75,7 +75,7 @@ function GroupHeader({ title, meta, badge, actions, parent }: { title: string; m
     <div className="group/head flex items-start gap-3">
       <div className="min-w-0 flex-1">
         <p className="line-clamp-2 text-[12.5px] leading-snug text-fg select-text">{title}</p>
-        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-faint">
+        <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-fg-faint">
           {badge}
           <span className="tabular">{meta}</span>
           {parent && <ParentChip rec={parent} />}
@@ -112,7 +112,7 @@ export function Gallery() {
           {session
             ? <InlineEdit value={session.name} onCommit={(n) => renameSession(session.id, n)} className="text-[14px] font-semibold text-fg" label="Rename session" />
             : <span className="truncate text-[14px] font-semibold text-fg">{viewTitle(state)}</span>}
-          <span className="tabular text-[12px] text-faint">{list.length} image{list.length === 1 ? '' : 's'}</span>
+          <span className="tabular text-[12px] text-fg-faint">{list.length} image{list.length === 1 ? '' : 's'}</span>
         </div>
         {state.selection.length > 0 && (
           <div className="cluster flex h-8 items-center gap-0.5 pr-1 pl-2.5">
@@ -186,20 +186,20 @@ function EmptyState({ favourites, board }: { favourites: boolean; board: boolean
   if (favourites || board)
     return (
       <div className="flex flex-col items-center gap-2 py-24 text-center">
-        <Heart size={22} strokeWidth={1.5} className="text-faint" />
+        <Heart size={22} strokeWidth={1.5} className="text-fg-faint" />
         <div className="text-[13px] font-medium text-fg">{board ? 'This board is empty' : 'No favourites yet'}</div>
-        <div className="max-w-[280px] text-[12px] leading-relaxed text-muted">{board ? 'Add images from a tile’s menu or the details panel.' : <>Select an image and press <Kbd>F</Kbd>, or click its heart.</>}</div>
+        <div className="max-w-[280px] text-[12px] leading-relaxed text-fg-muted">{board ? 'Add images from a tile’s menu or the details panel.' : <>Select an image and press <Kbd>F</Kbd>, or click its heart.</>}</div>
       </div>
     )
   return (
     <div className="flex flex-col items-center gap-3 py-20 text-center">
-      <ImagePlus size={24} strokeWidth={1.5} className="text-faint" />
+      <ImagePlus size={24} strokeWidth={1.5} className="text-fg-faint" />
       <div className="text-[14px] font-medium text-fg">Describe an image to start this session</div>
-      <div className="max-w-[340px] text-[12px] leading-relaxed text-muted">Write a prompt below and press <Kbd>⌘</Kbd><Kbd>↵</Kbd>. Every run lands here, grouped by prompt. Try one of these:</div>
+      <div className="max-w-[340px] text-[12px] leading-relaxed text-fg-muted">Write a prompt below and press <Kbd>⌘</Kbd><Kbd>↵</Kbd>. Every run lands here, grouped by prompt. Try one of these:</div>
       <div className="flex max-w-[620px] flex-wrap justify-center gap-1.5 pt-1">
         {IDEAS.map((t) => (
           <button key={t} type="button" onClick={() => { prompt.setValue('prompt', t); focusPrompt() }}
-            className={cn('rounded-full bg-panel px-3 py-1.5 text-[11.5px] text-muted shadow-[var(--shadow-cluster)] outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-accent')}>{t}</button>
+            className={cn('rounded-full bg-panel px-3 py-1.5 text-[11.5px] text-fg-muted shadow-[var(--shadow-cluster)] outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal')}>{t}</button>
         ))}
       </div>
     </div>

@@ -55,7 +55,7 @@ export function StateMachineGraph({ states, entry, current, transitions, lastTra
           <path d="M0,0 L8,4 L0,8 z" fill="var(--fg-faint)" />
         </marker>
         <marker id="sm-arrow-on" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill="var(--accent)" />
+          <path d="M0,0 L8,4 L0,8 z" fill="var(--signal)" />
         </marker>
       </defs>
       {(() => { const e = edge(pos.__entry, pos[entry]); return <line {...e} stroke="var(--fg-faint)" strokeWidth={1.25} markerEnd="url(#sm-arrow)" /> })()}
@@ -69,7 +69,7 @@ export function StateMachineGraph({ states, entry, current, transitions, lastTra
         const mx = (e.x1 + e.x2) / 2, my = (e.y1 + e.y2) / 2, len = Math.hypot(e.x2 - e.x1, e.y2 - e.y1) || 1
         const bow = both ? 8 : 0
         const cx = mx + (-(e.y2 - e.y1) / len) * bow, cy = my + ((e.x2 - e.x1) / len) * bow
-        return <path key={t.id} d={`M${e.x1},${e.y1} Q${cx},${cy} ${e.x2},${e.y2}`} fill="none" stroke={on ? 'var(--accent)' : 'var(--fg-faint)'} strokeWidth={on ? 2 : 1.25} markerEnd={on ? 'url(#sm-arrow-on)' : 'url(#sm-arrow)'} className="transition-[stroke] duration-300" />
+        return <path key={t.id} d={`M${e.x1},${e.y1} Q${cx},${cy} ${e.x2},${e.y2}`} fill="none" stroke={on ? 'var(--signal)' : 'var(--fg-faint)'} strokeWidth={on ? 2 : 1.25} markerEnd={on ? 'url(#sm-arrow-on)' : 'url(#sm-arrow)'} className="transition-[stroke] duration-300" />
       })}
       {[{ id: '__entry', name: 'Entry' }, { id: 'any', name: 'Any state' }, ...states].map((s) => {
         const p = pos[s.id]
@@ -78,10 +78,10 @@ export function StateMachineGraph({ states, entry, current, transitions, lastTra
         return (
           <g key={s.id} transform={`translate(${p.x},${p.y})`} onClick={() => !special && onSelect?.(s.id)} className={cn(!special && 'cursor-pointer')}>
             <rect width={NW} height={NH} rx={6}
-              fill={live ? 'var(--accent-strong)' : special ? 'var(--well)' : 'var(--input)'}
-              stroke={live ? 'var(--accent)' : 'var(--line-strong)'} strokeWidth={1} className="transition-[fill] duration-200" />
+              fill={live ? 'var(--signal-strong)' : special ? 'var(--well)' : 'var(--control)'}
+              stroke={live ? 'var(--signal)' : 'var(--line-strong)'} strokeWidth={1} className="transition-[fill] duration-200" />
             <text x={NW / 2} y={NH / 2 + 0.5} textAnchor="middle" dominantBaseline="middle" fontSize={10.5} fontWeight={500}
-              fill={live ? 'var(--accent-fg)' : special ? 'var(--fg-faint)' : 'var(--fg)'}>{s.name}</text>
+              fill={live ? 'var(--signal-fg)' : special ? 'var(--fg-faint)' : 'var(--fg)'}>{s.name}</text>
           </g>
         )
       })}
@@ -97,7 +97,7 @@ export function InputsList({ inputs, onInput, onFire, fired }: { inputs: SMInput
         return (
           <div key={i.id} className="flex h-[var(--row)] items-center gap-2 px-3">
             <Tip label={i.type === 'trigger' ? 'Trigger — fires once' : i.type === 'boolean' ? 'Boolean — on or off' : 'Number'} side="left">
-              <span className={cn('flex size-5 shrink-0 items-center justify-center rounded-[5px] bg-hover', fired === i.id ? 'text-key' : 'text-muted')}><Icon size={12} strokeWidth={1.75} /></span>
+              <span className={cn('flex size-5 shrink-0 items-center justify-center rounded-[5px] bg-hover', fired === i.id ? 'text-key' : 'text-fg-muted')}><Icon size={12} strokeWidth={1.75} /></span>
             </Tip>
             <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-fg">{i.name}</span>
             {i.type === 'trigger' && <Button size="sm" variant="default" onClick={() => onFire(i.id)}>Fire</Button>}
@@ -116,8 +116,8 @@ export function TransitionsList({ transitions, names, onMix }: { transitions: SM
       {transitions.map((t) => (
         <div key={t.id} className="flex min-h-[var(--row)] items-center gap-2 px-3 py-0.5">
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[11.5px] text-fg">{names[t.from] ?? t.from} <span className="text-faint">→</span> {names[t.to] ?? t.to}</div>
-            <div className="truncate font-mono text-[10.5px] text-faint">{t.label}</div>
+            <div className="truncate text-[11.5px] text-fg">{names[t.from] ?? t.from} <span className="text-fg-faint">→</span> {names[t.to] ?? t.to}</div>
+            <div className="truncate font-mono text-[10.5px] text-fg-faint">{t.label}</div>
           </div>
           <Tip label="Mix — how long the two animations blend" side="left">
             <span className="inline-flex"><ScrubValue boxed value={t.mix} min={0} max={2000} step={10} unit="ms" className="w-[60px]" label="Mix" onChange={(v, f) => onMix?.(t.id, v, f)} /></span>

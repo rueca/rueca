@@ -148,19 +148,19 @@ export function EnvelopeEditor({
         role="slider" tabIndex={0} aria-label={label} aria-valuetext={text}
         aria-valuenow={live.current[k]} aria-valuemin={min[k]} aria-valuemax={max[k]}
         onKeyDown={key(k)} onPointerDown={down(k)} onDoubleClick={reset(k)}
-        className="cursor-grab fill-[var(--panel)] stroke-[var(--accent)] outline-none transition-[r] [stroke-width:2] focus-visible:fill-[var(--accent)] hover:fill-[var(--accent)]"
+        className="cursor-grab fill-[var(--panel)] stroke-[var(--signal)] outline-none transition-[r] [stroke-width:2] focus-visible:fill-[var(--signal)] hover:fill-[var(--signal)]"
       />
     </g>
   )
 
   return (
     <div className={cn('flex w-full flex-col gap-1.5', className)}>
-      <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="w-full touch-none rounded-[6px] bg-input" style={{ aspectRatio: `${W} / ${H}` }}
+      <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="w-full touch-none rounded-[6px] bg-control" style={{ aspectRatio: `${W} / ${H}` }}
         onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
         {[0.25, 0.5, 0.75].map((g) => <line key={g} x1={PAD} x2={W - PAD} y1={yOf(g)} y2={yOf(g)} stroke="var(--line)" />)}
         {[slotX.d, slotX.hold, slotX.r].map((x) => <line key={x} x1={x} x2={x} y1={PAD} y2={H - PAD} stroke="var(--line)" strokeDasharray="2 3" />)}
-        <path d={`${path} L${pR[0]},${yOf(0)} L${p0[0]},${yOf(0)} Z`} fill="var(--accent-soft)" />
-        <path d={path} fill="none" stroke="var(--accent)" strokeWidth={1.75} strokeLinejoin="round" />
+        <path d={`${path} L${pR[0]},${yOf(0)} L${p0[0]},${yOf(0)} Z`} fill="var(--signal-soft)" />
+        <path d={path} fill="none" stroke="var(--signal)" strokeWidth={1.75} strokeLinejoin="round" />
         {/* sustain segment: drag vertically */}
         <line x1={pD[0]} x2={pS[0]} y1={pS[1]} y2={pS[1]} stroke="transparent" strokeWidth={12} className="cursor-ns-resize" onPointerDown={down('s')} />
         <circle ref={dot} r={3.5} fill="var(--rec)" style={{ opacity: 0 }} />
@@ -177,7 +177,7 @@ export function EnvelopeEditor({
         ] as const).map(([k, p, val, lo, hi, st, f]) => (
           <ScrubValue key={k} boxed align="left" prefix={p} value={val} min={lo} max={hi} step={st} fmt={f} label={{ a: 'Attack', d: 'Decay', s: 'Sustain', r: 'Release' }[k]}
             defaultValue={defaults?.[k]} changed={defaults ? defaults[k] !== val : undefined}
-            onChange={(n, fin) => onChange({ ...live.current, [k]: n }, fin)} className={cn(active === k && 'shadow-[inset_0_0_0_1px_var(--accent)]')} />
+            onChange={(n, fin) => onChange({ ...live.current, [k]: n }, fin)} className={cn(active === k && 'shadow-[inset_0_0_0_1px_var(--signal)]')} />
         ))}
       </div>
     </div>

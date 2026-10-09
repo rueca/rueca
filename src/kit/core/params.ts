@@ -9,18 +9,28 @@
      const v = useValues(params)
 
      // any artifact
-     params.subscribe((v) => scene.update(v))           // every change, incl. mid-drag
-     params.onCommit((v) => rebuildExpensiveThing(v))     // pointer-up only
+     params.subscribe((s) => scene.update(s.values))     // every change, incl. mid-drag
+     params.onCommit((v) => rebuildExpensiveThing(v))    // pointer-up only
 
    Mid-drag changes are not undo steps; the commit on release is. Undo/redo,
    presets, A/B, URL share and localStorage persistence all live here, so
    every shell gets them for free.
+
+   Document state that isn't a tunable value (a layer stack, clips, rows)
+   either lives in a hidden `p.data()` param here, or in a `createDocStore`
+   joined to these params by `createHistory([params, doc])`.
 --------------------------------------------------------------------------- */
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { defaultsOf, defIndex, equal, type Schema, type SchemaValues, type Values, type ParamDef } from './schema'
+import { defaultsOf, defIndex, equal, humanize, isValueDef, type Schema, type SchemaValues, type Values, type ParamDef } from './schema'
 
-export interface Preset<V> { name: string; values: V; builtin?: boolean }
+export interface Preset<V> {
+  name: string
+  values: Partial<V>
+  builtin?: boolean
+  /** merge (default) applies only the listed keys; replace resets everything else to defaults */
+  mode?: 'merge' | 'replace'
+}
 
 export interface ParamState<V extends Values> {
   values: V
@@ -29,10 +39,16 @@ export interface ParamState<V extends Values> {
   committed: V
   past: V[]
   future: V[]
+  /** labels parallel to past/future, for a History panel */
+  pastLabels: string[]
+  futureLabels: string[]
   presets: Preset<V>[]
   /** a stored comparison snapshot for A/B */
   compare: V | null
 }
+
+/** Why a commit happened — history coordinators ignore undo/redo replays. */
+export interface CommitMeta { label?: string; kind: 'edit' | 'undo' | 'redo' | 'replace' }
 
 export interface ParamStore<S extends Schema, V extends Values = SchemaValues<S>> extends StoreApi<ParamState<V>> {
   schema: S
@@ -40,20 +56,27 @@ export interface ParamStore<S extends Schema, V extends Values = SchemaValues<S>
   id: string
   /** current values (non-reactive) */
   values(): V
-  setValue<K extends keyof V>(key: K, value: V[K], opts?: { commit?: boolean }): void
-  patch(partial: Partial<V>, opts?: { commit?: boolean }): void
-  commit(): void
+  setValue<K extends keyof V>(key: K, value: V[K], opts?: { commit?: boolean; label?: string }): void
+  patch(partial: Partial<V>, opts?: { commit?: boolean; label?: string }): void
+  commit(label?: string): void
+  /** swap values without an undo step (load, import, sync from elsewhere) */
+  replace(values: Partial<V>, opts?: { history?: boolean; label?: string }): void
   reset(keys?: (keyof V)[]): void
-  undo(): void
-  redo(): void
-  onCommit(fn: (v: V) => void): () => void
-  savePreset(name: string): void
+  undo(): string | undefined
+  redo(): string | undefined
+  canUndo(): boolean
+  canRedo(): boolean
+  onCommit(fn: (v: V, meta: CommitMeta) => void): () => void
+  /** save a preset; `keys` limits it to part of the schema (default: the store's presetKeys, else all shareable values) */
+  savePreset(name: string, opts?: { keys?: (keyof V)[] }): void
   applyPreset(name: string): void
   deletePreset(name: string): void
+  /** the preset whose keys all match the current values, if any */
+  activePreset(): Preset<V> | undefined
   /** swap current values with the A/B slot (first call stores, later calls swap) */
   toggleCompare(): 'stored' | 'swapped'
   clearCompare(): void
-  toJSON(opts?: { changedOnly?: boolean }): Partial<V>
+  toJSON(opts?: { changedOnly?: boolean; shareable?: boolean }): Partial<V>
   shareURL(): string
   isChanged(key: keyof V): boolean
 }
@@ -61,37 +84,55 @@ export interface ParamStore<S extends Schema, V extends Values = SchemaValues<S>
 /** What kit components accept: any schema's store. */
 export type AnyParams = ParamStore<any, any>
 
-interface Options<V> {
+export interface ParamOptions<V> {
   id: string
   /** remember the last values in localStorage (default true) */
   persist?: boolean
+  /** bump when the schema's shape changes so stale saved values are ignored */
+  version?: number
   /** read `#p=` from the URL on load (default true) */
   url?: boolean
-  presets?: { name: string; values: Partial<V> }[]
+  presets?: { name: string; values: Partial<V>; mode?: 'merge' | 'replace' }[]
+  /** which keys a saved preset captures (e.g. only the "look" folders, not canvas size) */
+  presetKeys?: (keyof V)[]
   historyLimit?: number
 }
 
+const warned = { quota: false }
 const LS = {
   get<T>(k: string): T | null { try { const s = localStorage.getItem(k); return s ? JSON.parse(s) : null } catch { return null } },
-  set(k: string, v: unknown) { try { localStorage.setItem(k, JSON.stringify(v)) } catch { /* private mode */ } },
+  set(k: string, v: unknown) {
+    try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {
+      // Quota or private mode. Say so once — silent failure means "my settings vanished".
+      if (!warned.quota && typeof window !== 'undefined') {
+        warned.quota = true
+        window.dispatchEvent(new CustomEvent('studio:storage-error', { detail: { key: k, error: String(e) } }))
+      }
+    }
+  },
 }
 const b64 = {
   enc: (s: string) => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
   dec: (s: string) => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/')))),
 }
 
-export function createParams<S extends Schema>(schema: S, opts: Options<SchemaValues<S>>): ParamStore<S> {
+export function createParams<S extends Schema>(schema: S, opts: ParamOptions<SchemaValues<S>>): ParamStore<S> {
   type V = SchemaValues<S> & Values
   const defaults = defaultsOf(schema) as V
   const defs = defIndex(schema)
-  const keyLS = `studio:${opts.id}:values`
-  const keyPresets = `studio:${opts.id}:presets`
+  const suffix = opts.version ? `:v${opts.version}` : ''
+  const keyLS = `studio:${opts.id}:values${suffix}`
+  const keyPresets = `studio:${opts.id}:presets${suffix}`
   const limit = opts.historyLimit ?? 100
 
+  const flag = (k: string, f: 'persist' | 'share') => { const d = defs[k] as any; return !d || d[f] !== false }
+  const pick = (v: Values, f: 'persist' | 'share') => Object.fromEntries(Object.entries(v).filter(([k]) => flag(k, f)))
+  const labelOf = (k: string) => { const d = defs[k] as any; return d?.label ?? humanize(k) }
+
   // Only keep keys the schema still knows, so a renamed param never poisons state.
-  const sanitize = (src: Partial<V> | null): Partial<V> => {
+  const sanitize = (src: Partial<V> | null | undefined): Partial<V> => {
     const out: Partial<V> = {}
-    if (!src) return out
+    if (!src || typeof src !== 'object') return out
     for (const k of Object.keys(src)) if (k in defaults) (out as Values)[k] = (src as Values)[k]
     return out
   }
@@ -103,8 +144,8 @@ export function createParams<S extends Schema>(schema: S, opts: Options<SchemaVa
     if (m) try { initial = { ...initial, ...sanitize(JSON.parse(b64.dec(m[1]))) } } catch { /* bad link */ }
   }
 
-  const builtin: Preset<V>[] = (opts.presets ?? []).map((pr) => ({ name: pr.name, values: { ...defaults, ...pr.values } as V, builtin: true }))
-  const saved = (LS.get<Preset<V>[]>(keyPresets) ?? []).map((pr) => ({ ...pr, values: { ...defaults, ...sanitize(pr.values) } as V }))
+  const builtin: Preset<V>[] = (opts.presets ?? []).map((pr) => ({ name: pr.name, values: sanitize(pr.values), mode: pr.mode, builtin: true }))
+  const saved = (LS.get<Preset<V>[]>(keyPresets) ?? []).map((pr) => ({ ...pr, values: sanitize(pr.values) }))
 
   const store = createStore<ParamState<V>>(() => ({
     values: initial,
@@ -112,25 +153,56 @@ export function createParams<S extends Schema>(schema: S, opts: Options<SchemaVa
     committed: initial,
     past: [],
     future: [],
+    pastLabels: [],
+    futureLabels: [],
     presets: [...builtin, ...saved],
     compare: null,
   }))
 
-  const commitListeners = new Set<(v: V) => void>()
+  const commitListeners = new Set<(v: V, meta: CommitMeta) => void>()
+  const emit = (v: V, meta: CommitMeta) => commitListeners.forEach((fn) => fn(v, meta))
   const persistUser = () => LS.set(keyPresets, store.getState().presets.filter((p) => !p.builtin))
-
-  const commit = () => {
-    const s = store.getState()
-    if (equal(s.values, s.committed)) return
-    store.setState({ committed: s.values, past: [...s.past, s.committed].slice(-limit), future: [] })
-    if (opts.persist !== false) LS.set(keyLS, s.values)
-    commitListeners.forEach((fn) => fn(s.values))
+  let saveTimer: ReturnType<typeof setTimeout> | undefined
+  const save = (v: V) => {
+    if (opts.persist === false) return
+    clearTimeout(saveTimer)
+    saveTimer = setTimeout(() => LS.set(keyLS, pick(v, 'persist')), 120)
   }
 
-  const jump = (values: V) => {
+  const describe = (prev: V, next: V) => {
+    const changed = Object.keys(next).filter((k) => !equal((prev as Values)[k], (next as Values)[k]))
+    if (!changed.length) return 'Edit'
+    if (changed.length === 1) return labelOf(changed[0])
+    if (changed.length <= 3) return changed.map(labelOf).join(', ')
+    return `${changed.length} values`
+  }
+
+  const commit = (label?: string) => {
+    const s = store.getState()
+    if (equal(s.values, s.committed)) return
+    const l = label ?? describe(s.committed, s.values)
+    store.setState({
+      committed: s.values,
+      past: [...s.past, s.committed].slice(-limit),
+      pastLabels: [...s.pastLabels, l].slice(-limit),
+      future: [],
+      futureLabels: [],
+    })
+    save(s.values)
+    emit(s.values, { label: l, kind: 'edit' })
+  }
+
+  const jump = (values: V, meta: CommitMeta) => {
     store.setState({ values, committed: values })
-    if (opts.persist !== false) LS.set(keyLS, values)
-    commitListeners.forEach((fn) => fn(values))
+    save(values)
+    emit(values, meta)
+  }
+
+  const apply = (pr: Preset<V>) => {
+    const s = store.getState()
+    const base = pr.mode === 'replace' ? defaults : s.values
+    store.setState({ values: { ...base, ...structuredClone(pr.values) } as V })
+    commit(`Preset: ${pr.name}`)
   }
 
   const api: ParamStore<S> = Object.assign(store, {
@@ -138,70 +210,104 @@ export function createParams<S extends Schema>(schema: S, opts: Options<SchemaVa
     defs,
     id: opts.id,
     values: () => store.getState().values,
-    setValue: (key: any, value: any, o: { commit?: boolean } = {}) => {
+    setValue: (key: any, value: any, o: { commit?: boolean; label?: string } = {}) => {
       store.setState((s) => ({ values: { ...s.values, [key]: value } }))
-      if (o.commit !== false) commit()
+      if (o.commit !== false) commit(o.label)
     },
-    patch: (partial: Partial<V>, o: { commit?: boolean } = {}) => {
+    patch: (partial: Partial<V>, o: { commit?: boolean; label?: string } = {}) => {
       store.setState((s) => ({ values: { ...s.values, ...partial } }))
-      if (o.commit !== false) commit()
+      if (o.commit !== false) commit(o.label)
     },
     commit,
+    replace: (values: Partial<V>, o: { history?: boolean; label?: string } = {}) => {
+      const next = { ...store.getState().values, ...sanitize(values) } as V
+      if (o.history === false) {
+        store.setState({ values: next, committed: next })
+        save(next)
+        emit(next, { kind: 'replace', label: o.label })
+      } else {
+        store.setState({ values: next })
+        commit(o.label)
+      }
+    },
     reset: (keys?: (keyof V)[]) => {
       const s = store.getState()
       const next = { ...s.values }
       for (const k of keys ?? (Object.keys(defaults) as (keyof V)[])) (next as Values)[k as string] = structuredClone((defaults as Values)[k as string])
       store.setState({ values: next })
-      commit()
+      commit(keys?.length === 1 ? `Reset ${labelOf(keys[0] as string)}` : 'Reset')
     },
     undo: () => {
       const s = store.getState()
-      const prev = s.past.at(-1)
-      if (!prev) return
-      store.setState({ past: s.past.slice(0, -1), future: [s.committed, ...s.future] })
-      jump(prev)
+      if (!equal(s.values, s.committed)) commit()
+      const st = store.getState()
+      const prev = st.past.at(-1)
+      if (!prev) return undefined
+      const label = st.pastLabels.at(-1)
+      store.setState({
+        past: st.past.slice(0, -1), pastLabels: st.pastLabels.slice(0, -1),
+        future: [st.committed, ...st.future], futureLabels: [label ?? 'Edit', ...st.futureLabels],
+      })
+      jump(prev, { kind: 'undo', label })
+      return label
     },
     redo: () => {
       const s = store.getState()
       const [next, ...rest] = s.future
-      if (!next) return
-      store.setState({ future: rest, past: [...s.past, s.committed] })
-      jump(next)
+      if (!next) return undefined
+      const [label, ...restLabels] = s.futureLabels
+      store.setState({ future: rest, futureLabels: restLabels, past: [...s.past, s.committed], pastLabels: [...s.pastLabels, label ?? 'Edit'] })
+      jump(next, { kind: 'redo', label })
+      return label
     },
-    onCommit: (fn: (v: V) => void) => { commitListeners.add(fn); return () => commitListeners.delete(fn) },
-    savePreset: (name: string) => {
+    canUndo: () => store.getState().past.length > 0,
+    canRedo: () => store.getState().future.length > 0,
+    onCommit: (fn: (v: V, meta: CommitMeta) => void) => { commitListeners.add(fn); return () => { commitListeners.delete(fn) } },
+    savePreset: (name: string, o: { keys?: (keyof V)[] } = {}) => {
       const s = store.getState()
-      const presets = [...s.presets.filter((p) => p.name !== name || p.builtin), { name, values: s.values }]
+      const keys = (o.keys ?? opts.presetKeys ?? (Object.keys(s.values).filter((k) => flag(k, 'share') && isValueDef(defs[k]) && defs[k].type !== 'data') as (keyof V)[])) as string[]
+      const values = Object.fromEntries(keys.map((k) => [k, structuredClone((s.values as Values)[k])])) as Partial<V>
+      const presets = [...s.presets.filter((p) => p.name !== name || p.builtin), { name, values, mode: 'merge' as const }]
       store.setState({ presets })
       persistUser()
     },
     applyPreset: (name: string) => {
       const pr = store.getState().presets.find((p) => p.name === name)
-      if (!pr) return
-      store.setState({ values: { ...pr.values } })
-      commit()
+      if (pr) apply(pr)
     },
     deletePreset: (name: string) => {
       store.setState((s) => ({ presets: s.presets.filter((p) => p.name !== name || p.builtin) }))
       persistUser()
     },
+    activePreset: () => {
+      const s = store.getState()
+      return s.presets.find((p) => {
+        const keys = Object.keys(p.values)
+        if (!keys.length) return false
+        const base = p.mode === 'replace' ? { ...defaults, ...p.values } : p.values
+        return Object.keys(base).every((k) => equal((s.values as Values)[k], (base as Values)[k]))
+      })
+    },
     toggleCompare: () => {
       const s = store.getState()
       if (!s.compare) { store.setState({ compare: s.values }); return 'stored' as const }
       store.setState({ compare: s.values, values: s.compare })
-      commit()
+      commit('Swap A / B')
       return 'swapped' as const
     },
     clearCompare: () => store.setState({ compare: null }),
-    toJSON: (o: { changedOnly?: boolean } = {}) => {
-      const v = store.getState().values
-      if (!o.changedOnly) return { ...v }
-      const out: Partial<V> = {}
-      for (const k of Object.keys(v)) if (!equal((v as Values)[k], (defaults as Values)[k])) (out as Values)[k] = (v as Values)[k]
-      return out
+    toJSON: (o: { changedOnly?: boolean; shareable?: boolean } = {}) => {
+      const v = store.getState().values as Values
+      const out: Values = {}
+      for (const k of Object.keys(v)) {
+        if (o.shareable && !flag(k, 'share')) continue
+        if (o.changedOnly && equal(v[k], (defaults as Values)[k])) continue
+        out[k] = v[k]
+      }
+      return out as Partial<V>
     },
     shareURL: () => {
-      const changed = api.toJSON({ changedOnly: true })
+      const changed = api.toJSON({ changedOnly: true, shareable: true })
       const base = location.href.replace(/[#&]p=[^&]*/, '')
       const sep = base.includes('#') ? '&' : '#'
       return `${base}${sep}p=${b64.enc(JSON.stringify(changed))}`
@@ -221,3 +327,48 @@ export function useValues(store: ParamStore<any>, pick?: (v: any) => any) {
 
 export const useParamState = <S extends Schema, T>(store: ParamStore<S>, pick: (s: ParamState<SchemaValues<S>>) => T) =>
   useStore(store, pick as any) as T
+
+/* ---------------------------------------------------------------------------
+   Item params — point an <Inspector> at ONE item inside a collection (a layer
+   in a stack, a node in a graph, a fill in a fills list). Each item TYPE gets
+   a small non-persisted store; bindItem syncs it both ways with whichever item
+   is selected. Drags write through uncommitted; the item's commit becomes ONE
+   step on the owner (a params store or a doc store).
+
+     const warp = createItemParams(warpSchema, 'warp')
+     useEffect(() => bindItem(warp, {
+       read: () => layerById(sel)?.params ?? null,
+       write: (v) => setLayerParams(sel, v, { commit: false }),
+       commit: (label) => params.commit(label),
+       subscribe: (fn) => params.subscribe(fn),   // re-read on outside changes (undo)
+     }), [sel])
+     <Inspector params={warp} />
+   (After shader/local/itemParams.ts and nodes/graph/nodeParams.ts.)
+--------------------------------------------------------------------------- */
+export function createItemParams<S extends Schema>(schema: S, id: string): ParamStore<S> {
+  return createParams(schema, { id: `item:${id}`, persist: false, url: false })
+}
+
+export function bindItem(
+  item: AnyParams,
+  b: { read: () => Record<string, unknown> | null; write: (v: Record<string, unknown>) => void; commit: (label?: string) => void; subscribe: (fn: () => void) => () => void },
+): () => void {
+  let syncing = false
+  const pull = () => {
+    const src = b.read()
+    if (!src) return
+    const next = { ...item.getState().defaults, ...src }
+    if (equal(next, item.getState().values)) return
+    syncing = true
+    item.setState({ values: next, committed: next, past: [], future: [], pastLabels: [], futureLabels: [] })
+    syncing = false
+  }
+  pull()
+  const offOwner = b.subscribe(pull)
+  const offItem = item.subscribe((s, prev) => {
+    if (syncing || s.values === prev.values) return
+    b.write(s.values as Record<string, unknown>)
+  })
+  const offCommit = item.onCommit((_v, meta) => { if (meta.kind === 'edit') b.commit(meta.label) })
+  return () => { offOwner(); offItem(); offCommit() }
+}

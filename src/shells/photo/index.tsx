@@ -409,14 +409,14 @@ export default function DevelopShell() {
             <div className="flex flex-col gap-2 px-3">
               <ImageDrop value={null} onChange={(url) => url && openURL(url, 'Pasted photo')} compact />
               <div className="flex items-center justify-between text-[11.5px]">
-                <span className="truncate text-muted">{s.file}</span>
-                <span className="tabular text-faint">{W} × {H}</span>
+                <span className="truncate text-fg-muted">{s.file}</span>
+                <span className="tabular text-fg-faint">{W} × {H}</span>
               </div>
               <div className="flex gap-1.5">
                 <Button size="md" variant="default" className="flex-1" onClick={() => fileInput.current?.click()}><ImageUp size={13} strokeWidth={1.5} />Open…</Button>
                 <Button size="md" variant="default" className="flex-1" onClick={() => openSample(true)}><Images size={13} strokeWidth={1.5} />Sample</Button>
               </div>
-              <p className="text-[11px] leading-relaxed text-faint">Drop or paste a photo anywhere. Edits never touch the pixels — every setting is re-applied live from the original.</p>
+              <p className="text-[11px] leading-relaxed text-fg-faint">Drop or paste a photo anywhere. Edits never touch the pixels — every setting is re-applied live from the original.</p>
             </div>
           </Sec>
         </Panel>
@@ -436,7 +436,7 @@ export default function DevelopShell() {
             onDelete={(id) => ui.setState((x) => ({ userLooks: x.userLooks.filter((l) => l.id !== id) }))}
             trailing={
               <button type="button" onClick={saveLook}
-                className="flex shrink-0 flex-col items-center justify-center gap-1 self-start rounded-[8px] text-[11.5px] text-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-accent"
+                className="flex shrink-0 flex-col items-center justify-center gap-1 self-start rounded-[8px] text-[11.5px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"
                 style={{ width: 120, height: 80, marginTop: 4, boxShadow: 'inset 0 0 0 1px var(--line-strong)' }}>
                 <Plus size={16} strokeWidth={1.5} />Save look
               </button>
@@ -478,7 +478,7 @@ export default function DevelopShell() {
             <Empty icon={X} title="The develop engine couldn’t start" hint={`It needs WebGL2. ${failed}`} />
           </div>
         )}
-        {dragOver && <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-[12px] bg-accent-soft text-[13px] font-medium text-accent shadow-[inset_0_0_0_2px_var(--accent)]">Drop to open</div>}
+        {dragOver && <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-[12px] bg-signal-soft text-[13px] font-medium text-signal shadow-[inset_0_0_0_2px_var(--signal)]">Drop to open</div>}
       </div>
       <CommandPalette
         commands={commands}
@@ -498,7 +498,7 @@ export default function DevelopShell() {
 
 function HistoryCount() {
   const n = useStore(history.store, (h) => h.names.length)
-  return <span className="pr-1 text-[11px] tabular text-faint">{n}</span>
+  return <span className="pr-1 text-[11px] tabular text-fg-faint">{n}</span>
 }
 
 /* ===== stage overlay: crop bar + status chips ===== */
@@ -510,13 +510,13 @@ function StageOverlay() {
   if (d)
     return (
       <div className="cluster absolute top-3 left-1/2 flex h-10 max-w-[calc(100%-24px)] -translate-x-1/2 items-center gap-1.5 overflow-x-auto px-2">
-        <span className="shrink-0 pl-1 text-[11.5px] text-muted">Aspect</span>
+        <span className="shrink-0 pl-1 text-[11.5px] text-fg-muted">Aspect</span>
         <div className="w-[268px] shrink-0">
           <Segmented size="sm" label="Aspect" value={presetOf(d.aspect)} onChange={setAspect} options={ASPECTS.map((a) => ({ value: a.value, label: a.label }))} />
         </div>
         <IconButton size="icon-sm" icon={d.aspect.split(':').map(Number).reduce((a, b) => a / b) < 1 ? RectangleVertical : RectangleHorizontal} label="Swap orientation" shortcut="x" onClick={flipAspect} />
         <Divider vertical />
-        <span className="shrink-0 text-[11.5px] text-muted">Straighten</span>
+        <span className="shrink-0 text-[11.5px] text-fg-muted">Straighten</span>
         <div className="w-[112px] shrink-0"><GradientSlider value={d.angle} onChange={(a) => setAngle(a)} min={-45} max={45} step={0.1} origin={0} label="Straighten" /></div>
         <ScrubValue value={d.angle} onChange={(a) => setAngle(a)} min={-45} max={45} step={0.1} unit="°" defaultValue={0} label="Straighten angle" className="w-[50px] shrink-0" />
         <Divider vertical />
@@ -526,7 +526,7 @@ function StageOverlay() {
       </div>
     )
   if (s.bypass) return <div className={chip}><span className="size-1.5 rounded-full bg-key" />Before — release <Kbd>\</Kbd> for after</div>
-  if (preview) return <div className={chip}><span className="size-1.5 rounded-full bg-accent" />Previewing <span className="font-medium">{preview}</span><span className="text-faint">click to apply</span></div>
+  if (preview) return <div className={chip}><span className="size-1.5 rounded-full bg-signal" />Previewing <span className="font-medium">{preview}</span><span className="text-fg-faint">click to apply</span></div>
   return null
 }
 
@@ -542,9 +542,9 @@ function HistogramCard({ out, active }: { out: { w: number; h: number }; active:
         onClip={(which) => ui.setState((x) => ({ clip: { ...x.clip, [which]: !x.clip[which] } }))}
         footer={
           <div className="flex items-center gap-2 text-[11px]">
-            <span className="tabular text-muted">{out.w} × {out.h}</span>
-            <span className="text-faint">·</span>
-            <span className="text-faint">sRGB</span>
+            <span className="tabular text-fg-muted">{out.w} × {out.h}</span>
+            <span className="text-fg-faint">·</span>
+            <span className="text-fg-faint">sRGB</span>
             <span className="ml-auto truncate">{active ? <Badge tone="accent">{active}</Badge> : <Badge>Custom</Badge>}</span>
           </div>
         }
@@ -559,7 +559,7 @@ const BASIC_PRES = ['texture', 'clarity', 'dehaze', 'vibrance', 'saturation']
 const CURVE_KEYS = ['curveRGB', 'curveR', 'curveG', 'curveB']
 const HSL_KEYS = BANDS.flatMap((b) => ['h', 's', 'l'].map((c) => `hsl_${b.id}_${c}`))
 const VIG_KEYS = ['vignette', 'vigMid', 'vigFeather']
-const sub = (t: string) => <div className="px-3 pt-2 pb-0.5 text-[11px] text-faint no-select">{t}</div>
+const sub = (t: string) => <div className="px-3 pt-2 pb-0.5 text-[11px] text-fg-faint no-select">{t}</div>
 
 function Adjustments({ v }: { v: V }) {
   const s = useStore(ui)
@@ -595,7 +595,7 @@ function Adjustments({ v }: { v: V }) {
           <div className="flex gap-1">
             {([['Linear', [[0, 0], [1, 1]]], ['Medium', [[0, 0], [0.25, 0.21], [0.75, 0.8], [1, 1]]], ['Strong', [[0, 0], [0.25, 0.17], [0.75, 0.85], [1, 1]]]] as [string, CurvePoint[]][]).map(([n, p]) => (
               <button key={n} type="button" onClick={() => curvePreset(p, n)}
-                className={cn('h-5 flex-1 rounded-[5px] text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-accent', JSON.stringify(p) === JSON.stringify(pts) ? 'bg-accent-soft text-accent' : 'bg-hover text-muted hover:text-fg')}>
+                className={cn('h-5 flex-1 rounded-[5px] text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal', JSON.stringify(p) === JSON.stringify(pts) ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted hover:text-fg')}>
                 {n === 'Linear' ? n : `${n} contrast`}
               </button>
             ))}

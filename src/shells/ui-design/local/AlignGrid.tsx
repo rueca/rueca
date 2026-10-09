@@ -24,7 +24,7 @@ export function AlignGrid({ x, y, dir = 'row', onChange, between, className }: {
   }
   return (
     <div role="radiogroup" aria-label="Alignment" tabIndex={0} onKeyDown={onKey}
-      className={cn('grid size-[64px] shrink-0 grid-cols-3 grid-rows-3 rounded-[6px] bg-input p-1 outline-none focus-visible:ring-2 focus-visible:ring-accent', className)}>
+      className={cn('grid size-[64px] shrink-0 grid-cols-3 grid-rows-3 rounded-[6px] bg-control p-1 outline-none focus-visible:ring-2 focus-visible:ring-signal', className)}>
       {AX.map((cy) => AX.map((cx) => {
         // with space-between, the whole main axis is "on" for the cross position
         const on = between ? (dir === 'row' ? cy === y : cx === x) : cx === x && cy === y
@@ -35,11 +35,11 @@ export function AlignGrid({ x, y, dir = 'row', onChange, between, className }: {
             {on ? (
               <span className={cn('flex gap-[2px]', dir === 'row' ? 'flex-row' : 'flex-col', dir === 'row' ? (cy === 'start' ? 'items-start' : cy === 'end' ? 'items-end' : 'items-center') : (cx === 'start' ? 'items-start' : cx === 'end' ? 'items-end' : 'items-center'))}>
                 {[0.6, 1, 0.75].map((k, i) => (
-                  <span key={i} className="rounded-[1px] bg-accent" style={dir === 'row' ? { width: 2, height: 9 * k } : { height: 2, width: 9 * k }} />
+                  <span key={i} className="rounded-[1px] bg-signal" style={dir === 'row' ? { width: 2, height: 9 * k } : { height: 2, width: 9 * k }} />
                 ))}
               </span>
             ) : (
-              <span className="size-[3px] rounded-full bg-faint opacity-60 group-hover/cell:opacity-100" />
+              <span className="size-[3px] rounded-full bg-fg-faint opacity-60 group-hover/cell:opacity-100" />
             )}
           </button>
         )

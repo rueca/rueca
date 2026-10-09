@@ -43,7 +43,7 @@ export function DocumentPanel() {
             <div className="flex flex-wrap gap-1.5">
               {[...colours.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 18).map(([c, ids]) => (
                 <Tip key={c} label={`${c.toUpperCase()} · ${ids.length} layer${ids.length > 1 ? 's' : ''}`}>
-                  <button type="button" aria-label={`Select layers using ${c}`} onClick={() => S.select(ids)} className="rounded-[5px] outline-none hover:scale-110 transition-transform focus-visible:ring-2 focus-visible:ring-accent">
+                  <button type="button" aria-label={`Select layers using ${c}`} onClick={() => S.select(ids)} className="rounded-[5px] outline-none hover:scale-110 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
                     <Swatch color={c} size={20} className="rounded-[5px]" />
                   </button>
                 </Tip>
@@ -68,7 +68,7 @@ export function DocumentPanel() {
         </div>
       </Section>
       <Section title="Document">
-        <Row label="Components"><span className="flex-1 text-right tabular text-[11.5px] text-muted">{comps} on this page</span></Row>
+        <Row label="Components"><span className="flex-1 text-right tabular text-[11.5px] text-fg-muted">{comps} on this page</span></Row>
         <div className="grid grid-cols-2 gap-1.5 px-3 pt-1">
           <Button variant="default" size="md" onClick={downloadDocument}><FileDown size={14} strokeWidth={1.5} />Save .json</Button>
           <Button variant="default" size="md" onClick={() => file.current?.click()}><FileUp size={14} strokeWidth={1.5} />Open…</Button>
@@ -79,7 +79,7 @@ export function DocumentPanel() {
         </div>
       </Section>
       <div className="border-t border-line"><Inspector params={prefs} /></div>
-      <div className="flex items-center gap-1.5 px-3 py-3 text-[11px] text-faint"><Palette size={12} strokeWidth={1.5} />Select a layer to edit it. Hold ⌥ over a layer to measure.</div>
+      <div className="flex items-center gap-1.5 px-3 py-3 text-[11px] text-fg-faint"><Palette size={12} strokeWidth={1.5} />Select a layer to edit it. Hold ⌥ over a layer to measure.</div>
     </div>
   )
 }

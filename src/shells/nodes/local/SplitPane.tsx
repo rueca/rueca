@@ -65,7 +65,7 @@ export function SplitPane({
           onKeyDown={onKey}
           className="group/split relative flex w-[var(--gutter)] shrink-0 cursor-col-resize items-center justify-center outline-none"
         >
-          <span className={cn('h-10 w-[3px] rounded-full transition-colors', drag ? 'bg-accent' : 'bg-transparent group-hover/split:bg-line-strong group-focus-visible/split:bg-accent')} />
+          <span className={cn('h-10 w-[3px] rounded-full transition-colors', drag ? 'bg-signal' : 'bg-transparent group-hover/split:bg-line-strong group-focus-visible/split:bg-signal')} />
         </div>
       )}
       <div className={cn('relative min-w-0', show === 'a' && 'hidden')} style={{ flex: both ? `${1 - ratio} 1 0` : '1 1 0' }}>{b}</div>

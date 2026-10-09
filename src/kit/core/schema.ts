@@ -30,6 +30,10 @@ interface Base<V> {
   live?: boolean
   /** Expose in the simplified client / present view (Nodes.io "publish"). */
   publish?: boolean
+  /** Remember in localStorage (default true; false for big or private values — images default false). */
+  persist?: boolean
+  /** Include in share links (default true; images and data default false). */
+  share?: boolean
 }
 
 export type Option = string | { value: string; label?: string; icon?: React.ComponentType<{ size?: number; strokeWidth?: number }>; hint?: string; swatch?: string }
@@ -41,8 +45,14 @@ export interface NumberDef extends Base<number> {
   step?: number
   unit?: string
   fmt?: (v: number) => string
-  /** slider = rail + scrubbable value (default when min & max exist); field = scrubbable box only; stepper = − value + */
+  /** inverse of fmt for typed input, e.g. percent fields: (s) => parseFloat(s) / 100 */
+  parse?: (s: string) => number | null
+  /** slider = rail + scrubbable value (default when min & max exist); field = scrubbable box only; stepper = − value + ; knob = rotary */
   display?: 'slider' | 'field' | 'stepper' | 'knob'
+  /** log = perceptual taper for frequencies, sizes, time constants (min must be > 0) */
+  scale?: 'linear' | 'log'
+  /** soft range for dragging; typed values may go out to min/max (Blender) */
+  soft?: [number, number]
 }
 export interface RangeDef extends Base<[number, number]> { type: 'range'; min: number; max: number; step?: number; unit?: string; fmt?: (v: number) => string }
 export interface AngleDef extends Base<number> { type: 'angle' }
@@ -60,12 +70,15 @@ export interface SeedDef extends Base<number> { type: 'seed' }
 export interface CurveDef extends Base<[number, number, number, number]> { type: 'curve'; presets?: Record<string, [number, number, number, number]> }
 export interface SpringDef extends Base<{ stiffness: number; damping: number; mass: number }> { type: 'spring' }
 export interface ImageDef extends Base<string | null> { type: 'image'; accept?: string }
+/** Opaque document value — never rendered as a row, but undoable, persisted and (optionally) shared.
+    Use for collections (a layer stack, clips, pattern steps) that other UI edits. */
+export interface DataDef<T = unknown> extends Base<T> { type: 'data' }
 export interface ActionDef { type: 'action'; label: string; onClick: (v: any) => void; icon?: React.ComponentType<{ size?: number; strokeWidth?: number }>; hint?: string; variant?: 'primary' | 'default'; when?: (v: any) => boolean; value?: undefined }
 export interface MonitorDef { type: 'monitor'; label?: string; get: () => number | string; graph?: boolean; min?: number; max?: number; fmt?: (v: number) => string; hint?: string; when?: (v: any) => boolean; value?: undefined }
 
 export type ValueDef =
   | NumberDef | RangeDef | AngleDef | Vec2Def | Vec3Def | SizeDef | ColorDef | PaletteDef | GradientDef
-  | SelectDef | MultiDef | BoolDef | TextDef | SeedDef | CurveDef | SpringDef | ImageDef
+  | SelectDef | MultiDef | BoolDef | TextDef | SeedDef | CurveDef | SpringDef | ImageDef | DataDef<any>
 export type ParamDef = ValueDef | ActionDef | MonitorDef
 
 export interface Folder<P extends Record<string, ParamDef> = Record<string, ParamDef>> {
@@ -97,7 +110,10 @@ export const p = {
   seed: (value = 1, o: Opt<SeedDef> = {}): SeedDef => ({ type: 'seed', value, ...o }),
   curve: (value: [number, number, number, number], o: Opt<CurveDef> = {}): CurveDef => ({ type: 'curve', value, ...o }),
   spring: (value: SpringDef['value'], o: Opt<SpringDef> = {}): SpringDef => ({ type: 'spring', value, ...o }),
-  image: (value: string | null = null, o: Opt<ImageDef> = {}): ImageDef => ({ type: 'image', value, ...o }),
+  /** images are kept out of localStorage and share links by default (quota, privacy) */
+  image: (value: string | null = null, o: Opt<ImageDef> = {}): ImageDef => ({ type: 'image', value, persist: false, share: false, ...o }),
+  /** hidden document value: `p.data<Layer[]>([])` — typed, undoable, persisted, not rendered */
+  data: <T,>(value: T, o: Opt<DataDef<T>> = {}): DataDef<T> => ({ type: 'data', value, share: false, ...o }),
   action: (label: string, onClick: (v: any) => void, o: Omit<ActionDef, 'type' | 'label' | 'onClick'> = {}): ActionDef => ({ type: 'action', label, onClick, ...o }),
   monitor: (get: () => number | string, o: Omit<MonitorDef, 'type' | 'get'> = {}): MonitorDef => ({ type: 'monitor', get, ...o }),
 }

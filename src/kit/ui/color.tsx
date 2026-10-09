@@ -92,7 +92,7 @@ function Rail({ value, onChange, background, label }: { value: number; onChange:
         if (e.key === 'ArrowRight') onChange(clamp(value + 0.01, 0, 1), true)
         if (e.key === 'ArrowLeft') onChange(clamp(value - 0.01, 0, 1), true)
       }}
-      className="relative h-3 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="relative h-3 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-signal"
       style={{ background }}
     >
       <div className="pointer-events-none absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,.2),0_1px_3px_rgba(0,0,0,.4)]" style={{ left: `${value * 100}%` }} />
@@ -154,7 +154,7 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
       </div>
       <div className="flex items-center gap-2">
         {'EyeDropper' in window && (
-          <button type="button" aria-label="Pick from screen" onClick={pick} className="flex size-7 shrink-0 items-center justify-center rounded-[6px] text-muted hover:bg-hover hover:text-fg">
+          <button type="button" aria-label="Pick from screen" onClick={pick} className="flex size-7 shrink-0 items-center justify-center rounded-[6px] text-fg-muted hover:bg-hover hover:text-fg">
             <Pipette size={14} strokeWidth={1.5} />
           </button>
         )}
@@ -178,12 +178,12 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
           onChange={(e) => setText(e.target.value)}
           onBlur={applyText}
           onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') applyText() }}
-          className="h-6 w-full min-w-0 rounded-[5px] bg-input px-2 tabular text-[11px] text-fg uppercase outline-none focus:shadow-[inset_0_0_0_1px_var(--accent)]"
+          className="h-6 w-full min-w-0 rounded-[5px] bg-control px-2 tabular text-[11px] text-fg uppercase outline-none focus:shadow-[inset_0_0_0_1px_var(--signal)]"
         />
       </div>
       {(swatches?.length || recent.length > 0) && (
         <div className="flex flex-col gap-1.5">
-          <div className="text-[11px] text-faint">{swatches?.length ? 'Swatches' : 'Recent'}</div>
+          <div className="text-[11px] text-fg-faint">{swatches?.length ? 'Swatches' : 'Recent'}</div>
           <div className="grid grid-cols-8 gap-1.5">
             {(swatches?.length ? swatches : recent).slice(0, 16).map((c) => (
               <button key={c} type="button" aria-label={c} onClick={() => emit(hexToHsva(c), true)}
@@ -212,13 +212,13 @@ export function ColorField({ value, onChange, alpha = true, swatches, changed, t
     <Popover.Root>
       <Popover.Trigger
         className={cn(
-          'flex h-6 w-full min-w-0 items-center gap-2 rounded-[5px] bg-input pr-2 pl-1 text-left outline-none',
-          'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-accent data-[popup-open]:shadow-[inset_0_0_0_1px_var(--accent)]',
+          'flex h-6 w-full min-w-0 items-center gap-2 rounded-[5px] bg-control pr-2 pl-1 text-left outline-none',
+          'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]',
         )}
       >
         <Swatch color={value} />
-        <span className={cn('flex-1 truncate tabular text-[11px] uppercase', changed === false ? 'text-faint' : 'text-fg')}>{formatColor(value, 'hex')}</span>
-        {alpha && <span className="tabular text-[11px] text-faint">{Math.round(a * 100)}%</span>}
+        <span className={cn('flex-1 truncate tabular text-[11px] uppercase', changed === false ? 'text-fg-faint' : 'text-fg')}>{formatColor(value, 'hex')}</span>
+        {alpha && <span className="tabular text-[11px] text-fg-faint">{Math.round(a * 100)}%</span>}
         {trailing}
       </Popover.Trigger>
       <Popover.Portal>

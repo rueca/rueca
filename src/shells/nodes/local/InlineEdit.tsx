@@ -36,7 +36,7 @@ export function InlineEdit({
         onBlur={() => done(true)}
         onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') done(true); if (e.key === 'Escape') done(false) }}
         onPointerDown={(e) => e.stopPropagation()}
-        className={cn('nodrag min-w-0 rounded-[4px] bg-input px-1 text-fg outline-none shadow-[inset_0_0_0_1px_var(--accent)]', className, inputClassName)}
+        className={cn('nodrag min-w-0 rounded-[4px] bg-control px-1 text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]', className, inputClassName)}
       />
     )
   return (
@@ -46,9 +46,9 @@ export function InlineEdit({
       aria-label={`${label}: ${value}`}
       onDoubleClick={(e) => { e.stopPropagation(); setEditing(true) }}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'F2') { e.preventDefault(); e.stopPropagation(); setEditing(true) } }}
-      className={cn('min-w-0 truncate rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-accent', className)}
+      className={cn('min-w-0 truncate rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-signal', className)}
     >
-      {value || <span className="text-faint">{placeholder}</span>}
+      {value || <span className="text-fg-faint">{placeholder}</span>}
     </span>
   )
 }

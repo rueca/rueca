@@ -50,7 +50,7 @@ export const NodeView = memo(function NodeView({ n, parent, ctx }: { n: Node; pa
     style: { ...style, cursor: hot ? 'pointer' : undefined, pointerEvents: hot ? 'auto' : undefined } as CSSProperties,
     onClick: hot ? (e: React.MouseEvent) => { e.stopPropagation(); ctx.onHotspot!(n, e) } : undefined,
   }
-  const hotRing = hot && ctx.hotspots ? <div className="pointer-events-none absolute inset-0 animate-pulse rounded-[inherit] bg-accent-soft shadow-[inset_0_0_0_2px_var(--accent)]" /> : null
+  const hotRing = hot && ctx.hotspots ? <div className="pointer-events-none absolute inset-0 animate-pulse rounded-[inherit] bg-signal-soft shadow-[inset_0_0_0_2px_var(--signal)]" /> : null
 
   if (n.type === 'text' && n.text) return <TextNode n={n} box={box} common={common} editing={ctx.editing === n.id} />
   if (n.type === 'icon' && n.icon) {

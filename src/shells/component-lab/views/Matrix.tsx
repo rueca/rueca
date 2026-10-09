@@ -31,18 +31,18 @@ function Grid({ comp, theme }: { comp: CompId; theme: Theme }) {
       <div className="grid" style={{ gridTemplateColumns: `112px repeat(${m.states.length}, ${w}px)` }}>
         <div className="sticky top-0 z-[1]" />
         {m.states.map((s) => (
-          <div key={s.value} className="px-4 pt-4 pb-2 font-sans text-[11px] font-medium" style={{ color: 'var(--cl-text-muted)' }}>{s.label}</div>
+          <div key={s.value} className="px-4 pt-4 pb-2 font-ui text-[11px] font-medium" style={{ color: 'var(--cl-text-muted)' }}>{s.label}</div>
         ))}
         {m.variants.map((v) => (
           <div key={v.value} className="contents">
-            <div className="flex items-center px-4 font-sans text-[11px] font-medium" style={{ color: 'var(--cl-text-muted)', borderTop: '1px solid var(--cl-border)' }}>{v.label}</div>
+            <div className="flex items-center px-4 font-ui text-[11px] font-medium" style={{ color: 'var(--cl-text-muted)', borderTop: '1px solid var(--cl-border)' }}>{v.label}</div>
             {m.states.map((s) => {
               const on = picked === `${v.value}:${s.value}`
               return (
                 <Tip key={s.value} label={`${v.label} · ${s.label} — click to load, double-click to preview`} side="top">
                   <div role="button" tabIndex={0} onClick={() => apply(comp, v.value, s.value)} onDoubleClick={() => apply(comp, v.value, s.value, true)}
                     onKeyDown={(e) => { if (e.key === 'Enter') apply(comp, v.value, s.value, true) }}
-                    className={cn('relative flex min-h-[84px] cursor-pointer items-center justify-center p-4 outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-inset', comp === 'card' && 'items-start')}
+                    className={cn('relative flex min-h-[84px] cursor-pointer items-center justify-center p-4 outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-inset', comp === 'card' && 'items-start')}
                     style={{ borderTop: '1px solid var(--cl-border)', background: on ? 'var(--cl-accent-soft)' : undefined }}>
                     <div className="pointer-events-none flex w-full justify-center">
                       <Instance comp={comp} force={s.value} patch={{ [m.variantKey]: v.value, ...(comp === 'button' ? { disabled: false, loading: false } : comp === 'input' ? { inputDisabled: false } : {}) }} />
@@ -78,7 +78,7 @@ export function Matrix() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex flex-none items-center justify-center gap-2 px-4 pt-3 pb-2">
-        <span className="text-[11.5px] text-muted tabular">{m.variants.length} variants × {m.states.length} states{zoom < 1 ? ` · ${Math.round(zoom * 100)}%` : ''}</span>
+        <span className="text-[11.5px] text-fg-muted tabular">{m.variants.length} variants × {m.states.length} states{zoom < 1 ? ` · ${Math.round(zoom * 100)}%` : ''}</span>
         <div className="w-[120px]">
           <Segmented size="sm" iconOnly value={both ? 'both' : theme} label="Matrix theme"
             onChange={(t) => (t === 'both' ? setUI({ matrixThemes: 'both' }) : setUI({ matrixThemes: 'one', previewTheme: t as Theme }))}
@@ -89,7 +89,7 @@ export function Matrix() {
         <div className={cn('flex w-max min-w-full gap-8 px-8 pt-4 pb-16', both ? 'flex-col items-center' : 'justify-center')} style={{ zoom }}>
           {(both ? (['light', 'dark'] as Theme[]) : [theme]).map((t) => (
             <div key={t} className="flex flex-col gap-2">
-              {both && <div className="text-[11.5px] font-medium text-muted">{t === 'light' ? 'Light' : 'Dark'}</div>}
+              {both && <div className="text-[11.5px] font-medium text-fg-muted">{t === 'light' ? 'Light' : 'Dark'}</div>}
               <Grid comp={comp} theme={t} />
             </div>
           ))}

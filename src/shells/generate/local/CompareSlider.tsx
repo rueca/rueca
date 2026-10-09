@@ -48,7 +48,7 @@ export function CompareSlider({
           if (e.key === 'Home') set(0)
           if (e.key === 'End') set(1)
         }}
-        className="absolute top-1/2 flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-black shadow-[0_2px_10px_rgba(0,0,0,.35)] outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        className="absolute top-1/2 flex size-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-black shadow-[0_2px_10px_rgba(0,0,0,.35)] outline-none focus-visible:ring-2 focus-visible:ring-signal"
         style={{ left: `${v * 100}%` }}
       >
         <ChevronsLeftRight size={14} strokeWidth={1.75} />

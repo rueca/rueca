@@ -22,22 +22,35 @@ import { useHotkeys } from '../core/hotkeys'
 import { Menu } from '../ui/controls'
 
 export interface Camera { x: number; y: number; zoom: number }
-export type CameraStore = StoreApi<Camera> & { fit: () => void; zoomTo: (z: number, at?: { x: number; y: number }) => void; bounds?: () => DOMRect | null }
+export type CameraStore = StoreApi<Camera> & {
+  fit: () => void
+  zoomTo: (z: number, at?: { x: number; y: number }) => void
+  bounds?: () => DOMRect | null
+  /** the user has taken the camera — stop auto-fitting on resize (call from outside gestures too) */
+  touch: () => void
+  /** resume auto-fit */
+  untouch: () => void
+}
 
-export const createCamera = (): CameraStore => Object.assign(createStore<Camera>(() => ({ x: 0, y: 0, zoom: 1 })), { fit: () => {}, zoomTo: () => {} })
+export const createCamera = (): CameraStore =>
+  Object.assign(createStore<Camera>(() => ({ x: 0, y: 0, zoom: 1 })), { fit: () => {}, zoomTo: () => {}, touch: () => {}, untouch: () => {} })
 
 const CamCtx = createContext<CameraStore | null>(null)
 const NO_CAMERA = createCamera()
 export const useCamera = () => useContext(CamCtx)!
 
 export function Stage({
-  children, fill, camera: external, contentSize, className, background, grid, minZoom = 0.05, maxZoom = 64, padding = 48, onBackgroundPointerDown, hud = true, overlay,
+  children, fill, camera: external, contentSize, className, background, grid, minZoom = 0.05, maxZoom = 64, fitMaxZoom = 1, padding = 48, onBackgroundPointerDown, hud = true, overlay, hotkeys = true,
 }: {
   children: ReactNode
   fill?: boolean
   camera?: CameraStore
-  /** size of the content in world px; used by fit. Defaults to the first artboard's size. */
-  contentSize?: { w: number; h: number }
+  /** bounds of the content in world px; used by fit. Defaults to the first artboard's box. An inline object is fine — compared by value. */
+  contentSize?: { w: number; h: number; x?: number; y?: number }
+  /** fit never zooms past this (a small board shouldn't blow up to 156%) */
+  fitMaxZoom?: number
+  /** Shift+0 / Shift+1 / ⌘± (priority 0) */
+  hotkeys?: boolean
   className?: string
   background?: string
   grid?: boolean
@@ -55,19 +68,21 @@ export function Stage({
   const [space, setSpace] = useState(false)
   const pan = useRef<{ x: number; y: number; cx: number; cy: number } | null>(null)
 
+  // Compare content bounds by VALUE: an inline `contentSize={{…}}` must not refit every render.
+  const cw = contentSize?.w, ch = contentSize?.h, cx = contentSize?.x ?? 0, cy = contentSize?.y ?? 0
   const size = useCallback(() => {
-    if (contentSize) return contentSize
+    if (cw !== undefined && ch !== undefined) return { w: cw, h: ch, x: cx, y: cy }
     const w = world.current?.firstElementChild as HTMLElement | null
-    return w ? { w: w.offsetWidth, h: w.offsetHeight } : { w: 800, h: 600 }
-  }, [contentSize])
+    return w ? { w: w.offsetWidth, h: w.offsetHeight, x: w.offsetLeft, y: w.offsetTop } : { w: 800, h: 600, x: 0, y: 0 }
+  }, [cw, ch, cx, cy])
 
   const fit = useCallback(() => {
     const r = el.current?.getBoundingClientRect()
-    if (!r) return
+    if (!r || !r.width) return
     const s = size()
-    const z = clamp(Math.min((r.width - padding * 2) / s.w, (r.height - padding * 2) / s.h), minZoom, maxZoom)
-    cam.setState({ zoom: z, x: (r.width - s.w * z) / 2, y: (r.height - s.h * z) / 2 })
-  }, [cam, size, padding, minZoom, maxZoom])
+    const z = clamp(Math.min((r.width - padding * 2) / s.w, (r.height - padding * 2) / s.h, fitMaxZoom), minZoom, maxZoom)
+    cam.setState({ zoom: z, x: (r.width - s.w * z) / 2 - s.x * z, y: (r.height - s.h * z) / 2 - s.y * z })
+  }, [cam, size, padding, minZoom, maxZoom, fitMaxZoom])
 
   const zoomTo = useCallback((z: number, at?: { x: number; y: number }) => {
     const r = el.current!.getBoundingClientRect()
@@ -77,14 +92,15 @@ export function Stage({
     cam.setState({ zoom: nz, x: p.x - ((p.x - s.x) * nz) / s.zoom, y: p.y - ((p.y - s.y) * nz) / s.zoom })
   }, [cam, minZoom, maxZoom])
 
+  // Fit on mount and when the stage resizes, until the user takes the camera.
+  const touched = useRef(false)
   cam.fit = fit
   cam.zoomTo = zoomTo
   cam.bounds = () => el.current?.getBoundingClientRect() ?? null
-
-  // Fit on mount and when the stage resizes, until the user takes the camera.
-  const touched = useRef(false)
+  cam.touch = () => { touched.current = true }
+  cam.untouch = () => { touched.current = false }
   useLayoutEffect(() => {
-    if (fill) return
+    if (fill || touched.current) return
     fit()
     const ro = new ResizeObserver(() => !touched.current && fit())
     ro.observe(el.current!)
@@ -111,19 +127,20 @@ export function Stage({
   }, [cam, zoomTo, fill])
 
   useEffect(() => {
-    const down = (e: KeyboardEvent) => { if (e.code === 'Space' && !(e.target as HTMLElement).closest('input,textarea,[contenteditable]')) setSpace(true) }
+    if (fill) return
+    const down = (e: KeyboardEvent) => { if (e.code === 'Space' && !e.repeat && !(e.target as HTMLElement).closest?.('input,textarea,select,[contenteditable],button')) setSpace(true) }
     const up = (e: KeyboardEvent) => e.code === 'Space' && setSpace(false)
     window.addEventListener('keydown', down)
     window.addEventListener('keyup', up)
     return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up) }
-  }, [])
-
-  useHotkeys(fill ? {} : {
-    'shift+0': () => { touched.current = true; zoomTo(1) },
-    'shift+1': () => { touched.current = false; fit() },
-    'mod+=,mod+plus': () => { touched.current = true; zoomTo(cam.getState().zoom * 2) },
-    'mod+-': () => { touched.current = true; zoomTo(cam.getState().zoom / 2) },
   }, [fill])
+
+  useHotkeys(fill || !hotkeys ? {} : {
+    'shift+0': { run: () => { touched.current = true; zoomTo(1) }, label: 'Zoom to 100%', group: 'View' },
+    'shift+1': { run: () => { touched.current = false; fit() }, label: 'Zoom to fit', group: 'View' },
+    'mod+=,mod+plus': { run: () => { touched.current = true; zoomTo(cam.getState().zoom * 2) }, label: 'Zoom in', group: 'View' },
+    'mod+-': { run: () => { touched.current = true; zoomTo(cam.getState().zoom / 2) }, label: 'Zoom out', group: 'View' },
+  }, [fill, hotkeys], { priority: 0 })
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (fill) return
@@ -170,31 +187,38 @@ export function Stage({
   )
 }
 
-export function ZoomPill({ className }: { className?: string }) {
-  const cam = useCamera()
-  const zoom = useStore(cam, (s) => s.zoom)
+/**
+ * Zoom pill. Inside a <Stage> it drives that camera; anywhere else (React Flow,
+ * a custom canvas) pass zoom / onZoom / onFit.
+ */
+export function ZoomPill({
+  className, zoom: zoomProp, onZoom, onFit, step = 1.25, presets = [0.5, 1, 2], floating = true,
+}: { className?: string; zoom?: number; onZoom?: (z: number) => void; onFit?: () => void; step?: number; presets?: number[]; floating?: boolean }) {
+  const cam = useContext(CamCtx) ?? NO_CAMERA
+  const camZoom = useStore(cam, (s) => s.zoom)
+  const zoom = zoomProp ?? camZoom
+  const set = (z: number) => { if (onZoom) onZoom(z); else { cam.touch(); cam.zoomTo(z) } }
+  const fit = () => { if (onFit) onFit(); else { cam.untouch(); cam.fit() } }
   return (
-    <div className={cn('cluster absolute right-3 bottom-3 z-10 flex h-8 items-center gap-0.5 px-1', className)}>
-      <button type="button" aria-label="Zoom out" onClick={() => cam.zoomTo(zoom / 1.25)} className="flex size-6 items-center justify-center rounded-[5px] text-muted hover:bg-hover hover:text-fg"><Minus size={13} /></button>
+    <div className={cn('cluster flex h-8 items-center gap-0.5 px-1', floating && 'absolute right-3 bottom-3 z-10', className)}>
+      <button type="button" aria-label="Zoom out" onClick={() => set(zoom / step)} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg"><Minus size={13} /></button>
       <Menu
         side="top"
         align="end"
         trigger={<button type="button" className="h-6 min-w-[46px] rounded-[5px] px-1 tabular text-[11.5px] text-fg hover:bg-hover">{Math.round(zoom * 100)}%</button>}
         items={[
-          { label: 'Zoom to fit', shortcut: 'shift+1', onClick: () => cam.fit() },
-          { label: 'Zoom to 50%', onClick: () => cam.zoomTo(0.5) },
-          { label: 'Zoom to 100%', shortcut: 'shift+0', onClick: () => cam.zoomTo(1) },
-          { label: 'Zoom to 200%', onClick: () => cam.zoomTo(2) },
+          { label: 'Zoom to fit', shortcut: 'shift+1', onClick: fit },
+          ...presets.map((z) => ({ label: `Zoom to ${Math.round(z * 100)}%`, shortcut: z === 1 ? 'shift+0' : undefined, onClick: () => set(z) })),
         ]}
       />
-      <button type="button" aria-label="Zoom in" onClick={() => cam.zoomTo(zoom * 1.25)} className="flex size-6 items-center justify-center rounded-[5px] text-muted hover:bg-hover hover:text-fg"><Plus size={13} /></button>
+      <button type="button" aria-label="Zoom in" onClick={() => set(zoom * step)} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg"><Plus size={13} /></button>
     </div>
   )
 }
 
 /* An artboard: positioned in world space, with a label above its top-left corner. */
 export function Artboard({
-  width, height, label, x = 0, y = 0, children, className, background = '#000', selected, onSelect, style,
+  width, height, label, x = 0, y = 0, children, className, background = '#ffffff', selected, onSelect, style,
 }: { width: number; height: number; label?: ReactNode; x?: number; y?: number; children?: ReactNode; className?: string; background?: string; selected?: boolean; onSelect?: () => void; style?: React.CSSProperties }) {
   const zoom = useStore(useContext(CamCtx) ?? NO_CAMERA, (s) => s.zoom)
   return (
@@ -202,7 +226,7 @@ export function Artboard({
       {label && (
         <div
           onPointerDown={onSelect}
-          className={cn('absolute bottom-full left-0 flex origin-bottom-left items-center gap-1.5 pb-1.5 text-[11px] whitespace-nowrap no-select', selected ? 'text-accent' : 'text-faint')}
+          className={cn('absolute bottom-full left-0 flex origin-bottom-left items-center gap-1.5 pb-1.5 text-[11px] whitespace-nowrap no-select', selected ? 'text-signal' : 'text-fg-faint')}
           style={{ transform: `scale(${1 / zoom})` }}
         >
           {label}
@@ -213,9 +237,13 @@ export function Artboard({
         className={cn('relative h-full w-full overflow-hidden font-artboard', className)}
         style={{
           background,
-          boxShadow: `var(--shadow-artboard), 0 0 0 ${1 / zoom}px ${selected ? 'var(--accent)' : 'var(--artboard-ring)'}`,
+          // The chrome's Inter features (cv11, ss01) must not leak into the artwork's type.
+          fontFeatureSettings: 'normal',
           ...style,
+          // Keep the ring even when a shell supplies its own shadow.
+          boxShadow: `${style?.boxShadow ?? 'var(--shadow-artboard)'}, 0 0 0 ${1 / zoom}px ${selected ? 'var(--signal)' : 'var(--artboard-ring)'}`,
         }}
+        data-studio-artifact=""
       >
         {children}
       </div>

@@ -133,19 +133,19 @@ export function EffectStack({
               }}
               className={cn(
                 'group/row relative mx-1.5 flex h-[30px] shrink-0 items-center gap-1.5 rounded-[6px] pr-1 pl-2 text-[12px] outline-none no-select',
-                sel ? 'bg-accent-soft text-fg' : 'text-fg hover:bg-hover',
-                !it.visible && 'text-faint',
+                sel ? 'bg-signal-soft text-fg' : 'text-fg hover:bg-hover',
+                !it.visible && 'text-fg-faint',
                 drag === it.id && 'opacity-40',
-                'focus-visible:ring-2 focus-visible:ring-accent',
+                'focus-visible:ring-2 focus-visible:ring-signal',
               )}
             >
               {drop?.id === it.id && (
-                <div className={cn('pointer-events-none absolute right-1 left-1 h-0.5 rounded-full bg-accent', drop.where === 'before' ? '-top-px' : '-bottom-px')} />
+                <div className={cn('pointer-events-none absolute right-1 left-1 h-0.5 rounded-full bg-signal', drop.where === 'before' ? '-top-px' : '-bottom-px')} />
               )}
               {it.thumb ? (
                 <img src={it.thumb} alt="" className="size-5 shrink-0 rounded-[4px] object-cover shadow-[inset_0_0_0_1px_var(--line)]" />
               ) : Icon ? (
-                <Icon size={14} strokeWidth={1.5} className={cn('shrink-0', sel ? 'text-accent' : 'text-faint')} />
+                <Icon size={14} strokeWidth={1.5} className={cn('shrink-0', sel ? 'text-signal' : 'text-fg-faint')} />
               ) : null}
 
               {editing === it.id ? (
@@ -156,7 +156,7 @@ export function EffectStack({
                   onClick={(e) => e.stopPropagation()}
                   onBlur={(e) => { onRename?.(it.id, e.target.value.trim() || it.name); setEditing(null); focusRow(it.id) }}
                   onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') { setEditing(null); focusRow(it.id) } }}
-                  className="h-5 min-w-0 flex-1 rounded-[4px] bg-input px-1 text-[12px] text-fg shadow-[inset_0_0_0_1px_var(--accent)] outline-none"
+                  className="h-5 min-w-0 flex-1 rounded-[4px] bg-control px-1 text-[12px] text-fg shadow-[inset_0_0_0_1px_var(--signal)] outline-none"
                 />
               ) : (
                 <span className={cn('min-w-0 flex-1 truncate', !it.visible && 'line-through decoration-[var(--line-strong)]')}>{it.name}</span>
@@ -169,14 +169,14 @@ export function EffectStack({
                     align="end"
                     trigger={
                       <button type="button" aria-label={`Blend mode: ${blendLabel}`}
-                        className="h-5 max-w-[68px] truncate rounded-[4px] px-1 text-[11px] text-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent data-[popup-open]:bg-hover data-[popup-open]:text-fg">
+                        className="h-5 max-w-[68px] truncate rounded-[4px] px-1 text-[11px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover data-[popup-open]:text-fg">
                         {blendLabel}
                       </button>
                     }
                     items={[{ type: 'label', label: 'Blend mode' }, ...blendOptions.map((b) => ({ label: b.label, checked: b.value === it.blend, onClick: () => onBlend(it.id, b.value) }))]}
                   />
                 ) : (
-                  blendLabel && <span className="max-w-[68px] truncate px-1 text-[11px] text-faint">{blendLabel}</span>
+                  blendLabel && <span className="max-w-[68px] truncate px-1 text-[11px] text-fg-faint">{blendLabel}</span>
                 )}
                 <ScrubValue
                   value={Math.round(it.opacity * 100)}
@@ -192,13 +192,13 @@ export function EffectStack({
                 <Tip label={it.visible ? 'Hide' : 'Show'} shortcut="shift+mod+h">
                   <button type="button" aria-label={it.visible ? `Hide ${it.name}` : `Show ${it.name}`} aria-pressed={!it.visible}
                     onClick={(e) => { e.stopPropagation(); onToggle(it.id) }}
-                    className={cn('flex size-6 items-center justify-center rounded-[5px] outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent', it.visible ? 'text-faint' : 'text-muted')}>
+                    className={cn('flex size-6 items-center justify-center rounded-[5px] outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', it.visible ? 'text-fg-faint' : 'text-fg-muted')}>
                     {it.visible ? <Eye size={13} strokeWidth={1.5} /> : <EyeOff size={13} strokeWidth={1.5} />}
                   </button>
                 </Tip>
                 <Tip label="Remove" shortcut="backspace">
                   <button type="button" aria-label={`Remove ${it.name}`} onClick={(e) => { e.stopPropagation(); onRemove(it.id) }}
-                    className="flex size-6 items-center justify-center rounded-[5px] text-faint opacity-0 outline-none group-focus-within/row:opacity-100 group-hover/row:opacity-100 hover:bg-hover hover:text-rec focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent">
+                    className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint opacity-0 outline-none group-focus-within/row:opacity-100 group-hover/row:opacity-100 hover:bg-hover hover:text-rec focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal">
                     <Trash2 size={13} strokeWidth={1.5} />
                   </button>
                 </Tip>
@@ -232,10 +232,10 @@ export function EffectStack({
 function CtxItem({ icon: Icon, label, hint, onClick, danger, disabled }: { icon: Icon; label: string; hint?: string; onClick: () => void; danger?: boolean; disabled?: boolean }) {
   return (
     <ContextMenu.Item disabled={disabled} onClick={onClick}
-      className={cn('group/item flex h-7 cursor-default items-center gap-2 rounded-[5px] px-2 text-[12px] outline-none select-none data-[disabled]:opacity-40 data-[highlighted]:bg-accent-strong data-[highlighted]:text-accent-fg', danger ? 'text-rec' : 'text-fg')}>
-      <span className="flex w-4 justify-center text-muted group-data-[highlighted]/item:text-accent-fg"><Icon size={14} strokeWidth={1.5} /></span>
+      className={cn('group/item flex h-7 cursor-default items-center gap-2 rounded-[5px] px-2 text-[12px] outline-none select-none data-[disabled]:opacity-40 data-[highlighted]:bg-signal-strong data-[highlighted]:text-signal-fg', danger ? 'text-rec' : 'text-fg')}>
+      <span className="flex w-4 justify-center text-fg-muted group-data-[highlighted]/item:text-signal-fg"><Icon size={14} strokeWidth={1.5} /></span>
       <span className="flex-1">{label}</span>
-      {hint && <span className="text-[11px] text-faint group-data-[highlighted]/item:text-accent-fg/70">{hint}</span>}
+      {hint && <span className="text-[11px] text-fg-faint group-data-[highlighted]/item:text-signal-fg/70">{hint}</span>}
     </ContextMenu.Item>
   )
 }

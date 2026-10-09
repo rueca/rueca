@@ -34,8 +34,8 @@ Check here before debugging.
 | Slider track invisible in dark | Track darker than the panel. Dark grooves go lighter. |
 | Light theme looks grubby | Dark-theme shadow opacities carried over. Halve them or more. |
 | Theme flashes on load | `class="dark"` hardcoded in HTML, or theme resolved after first paint. Resolve in an inline `<head>` script. |
-| Brand font vanished from the artboard | Artboard text reads `--font-sans`; chrome font change propagated. Give the artboard its own token. |
-| Faint text fails contrast on fields | Checked against the panel only. Also check against `--input`. |
+| Brand font vanished from the artboard | Artboard text reads `--font-ui`; chrome font change propagated. Give the artboard its own token. |
+| Faint text fails contrast on fields | Checked against the panel only. Also check against `--control`. |
 
 ## Rendering and effects
 

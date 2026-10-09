@@ -192,9 +192,9 @@ export function LiveScene({ svgRef }: { svgRef: React.RefObject<SVGSVGElement | 
       onPointerDown={preview ? previewProps.onPointerDown : (e) => { if ((e.target as Element).hasAttribute('data-bg')) ui.setState({ sel: null }) }}>
       <SceneSVG doc={doc} r={r} inputs={inputs} bg={[v.bgTop, v.bgBottom]} interactive={!preview} onObjectDown={onObjectDown} svgRef={svgRef} ghosts={ghosts} ghostOf={sel}>
         <g data-overlay pointerEvents="none">
-          <polygon ref={outline} fill="none" stroke="var(--accent)" strokeWidth={1.5} vectorEffect="non-scaling-stroke" visibility="hidden" />
+          <polygon ref={outline} fill="none" stroke="var(--signal)" strokeWidth={1.5} vectorEffect="non-scaling-stroke" visibility="hidden" />
           <g ref={handles} visibility="hidden">
-            {[0, 1, 2, 3].map((i) => <rect key={i} fill="#fff" stroke="var(--accent)" strokeWidth={1} vectorEffect="non-scaling-stroke" />)}
+            {[0, 1, 2, 3].map((i) => <rect key={i} fill="#fff" stroke="var(--signal)" strokeWidth={1} vectorEffect="non-scaling-stroke" />)}
           </g>
         </g>
       </SceneSVG>

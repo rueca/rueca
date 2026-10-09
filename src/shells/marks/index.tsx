@@ -19,11 +19,8 @@ import {
 
 const ALL = FAMILIES.map((f) => f.id)
 
-const Mark = () => (
-  <a href="#/" aria-label="All shells" className="contents">
-    <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="8" cy="8" r="5.6" /><ellipse cx="8" cy="8" rx="5.6" ry="2.2" transform="rotate(-35 8 8)" /></svg>
-  </a>
-)
+// Brand links the mark home itself.
+const Mark = () => <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="8" cy="8" r="5.6" /><ellipse cx="8" cy="8" rx="5.6" ry="2.2" transform="rotate(-35 8 8)" /></svg>
 
 function setFamily(v: string) {
   settings.setValue('families', (v === 'all' ? ALL : [v]) as never)
@@ -142,7 +139,7 @@ export default function MarksShell() {
       }
       left={<FavouritesPanel />}
       right={
-        <Panel header={<PanelHeader title={inFocus ? 'Mark' : 'Brand'}>{inFocus && <span className="text-[11px] text-faint">{FAMILY[d.marks[focusId!].family].name}</span>}</PanelHeader>}>
+        <Panel header={<PanelHeader title={inFocus ? 'Mark' : 'Brand'}>{inFocus && <span className="text-[11px] text-fg-faint">{FAMILY[d.marks[focusId!].family].name}</span>}</PanelHeader>}>
           {inFocus ? <MarkPanel /> : <SettingsPanel />}
         </Panel>
       }

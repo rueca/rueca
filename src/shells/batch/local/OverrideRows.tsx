@@ -69,7 +69,7 @@ export function OverrideRows({
         }
         return (
           <div key={k} className="relative">
-            {over && <span className="absolute inset-y-1 left-0 w-[2px] rounded-full bg-accent" aria-hidden />}
+            {over && <span className="absolute inset-y-1 left-0 w-[2px] rounded-full bg-signal" aria-hidden />}
             <Row
               label={label}
               hint={hint}
@@ -78,7 +78,7 @@ export function OverrideRows({
               trailing={
                 <Tip label={over ? 'Revert to template' : undefined}>
                   <button type="button" aria-label={`Revert ${label} to template`} disabled={!over} onClick={() => onReset(k)}
-                    className={cn('flex size-5 shrink-0 items-center justify-center rounded-[4px] text-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent',
+                    className={cn('flex size-5 shrink-0 items-center justify-center rounded-[4px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal',
                       !over && 'invisible')}>
                     <RotateCcw size={11} strokeWidth={1.75} />
                   </button>

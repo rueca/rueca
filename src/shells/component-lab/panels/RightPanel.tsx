@@ -22,12 +22,12 @@ export function TokensPanel() {
           const on = equal(v, t)
           return (
             <button key={p.name} type="button" onClick={() => tokens.applyPreset(p.name)}
-              className={cn('group flex h-12 items-center gap-2 rounded-[8px] px-2 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent', on ? 'bg-accent-soft shadow-[inset_0_0_0_1px_var(--accent)]' : 'bg-input hover:bg-hover')}>
+              className={cn('group flex h-12 items-center gap-2 rounded-[8px] px-2 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-signal-soft shadow-[inset_0_0_0_1px_var(--signal)]' : 'bg-control hover:bg-hover')}>
               <span className="flex size-7 shrink-0 items-center justify-center text-[11px] font-semibold"
                 style={{ background: hexOf(v.accentL, v.accentC, v.accentH), borderRadius: Math.min(14, v.radius), boxShadow: v.shadow === 'hard' ? '2px 2px 0 0 currentColor' : undefined, color: v.accentL > 0.75 ? '#111' : '#fff' }}>Aa</span>
               <span className="flex min-w-0 flex-col">
                 <span className="truncate text-[11.5px] font-medium text-fg">{p.name}</span>
-                <span className="truncate text-[10.5px] text-faint">{v.radius}px · {v.density}</span>
+                <span className="truncate text-[10.5px] text-fg-faint">{v.radius}px · {v.density}</span>
               </span>
             </button>
           )

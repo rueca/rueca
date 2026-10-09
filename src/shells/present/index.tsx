@@ -82,7 +82,7 @@ export default function Present() {
       right={
         <Panel header={<PanelHeader title="Designer"><Badge tone="accent">{Object.values(params.defs).filter((d) => 'publish' in d && d.publish).length} published</Badge></PanelHeader>}>
           <Inspector params={params} />
-          <div className="mx-3 mb-3 rounded-[8px] bg-well p-3 text-[11.5px] leading-relaxed text-muted">
+          <div className="mx-3 mb-3 rounded-[8px] bg-well p-3 text-[11.5px] leading-relaxed text-fg-muted">
             Params marked <code className="text-fg">publish: true</code> appear in the client view. Everything else stays yours.
           </div>
         </Panel>
@@ -102,9 +102,9 @@ function ClientSheet({ onShuffle, onSave, onSend, onExit }: { onShuffle: () => v
         <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex h-[64px] flex-none items-center gap-3 px-4 text-left">
           <div className="flex-1">
             <div className="text-[14px] font-semibold">Make it yours</div>
-            <div className="text-[12px] text-muted">Shuffle, tweak, download</div>
+            <div className="text-[12px] text-fg-muted">Shuffle, tweak, download</div>
           </div>
-          <ChevronUp size={18} strokeWidth={1.5} className={cn('text-faint transition-transform', !open && 'rotate-180')} />
+          <ChevronUp size={18} strokeWidth={1.5} className={cn('text-fg-faint transition-transform', !open && 'rotate-180')} />
         </button>
         <div className="min-h-0 overflow-y-auto border-t border-line">
           <Inspector params={params} published />

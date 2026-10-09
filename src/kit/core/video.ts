@@ -1,7 +1,6 @@
 /* ---------------------------------------------------------------------------
-   recordFrames — frame-accurate video export. The kit's io.ts mentions it,
-   but only ships recordCanvas (real-time MediaRecorder, drops frames under
-   load). This steps a pure draw(t) function frame by frame and encodes with
+   recordFrames — frame-accurate video export. recordCanvas (io.ts) is real-time MediaRecorder and drops frames under
+   load. This steps a pure draw(t) function frame by frame and encodes with
    WebCodecs via mediabunny, so a 4K loop renders perfectly even at 5 fps.
 
      await recordFrames({
@@ -15,9 +14,10 @@
 
    Falls back to null when WebCodecs can't encode (caller then uses the kit's
    recordCanvas). Picks H.264 in MP4, then VP9 / AV1, then WebM.
+   (Promoted from shells/shader/local/recordFrames.ts.)
 --------------------------------------------------------------------------- */
 import { BufferTarget, CanvasSource, Mp4OutputFormat, Output, WebMOutputFormat, getFirstEncodableVideoCodec } from 'mediabunny'
-import { download } from '@kit'
+import { download } from './io'
 
 export interface RecordOptions {
   canvas: HTMLCanvasElement | OffscreenCanvas

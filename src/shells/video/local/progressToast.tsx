@@ -17,9 +17,9 @@ function Bar({ p }: { p: number }) {
   return (
     <span className="mt-1.5 flex w-[220px] items-center gap-2">
       <span className="relative h-[3px] flex-1 overflow-hidden rounded-full bg-track">
-        <span className="absolute inset-y-0 left-0 rounded-full bg-accent transition-[width] duration-150" style={{ width: `${Math.round(p * 100)}%` }} />
+        <span className="absolute inset-y-0 left-0 rounded-full bg-signal transition-[width] duration-150" style={{ width: `${Math.round(p * 100)}%` }} />
       </span>
-      <span className="w-8 text-right tabular text-[11px] text-muted">{Math.round(p * 100)}%</span>
+      <span className="w-8 text-right tabular text-[11px] text-fg-muted">{Math.round(p * 100)}%</span>
     </span>
   )
 }

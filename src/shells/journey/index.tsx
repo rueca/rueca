@@ -103,13 +103,13 @@ export default function JourneyShell() {
           start={<Brand name="Journey" doc={title} mark={Mark} />}
           center={
             <Cluster>
-              <Menu trigger={<Button size="md" active={!!filterTag}><Tag size={14} strokeWidth={1.5} />{filterTag ?? 'Highlight'}<ChevronDown size={12} className="text-faint" /></Button>}
+              <Menu trigger={<Button size="md" active={!!filterTag}><Tag size={14} strokeWidth={1.5} />{filterTag ?? 'Highlight'}<ChevronDown size={12} className="text-fg-faint" /></Button>}
                 items={[
                   { type: 'label', label: 'Highlight cards by tag' },
                   ...(tags.length ? tags.map(([t, n]) => ({ label: `${t}  ·  ${n}`, checked: filterTag === t, onClick: () => ui.setState({ filterTag: filterTag === t ? null : t }) })) : [{ label: 'No tags yet', disabled: true, onClick: () => {} }]),
                   ...(filterTag ? [{ type: 'separator' } as MenuItem, { label: 'Clear highlight', icon: X, shortcut: 'esc', onClick: () => ui.setState({ filterTag: null }) }] : []),
                 ]} />
-              <Menu trigger={<Button size="md"><Rows3 size={14} strokeWidth={1.5} />Lanes <span className="text-faint tabular">{visible.length}/{LANES.length}</span></Button>}
+              <Menu trigger={<Button size="md"><Rows3 size={14} strokeWidth={1.5} />Lanes <span className="text-fg-faint tabular">{visible.length}/{LANES.length}</span></Button>}
                 items={[
                   { type: 'label', label: 'Visible lanes' },
                   ...LANES.map((l) => ({ label: l.label, checked: visible.includes(l.id), onClick: () => {

@@ -88,7 +88,7 @@ export function EmotionLane({ stages, colW }: { stages: Stage[]; colW: number })
                 updateStage(s.id, { emotion: Math.max(-2, Math.min(2, s.emotion + d)) }, { label: 'Emotion' })
               }}
               className={cn('cursor-ns-resize outline-none transition-[r] duration-100 hover:[r:9] focus-visible:[stroke-width:3]')}
-              style={{ fill: 'var(--panel)', stroke: on ? 'var(--accent)' : tone, strokeWidth: 2.5 }}
+              style={{ fill: 'var(--panel)', stroke: on ? 'var(--signal)' : tone, strokeWidth: 2.5 }}
             />
           </g>
         )

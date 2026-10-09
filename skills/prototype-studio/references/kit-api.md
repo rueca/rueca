@@ -14,7 +14,7 @@ Import everything from `@kit`. Read `src/shells/motion/` for a complete worked e
   legal home for a hex value is the artifact (inside the artboard / canvas) and `theme.css`.
 - **Neutral chrome, brand inside the artboard.** Artboard text uses `font-artboard`.
 - **Sentence case**, never uppercase micro-caps. Section heads 11.5px medium.
-- **Hierarchy by opacity tier** (`text-fg` / `text-muted` / `text-faint`) at ~one size, not by
+- **Hierarchy by opacity tier** (`text-fg` / `text-fg-muted` / `text-fg-faint`) at ~one size, not by
   mixing sizes and weights. Live numbers always `tabular`.
 - **One accent, only on state** (filled slider, selection, focus, primary button). The
   playhead is `bg-rec` (red/orange) — never the accent.
@@ -32,10 +32,10 @@ Import everything from `@kit`. Read `src/shells/motion/` for a complete worked e
 ### Tokens (Tailwind utilities)
 Surfaces: `bg-field` (window) · `bg-panel` (islands) · `bg-overlay` (menus) · `bg-well`
 (recessed, segmented background) · `bg-track` (slider groove) · `bg-raised` (pill in a well) ·
-`bg-active` (toggled control on a panel) · `bg-input` (field fill) · `bg-hover` · `bg-press`.
-Text: `text-fg` · `text-muted` · `text-faint`. Lines: `border-line` · `border-line-strong`.
-Accent: `bg-accent` (fills) · `bg-accent-strong` (surfaces carrying text) · `text-accent-fg` ·
-`bg-accent-soft` (selection wash). Semantic: `key` (keyframed, amber) · `rec` (playhead/record/
+`bg-active` (toggled control on a panel) · `bg-control` (field fill) · `bg-hover` · `bg-press`.
+Text: `text-fg` · `text-fg-muted` · `text-fg-faint`. Lines: `border-line` · `border-line-strong`.
+Accent: `bg-signal` (fills) · `bg-signal-strong` (surfaces carrying text) · `text-signal-fg` ·
+`bg-signal-soft` (selection wash). Semantic: `key` (keyframed, amber) · `rec` (playhead/record/
 error) · `ok`. Lanes: `bg-lane`. Utilities: `panel` `cluster` `pop` `tabular` `no-select`
 `checker`. CSS vars: `--row` (28px lane), `--gutter`, `--inspector-w`.
 

@@ -115,3 +115,88 @@ A good studio tech: calm, exact, a little warm. We talk about the work and the p
 2. Edit `src/site.config.ts` (name, slug, tagline, repo, url), then run `npm run sync`.
 3. Replace the placeholder `Mark` in `src/landing/parts.tsx` with the chosen SVG from `brand/marks.js`.
 4. Run a trademark search before the public launch.
+
+---
+
+# Round 2: Spanish, Latin, history, inventors, pop culture
+
+Checked 9 Oct 2026, same method as round 1, 74 more names. Full table, marks and palettes are on the board under **Round 2**.
+
+## Recommendation
+
+**Cruceta**, the wooden cross a puppeteer holds to work a marionette. A marionette control doesn't make the
+puppet, it makes the puppet move. That's the product: we don't build your prototype, we give it the controls.
+It's clean on every check: npm, `@cruceta`, `.dev` `.studio` `.design` `.tools` `.app` `.io`, and no software uses the name.
+The GitHub handle is an empty 2017 account (`cruceta-dev` and `crucetahq` are free).
+
+## Shortlist
+
+| Name | Lens | Story | Availability | Watch out |
+|---|---|---|---|---|
+| **Cruceta** ★ | Spanish | Marionette control bar: the controls that bring it to life | npm ✓ · scope ✓ · 6 domains · GH ~ cruceta-dev | Unfamiliar word in English |
+| **Tramoya** | Spanish | Stage machinery: everything behind the show | npm ✓ · scope ✓ · .dev .studio .design .tools .io · GH ~ tramoya-dev | Three small GitHub projects use the same metaphor; tramoya.app exists |
+| **Bastidor** | Spanish | Canvas stretcher, embroidery hoop, chassis, theatre wings: the frame around the work | npm ✓ · scope ✓ · .dev .studio .design .tools .io · GH ~ bastidorhq | .com is an embroidery shop |
+| **Juanelo** | Inventors | Juanelo Turriano, Charles V's clockmaker and automaton-builder | npm ✓ (scope held, empty) · .studio .design .tools .app · GH ~ juanelohq | .com/.dev taken; English pronunciation |
+| **Periaktos** | History | Greek three-sided turning scenery prism: presets, about 2,000 years early | Free on every check | Hard to spell and say |
+
+Marks (first drafts in `brand/marks.js`): Cruceta = control cross with strings to the work · Tramoya = fly-loft
+beam, pulley, flown flat and counterweight · Bastidor = embroidery hoop · Juanelo = clockwork winding key set in
+the work · Periaktos = prism from above with the lit face.
+
+## Interesting but out
+
+- **Telekino**: Torres Quevedo's 1903 radio remote control, a great story. But it's also a big Argentine lottery, and scam apps use the name.
+- **Marey**: Moonvalley's AI video model.
+- **Frisket**: a live AI-spreadsheet product.
+- **Atrezo**: sounds like Atrezzo, a health-care software platform.
+- **Torelli**: an active developer holds the handle, and it's a common surname.
+- **Rotula**: means "kneecap".
+- **Maqueta**: unsearchable, because "maquetación" means web layout in Spanish.
+- **Trimpot** (round 1): a registered trademark.
+
+## Stories to borrow, whatever the name
+
+Spline ducks (the draughtsman's weights that held a curve), Heinlein's and Henson's **waldo**, Okuda's Star Trek
+panels, ILM **kitbashing**, Chaplin's **Candilejas**, the Greek **mechane** (deus ex machina), the man behind
+the curtain, **Torelli's one winch** (a preset in 1641), the **Telekino** steering a boat in Bilbao (1906),
+and Juanelo's **lute-playing lady**.
+
+---
+
+# Round 3: cute prefixes, toys, fictional makers
+
+Checked 9 Oct 2026, same method, 64 more names (177 total across three rounds). The board has it under **Round 3**.
+
+**Cute pick: Trompo**, the Latin American spinning top. It's inert in your hand and alive once you spin it. It's six
+letters and easy in English. npm, `@trompo` and `.dev` `.studio` `.design` `.tools` `.io` are free, and `trompo-dev` is free on GitHub.
+Watch out: a small Spanish food-delivery app and a restaurant ordering app share the name.
+
+| Name | Lens | Story | Availability | Watch out |
+|---|---|---|---|---|
+| **Trompo** ★ | Toys | Spinning top; also the al-pastor spit | npm ✓ · scope ✓ · 5 domains · GH ~ trompo-dev | Small food apps use it |
+| **Ruedita** | Cute (Spanish -ita) | "Little wheel", Thumbwheel's cute cousin | npm ✓ · scope ✓ · 5 domains · GH ~ ruedita-dev | Needs hearing once |
+| **Lilknob** | Cute (lil-) | A lil knob that smiles back | **Everything free, incl. .com** | Echoes lil-gui (a competitor); "knob" is British slang |
+| **Tornasol** | Fictional makers | Professor Calculus in Spanish Tintin; the everyday word means iridescent shimmer | npm ✓ · scope ✓ · 5 domains · GH ~ tornasol-dev | Tornasol Studio (Madrid design collective); keep clear of Tintin |
+
+**Reserve:**
+- Lildial: all free, but the same lil-gui echo.
+- Drosselmeyer: the Nutcracker's clockmaker. Long.
+- Busyboard: "busy" fights the calm-chrome promise.
+- Perillita: "little knob". Hard to say.
+- Juguetero: "toymaker".
+
+**Out:**
+- "Lite-" anything: it reads as the cut-down edition.
+- Knobby: svelte-knobby is a tuning panel in our exact space.
+- Balero: Balero Labs, a Uruguayan software company.
+- Papalote: the Mexico City children's museum.
+- Perinola: slang.
+- Geppetto: several AI products.
+- Gearloose: Disney.
+- Coppelius: CoppeliaSim.
+- Twiddle, Whirligig, Zoetrope, Pinwheel, Windup, Fiddly, Pygmalion, Daedalus and Penelope: all taken.
+
+**Stories:**
+- **Penelope's loom**: she unpicked her weaving every night, the oldest undo.
+- **Drosselmeyer's clockwork castle**: the children want to change what the figures do.
+- **The busy board**: fiddling is how you learn what a thing can do.

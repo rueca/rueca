@@ -46,7 +46,7 @@ export const FlowEdgeView = memo(function FlowEdgeView(props: EdgeProps<FlowEdge
           <div
             className={cn(
               'flows-edge-label nodrag nopan absolute flex h-[22px] max-w-[180px] items-center gap-1 rounded-full px-2 text-[11px] font-medium transition-[opacity,box-shadow] duration-200',
-              selected || onPath ? 'bg-accent-strong text-accent-fg' : 'bg-panel text-muted',
+              selected || onPath ? 'bg-signal-strong text-signal-fg' : 'bg-panel text-fg-muted',
               dim && 'is-dim',
             )}
             style={{ transform: `translate(-50%, -50%) translate(${lx}px, ${ly}px)`, pointerEvents: 'all', boxShadow: selected || onPath ? 'none' : 'var(--shadow-cluster), 0 0 0 1px var(--line)' }}

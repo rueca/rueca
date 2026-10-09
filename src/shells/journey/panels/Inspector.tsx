@@ -38,8 +38,8 @@ function CardInspector({ card, p }: { card: Card; p: Persona }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2 px-3 pt-3 pb-1">
-        <span className="flex size-6 items-center justify-center rounded-[6px] bg-active text-muted"><LIcon size={13} strokeWidth={1.5} /></span>
-        <div className="min-w-0 flex-1 text-[11.5px] text-muted">{stageName(card.stage)} · {lane.label}</div>
+        <span className="flex size-6 items-center justify-center rounded-[6px] bg-active text-fg-muted"><LIcon size={13} strokeWidth={1.5} /></span>
+        <div className="min-w-0 flex-1 text-[11.5px] text-fg-muted">{stageName(card.stage)} · {lane.label}</div>
         <IconButton icon={Copy} size="icon-sm" label="Duplicate" shortcut="mod+d" onClick={duplicateCard} />
         <IconButton icon={Trash2} size="icon-sm" label="Delete" shortcut="backspace" onClick={deleteSelection} />
       </div>
@@ -70,21 +70,21 @@ function CardInspector({ card, p }: { card: Card; p: Persona }) {
 
       {card.lane === 'opps' && (
         <Section title="Answers pain points">
-          {!pains.length && <div className="px-3 text-[11.5px] text-faint">No pain points in this journey yet.</div>}
+          {!pains.length && <div className="px-3 text-[11.5px] text-fg-faint">No pain points in this journey yet.</div>}
           {pains.map((pn) => (
             <label key={pn.id} className="flex cursor-default items-start gap-2 px-3 py-1 text-[11.5px] hover:bg-hover">
               <span className="mt-0.5"><Checkbox checked={!!card.links?.includes(pn.id)} onChange={() => toggleLink(card.id, pn.id)} label={pn.text} /></span>
-              <span className="min-w-0 flex-1"><span className="text-fg">{pn.text}</span><span className="block text-[10.5px] text-faint">{stageName(pn.stage)}</span></span>
+              <span className="min-w-0 flex-1"><span className="text-fg">{pn.text}</span><span className="block text-[10.5px] text-fg-faint">{stageName(pn.stage)}</span></span>
             </label>
           ))}
-          <div className="px-3 pt-1 text-[11px] text-faint">Tip: drag from a pain point’s bottom handle onto an opportunity.</div>
+          <div className="px-3 pt-1 text-[11px] text-fg-faint">Tip: drag from a pain point’s bottom handle onto an opportunity.</div>
         </Section>
       )}
       {card.lane === 'pains' && (
         <Section title="Answered by">
           {!answeredBy.length ? (
             <div className="flex items-center gap-2 px-3 py-1">
-              <span className="flex-1 text-[11.5px] text-faint">Nothing yet — an open pain point.</span>
+              <span className="flex-1 text-[11.5px] text-fg-faint">Nothing yet — an open pain point.</span>
               <Button size="sm" variant="default" onClick={() => { const c = addCard('opps', card.stage, undefined, true); if (c) toggleLink(c.id, card.id) }}><Plus size={12} />Opportunity</Button>
             </div>
           ) : answeredBy.map((o) => (
@@ -92,7 +92,7 @@ function CardInspector({ card, p }: { card: Card; p: Persona }) {
               className="mx-1.5 flex items-center gap-2 rounded-[6px] px-1.5 py-1.5 text-left text-[11.5px] hover:bg-hover">
               <span className="h-3 w-[3px] shrink-0 rounded-full bg-ok" />
               <span className="min-w-0 flex-1 truncate text-fg">{o.text}</span>
-              <span className="shrink-0 text-[10.5px] text-faint">{stageName(o.stage)}</span>
+              <span className="shrink-0 text-[10.5px] text-fg-faint">{stageName(o.stage)}</span>
             </button>
           ))}
         </Section>
@@ -124,7 +124,7 @@ function StageInspector({ stage, p }: { stage: Stage; p: Persona }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2 px-3 pt-3 pb-1">
-        <span className="flex h-6 min-w-6 items-center justify-center rounded-[6px] bg-accent-strong px-1 text-[11px] font-semibold text-accent-fg tabular">{i + 1}</span>
+        <span className="flex h-6 min-w-6 items-center justify-center rounded-[6px] bg-signal-strong px-1 text-[11px] font-semibold text-signal-fg tabular">{i + 1}</span>
         <div className="min-w-0 flex-1 truncate text-[12.5px] font-semibold">{stage.name}</div>
         <IconButton icon={ArrowLeft} size="icon-sm" label="Move stage left" shortcut="alt+arrowleft" disabled={i === 0} onClick={() => moveStage(stage.id, -1)} />
         <IconButton icon={ArrowRight} size="icon-sm" label="Move stage right" shortcut="alt+arrowright" disabled={i === p.stages.length - 1} onClick={() => moveStage(stage.id, 1)} />
@@ -151,9 +151,9 @@ function StageInspector({ stage, p }: { stage: Stage; p: Persona }) {
           const LI = l.icon
           return (
             <div key={l.id} className="group/l flex h-7 items-center gap-2 px-3 text-[11.5px]">
-              <LI size={13} strokeWidth={1.5} className="text-faint" />
-              <span className="flex-1 text-muted">{l.label}</span>
-              <span className={cn('tabular', n ? 'text-fg' : 'text-faint')}>{n}</span>
+              <LI size={13} strokeWidth={1.5} className="text-fg-faint" />
+              <span className="flex-1 text-fg-muted">{l.label}</span>
+              <span className={cn('tabular', n ? 'text-fg' : 'text-fg-faint')}>{n}</span>
               <IconButton icon={Plus} size="icon-sm" label={`Add to ${l.label.toLowerCase()}`} className="opacity-0 group-hover/l:opacity-100 focus-visible:opacity-100" onClick={() => addCard(l.id, stage.id)} />
             </div>
           )
@@ -190,31 +190,31 @@ function MapInspector({ p }: { p: Persona }) {
         {low && high && (
           <div className="mt-2 flex flex-col gap-1 px-3 text-[11.5px]">
             <button type="button" className="flex items-center gap-2 rounded-[6px] py-0.5 text-left hover:text-fg" onClick={() => ui.setState({ sel: { kind: 'stage', id: low.id } })}>
-              <span className="w-14 shrink-0 text-faint">Low point</span><span className="text-fg">{low.name}</span><Badge tone="rec">{emoji(low.emotion)} {fmtEmotion(low.emotion)}</Badge>
+              <span className="w-14 shrink-0 text-fg-faint">Low point</span><span className="text-fg">{low.name}</span><Badge tone="rec">{emoji(low.emotion)} {fmtEmotion(low.emotion)}</Badge>
             </button>
             <button type="button" className="flex items-center gap-2 rounded-[6px] py-0.5 text-left hover:text-fg" onClick={() => ui.setState({ sel: { kind: 'stage', id: high.id } })}>
-              <span className="w-14 shrink-0 text-faint">High point</span><span className="text-fg">{high.name}</span><Badge tone="ok">{emoji(high.emotion)} {fmtEmotion(high.emotion)}</Badge>
+              <span className="w-14 shrink-0 text-fg-faint">High point</span><span className="text-fg">{high.name}</span><Badge tone="ok">{emoji(high.emotion)} {fmtEmotion(high.emotion)}</Badge>
             </button>
           </div>
         )}
         {open.length > 0 && (
           <div className="mt-2 px-3">
-            <div className="pb-1 text-[11px] text-faint">Open pain points</div>
+            <div className="pb-1 text-[11px] text-fg-faint">Open pain points</div>
             {open.slice(0, 4).map((pn) => (
               <button key={pn.id} type="button" onClick={() => ui.setState({ sel: { kind: 'card', id: pn.id } })}
                 className="flex w-full items-center gap-2 rounded-[6px] py-1 text-left text-[11.5px] hover:text-fg">
-                <span className="h-3 w-[3px] shrink-0 rounded-full bg-rec" /><span className="min-w-0 flex-1 truncate text-muted">{pn.text}</span>
+                <span className="h-3 w-[3px] shrink-0 rounded-full bg-rec" /><span className="min-w-0 flex-1 truncate text-fg-muted">{pn.text}</span>
               </button>
             ))}
           </div>
         )}
       </Section>
       <Section title="Tags" actions={filter ? <IconButton icon={X} size="icon-sm" label="Clear highlight" shortcut="esc" onClick={() => ui.setState({ filterTag: null })} /> : undefined}>
-        {!tags.length && <div className="px-3 text-[11.5px] text-faint">Add #tags to cards to highlight themes across stages.</div>}
+        {!tags.length && <div className="px-3 text-[11.5px] text-fg-faint">Add #tags to cards to highlight themes across stages.</div>}
         <div className="flex flex-wrap gap-1 px-3">
           {tags.map(([t, n]) => (
             <button key={t} type="button" aria-pressed={filter === t} onClick={() => ui.setState({ filterTag: filter === t ? null : t })}
-              className={cn('flex h-6 items-center gap-1 rounded-[6px] px-2 text-[11.5px] outline-none focus-visible:ring-2 focus-visible:ring-accent', filter === t ? 'bg-accent-strong text-accent-fg' : 'bg-input text-muted hover:text-fg')}>
+              className={cn('flex h-6 items-center gap-1 rounded-[6px] px-2 text-[11.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal', filter === t ? 'bg-signal-strong text-signal-fg' : 'bg-control text-fg-muted hover:text-fg')}>
               <Tag size={11} strokeWidth={1.5} />{t}<span className="tabular opacity-60">{n}</span>
             </button>
           ))}
@@ -228,7 +228,7 @@ function MapInspector({ p }: { p: Persona }) {
 function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5 rounded-[8px] bg-well px-2.5 py-2">
-      <span className="text-[11px] text-faint">{label}</span>
+      <span className="text-[11px] text-fg-faint">{label}</span>
       <span className="text-[15px] font-semibold tabular">{value}</span>
     </div>
   )

@@ -12,7 +12,7 @@
    Reports `final=false` while moving and `final=true` on release, so owners
    can hold back expensive work until the drag ends.
 --------------------------------------------------------------------------- */
-import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type HTMLAttributes, type ReactNode } from 'react'
 import { clamp, cn, roundTo, decimalsOf } from '../core/cn'
 
 export interface ScrubProps {
@@ -35,7 +35,13 @@ export interface ScrubProps {
   disabled?: boolean
   label?: string
   align?: 'left' | 'right'
+  /** multi-select with differing values: shows "Mixed"; scrubbing reports a DELTA via onDelta */
   mixed?: boolean
+  onDelta?: (delta: number, final: boolean) => void
+  /** typed text → number, for fields whose fmt isn't plain (percent, timecode). Return null to reject. */
+  parse?: (s: string) => number | null
+  /** drag range; typed values may still reach min/max (Blender's soft vs hard limits) */
+  soft?: [number, number]
 }
 
 function evaluate(text: string, current: number): number | null {
@@ -53,20 +59,22 @@ function evaluate(text: string, current: number): number | null {
   } catch { return null }
 }
 
-export function ScrubValue({
+export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttributes<HTMLDivElement>, keyof ScrubProps | 'onChange'>>(function ScrubValue({
   value, onChange, min = -Infinity, max = Infinity, step = 1, defaultValue, fmt, unit, prefix,
-  sensitivity = 2, className, boxed, changed, disabled, label, align = 'right', mixed,
-}: ScrubProps) {
+  sensitivity = 2, className, boxed, changed, disabled, label, align = 'right', mixed, onDelta, parse, soft, ...rest
+}, fwd) {
   const [editing, setEditing] = useState(false)
   const [scrubbing, setScrubbing] = useState(false)
   const [draft, setDraft] = useState('')
   const el = useRef<HTMLDivElement>(null)
+  useImperativeHandle(fwd, () => el.current!)
   const input = useRef<HTMLInputElement>(null)
-  const drag = useRef({ x: 0, acc: 0, start: 0, moved: false, id: -1 })
+  const drag = useRef<{ x: number; acc: number; acc2?: number; start: number; moved: boolean; id: number }>({ x: 0, acc: 0, start: 0, moved: false, id: -1 })
   const live = useRef(value)
   live.current = value
 
-  const range = Number.isFinite(max - min) ? max - min : null
+  const dragMin = soft?.[0] ?? min, dragMax = soft?.[1] ?? max
+  const range = Number.isFinite(dragMax - dragMin) ? dragMax - dragMin : null
   // Scale scrubbing to the range so a 0–1 param and a 0–2000 param both feel right.
   const perPx = range ? Math.max(step, range / 300) / sensitivity : step / sensitivity * 2
 
@@ -79,7 +87,7 @@ export function ScrubValue({
   const onPointerDown = (e: React.PointerEvent) => {
     if (disabled || editing || e.button !== 0) return
     e.preventDefault()
-    drag.current = { x: e.clientX, acc: 0, start: live.current, moved: false, id: e.pointerId }
+    drag.current = { x: e.clientX, acc: 0, acc2: 0, start: live.current, moved: false, id: e.pointerId }
     el.current?.setPointerCapture(e.pointerId)
   }
   const onPointerMove = (e: React.PointerEvent) => {
@@ -97,7 +105,8 @@ export function ScrubValue({
     const dx = document.pointerLockElement ? e.movementX : e.clientX - d.acc
     d.acc = e.clientX
     const mult = e.shiftKey ? 10 : e.altKey ? 0.1 : 1
-    d.start = clamp(d.start + dx * perPx * mult, min, max)
+    if (mixed && onDelta) { d.acc2 = (d.acc2 ?? 0) + dx * perPx * mult; onDelta(roundTo(d.acc2, step), false); return }
+    d.start = clamp(d.start + dx * perPx * mult, Math.min(dragMin, live.current), Math.max(dragMax, live.current))
     commitNum(d.start, false)
   }
   const onPointerUp = (e: React.PointerEvent) => {
@@ -106,13 +115,13 @@ export function ScrubValue({
     d.id = -1
     el.current?.releasePointerCapture(e.pointerId)
     if (document.pointerLockElement) document.exitPointerLock()
-    if (d.moved) { setScrubbing(false); commitNum(d.start, true) }
+    if (d.moved) { setScrubbing(false); if (mixed && onDelta) onDelta(roundTo(d.acc2 ?? 0, step), true); else commitNum(d.start, true) }
     else { setDraft(mixed ? '' : String(roundTo(value, step))); setEditing(true) }
   }
 
   const finishEdit = (apply: boolean) => {
     if (apply) {
-      const v = evaluate(draft, value)
+      const v = parse ? parse(draft) : evaluate(draft, value)
       if (v !== null) commitNum(v, true)
     }
     setEditing(false)
@@ -146,18 +155,19 @@ export function ScrubValue({
       onPointerCancel={onPointerUp}
       onDoubleClick={() => defaultValue !== undefined && commitNum(defaultValue, true)}
       onKeyDown={onKeyDown}
+      {...rest}
       className={cn(
         'group/scrub relative flex h-6 min-w-0 items-center gap-1 rounded-[5px] tabular text-[11px] outline-none no-select',
-        'cursor-ew-resize focus-visible:ring-2 focus-visible:ring-accent',
-        boxed ? 'bg-input px-1.5 hover:shadow-[inset_0_0_0_1px_var(--line-strong)]' : 'px-1 hover:bg-hover',
+        'cursor-ew-resize focus-visible:ring-2 focus-visible:ring-signal',
+        boxed ? 'bg-control px-1.5 hover:shadow-[inset_0_0_0_1px_var(--line-strong)]' : 'px-1 hover:bg-hover',
         'data-[scrubbing]:bg-active',
-        changed === false ? 'text-faint' : 'text-fg',
-        mixed && 'text-faint italic',
+        changed === false ? 'text-fg-faint' : 'text-fg',
+        mixed && 'text-fg-faint italic',
         disabled && 'pointer-events-none opacity-40',
         className,
       )}
     >
-      {prefix != null && <span className="flex w-3 shrink-0 justify-center text-[10.5px] text-faint">{prefix}</span>}
+      {prefix != null && <span className="flex min-w-3 shrink-0 justify-center text-[10.5px] text-fg-faint">{prefix}</span>}
       {editing ? (
         <input
           ref={input}
@@ -176,4 +186,4 @@ export function ScrubValue({
       )}
     </div>
   )
-}
+})

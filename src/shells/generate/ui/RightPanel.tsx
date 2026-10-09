@@ -30,8 +30,8 @@ function Create() {
     <div className="flex flex-col">
       <div className="mx-3 mt-3 mb-1 rounded-[8px] bg-well p-2.5">
         <div className="flex items-center justify-between text-[12px] font-medium text-fg">{m.name}<Badge>{m.sampler}</Badge></div>
-        <div className="mt-0.5 text-[11.5px] text-muted">{m.blurb}. Best at {m.steps} steps, CFG {m.guidance}.</div>
-        <div className="mt-2 flex items-center gap-3 text-[11px] text-faint tabular">
+        <div className="mt-0.5 text-[11.5px] text-fg-muted">{m.blurb}. Best at {m.steps} steps, CFG {m.guidance}.</div>
+        <div className="mt-2 flex items-center gap-3 text-[11px] text-fg-faint tabular">
           <span>{v.batch} × {a.w}×{a.h}</span><span>≈ {est.toFixed(1)} s per run</span>
         </div>
         {v.steps < m.steps * 0.6 && <div className="mt-1.5 text-[11px] text-key">Below this model’s range — expect leftover noise.</div>}
@@ -66,7 +66,7 @@ function Details({ id }: { id: string }) {
     <div className="flex flex-col">
       <div className="p-3 pb-2">
         <button type="button" onClick={() => ui.setState({ overlay: { type: 'lightbox' } })} aria-label="Open large"
-          className="relative block w-full overflow-hidden rounded-[8px] bg-well outline-none focus-visible:ring-2 focus-visible:ring-accent" style={{ aspectRatio: `${p.w} / ${p.h}` }}>
+          className="relative block w-full overflow-hidden rounded-[8px] bg-well outline-none focus-visible:ring-2 focus-visible:ring-signal" style={{ aspectRatio: `${p.w} / ${p.h}` }}>
           {pix ? <img src={pix.url} alt="" className="h-full w-full object-cover" /> : <span className="block h-full w-full animate-pulse bg-hover" />}
         </button>
         <div className="mt-2 flex items-center gap-1">
@@ -99,7 +99,7 @@ function Details({ id }: { id: string }) {
 
       <Section title="Prompt" actions={<IconButton size="icon-sm" icon={CornerUpLeft} label="Reuse prompt" onClick={() => reusePrompt(rec)} />}>
         <p className="px-3 text-[12px] leading-relaxed text-fg select-text">{p.prompt}</p>
-        {p.negative && <p className="px-3 pt-1.5 text-[11.5px] leading-relaxed text-muted select-text"><span className="text-faint">Negative · </span>{p.negative}</p>}
+        {p.negative && <p className="px-3 pt-1.5 text-[11.5px] leading-relaxed text-fg-muted select-text"><span className="text-fg-faint">Negative · </span>{p.negative}</p>}
         <div className="flex flex-wrap gap-1 px-3 pt-2">
           <Badge>{seen.scene}</Badge>
           {seen.features.map((f) => <Badge key={f}>{f}</Badge>)}
@@ -122,7 +122,7 @@ function Details({ id }: { id: string }) {
         <div><KV k="Created">{ago(rec.createdAt)}</KV></div>
         {parent && (
           <Row label={rec.kind === 'upscale' ? 'Upscaled from' : rec.kind === 'remix' ? 'Remixed from' : 'Variation of'}>
-            <button type="button" onClick={() => select([parent.id])} className="truncate text-left text-[11.5px] text-accent outline-none hover:underline focus-visible:ring-2 focus-visible:ring-accent">#{parent.id.slice(-4)} · seed {parent.params.seed}</button>
+            <button type="button" onClick={() => select([parent.id])} className="truncate text-left text-[11.5px] text-signal outline-none hover:underline focus-visible:ring-2 focus-visible:ring-signal">#{parent.id.slice(-4)} · seed {parent.params.seed}</button>
           </Row>
         )}
       </Section>
@@ -147,10 +147,10 @@ function Pair({ a, b }: { a: string; b: string }) {
       <div className="pt-2 text-[11.5px] font-medium text-fg">{diffs.length ? `${diffs.length} difference${diffs.length > 1 ? 's' : ''}` : 'Identical settings'}</div>
       {diffs.map((d) => (
         <div key={d.k} className="rounded-[7px] bg-well px-2.5 py-2 text-[11.5px]">
-          <div className="text-faint">{d.label}</div>
+          <div className="text-fg-faint">{d.label}</div>
           <div className="mt-0.5 grid grid-cols-[14px_1fr] gap-x-1.5 gap-y-0.5 text-fg">
-            <span className="text-faint">A</span><span className="line-clamp-2 tabular">{d.fmt ? d.fmt(A.params[d.k]) : String(A.params[d.k] ?? '—')}</span>
-            <span className="text-faint">B</span><span className="line-clamp-2 tabular">{d.fmt ? d.fmt(B.params[d.k]) : String(B.params[d.k] ?? '—')}</span>
+            <span className="text-fg-faint">A</span><span className="line-clamp-2 tabular">{d.fmt ? d.fmt(A.params[d.k]) : String(A.params[d.k] ?? '—')}</span>
+            <span className="text-fg-faint">B</span><span className="line-clamp-2 tabular">{d.fmt ? d.fmt(B.params[d.k]) : String(B.params[d.k] ?? '—')}</span>
           </div>
         </div>
       ))}
@@ -176,7 +176,7 @@ function Many({ n }: { n: number }) {
       <Button variant="default" onClick={() => toggleFavourite(sel)}><Heart size={14} strokeWidth={1.5} />Toggle favourite</Button>
       <Button variant="default" onClick={() => { for (const id of sel) { const r = byId(id); if (r) upscale(r) } }}><Maximize2 size={14} strokeWidth={1.5} />Upscale all</Button>
       <Button variant="danger" onClick={() => removeWithUndo(sel)}><Trash2 size={14} strokeWidth={1.5} />Delete {n} images</Button>
-      <p className="pt-1 text-[11.5px] leading-relaxed text-muted">Select exactly two to compare them side by side.</p>
+      <p className="pt-1 text-[11.5px] leading-relaxed text-fg-muted">Select exactly two to compare them side by side.</p>
       <Button variant="ghost" onClick={() => select([])}>Clear selection</Button>
     </div>
   )

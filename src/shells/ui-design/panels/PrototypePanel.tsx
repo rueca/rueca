@@ -44,10 +44,10 @@ export function PrototypePanel({ onPresent }: { onPresent: () => void }) {
             <div className="flex flex-col gap-0.5 px-3">
               {listLinks(pg.nodes).map((l) => (
                 <button key={l.id} type="button" onClick={() => S.select([l.from.id])} className="flex h-7 items-center gap-1.5 rounded-[5px] px-1.5 text-left text-[11.5px] hover:bg-hover">
-                  <Zap size={12} strokeWidth={1.5} className="shrink-0 text-accent" />
+                  <Zap size={12} strokeWidth={1.5} className="shrink-0 text-signal" />
                   <span className="truncate text-fg">{l.from.name}</span>
-                  <span className="text-faint">→</span>
-                  <span className="truncate text-muted">{l.to}</span>
+                  <span className="text-fg-faint">→</span>
+                  <span className="truncate text-fg-muted">{l.to}</span>
                 </button>
               ))}
             </div>
@@ -68,14 +68,14 @@ export function PrototypePanel({ onPresent }: { onPresent: () => void }) {
         <Section title="Flow starting point" first>
           <Row label="Start here">
             <div className="flex flex-1 items-center justify-end gap-2">
-              {pg.start === n.id && <Flag size={12} strokeWidth={1.5} className="text-accent" />}
+              {pg.start === n.id && <Flag size={12} strokeWidth={1.5} className="text-signal" />}
               <Checkbox checked={pg.start === n.id} onChange={(b) => S.setPage({ start: b ? n.id : undefined })} label="Flow starting point" />
             </div>
           </Row>
         </Section>
       )}
       <Section title="Interactions" first={!isTop} actions={<IconButton icon={Plus} size="icon-sm" label="Add interaction" onClick={add} />}>
-        {!list.length && <div className="px-3 pb-1 text-[11.5px] text-faint">No interactions. Click + or drag the knob on the canvas onto a frame.</div>}
+        {!list.length && <div className="px-3 pb-1 text-[11.5px] text-fg-faint">No interactions. Click + or drag the knob on the canvas onto a frame.</div>}
         {list.map((it) => {
           const upd = (patch: Partial<Interaction>, final = true) => set(list.map((x) => (x.id === it.id ? { ...x, ...patch } : x)), final)
           const preset = Object.entries(EASINGS).find(([, e]) => e.join() === it.easing.join())?.[0] ?? 'Custom'
@@ -98,8 +98,8 @@ export function PrototypePanel({ onPresent }: { onPresent: () => void }) {
               {it.transition !== 'instant' && (
                 <Row label="Curve">
                   <Popover.Root>
-                    <Popover.Trigger className="flex h-6 min-w-0 flex-1 items-center gap-2 rounded-[5px] bg-input px-1.5 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] data-[popup-open]:shadow-[inset_0_0_0_1px_var(--accent)]">
-                      <CurveGlyph value={it.easing} className="text-accent" />
+                    <Popover.Trigger className="flex h-6 min-w-0 flex-1 items-center gap-2 rounded-[5px] bg-control px-1.5 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
+                      <CurveGlyph value={it.easing} className="text-signal" />
                       <span className="truncate text-[11px] text-fg">{preset}</span>
                     </Popover.Trigger>
                     <Popover.Portal>

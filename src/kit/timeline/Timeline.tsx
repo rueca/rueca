@@ -17,7 +17,7 @@
    step frames (shift ×10), J/K jump between keys, ⌘wheel zooms.
 --------------------------------------------------------------------------- */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { ChevronDown, Pause, Play, Repeat, Repeat1, SkipBack, StepBack, StepForward, Gauge } from 'lucide-react'
+import { ChevronDown, Pause, Play, Repeat, Repeat1, SkipBack, StepBack, StepForward, Gauge, ArrowRightLeft } from 'lucide-react'
 import { clamp, cn } from '../core/cn'
 import { useClock, useClockTime, fmtTime, type Clock } from '../core/clock'
 import { useHotkeys } from '../core/hotkeys'
@@ -42,7 +42,7 @@ export interface Lane {
 const LABEL_W = 148
 
 export function Timeline({
-  clock, lanes = [], className, collapsible = true, defaultOpen = true, timeMode: tmInit = 'seconds', onKeyClick, extra, height,
+  clock, lanes = [], className, collapsible = true, defaultOpen = true, timeMode: tmInit = 'seconds', onKeyClick, extra, height, hotkeys = true,
 }: {
   clock: Clock
   lanes?: Lane[]
@@ -52,14 +52,17 @@ export function Timeline({
   timeMode?: 'seconds' | 'frames' | 'timecode'
   onKeyClick?: (lane: Lane, key: Key) => void
   extra?: ReactNode
+  /** max height of the lanes area; lanes scroll past it */
   height?: number
+  /** bind Space, , . J K Home S (priority 0 — shell bindings win). false when a shell drives its own transport. */
+  hotkeys?: boolean
 }) {
   const [open, setOpen] = useState(defaultOpen)
   const [timeMode, setTimeMode] = useState(tmInit)
   const { layout } = useStudio()
   const playing = useClock(clock, (s) => s.playing)
   const duration = useClock(clock, (s) => s.duration)
-  const loop = useClock(clock, (s) => s.loop)
+  const mode = useClock(clock, (s) => s.mode)
   const rate = useClock(clock, (s) => s.rate)
   const fps = useClock(clock, (s) => s.fps)
   const region = useClock(clock, (s) => s.region)
@@ -74,18 +77,22 @@ export function Timeline({
     if (next !== undefined) { clock.pause(); clock.seek(next) }
   }
 
-  useHotkeys({
-    space: () => clock.toggle(),
-    enter: () => clock.replay(),
-    ',': () => clock.step(-1),
-    '.': () => clock.step(1),
-    'shift+,': () => clock.step(-10),
-    'shift+.': () => clock.step(10),
-    j: () => jump(-1),
-    k: () => jump(1),
-    home: () => clock.seek(region?.[0] ?? 0),
-    s: () => clock.setRate(clock.getState().rate === 1 ? 0.25 : 1),
-  }, [allKeys, region])
+  useHotkeys(hotkeys ? {
+    space: { run: () => clock.toggle(), label: 'Play / pause', group: 'Playback' },
+    enter: { run: () => clock.replay(), label: 'Replay', group: 'Playback' },
+    ',': { run: () => clock.step(-1), label: 'Previous frame', group: 'Playback' },
+    '.': { run: () => clock.step(1), label: 'Next frame', group: 'Playback' },
+    'shift+,': { run: () => clock.step(-10), label: 'Back 10 frames', group: 'Playback' },
+    'shift+.': { run: () => clock.step(10), label: 'Forward 10 frames', group: 'Playback' },
+    j: { run: () => jump(-1), label: 'Previous key', group: 'Playback' },
+    k: { run: () => jump(1), label: 'Next key', group: 'Playback' },
+    home: { run: () => clock.seek(region?.[0] ?? 0), label: 'Go to start', group: 'Playback' },
+    s: { run: () => clock.setRate(clock.getState().rate === 1 ? 0.25 : 1), label: 'Slow motion', group: 'Playback' },
+  } : {}, [allKeys, region, hotkeys], { priority: 0 })
+
+  const nextMode = mode === 'loop' ? 'pingpong' : mode === 'pingpong' ? 'once' : 'loop'
+  const ModeIcon = mode === 'loop' ? Repeat : mode === 'pingpong' ? ArrowRightLeft : Repeat1
+  const modeLabel = mode === 'loop' ? 'Looping' : mode === 'pingpong' ? 'Ping-pong' : 'Play once'
 
   const docked = layout === 'docked'
   return (
@@ -99,14 +106,14 @@ export function Timeline({
         <button type="button" onClick={() => setTimeMode(timeMode === 'seconds' ? 'frames' : timeMode === 'frames' ? 'timecode' : 'seconds')}
           className="ml-1 flex h-7 items-baseline gap-1 rounded-[6px] px-2 tabular text-[12px] text-fg hover:bg-hover" title="Click to change units">
           {fmtTime(t, timeMode, fps)}
-          <span className="text-[11px] text-faint">/ {fmtTime(duration, timeMode, fps)}</span>
+          <span className="text-[11px] text-fg-faint">/ {fmtTime(duration, timeMode, fps)}</span>
         </button>
         <div className="flex-1" />
         {extra}
-        <IconButton icon={loop ? Repeat : Repeat1} label={loop ? 'Looping' : 'Play once'} tipSide="top" active={loop} onClick={() => clock.setState({ loop: !loop })} />
+        <IconButton icon={ModeIcon} label={`${modeLabel} — click for ${nextMode === 'pingpong' ? 'ping-pong' : nextMode}`} tipSide="top" active={mode !== 'once'} onClick={() => clock.setState({ mode: nextMode })} />
         <Menu
           side="top" align="end"
-          trigger={<button type="button" className={cn('flex h-7 items-center gap-1 rounded-[6px] px-1.5 tabular text-[11.5px] hover:bg-hover', rate !== 1 ? 'text-accent' : 'text-muted')}><Gauge size={13} strokeWidth={1.5} />{rate}×</button>}
+          trigger={<button type="button" className={cn('flex h-7 items-center gap-1 rounded-[6px] px-1.5 tabular text-[11.5px] hover:bg-hover', rate !== 1 ? 'text-signal' : 'text-fg-muted')}><Gauge size={13} strokeWidth={1.5} />{rate}×</button>}
           items={[0.1, 0.25, 0.5, 1, 2].map((r) => ({ label: `${r}×`, checked: r === rate, onClick: () => clock.setRate(r), shortcut: r === 0.25 ? 's' : undefined }))}
         />
         {collapsible && (
@@ -190,12 +197,12 @@ function TrackArea({
 
   const playX = X(t)
   return (
-    <div className="flex min-h-0 border-t border-line" style={{ height: height ?? Math.min(36 + lanes.length * 24 + 8, 240) }} onWheel={onWheel}>
+    <div className="flex min-h-0 overflow-y-auto overflow-x-hidden border-t border-line" style={{ maxHeight: height ?? 240, height: 28 + lanes.length * 24 + 8 }} onWheel={onWheel}>
       {/* names */}
       <div className="flex-none overflow-hidden border-r border-line" style={{ width: LABEL_W }}>
         <div className="h-7" />
         {lanes.map((l) => (
-          <div key={l.id} className="flex h-6 items-center gap-1.5 pr-2 text-[11.5px] text-muted" style={{ paddingLeft: 12 + (l.depth ?? 0) * 12 }}>
+          <div key={l.id} className="flex h-6 items-center gap-1.5 pr-2 text-[11.5px] text-fg-muted" style={{ paddingLeft: 12 + (l.depth ?? 0) * 12 }}>
             <span className="size-1.5 shrink-0 rounded-full" style={{ background: l.color ?? 'var(--lane)' }} />
             <span className="truncate">{l.label}</span>
           </div>
@@ -210,11 +217,11 @@ function TrackArea({
             return (
               <div key={m} className="pointer-events-none absolute bottom-0" style={{ left: X(m) }}>
                 <div className={cn('w-px', major ? 'h-2 bg-line-strong' : 'h-1 bg-line')} />
-                {major && <div className="absolute bottom-2.5 left-1 tabular text-[10px] text-faint">{m >= 1000 ? `${m / 1000}s` : `${m}ms`}</div>}
+                {major && <div className="absolute bottom-2.5 left-1 tabular text-[10px] text-fg-faint">{m >= 1000 ? `${m / 1000}s` : `${m}ms`}</div>}
               </div>
             )
           })}
-          {region && <div className="pointer-events-none absolute top-0 bottom-0 bg-accent/15 shadow-[inset_1px_0_var(--accent),inset_-1px_0_var(--accent)]" style={{ left: X(region[0]), width: X(region[1]) - X(region[0]) }} />}
+          {region && <div className="pointer-events-none absolute top-0 bottom-0 bg-signal/15 shadow-[inset_1px_0_var(--signal),inset_-1px_0_var(--signal)]" style={{ left: X(region[0]), width: X(region[1]) - X(region[0]) }} />}
         </div>
         <div className="absolute inset-x-0 top-7 bottom-0">
           {lanes.map((l, i) => {
@@ -223,19 +230,19 @@ function TrackArea({
               <div key={l.id} className="absolute inset-x-0 h-6" style={{ top: i * 24 }}>
                 {(l.kind ?? 'bar') === 'bar' && (
                   <div className="absolute top-[7px] h-2.5 rounded-full transition-opacity"
-                    style={{ left: X(l.start ?? 0), width: Math.max(4, X(l.end ?? 0) - X(l.start ?? 0)), background: l.color ?? 'var(--accent)', opacity: active ? 1 : 0.38 }} />
+                    style={{ left: X(l.start ?? 0), width: Math.max(4, X(l.end ?? 0) - X(l.start ?? 0)), background: l.color ?? 'var(--signal)', opacity: active ? 1 : 0.38 }} />
                 )}
                 {l.kind === 'keys' && l.keys && (
                   <>
                     {l.keys.slice(1).map((k, j) => {
                       const a = l.keys![j]
                       const hold = a.value !== undefined && a.value === k.value
-                      return <div key={j} className={cn('absolute top-[11px] h-0.5', hold ? 'border-t border-dashed border-faint' : 'bg-line-strong')} style={{ left: X(a.t), width: X(k.t) - X(a.t) }} />
+                      return <div key={j} className={cn('absolute top-[11px] h-0.5', hold ? 'border-t border-dashed border-fg-faint' : 'bg-line-strong')} style={{ left: X(a.t), width: X(k.t) - X(a.t) }} />
                     })}
                     {l.keys.map((k, j) => (
                       <button key={j} type="button" aria-label={`Key at ${fmtTime(k.t)}`} onClick={() => { clock.pause(); clock.seek(k.t); onKeyClick?.(l, k) }}
                         className={cn('absolute top-[7px] size-[9px] -translate-x-1/2 rotate-45 rounded-[1.5px] outline-none',
-                          k.selected ? 'bg-accent' : 'bg-fg/80 hover:bg-fg', Math.abs(k.t - t) < 1 && 'ring-2 ring-accent/60')}
+                          k.selected ? 'bg-signal' : 'bg-fg/80 hover:bg-fg', Math.abs(k.t - t) < 1 && 'ring-2 ring-signal/60')}
                         style={{ left: X(k.t) }} />
                     ))}
                   </>
@@ -243,7 +250,7 @@ function TrackArea({
                 {l.kind === 'markers' && l.keys?.map((k, j) => (
                   <div key={j} className="absolute top-1 flex -translate-x-px items-center gap-1" style={{ left: X(k.t) }}>
                     <div className="h-4 w-0.5 rounded-full" style={{ background: l.color ?? 'var(--key)' }} />
-                    {k.value !== undefined && <span className="text-[10px] text-muted">{k.value}</span>}
+                    {k.value !== undefined && <span className="text-[10px] text-fg-muted">{k.value}</span>}
                   </div>
                 ))}
               </div>

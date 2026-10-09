@@ -7,7 +7,7 @@ import { copyText, download, recordCanvas, stamp, toast, toastManager } from '@k
 import { ShaderRenderer } from './renderer'
 import { buildShader, uniformValues } from './codegen'
 import { clock, getLayers, params, type V } from './state'
-import { recordFrames } from './local/recordFrames'
+import { recordFrames } from '@kit'
 import type { Layer } from './layers'
 
 export const ASPECTS: Record<string, number> = { '16:9': 16 / 9, '1:1': 1, '9:16': 9 / 16 }

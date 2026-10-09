@@ -36,7 +36,7 @@ npx shadcn@latest add https://OWNER.github.io/prototype-studio/r/studio.json -y
   @import "./components/studio/theme.css";
   ```
   Last, not first: shadcn's own theme also defines `muted`, `accent`, `input` and
-  `font-sans`. Imported first, the kit loses — labels vanish in dark, the accent turns
+  `font-ui`. Imported first, the kit loses — labels vanish in dark, the accent turns
   white, the font becomes Geist. Tailwind v4 accepts an `@import` at the end.
   For a dedicated harness project you can delete shadcn's tokens from the file
   entirely and keep just `@import "tailwindcss";` plus this line.

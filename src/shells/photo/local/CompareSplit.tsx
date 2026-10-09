@@ -49,7 +49,7 @@ export function CompareSplit({ value, onChange, before = 'Before', after = 'Afte
         style={{ left: `${value * 100}%`, width: 16 * s, transform: 'translateX(-50%)' }}
       >
         <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 bg-white shadow-[0_0_3px_rgba(0,0,0,.5)]" style={{ width: 1.5 * s }} />
-        <div className="absolute top-1/2 left-1/2 flex items-center justify-center rounded-full bg-white text-black shadow-[0_1px_4px_rgba(0,0,0,.45)] group-focus-visible/split:ring-2 group-focus-visible/split:ring-accent"
+        <div className="absolute top-1/2 left-1/2 flex items-center justify-center rounded-full bg-white text-black shadow-[0_1px_4px_rgba(0,0,0,.45)] group-focus-visible/split:ring-2 group-focus-visible/split:ring-signal"
           style={{ width: 28, height: 28, transform: `translate(-50%,-50%) scale(${s})` }}>
           <ChevronsLeftRight size={14} strokeWidth={1.75} />
         </div>

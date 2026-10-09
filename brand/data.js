@@ -185,6 +185,7 @@ export const voice = {
 export const round2Lenses = [
   { title: 'Spanish and Latin', body: 'Words that translate close to what we’d call it in English: harness, stage machinery, the frame around the work, the marionette’s controls.' },
   { title: 'Historical tools', body: 'Instruments that held, framed or steered someone else’s work, from Greek stage machinery and the letterpress to the draughtsman’s spline weights.' },
+  { title: 'Inventors', body: 'People who built machines that made other things move: automata-makers, stage engineers, the inventor of the remote control.' },
   { title: 'Pop culture', body: 'Controls that brought something to life on screen: Henson’s waldos, Star Trek’s panels, the ILM model shop and Chaplin’s footlights.' },
 ]
 
@@ -201,6 +202,24 @@ export const names2 = [
   { name: 'Periaktos', lens: 'History', idea: 'A Greek stage device: a three-sided prism you turn to change the scene. The original preset switcher, and Vitruvius described it.',
     npm: 'free', scope: 'free', gh: 'free', repos: '1 repo, ★0', domains: { free: ['.dev', '.studio', '.design', '.tools'], taken: ['.com (parked)'] },
     web: 'Nothing found. It is hard to spell and to say.', verdict: 'short' },
+  { name: 'Juanelo', lens: 'Inventors', idea: 'Juanelo Turriano, clockmaker to Charles V. He built automata (a lute-playing lady that walks and tilts her head) and the Artificio that lifted the Tagus up to Toledo.',
+    npm: 'free', scope: 'taken (empty, no packages) · use juanelo unscoped', gh: 'taken (empty user, 2012) · juanelo-dev, juanelohq free', repos: '24 repos, all tiny', domains: { free: ['.studio', '.design', '.tools', '.app'], taken: ['.com', '.dev'] },
+    web: 'Fundación Juanelo Turriano, a history-of-engineering foundation. No software.', verdict: 'short' },
+  { name: 'Torelli', lens: 'Inventors', idea: 'Giacomo Torelli, “il gran stregone”. His chariot-and-pole system let one stagehand at one winch change every piece of scenery at once. Presets, in 1641.',
+    npm: 'free', scope: 'taken', gh: 'taken (active developer)', repos: '133 repos (surname)', domains: { free: ['.studio', '.design', '.tools'], taken: ['.com', '.dev'] },
+    web: 'A common Italian surname, so it’s hard to own in search.', verdict: 'reserve' },
+  { name: 'Jazari', lens: 'Inventors', idea: 'Al-Jazari (1136–1206), author of The Book of Knowledge of Ingenious Mechanical Devices. His automata musicians were driven by cams and pegs.',
+    npm: 'free', scope: 'free', gh: 'taken (empty user, 2012)', repos: '130 repos (al-jazari livecoding game ★8)', domains: { free: ['.studio', '.design', '.tools'], taken: ['.com', '.dev'] },
+    web: 'Nothing big in software. It’s a heritage name, so use it with care and credit.', verdict: 'reserve' },
+  { name: 'Telekino', lens: 'Inventors', idea: 'Leonardo Torres Quevedo’s 1903 radio remote control. In 1906 he steered a boat in the Bilbao estuary from the shore.',
+    npm: 'free', scope: 'free', gh: 'taken (empty user, 2018) · telekino-dev free', repos: '11 repos, tiny', domains: { free: ['.dev', '.studio', '.design', '.tools'], taken: ['.com', '.app'] },
+    web: 'Telekino is a big Argentine lottery (since 1992), and scam casino apps trade on the name. The story is lovely but the association is strong.', verdict: 'pass' },
+  { name: 'Marey', lens: 'Inventors', idea: 'Étienne-Jules Marey graphed motion over time, the ancestor of every timeline.',
+    npm: 'free', scope: 'free', gh: 'taken (active developer)', repos: '264 repos', domains: { free: ['.design', '.tools', '.app'], taken: ['.com', '.dev', '.studio'] },
+    web: 'Marey is Moonvalley’s AI video model, a funded creative-tools product. Out.', verdict: 'pass' },
+  { name: 'Maillardet', lens: 'Inventors', idea: 'Henri Maillardet’s drawing automaton (c. 1800) inspired the film Hugo.',
+    npm: 'free', scope: 'free', gh: 'free', repos: '3 repos, ★0', domains: { free: ['.dev', '.studio'], taken: ['.com'] },
+    web: 'Nothing in software. Hard to spell and to say (my-ar-DAY).', verdict: 'pass' },
   { name: 'Candileja', lens: 'Pop culture', idea: 'Stage footlights. Chaplin’s Limelight was released in Spanish as “Candilejas”.',
     npm: 'free', scope: 'free', gh: 'free', repos: '4 repos, ★0', domains: { free: ['.dev', '.studio'], taken: ['.com'] },
     web: 'Nothing in software. The “j” trips English speakers (can-dee-LEH-ha).', verdict: 'reserve' },
@@ -240,7 +259,8 @@ export const names2 = [
 export const alsoChecked2 = ['Atril (music stand)', 'Ensayo (rehearsal)', 'Plantilla (template/jig)', 'Pollex (Latin: thumb)', 'Pulgar (thumb)', 'Diapasón (tuning fork)',
   'Ingenio / Ingenium (engine, ingenuity)', 'Opifex / Artifex (maker)', 'Vectis (lever)', 'Norma (carpenter’s square)', 'Tablero (board)', 'Cardo (hinge)', 'Tempera',
   'Libella (little balance)', 'Templa', 'Templador (tuning key)', 'Afina / Afinador (tune / tuner)', 'Sargento (F-clamp)', 'Aparejo (rigging)', 'Apuntador (prompter)',
-  'Telón (curtain)', 'Bambalina (border curtain)', 'Perilla (knob)', 'Mahlstick', 'Mechane', 'Tenter', 'Tympan', 'Heddle', 'Kitbash', 'Okudagram', 'Bilancino (Italian marionette control)']
+  'Telón (curtain)', 'Turriano', 'Ingegno (Brunelleschi’s stage machines)', 'Sabbatini (1638 stage-machine manual)', 'Vaucanson', 'Archytas', 'Ctesibius', 'Loutherbourg (Eidophusikon)',
+  'Reynaud / Praxinoscope', 'Reiniger', 'Camarena', 'Heron (taken)', 'Muybridge (taken)', 'Houdin (taken)', 'Bambalina (border curtain)', 'Perilla (knob)', 'Mahlstick', 'Mechane', 'Tenter', 'Tympan', 'Heddle', 'Kitbash', 'Okudagram', 'Bilancino (Italian marionette control)']
 
 export const shortlist2 = [
   {
@@ -266,7 +286,7 @@ export const shortlist2 = [
   {
     id: 'bastidor', name: 'Bastidor', recommended: false, say: 'bas-tee-DOR', short: 'The frame around the work',
     why: 'Four meanings and every one fits: the stretcher a painter tightens a canvas on, the embroidery hoop, a car chassis and the theatre wings. All of them are the frame that holds someone else’s work. “Entre bastidores” means behind the scenes.',
-    watch: 'bastidor.com is an embroidery shop and the GitHub org is empty but held (bastidorhq is free). In English it sounds a little like “matador”, which is fun or awkward depending on taste.',
+    watch: 'bastidor.com is an embroidery shop and the GitHub org is empty but held (bastidorhq is free). In English it sounds a little like “matador”. The hoop mark is a first draft and can read as a stopwatch.',
     font: { family: '"Fraunces", Georgia, serif', weight: 600, tracking: '-0.02em', case: 'lower', label: 'Fraunces SemiBold' },
     colors: { light: { ink: '#1D1B19', acc: '#2F3E8F', bg: '#EFE8DA' }, dark: { ink: '#EFE8DA', acc: '#8E9CFF', bg: '#1D1B19' } },
     palette: [{ name: 'Ink', hex: '#1D1B19' }, { name: 'Linen', hex: '#EFE8DA' }, { name: 'Indigo thread', hex: '#2F3E8F' }, { name: 'Beech', hex: '#D9B98C' }, { name: 'Madder', hex: '#A33B2A' }],
@@ -274,9 +294,19 @@ export const shortlist2 = [
     handle: 'bastidorhq', domain: 'bastidor.dev',
   },
   {
+    id: 'juanelo', name: 'Juanelo', recommended: false, say: 'hwah-NEH-lo', short: 'The inventor who made machines move',
+    why: 'A real person and a real story. Charles V brought Juanelo Turriano to Spain as court clockmaker. In retirement he built small automata to lift the emperor’s moods, including a lady who walks and plays the lute. He also built the Artificio, which carried water from the Tagus up to Toledo. It’s a warm, friendly name (it means “little Juan”), and nobody in software has it.',
+    watch: 'juanelo.com and .dev are taken, and the @juanelo npm scope exists (empty), so you’d ship as plain juanelo on juanelo.studio. English speakers may say “joo-an-ELL-o” until they hear it.',
+    font: { family: '"EB Garamond", Georgia, serif', weight: 500, tracking: '-0.01em', case: 'title', label: 'EB Garamond Medium' },
+    colors: { light: { ink: '#1A1714', acc: '#9C6F1A', bg: '#EFE8DA' }, dark: { ink: '#EFE8DA', acc: '#D9A84A', bg: '#1A1714' } },
+    palette: [{ name: 'Ink', hex: '#1A1714' }, { name: 'Toledo stone', hex: '#EFE8DA' }, { name: 'Brass', hex: '#B8892E' }, { name: 'Tajo green', hex: '#2E5E55' }, { name: 'Clock face', hex: '#FAF7F0' }],
+    taglines: ['Machines that make things move.', 'Wind it up. Watch it go.', 'Automata for the prototype age.'],
+    handle: 'juanelohq', domain: 'juanelo.studio',
+  },
+  {
     id: 'periaktos', name: 'Periaktos', recommended: false, say: 'peh-ree-AK-tos', short: 'Turn it to change the scene',
     why: 'This is the deep cut. Greek theatres had three-sided prisms with a different scene painted on each face, and a stagehand turned them to change the scene. That’s presets and A/B switching, about 2,000 years early. It’s free on every check, and nobody else will have it.',
-    watch: 'It’s hard to spell and to say, so people will have to see it written before they can find it. Best if you want the brand to feel scholarly.',
+    watch: 'It’s hard to spell and to say, so people will have to see it written before they can find it. Best if you want the brand to feel scholarly. The triangle-and-dot draft edges towards a warning sign or the all-seeing eye, so it needs another pass.',
     font: { family: '"Marcellus", Georgia, serif', weight: 400, tracking: '0.01em', case: 'title', label: 'Marcellus' },
     colors: { light: { ink: '#191817', acc: '#C0562F', bg: '#EEEBE5' }, dark: { ink: '#EEEBE5', acc: '#E07650', bg: '#191817' } },
     palette: [{ name: 'Ink', hex: '#191817' }, { name: 'Marble', hex: '#EEEBE5' }, { name: 'Terracotta', hex: '#C0562F' }, { name: 'Olive', hex: '#6E7346' }, { name: 'Aegean', hex: '#1F5C8C' }],
@@ -292,6 +322,121 @@ export const stories = [
   { title: 'Okudagrams', era: 'Star Trek: The Next Generation, 1987', body: 'Michael Okuda designed the LCARS control panels so they looked usable at a glance on screen. That’s presentation-grade chrome, in prop form.' },
   { title: 'Kitbashing', era: 'ILM model shop, Star Wars, 1977', body: 'Model-makers built starships from parts of off-the-shelf kits. Installing component by component has a lineage.' },
   { title: 'Candilejas', era: 'Chaplin, Limelight, 1952', body: 'The Spanish title was “Candilejas”, the footlights. Present mode is the footlights.' },
+  { title: 'Torelli’s one winch', era: 'Venice and Paris, 1641–1645', body: 'Giacomo Torelli tied every wing and shutter to one drum under the stage. One stagehand turned it, the whole scene changed in view of the audience, and they called him the great sorcerer. That’s a preset.' },
+  { title: 'The Telekino', era: 'Torres Quevedo, 1903–1906', body: 'A Spanish engineer sent coded radio commands to steer a boat full of people around the Bilbao estuary from the shore. The first remote control, and our bridge, in spirit.' },
+  { title: 'The lute-playing lady', era: 'Juanelo Turriano, 1550s', body: 'In retirement, Charles V’s clockmaker built tiny automata to cheer him up. The lute-playing lady attributed to him walks, turns her head and plays.' },
   { title: 'Deus ex machina', era: 'Greek theatre, 5th c. BC', body: 'The mechane was a crane that lowered gods onto the stage. Machinery has always been part of the show.' },
   { title: 'The man behind the curtain', era: 'The Wizard of Oz, 1939', body: '“Pay no attention to the man behind the curtain.” Good chrome gets out of the way of the show.' },
+]
+
+/* ---------------------------------------------------------------------------
+   Round 3 — cute prefixes, toys, fictional makers. Checked 9 Oct 2026, same method.
+--------------------------------------------------------------------------- */
+
+export const round3Lenses = [
+  { title: 'Cute prefixes', body: 'lil-, lite- and the Spanish diminutive -ita. “Lite” reads as the cut-down edition, so it’s out. “lil” is cute but echoes lil-gui, a panel we position against.' },
+  { title: 'Toys', body: 'Things you fiddle with for the joy of it: spinning tops, cup-and-ball, pinwheels, the toddler’s busy board of knobs and switches.' },
+  { title: 'Fictional makers', body: 'Characters who built things that came alive: Geppetto, Drosselmeyer, Coppélius, Pygmalion, Daedalus, Professor Calculus.' },
+]
+
+export const names3 = [
+  { name: 'Trompo', lens: 'Toys', idea: 'The Latin American spinning top: wind the string, throw, and it comes alive. In Mexico it’s also the spit that turns tacos al pastor.',
+    npm: 'free', scope: 'free', gh: 'taken (empty user, 2009) · trompo-dev, trompohq free', repos: '56 repos, tiny', domains: { free: ['.dev', '.studio', '.design', '.tools', '.io'], taken: ['.com', '.app'] },
+    web: 'Trompo App is a small Spanish food-delivery app, and Twisted Trompo is a restaurant app. Different worlds, but it’s not empty.', verdict: 'short' },
+  { name: 'Ruedita', lens: 'Cute prefixes', idea: '“Little wheel”: the lil- idea done the Spanish way, and Thumbwheel’s cute cousin.',
+    npm: 'free', scope: 'free', gh: 'taken (empty user, 2024) · ruedita-dev, rueditahq free', repos: '86 repos, tiny', domains: { free: ['.dev', '.studio', '.design', '.tools', '.io'], taken: ['.com', '.app'] },
+    web: 'Nothing named Ruedita in software (Ruedata is a tyre platform).', verdict: 'short' },
+  { name: 'Lilknob', lens: 'Cute prefixes', idea: 'Exactly what it says: a lil knob.',
+    npm: 'free', scope: 'free', gh: 'free', repos: 'none', domains: { free: ['.com', '.dev', '.studio', '.app'], taken: [] },
+    web: 'Nothing found, and it’s the only name with the .com free and every check clean. But “lil” sits right next to lil-gui.', verdict: 'short' },
+  { name: 'Tornasol', lens: 'Fictional makers', idea: 'Professor Calculus’s Spanish name in Tintin (Silvestre Tornasol), the inventor of the series. As a word it’s the shimmer of colour that shifts as you turn something, as well as litmus and sunflower.',
+    npm: 'free', scope: 'free', gh: 'taken (user, 2016) · tornasol-dev, tornasolhq free', repos: '31 repos, tiny', domains: { free: ['.dev', '.studio', '.design', '.tools', '.io'], taken: ['.com', '.app'] },
+    web: 'Tornasol Studio is a Madrid product-design collective, and there’s a small caregiving app. Lean on the everyday word, not on Tintin.', verdict: 'short' },
+  { name: 'Lildial', lens: 'Cute prefixes', idea: 'A lil dial.', npm: 'free', scope: 'free', gh: 'free', repos: 'none',
+    domains: { free: ['.com', '.dev', '.app'], taken: [] }, web: 'All clear, but it has the same lil-gui echo.', verdict: 'reserve' },
+  { name: 'Drosselmeyer', lens: 'Fictional makers', idea: 'The Nutcracker’s godfather: a clockmaker and inventor who built every mechanical toy in the house, and fixed the nutcracker.',
+    npm: 'free', scope: '—', gh: 'taken (active user)', repos: '72 repos', domains: { free: ['.dev', '.studio'], taken: ['.com'] },
+    web: 'Nothing in software. At twelve letters with a German spelling, it’s a lot to type.', verdict: 'reserve' },
+  { name: 'Busyboard', lens: 'Toys', idea: 'The toddler’s board of knobs, latches and switches, made to be fiddled with.', npm: 'free', scope: 'free', gh: 'taken (empty, 2011)', repos: '48 repos, tiny',
+    domains: { free: ['.dev', '.studio'], taken: ['.com'] }, web: 'Nothing big. But “busy” fights the calm-chrome promise.', verdict: 'reserve' },
+  { name: 'Perillita', lens: 'Cute prefixes', idea: '“Little knob” in Spanish.', npm: 'free', scope: '—', gh: 'free', repos: 'none',
+    domains: { free: ['.com', '.dev'], taken: [] }, web: 'Clean, but hard to say in English (peh-ree-YEE-ta).', verdict: 'reserve' },
+  { name: 'Juguetero', lens: 'Toys', idea: 'Spanish for toymaker.', npm: 'free', scope: '—', gh: 'taken', repos: '2 repos',
+    domains: { free: ['.dev', '.studio'], taken: ['.com'] }, web: 'Nothing in software, but it’s long and hard for English speakers.', verdict: 'reserve' },
+  { name: 'Balero', lens: 'Toys', idea: 'The cup-and-ball toy. In Mexico it also means a ball bearing.', npm: 'free', scope: 'free', gh: 'taken (empty, 2010)', repos: '60 repos',
+    domains: { free: ['.studio', '.design', '.tools', '.app', '.io'], taken: ['.com', '.dev'] }, web: 'Balero Labs is a Uruguayan software company, and there’s also a Balero Ventures.', verdict: 'pass' },
+  { name: 'Teetotum', lens: 'Toys', idea: 'An old spinning top with letters on its sides: spin it, and the face it lands on decides.', npm: 'free', scope: 'taken', gh: 'taken (active developer)', repos: '17 repos',
+    domains: { free: ['.dev', '.studio'], taken: ['.com'] }, web: 'Hard to say and the scope is taken.', verdict: 'pass' },
+  { name: 'Rehilete', lens: 'Toys', idea: 'The Mexican pinwheel.', npm: 'free', scope: '—', gh: 'taken (Estudio Mixtli)', repos: '8 repos',
+    domains: { free: ['.dev', '.studio'], taken: ['.com'] }, web: 'A design studio holds the handle, and it’s hard to say.', verdict: 'pass' },
+  { name: 'Papalote', lens: 'Toys', idea: 'The Mexican word for kite.', npm: 'free', scope: '—', gh: 'taken', repos: '58 repos',
+    domains: { free: [], taken: [] }, web: 'Papalote Museo del Niño is the big children’s museum in Mexico City.', verdict: 'pass' },
+  { name: 'Perinola', lens: 'Toys', idea: 'The Mexican teetotum (“toma todo”).', npm: 'free', scope: '—', gh: 'taken', repos: '55 repos',
+    domains: { free: [], taken: [] }, web: 'It’s rude slang in some countries.', verdict: 'pass' },
+  { name: 'Knobby', lens: 'Cute prefixes', idea: 'Cute knob.', npm: 'free', scope: '—', gh: 'taken', repos: 'svelte-knobby ★202, knobby ★215',
+    domains: { free: [], taken: [] }, web: 'svelte-knobby is a tuning-panel library in our exact space. Out.', verdict: 'pass' },
+  { name: 'Coppelius', lens: 'Fictional makers', idea: 'The toymaker in the ballet Coppélia, whose doll seems alive.', npm: 'free', scope: '—', gh: 'taken', repos: 'CoppeliaSim (robotics) ★152',
+    domains: { free: [], taken: [] }, web: 'CoppeliaSim is a well-known robot simulator, and Hoffmann’s original Coppelius is sinister.', verdict: 'pass' },
+  { name: 'Gearloose', lens: 'Fictional makers', idea: 'Gyro Gearloose, Disney’s inventor.', npm: 'free', scope: '—', gh: 'taken', repos: '18 repos',
+    domains: { free: [], taken: [] }, web: 'This is a Disney character, so don’t.', verdict: 'pass' },
+  { name: 'Geppetto', lens: 'Fictional makers', idea: 'Pinocchio’s woodcarver, who made a puppet that came alive.', npm: 'taken', scope: '—', gh: 'taken', repos: '341 repos',
+    domains: { free: [], taken: [] }, web: 'Several AI products already use Gepetto/Geppetto.', verdict: 'taken' },
+  { name: 'Pygmalion', lens: 'Fictional makers', idea: 'The sculptor whose statue came to life.', npm: 'taken', scope: '—', gh: 'taken', repos: '186 repos',
+    domains: { free: [], taken: [] }, web: 'Taken.', verdict: 'taken' },
+  { name: 'Daedalus', lens: 'Fictional makers', idea: 'The myth’s master craftsman: the labyrinth, the wings.', npm: 'taken', scope: '—', gh: 'taken', repos: '2k repos',
+    domains: { free: [], taken: [] }, web: 'Taken many times over.', verdict: 'taken' },
+]
+
+export const alsoChecked3 = ['Lilrig', 'Lilstudio', 'Lilwheel', 'Lilthumb', 'Lilstage', 'Lilfader', 'Liltweak', 'Lilscrub', 'Lilknobs', 'Litestudio', 'Literig', 'Litedial', 'Litejig',
+  'Tinyknob', 'Weeknob', 'Knoblet', 'Knobble (Knobbler controller)', 'Palanquita', 'Twiddle', 'Twiddly', 'Nudgy', 'Slidey', 'Fiddly', 'Doohickey', 'Thingamajig', 'Whirligig',
+  'Pinwheel', 'Zoetrope', 'Thaumatrope', 'Windup', 'Jumpingjack', 'Playset', 'Kendama', 'Hurdy-gurdy', 'Tinbot', 'Bobble', 'Gepeto', 'Drossel', 'Coppelia', 'Ilmarinen',
+  'Weland', 'Luthier', 'Rumpel', 'Penelope']
+
+export const shortlist3 = [
+  {
+    id: 'trompo', name: 'Trompo', recommended: true, say: 'TROM-po', short: 'Wind it, throw it, watch it spin',
+    why: 'This is the cute name that still sounds like a product. Six letters, two syllables, easy in English, and a toy every Latin American kid knows. The spinning top is a lovely metaphor for a prototype: inert in your hand, alive once you give it a spin. The mark draws itself.',
+    watch: 'A small Spanish food-delivery app and a restaurant ordering app use “Trompo”, so you’d need to own it in design-tool search. Some people will think of tacos al pastor first, which might be a plus.',
+    font: { family: '"Fredoka", "Inter", sans-serif', weight: 600, tracking: '-0.02em', case: 'lower', label: 'Fredoka SemiBold' },
+    colors: { light: { ink: '#1C1A19', acc: '#D1006F', bg: '#F6F1EA' }, dark: { ink: '#F6F1EA', acc: '#FF3EA5', bg: '#1C1A19' } },
+    palette: [{ name: 'Ink', hex: '#1C1A19' }, { name: 'Paper', hex: '#F6F1EA' }, { name: 'Rosa mexicano', hex: '#E4007C' }, { name: 'Wood', hex: '#C58B4E' }, { name: 'Turquesa', hex: '#1E9AA0' }],
+    taglines: ['Give it a spin.', 'Wind it up. Let it go.', 'Every prototype wants to spin.'],
+    handle: 'trompo-dev', domain: 'trompo.dev',
+  },
+  {
+    id: 'ruedita', name: 'Ruedita', recommended: false, say: 'rweh-DEE-ta', short: 'The lil wheel',
+    why: 'This is the “lil” brief done in Spanish, without the lil-gui echo. It literally means little wheel, so it’s Thumbwheel’s friendlier cousin, and it’s clean in software. The diminutive makes it affectionate rather than technical.',
+    watch: 'English speakers will need to hear it once. .com and .app are taken, but .dev, .studio, .design, .tools and .io are free.',
+    font: { family: '"Nunito", "Inter", sans-serif', weight: 800, tracking: '-0.02em', case: 'lower', label: 'Nunito ExtraBold' },
+    colors: { light: { ink: '#1A1B1F', acc: '#E0A800', bg: '#F5F1E8' }, dark: { ink: '#F5F1E8', acc: '#F5C84B', bg: '#1A1B1F' } },
+    palette: [{ name: 'Ink', hex: '#1A1B1F' }, { name: 'Cream', hex: '#F5F1E8' }, { name: 'Butter', hex: '#F5C84B' }, { name: 'Tomato', hex: '#F0533A' }, { name: 'Sky', hex: '#5AA9E6' }],
+    taglines: ['Roll it till it’s right.', 'A lil wheel for every value.', 'Small wheel. Big studio.'],
+    handle: 'ruedita-dev', domain: 'ruedita.dev',
+  },
+  {
+    id: 'lilknob', name: 'Lilknob', recommended: false, say: 'LIL-nob', short: 'A lil knob',
+    why: 'This is the cleanest name in all three rounds: npm, scope, GitHub, .com, .dev, .studio and .app are all free. It’s instantly understood, impossible to misspell and plainly cute. The mark is a knob that smiles back.',
+    watch: 'lil-gui is one of the debug panels we position against, so “lil” invites the comparison. And in British English “knob” is a mild insult, which is the same problem Knobwork had in round 1.',
+    font: { family: '"Sniglet", "Inter", sans-serif', weight: 800, tracking: '-0.01em', case: 'lower', label: 'Sniglet ExtraBold' },
+    colors: { light: { ink: '#1B1C1A', acc: '#149E72', bg: '#F2F4EE' }, dark: { ink: '#F2F4EE', acc: '#4BE0AE', bg: '#1B1C1A' } },
+    palette: [{ name: 'Ink', hex: '#1B1C1A' }, { name: 'Paper', hex: '#F2F4EE' }, { name: 'Mint', hex: '#3CCB9A' }, { name: 'Peach', hex: '#FFB59A' }, { name: 'Pebble', hex: '#B9BCB4' }],
+    taglines: ['Turn it up a lil.', 'Lil knobs, big tools.', 'Every prototype needs a lil knob.'],
+    handle: 'lilknob', domain: 'lilknob.com',
+  },
+  {
+    id: 'tornasol', name: 'Tornasol', recommended: false, say: 'tor-na-SOL', short: 'Colour that shifts as you turn it',
+    why: 'Fans know it as Professor Calculus’s Spanish name in Tintin, the series’ absent-minded inventor. Everyone else hears the everyday word: “tornasolado” is the iridescent shimmer that changes as you turn something. That’s a design tool in one word, and it says itself in English.',
+    watch: 'Tornasol Studio, a Madrid product-design collective, shares the name, so it overlaps with the design world. Don’t lean on Tintin, because the Hergé estate is famously protective. Sell the shimmer, not the professor.',
+    font: { family: '"Syne", "Inter", sans-serif', weight: 700, tracking: '-0.02em', case: 'lower', label: 'Syne Bold' },
+    colors: { light: { ink: '#161616', acc: '#0E6E7E', acc2: '#C2368F', bg: '#F3F1EC' }, dark: { ink: '#F3F1EC', acc: '#2BB3C4', acc2: '#F062B5', bg: '#161616' } },
+    palette: [{ name: 'Ink', hex: '#161616' }, { name: 'Paper', hex: '#F3F1EC' }, { name: 'Petrol', hex: '#0E6E7E' }, { name: 'Magenta', hex: '#C2368F' }, { name: 'Gold', hex: '#E5B53A' }],
+    taglines: ['Turn it. Watch it change.', 'Every angle of your idea.', 'Design that shifts in the light.'],
+    handle: 'tornasol-dev', domain: 'tornasol.dev',
+  },
+]
+
+export const stories3 = [
+  { title: 'Penelope’s loom', era: 'The Odyssey', body: 'She wove a shroud by day and unpicked it by night to keep her suitors waiting. The oldest undo in literature.' },
+  { title: 'Drosselmeyer’s castle', era: 'Hoffmann, 1816', body: 'The godfather clockmaker builds a clockwork castle where tiny figures walk the halls. The children love it for a minute, then want to change what the figures do. Every client demo, ever.' },
+  { title: 'The busy board', era: 'Every toddler’s bedroom', body: 'A plank of knobs, latches and switches whose only job is to be fiddled with. Fiddling is how you learn what a thing can do.' },
 ]

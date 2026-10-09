@@ -48,7 +48,7 @@ export function DenoisePreview({ src, progress, label, className, running = true
           <span className="tabular min-w-0 flex-1 truncate">{label}</span>
         </div>
       )}
-      <div className="absolute inset-x-0 bottom-0 h-[2px] bg-white/10"><div className="h-full bg-accent transition-[width] duration-100" style={{ width: `${p * 100}%` }} /></div>
+      <div className="absolute inset-x-0 bottom-0 h-[2px] bg-white/10"><div className="h-full bg-signal transition-[width] duration-100" style={{ width: `${p * 100}%` }} /></div>
       {children}
     </div>
   )

@@ -23,8 +23,8 @@ function CardButton({ label, shortcut, onClick, children, on }: { label: string;
   return (
     <Tip label={label} shortcut={shortcut}>
       <button type="button" aria-label={label} aria-pressed={on} onClick={(e) => { e.stopPropagation(); onClick() }}
-        className={cn('flex size-7 items-center justify-center rounded-[7px] bg-overlay/90 text-muted shadow-[var(--shadow-segment)] outline-none backdrop-blur-sm',
-          'hover:text-fg focus-visible:ring-2 focus-visible:ring-accent', on && 'text-accent hover:text-accent')}>
+        className={cn('flex size-7 items-center justify-center rounded-[7px] bg-overlay/90 text-fg-muted shadow-[var(--shadow-segment)] outline-none backdrop-blur-sm',
+          'hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', on && 'text-signal hover:text-signal')}>
         {children}
       </button>
     </Tip>
@@ -69,7 +69,7 @@ export function VariantGrid({
             className="group/card flex min-w-0 flex-col gap-1.5 outline-none"
             style={{ animation: `vg-pop 280ms cubic-bezier(.2,.8,.2,1) ${Math.min(i, 24) * 14}ms both` }}>
             <div className={cn('relative aspect-square overflow-hidden rounded-[10px] transition-shadow duration-150',
-              active ? 'shadow-[0_0_0_2px_var(--accent)]' : it.locked ? 'shadow-[0_0_0_1px_var(--line-strong)]' : 'shadow-[0_0_0_1px_var(--line)] group-hover/card:shadow-[0_0_0_1px_var(--line-strong)]')}
+              active ? 'shadow-[0_0_0_2px_var(--signal)]' : it.locked ? 'shadow-[0_0_0_1px_var(--line-strong)]' : 'shadow-[0_0_0_1px_var(--line)] group-hover/card:shadow-[0_0_0_1px_var(--line-strong)]')}
               style={{ background: it.background }}>
               <div className="absolute inset-0 [&>svg]:size-full">{render(it.id)}</div>
               {/* persistent state */}
@@ -88,8 +88,8 @@ export function VariantGrid({
               </div>
             </div>
             <div className="flex min-w-0 items-center justify-between gap-2 px-0.5 text-[11.5px]">
-              <span className={cn('truncate', active ? 'text-fg' : 'text-muted')}>{it.label}</span>
-              {it.sub && <span className="shrink-0 tabular text-faint">{it.sub}</span>}
+              <span className={cn('truncate', active ? 'text-fg' : 'text-fg-muted')}>{it.label}</span>
+              {it.sub && <span className="shrink-0 tabular text-fg-faint">{it.sub}</span>}
             </div>
           </div>
         )

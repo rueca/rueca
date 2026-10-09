@@ -31,10 +31,10 @@ export function Slider({
       <Base.Control className="flex h-6 w-full cursor-default items-center">
         <Base.Track className="relative h-[3px] w-full rounded-full bg-track">
           {fillFrom === null ? (
-            <Base.Indicator className="rounded-full bg-accent" />
+            <Base.Indicator className="rounded-full bg-signal" />
           ) : (
             <div
-              className="absolute inset-y-0 rounded-full bg-accent"
+              className="absolute inset-y-0 rounded-full bg-signal"
               style={{ left: `${Math.min(fillFrom, at)}%`, width: `${Math.abs(at - fillFrom)}%` }}
             />
           )}
@@ -46,7 +46,7 @@ export function Slider({
               className={cn(
                 'size-3 rounded-full bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,.25),0_1px_3px_rgba(0,0,0,.4)] outline-none',
                 'opacity-0 transition-opacity duration-100 group-hover/slider:opacity-100',
-                'focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent data-[dragging]:opacity-100',
+                'focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal data-[dragging]:opacity-100',
               )}
             />
           ))}

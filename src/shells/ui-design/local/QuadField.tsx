@@ -37,7 +37,7 @@ export function QuadField({
   const toggle = (
     <Tip label={split ? 'Use one value' : 'Independent values'}>
       <button type="button" aria-pressed={split} onClick={() => setSplit(!split)}
-        className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent', split ? 'bg-active text-fg' : 'text-faint')}>
+        className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', split ? 'bg-active text-fg' : 'text-fg-faint')}>
         {toggleIcon}
       </button>
     </Tip>

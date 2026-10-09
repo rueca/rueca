@@ -110,20 +110,20 @@ export function ShaderStage() {
         style={{ left: frame.x, top: frame.y, width: frame.w, height: frame.h }}
       />
       {framed && !present && frame.w > 0 && (
-        <div className="pointer-events-none absolute flex items-center gap-1.5 text-[11px] text-faint no-select" style={{ left: frame.x, top: frame.y - 20 }}>
+        <div className="pointer-events-none absolute flex items-center gap-1.5 text-[11px] text-fg-faint no-select" style={{ left: frame.x, top: frame.y - 20 }}>
           <span>{aspectKey}</span>
           <span className="tabular opacity-70">{frame.w} × {frame.h}</span>
         </div>
       )}
       {previewing && (
-        <div className="pointer-events-none absolute top-[60px] left-1/2 -translate-x-1/2 rounded-full bg-overlay px-2.5 py-1 text-[11px] text-muted shadow-[var(--shadow-cluster)]">
+        <div className="pointer-events-none absolute top-[60px] left-1/2 -translate-x-1/2 rounded-full bg-overlay px-2.5 py-1 text-[11px] text-fg-muted shadow-[var(--shadow-cluster)]">
           Previewing — click to apply
         </div>
       )}
       {error && (
         <div className="absolute inset-x-0 bottom-20 mx-auto flex w-fit max-w-[520px] items-start gap-2 rounded-[10px] bg-overlay px-3 py-2 text-[11.5px] text-fg shadow-[var(--shadow-pop)]">
           <TriangleAlert size={14} strokeWidth={1.5} className="mt-px shrink-0 text-rec" />
-          <span className="line-clamp-3 font-mono text-[11px] text-muted">{error}</span>
+          <span className="line-clamp-3 font-mono text-[11px] text-fg-muted">{error}</span>
         </div>
       )}
     </div>

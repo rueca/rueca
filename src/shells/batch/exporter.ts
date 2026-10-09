@@ -3,7 +3,7 @@ import { createStore } from 'zustand/vanilla'
 import { download, toast } from '@kit'
 import { drawPost, ensureFonts, loadImage } from './artifact'
 import { doc, params, ui, effective, type DataRow, type SizeSpec } from './model'
-import { canvasBlob, createZip, fmtBytes } from './local/zip'
+import { canvasBlob, createZip, fmtBytes } from '@kit'
 import type { Job } from './local/JobQueue'
 
 export interface ExportSettings {

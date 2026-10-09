@@ -28,10 +28,10 @@ for (const theme of ['dark','light']) {
     ['track/panel',             g('--track'),     panel,                 1.15],
     ['ACTIVE PILL raised/well', g('--raised'),    g('--well'),           1.3],
     ['active/panel',            g('--active'),    panel,                 1.12],
-    ['button label (WCAG AA)',  g('--accent-fg'), g('--accent-strong'),  4.5],
-    ['accent fill/panel',       g('--accent'),    panel,                 3],
+    ['button label (WCAG AA)',  g('--signal-fg'), g('--signal-strong'),  4.5],
+    ['accent fill/panel',       g('--signal'),    panel,                 3],
     ['fg-faint/panel',          g('--fg-faint'),  panel,                 3],
-    ['fg-faint/input',          g('--fg-faint'),  g('--input'),          3],
+    ['fg-faint/input',          g('--fg-faint'),  g('--control'),          3],
     ['fg-muted/panel',          g('--fg-muted'),  panel,                 4.5],
     ['fg/panel',                g('--fg'),        panel,                 7],
   ].forEach(([n,a,b,min]) => { const r = ratio(a,b); if (r < min) fails.push(`${theme}: ${n} ${r} < ${min}`) })

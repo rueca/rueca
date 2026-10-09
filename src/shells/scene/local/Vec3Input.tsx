@@ -70,7 +70,7 @@ export function Vec3Input({
             aria-pressed={locked}
             aria-label="Uniform scale"
             onClick={() => setLocked(!locked)}
-            className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent', locked ? 'text-accent' : 'text-faint')}
+            className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', locked ? 'text-signal' : 'text-fg-faint')}
           >
             {locked ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
           </button>

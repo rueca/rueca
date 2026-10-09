@@ -58,8 +58,8 @@ export function EasingEditor({ value, onChange, span, footer }: { value: Ease; o
       <div className="flex flex-wrap gap-1">
         {PRESETS.map((p) => (
           <button key={p.name} type="button" onClick={() => set(p.ease, true)}
-            className={cn('flex h-6 items-center gap-1 rounded-[5px] pr-1.5 pl-1 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-accent',
-              same(p.ease, value) ? 'bg-accent-soft text-accent' : 'bg-hover text-muted hover:text-fg')}>
+            className={cn('flex h-6 items-center gap-1 rounded-[5px] pr-1.5 pl-1 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-signal',
+              same(p.ease, value) ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted hover:text-fg')}>
             <EaseGlyph ease={p.ease} className="size-3.5" />
             {p.name}
           </button>
@@ -80,18 +80,18 @@ export function EasingEditor({ value, onChange, span, footer }: { value: Ease; o
       {value.kind === 'hold' && (
         <div className="flex flex-col gap-2">
           <SpringGraphHold />
-          <p className="text-[11.5px] leading-relaxed text-muted">The value stays put, then jumps when the next key is reached. Use it for colour swaps and visibility.</p>
+          <p className="text-[11.5px] leading-relaxed text-fg-muted">The value stays put, then jumps when the next key is reached. Use it for colour swaps and visibility.</p>
         </div>
       )}
-      {footer && <div className="border-t border-line pt-2 text-[11px] text-faint">{footer}</div>}
+      {footer && <div className="border-t border-line pt-2 text-[11px] text-fg-faint">{footer}</div>}
     </div>
   )
 }
 
 function SpringGraphHold() {
   return (
-    <svg viewBox="0 0 100 64" preserveAspectRatio="none" className="h-16 w-full rounded-[6px] bg-input">
-      <polyline points="0,52 98,52 98,16 100,16" fill="none" stroke="var(--accent)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
+    <svg viewBox="0 0 100 64" preserveAspectRatio="none" className="h-16 w-full rounded-[6px] bg-control">
+      <polyline points="0,52 98,52 98,16 100,16" fill="none" stroke="var(--signal)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
     </svg>
   )
 }

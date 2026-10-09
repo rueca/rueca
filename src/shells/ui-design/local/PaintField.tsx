@@ -50,8 +50,8 @@ export function PaintField<T extends PaintValue>({
     <div className="flex min-w-0 flex-1 items-center gap-1">
       <Popover.Root>
         <Popover.Trigger
-          className={cn('flex h-6 min-w-0 flex-1 items-center gap-2 rounded-[5px] bg-input pr-2 pl-1 text-left outline-none',
-            'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-accent data-[popup-open]:shadow-[inset_0_0_0_1px_var(--accent)]')}>
+          className={cn('flex h-6 min-w-0 flex-1 items-center gap-2 rounded-[5px] bg-control pr-2 pl-1 text-left outline-none',
+            'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]')}>
           <span className="checker relative size-4 shrink-0 overflow-hidden rounded-[4px] shadow-[inset_0_0_0_1px_var(--line-strong)]">
             <span className="absolute inset-0" style={{ background: paintPreview(value, imageURL), opacity: value.opacity }} />
           </span>
@@ -73,7 +73,7 @@ export function PaintField<T extends PaintValue>({
                   <div className="grid grid-cols-3 gap-1.5">
                     {Object.entries(images ?? {}).map(([k, l]) => (
                       <button key={k} type="button" aria-label={l} title={l} onClick={() => set({ image: k }, true)}
-                        className={cn('aspect-square rounded-[6px] bg-cover bg-center outline-none focus-visible:ring-2 focus-visible:ring-accent', value.image === k ? 'shadow-[0_0_0_2px_var(--accent)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}
+                        className={cn('aspect-square rounded-[6px] bg-cover bg-center outline-none focus-visible:ring-2 focus-visible:ring-signal', value.image === k ? 'shadow-[0_0_0_2px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}
                         style={{ backgroundImage: `url("${imageURL(k)}")` }} />
                     ))}
                   </div>

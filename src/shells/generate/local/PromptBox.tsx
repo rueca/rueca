@@ -60,13 +60,13 @@ export const PromptBox = forwardRef<HTMLTextAreaElement, PromptBoxProps>(functio
           if (e.key === 'Escape') (e.target as HTMLTextAreaElement).blur()
         }}
         className={cn(
-          'block w-full resize-none bg-transparent text-fg outline-none placeholder:text-faint',
+          'block w-full resize-none bg-transparent text-fg outline-none placeholder:text-fg-faint',
           size === 'md' ? 'text-[13.5px] leading-[20px]' : 'text-[12px] leading-[18px]',
           tokenLimit && 'pr-12',
         )}
       />
       {tokenLimit !== undefined && tokens > 0 && (
-        <span className={cn('pointer-events-none absolute right-0 bottom-0 tabular text-[10.5px]', tokens > tokenLimit ? 'text-rec' : 'text-faint')} title="Estimated tokens — the text encoder ignores everything past the limit">
+        <span className={cn('pointer-events-none absolute right-0 bottom-0 tabular text-[10.5px]', tokens > tokenLimit ? 'text-rec' : 'text-fg-faint')} title="Estimated tokens — the text encoder ignores everything past the limit">
           {tokens}/{tokenLimit}
         </span>
       )}

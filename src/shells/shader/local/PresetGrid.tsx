@@ -48,8 +48,8 @@ export function PresetGrid({
             onBlur={() => onPreview?.(null)}
             className={cn(
               'relative w-full overflow-hidden rounded-[7px] bg-well outline-none transition-shadow duration-100',
-              it.active ? 'shadow-[0_0_0_1.5px_var(--accent)]' : 'shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[0_0_0_1.5px_var(--line-strong)]',
-              'focus-visible:shadow-[0_0_0_2px_var(--accent)]',
+              it.active ? 'shadow-[0_0_0_1.5px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[0_0_0_1.5px_var(--line-strong)]',
+              'focus-visible:shadow-[0_0_0_2px_var(--signal)]',
             )}
             style={{ aspectRatio: aspect }}
           >
@@ -59,10 +59,10 @@ export function PresetGrid({
               <span className="absolute inset-0 animate-pulse bg-hover" />
             )}
           </button>
-          <span className={cn('truncate px-0.5 text-[11.5px]', it.active ? 'text-fg' : 'text-muted')}>{it.name}</span>
+          <span className={cn('truncate px-0.5 text-[11.5px]', it.active ? 'text-fg' : 'text-fg-muted')}>{it.name}</span>
           {it.removable && onRemove && (
             <button type="button" aria-label={`Delete ${it.name}`} onClick={() => onRemove(it.id)}
-              className="absolute top-1 right-1 hidden size-5 items-center justify-center rounded-full bg-overlay text-muted shadow-[var(--shadow-segment)] outline-none group-focus-within/tile:flex group-hover/tile:flex hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+              className="absolute top-1 right-1 hidden size-5 items-center justify-center rounded-full bg-overlay text-fg-muted shadow-[var(--shadow-segment)] outline-none group-focus-within/tile:flex group-hover/tile:flex hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
               <X size={11} strokeWidth={2} />
             </button>
           )}

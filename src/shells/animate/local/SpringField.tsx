@@ -33,11 +33,11 @@ export function SpringGraph({ value, span, height = 64 }: { value: SpringDB; spa
   }
   const settle = Math.min(1, value.duration / Math.max(span, 1)) * 100
   return (
-    <svg viewBox="0 0 100 64" preserveAspectRatio="none" className="w-full rounded-[6px] bg-input" style={{ height }}>
+    <svg viewBox="0 0 100 64" preserveAspectRatio="none" className="w-full rounded-[6px] bg-control" style={{ height }}>
       <line x1={0} x2={100} y1={16} y2={16} stroke="var(--line-strong)" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
       <line x1={0} x2={100} y1={52} y2={52} stroke="var(--line)" vectorEffect="non-scaling-stroke" />
       {settle < 100 && <line x1={settle} x2={settle} y1={4} y2={60} stroke="var(--fg-faint)" strokeDasharray="1.5 2" vectorEffect="non-scaling-stroke" />}
-      <polyline points={pts.join(' ')} fill="none" stroke="var(--accent)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
+      <polyline points={pts.join(' ')} fill="none" stroke="var(--signal)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
     </svg>
   )
 }
@@ -54,13 +54,13 @@ export function SpringField({ value, onChange, span }: { value: SpringDB; onChan
       {!physics && (
         <div className="flex flex-col gap-0.5">
           <div className="flex h-7 items-center gap-2">
-            <span className="w-[58px] shrink-0 text-[11.5px] text-muted">Duration</span>
+            <span className="w-[58px] shrink-0 text-[11.5px] text-fg-muted">Duration</span>
             <Slider value={value.duration} min={50} max={2000} step={10} label="Duration" onChange={(d, f) => onChange({ ...value, duration: d }, f)} />
             <ScrubValue value={value.duration} min={50} max={4000} step={10} unit="ms" className="w-[56px] shrink-0" label="Duration"
               onChange={(d, f) => onChange({ ...value, duration: d }, f)} defaultValue={500} />
           </div>
           <div className="flex h-7 items-center gap-2">
-            <span className="w-[58px] shrink-0 text-[11.5px] text-muted">Bounce</span>
+            <span className="w-[58px] shrink-0 text-[11.5px] text-fg-muted">Bounce</span>
             <Slider value={value.bounce} min={-0.5} max={0.9} step={0.01} origin={0} label="Bounce" onChange={(b, f) => onChange({ ...value, bounce: b }, f)} />
             <ScrubValue value={value.bounce} min={-0.5} max={0.9} step={0.01} className="w-[56px] shrink-0" label="Bounce"
               fmt={(b) => `${Math.round(b * 100)}%`} onChange={(b, f) => onChange({ ...value, bounce: b }, f)} defaultValue={0.25} />
@@ -70,12 +70,12 @@ export function SpringField({ value, onChange, span }: { value: SpringDB; onChan
       <div className="flex items-center gap-1">
         {Object.entries(SPRING_PRESETS).map(([n, p]) => (
           <button key={n} type="button" onClick={() => onChange(p, true)}
-            className={cn('h-5 rounded-[5px] px-1.5 text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-accent', presetName === n ? 'bg-accent-soft text-accent' : 'bg-hover text-muted hover:text-fg')}>
+            className={cn('h-5 rounded-[5px] px-1.5 text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal', presetName === n ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted hover:text-fg')}>
             {n}
           </button>
         ))}
         <div className="flex-1" />
-        <label className="flex items-center gap-1.5 text-[11px] text-muted">
+        <label className="flex items-center gap-1.5 text-[11px] text-fg-muted">
           Physics
           <Switch size="sm" checked={physics} onChange={setPhysics} label="Edit as stiffness, damping and mass" />
         </label>

@@ -41,11 +41,11 @@ export function LeftPanel() {
           return (
             <div key={f.id} role="option" aria-selected={on} tabIndex={0}
               onClick={() => switchFlow(f.id)} onKeyDown={(e) => { if (e.key === 'Enter') switchFlow(f.id) }}
-              className={cn('group/row mx-1.5 flex h-8 items-center gap-2 rounded-[6px] pr-1 pl-2 outline-none focus-visible:ring-2 focus-visible:ring-accent', on ? 'bg-active text-fg' : 'text-muted hover:bg-hover hover:text-fg')}>
-              <Workflow size={14} strokeWidth={1.5} className={on ? 'text-accent' : 'text-faint'} />
+              className={cn('group/row mx-1.5 flex h-8 items-center gap-2 rounded-[6px] pr-1 pl-2 outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
+              <Workflow size={14} strokeWidth={1.5} className={on ? 'text-signal' : 'text-fg-faint'} />
               <InlineText value={f.name} onCommit={(s) => renameFlow(f.id, s)} editing={renaming === f.id} onEditingChange={(b) => setRenaming(b ? f.id : null)}
                 className="min-w-0 flex-1 truncate text-[12px]" title="Flow name" />
-              <span className="text-[11px] text-faint tabular group-hover/row:hidden group-focus-within/row:hidden">{screens}</span>
+              <span className="text-[11px] text-fg-faint tabular group-hover/row:hidden group-focus-within/row:hidden">{screens}</span>
               <div className="hidden group-hover/row:block group-focus-within/row:block" onClick={(e) => e.stopPropagation()}>
                 <Menu align="end" trigger={<IconButton icon={MoreHorizontal} size="icon-sm" label="Flow actions" />}
                   items={[
@@ -68,7 +68,7 @@ export function LeftPanel() {
               <button type="button" draggable aria-label={`Add ${s.label.toLowerCase()}`}
                 onDragStart={(e) => drag(e, { kind: s.kind, role: s.role })}
                 onClick={() => addNode(s.kind, undefined, s.role ? { role: s.role, name: s.role === 'end' ? 'End' : 'Start' } : {})}
-                className="flex aspect-square items-center justify-center rounded-[7px] bg-input text-muted outline-none transition-colors hover:text-fg hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-accent active:cursor-grabbing">
+                className="flex aspect-square items-center justify-center rounded-[7px] bg-control text-fg-muted outline-none transition-colors hover:text-fg hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal active:cursor-grabbing">
                 <ShapeGlyph kind={s.glyph} />
               </button>
             </Tip>
@@ -78,22 +78,22 @@ export function LeftPanel() {
 
       <Section title="Screens" open={open.screens} onToggle={() => setOpen((o) => ({ ...o, screens: !o.screens }))}>
         <div className="px-3 pb-1">
-          <label className="flex h-6 items-center gap-1.5 rounded-[5px] bg-input px-2 text-faint focus-within:shadow-[inset_0_0_0_1px_var(--accent)]">
+          <label className="flex h-6 items-center gap-1.5 rounded-[5px] bg-control px-2 text-fg-faint focus-within:shadow-[inset_0_0_0_1px_var(--signal)]">
             <Search size={12} strokeWidth={1.5} />
             <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.stopPropagation()} placeholder="Search screens" aria-label="Search screens"
-              className="min-w-0 flex-1 bg-transparent text-[11.5px] text-fg outline-none placeholder:text-faint" />
+              className="min-w-0 flex-1 bg-transparent text-[11.5px] text-fg outline-none placeholder:text-fg-faint" />
           </label>
         </div>
         {groups.map((g) => (
           <div key={g} className="px-3 pt-1.5">
-            <div className="pb-1 text-[11px] text-faint">{g}</div>
+            <div className="pb-1 text-[11px] text-fg-faint">{g}</div>
             <div className="grid grid-cols-3 gap-1.5">
               {list.filter((t) => t.group === g).map((t) => <LibraryTile key={t.value} template={t.value} label={t.label} />)}
             </div>
           </div>
         ))}
-        {!list.length && <div className="px-3 py-4 text-center text-[11.5px] text-muted">No screens match “{q}”</div>}
-        <div className="px-3 pt-3 pb-1 text-[11px] leading-relaxed text-faint">Drag onto the canvas, or click to add next to the selection.</div>
+        {!list.length && <div className="px-3 py-4 text-center text-[11.5px] text-fg-muted">No screens match “{q}”</div>}
+        <div className="px-3 pt-3 pb-1 text-[11px] leading-relaxed text-fg-faint">Drag onto the canvas, or click to add next to the selection.</div>
       </Section>
     </Panel>
   )
@@ -102,11 +102,11 @@ export function LeftPanel() {
 function LibraryTile({ template, label }: { template: Template; label: string }) {
   return (
     <button type="button" draggable onDragStart={(e) => drag(e, { kind: 'screen', template })} onClick={() => addScreen(template)} aria-label={`Add ${label} screen`}
-      className="group/tile flex min-w-0 flex-col items-center gap-1 rounded-[7px] p-1 outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent">
-      <span className="block w-full overflow-hidden rounded-[5px] shadow-[0_0_0_1px_var(--line-strong)] transition-shadow group-hover/tile:shadow-[0_0_0_1px_var(--accent)]">
+      className="group/tile flex min-w-0 flex-col items-center gap-1 rounded-[7px] p-1 outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
+      <span className="block w-full overflow-hidden rounded-[5px] shadow-[0_0_0_1px_var(--line-strong)] transition-shadow group-hover/tile:shadow-[0_0_0_1px_var(--signal)]">
         <Wireframe template={template} className="block h-auto w-full" />
       </span>
-      <span className="w-full truncate text-center text-[10.5px] text-muted group-hover/tile:text-fg">{label}</span>
+      <span className="w-full truncate text-center text-[10.5px] text-fg-muted group-hover/tile:text-fg">{label}</span>
     </button>
   )
 }

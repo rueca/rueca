@@ -20,8 +20,15 @@ export interface ClockState {
   playing: boolean
   rate: number
   duration: number
+  /** kept for compatibility: true = 'loop', false = 'once' */
   loop: boolean
+  /** what happens at the end: stop, wrap, or bounce back (Rive / Figma Motion) */
+  mode: 'once' | 'loop' | 'pingpong'
+  /** current direction while ping-ponging */
+  direction: 1 | -1
   fps: number
+  /** keep emitting ticks (dt = 0) while paused — for artifacts with their own life (physics, cursors). Default true. */
+  idle: boolean
   /** loop/work-area region in ms; null = whole duration */
   region: [number, number] | null
 }
@@ -42,15 +49,24 @@ export interface Clock extends StoreApi<ClockState> {
 }
 
 export function createClock(init: Partial<ClockState> = {}): Clock {
+  const mode = init.mode ?? (init.loop === false ? 'once' : 'loop')
   const store = createStore<ClockState>(() => ({
     playing: init.playing ?? true,
     rate: 1,
     duration: 3000,
-    loop: true,
     fps: 60,
     region: null,
+    idle: true,
+    direction: 1,
     ...init,
+    mode,
+    loop: mode !== 'once',
   }))
+  // keep `loop` and `mode` in step whichever one a caller sets
+  store.subscribe((s, prev) => {
+    if (s.loop !== prev.loop && s.mode === prev.mode) store.setState({ mode: s.loop ? 'loop' : 'once' })
+    else if (s.mode !== prev.mode && s.loop !== (s.mode !== 'once')) store.setState({ loop: s.mode !== 'once', direction: 1 })
+  })
 
   let t = 0
   let last = 0
@@ -66,21 +82,25 @@ export function createClock(init: Partial<ClockState> = {}): Clock {
 
   const frame = (now: number) => {
     raf = requestAnimationFrame(frame)
+    // Hidden tab: browsers throttle rAF anyway; don't advance or render at all.
+    if (typeof document !== 'undefined' && document.hidden) { last = 0; return }
     const dtReal = last ? Math.min(now - last, 100) : 0
     last = now
     const s = store.getState()
     let dt = 0
     if (s.playing && !held) {
-      dt = dtReal * s.rate
+      dt = dtReal * s.rate * (s.mode === 'pingpong' ? s.direction : 1)
       t += dt
       const [a, b] = bounds()
-      if (t >= b) {
-        if (s.loop) t = a + ((t - a) % Math.max(1, b - a))
+      if (s.mode === 'pingpong') {
+        if (t >= b) { t = b - (t - b); store.setState({ direction: -1 }) }
+        else if (t <= a) { t = a + (a - t); store.setState({ direction: 1 }) }
+      } else if (t >= b) {
+        if (s.mode === 'loop') t = a + ((t - a) % Math.max(1, b - a))
         else { t = b; store.setState({ playing: false }) }
       }
-    }
-    // Always emit: artifacts with their own life (physics, cursor) keep running while paused.
-    emit(dt)
+      emit(dt)
+    } else if (s.idle) emit(0)
   }
 
   const start = () => { if (!raf && typeof window !== 'undefined') { last = 0; raf = requestAnimationFrame(frame) } }
@@ -100,7 +120,7 @@ export function createClock(init: Partial<ClockState> = {}): Clock {
     },
     pause: () => store.setState({ playing: false }),
     toggle: () => (store.getState().playing ? api.pause() : api.play()),
-    replay: () => { t = bounds()[0]; store.setState({ playing: true }); emit(0) },
+    replay: () => { t = bounds()[0]; store.setState({ playing: true, direction: 1 }); emit(0) },
     step: (frames: number) => {
       const s = store.getState()
       store.setState({ playing: false })

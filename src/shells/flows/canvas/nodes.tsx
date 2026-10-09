@@ -9,8 +9,8 @@ import { STICKY, templateLabel, type FlowNode, type Status } from '../model'
 import { params, updateNodeData, useUI, useFlow, setNodes, doc } from '../store'
 
 export const STATUS: Record<Status, { label: string; dot: string; text: string }> = {
-  draft: { label: 'Draft', dot: 'bg-faint', text: 'text-faint' },
-  ready: { label: 'Ready', dot: 'bg-accent', text: 'text-accent' },
+  draft: { label: 'Draft', dot: 'bg-fg-faint', text: 'text-fg-faint' },
+  ready: { label: 'Ready', dot: 'bg-signal', text: 'text-signal' },
   shipped: { label: 'Shipped', dot: 'bg-ok', text: 'text-ok' },
 }
 
@@ -34,8 +34,8 @@ function useNodeState(id: string, selected: boolean) {
   const walkState = useUI((s) => (s.walk === null ? 'off' : s.walkNodes[s.walk] === id ? 'current' : s.walkNodes.slice(0, s.walk).includes(id) ? 'visited' : 'other'))
   const dim = useValues(params, (v) => v.dim) && walkState !== 'off' && walkState !== 'current'
   const ring: CSSProperties['boxShadow'] =
-    walkState === 'current' ? 'var(--shadow-cluster), 0 0 0 2px var(--accent), 0 0 0 8px var(--accent-soft)'
-      : selected ? 'var(--shadow-cluster), 0 0 0 2px var(--accent)'
+    walkState === 'current' ? 'var(--shadow-cluster), 0 0 0 2px var(--signal), 0 0 0 8px var(--signal-soft)'
+      : selected ? 'var(--shadow-cluster), 0 0 0 2px var(--signal)'
         : 'var(--shadow-cluster), 0 0 0 1px var(--line)'
   return { walkState, dim, ring }
 }
@@ -45,7 +45,7 @@ const rename = (id: string) => (name: string) => updateNodeData(id, { name })
 function CommentBadge({ id }: { id: string }) {
   const n = useFlow().comments.filter((c) => c.node === id && !c.resolved).length
   if (!n) return null
-  return <span className="flex items-center gap-0.5 text-[10.5px] text-faint tabular"><MessageCircle size={11} strokeWidth={1.5} />{n}</span>
+  return <span className="flex items-center gap-0.5 text-[10.5px] text-fg-faint tabular"><MessageCircle size={11} strokeWidth={1.5} />{n}</span>
 }
 
 export const ScreenNode = memo(function ScreenNode({ id, data, selected }: NodeProps<FlowNode>) {
@@ -63,7 +63,7 @@ export const ScreenNode = memo(function ScreenNode({ id, data, selected }: NodeP
           <Wireframe template={data.template ?? 'empty'} className="block h-auto w-full" />
         </div>
       ) : (
-        <div className="truncate px-1.5 pb-1 pl-[22px] text-[11px] text-faint">{templateLabel(data.template)}</div>
+        <div className="truncate px-1.5 pb-1 pl-[22px] text-[11px] text-fg-faint">{templateLabel(data.template)}</div>
       )}
       <Handles />
     </div>
@@ -76,9 +76,9 @@ export const DecisionNode = memo(function DecisionNode({ id, data, selected }: N
   return (
     <div className={cn('flows-node relative size-[136px] transition-opacity duration-200', dim && 'opacity-25')}>
       <svg viewBox="0 0 136 136" className="absolute inset-0 overflow-visible">
-        {walkState === 'current' && <polygon points="68,-8 144,68 68,144 -8,68" className="fill-accent-soft" />}
+        {walkState === 'current' && <polygon points="68,-8 144,68 68,144 -8,68" className="fill-signal-soft" />}
         <polygon points="68,2 134,68 68,134 2,68" strokeLinejoin="round"
-          style={{ fill: 'var(--panel)', stroke: on ? 'var(--accent)' : 'var(--line-strong)', strokeWidth: on ? 2 : 1, filter: 'drop-shadow(0 2px 6px rgb(0 0 0 / 0.18))' }} />
+          style={{ fill: 'var(--panel)', stroke: on ? 'var(--signal)' : 'var(--line-strong)', strokeWidth: on ? 2 : 1, filter: 'drop-shadow(0 2px 6px rgb(0 0 0 / 0.18))' }} />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-7 text-center">
         <StatusDot status={data.status} />
@@ -107,7 +107,7 @@ export const NoteNode = memo(function NoteNode({ id, data, selected }: NodeProps
   const bg = STICKY[data.color ?? 'yellow']
   return (
     <div className={cn('flows-node flex min-h-[120px] w-[176px] flex-col rounded-[4px] p-3 text-[12.5px] leading-snug transition-opacity duration-200', dim && 'opacity-25')}
-      style={{ background: bg, color: '#1d1d1f', boxShadow: selected ? `0 0 0 2px var(--accent), 0 6px 16px -6px rgb(0 0 0 / .35)` : '0 1px 1px rgb(0 0 0 / .08), 0 6px 16px -6px rgb(0 0 0 / .35)' }}>
+      style={{ background: bg, color: '#1d1d1f', boxShadow: selected ? `0 0 0 2px var(--signal), 0 6px 16px -6px rgb(0 0 0 / .35)` : '0 1px 1px rgb(0 0 0 / .08), 0 6px 16px -6px rgb(0 0 0 / .35)' }}>
       <InlineText value={data.name} multiline onCommit={rename(id)} className="block w-full flex-1 whitespace-pre-wrap" placeholder="Add a note" title="Sticky note" />
       <div className="mt-2 text-[10.5px] opacity-55">{data.attach ? 'Annotation' : 'Sticky'}</div>
     </div>
@@ -127,7 +127,7 @@ export const SectionNode = memo(function SectionNode({ id, data, selected, width
         style={{
           width: width ?? 800, height: height ?? 480,
           background: `color-mix(in srgb, ${hue} 7%, transparent)`,
-          boxShadow: `inset 0 0 0 ${selected ? 2 : 1}px ${selected ? 'var(--accent)' : `color-mix(in srgb, ${hue} 32%, transparent)`}`,
+          boxShadow: `inset 0 0 0 ${selected ? 2 : 1}px ${selected ? 'var(--signal)' : `color-mix(in srgb, ${hue} 32%, transparent)`}`,
         }}>
         <div className="flows-section-tab absolute top-3 left-3 flex h-7 max-w-[calc(100%-24px)] origin-top-left cursor-grab items-center gap-2 rounded-[8px] px-2.5 text-[12.5px] font-semibold text-white" style={{ background: hue, transform: `scale(${titleScale})` }}>
           <InlineText value={data.name} onCommit={rename(id)} className="truncate" inputClassName="min-w-[120px]" title="Section name" />

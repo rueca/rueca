@@ -126,7 +126,7 @@ const ABOUT = {
   bridge: ['Studio bridge', '2 KB script that lets the harness drive any page inside an iframe via postMessage.'],
 }
 /* The registry copy of theme.css lands next to an existing stylesheet — often
-   shadcn's, whose @theme also defines muted / accent / input / font-sans.
+   shadcn's, whose @theme also defines muted / accent / input / font-ui.
    Imported LAST, the kit's @theme wins (Tailwind v4 inlines @import anywhere);
    doubling :root also lifts the raw tokens above shadcn's .dark block. The
    user's main CSS already imports tailwindcss. Verified against a fresh

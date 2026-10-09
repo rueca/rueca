@@ -61,22 +61,22 @@ function Transport() {
       {preview ? (
         <span className="ml-1 flex h-7 items-center gap-1.5 px-2 text-[12px] text-fg"><span className="size-1.5 animate-pulse rounded-full bg-ok" />Live · {anims.find((x) => x.id === smState)?.name ?? '—'}</span>
       ) : <button type="button" onClick={() => setFrames(!frames)} title="Click to switch seconds / frames"
-        className={cn('ml-1 flex h-7 items-baseline gap-1 rounded-[6px] px-2 tabular text-[12px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent', autoKey ? 'text-rec' : 'text-fg')}>
+        className={cn('ml-1 flex h-7 items-baseline gap-1 rounded-[6px] px-2 tabular text-[12px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', autoKey ? 'text-rec' : 'text-fg')}>
         {frames ? `f${Math.round((at / 1000) * fps)}` : fmtTime(at)}
-        <span className="text-[11px] text-faint">/ {frames ? `f${Math.round((anim.duration / 1000) * fps)}` : fmtTime(anim.duration)}</span>
+        <span className="text-[11px] text-fg-faint">/ {frames ? `f${Math.round((anim.duration / 1000) * fps)}` : fmtTime(anim.duration)}</span>
       </button>}
       <div className="ml-1 w-[96px]">
         <Segmented size="sm" iconOnly label="Loop mode" value={anim.loop} onChange={(l) => updateAnim({ loop: l as Anim['loop'] })}
           options={[{ value: 'loop', label: 'Loop', icon: Repeat, hint: 'Loop' }, { value: 'once', label: 'Once', icon: ArrowRight, hint: 'Play once' }, { value: 'pingpong', label: 'Ping-pong', icon: ArrowLeftRight, hint: 'Ping-pong' }]} />
       </div>
       <div className="flex-1" />
-      {keySel.length > 0 && <span className="mr-1 text-[11px] text-muted tabular">{keySel.length} selected</span>}
+      {keySel.length > 0 && <span className="mr-1 text-[11px] text-fg-muted tabular">{keySel.length} selected</span>}
       <IconButton icon={Diamond} label="Add keyframe at playhead" shortcut="k" tipSide="top" onClick={addKey} />
       <IconButton icon={Magnet} label={v.snap ? 'Snapping on' : 'Snapping off'} tipSide="top" active={v.snap} onClick={() => params.setValue('snap', !v.snap)} />
       <Tip label={autoKey ? 'Auto-key on — changes write keys' : 'Auto-key'} shortcut="shift+k" side="top">
         <button type="button" aria-pressed={autoKey} aria-label="Auto-key" onClick={() => ui.setState({ autoKey: !autoKey })}
-          className={cn('flex h-7 items-center gap-1.5 rounded-[6px] px-2 text-[11.5px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-accent',
-            autoKey ? 'bg-rec/15 text-rec' : 'text-muted hover:bg-hover hover:text-fg')}>
+          className={cn('flex h-7 items-center gap-1.5 rounded-[6px] px-2 text-[11.5px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-signal',
+            autoKey ? 'bg-rec/15 text-rec' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
           <CircleDot size={14} strokeWidth={1.75} />Auto-key
         </button>
       </Tip>
@@ -106,7 +106,7 @@ function LayersPanel() {
     return build(null)
   }, [doc, anim])
   return (
-    <Panel header={<PanelHeader title="Layers"><span className="text-[11px] text-faint tabular">{doc.objects.length}</span></PanelHeader>}>
+    <Panel header={<PanelHeader title="Layers"><span className="text-[11px] text-fg-faint tabular">{doc.objects.length}</span></PanelHeader>}>
       <LayerTree items={items} selected={sel ? [sel] : []}
         onSelect={(ids) => ui.setState({ sel: ids.at(-1) ?? null })}
         onToggle={(id, prop) => { const o = doc.objects.find((x) => x.id === id)!; patchObject(id, prop === 'visible' ? { visible: !o.visible } : { locked: !o.locked }) }}
@@ -148,19 +148,19 @@ function AnimationsPanel() {
                 onClick={() => { ui.setState({ animId: a.id, preview: false, keySel: [], pending: {} }); clock.pause(); seek(0) }}
                 onDoubleClick={() => setRenaming(a.id)}
                 onKeyDown={(e) => { if (e.key === 'Enter') setRenaming(a.id) }}
-                className={cn('group/row mx-1.5 flex h-8 items-center gap-2 rounded-[6px] pr-1 pl-2 text-[12px] outline-none focus-visible:ring-2 focus-visible:ring-accent', on ? 'bg-accent-soft' : 'hover:bg-hover')}>
-                <Film size={14} strokeWidth={1.5} className={on ? 'text-accent' : 'text-faint'} />
+                className={cn('group/row mx-1.5 flex h-8 items-center gap-2 rounded-[6px] pr-1 pl-2 text-[12px] outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-signal-soft' : 'hover:bg-hover')}>
+                <Film size={14} strokeWidth={1.5} className={on ? 'text-signal' : 'text-fg-faint'} />
                 {renaming === a.id ? (
                   <input autoFocus defaultValue={a.name} onClick={(e) => e.stopPropagation()}
                     onBlur={(e) => { updateAnim({ name: e.target.value || a.name }, true, a.id); setRenaming(null) }}
                     onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setRenaming(null) }}
-                    className="h-5 min-w-0 flex-1 rounded-[4px] bg-input px-1 text-[12px] text-fg outline-none shadow-[inset_0_0_0_1px_var(--accent)]" />
+                    className="h-5 min-w-0 flex-1 rounded-[4px] bg-control px-1 text-[12px] text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
                 ) : <span className="min-w-0 flex-1 truncate text-fg">{a.name}</span>}
-                {doc.sm.entry === a.id && <span className="text-[10.5px] text-faint">entry</span>}
-                <Tip label={a.loop === 'loop' ? 'Loops' : a.loop === 'once' ? 'Plays once' : 'Ping-pong'}><span className="text-faint"><Icon size={12} strokeWidth={1.5} /></span></Tip>
-                <span className="w-9 text-right tabular text-[11px] text-faint">{(a.duration / 1000).toFixed(1)}s</span>
-                <span className="text-[10.5px] text-faint tabular opacity-0 group-hover/row:opacity-100">{i + 1}</span>
-                <Menu align="end" trigger={<button type="button" aria-label="Animation options" onClick={(e) => e.stopPropagation()} className="flex size-6 items-center justify-center rounded-[5px] text-faint opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/row:opacity-100 focus-visible:opacity-100 data-[popup-open]:opacity-100"><Ellipsis size={14} strokeWidth={1.5} /></button>}
+                {doc.sm.entry === a.id && <span className="text-[10.5px] text-fg-faint">entry</span>}
+                <Tip label={a.loop === 'loop' ? 'Loops' : a.loop === 'once' ? 'Plays once' : 'Ping-pong'}><span className="text-fg-faint"><Icon size={12} strokeWidth={1.5} /></span></Tip>
+                <span className="w-9 text-right tabular text-[11px] text-fg-faint">{(a.duration / 1000).toFixed(1)}s</span>
+                <span className="text-[10.5px] text-fg-faint tabular opacity-0 group-hover/row:opacity-100">{i + 1}</span>
+                <Menu align="end" trigger={<button type="button" aria-label="Animation options" onClick={(e) => e.stopPropagation()} className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/row:opacity-100 focus-visible:opacity-100 data-[popup-open]:opacity-100"><Ellipsis size={14} strokeWidth={1.5} /></button>}
                   items={[
                     { label: 'Rename', onClick: () => setRenaming(a.id) },
                     { label: 'Duplicate', icon: Copy, onClick: () => addAnim(a) },
@@ -171,7 +171,7 @@ function AnimationsPanel() {
               </div>
             )
           })}
-          <p className="px-3.5 pt-2 pb-1 text-[11px] leading-relaxed text-faint">Double-click to rename. Keys 1–9 switch animations.</p>
+          <p className="px-3.5 pt-2 pb-1 text-[11px] leading-relaxed text-fg-faint">Double-click to rename. Keys 1–9 switch animations.</p>
         </div>
       ) : (
         <div className="flex flex-col">
@@ -195,9 +195,9 @@ function AnimationsPanel() {
           </div>
           <div className="border-t border-line pt-1.5 pb-1">
             <div className="flex h-7 items-center px-3 text-[11.5px] font-medium">Listeners</div>
-            <div className="flex flex-col gap-1 px-3 pb-1.5 font-mono text-[10.5px] text-muted">
-              <span><span className="text-faint">pointer enter / exit →</span> hover</span>
-              <span><span className="text-faint">pointer down →</span> press, likes + 1</span>
+            <div className="flex flex-col gap-1 px-3 pb-1.5 font-mono text-[10.5px] text-fg-muted">
+              <span><span className="text-fg-faint">pointer enter / exit →</span> hover</span>
+              <span><span className="text-fg-faint">pointer down →</span> press, likes + 1</span>
             </div>
           </div>
           <div className="border-t border-line pt-1.5 pb-2">
@@ -263,7 +263,7 @@ export default function AnimateShell() {
             id: `o:${o.id}`, kind: 'group', label: o.name, icon: KIND_ICON[o.kind], open, highlight: o.id === sel,
             depth: depthOf(o),
             keys: times.map((tm) => { const ids = all.filter((k) => Math.round(k.t) === tm).map((k) => k.id); return { id: `g:${o.id}:${ids[0]}`, t: tm, ids } }),
-            value: !props.length ? <span className="text-faint">no keys</span> : undefined,
+            value: !props.length ? <span className="text-fg-faint">no keys</span> : undefined,
           })
           if (open) for (const p of props) {
             const keys = anim.tracks[trackKey(o.id, p)]
@@ -459,7 +459,7 @@ export default function AnimateShell() {
       }
       right={
         <Panel header={<PanelHeader title={sel ? objName : preview ? 'Preview' : mode === 'animate' ? anim.name : 'Document'}>
-          <span className={cn('rounded-[5px] px-1.5 py-0.5 text-[11px]', mode === 'animate' && !preview ? 'bg-accent-soft text-accent' : 'bg-hover text-muted')}>{preview ? 'State machine' : mode === 'animate' ? 'Animate' : 'Design'}</span>
+          <span className={cn('rounded-[5px] px-1.5 py-0.5 text-[11px]', mode === 'animate' && !preview ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted')}>{preview ? 'State machine' : mode === 'animate' ? 'Animate' : 'Design'}</span>
         </PanelHeader>}>
           <AnimInspector />
         </Panel>
@@ -482,17 +482,17 @@ export default function AnimateShell() {
           blocked={preview ? (
             <div className="flex flex-col items-center gap-2 text-center">
               <div className="text-[12px] font-medium text-fg">Previewing the state machine</div>
-              <div className="text-[11.5px] text-muted">Hover and click the button on the artboard, or use the inputs. Now playing: <span className="text-accent">{doc.anims.find((a) => a.id === smState)?.name ?? '—'}</span></div>
+              <div className="text-[11.5px] text-fg-muted">Hover and click the button on the artboard, or use the inputs. Now playing: <span className="text-signal">{doc.anims.find((a) => a.id === smState)?.name ?? '—'}</span></div>
               <Button size="sm" variant="default" onClick={() => togglePreview(false)}>Back to editing</Button>
             </div>
           ) : undefined}
         />
       ) : (
-        <div className="cluster flex h-10 items-center gap-2 px-3 text-[11.5px] text-muted">
-          <MousePointer2 size={14} strokeWidth={1.5} className="text-faint" />
+        <div className="cluster flex h-10 items-center gap-2 px-3 text-[11.5px] text-fg-muted">
+          <MousePointer2 size={14} strokeWidth={1.5} className="text-fg-faint" />
           Design mode — edits change the base state every animation starts from.
           <div className="flex-1" />
-          <Button size="sm" variant="default" onClick={() => setMode('animate')}><Diamond size={13} strokeWidth={1.5} />Animate<span className="text-faint">A</span></Button>
+          <Button size="sm" variant="default" onClick={() => setMode('animate')}><Diamond size={13} strokeWidth={1.5} />Animate<span className="text-fg-faint">A</span></Button>
         </div>
       )}
     >
@@ -500,14 +500,14 @@ export default function AnimateShell() {
         preview ? (
           <div className="pointer-events-none absolute top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 cluster h-8 px-3 text-[11.5px]">
             <span className="size-1.5 animate-pulse rounded-full bg-ok" />
-            <span className="text-muted">State machine</span>
+            <span className="text-fg-muted">State machine</span>
             <span className="font-medium text-fg">{doc.anims.find((a) => a.id === smState)?.name ?? '—'}</span>
           </div>
         ) : Object.keys(pending).length > 0 ? (
           <div className="absolute top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 cluster h-8 pr-1 pl-3 text-[11.5px]">
             <span className="size-1.5 rounded-full bg-key" />
-            <span className="text-muted">{Object.keys(pending).length} edited, not keyed</span>
-            <Button size="sm" variant="default" onClick={() => commitPending()}>Key<span className="text-faint">↵</span></Button>
+            <span className="text-fg-muted">{Object.keys(pending).length} edited, not keyed</span>
+            <Button size="sm" variant="default" onClick={() => commitPending()}>Key<span className="text-fg-faint">↵</span></Button>
             <Button size="sm" onClick={() => ui.setState({ pending: {} })}>Discard</Button>
           </div>
         ) : null

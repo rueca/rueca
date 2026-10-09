@@ -36,12 +36,12 @@ export function GradientSlider({
       className={cn('group/slider relative flex h-6 w-full min-w-0 items-center no-select', className)}>
       <Base.Control className="flex h-6 w-full cursor-default items-center">
         <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px]' : 'h-[3px] bg-track')} style={track ? { background: track } : undefined}>
-          {!track && <div className="absolute inset-y-0 rounded-full bg-accent" style={{ left: `${Math.min(from, at)}%`, width: `${Math.abs(at - from)}%` }} />}
+          {!track && <div className="absolute inset-y-0 rounded-full bg-signal" style={{ left: `${Math.min(from, at)}%`, width: `${Math.abs(at - from)}%` }} />}
           <Base.Thumb
             aria-label={label}
             className={cn(
               'rounded-full bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,.3),0_1px_3px_rgba(0,0,0,.45)] outline-none transition-opacity duration-100',
-              'focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent data-[dragging]:opacity-100',
+              'focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal data-[dragging]:opacity-100',
               track ? 'size-[11px]' : 'size-3 opacity-0 group-hover/slider:opacity-100',
             )}
           />

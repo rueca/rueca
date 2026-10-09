@@ -14,6 +14,7 @@
    Inter @font-face as data URLs, wrap in <foreignObject>, draw to canvas.
    Computed styles resolve every token var(), so the snapshot matches the
    current theme exactly. Pseudo-elements and <canvas> children are skipped.
+   (Promoted from shells/flows/local/snapshot.ts.)
 --------------------------------------------------------------------------- */
 
 const INHERITED = new Set([

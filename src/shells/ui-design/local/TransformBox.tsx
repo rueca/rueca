@@ -16,7 +16,7 @@ export type Handle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 const CURSOR: Record<Handle, string> = { nw: 'nwse-resize', se: 'nwse-resize', ne: 'nesw-resize', sw: 'nesw-resize', n: 'ns-resize', s: 'ns-resize', e: 'ew-resize', w: 'ew-resize' }
 
 export function TransformBox({
-  rect, rotation = 0, badge, onHandle, onRotate, handles = true, tone = 'var(--accent)', children,
+  rect, rotation = 0, badge, onHandle, onRotate, handles = true, tone = 'var(--signal)', children,
 }: {
   rect: { x: number; y: number; w: number; h: number }
   rotation?: number
@@ -47,7 +47,7 @@ export function TransformBox({
         </div>
       ))}
       {badge != null && (
-        <div className="absolute left-1/2 whitespace-nowrap rounded-[4px] bg-accent-strong px-1.5 py-px tabular text-[10.5px] font-medium text-accent-fg" style={{ top: h + 8, transform: `translateX(-50%) rotate(${rotation}deg)` }}>
+        <div className="absolute left-1/2 whitespace-nowrap rounded-[4px] bg-signal-strong px-1.5 py-px tabular text-[10.5px] font-medium text-signal-fg" style={{ top: h + 8, transform: `translateX(-50%) rotate(${rotation}deg)` }}>
           {badge}
         </div>
       )}

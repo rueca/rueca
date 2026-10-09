@@ -8,7 +8,7 @@
        end={<><Cluster>…</Cluster><Button variant="primary">Export</Button></>}
      />
 --------------------------------------------------------------------------- */
-import type { ComponentType, ReactNode } from 'react'
+import { isValidElement, type ComponentType, type ReactNode } from 'react'
 import { cn } from '../core/cn'
 import { useStudio } from './Studio'
 
@@ -28,14 +28,18 @@ export function Cluster({ children, className }: { children: ReactNode; classNam
 }
 
 /** Title block: a small mark + the instrument name + optional doc name. */
-export function Brand({ name, doc, mark }: { name: string; doc?: ReactNode; mark?: ReactNode }) {
+export function Brand({ name, doc, mark, href = '#/' }: { name: string; doc?: ReactNode; mark?: ReactNode; href?: string | false }) {
+  const { layout } = useStudio()
+  const markEl = mark ?? <svg viewBox="0 0 16 16" width="11" height="11"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>
   return (
-    <div className="cluster flex h-9 min-w-0 items-center gap-2 pr-3 pl-2">
-      <div className="flex size-5 shrink-0 items-center justify-center rounded-[5px] bg-fg text-field">
-        {mark ?? <svg viewBox="0 0 16 16" width="11" height="11"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>}
-      </div>
+    <div className={cn('flex h-9 min-w-0 items-center gap-2 pr-3 pl-2', layout !== 'docked' && 'cluster')}>
+      {href && !(isValidElement(mark) && mark.type === 'a') /* shells that pass their own <a> keep it */ ? (
+        <a href={href} aria-label="Home" className="flex size-5 shrink-0 items-center justify-center rounded-[5px] bg-fg text-field outline-none focus-visible:ring-2 focus-visible:ring-signal">{markEl}</a>
+      ) : (
+        <div className="flex size-5 shrink-0 items-center justify-center rounded-[5px] bg-fg text-field">{markEl}</div>
+      )}
       <span className="truncate text-[12.5px] font-semibold tracking-[-0.005em]">{name}</span>
-      {doc && <><span className="text-faint">/</span><span className="truncate text-[12.5px] text-muted">{doc}</span></>}
+      {doc && <><span className="text-fg-faint">/</span><span className="truncate text-[12.5px] text-fg-muted">{doc}</span></>}
     </div>
   )
 }
@@ -52,8 +56,8 @@ export function ToolDock<T extends string>({
         return (
           <button key={t.value} type="button" aria-label={t.label} aria-pressed={on} title={`${t.label}${t.shortcut ? ` (${t.shortcut.toUpperCase()})` : ''}`}
             onClick={() => onChange(t.value)}
-            className={cn('flex size-8 items-center justify-center rounded-[8px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent',
-              on ? 'bg-accent-strong text-accent-fg' : 'text-muted hover:bg-hover hover:text-fg')}>
+            className={cn('flex size-8 items-center justify-center rounded-[8px] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
+              on ? 'bg-signal-strong text-signal-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
             <Icon size={16} strokeWidth={1.5} />
           </button>
         )

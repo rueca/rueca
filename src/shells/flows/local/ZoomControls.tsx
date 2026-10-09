@@ -11,11 +11,11 @@ import { cn, Menu, type MenuItem } from '@kit'
 export function ZoomControls({ zoom, onZoom, onFit, extra = [], className }: { zoom: number; onZoom: (z: number) => void; onFit: () => void; extra?: MenuItem[]; className?: string }) {
   return (
     <div className={cn('cluster flex h-8 items-center gap-0.5 px-1', className)}>
-      <button type="button" aria-label="Zoom out" onClick={() => onZoom(zoom / 1.25)} className="flex size-6 items-center justify-center rounded-[5px] text-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent"><Minus size={13} /></button>
+      <button type="button" aria-label="Zoom out" onClick={() => onZoom(zoom / 1.25)} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"><Minus size={13} /></button>
       <Menu
         side="top"
         align="end"
-        trigger={<button type="button" className="h-6 min-w-[46px] rounded-[5px] px-1 tabular text-[11.5px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent">{Math.round(zoom * 100)}%</button>}
+        trigger={<button type="button" className="h-6 min-w-[46px] rounded-[5px] px-1 tabular text-[11.5px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">{Math.round(zoom * 100)}%</button>}
         items={[
           { label: 'Zoom to fit', shortcut: 'shift+1', onClick: onFit },
           ...extra,
@@ -25,7 +25,7 @@ export function ZoomControls({ zoom, onZoom, onFit, extra = [], className }: { z
           { label: 'Zoom to 200%', onClick: () => onZoom(2) },
         ]}
       />
-      <button type="button" aria-label="Zoom in" onClick={() => onZoom(zoom * 1.25)} className="flex size-6 items-center justify-center rounded-[5px] text-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent"><Plus size={13} /></button>
+      <button type="button" aria-label="Zoom in" onClick={() => onZoom(zoom * 1.25)} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"><Plus size={13} /></button>
     </div>
   )
 }

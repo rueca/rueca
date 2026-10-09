@@ -43,9 +43,9 @@ export function AngleDial({ value, onChange, size = 24, changed }: { value: numb
   const rad = (value * Math.PI) / 180
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2">
-      <div {...drag} role="presentation" className="relative shrink-0 cursor-grab rounded-full bg-input shadow-[inset_0_0_0_1px_var(--line-strong)] active:cursor-grabbing" style={{ width: size, height: size }}>
-        <div className="absolute top-1/2 left-1/2 h-px origin-left bg-accent" style={{ width: size / 2 - 3, transform: `rotate(${value}deg)` }} />
-        <div className="absolute size-1.5 -translate-1/2 rounded-full bg-accent" style={{ left: size / 2 + Math.cos(rad) * (size / 2 - 4), top: size / 2 + Math.sin(rad) * (size / 2 - 4) }} />
+      <div {...drag} role="presentation" className="relative shrink-0 cursor-grab rounded-full bg-control shadow-[inset_0_0_0_1px_var(--line-strong)] active:cursor-grabbing" style={{ width: size, height: size }}>
+        <div className="absolute top-1/2 left-1/2 h-px origin-left bg-signal" style={{ width: size / 2 - 3, transform: `rotate(${value}deg)` }} />
+        <div className="absolute size-1.5 -translate-1/2 rounded-full bg-signal" style={{ left: size / 2 + Math.cos(rad) * (size / 2 - 4), top: size / 2 + Math.sin(rad) * (size / 2 - 4) }} />
       </div>
       <ScrubValue value={value} onChange={(v, f) => onChange(((v % 360) + 360) % 360, f)} step={1} unit="°" boxed className="flex-1" changed={changed} label="Angle" />
     </div>
@@ -68,12 +68,12 @@ export function XYPad({
   return (
     <div className="flex w-full flex-col gap-1.5">
       {pad && (
-        <div {...drag} className="relative aspect-[2/1] w-full cursor-crosshair overflow-hidden rounded-[6px] bg-input shadow-[inset_0_0_0_1px_var(--line)]">
+        <div {...drag} className="relative aspect-[2/1] w-full cursor-crosshair overflow-hidden rounded-[6px] bg-control shadow-[inset_0_0_0_1px_var(--line)]">
           <div className="absolute top-1/2 left-0 h-px w-full bg-line" />
           <div className="absolute top-0 left-1/2 h-full w-px bg-line" />
-          <div className="absolute h-px w-full bg-accent/25" style={{ top: `${py}%` }} />
-          <div className="absolute h-full w-px bg-accent/25" style={{ left: `${px}%` }} />
-          <div className="absolute size-2.5 -translate-1/2 rounded-full bg-accent shadow-[0_0_0_2px_var(--panel)]" style={{ left: `${px}%`, top: `${py}%` }} />
+          <div className="absolute h-px w-full bg-signal/25" style={{ top: `${py}%` }} />
+          <div className="absolute h-full w-px bg-signal/25" style={{ left: `${px}%` }} />
+          <div className="absolute size-2.5 -translate-1/2 rounded-full bg-signal shadow-[0_0_0_2px_var(--panel)]" style={{ left: `${px}%`, top: `${py}%` }} />
         </div>
       )}
       <div className="grid grid-cols-2 gap-1.5">
@@ -108,7 +108,7 @@ export function SizeFields({
         onChange={(w, f) => onChange(lock ? { w, h: Math.round(w / ratio) } : { ...value, w }, f)} className="flex-1" />
       <Tip label={lock ? 'Unlink proportions' : 'Link proportions'}>
         <button type="button" aria-pressed={lock} onClick={() => setLock(!lock)}
-          className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent', lock ? 'text-accent' : 'text-faint')}>
+          className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
           {lock ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
         </button>
       </Tip>
@@ -125,7 +125,7 @@ export function SeedField({ value, onChange, changed }: { value: number; onChang
       <ScrubValue boxed align="left" prefix="#" value={value} min={0} max={99999} step={1} changed={changed} onChange={onChange} className="flex-1" label="Seed" />
       <Tip label="New seed">
         <button type="button" aria-label="Randomise seed" onClick={() => onChange(Math.floor(Math.random() * 99999), true)}
-          className="flex size-6 shrink-0 items-center justify-center rounded-[5px] text-muted outline-none hover:bg-hover hover:text-fg active:scale-90 transition-transform focus-visible:ring-2 focus-visible:ring-accent">
+          className="flex size-6 shrink-0 items-center justify-center rounded-[5px] text-fg-muted outline-none hover:bg-hover hover:text-fg active:scale-90 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
           <Dices size={14} strokeWidth={1.5} />
         </button>
       </Tip>
@@ -166,7 +166,7 @@ export function CurveEditor({ value, onChange, presets = EASINGS, height = 132 }
       <svg
         ref={ref}
         viewBox={`0 0 ${W} ${H + padY * 2}`}
-        className="w-full touch-none overflow-visible rounded-[6px] bg-input"
+        className="w-full touch-none overflow-visible rounded-[6px] bg-control"
         style={{ height }}
         preserveAspectRatio="none"
         onPointerMove={(e) => move(e, false)}
@@ -176,9 +176,9 @@ export function CurveEditor({ value, onChange, presets = EASINGS, height = 132 }
         <line x1={sx} y1={sy} x2={ex} y2={ey} stroke="var(--line)" strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />
         <line x1={sx} y1={sy} x2={ax} y2={ay} stroke="var(--fg-faint)" vectorEffect="non-scaling-stroke" />
         <line x1={ex} y1={ey} x2={bx} y2={by} stroke="var(--fg-faint)" vectorEffect="non-scaling-stroke" />
-        <path d={`M${sx},${sy} C${ax},${ay} ${bx},${by} ${ex},${ey}`} fill="none" stroke="var(--accent)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+        <path d={`M${sx},${sy} C${ax},${ay} ${bx},${by} ${ex},${ey}`} fill="none" stroke="var(--signal)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
         {[[ax, ay], [bx, by]].map(([x, y], i) => (
-          <ellipse key={i} cx={x} cy={y} rx={4} ry={4 * ((H + padY * 2) / W) * (100 / height) * (height / 132)} fill="var(--panel)" stroke="var(--accent)" strokeWidth={2} vectorEffect="non-scaling-stroke"
+          <ellipse key={i} cx={x} cy={y} rx={4} ry={4 * ((H + padY * 2) / W) * (100 / height) * (height / 132)} fill="var(--panel)" stroke="var(--signal)" strokeWidth={2} vectorEffect="non-scaling-stroke"
             className="cursor-grab" onPointerDown={(e) => { which.current = i as 0 | 1; (e.target as Element).setPointerCapture?.(e.pointerId); (ref.current as SVGSVGElement).setPointerCapture(e.pointerId) }} />
         ))}
       </svg>
@@ -191,7 +191,7 @@ export function CurveEditor({ value, onChange, presets = EASINGS, height = 132 }
       <div className="flex flex-wrap gap-1">
         {Object.entries(presets).map(([name, v]) => (
           <button key={name} type="button" onClick={() => onChange(v, true)}
-            className={cn('h-5 rounded-[5px] px-1.5 text-[10.5px] outline-none', presetName === name ? 'bg-accent-soft text-accent' : 'bg-hover text-muted hover:text-fg')}>
+            className={cn('h-5 rounded-[5px] px-1.5 text-[10.5px] outline-none', presetName === name ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted hover:text-fg')}>
             {name}
           </button>
         ))}
@@ -223,9 +223,9 @@ export function SpringEditor({ value, onChange }: { value: { stiffness: number; 
   }
   return (
     <div className="flex w-full flex-col gap-1.5">
-      <svg viewBox="0 0 100 64" className="h-16 w-full rounded-[6px] bg-input" preserveAspectRatio="none">
+      <svg viewBox="0 0 100 64" className="h-16 w-full rounded-[6px] bg-control" preserveAspectRatio="none">
         <line x1={0} x2={100} y1={30} y2={30} stroke="var(--line-strong)" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
-        <polyline points={pts.join(' ')} fill="none" stroke="var(--accent)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
+        <polyline points={pts.join(' ')} fill="none" stroke="var(--signal)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
       </svg>
       <div className="grid grid-cols-3 gap-1">
         <ScrubValue boxed align="left" prefix="K" value={value.stiffness} min={1} max={1000} step={1} label="Stiffness" onChange={(s, f) => onChange({ ...value, stiffness: s }, f)} />
@@ -237,7 +237,7 @@ export function SpringEditor({ value, onChange }: { value: { stiffness: number; 
 }
 
 /* --- Gradient: a bar with draggable stops; click empty bar to add, drag off to remove. --- */
-export function GradientEditor({ value, onChange }: { value: { angle: number; stops: { pos: number; color: string }[] }; onChange: (v: { angle: number; stops: { pos: number; color: string }[] }, final: boolean) => void }) {
+export function GradientEditor({ value, onChange, angle = true }: { value: { angle: number; stops: { pos: number; color: string }[] }; onChange: (v: { angle: number; stops: { pos: number; color: string }[] }, final: boolean) => void; /** false for 1-D ramps (colour maps) where direction means nothing */ angle?: boolean }) {
   const [sel, setSel] = useState(0)
   const bar = useRef<HTMLDivElement>(null)
   const dragging = useRef<number | null>(null)
@@ -284,17 +284,17 @@ export function GradientEditor({ value, onChange }: { value: { angle: number; st
               if (e.clientY - r.bottom > 28 && value.stops.length > 2) { onChange({ ...value, stops: value.stops.filter((_, j) => j !== i) }, true); setSel(0) }
               else setStop(i, {}, true)
             }}
-            className={cn('absolute top-1/2 h-[30px] w-3 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-[4px] border-2 outline-none focus-visible:ring-2 focus-visible:ring-accent', sel === i ? 'border-accent' : 'border-white')}
+            className={cn('absolute top-1/2 h-[30px] w-3 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-[4px] border-2 outline-none focus-visible:ring-2 focus-visible:ring-signal', sel === i ? 'border-signal' : 'border-white')}
             style={{ left: `${s.pos * 100}%`, background: s.color, boxShadow: '0 1px 3px rgba(0,0,0,.4)' }}
           />
         ))}
       </div>
       <div className="flex items-center gap-1.5">
         <Popover.Root>
-          <Popover.Trigger className="flex h-6 flex-1 items-center gap-2 rounded-[5px] bg-input pr-2 pl-1 outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)]">
+          <Popover.Trigger className="flex h-6 flex-1 items-center gap-2 rounded-[5px] bg-control pr-2 pl-1 outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)]">
             <Swatch color={cur.color} />
             <span className="tabular text-[11px] uppercase text-fg">{cur.color.replace('#', '').slice(0, 6)}</span>
-            <span className="ml-auto tabular text-[11px] text-faint">{Math.round(hexToRgba(cur.color)[3] * 100)}%</span>
+            <span className="ml-auto tabular text-[11px] text-fg-faint">{Math.round(hexToRgba(cur.color)[3] * 100)}%</span>
           </Popover.Trigger>
           <Popover.Portal>
             <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[100]">
@@ -304,7 +304,7 @@ export function GradientEditor({ value, onChange }: { value: { angle: number; st
         </Popover.Root>
         <ScrubValue boxed value={Math.round(cur.pos * 100)} min={0} max={100} unit="%" className="w-14" label="Stop position" onChange={(p, f) => setStop(sel, { pos: p / 100 }, f)} />
       </div>
-      <AngleDial value={value.angle} onChange={(a, f) => onChange({ ...value, angle: a }, f)} />
+      {angle && <AngleDial value={value.angle} onChange={(a, f) => onChange({ ...value, angle: a }, f)} />}
     </div>
   )
 }
@@ -315,11 +315,11 @@ export function PaletteField({ value, onChange, max = 8 }: { value: string[]; on
     <div className="flex w-full flex-wrap gap-1">
       {value.map((c, i) => (
         <Popover.Root key={i}>
-          <Popover.Trigger aria-label={`Colour ${i + 1}`} className="group/sw relative size-6 rounded-[5px] outline-none focus-visible:ring-2 focus-visible:ring-accent">
+          <Popover.Trigger aria-label={`Colour ${i + 1}`} className="group/sw relative size-6 rounded-[5px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
             <Swatch color={c} size={24} className="rounded-[5px]" />
             {value.length > 1 && (
               <span role="button" aria-label="Remove colour" onClick={(e) => { e.stopPropagation(); onChange(value.filter((_, j) => j !== i), true) }}
-                className="absolute -top-1 -right-1 hidden size-3.5 items-center justify-center rounded-full bg-overlay text-muted shadow-[var(--shadow-segment)] group-hover/sw:flex">
+                className="absolute -top-1 -right-1 hidden size-3.5 items-center justify-center rounded-full bg-overlay text-fg-muted shadow-[var(--shadow-segment)] group-hover/sw:flex">
                 <X size={9} strokeWidth={2} />
               </span>
             )}
@@ -333,7 +333,7 @@ export function PaletteField({ value, onChange, max = 8 }: { value: string[]; on
       ))}
       {value.length < max && (
         <button type="button" aria-label="Add colour" onClick={() => onChange([...value, value.at(-1) ?? '#ffffff'], true)}
-          className="flex size-6 items-center justify-center rounded-[5px] text-faint shadow-[inset_0_0_0_1px_var(--line-strong)] hover:text-fg">+</button>
+          className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint shadow-[inset_0_0_0_1px_var(--line-strong)] hover:text-fg">+</button>
       )}
     </div>
   )
@@ -356,9 +356,9 @@ export function ImageDrop({ value, onChange, accept = 'image/*', compact }: { va
       aria-label="Choose image"
       onKeyDown={(e) => e.key === 'Enter' && input.current?.click()}
       className={cn(
-        'group/drop relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-[7px] bg-input outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent',
+        'group/drop relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-[7px] bg-control outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
         compact ? 'h-12' : 'h-[88px]',
-        over ? 'shadow-[inset_0_0_0_1.5px_var(--accent)] bg-accent-soft' : 'shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-strong)]',
+        over ? 'shadow-[inset_0_0_0_1.5px_var(--signal)] bg-signal-soft' : 'shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-strong)]',
       )}
     >
       <input ref={input} type="file" accept={accept} hidden onChange={(e) => take(e.target.files?.[0])} />
@@ -369,7 +369,7 @@ export function ImageDrop({ value, onChange, accept = 'image/*', compact }: { va
             className="absolute top-1 right-1 hidden size-5 items-center justify-center rounded-full bg-black/60 text-white group-hover/drop:flex"><X size={11} /></button>
         </>
       ) : (
-        <div className="flex flex-col items-center gap-1 text-faint">
+        <div className="flex flex-col items-center gap-1 text-fg-faint">
           <ImagePlus size={16} strokeWidth={1.5} />
           {!compact && <span className="text-[11px]">Drop, paste or click</span>}
         </div>
@@ -383,14 +383,17 @@ export function Monitor({ get, graph, min, max, fmt }: { get: () => number | str
   const [text, setText] = useState('')
   const canvas = useRef<HTMLCanvasElement>(null)
   const hist = useRef<number[]>([])
+  const getRef = useRef(get); getRef.current = get
+  const fmtRef = useRef(fmt); fmtRef.current = fmt
   useEffect(() => {
     let raf = 0, last = 0
     const loop = (now: number) => {
       raf = requestAnimationFrame(loop)
       if (now - last < 66) return
       last = now
-      const v = get()
-      setText(typeof v === 'number' ? (fmt ? fmt(v) : v.toFixed(2)) : v)
+      const v = getRef.current()
+      const f = fmtRef.current
+      setText(typeof v === 'number' ? (f ? f(v) : v.toFixed(2)) : v)
       if (!graph || typeof v !== 'number' || !canvas.current) return
       const h = hist.current
       h.push(v); if (h.length > 80) h.shift()
@@ -398,7 +401,7 @@ export function Monitor({ get, graph, min, max, fmt }: { get: () => number | str
       const dpr = devicePixelRatio
       c.width = c.clientWidth * dpr; c.height = c.clientHeight * dpr
       const lo = min ?? Math.min(...h), hi = max ?? Math.max(...h)
-      const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent')
+      const accent = getComputedStyle(document.documentElement).getPropertyValue('--signal') // re-read: follows theme changes
       ctx.strokeStyle = accent; ctx.lineWidth = 1.25 * dpr; ctx.beginPath()
       h.forEach((y, i) => {
         const X = (i / 79) * c.width, Y = c.height - ((y - lo) / Math.max(1e-6, hi - lo)) * (c.height - 4 * dpr) - 2 * dpr
@@ -408,10 +411,10 @@ export function Monitor({ get, graph, min, max, fmt }: { get: () => number | str
     }
     raf = requestAnimationFrame(loop)
     return () => cancelAnimationFrame(raf)
-  }, [get, graph, min, max, fmt])
+  }, [graph, min, max])
   return (
     <div className="flex w-full items-center gap-2">
-      {graph && <canvas ref={canvas} className="h-6 min-w-0 flex-1 rounded-[4px] bg-input" />}
+      {graph && <canvas ref={canvas} className="h-6 min-w-0 flex-1 rounded-[4px] bg-control" />}
       <span className={cn('tabular text-[11px] text-fg', graph ? 'w-12 text-right' : 'flex-1 text-right')}>{text}</span>
     </div>
   )

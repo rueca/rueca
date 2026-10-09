@@ -175,7 +175,7 @@ export default function SceneShell() {
           start={<Brand name="Scene" doc="Aura speaker" mark={mark} />}
           center={
             <Cluster className="gap-1.5 pr-2 pl-3">
-              <span className="text-[11.5px] text-muted">Colourway</span>
+              <span className="text-[11.5px] text-fg-muted">Colourway</span>
               <SwatchTiles size="sm" value={cw} options={swatchOptions} onChange={applyColourway} onPreview={(p) => ui.setState({ preview: p })} label="Colourway" />
             </Cluster>
           }
@@ -264,7 +264,7 @@ function ViewChip({ v }: { v: V }) {
   const cur = all.find((x) => x.id === active)
   return (
     <div className="cluster absolute top-0 left-0 flex h-8 items-center gap-0.5 px-1">
-      <span className="px-1.5 text-[11.5px] text-muted">{v.projection === 'perspective' ? `Perspective · ${v.fov}°` : 'Orthographic'}</span>
+      <span className="px-1.5 text-[11.5px] text-fg-muted">{v.projection === 'perspective' ? `Perspective · ${v.fov}°` : 'Orthographic'}</span>
       <Divider vertical />
       <Menu
         items={[
@@ -274,7 +274,7 @@ function ViewChip({ v }: { v: V }) {
           { label: 'Save current view', icon: Plus, shortcut: 'shift+v', onClick: saveView },
           { label: 'Copy camera JSON', icon: Braces, onClick: copyCamera },
         ]}
-        trigger={<Button size="sm" className="gap-1"><Camera size={13} strokeWidth={1.5} />{cur?.name ?? 'Free camera'}<ChevronDown size={12} className="text-faint" /></Button>}
+        trigger={<Button size="sm" className="gap-1"><Camera size={13} strokeWidth={1.5} />{cur?.name ?? 'Free camera'}<ChevronDown size={12} className="text-fg-faint" /></Button>}
       />
     </div>
   )
@@ -283,7 +283,7 @@ function ViewChip({ v }: { v: V }) {
 function Stats() {
   const s = useStore(ui, (x) => x.stats)
   return (
-    <div className="absolute bottom-1 left-1 text-[11px] tabular text-faint no-select">
+    <div className="absolute bottom-1 left-1 text-[11px] tabular text-fg-faint no-select">
       {(s.tris / 1000).toFixed(1)}k triangles · {s.meshes} meshes · {s.lights} lights
     </div>
   )
@@ -310,7 +310,7 @@ function Outliner({ v, selected }: { v: V; selected: string | null }) {
   const onSelect = (ids: string[]) => ui.setState({ selected: ids.at(-1) ?? null })
   const onToggle = (id: string, prop: 'visible' | 'locked') => { const k = `${id}_${prop}`; params.setValue(k, !params.values()[k]) }
   const onRename = (id: string, name: string) => ui.setState((s) => ({ names: { ...s.names, [id]: name } }))
-  const head = (t: string) => <div className="px-3 pt-2.5 pb-0.5 text-[11px] text-faint no-select">{t}</div>
+  const head = (t: string) => <div className="px-3 pt-2.5 pb-0.5 text-[11px] text-fg-faint no-select">{t}</div>
   return (
     <div className="pb-2">
       {head('Objects')}
@@ -338,14 +338,14 @@ function ViewsPanel() {
             <button
               type="button"
               onClick={() => goView(x)}
-              className={cn('flex w-full flex-col gap-1 rounded-[8px] p-1 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent',
-                active === x.id ? 'bg-accent-soft shadow-[inset_0_0_0_1px_var(--accent)]' : 'hover:bg-hover')}
+              className={cn('flex w-full flex-col gap-1 rounded-[8px] p-1 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
+                active === x.id ? 'bg-signal-soft shadow-[inset_0_0_0_1px_var(--signal)]' : 'hover:bg-hover')}
             >
-              <div className="aspect-[176/112] w-full overflow-hidden rounded-[5px] bg-input">
+              <div className="aspect-[176/112] w-full overflow-hidden rounded-[5px] bg-control">
                 {thumbs[x.id] && <img src={thumbs[x.id]} alt="" className="size-full object-cover" />}
               </div>
               <div className="flex items-center gap-1 px-0.5">
-                <span className={cn('min-w-0 flex-1 truncate text-[11.5px]', active === x.id ? 'text-fg' : 'text-muted')}>{x.name}</span>
+                <span className={cn('min-w-0 flex-1 truncate text-[11.5px]', active === x.id ? 'text-fg' : 'text-fg-muted')}>{x.name}</span>
                 {i < 9 && <Kbd>{i + 1}</Kbd>}
               </div>
             </button>
@@ -359,7 +359,7 @@ function ViewsPanel() {
           </div>
         ))}
       </div>
-      {views.length === 0 && <p className="px-1 pt-1 text-[11.5px] leading-relaxed text-faint">Orbit to a framing you like and save it. Saved views get a number key and survive reloads.</p>}
+      {views.length === 0 && <p className="px-1 pt-1 text-[11.5px] leading-relaxed text-fg-faint">Orbit to a framing you like and save it. Saved views get a number key and survive reloads.</p>}
     </div>
   )
 }
@@ -372,7 +372,7 @@ function InspectorHeader({ id, v }: { id: string | null; v: V }) {
   const hidden = v[`${id}_visible`] === false
   return (
     <PanelHeader>
-      <Icon size={14} strokeWidth={1.5} className="shrink-0 text-accent" />
+      <Icon size={14} strokeWidth={1.5} className="shrink-0 text-signal" />
       <div className="ml-1 min-w-0 flex-1 truncate text-[12px] font-semibold">{nameOf(id)}</div>
       <Badge>{kindLabel(id, v)}</Badge>
       {hideable && <IconButton size="icon-sm" icon={hidden ? EyeOff : Eye} label={hidden ? 'Show' : 'Hide'} shortcut="h" onClick={() => params.setValue(`${id}_visible`, hidden)} />}
@@ -388,13 +388,13 @@ function SceneSettings({ v, cw }: { v: V; cw: string | null }) {
         <div className="px-3 pt-0.5 pb-1">
           <SwatchTiles value={cw} options={swatchOptions} onChange={applyColourway} onPreview={(p) => ui.setState({ preview: p })} label="Colourway" />
         </div>
-        <p className="px-3 pt-1 text-[11px] leading-relaxed text-faint">
+        <p className="px-3 pt-1 text-[11px] leading-relaxed text-fg-faint">
           {cw ? 'Colourways change materials and background only — transforms and lights stay put.' : 'Custom colours. Pick a colourway to snap back to a defined variant.'}
         </p>
       </Sec>
       <div className="border-t border-line"><Inspector params={params} folders={['look', 'env', 'render', 'viewport']} /></div>
       <Sec title="Selection">
-        <p className="px-3 text-[11.5px] leading-relaxed text-muted">
+        <p className="px-3 text-[11.5px] leading-relaxed text-fg-muted">
           Click the product to select it, click again to select a part. <Kbd>W</Kbd> <Kbd>E</Kbd> <Kbd>R</Kbd> switch the gizmo; <Kbd>F</Kbd> frames it. {v.turntable ? 'Turntable is on.' : ''}
         </p>
       </Sec>
@@ -431,7 +431,7 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
       {kind === 'light' && (
         <>
           <div className="border-t border-line"><Inspector params={params} folders={[`${id}_light`]} /></div>
-          <p className="px-3 pb-3 text-[11px] leading-relaxed text-faint">Spot and directional lights always aim at the product, so moving one re-angles it.</p>
+          <p className="px-3 pb-3 text-[11px] leading-relaxed text-fg-faint">Spot and directional lights always aim at the product, so moving one re-angles it.</p>
         </>
       )}
       {kind === 'group' && (
@@ -440,11 +440,11 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
             const Icon = iconOf(c, v)
             return (
               <button key={c} type="button" onClick={() => ui.setState({ selected: c })}
-                className="mx-1.5 flex h-7 items-center gap-2 rounded-[6px] px-2 text-left text-[12px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent">
-                <Icon size={14} strokeWidth={1.5} className="text-faint" />
+                className="mx-1.5 flex h-7 items-center gap-2 rounded-[6px] px-2 text-left text-[12px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
+                <Icon size={14} strokeWidth={1.5} className="text-fg-faint" />
                 <span className="flex-1 truncate">{nameOf(c)}</span>
                 <Swatch color={v[`${c}_color`]} size={12} className="rounded-full" />
-                <span className="text-[11px] text-faint">{String(v[`${c}_mtype`]).replace(/^./, (x) => x.toUpperCase())}</span>
+                <span className="text-[11px] text-fg-faint">{String(v[`${c}_mtype`]).replace(/^./, (x) => x.toUpperCase())}</span>
               </button>
             )
           })}

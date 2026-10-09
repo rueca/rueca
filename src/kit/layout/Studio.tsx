@@ -16,7 +16,7 @@
      layout="docked"   panels flush to the window edges, Figma UI3 style
    `present` hides all chrome (⌘\ / F) — the client-facing view.
 --------------------------------------------------------------------------- */
-import { createContext, useContext, useState, type ReactNode } from 'react'
+import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from '../core/cn'
 import { useHotkeys } from '../core/hotkeys'
 import { TipProvider } from '../ui/tooltip'
@@ -33,25 +33,29 @@ export function Studio({
   children: ReactNode; layout?: Layout; className?: string; leftWidth?: number; rightWidth?: number
 }) {
   const [present, setPresent] = useState(false)
-  useHotkeys({ 'mod+\\': () => setPresent((p) => !p), esc: present ? () => setPresent(false) : undefined }, [present])
+  useHotkeys({
+    'mod+\\': { run: () => setPresent((p) => !p), label: 'Hide interface', group: 'View' },
+    esc: present ? () => setPresent(false) : undefined,
+  }, [present], { priority: 0 })
   const rw = rightWidth ? `${rightWidth}px` : 'var(--inspector-w)'
 
   const shell =
     layout === 'overlay' ? (
-      <div className="relative h-full w-full overflow-hidden">
+      <SafeAreaRoot className="relative h-full w-full overflow-hidden">
         <div className="absolute inset-0">{children}</div>
         {!present && (
           <div className="pointer-events-none absolute inset-0 flex flex-col gap-[var(--gutter)] p-[var(--gutter)]">
-            {toolbar && <div className="pointer-events-auto flex-none">{toolbar}</div>}
+            {toolbar && <div data-safe="top" className="pointer-events-auto flex-none">{toolbar}</div>}
             <div className="flex min-h-0 flex-1 gap-[var(--gutter)]">
-              {left && <aside className="pointer-events-auto flex min-h-0 flex-none flex-col" style={{ width: leftWidth }}>{left}</aside>}
+              {left && <aside data-safe="left" className="pointer-events-auto flex min-h-0 flex-none flex-col" style={{ width: leftWidth }}>{left}</aside>}
               <div className="flex-1" />
-              {right && <aside className="pointer-events-auto flex min-h-0 flex-none flex-col" style={{ width: rw }}>{right}</aside>}
+              {right && <aside data-safe="right" className="pointer-events-auto flex min-h-0 flex-none flex-col" style={{ width: rw }}>{right}</aside>}
             </div>
-            {bottom && <div className="pointer-events-auto flex-none">{bottom}</div>}
+            {/* the strip itself lets clicks through; only its content takes them */}
+            {bottom && <div data-safe="bottom" className="flex flex-none justify-center [&>*]:pointer-events-auto">{bottom}</div>}
           </div>
         )}
-      </div>
+      </SafeAreaRoot>
     ) : layout === 'docked' ? (
       <div className="flex h-full flex-col">
         {toolbar && !present && <div className="flex-none border-b border-line bg-panel px-2 py-1.5">{toolbar}</div>}
@@ -82,7 +86,7 @@ export function Studio({
           {statusbar}
           {present && (
             <button type="button" onClick={() => setPresent(false)}
-              className="cluster fixed right-3 bottom-3 z-50 h-7 px-2.5 text-[11.5px] text-muted opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100">
+              className="cluster fixed right-3 bottom-3 z-50 h-7 px-2.5 text-[11.5px] text-fg-muted opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100">
               Show interface
             </button>
           )}
@@ -121,8 +125,8 @@ export function PanelTabs<T extends string>({ value, onChange, tabs }: { value: 
     <div role="tablist" className="flex flex-1 items-center gap-0.5">
       {tabs.map((t) => (
         <button key={t.value} role="tab" type="button" aria-selected={value === t.value} onClick={() => onChange(t.value)}
-          className={cn('h-7 rounded-[6px] px-2 text-[12px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-accent',
-            value === t.value ? 'bg-active text-fg' : 'text-muted hover:text-fg')}>
+          className={cn('h-7 rounded-[6px] px-2 text-[12px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
+            value === t.value ? 'bg-active text-fg' : 'text-fg-muted hover:text-fg')}>
           {t.label}
         </button>
       ))}
@@ -131,13 +135,52 @@ export function PanelTabs<T extends string>({ value, onChange, tabs }: { value: 
 }
 
 /* Empty state: say what to do, not that there is nothing. */
-export function Empty({ icon: Icon, title, hint, action }: { icon?: React.ComponentType<{ size?: number; strokeWidth?: number }>; title: string; hint?: string; action?: ReactNode }) {
+export function Empty({ icon: Icon, title, hint, action, compact }: { icon?: React.ComponentType<{ size?: number; strokeWidth?: number }>; title: string; hint?: string; action?: ReactNode; compact?: boolean }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 px-6 py-10 text-center">
-      {Icon && <div className="text-faint"><Icon size={20} strokeWidth={1.5} /></div>}
+    <div className={cn('flex flex-col items-center justify-center gap-2 text-center', compact ? 'px-4 py-5' : 'px-6 py-10')}>
+      {Icon && <div className="text-fg-faint"><Icon size={20} strokeWidth={1.5} /></div>}
       <div className="text-[12px] font-medium text-fg">{title}</div>
-      {hint && <div className="max-w-[220px] text-[11.5px] leading-relaxed text-muted">{hint}</div>}
+      {hint && <div className="max-w-[220px] text-[11.5px] leading-relaxed text-fg-muted">{hint}</div>}
       {action}
     </div>
   )
+}
+
+/* ---------------------------------------------------------------------------
+   Safe area — in the overlay layout the stage runs under the panels. This
+   measures what the panels cover and exposes it as CSS vars on the root
+   (--safe-top/right/bottom/left) and via useSafeArea(), so a HUD, a fixed-
+   aspect frame or the camera's "centre" can sit in the uncovered rect.
+--------------------------------------------------------------------------- */
+export interface SafeArea { top: number; right: number; bottom: number; left: number }
+const SafeCtx = createContext<SafeArea>({ top: 0, right: 0, bottom: 0, left: 0 })
+export const useSafeArea = () => useContext(SafeCtx)
+
+function SafeAreaRoot({ children, className }: { children: ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [safe, setSafe] = useState<SafeArea>({ top: 0, right: 0, bottom: 0, left: 0 })
+  useLayoutEffect(() => {
+    const root = ref.current!
+    const measure = () => {
+      const r = root.getBoundingClientRect()
+      const box = (side: string) => root.querySelector<HTMLElement>(`[data-safe="${side}"]`)?.getBoundingClientRect()
+      const t = box('top'), l = box('left'), rr = box('right'), b = box('bottom')
+      const next = {
+        top: t ? Math.round(t.bottom - r.top) : 0,
+        left: l ? Math.round(l.right - r.left) : 0,
+        right: rr ? Math.round(r.right - rr.left) : 0,
+        bottom: b && b.height ? Math.round(r.bottom - b.top) : 0,
+      }
+      for (const [k, v] of Object.entries(next)) root.style.setProperty(`--safe-${k}`, `${v}px`)
+      setSafe((p) => (p.top === next.top && p.left === next.left && p.right === next.right && p.bottom === next.bottom ? p : next))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(root)
+    root.querySelectorAll('[data-safe]').forEach((n) => ro.observe(n))
+    const mo = new MutationObserver(() => { root.querySelectorAll('[data-safe]').forEach((n) => ro.observe(n)); measure() })
+    mo.observe(root, { childList: true, subtree: false })
+    return () => { ro.disconnect(); mo.disconnect() }
+  }, [])
+  return <SafeCtx.Provider value={safe}><div ref={ref} className={className}>{children}</div></SafeCtx.Provider>
 }

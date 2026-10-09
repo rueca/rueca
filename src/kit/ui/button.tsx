@@ -11,9 +11,9 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        ghost: 'text-muted hover:bg-hover hover:text-fg active:bg-press data-[active=true]:bg-active data-[active=true]:text-fg',
+        ghost: 'text-fg-muted hover:bg-hover hover:text-fg active:bg-press data-[active=true]:bg-active data-[active=true]:text-fg',
         default: 'bg-active text-fg hover:brightness-110 active:brightness-95',
-        primary: 'bg-accent-strong text-accent-fg hover:brightness-110 active:brightness-95',
+        primary: 'bg-signal-strong text-signal-fg hover:brightness-110 active:brightness-95',
         outline: 'text-fg shadow-[inset_0_0_0_1px_var(--line-strong)] hover:bg-hover',
         danger: 'text-rec hover:bg-hover',
       },
@@ -54,7 +54,7 @@ IconButton.displayName = 'IconButton'
 
 export function Kbd({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <kbd className={cn('inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] bg-hover px-1 font-sans text-[10.5px] font-medium text-muted', className)}>
+    <kbd className={cn('inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] bg-hover px-1 font-ui text-[10.5px] font-medium text-fg-muted', className)}>
       {children}
     </kbd>
   )

@@ -1,10 +1,15 @@
 /* Prototype Studio kit — public surface. Import from '@kit'. */
 export * from './core/schema'
 export * from './core/params'
+export * from './core/doc'
+export * from './core/history'
 export * from './core/clock'
 export * from './core/hotkeys'
 export * from './core/theme'
 export * from './core/io'
+export * from './core/video'
+export * from './core/zip'
+export * from './core/snapshot'
 export { cn, clamp, lerp, roundTo } from './core/cn'
 
 export * from './ui/button'
@@ -14,6 +19,7 @@ export * from './ui/slider'
 export * from './ui/controls'
 export * from './ui/color'
 export * from './ui/special'
+export * from './ui/knob'
 
 export * from './inspector/Inspector'
 export * from './layout/Studio'

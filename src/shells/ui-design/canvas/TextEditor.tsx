@@ -73,8 +73,8 @@ export function TextEditor({ id }: { id: string }) {
         textAlign: t.align,
         whiteSpace: t.resize === 'auto-width' ? 'pre' : 'pre-wrap',
         color: fill ? rgba(fill.color, fill.opacity) : '#000',
-        caretColor: 'var(--accent)',
-        boxShadow: '0 0 0 1px var(--accent)',
+        caretColor: 'var(--signal)',
+        boxShadow: '0 0 0 1px var(--signal)',
         transform: n.rotation ? `rotate(${-n.rotation}deg)` : undefined,
         wordBreak: 'break-word',
       }}

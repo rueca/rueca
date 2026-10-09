@@ -135,7 +135,7 @@ export function ToneCurve({
         ref={box}
         role="group"
         aria-label={label}
-        className="relative w-full touch-none cursor-crosshair rounded-[6px] bg-input shadow-[inset_0_0_0_1px_var(--line)]"
+        className="relative w-full touch-none cursor-crosshair rounded-[6px] bg-control shadow-[inset_0_0_0_1px_var(--line)]"
         style={{ height }}
         onPointerDown={onDown}
         onPointerMove={onMove}
@@ -177,14 +177,14 @@ export function ToneCurve({
               move(i, p[0] + d[0], p[1] + d[1], true)
             }}
             className={cn(
-              'absolute size-3 -translate-1/2 rounded-full border-2 outline-none focus-visible:ring-2 focus-visible:ring-accent',
-              s === i ? 'border-[var(--panel)] shadow-[0_0_0_1.5px_var(--accent)]' : 'border-[var(--panel)]',
+              'absolute size-3 -translate-1/2 rounded-full border-2 outline-none focus-visible:ring-2 focus-visible:ring-signal',
+              s === i ? 'border-[var(--panel)] shadow-[0_0_0_1.5px_var(--signal)]' : 'border-[var(--panel)]',
             )}
-            style={{ left: `${p[0] * 100}%`, top: `${(1 - p[1]) * 100}%`, background: s === i ? 'var(--accent)' : color }}
+            style={{ left: `${p[0] * 100}%`, top: `${(1 - p[1]) * 100}%`, background: s === i ? 'var(--signal)' : color }}
           />
         ))}
       </div>
-      <div className="flex items-center gap-1.5 text-[11px] text-faint">
+      <div className="flex items-center gap-1.5 text-[11px] text-fg-faint">
         <span>Input</span>
         <ScrubValue boxed align="left" value={Math.round(cur[0] * 255)} min={0} max={255} step={1} label="Input" className="flex-1"
           disabled={s === 0 || s === pts.length - 1} onChange={(n, f) => move(s, n / 255, cur[1], f)} />

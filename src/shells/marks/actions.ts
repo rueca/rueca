@@ -3,7 +3,7 @@ import { copyText, download, exportJSON, toast, toastManager } from '@kit'
 import { FAMILY, mulberry32, mutateParams, sampleParams, type FamilyId } from './families'
 import { doc, settings, ui, newMark, uid, colorsOf, markLabel, type Doc, type Mark } from './model'
 import { lockupSVG, markSVG, svgToPNG } from './render'
-import { createZip } from '../batch/local/zip'
+import { createZip } from '@kit'
 
 const rng = () => mulberry32((Math.random() * 2 ** 31) | 0)
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'mark'

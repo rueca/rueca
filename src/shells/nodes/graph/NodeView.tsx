@@ -72,16 +72,16 @@ export const NodeView = memo(function NodeView({ id, data, selected }: NodeProps
   return (
     <div
       className={cn('gnode relative w-[176px] rounded-[10px] bg-panel transition-opacity', data.bypass && 'opacity-40')}
-      style={{ boxShadow: selected ? '0 0 0 1.5px var(--accent), var(--shadow-panel)' : error ? '0 0 0 1px color-mix(in srgb, var(--rec) 70%, transparent), var(--shadow-panel)' : 'var(--shadow-cluster)' }}
+      style={{ boxShadow: selected ? '0 0 0 1.5px var(--signal), var(--shadow-panel)' : error ? '0 0 0 1px color-mix(in srgb, var(--rec) 70%, transparent), var(--shadow-panel)' : 'var(--shadow-cluster)' }}
     >
       {/* category stripe */}
       <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-[10px]" style={{ background: cat }} />
       <div className="flex h-8 items-center gap-1.5 pt-[3px] pr-2 pl-2.5">
         <span className="flex shrink-0" style={{ color: cat }}><Icon size={14} strokeWidth={1.5} /></span>
         <InlineEdit value={data.title} onCommit={(t) => updateData([id], () => ({ title: t }))} className="flex-1 text-[12px] font-medium text-fg" label="Rename node" />
-        {data.bypass && <Tip label="Bypassed (B)"><span className="text-faint"><EyeOff size={12} strokeWidth={1.5} /></span></Tip>}
+        {data.bypass && <Tip label="Bypassed (B)"><span className="text-fg-faint"><EyeOff size={12} strokeWidth={1.5} /></span></Tip>}
         {error && <Tip label={error}><span className="text-rec"><AlertTriangle size={13} strokeWidth={1.75} /></span></Tip>}
-        {!error && thumb && thumb.ms >= 0.5 && <span className="tabular text-[10.5px] text-faint">{thumb.ms < 10 ? thumb.ms.toFixed(1) : Math.round(thumb.ms)}ms</span>}
+        {!error && thumb && thumb.ms >= 0.5 && <span className="tabular text-[10.5px] text-fg-faint">{thumb.ms < 10 ? thumb.ms.toFixed(1) : Math.round(thumb.ms)}ms</span>}
       </div>
 
       {/* ports: inputs left, outputs right, sharing rows */}
@@ -94,12 +94,12 @@ export const NodeView = memo(function NodeView({ id, data, selected }: NodeProps
                 {inp ? (
                   <>
                     <Port port={inp} side="in" wired={wired.has(`i:${inp.key}`)} dim={dimFor(inp, 'in')} />
-                    <span className={cn('truncate', wired.has(`i:${inp.key}`) ? 'text-fg' : inp.optional ? 'text-faint' : 'text-muted')}>{inp.label}</span>
+                    <span className={cn('truncate', wired.has(`i:${inp.key}`) ? 'text-fg' : inp.optional ? 'text-fg-faint' : 'text-fg-muted')}>{inp.label}</span>
                   </>
                 ) : <span />}
                 {out && (
                   <>
-                    <span className="truncate text-muted">{out.label}</span>
+                    <span className="truncate text-fg-muted">{out.label}</span>
                     <Port port={out} side="out" wired={wired.has(`o:${out.key}`)} dim={dimFor(out, 'out')} />
                   </>
                 )}
@@ -117,7 +117,7 @@ export const NodeView = memo(function NodeView({ id, data, selected }: NodeProps
           <div className="checker relative aspect-square w-full overflow-hidden rounded-[6px] shadow-[inset_0_0_0_1px_var(--line)]">
             {thumb?.image && !error && !blocked && <ImageCanvas image={thumb.image} className="absolute inset-0 h-full w-full" />}
             {(error || blocked || !thumb?.image) && (
-              <div className="absolute inset-0 flex items-center justify-center bg-well px-3 text-center text-[11px] leading-snug text-faint">
+              <div className="absolute inset-0 flex items-center justify-center bg-well px-3 text-center text-[11px] leading-snug text-fg-faint">
                 {error ? <span className="text-rec">{error}</span> : blocked ? 'Waiting for a valid input' : 'Cooking…'}
               </div>
             )}
@@ -142,7 +142,7 @@ function ColorBody({ value }: { value: string }) {
   return (
     <div className="flex items-center gap-2 px-2 pb-2">
       <span className="checker relative h-6 flex-1 overflow-hidden rounded-[5px] shadow-[inset_0_0_0_1px_var(--line-strong)]"><span className="absolute inset-0" style={{ background: value }} /></span>
-      <span className="tabular text-[11px] text-muted uppercase">{value.replace('#', '').slice(0, 6)}</span>
+      <span className="tabular text-[11px] text-fg-muted uppercase">{value.replace('#', '').slice(0, 6)}</span>
     </div>
   )
 }

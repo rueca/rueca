@@ -36,7 +36,7 @@ function Lightbox() {
       <div className="flex h-12 flex-none items-center gap-2 px-3">
         <div className="min-w-0 flex-1">
           <div className="truncate text-[12.5px] text-fg">{p.prompt}</div>
-          <div className="tabular text-[11px] text-faint">{idx + 1} / {list.length} · {modelOf(p.model).name} · seed {p.seed} · {p.w * (p.upscale ?? 1)} × {p.h * (p.upscale ?? 1)}</div>
+          <div className="tabular text-[11px] text-fg-faint">{idx + 1} / {list.length} · {modelOf(p.model).name} · seed {p.seed} · {p.w * (p.upscale ?? 1)} × {p.h * (p.upscale ?? 1)}</div>
         </div>
         <IconButton icon={Heart} label="Favourite" shortcut="f" active={!!rec.favourite} onClick={() => toggleFavourite([rec.id])} />
         <IconButton icon={Sparkles} label="Variations" shortcut="v" onClick={() => variations(rec)} />
@@ -48,9 +48,9 @@ function Lightbox() {
       <div className="relative flex min-h-0 flex-1 items-center justify-center p-4 pt-0" onClick={(e) => e.target === e.currentTarget && close()}>
         <Big rec={rec} className="rounded-[6px] shadow-[var(--shadow-artboard)]" />
         <button type="button" aria-label="Previous image" disabled={idx <= 0} onClick={() => step(-1)}
-          className="cluster absolute top-1/2 left-4 flex size-9 -translate-y-1/2 items-center justify-center text-muted outline-none hover:text-fg disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-accent"><ChevronLeft size={16} strokeWidth={1.5} /></button>
+          className="cluster absolute top-1/2 left-4 flex size-9 -translate-y-1/2 items-center justify-center text-fg-muted outline-none hover:text-fg disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-signal"><ChevronLeft size={16} strokeWidth={1.5} /></button>
         <button type="button" aria-label="Next image" disabled={idx >= list.length - 1} onClick={() => step(1)}
-          className="cluster absolute top-1/2 right-4 flex size-9 -translate-y-1/2 items-center justify-center text-muted outline-none hover:text-fg disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-accent"><ChevronRight size={16} strokeWidth={1.5} /></button>
+          className="cluster absolute top-1/2 right-4 flex size-9 -translate-y-1/2 items-center justify-center text-fg-muted outline-none hover:text-fg disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-signal"><ChevronRight size={16} strokeWidth={1.5} /></button>
       </div>
     </div>
   )
@@ -89,7 +89,7 @@ function Compare({ a, b, mode }: { a: string; b: string; mode: 'wipe' | 'side' }
             {[A, B].map((r, i) => (
               <figure key={r.id} className="flex min-h-0 flex-col items-center justify-center gap-2">
                 <div className="flex min-h-0 flex-1 items-center justify-center"><Big rec={r} className="rounded-[6px] shadow-[var(--shadow-artboard)]" /></div>
-                <figcaption className="tabular text-[11.5px] text-muted"><span className="text-fg">{i ? 'B' : 'A'}</span> · {label(r)} · {r.params.steps} steps · CFG {r.params.guidance}</figcaption>
+                <figcaption className="tabular text-[11.5px] text-fg-muted"><span className="text-fg">{i ? 'B' : 'A'}</span> · {label(r)} · {r.params.steps} steps · CFG {r.params.guidance}</figcaption>
               </figure>
             ))}
           </div>

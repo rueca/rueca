@@ -72,7 +72,7 @@ export function BeforeAfter({
             }}
           >
             <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,.35)]" style={{ width: 1.5 * k }} />
-            <div className="absolute top-1/2 left-1/2 flex items-center justify-center rounded-full bg-white text-black shadow-[0_2px_8px_rgba(0,0,0,.45)] transition-transform group-focus-visible/div:ring-2 group-focus-visible/div:ring-accent"
+            <div className="absolute top-1/2 left-1/2 flex items-center justify-center rounded-full bg-white text-black shadow-[0_2px_8px_rgba(0,0,0,.45)] transition-transform group-focus-visible/div:ring-2 group-focus-visible/div:ring-signal"
               style={{ width: 28 * k, height: 28 * k, transform: 'translate(-50%, -50%)' }}>
               <ChevronsLeftRight size={14 * k} strokeWidth={1.75} />
             </div>

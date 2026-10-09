@@ -44,16 +44,16 @@ export function PalettePicker({ value, options, onChange, columns = 2, className
             }}
             className={cn(
               'group/pal flex min-w-0 flex-col gap-1 rounded-[7px] p-1 text-left outline-none transition-colors',
-              on ? 'bg-accent-soft' : 'hover:bg-hover',
-              'focus-visible:ring-2 focus-visible:ring-accent',
+              on ? 'bg-signal-soft' : 'hover:bg-hover',
+              'focus-visible:ring-2 focus-visible:ring-signal',
             )}
           >
-            <span className={cn('flex h-4 w-full overflow-hidden rounded-[4px]', on ? 'shadow-[0_0_0_1.5px_var(--accent)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}>
+            <span className={cn('flex h-4 w-full overflow-hidden rounded-[4px]', on ? 'shadow-[0_0_0_1.5px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}>
               {o.colors.map((c, j) => <span key={j} className="h-full min-w-0 flex-1" style={{ background: c }} />)}
             </span>
-            <span className={cn('flex items-center justify-between gap-1 px-0.5 text-[11px]', on ? 'text-fg' : 'text-muted')}>
+            <span className={cn('flex items-center justify-between gap-1 px-0.5 text-[11px]', on ? 'text-fg' : 'text-fg-muted')}>
               <span className="truncate">{o.name}</span>
-              <span className="tabular text-faint">{o.colors.length}</span>
+              <span className="tabular text-fg-faint">{o.colors.length}</span>
             </span>
           </button>
         )

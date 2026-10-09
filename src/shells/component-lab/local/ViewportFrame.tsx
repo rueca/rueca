@@ -76,7 +76,7 @@ export function ViewportFrame({
     <div role="slider" aria-label="Viewport width" aria-valuenow={width} aria-valuemin={min} aria-valuemax={max} tabIndex={0}
       onPointerDown={(e) => startDrag(e, side)} onKeyDown={key}
       className={cn('group/h absolute top-0 bottom-0 z-10 flex w-4 cursor-ew-resize items-center justify-center outline-none', side < 0 ? '-left-4' : '-right-4')}>
-      <div className={cn('h-12 w-1 rounded-full bg-line-strong transition-colors group-hover/h:bg-accent group-focus-visible/h:bg-accent', drag && 'bg-accent')} />
+      <div className={cn('h-12 w-1 rounded-full bg-line-strong transition-colors group-hover/h:bg-signal group-focus-visible/h:bg-signal', drag && 'bg-signal')} />
     </div>
   )
 
@@ -90,14 +90,14 @@ export function ViewportFrame({
           </div>
         )}
         <ScrubValue boxed value={width} min={min} max={max} step={1} unit="px" label="Viewport width" onChange={(v, f) => onWidth(v, f)} className="w-[76px]" />
-        {scale < 1 && <Tip label="The frame is wider than the stage and is shown scaled down"><span className="tabular text-[11px] text-faint">{Math.round(scale * 100)}%</span></Tip>}
+        {scale < 1 && <Tip label="The frame is wider than the stage and is shown scaled down"><span className="tabular text-[11px] text-fg-faint">{Math.round(scale * 100)}%</span></Tip>}
         {toolbar}
       </div>
       <div ref={stage} className="relative min-h-0 flex-1 overflow-auto">
         <div className="flex min-h-full items-start justify-center px-6 pt-6 pb-16">
           <div className="relative" style={{ width: width * scale }}>
             {/* ruler with breakpoint ticks */}
-            <div className="relative mb-2 h-5 tabular text-[10.5px] text-faint no-select">
+            <div className="relative mb-2 h-5 tabular text-[10.5px] text-fg-faint no-select">
               <div className="absolute inset-x-0 top-2.5 h-px bg-line" />
               {presets.filter((p) => p.width < width).flatMap((p) => [-1, 1].map((side) => {
                 const x = (width / 2 + (side * p.width) / 2) * scale
@@ -109,7 +109,7 @@ export function ViewportFrame({
                   </Tip>
                 )
               }))}
-              <div className={cn('absolute left-1/2 -translate-x-1/2 rounded-[4px] px-1.5 leading-5', drag ? 'bg-accent-strong text-accent-fg' : 'bg-field text-muted')}>{width}px</div>
+              <div className={cn('absolute left-1/2 -translate-x-1/2 rounded-[4px] px-1.5 leading-5', drag ? 'bg-signal-strong text-signal-fg' : 'bg-field text-fg-muted')}>{width}px</div>
             </div>
             <div className="relative" style={{ height: scale < 1 ? innerH * scale : undefined }}>
               {handle(-1)}

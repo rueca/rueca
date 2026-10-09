@@ -6,7 +6,7 @@
 <title>Brand board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700&family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Instrument+Serif&family=Inter:wght@400;500;600&family=Young+Serif&family=Schibsted+Grotesk:wght@800&family=Fraunces:opsz,wght@9..144,600&family=Marcellus&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700&family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Instrument+Serif&family=Inter:wght@400;500;600&family=Young+Serif&family=Schibsted+Grotesk:wght@800&family=Fraunces:opsz,wght@9..144,600&family=Marcellus&family=EB+Garamond:wght@500&family=Fredoka:wght@600&family=Nunito:wght@800&family=Sniglet:wght@800&family=Syne:wght@700&display=swap" />
 <script>
   try {
     var t = localStorage.getItem('studio:theme');
@@ -227,22 +227,36 @@
   <header class="top">
     <div class="crumb">Brand board <span>Prototype Studio · working name</span></div>
     <nav class="nav" aria-label="Sections">
-      <a href="#round2">Round 2</a><a href="#positioning">Positioning</a><a href="#names">Names</a><a href="#shortlist">Round 1</a><a href="#voice">Voice</a><a href="#next">Next</a>
+      <a href="#round3">Round 3</a><a href="#round2">Round 2</a><a href="#positioning">Positioning</a><a href="#names">Names</a><a href="#shortlist">Round 1</a><a href="#voice">Voice</a><a href="#next">Next</a>
     </nav>
     <button class="btn solid" id="theme" type="button" aria-label="Toggle theme (T)">Theme</button>
   </header>
 
   <h1>Naming and brand</h1>
-  <p class="lede">Two rounds, 93 names, all checked against npm, GitHub, domains and the web. Round 2 went looking in Spanish and Latin, in the history of tools, and in pop culture. Each shortlist has drawn marks, a wordmark and a palette. The final name and look are your call.</p>
+  <p class="lede">Three rounds, 177 names, all checked against npm, GitHub, domains and the web. Round 2 went looking in Spanish and Latin, in the history of tools, among inventors and in pop culture. Round 3 went cute: lil- names, toys and fictional makers. Each shortlist has drawn marks, a wordmark and a palette. The final name and look are your call.</p>
 
   <div class="calls">
-    <div class="panel call"><span class="k">Your call · 1</span><b>Pick the name</b><p>From round 2, my pick is <strong>Cruceta</strong>, the marionette’s control bar. We don’t make your prototype, we make it move. Thumbwheel is still the safest English pick. Tramoya is the richest story.</p></div>
+    <div class="panel call"><span class="k">Your call · 1</span><b>Pick the name</b><p>Overall, my pick is <strong>Cruceta</strong>, the marionette’s control bar: we don’t make your prototype, we make it move. If you want cute, it’s <strong>Trompo</strong>. Thumbwheel is still the safest English pick.</p></div>
     <div class="panel call"><span class="k">Your call · 2</span><b>Pick the look</b><p>The marks are first drafts on a 32-unit grid, drawn to survive 16px. Push on the forms, the type and the palette. These are the places your eye beats mine.</p></div>
     <div class="panel call"><span class="k">Your call · 3</span><b>Approve the voice</b><p>Seven rules and the do/don’t pairs. If one doesn’t sound like you, cut it.</p></div>
   </div>
 
+  <section id="round3">
+    <div class="sh"><span class="n">R3</span><h2>Round 3: cute prefixes, toys, fictional makers</h2><p>Checked 9 Oct 2026</p></div>
+    <div class="lenses" id="lenses3"></div>
+    <h3 class="sub">Shortlist</h3>
+    <div class="cands" id="cands3"></div>
+    <h3 class="sub">Every name in round 3</h3>
+    <div class="panel tbl"><table><thead><tr>
+      <th>Name</th><th>Lens</th><th>npm</th><th>@scope</th><th>GitHub handle</th><th>Repo clashes</th><th>Domains</th><th>Already out there</th><th>Verdict</th>
+    </tr></thead><tbody id="rows3"></tbody></table></div>
+    <p class="note" id="also3"></p>
+    <h3 class="sub">Stories worth borrowing</h3>
+    <div class="stories" id="stories3"></div>
+  </section>
+
   <section id="round2">
-    <div class="sh"><span class="n">R2</span><h2>Round 2: Spanish, Latin, history, pop culture</h2><p>Checked 9 Oct 2026</p></div>
+    <div class="sh"><span class="n">R2</span><h2>Round 2: Spanish, Latin, history, inventors, pop culture</h2><p>Checked 9 Oct 2026</p></div>
     <div class="lenses" id="lenses"></div>
     <h3 class="sub">Shortlist</h3>
     <div class="cands" id="cands2"></div>
@@ -306,7 +320,7 @@
 
 <script type="module">
   import { marks } from './marks.js'
-  import { names, alsoChecked, shortlist, positioning, voice, checkedOn, round2Lenses, names2, alsoChecked2, shortlist2, stories } from './data.js'
+  import { names, alsoChecked, shortlist, positioning, voice, checkedOn, round2Lenses, names2, alsoChecked2, shortlist2, stories, round3Lenses, names3, alsoChecked3, shortlist3, stories3 } from './data.js'
 
   const $ = (id) => document.getElementById(id)
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
@@ -408,8 +422,14 @@
       </article>`
     }).join('')
   }
-  const renderAll = () => { renderCands(); renderCands(shortlist2, names2, 'cands2') }
+  const renderAll = () => { renderCands(); renderCands(shortlist2, names2, 'cands2'); renderCands(shortlist3, names3, 'cands3') }
   renderAll()
+
+  /* round 3 */
+  $('lenses3').innerHTML = round3Lenses.map((l) => `<div class="panel"><b>${esc(l.title)}</b><p>${esc(l.body)}</p></div>`).join('')
+  $('rows3').innerHTML = names3.map((n) => rowHTML(n, true)).join('')
+  $('also3').textContent = `Also checked and dropped: ${alsoChecked3.join(', ')}.`
+  $('stories3').innerHTML = stories3.map((x) => `<div class="panel"><b>${esc(x.title)}</b><span class="era">${esc(x.era)}</span><p>${esc(x.body)}</p></div>`).join('')
 
   /* round 2 */
   $('lenses').innerHTML = round2Lenses.map((l) => `<div class="panel"><b>${esc(l.title)}</b><p>${esc(l.body)}</p></div>`).join('')

@@ -21,10 +21,10 @@ export const JourneyCard = memo(function JourneyCard({
   const tint =
     lane === 'pains' ? 'color-mix(in srgb, var(--rec) 9%, var(--overlay))'
       : lane === 'opps' ? 'color-mix(in srgb, var(--ok) 10%, var(--overlay))'
-        : lane === 'thoughts' ? 'color-mix(in srgb, var(--accent) 8%, var(--overlay))'
+        : lane === 'thoughts' ? 'color-mix(in srgb, var(--signal) 8%, var(--overlay))'
           : 'var(--overlay)'
   const bar = lane === 'pains' ? 'var(--rec)' : lane === 'opps' ? 'var(--ok)' : null
-  const ring = selected ? '0 0 0 2px var(--accent)' : hit ? '0 0 0 1.5px var(--accent)' : '0 0 0 1px var(--line-strong)'
+  const ring = selected ? '0 0 0 2px var(--signal)' : hit ? '0 0 0 1.5px var(--signal)' : '0 0 0 1px var(--line-strong)'
 
   const endEdit = (b: boolean) => ui.setState({ editing: b ? card.id : null })
 
@@ -54,10 +54,10 @@ export const JourneyCard = memo(function JourneyCard({
       {bar && <span className="absolute top-2 bottom-2 left-0 w-[3px] rounded-r-full" style={{ background: bar }} />}
 
       {lane === 'touchpoints' && Ch && (
-        <div className="flex items-center gap-1 text-[10.5px] text-faint"><Ch.icon size={11} strokeWidth={1.5} />{Ch.label}</div>
+        <div className="flex items-center gap-1 text-[10.5px] text-fg-faint"><Ch.icon size={11} strokeWidth={1.5} />{Ch.label}</div>
       )}
       {(lane === 'pains' || lane === 'opps') && (
-        <div className="flex items-center gap-1.5 text-[10.5px] text-faint">
+        <div className="flex items-center gap-1.5 text-[10.5px] text-fg-faint">
           <span className="flex gap-[2px]" aria-label={`${lane === 'pains' ? 'Severity' : 'Impact'} ${LEVEL[card.level ?? 2]}`}>
             {[1, 2, 3].map((i) => <span key={i} className="size-[5px] rounded-full" style={{ background: i <= (card.level ?? 2) ? (lane === 'pains' ? 'var(--rec)' : 'var(--ok)') : 'var(--line-strong)' }} />)}
           </span>
@@ -88,8 +88,8 @@ export const JourneyCard = memo(function JourneyCard({
       )}
 
       {showTags && card.tags.length > 0 && (
-        <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 text-[10.5px] text-faint">
-          {card.tags.map((t) => <span key={t} className={cn(hit && 'text-accent')}>{t}</span>)}
+        <div className="flex flex-wrap gap-x-1.5 gap-y-0.5 text-[10.5px] text-fg-faint">
+          {card.tags.map((t) => <span key={t} className={cn(hit && 'text-signal')}>{t}</span>)}
         </div>
       )}
 

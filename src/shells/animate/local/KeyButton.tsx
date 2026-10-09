@@ -32,8 +32,8 @@ export function KeyDiamond({ state, size = 9, className }: { state: KeyState; si
         x={2.5} y={2.5} width={7} height={7} rx={1.2} transform="rotate(45 6 6)"
         className={cn(
           state === 'none' && 'fill-transparent stroke-[var(--fg-faint)]',
-          state === 'animated' && 'fill-transparent stroke-[var(--accent)]',
-          state === 'key' && 'fill-[var(--accent)] stroke-[var(--accent)]',
+          state === 'animated' && 'fill-transparent stroke-[var(--signal)]',
+          state === 'key' && 'fill-[var(--signal)] stroke-[var(--signal)]',
           state === 'edited' && 'fill-[var(--key)] stroke-[var(--key)]',
         )}
         strokeWidth={1.4}
@@ -52,7 +52,7 @@ export function KeyButton({
   disabled?: boolean
   className?: string
 }) {
-  const nav = 'flex h-6 w-3.5 items-center justify-center rounded-[4px] text-faint outline-none hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-accent'
+  const nav = 'flex h-6 w-3.5 items-center justify-center rounded-[4px] text-fg-faint outline-none hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal'
   const reveal = 'opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100'
   return (
     <div className={cn('flex shrink-0 items-center', disabled && 'pointer-events-none opacity-30', className)}>
@@ -67,7 +67,7 @@ export function KeyButton({
           aria-pressed={state === 'key'}
           onClick={onToggle}
           className={cn(
-            'flex size-6 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent',
+            'flex size-6 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal',
             state === 'none' && reveal,
           )}
         >

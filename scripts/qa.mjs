@@ -39,8 +39,8 @@ const audit = () => {
   const g = (n) => parse(V(n)), panel = g('--panel')
   const fails = []
   ;[['well/panel', g('--well'), panel, 1.08], ['track/panel', g('--track'), panel, 1.15], ['raised/well', g('--raised'), g('--well'), 1.3],
-    ['active/panel', g('--active'), panel, 1.12], ['accent-fg/accent-strong', g('--accent-fg'), g('--accent-strong'), 4.5],
-    ['accent/panel', g('--accent'), panel, 3], ['faint/panel', g('--fg-faint'), panel, 3], ['muted/panel', g('--fg-muted'), panel, 4.5], ['fg/panel', g('--fg'), panel, 7],
+    ['active/panel', g('--active'), panel, 1.12], ['accent-fg/accent-strong', g('--signal-fg'), g('--signal-strong'), 4.5],
+    ['accent/panel', g('--signal'), panel, 3], ['faint/panel', g('--fg-faint'), panel, 3], ['muted/panel', g('--fg-muted'), panel, 4.5], ['fg/panel', g('--fg'), panel, 7],
   ].forEach(([n, a, b, min]) => { const r = ratio(a, b); if (r < min) fails.push(`${n} ${r}<${min}`) })
   // Text actually rendered in chrome: sample visible text nodes outside canvases/artboards.
   const lowText = []

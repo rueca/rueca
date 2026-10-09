@@ -10,6 +10,7 @@
 
    UTF-8 names (flag bit 11), CRC-32, DOS timestamps. ~4 GB / 65k-entry
    limits of classic zip apply; no zip64.
+   (Promoted from shells/batch/local/zip.ts.)
 --------------------------------------------------------------------------- */
 
 const CRC_TABLE = (() => {

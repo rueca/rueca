@@ -57,8 +57,8 @@ export function LiveShell({ shells }: { shells: Shell[] }) {
         <div className="mb-3 flex flex-wrap items-center gap-1.5" role="group" aria-label="Choose a live shell">
           {shells.map((s) => (
             <button key={s.id} type="button" onClick={() => setId(s.id)} aria-pressed={id === s.id}
-              className={cn('h-7 rounded-full px-3 text-[12px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-accent',
-                id === s.id ? 'bg-fg text-field' : 'text-muted hover:bg-hover hover:text-fg')}>
+              className={cn('h-7 rounded-full px-3 text-[12px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-signal',
+                id === s.id ? 'bg-fg text-field' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
               {s.name}
             </button>
           ))}
@@ -90,7 +90,7 @@ export function LiveShell({ shells }: { shells: Shell[] }) {
           <button type="button" onClick={() => { setActive(true); requestAnimationFrame(() => frame.current?.focus()) }}
             className="group absolute inset-0 flex items-end justify-center pb-5 outline-none"
             aria-label={`Interact with the ${shell?.name ?? ''} shell`}>
-            <span className="pop flex h-9 items-center gap-2 px-3.5 text-[12.5px] font-medium text-fg opacity-90 transition-opacity group-hover:opacity-100 group-focus-visible:ring-2 group-focus-visible:ring-accent">
+            <span className="pop flex h-9 items-center gap-2 px-3.5 text-[12.5px] font-medium text-fg opacity-90 transition-opacity group-hover:opacity-100 group-focus-visible:ring-2 group-focus-visible:ring-signal">
               <MousePointerClick size={14} strokeWidth={1.5} />
               {narrow ? 'Tap to try the client view' : 'Click to try it — this is the real shell'}
             </span>
@@ -98,15 +98,15 @@ export function LiveShell({ shells }: { shells: Shell[] }) {
         )}
         {active && (
           <button type="button" onClick={() => setActive(false)} aria-label="Stop interacting"
-            className="pop absolute top-3 right-3 flex h-8 items-center gap-1.5 px-2.5 text-[12px] text-muted hover:text-fg sm:hidden">
+            className="pop absolute top-3 right-3 flex h-8 items-center gap-1.5 px-2.5 text-[12px] text-fg-muted hover:text-fg sm:hidden">
             <X size={13} strokeWidth={1.5} />Done
           </button>
         )}
       </div>
       {shell && (
         <div className="mt-3 flex items-start justify-between gap-4 text-[12.5px]">
-          <p className="min-w-0 text-pretty text-muted"><span className="font-medium text-fg">{shell.name}.</span> {shell.description}</p>
-          <a href={`#/${shell.id}${narrow ? '?client' : ''}`} className="flex flex-none items-center gap-1 text-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+          <p className="min-w-0 text-pretty text-fg-muted"><span className="font-medium text-fg">{shell.name}.</span> {shell.description}</p>
+          <a href={`#/${shell.id}${narrow ? '?client' : ''}`} className="flex flex-none items-center gap-1 text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
             Full screen<ArrowUpRight size={13} strokeWidth={1.5} />
           </a>
         </div>

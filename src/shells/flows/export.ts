@@ -1,6 +1,6 @@
 /* Flows — getting things out: PNG (DOM snapshot of the viewport), JSON, Mermaid. */
 import { copyText, download, exportCanvasPNG, exportJSON, toast, toastManager } from '@kit'
-import { snapshotElement } from './local/snapshot'
+import { snapshotElement } from '@kit'
 import { activeFlow, importFlow, select, sizeOf, ui, viewport } from './store'
 import type { Flow } from './model'
 

@@ -4,14 +4,51 @@ import { X } from 'lucide-react'
 
 export const toastManager = Toast.createToastManager()
 
-export function toast(title: string, opts: { description?: string; type?: 'default' | 'success' | 'error' | 'loading'; timeout?: number; action?: { label: string; onClick: () => void } } = {}) {
-  return toastManager.add({
-    title,
-    description: opts.description,
-    type: opts.type,
-    timeout: opts.timeout ?? 2600,
-    actionProps: opts.action ? { children: opts.action.label, onClick: opts.action.onClick } : undefined,
-  })
+type ToastType = 'default' | 'success' | 'error' | 'loading'
+interface ToastOpts { description?: string; type?: ToastType; timeout?: number; action?: { label: string; onClick: () => void } }
+
+const toProps = (title: string, o: ToastOpts) => ({
+  title,
+  description: o.description,
+  type: o.type,
+  timeout: o.timeout ?? (o.type === 'loading' ? 0 : 2600),
+  actionProps: o.action ? { children: o.action.label, onClick: o.action.onClick } : undefined,
+})
+
+/** Show a toast; returns its id. Loading toasts stay until updated or dismissed. */
+export function toast(title: string, opts: ToastOpts = {}) {
+  return toastManager.add(toProps(title, opts))
+}
+/** Change a toast in place (e.g. loading → success). */
+toast.update = (id: string, title: string, opts: ToastOpts = {}) => toastManager.update(id, toProps(title, { timeout: 2600, ...opts }))
+toast.dismiss = (id: string) => toastManager.close(id)
+/** loading → success / error around a promise. */
+toast.promise = async <T,>(p: Promise<T>, m: { loading: string; success: string | ((v: T) => string); error?: string | ((e: unknown) => string) }) => {
+  const id = toast(m.loading, { type: 'loading' })
+  try {
+    const v = await p
+    toast.update(id, typeof m.success === 'function' ? m.success(v) : m.success, { type: 'success' })
+    return v
+  } catch (e) {
+    toast.update(id, typeof m.error === 'function' ? m.error(e) : (m.error ?? 'Something went wrong'), { type: 'error', description: e instanceof Error ? e.message : undefined, timeout: 5000 })
+    throw e
+  }
+}
+/** A long job with progress (0–1) and Cancel. `done()` / `fail()` end it. */
+toast.progress = (title: string, opts: { onCancel?: () => void } = {}) => {
+  const id = toast(title, { type: 'loading', action: opts.onCancel ? { label: 'Cancel', onClick: opts.onCancel } : undefined })
+  return {
+    id,
+    set: (p: number, detail?: string) => toastManager.update(id, { title, description: `${Math.round(p * 100)}%${detail ? ` · ${detail}` : ''}` }),
+    done: (msg: string, o: ToastOpts = {}) => toast.update(id, msg, { type: 'success', ...o }),
+    fail: (msg: string, o: ToastOpts = {}) => toast.update(id, msg, { type: 'error', timeout: 5000, ...o }),
+  }
+}
+
+if (typeof window !== 'undefined') {
+  // Params / doc stores announce storage failures once; tell the person, quietly.
+  window.addEventListener('studio:storage-error', () =>
+    toast('Settings could not be saved', { type: 'error', description: 'Browser storage is full or blocked. Your work is fine until you reload.', timeout: 6000 }))
 }
 
 export function Toaster() {
@@ -37,14 +74,14 @@ function List() {
       <Toast.Content className="flex min-w-0 items-center gap-2">
         {t.type === 'success' && <span className="size-1.5 shrink-0 rounded-full bg-ok" />}
         {t.type === 'error' && <span className="size-1.5 shrink-0 rounded-full bg-rec" />}
-        {t.type === 'loading' && <span className="size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-line-strong border-t-accent" />}
+        {t.type === 'loading' && <span className="size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" />}
         <div className="min-w-0">
           <Toast.Title className="truncate font-medium" />
-          <Toast.Description className="text-[11.5px] text-muted" />
+          <Toast.Description className="text-[11.5px] text-fg-muted" />
         </div>
       </Toast.Content>
-      <Toast.Action className="h-6 rounded-[5px] px-2 text-[11.5px] font-medium text-accent hover:bg-hover" />
-      <Toast.Close aria-label="Dismiss" className="flex size-6 items-center justify-center rounded-[5px] text-faint hover:bg-hover hover:text-fg">
+      <Toast.Action className="h-6 rounded-[5px] px-2 text-[11.5px] font-medium text-signal hover:bg-hover" />
+      <Toast.Close aria-label="Dismiss" className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint hover:bg-hover hover:text-fg">
         <X size={12} />
       </Toast.Close>
     </Toast.Root>

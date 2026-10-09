@@ -77,7 +77,7 @@ export function Canvas({ dock }: { dock: React.ReactNode }) {
               return (
                 <Artboard key={n.id} x={b.x} y={b.y} width={Math.round(b.w)} height={Math.round(b.h)} background={(background as string) ?? 'transparent'}
                   selected={selection.includes(n.id)}
-                  label={<span className="flex items-center gap-1">{n.component && <Component size={11} strokeWidth={1.75} className="text-accent" />}{n.name}</span>}
+                  label={<span className="flex items-center gap-1">{n.component && <Component size={11} strokeWidth={1.75} className="text-signal" />}{n.name}</span>}
                   className={cn(!n.clip && 'overflow-visible')}
                   style={{ ...Object.fromEntries(Object.entries(rest).filter(([, v]) => v !== undefined)), opacity: n.opacity }}>
                   {n.children?.map((c) => <NodeView key={c.id} n={c} parent={b} ctx={ctx} />)}

@@ -15,7 +15,7 @@ import { OverrideRows } from './local/OverrideRows'
 import { DataGrid } from './local/DataGrid'
 import { JobQueue, Progress } from './local/JobQueue'
 import { Modal } from './local/Modal'
-import { fmtBytes } from './local/zip'
+import { fmtBytes } from '@kit'
 import { drawPost } from './artifact'
 import {
   addPreset, addRow, addSize, clearAllOverrides, clearOverride, editCell, exportCSV, importText, moveSize, overrideCount, pasteBlock, patchSize, pickCSV,
@@ -53,7 +53,7 @@ export function SizesPanel({ openCustom }: { openCustom: () => void }) {
     const n = overrideCount(d, s.id)
     return {
       id: s.id, name: s.name, icon: shapeIcon(s), visible: s.visible !== false, locked: !!s.locked,
-      meta: <span className="flex items-center gap-1.5 tabular">{n > 0 && <span className="size-1.5 rounded-full bg-accent" aria-label={`${n} overrides`} />}{ratio(s.w, s.h)}</span>,
+      meta: <span className="flex items-center gap-1.5 tabular">{n > 0 && <span className="size-1.5 rounded-full bg-signal" aria-label={`${n} overrides`} />}{ratio(s.w, s.h)}</span>,
     }
   })
   return (
@@ -63,7 +63,7 @@ export function SizesPanel({ openCustom }: { openCustom: () => void }) {
           <Menu align="end" trigger={<IconButton icon={Plus} label="Add size" size="icon-sm" />} items={addSizeItems(openCustom)} />
         </PanelHeader>
       }
-      footer={<div className="px-3 py-2 text-[11px] text-faint">{sizes.filter((s) => s.visible !== false).length} of {sizes.length} on stage · drag to reorder</div>}
+      footer={<div className="px-3 py-2 text-[11px] text-fg-faint">{sizes.filter((s) => s.visible !== false).length} of {sizes.length} on stage · drag to reorder</div>}
     >
       {sizes.length ? (
         <LayerTree
@@ -97,7 +97,7 @@ function TemplateInspector() {
   const withOverrides = d.sizes.filter((s) => overrideCount(d, s.id) > 0)
   return (
     <>
-      <div className="px-3 pt-3 pb-1 text-[11.5px] leading-relaxed text-muted">
+      <div className="px-3 pt-3 pb-1 text-[11.5px] leading-relaxed text-fg-muted">
         Template — every size inherits these. Select a size to override it.
       </div>
       <Inspector params={params} folders={['template', 'look']} />
@@ -106,16 +106,16 @@ function TemplateInspector() {
           const keys = Object.keys(d.overrides[s.id] ?? {})
           return (
             <button key={s.id} type="button" onClick={() => selectSize(s.id)}
-              className="group/ov mx-1.5 flex min-h-8 items-center gap-2 rounded-[6px] px-1.5 py-1 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent">
-              <span className="size-1.5 shrink-0 rounded-full bg-accent" />
+              className="group/ov mx-1.5 flex min-h-8 items-center gap-2 rounded-[6px] px-1.5 py-1 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
+              <span className="size-1.5 shrink-0 rounded-full bg-signal" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[12px] text-fg">{s.name}</span>
-                <span className="block truncate text-[11px] text-faint">{keys.map((k) => (params.defs[k] as { label?: string })?.label ?? k).join(', ')}</span>
+                <span className="block truncate text-[11px] text-fg-faint">{keys.map((k) => (params.defs[k] as { label?: string })?.label ?? k).join(', ')}</span>
               </span>
               <Badge>{keys.length}</Badge>
             </button>
           )
-        }) : <div className="px-3 pb-1 text-[11.5px] text-faint">No size overrides the template.</div>}
+        }) : <div className="px-3 pb-1 text-[11.5px] text-fg-faint">No size overrides the template.</div>}
       </Section>
     </>
   )
@@ -149,11 +149,11 @@ function SizeInspector({ size, issues }: { size: SizeSpec; issues: string[] }) {
             : <span className="tabular text-[11.5px] text-fg">{size.w} × {size.h} px</span>}
         </Row>
         <Row label="Safe area" hint="Insets kept clear of platform UI. Toggle the overlay with S.">
-          <span className="tabular text-[11.5px] text-muted">{[size.safe.t, size.safe.r, size.safe.b, size.safe.l].join(' · ')} px</span>
+          <span className="tabular text-[11.5px] text-fg-muted">{[size.safe.t, size.safe.r, size.safe.b, size.safe.l].join(' · ')} px</span>
         </Row>
         <Row label="Layout used" hint="The rule this size resolves to with the current values.">
           <span className="text-[11.5px] text-fg capitalize">{mode}</span>
-          {eff.layout === 'auto' && <span className="text-[11.5px] text-faint">(auto)</span>}
+          {eff.layout === 'auto' && <span className="text-[11.5px] text-fg-faint">(auto)</span>}
         </Row>
       </Section>
       <Section
@@ -162,7 +162,7 @@ function SizeInspector({ size, issues }: { size: SizeSpec; issues: string[] }) {
         onReset={n && !size.locked ? () => clearOverride(size.id) : undefined}
         actions={<Badge tone={n ? 'accent' : 'default'}>{n}</Badge>}
       >
-        {size.locked && <div className="px-3 pb-1 text-[11.5px] text-muted">Size is locked. Unlock it to change overrides.</div>}
+        {size.locked && <div className="px-3 pb-1 text-[11.5px] text-fg-muted">Size is locked. Unlock it to change overrides.</div>}
         <OverrideRows
           params={params}
           keys={[...OVERRIDABLE]}
@@ -182,7 +182,7 @@ function SizeInspector({ size, issues }: { size: SizeSpec; issues: string[] }) {
       <Section title="Checks" changed={issues.length > 0}>
         {issues.length ? issues.map((i) => (
           <div key={i} className="flex min-h-7 items-center gap-2 px-3 text-[11.5px] text-fg"><TriangleAlert size={12} strokeWidth={1.75} className="shrink-0 text-key" />{i}</div>
-        )) : <div className="flex min-h-7 items-center gap-2 px-3 text-[11.5px] text-muted"><Check size={12} strokeWidth={2} className="text-ok" />Copy and product fit this row.</div>}
+        )) : <div className="flex min-h-7 items-center gap-2 px-3 text-[11.5px] text-fg-muted"><Check size={12} strokeWidth={2} className="text-ok" />Copy and product fit this row.</div>}
       </Section>
       <div className="border-t border-line p-2">
         <Button variant="danger" size="md" className="w-full" onClick={() => removeSize(size.id)}><Trash2 size={13} strokeWidth={1.5} />Remove size</Button>
@@ -201,11 +201,11 @@ export function BrandTab() {
     <>
       <div className="p-2">
         <button type="button" onClick={() => params.setValue('brandLocked', !locked)} aria-pressed={locked}
-          className="flex w-full items-center gap-2.5 rounded-[8px] bg-input px-2.5 py-2 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-accent">
-          <span className={locked ? 'text-accent' : 'text-faint'}>{locked ? <Lock size={14} strokeWidth={1.5} /> : <LockOpen size={14} strokeWidth={1.5} />}</span>
+          className="flex w-full items-center gap-2.5 rounded-[8px] bg-control px-2.5 py-2 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal">
+          <span className={locked ? 'text-signal' : 'text-fg-faint'}>{locked ? <Lock size={14} strokeWidth={1.5} /> : <LockOpen size={14} strokeWidth={1.5} />}</span>
           <span className="min-w-0 flex-1">
             <span className="block text-[12px] font-medium text-fg">{locked ? 'Brand locked' : 'Brand unlocked'}</span>
-            <span className="block text-[11px] text-muted">{locked ? 'Logo, colours and type are read-only.' : 'Lock before handing over to keep the brand fixed.'}</span>
+            <span className="block text-[11px] text-fg-muted">{locked ? 'Logo, colours and type are read-only.' : 'Lock before handing over to keep the brand fixed.'}</span>
           </span>
           <Switch checked={locked} label="Lock brand" onChange={(b) => params.setValue('brandLocked', b)} />
         </button>
@@ -216,9 +216,9 @@ export function BrandTab() {
           <Tip label="Paper"><span><Swatch color={v.paper} size={20} /></span></Tip>
           <Tip label="Ink"><span><Swatch color={v.ink} size={20} /></span></Tip>
           <span className="mx-1 w-px self-stretch bg-line" />
-          {rows.map((r, i) => <Tip key={i} label={`${r.name} · ${r.color}`}><button type="button" onClick={() => setRow(i)} className="rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-accent"><Swatch color={r.color} size={20} /></button></Tip>)}
+          {rows.map((r, i) => <Tip key={i} label={`${r.name} · ${r.color}`}><button type="button" onClick={() => setRow(i)} className="rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-signal"><Swatch color={r.color} size={20} /></button></Tip>)}
         </div>
-        <div className="px-3 pt-1 text-[11px] text-faint">Row colours come from the data table.</div>
+        <div className="px-3 pt-1 text-[11px] text-fg-faint">Row colours come from the data table.</div>
       </Section>
     </>
   )
@@ -257,7 +257,7 @@ export function ExportTab() {
           <label key={z.id} className="flex h-7 cursor-default items-center gap-2 px-3 text-[12px] hover:bg-hover">
             <Checkbox checked={chosen(z.id)} onChange={() => toggleSize(z.id)} label={z.name} />
             <span className="min-w-0 flex-1 truncate text-fg">{z.name}</span>
-            <span className="tabular text-[11px] text-faint">{z.w}×{z.h}</span>
+            <span className="tabular text-[11px] text-fg-faint">{z.w}×{z.h}</span>
           </label>
         ))}
       </Section>
@@ -267,7 +267,7 @@ export function ExportTab() {
           <>
             <div className="flex items-center justify-between text-[11.5px]">
               <span className="text-fg tabular">Rendering {st.done + 1 > total ? total : st.done + 1} of {total}</span>
-              <span className="text-faint tabular">{fmtBytes(st.bytes)}</span>
+              <span className="text-fg-faint tabular">{fmtBytes(st.bytes)}</span>
             </div>
             <Progress value={st.done / Math.max(1, total)} />
             <Button variant="outline" size="md" className="w-full" onClick={cancelExport}><X size={13} strokeWidth={1.5} />Cancel</Button>
@@ -276,7 +276,7 @@ export function ExportTab() {
           <>
             <div className="flex items-center justify-between text-[11.5px]">
               <span className="text-fg tabular">{st.done} of {total} rendered{st.status === 'cancelled' ? ' — cancelled' : ''}</span>
-              <span className="text-faint tabular">{(st.elapsed / 1000).toFixed(1)}s</span>
+              <span className="text-fg-faint tabular">{(st.elapsed / 1000).toFixed(1)}s</span>
             </div>
             <Progress value={st.done / Math.max(1, total)} tone={st.status === 'cancelled' ? 'rec' : 'ok'} />
             {st.zip && <Button variant="primary" size="lg" className="w-full" onClick={downloadZip}><Package size={14} strokeWidth={1.5} />Download zip · {fmtBytes(st.zip.size)}</Button>}
@@ -287,7 +287,7 @@ export function ExportTab() {
           </>
         ) : (
           <>
-            <div className="text-[11.5px] text-muted tabular">{planned.length} image{planned.length === 1 ? '' : 's'} · {s.format.toUpperCase()} at {s.scale}× · {s.pack === 'zip' ? 'one zip' : 'separate files'}</div>
+            <div className="text-[11.5px] text-fg-muted tabular">{planned.length} image{planned.length === 1 ? '' : 's'} · {s.format.toUpperCase()} at {s.scale}× · {s.pack === 'zip' ? 'one zip' : 'separate files'}</div>
             <Button variant="primary" size="lg" className="w-full" disabled={!planned.length} onClick={() => void runExport()}>
               <Download size={14} strokeWidth={1.75} />Render {planned.length} image{planned.length === 1 ? '' : 's'}
             </Button>
@@ -313,7 +313,7 @@ export function DataPanel({ rowIssues, openPaste }: { rowIssues: (i: number) => 
       className="h-[232px]"
       scroll={false}
       header={
-        <PanelHeader title={<span>Data <span className="font-normal text-faint">· {rows.length} row{rows.length === 1 ? '' : 's'} · each row is one set of assets</span></span>}>
+        <PanelHeader title={<span>Data <span className="font-normal text-fg-faint">· {rows.length} row{rows.length === 1 ? '' : 's'} · each row is one set of assets</span></span>}>
           <IconButton icon={ClipboardPaste} label="Paste CSV…" size="icon-sm" onClick={openPaste} />
           <IconButton icon={FileUp} label="Import CSV file" size="icon-sm" onClick={pickCSV} />
           <IconButton icon={FileDown} label="Download as CSV" size="icon-sm" onClick={exportCSV} />
@@ -333,7 +333,7 @@ export function DataPanel({ rowIssues, openPaste }: { rowIssues: (i: number) => 
         onAddRow={() => addRow(rows.length - 1)}
         onRemoveRow={removeRow}
         rowIssues={rowIssues}
-        empty={<div className="px-3 py-4 text-[11.5px] text-muted">No rows. Paste from a spreadsheet (⌘V) or add one.</div>}
+        empty={<div className="px-3 py-4 text-[11.5px] text-fg-muted">No rows. Paste from a spreadsheet (⌘V) or add one.</div>}
       />
     </Panel>
   )
@@ -353,7 +353,7 @@ export function PasteDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       onSubmit={() => parsed.length && done('replace')}
       footer={
         <>
-          <span className="mr-auto text-[11.5px] text-muted tabular">{parsed.length ? `${parsed.length} row${parsed.length === 1 ? '' : 's'}${header ? ' · header detected' : ''}` : 'Waiting for data'}</span>
+          <span className="mr-auto text-[11.5px] text-fg-muted tabular">{parsed.length ? `${parsed.length} row${parsed.length === 1 ? '' : 's'}${header ? ' · header detected' : ''}` : 'Waiting for data'}</span>
           <Button size="md" variant="default" disabled={!parsed.length} onClick={() => done('append')}>Append</Button>
           <Button size="md" variant="primary" disabled={!parsed.length} onClick={() => done('replace')}>Replace rows</Button>
         </>
@@ -375,7 +375,7 @@ export function CustomSizeDialog({ open, onOpenChange }: { open: boolean; onOpen
       <div className="-mx-3 flex flex-col">
         <Row label="Name"><TextInput value={name} onChange={setName} label="Name" /></Row>
         <Row label="Size"><SizeFields value={dim} min={16} max={8000} onChange={(s) => setDim({ w: Math.round(s.w), h: Math.round(s.h) })} /></Row>
-        <Row label="Aspect"><span className="tabular text-[11.5px] text-muted">{(dim.w / dim.h).toFixed(2)} · {dim.w / dim.h < 0.82 ? 'stack' : dim.w / dim.h > 1.3 ? 'split' : 'hero'} layout</span></Row>
+        <Row label="Aspect"><span className="tabular text-[11.5px] text-fg-muted">{(dim.w / dim.h).toFixed(2)} · {dim.w / dim.h < 0.82 ? 'stack' : dim.w / dim.h > 1.3 ? 'split' : 'hero'} layout</span></Row>
       </div>
     </Modal>
   )

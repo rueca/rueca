@@ -69,11 +69,11 @@ export function HistoryList({ history, max = 60 }: { history: NamedHistory; max?
           aria-selected={i === index}
           onClick={() => history.jump(i)}
           className={cn(
-            'mx-1.5 flex h-7 shrink-0 items-center gap-2 rounded-[6px] px-2 text-left text-[12px] outline-none focus-visible:ring-2 focus-visible:ring-accent',
-            i === index ? 'bg-accent-soft text-fg' : i > index ? 'text-faint hover:bg-hover' : 'text-muted hover:bg-hover hover:text-fg',
+            'mx-1.5 flex h-7 shrink-0 items-center gap-2 rounded-[6px] px-2 text-left text-[12px] outline-none focus-visible:ring-2 focus-visible:ring-signal',
+            i === index ? 'bg-signal-soft text-fg' : i > index ? 'text-fg-faint hover:bg-hover' : 'text-fg-muted hover:bg-hover hover:text-fg',
           )}
         >
-          <span className={cn('size-1.5 shrink-0 rounded-full', i === index ? 'bg-accent' : i > index ? 'shadow-[inset_0_0_0_1px_var(--fg-faint)]' : 'bg-[var(--fg-faint)]')} />
+          <span className={cn('size-1.5 shrink-0 rounded-full', i === index ? 'bg-signal' : i > index ? 'shadow-[inset_0_0_0_1px_var(--fg-faint)]' : 'bg-[var(--fg-faint)]')} />
           <span className={cn('min-w-0 flex-1 truncate', i > index && 'line-through decoration-[var(--line-strong)]')}>{n}</span>
         </button>
       ))}

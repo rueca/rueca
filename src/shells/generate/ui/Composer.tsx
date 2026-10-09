@@ -44,9 +44,9 @@ export function Composer() {
   return (
     <div className="panel pointer-events-auto flex w-full max-w-[780px] flex-col gap-2 p-2.5">
       {remix && (
-        <div className="flex items-center gap-2 rounded-[8px] bg-accent-soft py-1 pr-1 pl-1">
+        <div className="flex items-center gap-2 rounded-[8px] bg-signal-soft py-1 pr-1 pl-1">
           <span className="size-6 overflow-hidden rounded-[5px] bg-well">{remixPix && <img src={remixPix.url} alt="" className="h-full w-full object-cover" />}</span>
-          <span className="flex-1 text-[11.5px] text-fg">Remixing <span className="text-muted">#{remix.id.slice(-4)} · seed {remix.params.seed} locked — edit the prompt and generate</span></span>
+          <span className="flex-1 text-[11.5px] text-fg">Remixing <span className="text-fg-muted">#{remix.id.slice(-4)} · seed {remix.params.seed} locked — edit the prompt and generate</span></span>
           <Button size="icon-sm" variant="ghost" aria-label="Stop remixing" onClick={() => ui.setState({ remixOf: null })}><X size={13} strokeWidth={1.5} /></Button>
         </div>
       )}
@@ -65,8 +65,8 @@ export function Composer() {
         />
       </div>
       {negativeOpen && (
-        <div className="flex items-start gap-2 rounded-[8px] bg-input px-2.5 py-2">
-          <MinusCircle size={13} strokeWidth={1.5} className="mt-[3px] shrink-0 text-faint" />
+        <div className="flex items-start gap-2 rounded-[8px] bg-control px-2.5 py-2">
+          <MinusCircle size={13} strokeWidth={1.5} className="mt-[3px] shrink-0 text-fg-faint" />
           <PromptBox
             className="flex-1"
             size="sm"
@@ -85,7 +85,7 @@ export function Composer() {
         <Menu side="top" trigger={
           <Button size="sm" variant="default" className="h-6 gap-1 px-2" aria-label="Aspect ratio">
             {(() => { const I = aspectIcon(a.w, a.h); return <I size={13} /> })()}
-            <span className="tabular">{a.id}</span><ChevronDown size={11} className="text-faint" />
+            <span className="tabular">{a.id}</span><ChevronDown size={11} className="text-fg-faint" />
           </Button>}
           items={[{ type: 'label', label: 'Aspect ratio' }, ...ASPECTS.map((x) => ({ label: `${x.id}  ·  ${x.label}`, icon: aspectIcon(x.w, x.h), checked: x.id === v.aspect, hint: `${x.w} × ${x.h}`, onClick: () => params.setValue('aspect', x.id) }))]} />
         <div className="w-[92px]"><Segmented size="sm" value={String(v.batch)} onChange={(n) => params.setValue('batch', Number(n))} label="Images per run"
@@ -95,7 +95,7 @@ export function Composer() {
         </Tip>
         <Tip label="Enhance prompt"><Button size="icon-sm" variant="ghost" aria-label="Enhance prompt" disabled={!t.prompt.trim()} onClick={enhance}><Wand2 size={14} strokeWidth={1.5} /></Button></Tip>
         <button type="button" onClick={() => ui.setState({ tab: 'create' })}
-          className="flex h-6 min-w-0 items-center gap-1.5 rounded-[5px] px-1.5 text-[11.5px] text-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+          className="flex h-6 min-w-0 items-center gap-1.5 rounded-[5px] px-1.5 text-[11.5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
           <SlidersHorizontal size={13} strokeWidth={1.5} className="shrink-0" />
           <span className="tabular truncate">{v.steps} steps · CFG {v.guidance}</span>
           {v.lockSeed ? <Lock size={11} strokeWidth={1.75} className="shrink-0" /> : <Shuffle size={11} strokeWidth={1.75} className="shrink-0" />}
@@ -104,7 +104,7 @@ export function Composer() {
         <Button variant="primary" size="lg" onClick={generate} className={cn('gap-2 pr-2')} aria-label="Generate">
           <Sparkles size={14} strokeWidth={1.75} />
           {busy ? 'Queue' : 'Generate'}
-          <Kbd className="bg-accent-fg/15 text-accent-fg">{prettyCombo('mod+enter')}</Kbd>
+          <Kbd className="bg-signal-fg/15 text-signal-fg">{prettyCombo('mod+enter')}</Kbd>
         </Button>
       </div>
     </div>

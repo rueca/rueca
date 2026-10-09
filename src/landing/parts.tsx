@@ -20,39 +20,9 @@ export function Section({ id, children, className }: { id?: string; children: Re
 export function Heading({ kicker, title, lede, className }: { kicker?: string; title: ReactNode; lede?: ReactNode; className?: string }) {
   return (
     <div className={cn('max-w-[640px]', className)}>
-      {kicker && <div className="mb-3 text-[13px] font-medium text-faint">{kicker}</div>}
+      {kicker && <div className="mb-3 text-[13px] font-medium text-fg-faint">{kicker}</div>}
       <h2 className="text-[26px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance text-fg sm:text-[32px]">{title}</h2>
-      {lede && <p className="mt-4 text-[15px] leading-[1.6] text-pretty text-muted">{lede}</p>}
-    </div>
-  )
-}
-
-/* A deliberately tiny highlighter: opacity tiers, not a rainbow. Components
-   and calls read at full contrast, keywords and comments recede. */
-const TOKEN = /(\/\/.*|\/\*[\s\S]*?\*\/)|('(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`)|(<\/?[A-Za-z][\w.]*|\/?>)|\b(export|const|let|return|for|import|from|new|true|false|null)\b|\b([A-Za-z_]\w*)(?=\()|(\b\d+(?:\.\d+)?\b)/g
-
-function highlight(src: string) {
-  const out: ReactNode[] = []
-  let last = 0
-  let i = 0
-  for (const m of src.matchAll(TOKEN)) {
-    if (m.index! > last) out.push(src.slice(last, m.index))
-    const [s, comment, str, tag, kw, call, num] = m
-    const cls = comment ? 'text-faint italic' : str ? 'text-fg' : tag ? 'text-fg font-medium' : kw ? 'text-faint' : call ? 'text-fg' : num ? 'text-fg' : ''
-    out.push(<span key={i++} className={cls}>{s}</span>)
-    last = m.index! + s.length
-  }
-  out.push(src.slice(last))
-  return out
-}
-
-export function Code({ code, file, className }: { code: string; file?: string; className?: string }) {
-  return (
-    <div className={cn('flex min-w-0 flex-col overflow-hidden rounded-[10px] bg-well', className)}>
-      {file && <div className="flex h-8 flex-none items-center border-b border-line px-3.5 text-[11.5px] text-faint">{file}</div>}
-      <pre className="min-w-0 overflow-x-auto px-3.5 py-3 font-mono text-[11.5px] leading-[1.65] text-muted">
-        <code>{highlight(code)}</code>
-      </pre>
+      {lede && <p className="mt-4 text-[15px] leading-[1.6] text-pretty text-fg-muted">{lede}</p>}
     </div>
   )
 }
@@ -63,14 +33,14 @@ export function CommandLine({ text, className }: { text: string; className?: str
   const slash = text.startsWith('/')
   return (
     <div className={cn('group flex h-10 min-w-0 items-center gap-2 rounded-[9px] bg-well pr-1 pl-3.5', className)}>
-      <span className="flex-none font-mono text-[12px] text-faint select-none">{slash ? '›' : '$'}</span>
+      <span className="flex-none font-mono text-[12px] text-fg-faint select-none">{slash ? '›' : '$'}</span>
       <code className="min-w-0 flex-1 truncate font-mono text-[12.5px] text-fg" title={text}>{text}</code>
       <Tip label={done ? 'Copied' : 'Copy'}>
         <button
           type="button"
           aria-label={`Copy: ${text}`}
           onClick={() => copyText(text).then(() => { setDone(true); setTimeout(() => setDone(false), 1400) })}
-          className="flex size-8 flex-none items-center justify-center rounded-[7px] text-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent"
+          className="flex size-8 flex-none items-center justify-center rounded-[7px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"
         >
           {done ? <Check size={14} strokeWidth={1.75} className="text-ok" /> : <Copy size={14} strokeWidth={1.5} />}
         </button>
@@ -84,7 +54,7 @@ export function ThemeButton({ className }: { className?: string }) {
   return (
     <Tip label={theme === 'dark' ? 'Light theme' : 'Dark theme'}>
       <button type="button" onClick={toggle} aria-label="Toggle theme"
-        className={cn('flex size-8 flex-none items-center justify-center rounded-[8px] text-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-accent', className)}>
+        className={cn('flex size-8 flex-none items-center justify-center rounded-[8px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', className)}>
         {theme === 'dark' ? <Sun size={15} strokeWidth={1.5} /> : <Moon size={15} strokeWidth={1.5} />}
       </button>
     </Tip>
@@ -100,7 +70,7 @@ export function Mark({ size = 20 }: { size?: number }) {
 }
 
 export function Chip({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn('inline-flex h-6 items-center rounded-[6px] bg-hover px-2 text-[11.5px] whitespace-nowrap text-muted', className)}>{children}</span>
+  return <span className={cn('inline-flex h-6 items-center rounded-[6px] bg-hover px-2 text-[11.5px] whitespace-nowrap text-fg-muted', className)}>{children}</span>
 }
 
 /** Scroll to a landing section without touching the hash — the hash is the router. */

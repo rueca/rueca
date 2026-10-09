@@ -148,7 +148,7 @@ function Header({ nodes }: { nodes: Node[] }) {
   const isTop = single && !locate(S.nodesOf(), single.id)?.parent && single.type === 'frame'
   return (
     <div className="flex h-10 items-center gap-2 border-b border-line px-3">
-      <Icon size={14} strokeWidth={1.5} className={single?.component ? 'text-accent' : 'text-faint'} />
+      <Icon size={14} strokeWidth={1.5} className={single?.component ? 'text-signal' : 'text-fg-faint'} />
       <span className="min-w-0 flex-1 truncate text-[12px] font-medium">{single ? typeName(single) : `${nodes.length} layers`}</span>
       {single?.component && <Badge tone="accent">Main</Badge>}
       {isTop && (
@@ -186,7 +186,7 @@ function SizeRow({ nodes, W, H, anyAuto }: { nodes: Node[]; W: NF; H: NF; anyAut
         }}
         fmt={tag(s) ? () => tag(s)! : undefined} className="flex-1 pr-5" />
       <Menu align="end" items={sizingMenu(axis, s)} trigger={
-        <button type="button" aria-label={`${axis === 'w' ? 'Horizontal' : 'Vertical'} resizing`} className="absolute top-0 right-0 flex h-6 w-5 items-center justify-center rounded-r-[5px] text-faint outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-accent">
+        <button type="button" aria-label={`${axis === 'w' ? 'Horizontal' : 'Vertical'} resizing`} className="absolute top-0 right-0 flex h-6 w-5 items-center justify-center rounded-r-[5px] text-fg-faint outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
           <ChevronDown size={11} strokeWidth={1.75} />
         </button>} />
     </div>
@@ -197,7 +197,7 @@ function SizeRow({ nodes, W, H, anyAuto }: { nodes: Node[]; W: NF; H: NF; anyAut
       {field('h', H, sizingH)}
       <Tip label={lock ? 'Unlock aspect ratio' : 'Lock aspect ratio'}>
         <button type="button" aria-pressed={lock} onClick={() => setLock(!lock)}
-          className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-accent', lock ? 'text-accent' : 'text-faint')}>
+          className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
           {lock ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
         </button>
       </Tip>
@@ -227,7 +227,7 @@ function AutoLayoutRows({ n }: { n: Node }) {
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <ScrubValue boxed align="left" prefix={L.dir === 'row' ? <PanelLeft size={10} strokeWidth={1.75} className="rotate-90" /> : <PanelTop size={10} strokeWidth={1.75} />} label="Gap"
             value={L.gap} min={0} max={400} mixed={L.between} fmt={L.between ? () => 'Auto' : undefined} onChange={(v, f) => set({ gap: v, between: false }, f)} className="w-full" />
-          <div className="text-[10.5px] leading-tight text-faint">Gap between items{L.between ? ' — distributed' : ''}</div>
+          <div className="text-[10.5px] leading-tight text-fg-faint">Gap between items{L.between ? ' — distributed' : ''}</div>
         </div>
       </div>
       <Row label="Padding">
@@ -301,7 +301,7 @@ function EffectsSection({ nodes, open }: { nodes: Node[]; open: { open: boolean;
           <>
             <Popover.Root>
               <Tip label="Effect settings">
-                <Popover.Trigger aria-label="Effect settings" className="flex size-6 shrink-0 items-center justify-center rounded-[5px] bg-input text-muted outline-none hover:text-fg data-[popup-open]:shadow-[inset_0_0_0_1px_var(--accent)] focus-visible:ring-2 focus-visible:ring-accent">
+                <Popover.Trigger aria-label="Effect settings" className="flex size-6 shrink-0 items-center justify-center rounded-[5px] bg-control text-fg-muted outline-none hover:text-fg data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)] focus-visible:ring-2 focus-visible:ring-signal">
                   <Sun size={13} strokeWidth={1.5} />
                 </Popover.Trigger>
               </Tip>
@@ -376,7 +376,7 @@ function TextSection({ nodes, open }: { nodes: Node[]; open: { open: boolean; on
         </div>
       </Row>
       {nodes.length === 1 && (
-        <div className="px-3 pt-1 text-[10.5px] text-faint tabular">
+        <div className="px-3 pt-1 text-[10.5px] text-fg-faint tabular">
           {nodes[0].text!.content.length} characters · {wrapText(nodes[0].text!, nodes[0].text!.resize === 'auto-width' ? Infinity : L.get(nodes[0].id)?.w ?? 100).lines.length} lines
         </div>
       )}

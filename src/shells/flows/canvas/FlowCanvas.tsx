@@ -245,7 +245,7 @@ export function FlowCanvas() {
         onPaneClick={onPaneClick}
         onNodeClick={onNodeClick}
         connectionMode={ConnectionMode.Loose}
-        connectionLineStyle={{ stroke: 'var(--accent)', strokeWidth: 1.5 }}
+        connectionLineStyle={{ stroke: 'var(--signal)', strokeWidth: 1.5 }}
         defaultEdgeOptions={{ type: 'flow' }}
         deleteKeyCode={null}
         selectionKeyCode={null}
@@ -301,8 +301,8 @@ export function FlowCanvas() {
           <ZoomControls className="absolute right-3 bottom-3 z-10" zoom={zoom} onZoom={(z) => rf.zoomTo(z, { duration: 200 })} onFit={() => viewport.fit?.()}
             extra={[{ label: 'Zoom to selection', shortcut: 'shift+2', onClick: () => sel.nodes.length && viewport.focus?.(sel.nodes) }]} />
           {tool === 'comment' && (
-            <div className="cluster absolute top-3 left-1/2 z-10 flex h-8 -translate-x-1/2 items-center gap-2 px-3 text-[11.5px] text-muted">
-              <MessageCircle size={13} strokeWidth={1.5} className="text-accent" />Click anywhere to leave a comment
+            <div className="cluster absolute top-3 left-1/2 z-10 flex h-8 -translate-x-1/2 items-center gap-2 px-3 text-[11.5px] text-fg-muted">
+              <MessageCircle size={13} strokeWidth={1.5} className="text-signal" />Click anywhere to leave a comment
               <button type="button" className="text-fg hover:underline" onClick={() => ui.setState({ tool: 'select', draft: null })}>Done</button>
             </div>
           )}
@@ -329,19 +329,19 @@ function WalkHUD({ index, onStep, onExit, playing, onPlay, canPlay }: { index: n
     <>
       <div className="cluster absolute top-3 left-3 z-10 flex h-9 items-center gap-2 px-3 text-[12px]">
         <span className="font-semibold">{flow.name}</span>
-        <span className="text-faint">Walkthrough · happy path</span>
+        <span className="text-fg-faint">Walkthrough · happy path</span>
       </div>
       <div className="absolute bottom-4 left-1/2 z-10 w-[min(560px,calc(100%-24px))] -translate-x-1/2">
         <div className="pop overflow-hidden rounded-[14px]">
           <div className="flex items-start gap-3 px-4 pt-3.5 pb-3">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 text-[11px] text-faint tabular">
+              <div className="flex items-center gap-2 text-[11px] text-fg-faint tabular">
                 Step {index + 1} of {ids.length}
                 {node.data.status && <span className={cn('flex items-center gap-1', STATUS[node.data.status].text)}>· {STATUS[node.data.status].label}</span>}
               </div>
               <div className="mt-0.5 truncate text-[15px] font-semibold tracking-[-0.01em]">{node.data.name}</div>
-              {via && <div className="mt-1 flex items-center gap-1.5 text-[11.5px] text-muted"><ViaIcon size={12} strokeWidth={1.5} />Arrived via {via.data?.label || via.data?.trigger}</div>}
-              {node.data.notes && <p className="mt-1.5 text-[12px] leading-relaxed text-muted">{node.data.notes}</p>}
+              {via && <div className="mt-1 flex items-center gap-1.5 text-[11.5px] text-fg-muted"><ViaIcon size={12} strokeWidth={1.5} />Arrived via {via.data?.label || via.data?.trigger}</div>}
+              {node.data.notes && <p className="mt-1.5 text-[12px] leading-relaxed text-fg-muted">{node.data.notes}</p>}
             </div>
             <IconButton icon={X} label="Exit walkthrough" shortcut="esc" tipSide="top" onClick={onExit} />
           </div>
@@ -351,7 +351,7 @@ function WalkHUD({ index, onStep, onExit, playing, onPlay, canPlay }: { index: n
             <div className="mx-2 flex flex-1 items-center gap-[3px]" role="progressbar" aria-valuemin={1} aria-valuemax={ids.length} aria-valuenow={index + 1}>
               {ids.map((id, i) => (
                 <button key={id} type="button" aria-label={`Go to step ${i + 1}`} onClick={() => onStep(i)}
-                  className={cn('h-1.5 flex-1 rounded-full transition-colors', i < index ? 'bg-accent/60' : i === index ? 'bg-accent' : 'bg-track hover:bg-line-strong')} />
+                  className={cn('h-1.5 flex-1 rounded-full transition-colors', i < index ? 'bg-signal/60' : i === index ? 'bg-signal' : 'bg-track hover:bg-line-strong')} />
               ))}
             </div>
             {next ? (

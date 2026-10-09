@@ -79,15 +79,15 @@ export function QuickAdd({
     >
       <Cmdk loop label="Add" className="flex flex-col">
         <div className="flex h-9 items-center gap-2 border-b border-line px-3">
-          <Search size={14} strokeWidth={1.5} className="shrink-0 text-faint" />
-          <Cmdk.Input ref={input} autoFocus placeholder={placeholder} className="h-full min-w-0 flex-1 bg-transparent text-[12.5px] text-fg outline-none placeholder:text-faint" />
+          <Search size={14} strokeWidth={1.5} className="shrink-0 text-fg-faint" />
+          <Cmdk.Input ref={input} autoFocus placeholder={placeholder} className="h-full min-w-0 flex-1 bg-transparent text-[12.5px] text-fg outline-none placeholder:text-fg-faint" />
           <Kbd>esc</Kbd>
         </div>
-        {context && <div className="border-b border-line px-3 py-1.5 text-[11px] text-muted">{context}</div>}
+        {context && <div className="border-b border-line px-3 py-1.5 text-[11px] text-fg-muted">{context}</div>}
         <Cmdk.List className="max-h-[300px] overflow-y-auto p-1">
-          <Cmdk.Empty className="px-3 py-5 text-center text-[11.5px] text-muted">{empty}</Cmdk.Empty>
+          <Cmdk.Empty className="px-3 py-5 text-center text-[11.5px] text-fg-muted">{empty}</Cmdk.Empty>
           {groups.map((g) => (
-            <Cmdk.Group key={g} heading={g} className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-1.5 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:text-faint">
+            <Cmdk.Group key={g} heading={g} className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-1.5 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:text-fg-faint">
               {items.filter((i) => i.group === g).map((i) => {
                 const Icon = i.icon
                 return (
@@ -96,7 +96,7 @@ export function QuickAdd({
                     value={`${i.label} ${i.group} ${i.keywords?.join(' ') ?? ''}`}
                     onSelect={() => { onPick(i.id); onClose() }}
                     className={cn('group/qa flex h-8 cursor-default items-center gap-2 rounded-[6px] px-1.5 text-[12px] text-fg outline-none',
-                      'data-[selected=true]:bg-accent-strong data-[selected=true]:text-accent-fg')}
+                      'data-[selected=true]:bg-signal-strong data-[selected=true]:text-signal-fg')}
                   >
                     <span className="flex size-5 shrink-0 items-center justify-center rounded-[5px]" style={{ background: i.tint ? `color-mix(in srgb, ${i.tint} 18%, transparent)` : undefined, color: i.tint }}>
                       {Icon && <Icon size={13} strokeWidth={1.5} />}

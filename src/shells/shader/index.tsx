@@ -180,7 +180,7 @@ export default function GradientStudio() {
       }
       right={
         <Panel header={
-          <PanelHeader title={sel ? <span className="flex min-w-0 items-center gap-1.5">{(() => { const I = LAYER_TYPES[sel.type].icon; return <I size={14} strokeWidth={1.5} className="shrink-0 text-accent" /> })()}<span className="truncate">{sel.name}</span></span> : 'Document'}>
+          <PanelHeader title={sel ? <span className="flex min-w-0 items-center gap-1.5">{(() => { const I = LAYER_TYPES[sel.type].icon; return <I size={14} strokeWidth={1.5} className="shrink-0 text-signal" /> })()}<span className="truncate">{sel.name}</span></span> : 'Document'}>
             {sel && (
               <>
                 <IconButton icon={Copy} label="Duplicate" shortcut="mod+d" size="icon-sm" onClick={() => duplicateLayer(sel.id)} />
@@ -226,7 +226,7 @@ function LayerInspector({ layer }: { layer: Layer }) {
       <Section title="Layer" hint={def.hint} first>
         <Row label="Blend" hint={domain ? 'A distortion has no blend mode — it bends everything below it.' : 'How this layer combines with everything below it.'} changed={layer.blend !== def.blend} onReset={() => set({ blend: def.blend })}>
           {domain
-            ? <span className="text-[11.5px] text-faint">Distorts layers below</span>
+            ? <span className="text-[11.5px] text-fg-faint">Distorts layers below</span>
             : <Select value={layer.blend} options={BLENDS} onChange={(b) => set({ blend: b as BlendMode })} label="Blend mode" />}
         </Row>
         <Row label={domain ? 'Mix' : 'Opacity'} hint={domain ? 'Blend between straight and fully warped coordinates.' : 'Number keys set it: 1 = 10%, 0 = 100%.'} changed={layer.opacity !== def.opacity} onReset={() => set({ opacity: def.opacity })}>
@@ -299,7 +299,7 @@ function Transport() {
     <div className="pointer-events-none flex justify-center">
       <div className="cluster pointer-events-auto flex h-10 items-center gap-1 px-1.5">
         <IconButton icon={playing ? Pause : Play} label={playing ? 'Pause' : 'Play'} shortcut="space" tipSide="top" onClick={() => clock.toggle()} />
-        <span className="w-[86px] text-center tabular text-[11.5px] text-fg">{fmtTime(t)}<span className="text-faint"> / {fmtTime(duration)}</span></span>
+        <span className="w-[86px] text-center tabular text-[11.5px] text-fg">{fmtTime(t)}<span className="text-fg-faint"> / {fmtTime(duration)}</span></span>
         <div className="w-[150px] px-1">
           <Slider value={duration ? t / duration : 0} min={0} max={1} step={0.001} label="Loop position" onChange={(n) => clock.seek(n * duration)} />
         </div>
@@ -311,7 +311,7 @@ function Transport() {
           <Monitor get={fpsNow} graph min={0} max={75} fmt={fpsFmt} />
         </div>
         <Menu side="top" align="end"
-          trigger={<Button size="sm" variant="ghost" className="gap-1" aria-label="Drawing resolution"><Gauge size={13} strokeWidth={1.5} />{QUALITY.find((q) => q.value === quality)?.label}{quality === 'auto' && perf.scale < 0.99 && <span className="tabular text-faint">{Math.round(perf.scale * 100)}%</span>}</Button>}
+          trigger={<Button size="sm" variant="ghost" className="gap-1" aria-label="Drawing resolution"><Gauge size={13} strokeWidth={1.5} />{QUALITY.find((q) => q.value === quality)?.label}{quality === 'auto' && perf.scale < 0.99 && <span className="tabular text-fg-faint">{Math.round(perf.scale * 100)}%</span>}</Button>}
           items={[
             { type: 'label', label: 'Drawing resolution' },
             ...QUALITY.map((q) => ({ label: q.value === 'auto' ? 'Auto — hold the frame rate' : q.label, checked: q.value === quality, onClick: () => params.setValue('quality', q.value) })),

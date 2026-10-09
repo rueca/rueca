@@ -43,7 +43,7 @@ function One({ id }: { id: string }) {
         </span>
         <div className="min-w-0 flex-1">
           <InlineEdit value={node.data.title} onCommit={(t) => updateData([id], () => ({ title: t }))} className="block text-[12.5px] font-semibold text-fg" label="Rename node" />
-          <div className="mt-0.5 text-[11.5px] leading-snug text-muted">{def.description}</div>
+          <div className="mt-0.5 text-[11.5px] leading-snug text-fg-muted">{def.description}</div>
         </div>
         <IconButton icon={node.data.bypass ? EyeOff : Eye} label={node.data.bypass ? 'Enable node' : 'Bypass node'} shortcut="b" active={!!node.data.bypass} size="icon-sm" onClick={() => updateData([id], (d) => ({ bypass: !d.bypass }))} />
         <Menu align="end" trigger={<IconButton icon={MoreHorizontal} label="More" size="icon-sm" />}
@@ -69,10 +69,10 @@ function One({ id }: { id: string }) {
             return (
               <Row key={p.key} label={p.label} hint={p.param ? `Wiring this overrides the ${p.param} value below.` : undefined}>
                 <span className="size-2 shrink-0 rounded-full" style={{ background: src ? portVar(p.type) : 'transparent', boxShadow: `inset 0 0 0 1.5px ${portVar(p.type)}` }} />
-                <span className={cn('min-w-0 flex-1 truncate text-[11.5px]', src ? 'text-fg' : p.optional ? 'text-faint' : 'text-rec')}>
+                <span className={cn('min-w-0 flex-1 truncate text-[11.5px]', src ? 'text-fg' : p.optional ? 'text-fg-faint' : 'text-rec')}>
                   {src ?? (p.optional ? 'Optional' : 'Not connected')}
                 </span>
-                <span className="text-[11px] text-faint">{p.type}</span>
+                <span className="text-[11px] text-fg-faint">{p.type}</span>
               </Row>
             )
           })}
@@ -88,7 +88,7 @@ function Many({ ids }: { ids: string[] }) {
   const allBypassed = useStore(graph, (s) => s.nodes.filter((n) => ids.includes(n.id)).every((n) => n.data.bypass))
   return (
     <div className="flex flex-col gap-1.5 p-3">
-      <p className="pb-1 text-[11.5px] leading-relaxed text-muted">Select a single node to edit its parameters.</p>
+      <p className="pb-1 text-[11.5px] leading-relaxed text-fg-muted">Select a single node to edit its parameters.</p>
       <Button variant="default" onClick={() => updateData(ids, () => ({ bypass: !allBypassed }))}>{allBypassed ? <Eye size={14} strokeWidth={1.5} /> : <EyeOff size={14} strokeWidth={1.5} />}{allBypassed ? 'Enable all' : 'Bypass all'}</Button>
       <Button variant="default" onClick={() => duplicate(ids)}><Copy size={14} strokeWidth={1.5} />Duplicate</Button>
       <Button variant="danger" onClick={() => removeNodes(ids)}><Trash2 size={14} strokeWidth={1.5} />Delete {ids.length} nodes</Button>
@@ -104,10 +104,10 @@ function DocSettings() {
   return (
     <div className="flex flex-col">
       <div className="flex gap-2.5 px-3 pt-3 pb-3">
-        <MousePointerClick size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-faint" />
+        <MousePointerClick size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-fg-faint" />
         <div className="min-w-0">
-          <div className="text-[11.5px] leading-snug text-muted">Select a node to edit it. With nothing selected, these settings apply to the whole document.</div>
-          <div className="mt-1.5 tabular text-[11px] text-faint">{counts} · last cook {lastMs < 10 ? lastMs.toFixed(1) : Math.round(lastMs)} ms{inline ? ' · main thread' : ' · worker'}</div>
+          <div className="text-[11.5px] leading-snug text-fg-muted">Select a node to edit it. With nothing selected, these settings apply to the whole document.</div>
+          <div className="mt-1.5 tabular text-[11px] text-fg-faint">{counts} · last cook {lastMs < 10 ? lastMs.toFixed(1) : Math.round(lastMs)} ms{inline ? ' · main thread' : ' · worker'}</div>
         </div>
       </div>
       <div className="border-t border-line"><Inspector params={doc} folders={['preview', 'graph', 'export']} /></div>
