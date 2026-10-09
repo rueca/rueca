@@ -62,6 +62,51 @@ utility and cannot be themed at runtime.
   `#0d99ff` is 2.99:1 and fails WCAG AA for a button label.
 - **Semantic colours, sparingly:** `key` (amber — keyframed), `rec` (red — playhead,
   record, error), `ok` (green).
+
+### The accent is checked against the work
+
+The accent (`--signal`) is the one chrome colour drawn **on top of the prototype**: the
+selection outline, transform handles, focus ring, the selection wash. If the artboard
+is built from the same hue, the person can't see what they've selected. If the
+accent sits near a semantic colour, "selected" reads as "recording" or "keyframed".
+
+- **Default: system blue** (OKLCH hue ≈ 249°). It is far from `rec` (25°), `key`
+  (≈ 80°) and `ok` (160°), and blue already reads as "the tool is selecting this".
+- **Never a brand colour.** Not the client's (that lives in the artboard), and not
+  Trompo's own pink either: at hue 353–360° it sits 25–32° from `rec`, so the
+  selection would look like an error or a recording. It also stamps someone else's
+  tool with our brand.
+- **The rule:** keep the accent at least **35° of OKLCH hue** from any chromatic
+  colour covering ≥ 4% of the rendered artboard, and from `rec`, `key` and `ok`.
+  Greys can't clash (OKLCH chroma < 0.06 is ignored), so a monochrome prototype
+  always keeps blue. That leaves accents between roughly 195° and 350°.
+- **Measure it, don't eyeball it:** `scripts/accent-check.mjs <url>` screenshots the
+  artboard alone, buckets its pixels by hue and names the fallback → `qa.md` §2.
+- **Fallbacks, pre-audited** (fill ≥ 3:1 on the panel, white label on `strong`
+  ≥ 4.5:1, both themes). Pick the one the check names:
+
+  | Accent | Hue | Dark: fill / strong | Light: fill / strong |
+  |---|---|---|---|
+  | blue (default) | 249° | `#0d99ff` / `#0a72c6` | `#0b84e0` / `#0a6fc0` |
+  | violet | 293° | `#9c78fd` / `#704ec0` | `#8862e5` / `#6a48b9` |
+  | magenta | 332° | `#d561c8` / `#9e3a93` | `#be4bb1` / `#97338d` |
+  | cyan | 222° | `#00a5cb` / `#007590` | `#008eaf` / `#006e89` |
+
+  Override in the project's own CSS, after the theme import. Never edit the kit's
+  theme file:
+  ```css
+  :root       { --signal: #d561c8; --signal-strong: #9e3a93; --signal-soft: rgb(213 97 200 / .16); }
+  :root.light { --signal: #be4bb1; --signal-strong: #97338d; --signal-soft: rgb(190 75 177 / .12); }
+  ```
+- **One accent per project, not per theme.** If dark and light disagree, pick one
+  fallback for both.
+- **If nothing clears 35°** (a full-spectrum prototype), keep blue and make selection
+  shape-led rather than colour-led: a two-tone outline that reads on any background.
+  ```css
+  box-shadow: 0 0 0 1.5px var(--signal), 0 0 0 3px var(--field);
+  ```
+- Re-run the check when the prototype's palette changes. A rebrand inside the artboard
+  can create a clash that wasn't there yesterday.
 - **Density is one knob:** `--row` (28px default; 24 compact, 32 comfortable),
   `--gutter`, `--inspector-w`.
 

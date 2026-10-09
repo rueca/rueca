@@ -52,18 +52,21 @@ export const steps = [
     short: 'Describe',
     title: 'Name what you want to tune',
     body: 'Tell the agent what should be adjustable: size, colour, speed, mood. Each becomes a control, with undo, presets, before/after and a shareable link already included.',
+    tags: ['Undo', 'Presets', 'Before/after', 'Share link'],
   },
   {
     n: 2,
     short: 'Drop in',
     title: 'Bring the thing you are designing',
     body: 'An animation, a shader, a 3D scene, a page you already built. The agent connects it to the controls without rebuilding it.',
+    tags: ['Canvas', 'WebGL', 'three.js', 'Any web page'],
   },
   {
     n: 3,
     short: 'Tune',
     title: 'Get a tool that feels like a real one',
     body: 'Inspector, timeline, layers, command palette and export, laid out the way Figma, Framer and Rive do it. Keep tuning, or hand it to a client.',
+    tags: ['Inspector', 'Timeline', 'Layers', 'Export'],
   },
 ]
 

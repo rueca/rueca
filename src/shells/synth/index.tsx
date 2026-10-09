@@ -15,6 +15,8 @@ import { drawStage } from './visual'
 import { Sequencer, SequencerHeader, applyPatternPreset } from './Sequencer'
 import { SynthPanel, MonitorPanel, SoundMenu } from './panels'
 
+const CAPTURE = typeof location !== 'undefined' && /[?&]qa\b/.test(location.search)
+
 /** A free-running clock just to tick the stage canvas (audio time is the real master). */
 const visClock = createClock({ duration: 3_600_000, loop: true })
 
@@ -177,8 +179,9 @@ export default function SynthShell() {
                   <Segmented size="sm" value={v.visual} onChange={(s) => params.setValue('visual', s)} options={[{ value: 'orbit', label: 'Orbit' }, { value: 'horizon', label: 'Horizon' }]} label="Visual" />
                 </div>
               </div>
-              {!started && (
-                <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/25">
+              {/* hidden in QA / thumbnail captures (?qa) — the card would cover the visual */}
+              {!started && !CAPTURE && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center bg-scrim">
                   <div className="pop flex w-[300px] flex-col items-center gap-3 px-6 py-6 text-center">
                     <div className="flex size-10 items-center justify-center rounded-full bg-signal-soft text-signal"><Volume2 size={18} strokeWidth={1.5} /></div>
                     <div className="text-[13px] font-semibold text-fg">Click to start audio</div>

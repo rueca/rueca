@@ -44,27 +44,43 @@ const ACCENTS = {
 }
 
 const browser = await chromium.launch({ channel: 'chrome' })
-let clashed = false
-for (const theme of ['dark', 'light']) {
+let clashed = false, failed = false
+const picks = new Set()
+const reloaded = (e) => /context was destroyed|Cannot find context|navigation/i.test(e.message)
+for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attempt++) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme })
+  try {
   const page = await ctx.newPage()
-  await page.goto(url, { waitUntil: 'networkidle' })
+  await page.goto(url, { waitUntil: 'load', timeout: 30000 }) // not networkidle: live artifacts may never go idle
   await page.evaluate((t) => { const h = document.documentElement; h.classList.toggle('dark', t === 'dark'); h.classList.toggle('light', t === 'light') }, theme)
   await page.waitForTimeout(800) // let a canvas / WebGL artifact draw a frame
 
-  // Find the artboard: explicit selector → kit Artboard (.font-artboard) → largest canvas/iframe.
-  const found = await page.evaluate((sel) => {
+  // Find the artboard: explicit selector → kit Artboard (.font-artboard) → the biggest canvas/iframe/media
+  // if it fills a good part of the stage → the stage itself (graphs, sheets, grids have no single artboard).
+  // Kit panels (.panel .cluster .pop) are always hidden so their own accent states don't count.
+  const locate = (sel) => {
     const area = (e) => { const r = e.getBoundingClientRect(); return r.width * r.height }
-    const el = (sel && document.querySelector(sel)) ?? document.querySelector('[data-artboard], .font-artboard') ??
-      [...document.querySelectorAll('canvas, iframe, video, img')].sort((a, b) => area(b) - area(a))[0]
-    if (!el || area(el) < 64 * 64) return null
+    const biggest = (q) => [...document.querySelectorAll(q)].sort((a, b) => area(b) - area(a))[0]
+    const stage = document.querySelector('main') ?? document.body
+    const media = biggest('canvas, iframe, video, img')
+    let el = (sel && document.querySelector(sel)) ?? document.querySelector('[data-artboard]') ?? biggest('.font-artboard')
+    let how = 'artboard'
+    if (!el && media && area(media) >= area(stage) * 0.25) { el = media; how = 'largest media' }
+    if (!el) { el = stage; how = 'whole stage' }
+    if (area(el) < 64 * 64) return null
     el.setAttribute('data-accent-check', '')
-    const s = document.createElement('style'); s.id = 'accent-check-hide'
-    s.textContent = 'body *{visibility:hidden!important}[data-accent-check],[data-accent-check] *{visibility:visible!important}'
+    const s = document.createElement('style')
+    s.textContent = 'body *{visibility:hidden!important}[data-accent-check],[data-accent-check] *{visibility:visible!important}' +
+      '[data-accent-check] :is(.panel,.cluster,.pop),[data-accent-check] :is(.panel,.cluster,.pop) *{visibility:hidden!important}'
     document.head.append(s)
-    return el.tagName.toLowerCase() + (el.id ? '#' + el.id : el.classList.length ? '.' + [...el.classList].slice(0, 2).join('.') : '')
-  }, flag('--artboard'))
-  if (!found) { console.error(`${theme}: no artboard found — pass --artboard <selector>`); clashed = true; await ctx.close(); continue }
+    return `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : el.classList.length ? '.' + [...el.classList].slice(0, 2).join('.') : ''} (${how})`
+  }
+  let found = null
+  for (let i = 0; i < 10 && !found; i++) { // artifacts can mount late
+    found = await page.evaluate(locate, flag('--artboard')).catch(() => null)
+    if (!found) await page.waitForTimeout(500)
+  }
+  if (!found) throw new Error('no artboard found — pass --artboard <selector>')
 
   const png = await page.locator('[data-accent-check]').first().screenshot()
   const result = await page.evaluate(async ({ b64, MIN_HUE, MIN_SHARE, MIN_CHROMA, ACCENTS }) => {
@@ -106,7 +122,7 @@ for (const theme of ['dark', 'light']) {
     ]
     const clearance = (h) => Math.min(360, ...palette.map(([k]) => dist(k, h)), ...Object.values(semantic).map((k) => dist(k, h)))
     const ranked = Object.entries(ACCENTS).map(([name, a]) => [name, clearance(a.h)]).sort((a, b) => b[1] - a[1])
-    return { palette: palette.map(([k, s]) => `${k}° ${Math.round(s * 100)}%`), accent: Math.round(accent), clashes: near(accent), best: ranked[0] }
+    return { palette: palette.map(([k, s]) => `${k}° ${Math.round(s * 100)}%`), accent: Math.round(accent), clashes: near(accent), best: [ranked[0][0], Math.round(ranked[0][1])] }
   }, { b64: png.toString('base64'), MIN_HUE, MIN_SHARE, MIN_CHROMA, ACCENTS })
 
   const head = `${theme.padEnd(5)} artboard ${found} · chromatic hues ${result.palette.join(', ') || 'none (greyscale)'} · accent ${result.accent}°`
@@ -115,19 +131,25 @@ for (const theme of ['dark', 'light']) {
     clashed = true
     const [name, clear] = result.best
     console.log(`${head}\n      CLASH — too close to ${result.clashes.join(', ')}`)
-    if (clear >= MIN_HUE) console.log(`      → switch to ${name} (clears everything by ${clear}°)`)
+    if (clear >= MIN_HUE) { picks.add(name); console.log(`      → switch to ${name} (clears everything by ${clear}°)`) }
     else console.log(`      → nothing clears ${MIN_HUE}°: keep blue and give selection a two-tone outline (visual-rules.md)`)
   }
-  await ctx.close()
+    await ctx.close(); break
+  } catch (e) {
+    await ctx.close()
+    if (attempt === 1 && reloaded(e)) continue // the dev server hot-reloaded mid-check: try once more
+    failed = true; console.error(`${theme.padEnd(5)} ERROR ${e.message.split('\n')[0]}`); break
+  }
 }
 await browser.close()
 
-// Print the override for the best fallback once, for both themes, ready to paste after the theme import.
-if (clashed) {
-  console.log('\nOverride (paste after the theme import; pick the fallback named above):')
-  for (const [name, a] of Object.entries(ACCENTS)) if (name !== 'blue') {
+// Print the override for the chosen fallback, both themes, ready to paste after the theme import.
+// If the themes disagree, both are printed: pick one — the accent must not change with the theme.
+if (picks.size) {
+  console.log('\nOverride — paste after the theme import:')
+  for (const [name, a] of Object.entries(ACCENTS)) if (picks.has(name)) {
     const soft = (hex, al) => `rgb(${parseInt(hex.slice(1, 3), 16)} ${parseInt(hex.slice(3, 5), 16)} ${parseInt(hex.slice(5, 7), 16)} / ${al})`
     console.log(`/* ${name} */\n:root { --signal: ${a.dark[0]}; --signal-strong: ${a.dark[1]}; --signal-soft: ${soft(a.dark[0], 0.16)}; }\n:root.light { --signal: ${a.light[0]}; --signal-strong: ${a.light[1]}; --signal-soft: ${soft(a.light[0], 0.12)}; }`)
   }
 }
-process.exit(clashed ? 1 : 0)
+process.exit(failed ? 2 : clashed ? 1 : 0)

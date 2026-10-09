@@ -73,10 +73,12 @@ for (const id of shells) {
       catch (err) { if (tries >= 3) throw err; await page.waitForTimeout(1500) }
     }
     await page.waitForTimeout(2200)
-    await page.screenshot({ path: full, type: 'jpeg', quality: 80 })
+    // a shell that never settles its fonts must not stall the whole run
+    try { await page.screenshot({ path: full, type: 'jpeg', quality: 80, timeout: 15000 }) }
+    catch (err) { console.log(`✗ ${id.padEnd(14)} ${theme}  (screenshot timed out: ${String(err).split('\n')[0]})`); continue }
     const ok = await page.evaluate(isolate)
     if (theme === 'dark') { manifest[id] = ok ?? null; writeFileSync(MANIFEST, JSON.stringify(manifest, null, 2) + '\n') }
-    if (ok) { await page.waitForTimeout(60); await page.screenshot({ path: out, type: 'jpeg', quality: 80 }) }
+    if (ok) { await page.waitForTimeout(60); await page.screenshot({ path: out, type: 'jpeg', quality: 80, timeout: 15000 }).catch(() => {}) }
     else if (existsSync(out)) unlinkSync(out)
     console.log(`${ok ? '✓' : '–'} ${id.padEnd(14)} ${theme}${ok ? '' : '  (no artwork found, skipped)'}`)
   }

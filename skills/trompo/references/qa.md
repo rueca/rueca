@@ -43,7 +43,35 @@ Surface-to-surface minima are heuristics (WCAG doesn't govern them); the text on
 real WCAG AA. Enforce both. Also sample *rendered* chrome text against its first opaque
 background — a token can pass while a component uses the wrong one.
 
-## 2. Assert in the browser
+## 2. Accent clash, both themes
+
+The contrast audit proves the accent is legible on the *chrome*. This proves it is
+legible on the *work*, where the selection outline actually sits (rule and fallbacks:
+`visual-rules.md` §3).
+
+```bash
+npm i -D playwright-core            # once; uses the installed Chrome
+node <skill>/scripts/accent-check.mjs http://localhost:5173/#/my-tool
+node <skill>/scripts/accent-check.mjs <url> --artboard "#preview"   # if it picks the wrong element
+```
+
+It finds the artboard (`--artboard` selector → the kit's Artboard → the largest
+canvas/iframe/media → the whole stage), hides all chrome including floating panels,
+and screenshots what's left. Rendered pixels work the same for DOM, SVG, Canvas,
+WebGL and iframes. Then it buckets the pixels by OKLCH hue and checks the accent
+against them and against `rec`, `key` and `ok`.
+
+```
+dark  artboard canvas.block.h-full (largest media) · chromatic hues 240° 21%, 250° 18%, 30° 16% · accent 249°
+      CLASH — too close to artboard hue 240° (21%), artboard hue 250° (18%)
+      → switch to magenta (clears everything by 53°)
+```
+
+Exit code: 0 pass, 1 clash (it prints the override CSS to paste), 2 couldn't run.
+If it reports "whole stage" for a single-artboard tool, pass `--artboard`, because the
+stage background then dilutes the sample.
+
+## 3. Assert in the browser
 
 - **Interaction** — dragging a slider preserves the artifact's scroll position; the
   scrubber changes the value; undo restores it; the timeline collapses.
@@ -65,7 +93,7 @@ background — a token can pass while a component uses the wrong one.
   buttons not squeezed.
 - **Console** — zero errors and zero React key/act warnings.
 
-## 3. In the shell
+## 4. In the shell
 
 ```bash
 # theme leaks — the theme file and the artifact are the only legal homes for a colour
@@ -83,14 +111,14 @@ npx tsc --noEmit && npx vite build
 
 Unused dependencies: compare `package.json` against `grep -rhoE "from '[^'.][^']*'" src`.
 
-## 4. Headless runs
+## 5. Headless runs
 
 For repeatable checks across many screens, drive the installed Chrome with
 `playwright-core` (`chromium.launch({ channel: 'chrome' })` — no browser download):
 console errors, the contrast audit in both themes, rendered-text contrast, and
 thumbnails. The kit repo's `scripts/qa.mjs` is a complete example.
 
-## 5. Measure the reference too
+## 6. Measure the reference too
 
 When matching an effect from Figma or a screenshot, export the rendered node and sample
 it. That is how a "glass" pill got solved: it turned out to *darken* a bright backdrop

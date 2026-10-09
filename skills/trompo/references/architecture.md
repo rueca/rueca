@@ -31,6 +31,31 @@ generate from it. **Adding a knob is one line and nothing else.**
 - Soft range for scrubbing, hard range for typing (Blender): `min/max` is what the
   slider shows; typed values may exceed it unless clamped.
 
+## Document state: where non-knob data lives
+
+Tools hold more than knobs: a layer stack, clips, rows of data, a node graph, a flow.
+Pick by shape, not habit:
+
+| Data | Put it in | Why |
+|---|---|---|
+| A small list the knobs describe (a shader's layer stack, a synth pattern) | `p.data<T>()` in the schema | One store: undo, presets (via `presetKeys`), A/B and share links come free |
+| A real document the user edits directly (graph, flow, rows, layer tree, clips) | `createDocStore(initial, { id, version })` | Labelled steps, versioned persistence, kept apart from tuning values |
+| Selection, hover, camera, open panels | plain React / a tiny zustand store | Never undoable — undo must not fight focus |
+
+With params **and** a doc, join them: `const history = createHistory([params, doc])`, then
+`<ParamActions params={params} history={history} />`. ⌘Z undoes whichever changed last.
+Label steps (`doc.commit('Move 3 nodes')`, `params.setValue(k, v, { label })`) so
+`<HistoryList>` reads like Lightroom's history.
+
+To edit **one item** of a collection in the Inspector (the selected layer, node or fill),
+make one `createItemParams(schema, id)` per item *type* and `bindItem` it to the selection.
+Drags write through uncommitted; release is one step on the owner.
+
+Presets **merge** by default — only the keys a preset names change. Set `presetKeys` so
+"Save preset" captures the look and not the canvas size or the document. Bump `version`
+when a schema's shape changes so stale saved values are ignored. Images never go in
+params (`p.image()` is persist/share-off; use `useImageIntake` for files).
+
 ## Keep the render pure, drive it with refs
 
 Split into a pure `draw(ctx, values, t) → derived` and a thin shell. Pure means you can
@@ -68,8 +93,9 @@ The contract is three things: a DOM element to own, the params, the clock.
 
 | Artifact | Surface |
 |---|---|
-| Canvas 2D | `CanvasSurface draw={(ctx, { t, w, h, v }) => …}` — handles DPR and resize |
-| WebGL / vanilla three.js / p5 / anything imperative | `MountSurface mount={(el, api) => { …; return cleanup }}` |
+| Canvas 2D | `CanvasSurface draw={(ctx, { t, w, h, v }) => …}` — DPR, resize, `deps` for non-param inputs |
+| Raw WebGL2 | `WebGLSurface setup={(gl) => state} draw={(gl, f, state) => …}` — `size` for adaptive resolution |
+| vanilla three.js / p5 / anything imperative | `MountSurface mount={(el, api) => ({ engine, dispose })}` — the ref exposes `handle` |
 | React / DOM / SVG | render directly inside `<Artboard>` using `useValues(params)` |
 | An existing page, another framework, a built app | `FrameSurface src=…` + `studio-bridge.js` inside the page |
 
@@ -100,3 +126,9 @@ design vs prototype).
 `Space` play · `⏎` replay · `S` slow-mo · `,` `.` frame step · `J` `K` prev/next key ·
 `\` A/B · `T` theme · `⌘K` palette · `?` shortcut sheet · `⌘\` hide UI (present) ·
 `Shift+0/1` zoom 100% / fit · `⌘Z` / `⇧⌘Z` undo/redo.
+
+One dispatcher owns every key. Kit defaults register at priority 0, shell code at 10,
+so a tool's own `T` (Text) beats the theme toggle with no configuration. Label bindings
+(`{ run, label, group }`) and the `?` sheet lists them — it is generated, never typed.
+Space and Enter on a focused button go to the button. Hold keys (`\` to peek at the
+original) use `useHoldKey`.

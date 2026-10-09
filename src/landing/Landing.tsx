@@ -51,7 +51,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
 
         {/* ── how it works ─────────────────────────────────────── */}
         <Section id="how">
-          <Heading kicker="How it works" title="Ask for a tool, get a real one."
+          <Heading className="mx-auto text-center" kicker="How it works" title="Ask for a tool, get a real one."
             lede={<>Install the skill, then ask your agent for a prototype, a playground or “a tool to tune this”. The tool stays neutral: <span className="text-fg">the brand lives inside the artboard, never around it.</span></>} />
           <div className="mt-8 lg:mt-10"><StepDeck steps={steps} /></div>
         </Section>
@@ -151,7 +151,9 @@ export function Landing({ shells }: { shells: Shell[] }) {
 
         <footer className="border-t border-line">
           <Container className="flex flex-wrap items-center justify-between gap-4 py-8 text-[12.5px] text-fg-muted">
-            <div className="flex items-center gap-2"><Mark size={18} /><span className="text-fg">{site.name}</span><span className="text-fg-faint">· {site.license} · {site.author.name}</span></div>
+            <div className="flex items-center gap-2"><Mark size={18} /><span className="text-fg">{site.name}</span><span className="text-fg-faint">· {site.license} · {site.author.url
+              ? <a href={site.author.url} target="_blank" rel="noreferrer" className="underline-offset-2 outline-none hover:text-fg hover:underline focus-visible:ring-2 focus-visible:ring-signal">{site.author.name}</a>
+              : site.author.name}</span></div>
             <div className="flex gap-5">
               <a href="#/shells" className="hover:text-fg">Shells</a>
               <a href={links.repo} className="hover:text-fg">GitHub</a>

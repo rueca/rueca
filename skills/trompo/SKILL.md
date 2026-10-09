@@ -48,6 +48,12 @@ designed reads truthfully inside the artboard.
 - **Radius and shadow, not borders.** Sentence case, never micro-caps. Hierarchy by
   opacity tier at one size. Tabular numbers on anything live.
 - **One accent, only on state.** Playhead is red/orange, not the accent.
+- **The accent must not clash with the work.** It defaults to system blue (`--signal`),
+  never a brand colour, and that includes Trompo's own pink. Selection outlines,
+  handles and focus rings sit *on top of* the prototype, so before handoff run
+  `scripts/accent-check.mjs <url>`. If the artboard or a semantic colour (`--rec`,
+  `--key`, `--ok`) is within 35° of hue, switch to the fallback it names
+  → `references/visual-rules.md` §3, `references/qa.md` §2
 - **Every number is a scrubber** (drag, type, expressions) and every drag has a
   non-drag alternative.
 - **Values that differ from the default render at full contrast**; untouched ones
@@ -72,3 +78,5 @@ designed reads truthfully inside the artboard.
 
 `assets/theme.css` is the complete, contrast-audited token set (dark + light).
 `assets/studio-bridge.js` is the 2 KB script that lets the harness drive any page.
+`scripts/accent-check.mjs` checks the accent against the rendered artboard (needs
+`playwright-core` and an installed Chrome).

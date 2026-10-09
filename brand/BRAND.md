@@ -18,7 +18,7 @@ harness does the same to a prototype: it's inert on its own and alive once it ha
 | Mark | A spinning top with a pink band and two motion swooshes. The swooshes drop below 24px. Files: `brand/trompo/mark-light.svg`, `mark-dark.svg`, `mark-small.svg`, `app-icon.svg`, `favicon.svg` (theme-aware) |
 | Wordmark | Fredoka SemiBold, lowercase, −0.02em (Google Fonts, OFL) |
 | Palette | Ink `#1C1A19` · Paper `#F6F1EA` · Rosa mexicano `#E4007C` (mark accent `#D1006F` on light, `#FF3EA5` on dark) · Wood `#C58B4E` · Turquesa `#1E9AA0` |
-| Rule | Brand colour lives on the site and the mark only. The product chrome stays neutral (Inter and kit tokens). |
+| Rule | Brand colour lives on the site and the mark only. The product chrome stays neutral (Inter and kit tokens). **The pink is never the chrome accent** (decided 9 Oct): at hue 353–360° it sits 25–32° from the record red, and it would stamp clients' tools with our brand. The accent stays system blue, and the skill checks it against each prototype (`skills/trompo/scripts/accent-check.mjs`). |
 
 ### Claim these the same day (needs Rafael's accounts)
 
