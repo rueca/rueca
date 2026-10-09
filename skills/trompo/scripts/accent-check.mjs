@@ -55,25 +55,37 @@ for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attem
   await page.evaluate((t) => { const h = document.documentElement; h.classList.toggle('dark', t === 'dark'); h.classList.toggle('light', t === 'light') }, theme)
   await page.waitForTimeout(800) // let a canvas / WebGL artifact draw a frame
 
-  // Find the artboard: explicit selector → kit Artboard (.font-artboard) → the biggest canvas/iframe/media
-  // if it fills a good part of the stage → the stage itself (graphs, sheets, grids have no single artboard).
+  // Find the artboard: --artboard selector → the kit's hook [data-studio-artifact] (on Artboard, and on
+  // <Stage fill>'s display:contents wrapper) → the biggest canvas/iframe/media if it fills a good part of
+  // the stage (hand-built pages) → the stage itself (graphs, sheets, grids have no single artboard).
   // Kit panels (.panel .cluster .pop) are always hidden so their own accent states don't count.
   const locate = (sel) => {
-    const area = (e) => { const r = e.getBoundingClientRect(); return r.width * r.height }
+    // display:contents has no box of its own: measure the union of its children instead
+    const box = (e) => {
+      if (getComputedStyle(e).display !== 'contents') return e.getBoundingClientRect()
+      const rs = [...e.children].map(box).filter((r) => r.width && r.height)
+      if (!rs.length) return new DOMRect()
+      const x = Math.min(...rs.map((r) => r.left)), y = Math.min(...rs.map((r) => r.top))
+      return new DOMRect(x, y, Math.max(...rs.map((r) => r.right)) - x, Math.max(...rs.map((r) => r.bottom)) - y)
+    }
+    const area = (e) => { const r = box(e); return r.width * r.height }
     const biggest = (q) => [...document.querySelectorAll(q)].sort((a, b) => area(b) - area(a))[0]
     const stage = document.querySelector('main') ?? document.body
     const media = biggest('canvas, iframe, video, img')
-    let el = (sel && document.querySelector(sel)) ?? document.querySelector('[data-artboard]') ?? biggest('.font-artboard')
-    let how = 'artboard'
+    let el = (sel && document.querySelector(sel)) ?? biggest('[data-studio-artifact]')
+    let how = el && !sel ? 'kit artifact' : 'artboard'
     if (!el && media && area(media) >= area(stage) * 0.25) { el = media; how = 'largest media' }
     if (!el) { el = stage; how = 'whole stage' }
     if (area(el) < 64 * 64) return null
     el.setAttribute('data-accent-check', '')
+    const r = box(el), vw = innerWidth, vh = innerHeight // clip to the viewport for the screenshot
+    const clip = { x: Math.max(0, r.left), y: Math.max(0, r.top) }
+    clip.width = Math.min(vw, r.right) - clip.x; clip.height = Math.min(vh, r.bottom) - clip.y
     const s = document.createElement('style')
     s.textContent = 'body *{visibility:hidden!important}[data-accent-check],[data-accent-check] *{visibility:visible!important}' +
       '[data-accent-check] :is(.panel,.cluster,.pop),[data-accent-check] :is(.panel,.cluster,.pop) *{visibility:hidden!important}'
     document.head.append(s)
-    return `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : el.classList.length ? '.' + [...el.classList].slice(0, 2).join('.') : ''} (${how})`
+    return { clip, label: `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : el.classList.length ? '.' + [...el.classList].slice(0, 2).join('.') : ''} (${how})` }
   }
   let found = null
   for (let i = 0; i < 10 && !found; i++) { // artifacts can mount late
@@ -82,7 +94,7 @@ for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attem
   }
   if (!found) throw new Error('no artboard found — pass --artboard <selector>')
 
-  const png = await page.locator('[data-accent-check]').first().screenshot()
+  const png = await page.screenshot({ clip: found.clip })
   const result = await page.evaluate(async ({ b64, MIN_HUE, MIN_SHARE, MIN_CHROMA, ACCENTS }) => {
     const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode()
     const cv = document.createElement('canvas'); cv.width = cv.height = 96
@@ -125,7 +137,7 @@ for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attem
     return { palette: palette.map(([k, s]) => `${k}° ${Math.round(s * 100)}%`), accent: Math.round(accent), clashes: near(accent), best: [ranked[0][0], Math.round(ranked[0][1])] }
   }, { b64: png.toString('base64'), MIN_HUE, MIN_SHARE, MIN_CHROMA, ACCENTS })
 
-  const head = `${theme.padEnd(5)} artboard ${found} · chromatic hues ${result.palette.join(', ') || 'none (greyscale)'} · accent ${result.accent}°`
+  const head = `${theme.padEnd(5)} artboard ${found.label} · chromatic hues ${result.palette.join(', ') || 'none (greyscale)'} · accent ${result.accent}°`
   if (!result.clashes.length) console.log(`${head}\n      PASS — the accent clears the artboard and the semantic colours`)
   else {
     clashed = true

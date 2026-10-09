@@ -175,7 +175,7 @@ export function Stage({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
       >
-        {fill ? <div data-studio-artifact="" className="contents">{children}</div> : (
+        {fill ? <div data-studio-artifact="" className="absolute inset-0">{children}</div> : (
           <div ref={world} className="absolute top-0 left-0 origin-top-left will-change-transform" style={{ transform: `translate(${x}px, ${y}px) scale(${zoom})` }}>
             {children}
           </div>

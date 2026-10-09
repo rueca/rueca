@@ -1,5 +1,53 @@
 [
   {
+    "id": "present",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 31
+  },
+  {
+    "id": "present",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 31
+  },
+  {
+    "id": "shader",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 49
+  },
+  {
+    "id": "shader",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 49
+  },
+  {
+    "id": "scene",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 69
+  },
+  {
+    "id": "scene",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 69
+  },
+  {
     "id": "synth",
     "theme": "dark",
     "errors": [],
