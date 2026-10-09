@@ -1,17 +1,19 @@
 import '@xyflow/react/dist/base.css'
-import './local/graph-theme.css'
+import '@kit/xyflow.css'
+import './graph/graph.css'
 import { useRef } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
-import { useStore } from 'zustand'
 import {
   Plus, Maximize, Download, Image as ImageIcon, Braces, FolderOpen, Copy, ClipboardPaste, EyeOff, Undo2, Redo2, Workflow, Columns2,
   Image, ScanEye, Map as MapIcon, FilePlus2, LayoutGrid, Trash2, BoxSelect, ClipboardCopy,
 } from 'lucide-react'
 import {
-  Studio, Toolbar, Brand, Cluster, Button, IconButton, Menu, Segmented, Divider, ThemeToggle, CommandPalette,
-  toast, toastManager, exportCanvasPNG, exportJSON, copyText, useHotkeys, useValues, type Command,
+  Studio, Toolbar, Brand, Cluster, Button, IconButton, Menu, Segmented, Divider, ThemeToggle, CommandPalette, HistoryButtons,
+  toast, exportCanvasPNG, exportJSON, copyText, useHotkeys, useValues, type Command,
 } from '@kit'
-import { graph, useGraph, undo, redo, load, commit, copy, paste, duplicate, select, selectedIds, updateData, removeNodes, addNode, outputId, toSaved, type SavedGraph } from './graph/store'
+import { SplitPane } from '@kit/layout/SplitPane'
+import { InlineText } from '@kit/ui/inline-text'
+import { graph, graphHistory, useGraph, undo, redo, load, commit, copy, paste, duplicate, select, selectedIds, updateData, removeNodes, addNode, outputId, toSaved, type SavedGraph } from './graph/store'
 import { DEF_LIST } from './graph/defs'
 import { SAMPLES, BLANK } from './graph/samples'
 import { doc } from './graph/doc'
@@ -20,8 +22,6 @@ import { GraphCanvas, canvasApi } from './graph/Canvas'
 import { Library } from './graph/Library'
 import { NodeInspector } from './graph/NodeInspector'
 import { PreviewPane } from './graph/Preview'
-import { SplitPane } from './local/SplitPane'
-import { InlineEdit } from './local/InlineEdit'
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'graph'
 
@@ -29,16 +29,16 @@ async function exportPng() {
   const out = outputId()
   if (!out) { toast('Add an Output node first', { type: 'error' }); return }
   const res = Number(doc.values().exportRes)
-  const id = toast(`Rendering ${res} px…`, { type: 'loading', timeout: 0 })
+  const id = toast(`Rendering ${res} px…`, { type: 'loading' })
   try {
     const img = await render(out, res)
     const c = document.createElement('canvas')
     c.width = img.width; c.height = img.height
     c.getContext('2d')!.putImageData(img, 0, 0)
     await exportCanvasPNG(c, `${slug(graph.getState().name)}-${res}.png`)
-    toastManager.update(id, { title: 'PNG exported', description: `${res} × ${res}, cooked at full size`, type: 'success', timeout: 2600 })
+    toast.update(id, 'PNG exported', { description: `${res} × ${res}, cooked at full size`, type: 'success' })
   } catch (e) {
-    toastManager.update(id, { title: 'Export failed', description: e instanceof Error ? e.message : String(e), type: 'error', timeout: 4000 })
+    toast.update(id, 'Export failed', { description: e instanceof Error ? e.message : String(e), type: 'error', timeout: 4000 })
   }
 }
 
@@ -60,16 +60,10 @@ function toggleBypass() {
 export default function NodesShell() {
   const file = useRef<HTMLInputElement>(null)
   const name = useGraph((s) => s.name)
-  const canUndo = useStore(graph, (s) => s.past.length > 0)
-  const canRedo = useStore(graph, (s) => s.future.length > 0)
   const view = useValues(doc, (v) => v.view)
   const setView = (x: string) => doc.setValue('view', x as 'graph' | 'split' | 'preview')
 
-  useHotkeys({
-    'mod+z': undo,
-    'shift+mod+z,mod+y': redo,
-    esc: () => select([]),
-  })
+  useHotkeys({ esc: { run: () => select([]), label: 'Clear selection', group: 'Graph' } })
 
   const importGraph = () => file.current?.click()
   const onFile = async (f?: File) => {
@@ -111,11 +105,8 @@ export default function NodesShell() {
     ...DEF_LIST.map((d) => ({ id: `add-${d.kind}`, label: `Add ${d.label}`, group: 'Add node', icon: d.icon, keywords: d.keywords, run: () => { const c = canvasApi.center(); addNode(d.kind, { x: c.x - 88, y: c.y - 60 }) } })),
   ]
 
-  const mark = (
-    <a href="#/" aria-label="All shells" className="contents">
-      <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="3.5" cy="4" r="2" /><circle cx="3.5" cy="12" r="2" /><circle cx="12.5" cy="8" r="2" /><path d="M5.5 4c3 0 3 4 5 4M5.5 12c3 0 3-4 5-4" /></svg>
-    </a>
-  )
+  // Brand links the mark home itself.
+  const mark = <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="3.5" cy="4" r="2" /><circle cx="3.5" cy="12" r="2" /><circle cx="12.5" cy="8" r="2" /><path d="M5.5 4c3 0 3 4 5 4M5.5 12c3 0 3-4 5-4" /></svg>
 
   return (
     <ReactFlowProvider>
@@ -124,7 +115,7 @@ export default function NodesShell() {
         rightWidth={296}
         toolbar={
           <Toolbar
-            start={<Brand name="Nodes" mark={mark} doc={<InlineEdit value={name} onCommit={(n) => { graph.setState({ name: n }); commit() }} label="Rename graph" />} />}
+            start={<Brand name="Nodes" mark={mark} doc={<InlineText value={name} onCommit={(n) => { graph.setState({ name: n }); commit() }} label="Rename graph" className="block truncate" />} />}
             center={
               <Cluster>
                 <div className="w-[104px] px-0.5">
@@ -139,8 +130,7 @@ export default function NodesShell() {
             end={
               <>
                 <Cluster>
-                  <IconButton icon={Undo2} label="Undo" shortcut="mod+z" disabled={!canUndo} onClick={undo} />
-                  <IconButton icon={Redo2} label="Redo" shortcut="shift+mod+z" disabled={!canRedo} onClick={redo} />
+                  <HistoryButtons history={graphHistory} />
                   <Divider vertical />
                   <ThemeToggle />
                 </Cluster>
@@ -165,9 +155,7 @@ export default function NodesShell() {
         <SplitPane id="nodes" show={view === 'split' ? 'both' : view === 'graph' ? 'a' : 'b'} defaultRatio={0.58} a={<GraphCanvas />} b={<PreviewPane />} label="Resize graph and preview" />
         <input ref={file} type="file" accept="application/json,.json" className="hidden" onChange={(e) => { void onFile(e.target.files?.[0]); e.target.value = '' }} />
         <CommandPalette commands={commands} extraShortcuts={[
-          { keys: 'tab', label: 'Add node at cursor' },
           { keys: 'backspace', label: 'Delete selection' },
-          { keys: 'esc', label: 'Clear selection' },
           { keys: 'space', label: 'Hold to pan the graph' },
           { keys: 'shift+1', label: 'Fit preview' },
           { keys: 'shift+0', label: 'Preview at 100%' },

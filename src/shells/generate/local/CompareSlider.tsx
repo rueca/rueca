@@ -53,8 +53,8 @@ export function CompareSlider({
       >
         <ChevronsLeftRight size={14} strokeWidth={1.75} />
       </div>
-      <span className="pointer-events-none absolute top-3 left-3 rounded-[6px] bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">{labelA}</span>
-      <span className="pointer-events-none absolute top-3 right-3 rounded-[6px] bg-black/55 px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">{labelB}</span>
+      <span className="pointer-events-none absolute top-3 left-3 rounded-[6px] bg-scrim px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">{labelA}</span>
+      <span className="pointer-events-none absolute top-3 right-3 rounded-[6px] bg-scrim px-2 py-1 text-[11px] font-medium text-white backdrop-blur-sm">{labelB}</span>
     </div>
   )
 }

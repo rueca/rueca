@@ -47,14 +47,38 @@ export interface DocStore<D> extends StoreApi<DocState<D>> {
   onCommit(fn: (d: D, meta: CommitMeta) => void): () => void
 }
 
-export interface DocOptions { id: string; persist?: boolean; version?: number; limit?: number }
+export interface DocOptions<D = unknown> {
+  id: string
+  persist?: boolean
+  version?: number
+  limit?: number
+  /** upgrade a saved doc from an older version / key; return null to discard it */
+  migrate?: (raw: unknown, fromVersion: number | null) => D | null
+  /** older localStorage keys to try (and remove) when nothing is saved under the current one */
+  legacyKeys?: string[]
+}
 
-export function createDocStore<D>(initial: D, opts: DocOptions): DocStore<D> {
+export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> {
   const key = `studio:${opts.id}:doc:v${opts.version ?? 1}`
   const limit = opts.limit ?? 120
   let start = initial
   if (opts.persist !== false && typeof localStorage !== 'undefined') {
-    try { const s = localStorage.getItem(key); if (s) start = JSON.parse(s) } catch { /* private mode / bad json */ }
+    try {
+      const s = localStorage.getItem(key)
+      if (s) start = opts.migrate ? (opts.migrate(JSON.parse(s), opts.version ?? 1) ?? initial) : JSON.parse(s)
+      else {
+        // nothing under this version: try older versions and legacy keys, migrating once
+        const older = [...Array(Math.max(0, (opts.version ?? 1) - 1)).keys()].map((i) => `studio:${opts.id}:doc:v${i + 1}`).reverse()
+        for (const k of [...older, ...(opts.legacyKeys ?? [])]) {
+          const raw = localStorage.getItem(k)
+          if (!raw) continue
+          const v = Number(k.match(/:v(\d+)$/)?.[1] ?? NaN)
+          const m = opts.migrate ? opts.migrate(JSON.parse(raw), Number.isNaN(v) ? null : v) : null
+          if (m) { start = m; localStorage.setItem(key, JSON.stringify(m)) }
+          break
+        }
+      }
+    } catch { /* private mode / bad json */ }
   }
   const store = createStore<DocState<D>>(() => ({ doc: start, committed: start, past: [], future: [], dirty: false }))
   const listeners = new Set<(d: D, meta: CommitMeta) => void>()

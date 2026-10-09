@@ -4,10 +4,10 @@ import {
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, SquaresUnite, SquaresSubtract, SquaresIntersect, SquaresExclude,
   Frame, Component, Columns3, Rows3, ImageDown, CodeXml, Type, Ellipsis, TextAlignStart, TextAlignCenter, TextAlignEnd, Ungroup, Combine,
 } from 'lucide-react'
-import { IconButton, Menu, toast, type MenuItem } from '@kit'
+import { toast, type MenuItem } from '@kit'
+import { ContextBar as Bar, type ContextAction } from '@kit/stage/ContextBar'
 import * as S from '../model/store'
 import { topMost } from '../model/tree'
-import { SelectionBar } from '../local/SelectionBar'
 import { exportSelection, copyCSS, toggleHidden, toggleLocked } from '../actions'
 import type { BoolOp } from '../model/types'
 
@@ -37,65 +37,51 @@ export function ContextBar({ rect }: { rect: { x: number; y: number; w: number; 
     { label: 'Delete', danger: true, shortcut: 'backspace', onClick: S.deleteSelection },
   ]
 
-  return (
-    <SelectionBar anchor={rect}>
-      {single?.type === 'text' && (
-        <>
-          <IconButton icon={Type} label="Edit text" shortcut="enter" onClick={() => S.design.setState({ editing: single.id })} />
-          {([['left', TextAlignStart], ['center', TextAlignCenter], ['right', TextAlignEnd]] as const).map(([a, I]) => (
-            <IconButton key={a} icon={I} label={`Align ${a}`} active={single.text!.align === a} onClick={() => S.patchNode(single.id, (n) => ({ text: { ...n.text!, align: a } }))} />
-          ))}
-          <SelectionBar.Divider />
-        </>
-      )}
-      {single?.type === 'frame' && (
-        <>
-          <IconButton icon={single.layout?.dir === 'column' ? Rows3 : Columns3} label={single.layout ? 'Remove auto layout' : 'Add auto layout'} shortcut="shift+a" active={!!single.layout} onClick={S.addAutoLayout} />
-          <IconButton icon={Component} label={single.component ? 'Detach component' : 'Create component'} shortcut="alt+mod+k" active={!!single.component}
-            onClick={() => { const r = S.toggleComponent(); toast(r === 'created' ? 'Component created' : 'Component detached', { type: 'success' }) }} />
-          <SelectionBar.Divider />
-        </>
-      )}
-      {free > 1 && (
-        <>
-          <IconButton icon={AlignStartVertical} label="Align left" shortcut="alt+a" onClick={() => S.align('left')} />
-          <IconButton icon={AlignCenterVertical} label="Align horizontal centres" shortcut="alt+h" onClick={() => S.align('hcenter')} />
-          <IconButton icon={AlignEndVertical} label="Align right" shortcut="alt+d" onClick={() => S.align('right')} />
-          <IconButton icon={AlignStartHorizontal} label="Align top" shortcut="alt+w" onClick={() => S.align('top')} />
-          <IconButton icon={AlignCenterHorizontal} label="Align vertical centres" shortcut="alt+v" onClick={() => S.align('vcenter')} />
-          <IconButton icon={AlignEndHorizontal} label="Align bottom" shortcut="alt+s" onClick={() => S.align('bottom')} />
-          {free > 2 && (
-            <>
-              <IconButton icon={AlignHorizontalDistributeCenter} label="Distribute horizontally" shortcut="alt+shift+h" onClick={() => S.distribute('x')} />
-              <IconButton icon={AlignVerticalDistributeCenter} label="Distribute vertically" shortcut="alt+shift+v" onClick={() => S.distribute('y')} />
-            </>
-          )}
-          <SelectionBar.Divider />
-        </>
-      )}
-      {(shapes || isBool) && (
-        <>
-          <Menu side="bottom" trigger={<IconButton icon={isBool ? ({ union: SquaresUnite, subtract: SquaresSubtract, intersect: SquaresIntersect, exclude: SquaresExclude } as const)[single!.bool ?? 'union'] : Combine} label="Boolean" />}
-            items={[
-              { type: 'label', label: 'Boolean' },
-              { label: 'Union', icon: SquaresUnite, checked: single?.bool === 'union', onClick: bool('union') },
-              { label: 'Subtract', icon: SquaresSubtract, checked: single?.bool === 'subtract', onClick: bool('subtract') },
-              { label: 'Intersect', icon: SquaresIntersect, checked: single?.bool === 'intersect', onClick: bool('intersect') },
-              { label: 'Exclude', icon: SquaresExclude, checked: single?.bool === 'exclude', onClick: bool('exclude') },
-            ]} />
-          <SelectionBar.Divider />
-        </>
-      )}
-      {sel.length > 1 && (
-        <>
-          <IconButton icon={Frame} label="Frame selection" shortcut="alt+mod+g" onClick={() => S.wrapSelection('frame')} />
-          <IconButton icon={Component} label="Create component" shortcut="alt+mod+k" onClick={() => { S.toggleComponent(); toast('Component created', { type: 'success' }) }} />
-          <SelectionBar.Divider />
-        </>
-      )}
-      <IconButton icon={ImageDown} label="Export" shortcut="shift+mod+e" onClick={exportSelection} />
-      <IconButton icon={CodeXml} label="Copy CSS" shortcut="alt+shift+c" onClick={copyCSS} />
-      <Menu align="end" items={more} trigger={<IconButton icon={Ellipsis} label="More" />} />
-    </SelectionBar>
-  )
+  const boolIcon = isBool ? ({ union: SquaresUnite, subtract: SquaresSubtract, intersect: SquaresIntersect, exclude: SquaresExclude } as const)[single!.bool ?? 'union'] : Combine
+  const actions: (ContextAction | false)[] = [
+    ...(single?.type === 'text' ? [
+      { icon: Type, label: 'Edit text', shortcut: 'enter', onClick: () => S.design.setState({ editing: single.id }) },
+      ...([['left', TextAlignStart], ['center', TextAlignCenter], ['right', TextAlignEnd]] as const).map(([a, I]) => (
+        { icon: I, label: `Align ${a}`, active: single.text!.align === a, onClick: () => S.patchNode(single.id, (n) => ({ text: { ...n.text!, align: a } }), { label: 'Text align' }) })),
+      { type: 'divider' as const },
+    ] : []),
+    ...(single?.type === 'frame' ? [
+      { icon: single.layout?.dir === 'column' ? Rows3 : Columns3, label: single.layout ? 'Remove auto layout' : 'Add auto layout', shortcut: 'shift+a', active: !!single.layout, onClick: S.addAutoLayout },
+      { icon: Component, label: single.component ? 'Detach component' : 'Create component', shortcut: 'alt+mod+k', active: !!single.component,
+        onClick: () => { const r = S.toggleComponent(); toast(r === 'created' ? 'Component created' : 'Component detached', { type: 'success' }) } },
+      { type: 'divider' as const },
+    ] : []),
+    ...(free > 1 ? [
+      { icon: AlignStartVertical, label: 'Align left', shortcut: 'alt+a', onClick: () => S.align('left') },
+      { icon: AlignCenterVertical, label: 'Align horizontal centres', shortcut: 'alt+h', onClick: () => S.align('hcenter') },
+      { icon: AlignEndVertical, label: 'Align right', shortcut: 'alt+d', onClick: () => S.align('right') },
+      { icon: AlignStartHorizontal, label: 'Align top', shortcut: 'alt+w', onClick: () => S.align('top') },
+      { icon: AlignCenterHorizontal, label: 'Align vertical centres', shortcut: 'alt+v', onClick: () => S.align('vcenter') },
+      { icon: AlignEndHorizontal, label: 'Align bottom', shortcut: 'alt+s', onClick: () => S.align('bottom') },
+      free > 2 && { icon: AlignHorizontalDistributeCenter, label: 'Distribute horizontally', shortcut: 'alt+shift+h', onClick: () => S.distribute('x') },
+      free > 2 && { icon: AlignVerticalDistributeCenter, label: 'Distribute vertically', shortcut: 'alt+shift+v', onClick: () => S.distribute('y') },
+      { type: 'divider' as const },
+    ] : []),
+    (shapes || isBool) && {
+      type: 'menu', icon: boolIcon, label: 'Boolean', items: [
+        { type: 'label', label: 'Boolean' },
+        { label: 'Union', icon: SquaresUnite, checked: single?.bool === 'union', onClick: bool('union') },
+        { label: 'Subtract', icon: SquaresSubtract, checked: single?.bool === 'subtract', onClick: bool('subtract') },
+        { label: 'Intersect', icon: SquaresIntersect, checked: single?.bool === 'intersect', onClick: bool('intersect') },
+        { label: 'Exclude', icon: SquaresExclude, checked: single?.bool === 'exclude', onClick: bool('exclude') },
+      ],
+    },
+    { type: 'divider' },
+    ...(sel.length > 1 ? [
+      { icon: Frame, label: 'Frame selection', shortcut: 'alt+mod+g', onClick: () => S.wrapSelection('frame') },
+      { icon: Component, label: 'Create component', shortcut: 'alt+mod+k', onClick: () => { S.toggleComponent(); toast('Component created', { type: 'success' }) } },
+      { type: 'divider' as const },
+    ] : []),
+    { icon: ImageDown, label: 'Export', shortcut: 'shift+mod+e', onClick: exportSelection },
+    { icon: CodeXml, label: 'Copy CSS', shortcut: 'alt+shift+c', onClick: copyCSS },
+    { type: 'menu', icon: Ellipsis, label: 'More', items: more, align: 'end' },
+  ]
+
+  // inset.bottom keeps the bar clear of the tool dock
+  return <Bar anchor={rect} actions={actions} inset={{ bottom: 56 }} />
 }

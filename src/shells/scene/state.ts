@@ -11,7 +11,6 @@
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
 import { createParams, defineSchema, folder, p, type Folder, type ParamDef, type ParamStore, type Schema } from '@kit'
-import type { Insets } from './local/SafeArea'
 
 export type Kind = 'group' | 'mesh' | 'floor' | 'light' | 'camera'
 export type MatType = 'standard' | 'physical' | 'toon'
@@ -150,7 +149,11 @@ export const BUILTIN_VIEWS: View[] = [
 
 /* --- editor ui ----------------------------------------------------------- */
 export type Tool = 'select' | 'translate' | 'rotate' | 'scale'
+/** px of the viewport covered by chrome, for the camera's view offset */
+export interface Insets { l: number; r: number; t: number; b: number }
 interface UI {
+  /** the viewport is mounted (its handle is reachable through the MountSurface ref) */
+  ready: boolean
   selected: string | null
   tool: Tool
   insets: Insets
@@ -164,6 +167,7 @@ interface UI {
 const LSK = 'studio:scene:ui'
 const saved = (() => { try { return JSON.parse(localStorage.getItem(LSK) || '{}') as Partial<UI> } catch { return {} } })()
 export const ui = createStore<UI>(() => ({
+  ready: false,
   selected: null,
   tool: 'translate',
   insets: { l: 0, r: 0, t: 0, b: 0 },

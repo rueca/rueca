@@ -2,10 +2,9 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { useStore } from 'zustand'
 import { Plus, TriangleAlert, Eye, ClipboardPaste } from 'lucide-react'
-import { Stage, Artboard, Empty, Button, Tip, useValues, useCamera, type CameraStore } from '@kit'
+import { Stage, Artboard, Empty, Button, Tip, useValues, useDoc, useCamera, type CameraStore } from '@kit'
 import { drawPost, ensureFonts, peekImage } from './artifact'
 import { doc, params, ui, effective, type DataRow, type SizeSpec, type V } from './model'
-import { useDoc } from './local/history'
 import { packArtboards } from './local/pack'
 import { addRow, patchSize, selectSize } from './actions'
 

@@ -15,8 +15,9 @@ import { prefs } from '../model/prefs'
 import { find, locate } from '../model/tree'
 import { union, type LayoutMap } from '../model/layout'
 import type { Box, Node } from '../model/types'
-import { TransformBox } from '../local/TransformBox'
-import { measure } from '../local/snap'
+import { TransformBox } from '@kit/stage/TransformBox'
+import { measure } from '@kit/stage/snap'
+import { Guides } from '@kit/stage/Guides'
 import { startResize, startRotate, startConnect } from './gestures'
 import { ContextBar } from './ContextBar'
 import { TextEditor } from './TextEditor'
@@ -83,7 +84,7 @@ export function Overlay() {
       {showSel && bb && (
         <TransformBox
           rect={sc(single ? L.get(single.id)! : bb)}
-          rotation={single?.rotation ?? 0}
+          rotation={-(single?.rotation ?? 0)}
           badge={gesture === 'move' && !parentAuto ? `${fmt(bb.x - (single ? (locate(nodes, single.id)?.parent ? L.get(locate(nodes, single.id)!.parent!.id)!.x : 0) : 0))}, ${fmt(bb.y - (single ? (locate(nodes, single.id)?.parent ? L.get(locate(nodes, single.id)!.parent!.id)!.y : 0) : 0))}` : single ? sizeLabel(single, L.get(single.id)!) : `${fmt(bb.w)} × ${fmt(bb.h)}`}
           onHandle={selNodes.some((n) => n.locked) ? undefined : (h, e) => startResize(e, h)}
           onRotate={single && !single.locked && !parentAuto ? startRotate : undefined}
@@ -94,32 +95,8 @@ export function Overlay() {
       {/* auto-layout padding / gap hint for a selected auto-layout frame */}
       {showSel && single?.layout && !gesture && <LayoutHints n={single} L={L} sc={sc} />}
 
-      {/* smart guides */}
-      {guides.length > 0 && (
-        <svg className="absolute inset-0 size-full overflow-visible">
-          {guides.map((g, i) => {
-            const a = g.axis === 'x' ? { x1: g.at * cam.zoom + cam.x, x2: g.at * cam.zoom + cam.x, y1: g.from * cam.zoom + cam.y, y2: g.to * cam.zoom + cam.y } : { y1: g.at * cam.zoom + cam.y, y2: g.at * cam.zoom + cam.y, x1: g.from * cam.zoom + cam.x, x2: g.to * cam.zoom + cam.x }
-            return <line key={i} {...a} stroke="var(--rec)" strokeWidth={1} shapeRendering="crispEdges" />
-          })}
-        </svg>
-      )}
-
-      {/* ⌥ measurements */}
-      {measures.length > 0 && (
-        <svg className="absolute inset-0 size-full overflow-visible">
-          {measures.map((m, i) => {
-            const x1 = m.x1 * cam.zoom + cam.x, y1 = m.y1 * cam.zoom + cam.y, x2 = m.x2 * cam.zoom + cam.x, y2 = m.y2 * cam.zoom + cam.y
-            return (
-              <g key={i}>
-                <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="var(--rec)" strokeWidth={1} shapeRendering="crispEdges" />
-                <foreignObject x={(x1 + x2) / 2 - 30} y={(y1 + y2) / 2 - 9} width={60} height={18}>
-                  <div className="flex h-full items-center justify-center"><span className="rounded-[3px] bg-rec px-1 tabular text-[10.5px] font-medium text-signal-fg">{fmt(m.value)}</span></div>
-                </foreignObject>
-              </g>
-            )
-          })}
-        </svg>
-      )}
+      {/* smart guides + ⌥ measurements (kit renderer, screen space) */}
+      <Guides view={cam} guides={guides} measures={measures} fmt={fmt} />
       {measuring && bb && hoverBox && <Outline b={sc(hoverBox)} width={1} tone="var(--rec)" />}
 
       {/* marquee */}

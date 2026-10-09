@@ -1,0 +1,133 @@
+#!/usr/bin/env node
+/* ---------------------------------------------------------------------------
+   accent-check — does the chrome accent clash with the prototype?
+
+     node <skill>/scripts/accent-check.mjs http://localhost:5173/#/my-tool
+     node <skill>/scripts/accent-check.mjs <url> --artboard "#preview"
+
+   The accent (--signal) draws selection outlines, handles and focus rings ON TOP
+   of the work. If the prototype is built from the same hue, selection vanishes.
+   It must also stay clear of the semantic colours (--rec, --key, --ok), or
+   "selected" reads as "recording" / "keyframed" / "done".
+
+   How: screenshot the artboard alone (chrome hidden, so the panels' own accent
+   states don't count), bucket the rendered pixels by OKLCH hue, and compare.
+   Rendered pixels work the same for DOM, SVG, Canvas, WebGL and iframes.
+
+   Needs playwright-core in the project (npm i -D playwright-core) and an
+   installed Chrome. Exit code 1 on a clash, so it can gate a QA run.
+--------------------------------------------------------------------------- */
+import { createRequire } from 'node:module'
+
+const args = process.argv.slice(2)
+const url = args.find((a) => !a.startsWith('--'))
+const flag = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : undefined }
+if (!url) { console.error('usage: accent-check.mjs <url> [--artboard <selector>]'); process.exit(2) }
+
+// Resolve playwright-core from the project being checked, not from the skill folder.
+const require = createRequire(process.cwd() + '/')
+let chromium
+try { ({ chromium } = require('playwright-core')) } catch {
+  console.error('accent-check needs playwright-core in this project: npm i -D playwright-core'); process.exit(2)
+}
+
+const MIN_HUE = 35      // degrees of OKLCH hue the accent must keep from anything that matters
+const MIN_SHARE = 0.04  // a hue must cover ≥4% of the artboard to count
+const MIN_CHROMA = 0.06 // below this a colour reads as grey and can't clash
+
+// Pre-audited accents: fill ≥3:1 on the panel, white text on `strong` ≥4.5:1, both themes.
+const ACCENTS = {
+  blue:    { h: 249, dark: ['#0d99ff', '#0a72c6'], light: ['#0b84e0', '#0a6fc0'] }, // the default
+  violet:  { h: 293, dark: ['#9c78fd', '#704ec0'], light: ['#8862e5', '#6a48b9'] },
+  magenta: { h: 332, dark: ['#d561c8', '#9e3a93'], light: ['#be4bb1', '#97338d'] },
+  cyan:    { h: 222, dark: ['#00a5cb', '#007590'], light: ['#008eaf', '#006e89'] },
+}
+
+const browser = await chromium.launch({ channel: 'chrome' })
+let clashed = false
+for (const theme of ['dark', 'light']) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme })
+  const page = await ctx.newPage()
+  await page.goto(url, { waitUntil: 'networkidle' })
+  await page.evaluate((t) => { const h = document.documentElement; h.classList.toggle('dark', t === 'dark'); h.classList.toggle('light', t === 'light') }, theme)
+  await page.waitForTimeout(800) // let a canvas / WebGL artifact draw a frame
+
+  // Find the artboard: explicit selector → kit Artboard (.font-artboard) → largest canvas/iframe.
+  const found = await page.evaluate((sel) => {
+    const area = (e) => { const r = e.getBoundingClientRect(); return r.width * r.height }
+    const el = (sel && document.querySelector(sel)) ?? document.querySelector('[data-artboard], .font-artboard') ??
+      [...document.querySelectorAll('canvas, iframe, video, img')].sort((a, b) => area(b) - area(a))[0]
+    if (!el || area(el) < 64 * 64) return null
+    el.setAttribute('data-accent-check', '')
+    const s = document.createElement('style'); s.id = 'accent-check-hide'
+    s.textContent = 'body *{visibility:hidden!important}[data-accent-check],[data-accent-check] *{visibility:visible!important}'
+    document.head.append(s)
+    return el.tagName.toLowerCase() + (el.id ? '#' + el.id : el.classList.length ? '.' + [...el.classList].slice(0, 2).join('.') : '')
+  }, flag('--artboard'))
+  if (!found) { console.error(`${theme}: no artboard found — pass --artboard <selector>`); clashed = true; await ctx.close(); continue }
+
+  const png = await page.locator('[data-accent-check]').first().screenshot()
+  const result = await page.evaluate(async ({ b64, MIN_HUE, MIN_SHARE, MIN_CHROMA, ACCENTS }) => {
+    const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode()
+    const cv = document.createElement('canvas'); cv.width = cv.height = 96
+    const cx = cv.getContext('2d', { willReadFrequently: true }); cx.drawImage(img, 0, 0, 96, 96)
+    const px = cx.getImageData(0, 0, 96, 96).data
+
+    const oklch = (r, g, b) => {
+      const lin = (c) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+      const [R, G, B] = [lin(r), lin(g), lin(b)]
+      const l = Math.cbrt(0.4122214708 * R + 0.5363325363 * G + 0.0514459929 * B)
+      const m = Math.cbrt(0.2119034982 * R + 0.6806995451 * G + 0.1073969566 * B)
+      const s = Math.cbrt(0.0883024619 * R + 0.2817188376 * G + 0.6299787005 * B)
+      const a = 1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s
+      const bb = 0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s
+      return { C: Math.hypot(a, bb), H: ((Math.atan2(bb, a) * 180) / Math.PI + 360) % 360 }
+    }
+    const dist = (x, y) => { const d = Math.abs(x - y) % 360; return Math.min(d, 360 - d) }
+    const cssHue = (name) => {
+      const d = document.createElement('div'); d.style.color = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+      document.body.append(d); const v = getComputedStyle(d).color.match(/[\d.]+/g).map(Number); d.remove()
+      return oklch(v[0], v[1], v[2]).H
+    }
+
+    // Bucket the artboard's chromatic pixels into 10° hue bins.
+    const bins = new Map(); let n = 0
+    for (let i = 0; i < px.length; i += 4) {
+      if (px[i + 3] < 128) continue; n++
+      const { C, H } = oklch(px[i], px[i + 1], px[i + 2]); if (C < MIN_CHROMA) continue
+      const k = (Math.round(H / 10) * 10) % 360; bins.set(k, (bins.get(k) ?? 0) + 1)
+    }
+    const palette = [...bins].map(([k, c]) => [k, c / Math.max(1, n)]).filter(([, s]) => s >= MIN_SHARE).sort((a, b) => b[1] - a[1])
+    const semantic = { rec: cssHue('--rec'), key: cssHue('--key'), ok: cssHue('--ok') }
+    const accent = cssHue('--signal')
+    const near = (h) => [
+      ...palette.filter(([k]) => dist(k, h) < MIN_HUE).map(([k, s]) => `artboard hue ${k}° (${Math.round(s * 100)}%)`),
+      ...Object.entries(semantic).filter(([, k]) => dist(k, h) < MIN_HUE).map(([nm, k]) => `--${nm} (${Math.round(k)}°)`),
+    ]
+    const clearance = (h) => Math.min(360, ...palette.map(([k]) => dist(k, h)), ...Object.values(semantic).map((k) => dist(k, h)))
+    const ranked = Object.entries(ACCENTS).map(([name, a]) => [name, clearance(a.h)]).sort((a, b) => b[1] - a[1])
+    return { palette: palette.map(([k, s]) => `${k}° ${Math.round(s * 100)}%`), accent: Math.round(accent), clashes: near(accent), best: ranked[0] }
+  }, { b64: png.toString('base64'), MIN_HUE, MIN_SHARE, MIN_CHROMA, ACCENTS })
+
+  const head = `${theme.padEnd(5)} artboard ${found} · chromatic hues ${result.palette.join(', ') || 'none (greyscale)'} · accent ${result.accent}°`
+  if (!result.clashes.length) console.log(`${head}\n      PASS — the accent clears the artboard and the semantic colours`)
+  else {
+    clashed = true
+    const [name, clear] = result.best
+    console.log(`${head}\n      CLASH — too close to ${result.clashes.join(', ')}`)
+    if (clear >= MIN_HUE) console.log(`      → switch to ${name} (clears everything by ${clear}°)`)
+    else console.log(`      → nothing clears ${MIN_HUE}°: keep blue and give selection a two-tone outline (visual-rules.md)`)
+  }
+  await ctx.close()
+}
+await browser.close()
+
+// Print the override for the best fallback once, for both themes, ready to paste after the theme import.
+if (clashed) {
+  console.log('\nOverride (paste after the theme import; pick the fallback named above):')
+  for (const [name, a] of Object.entries(ACCENTS)) if (name !== 'blue') {
+    const soft = (hex, al) => `rgb(${parseInt(hex.slice(1, 3), 16)} ${parseInt(hex.slice(3, 5), 16)} ${parseInt(hex.slice(5, 7), 16)} / ${al})`
+    console.log(`/* ${name} */\n:root { --signal: ${a.dark[0]}; --signal-strong: ${a.dark[1]}; --signal-soft: ${soft(a.dark[0], 0.16)}; }\n:root.light { --signal: ${a.light[0]}; --signal-strong: ${a.light[1]}; --signal-soft: ${soft(a.light[0], 0.12)}; }`)
+  }
+}
+process.exit(clashed ? 1 : 0)

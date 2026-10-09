@@ -1,7 +1,6 @@
 /* Marks — model: brand settings (params), the variant document (with history), view state. */
 import { createStore } from 'zustand/vanilla'
-import { defineSchema, folder, p, createParams, equal } from '@kit'
-import { createDocStore, linkHistory } from '../batch/local/history'
+import { defineSchema, folder, p, createParams, createDocStore, createHistory, equal } from '@kit'
 import { FAMILIES, FAMILY, mulberry32, sampleParams, type FamilyId } from './families'
 
 export const settingsSchema = defineSchema({
@@ -60,17 +59,26 @@ function demoDoc(): Doc {
   return { marks: Object.fromEntries(marks.map((m) => [m.id, m])), grid: marks.map((m) => m.id), favs: [marks[0].id, marks[5].id] }
 }
 
-export const doc = createDocStore<Doc>(demoDoc(), {
-  id: 'marks',
-  migrate: (raw) => {
-    const d = raw as Doc
-    return d && d.marks && Array.isArray(d.grid) && Array.isArray(d.favs) && d.grid.every((id) => d.marks[id] && FAMILY[d.marks[id].family]) ? d : null
-  },
-})
-export const resetDemoDoc = () => doc.set(demoDoc())
+const valid = (raw: unknown): raw is Doc => {
+  const d = raw as Doc
+  return !!d && !!d.marks && Array.isArray(d.grid) && Array.isArray(d.favs) && d.grid.every((id) => d.marks[id] && FAMILY[d.marks[id].family])
+}
+
+export const doc = createDocStore<Doc>(demoDoc(), { id: 'marks', version: 1 })
+// A stored doc from an older build (or a different family set) falls back to the demo;
+// the pre-kit store kept its doc under `studio:marks:doc` — carry it over once.
+{
+  let start: unknown = doc.get()
+  try {
+    const legacy = localStorage.getItem('studio:marks:doc')
+    if (legacy) { localStorage.removeItem('studio:marks:doc'); const d = JSON.parse(legacy); if (valid(d)) start = d }
+  } catch { /* private mode / bad json */ }
+  if (start !== doc.get() || !valid(start)) doc.replace(valid(start) ? start : demoDoc(), { history: false })
+}
+export const resetDemoDoc = () => doc.set(demoDoc(), { label: 'Restore demo variants' })
 
 /** ⌘Z undoes the last change — to brand settings or to the marks. */
-export const history = linkHistory([settings, doc], ['Settings', 'Marks'])
+export const history = createHistory([settings, doc])
 
 /* --- view state (not undoable) --- */
 export interface UI {
@@ -98,7 +106,8 @@ function pushToInspector() {
   const values = { ...(fam.params.getState().defaults as Record<string, unknown>), ...m.v }
   if (equal(values, fam.params.getState().values)) return
   syncing = true
-  fam.params.setState({ values, committed: values, past: [], future: [], compare: null })
+  // the family inspector edits ONE mark: its own undo stack must not reach into another mark
+  fam.params.setState({ values, committed: values, past: [], future: [], pastLabels: [], futureLabels: [], compare: null })
   syncing = false
 }
 ui.subscribe((s, prev) => { if (s.focus !== prev.focus) pushToInspector() })
@@ -111,5 +120,5 @@ for (const fam of FAMILIES) {
     if (!m || m.family !== fam.id || equal(m.v, s.values)) return
     doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, v: { ...s.values } } } }), { commit: false })
   })
-  fam.params.onCommit(() => { if (!syncing) doc.commit() })
+  fam.params.onCommit((_v, meta) => { if (!syncing && meta.kind === 'edit') doc.commit(meta.label ?? 'Shape') })
 }

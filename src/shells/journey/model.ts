@@ -217,3 +217,6 @@ export const demoDoc = (): JourneyDoc => ({ title: 'Harvest · first 60 days', p
 
 export const blankStages = (prefix: string): Stage[] =>
   STAGE_NAMES.map((name, i) => ({ id: `${prefix}-s${i}`, name, goal: '', duration: '', emotion: 0, feeling: '' }))
+
+/** A user-picked hue, darkened just enough that white text on it clears WCAG AA (≥4.5:1). */
+export { readableOn as deepen } from '@kit'

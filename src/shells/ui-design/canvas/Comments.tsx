@@ -45,10 +45,10 @@ function Thread({ c }: { c: Comment }) {
     const comments = S.page().comments
     if (!draft.trim()) {
       if (isNew) S.design.setState({ doc: S.get().anchor.doc, openComment: null })
-      else { S.setPage({ comments: comments.filter((x) => x.id !== c.id) }); S.design.setState({ openComment: null }) }
+      else { S.setPage({ comments: comments.filter((x) => x.id !== c.id) }, { label: 'Delete comment' }); S.design.setState({ openComment: null }) }
       return
     }
-    S.setPage({ comments: comments.map((x) => (x.id === c.id ? { ...x, text: draft.trim(), at: isNew ? Date.now() : x.at } : x)) })
+    S.setPage({ comments: comments.map((x) => (x.id === c.id ? { ...x, text: draft.trim(), at: isNew ? Date.now() : x.at } : x)) }, { label: isNew ? 'Add comment' : 'Edit comment' })
     S.design.setState({ openComment: null })
   }
   return (
@@ -61,9 +61,9 @@ function Thread({ c }: { c: Comment }) {
             <p className="mt-0.5 text-[12px] leading-relaxed text-fg select-text">{c.text}</p>
           </div>
           <IconButton icon={Check} label={c.resolved ? 'Reopen' : 'Resolve'} size="icon-sm" active={c.resolved}
-            onClick={() => { S.setPage({ comments: S.page().comments.map((x) => (x.id === c.id ? { ...x, resolved: !x.resolved } : x)) }); S.design.setState({ openComment: null }) }} />
+            onClick={() => { S.setPage({ comments: S.page().comments.map((x) => (x.id === c.id ? { ...x, resolved: !x.resolved } : x)) }, { label: c.resolved ? 'Reopen comment' : 'Resolve comment' }); S.design.setState({ openComment: null }) }} />
           <IconButton icon={Trash2} label="Delete comment" size="icon-sm"
-            onClick={() => { S.setPage({ comments: S.page().comments.filter((x) => x.id !== c.id) }); S.design.setState({ openComment: null }) }} />
+            onClick={() => { S.setPage({ comments: S.page().comments.filter((x) => x.id !== c.id) }, { label: 'Delete comment' }); S.design.setState({ openComment: null }) }} />
         </div>
       )}
       <textarea autoFocus={isNew} value={draft} onChange={(e) => setDraft(e.target.value)} rows={isNew ? 3 : 2} placeholder={isNew ? 'Add a comment' : 'Edit comment'}

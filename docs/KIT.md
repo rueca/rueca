@@ -1,4 +1,4 @@
-# Prototype Studio kit — guide
+# Trompo kit — guide
 
 The kit is the **harness**: the design-tool chrome around a prototype. The prototype (the
 *artifact*) can be anything — Canvas 2D, WebGL, vanilla three.js, SVG, DOM/React, an iframe.
@@ -33,7 +33,11 @@ Text: `text-fg` · `text-fg-muted` · `text-fg-faint`. Lines: `border-line` · `
 Accent: `bg-signal` (fills) · `bg-signal-strong` (surfaces carrying text) · `text-signal-fg` ·
 `bg-signal-soft` (selection wash). Semantic: `key` (keyframed, amber) · `rec` (playhead/record/
 error) · `ok`. Lanes: `bg-lane`. Utilities: `panel` `cluster` `pop` `tabular` `no-select`
-`checker`. CSS vars: `--row` (28px lane), `--gutter`, `--inspector-w`.
+`checker`. Categorical (identity, never state): `cat-1`…`cat-8` (ports, lanes, tags). Over
+images: `bg-scrim`. CSS vars: `--row` (28px lane), `--gutter`, `--inspector-w`, and in overlay
+layouts `--safe-top/right/bottom/left` (what the panels cover).
+Token names are namespaced so they never collide with shadcn (`muted`, `accent`, `input` mean
+something else there): ours are `fg-muted`, `signal`, `control`; font is `font-ui`.
 
 ## 2. State: schema → params store
 
@@ -68,40 +72,82 @@ export const schema = defineSchema({
 ```
 
 Every def accepts `label`, `hint`, `when: (v) => boolean` (conditional row), `disabled`,
-`live: false` (expensive — apply on commit). Keys are **flat across folders** (`v.count`).
+`live: false` (expensive — apply on commit), `publish: true` (shows in the client view),
+`persist: false` (keep out of localStorage), `share: false` (keep out of links/JSON).
+Keys are **flat across folders** (`v.count`).
+
+More defs: `p.data<Layer[]>([])` — a hidden, typed document value (a layer stack, clips, pattern
+steps): undoable and persisted, never rendered as a row. `p.image()` defaults to persist/share
+off (a photo would blow the storage quota). Numbers take `scale: 'log'`, `soft: [lo, hi]` (drag
+range; typing can exceed it), `parse` (typed text → number, e.g. percent), `display: 'knob'`.
 
 ```ts
-export const params = createParams(schema, { id: 'my-tool', presets: [{ name: 'Calm', values: { … } }] })
+export const params = createParams(schema, {
+  id: 'my-tool', version: 2,                          // bump when the schema's shape changes
+  presets: [{ name: 'Calm', values: { … } }],          // merge by default: only the listed keys change
+  presetKeys: ['palette', 'grain'],                    // what "Save preset" captures (default: all shareable)
+})
 params.values()                       // current values (non-reactive)
-params.subscribe(() => …)             // every change, incl. mid-drag (zustand)
-params.onCommit((v) => …)             // pointer-up only — do expensive work here
-params.setValue('count', 3)           // commits (undo step); { commit: false } while dragging
+params.subscribe((s) => …)            // every change, incl. mid-drag (zustand)
+params.onCommit((v, meta) => …)       // pointer-up only; meta = { label, kind: edit|undo|redo|replace }
+params.setValue('count', 3, { label: 'Count' })   // commits one labelled undo step; { commit: false } mid-drag
 params.patch({ … }); params.reset(['count']); params.undo(); params.redo()
-params.savePreset(name); params.applyPreset(name); params.toggleCompare()   // A/B
-params.toJSON({ changedOnly: true }); params.shareURL()
+params.replace(values, { history: false })        // load/import without an undo step
+params.savePreset(name); params.applyPreset(name); params.activePreset(); params.toggleCompare()
+params.toJSON({ changedOnly: true, shareable: true }); params.shareURL()
 const v = useValues(params)            // React
 ```
 
-Persistence (localStorage) and `#p=` URL share are automatic.
+Persistence (localStorage, debounced; a quota failure shows a toast once) and `#p=` URL share
+are automatic.
+
+### Document state + one undo timeline
+
+```ts
+export const doc = createDocStore(initialDoc, { id: 'flows', version: 1 })  // graph, rows, layer tree…
+doc.set((d) => ({ ...d, nodes }), { commit: false })   // mid-drag
+doc.commit('Move 3 nodes')                             // pointer-up = one labelled step
+const nodes = useDoc(doc, (d) => d.nodes)
+export const history = createHistory([params, doc])    // ⌘Z undoes whichever changed last
+<ParamActions params={params} history={history} />     // or <HistoryButtons history={history} />
+<HistoryList history={history} />                      // Lightroom-style named steps, click to jump
+```
+Keep selection and view state OUT of the doc so undo never fights focus.
+
+### One item of a collection in the Inspector
+
+```ts
+const warp = createItemParams(warpSchema, 'warp')      // per item TYPE, not per item
+useEffect(() => bindItem(warp, {
+  read: () => layer(sel)?.params ?? null,
+  write: (v) => doc.set((d) => setLayerParams(d, sel, v), { commit: false }),
+  commit: (label) => doc.commit(label),
+  subscribe: (fn) => doc.subscribe(fn),
+}), [sel])
+<Inspector params={warp} />
+```
 
 ## 3. Time: the clock
 
 ```ts
-export const clock = createClock({ duration: 4000, loop: true, fps: 60 })
+export const clock = createClock({ duration: 4000, mode: 'loop' /* | 'once' | 'pingpong' */, fps: 60, idle: true })
 clock.onTick((t, dt) => …)  clock.time()  clock.seek(ms)  clock.play()/pause()/toggle()/replay()/step(n)
 useClockTime(clock, 15)     // throttled React readout
 ```
 Render as a pure function of `(values, t)` so scrubbing and export work. Keep live values in
-refs, never in a rAF effect's dependency array.
+refs, never in a rAF effect's dependency array. The clock stops in hidden tabs; `idle: false`
+stops ticks while paused too (default true for artifacts with their own life).
 
 ## 4. Surfaces — plugging the artifact in
 
 ```tsx
-<CanvasSurface ref={h} params={params} clock={clock} draw={(ctx, { t, w, h, v, dt }) => …} />
-<MountSurface params={params} clock={clock} mount={(el, { values, params, clock }) => { /* vanilla three.js etc */ return cleanup }} />
-<FrameSurface src="/proto.html" params={params} />   // postMessage bridge { type: 'studio:params', values }
+<CanvasSurface ref={h} params={params} clock={clock} draw={(ctx, { t, w, h, v, dt }) => …} deps={[docVersion]} />
+<WebGLSurface params={params} clock={clock} setup={(gl) => program} draw={(gl, f, program) => …} />
+<MountSurface ref={m} params={params} clock={clock} mount={(el, { values, params, clock }) => ({ engine, dispose })} />
+<FrameSurface src="/proto.html" params={params} />   // postMessage bridge — see public/studio-bridge.js
 ```
-`h.current.canvas` gives the canvas for export.
+`h.current.canvas` gives the canvas for export; `m.current.handle` the object `mount` returned.
+`v` in `draw` is typed from the schema. Without a clock, `animate` runs its own rAF.
 
 ## 5. Layout
 
@@ -118,35 +164,47 @@ refs, never in a rAF effect's dependency array.
 - `islands`: floating cards with gutter (artboard work). `overlay`: stage full-bleed under
   floating panels (shaders, 3D, photo). `docked`: flush panels, Figma UI3 (dense editors).
 - `⌘\` hides all chrome (present mode).
-- Toolbar: `<Brand name doc mark>` (make `mark` an `<a href="#/">` back to the gallery),
+- Toolbar: `<Brand name doc mark>` (the mark links home itself — pass a plain glyph),
   `<Cluster>` groups, `<ToolDock value onChange tools>` (bottom-centre tools, place it yourself
   absolutely inside the Stage overlay), `<Button variant="primary">` for the ONE primary action.
 - `<Stage>` = camera (wheel pan, ⌘wheel/pinch zoom, space-drag, Shift+0/1), `contentSize`
-  for fit, `grid` dots, `overlay` slot for HUD. `<Artboard width height label x y background selected>`.
-  `useCamera()` inside the stage gives `{ x, y, zoom }` store + `fit()` / `zoomTo()`.
-- `<Panel>` (scrolls) · `<PanelHeader title>` · `<PanelTabs value onChange tabs>` · `<Empty icon title hint action>`.
+  ({ w, h, x?, y? } — compared by value, inline is fine) for fit, `fitMaxZoom` (default 1),
+  `grid` dots, `overlay` slot for HUD, `hotkeys={false}`. `<Stage fill>` has no camera or Space.
+  `<Artboard width height label x y background selected>` (defaults white; resets font features).
+  `useCamera()` gives the store + `fit()` / `zoomTo()` / `touch()` / `untouch()`.
+  `<ZoomPill zoom onZoom onFit />` works outside a Stage too (React Flow, custom canvases).
+- `useSafeArea()` in overlay layouts → `{ top, right, bottom, left }` covered by panels.
+- `<Panel>` (scrolls) · `<PanelHeader title>` · `<PanelTabs value onChange tabs>` · `<Empty icon title hint action compact>`.
 
 ## 6. Components
 
-- `Inspector params folders?` — whole schema → sections + rows.
-- `Section title open onToggle onReset changed actions` and `Row label hint changed onReset stacked trailing`
-  — for hand-built panels that must match schema rows.
+- `Inspector params folders? keys? published? id?` — schema → sections + rows (folders render in the order given).
+- Hand-built panels that must match: `Section title (open+onToggle | defaultOpen persistKey) onReset changed actions collapsible`,
+  `Row label hint changed onReset stacked trailing labelWidth`, `ParamRow k params` (one schema row),
+  `ParamControl def value onChange` (just the control).
 - Controls: `ScrubValue` (drag/type/expr number) · `Slider` · `Segmented` · `Tiles` · `Switch` ·
   `Checkbox` · `Select` · `TextInput` · `Menu` (items: item/separator/label/submenu) · `ColorField`
   / `ColorPanel` / `Swatch` · `AngleDial` · `XYPad` · `Vec3Fields` · `SizeFields` · `SeedField` ·
   `CurveEditor` / `CurveGlyph` · `SpringEditor` · `GradientEditor` · `PaletteField` · `ImageDrop` ·
-  `Monitor` · `Button` (variants ghost/default/primary/outline/danger; sizes sm/md/lg/icon/icon-sm) ·
+  `Monitor` · `Knob` (rotary, log taper, bipolar) · `Button` (variants ghost/default/primary/outline/danger; sizes sm/md/lg/icon/icon-sm) ·
   `IconButton icon label shortcut active` · `Tip label shortcut` · `Kbd` · `Badge tone` · `Divider`.
-- `Timeline clock lanes` — lanes: `{ id, label, start, end }` bars, `{ kind: 'keys', keys: [{ t, value, selected }] }`,
+- `Timeline clock lanes hotkeys?` — read-only beat view + transport (loop / ping-pong / once). Lanes: `{ id, label, start, end }` bars, `{ kind: 'keys', keys: [{ t, value, selected }] }`,
   `{ kind: 'markers', keys }`; `depth` indents. Derive lanes from the render maths.
-- `LayerTree items selected onSelect onToggle onMove onRename` + `updateTree` / `moveInTree` / `findInTree`.
-- `ParamActions params` (undo/redo, A/B, presets, share, theme) · `HistoryButtons` · `PresetMenu` ·
+- `LayerTree items selected onSelect onToggle onMove onRename toggles defaultCollapsed expanded onHover` +
+  `updateTree` / `moveInTree` / `findInTree`. Items: `container` (droppable when empty), `toggles`, `meta`, `thumb`.
+- `ParamActions params history? presets compare theme share` (each part switchable; `compare={{ hotkey: false }}`) · `HistoryButtons` · `PresetMenu` ·
   `CompareButton` · `ThemeToggle` · `shareMenuItems(params)` (link, JSON, **copy as agent prompt**).
 - `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound.
-- `toast(title, { type: 'success'|'error'|'loading', description, action })`.
-- IO: `exportCanvasPNG(canvas, name, scale)` · `exportSVG(svg)` · `exportJSON(data)` ·
-  `recordCanvas(canvas, ms, fps)` · `download(blob, name)` · `copyText` · `readFileAsDataURL`.
-- Hotkeys: `useHotkeys({ 'mod+e': fn, 'shift+/': fn })`, `prettyCombo`.
+- `toast(title, opts)` returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
+  `toast.promise(p, { loading, success, error })` · `toast.progress(title, { onCancel })` → `{ set(p), done(msg), fail(msg) }`.
+- IO: `exportCanvasPNG(canvas, name, scale, { smoothing })` · `exportSVG(svg | string)` · `exportJSON(data)` ·
+  `recordFrames({ canvas, draw(t, i), frames, fps, name, onProgress, signal })` (frame-accurate MP4/WebM, WebCodecs) ·
+  `recordCanvas(canvas, ms)` (quick real-time fallback) · `createZip()` (STORE zip: `add(name, bytes)`, `await addBlob(name, blob)`, `toBlob()`) ·
+  `snapshotElement(el, { width, height, scale, background, filter, hide })` (DOM → canvas) · `download` · `copyText` · `readFileAsDataURL`.
+- Hotkeys: `useHotkeys({ 'mod+e': fn, t: { run, label: 'Text tool', group: 'Tools' } }, deps, { priority })`.
+  One dispatcher; shell bindings (priority 10) beat kit defaults (0); labelled bindings appear in the
+  `?` sheet automatically; dev warns on duplicates. `useHoldKey('\\', (down) => …)` for hold-to-peek.
+  Space/Enter on a focused button go to the button.
 
 ## 7. Conventions borrowed from Spline · Paper · Figma · Framer · Affinity · Rive
 

@@ -5,11 +5,10 @@ import { ArrowRight, ArrowUpRight, Box, Code2, Frame, Smartphone } from 'lucide-
 import { Button, Segmented, TipProvider, useTheme, cn } from '@kit'
 import { site } from '@/site.config'
 import type { Shell } from '@/gallery/registry'
-import { ShellCard } from '@/gallery/ShellCard'
-import { CategoryChips } from '@/gallery/Gallery'
-import { Chip, CommandLine, Container, Heading, Mark, Section, ThemeButton, scrollToSection } from './parts'
+import { Chip, CommandLine, Container, Heading, Mark, Rise, Section, ThemeButton, scrollToSection } from './parts'
 import { LiveShell } from './LiveShell'
 import { StepDeck } from './StepDeck'
+import { ShellRail } from './ShellRail'
 import { HERO_SHELLS, credits, environments, faq, installs, kitGroups, links, steps, surfaces } from './content'
 
 const NAV = [
@@ -34,20 +33,21 @@ export function Landing({ shells }: { shells: Shell[] }) {
         {/* ── hero ─────────────────────────────────────────────── */}
         <Container className="pt-14 sm:pt-20">
           <div className="max-w-[760px]">
-            <h1 className="text-[34px] leading-[1.06] font-semibold tracking-[-0.035em] text-balance sm:text-[52px]">{site.tagline}</h1>
-            <p className="mt-5 max-w-[620px] text-[15.5px] leading-[1.6] text-pretty text-fg-muted sm:text-[17px]">{site.description}</p>
-            <div className="mt-8 flex flex-wrap items-center gap-2.5">
+            <Rise><h1 className="text-[34px] leading-[1.06] font-semibold tracking-[-0.035em] text-balance sm:text-[52px]">{site.tagline}</h1></Rise>
+            <Rise delay={0.08}><p className="mt-5 max-w-[620px] text-[15.5px] leading-[1.6] text-pretty text-fg-muted sm:text-[17px]">{site.description}</p></Rise>
+            <Rise delay={0.16} className="mt-8 flex flex-wrap items-center gap-2.5">
               <Button variant="primary" size="lg" className="h-10 px-4 text-[13.5px]" onClick={() => scrollToSection('install')}>Install<ArrowRight size={14} strokeWidth={1.75} /></Button>
               <a href="#/shells" className="inline-flex h-10 items-center gap-1.5 rounded-[8px] px-4 text-[13.5px] font-medium text-fg shadow-[inset_0_0_0_1px_var(--line-strong)] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
                 Browse {shells.length} shells
               </a>
-            </div>
-            <CommandLine text={installs[0].lines[0]} className="mt-6 max-w-[460px]" />
+            </Rise>
+            <Rise delay={0.24}><CommandLine text={installs[0].lines[0]} className="mt-6 max-w-[460px]" /></Rise>
           </div>
         </Container>
-        <Container className="mt-12 sm:mt-16">
+        {/* the preview breaks out of the text column — nearly full width, up to the tool's native 1440 */}
+        <div className="mx-auto mt-12 w-full max-w-[1440px] px-3 sm:mt-16 sm:px-6">
           {heroShells.length > 0 && <LiveShell shells={heroShells} />}
-        </Container>
+        </div>
 
         {/* ── how it works ─────────────────────────────────────── */}
         <Section id="how">
@@ -87,7 +87,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
         </Section>
 
         {/* ── shells ───────────────────────────────────────────── */}
-        <ShellsSection shells={shells} theme={theme} />
+        <ShellRail shells={shells} theme={theme} />
 
         {/* ── kit ──────────────────────────────────────────────── */}
         <Section id="kit">
@@ -186,24 +186,6 @@ function Nav() {
         </nav>
       </Container>
     </div>
-  )
-}
-
-function ShellsSection({ shells, theme }: { shells: Shell[]; theme: string }) {
-  const [cat, setCat] = useState('All')
-  const list = shells.filter((s) => cat === 'All' || s.category === cat)
-  return (
-    <Section id="shells">
-      <div className="flex flex-wrap items-end justify-between gap-6">
-        <Heading kicker="Shells" title={`${shells.length} instruments, one kit.`}
-          lede="Each shell is a different kind of tool — and a starting point. Open one, press ⌘K for commands and ? for shortcuts, then copy its folder." />
-        <a href="#/shells" className="inline-flex items-center gap-1 text-[13px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">All shells<ArrowUpRight size={13} strokeWidth={1.5} /></a>
-      </div>
-      <div className="mt-8"><CategoryChips shells={shells} value={cat} onChange={setCat} /></div>
-      <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-4">
-        {list.map((s) => <ShellCard key={s.id} shell={s} theme={theme} compact />)}
-      </div>
-    </Section>
   )
 }
 

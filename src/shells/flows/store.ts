@@ -1,8 +1,7 @@
 /* Flows — state: view params (schema), the undoable document, transient UI. */
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { defineSchema, folder, p, createParams, toast } from '@kit'
-import { createDocStore, createHistory, useDoc } from './local/doc-store'
+import { defineSchema, folder, p, createParams, createDocStore, createHistory, useDoc, toast } from '@kit'
 import { autoLayout, rehandle } from './layout'
 import {
   demoFlows, makeEdge, makeNode, screenSize, SIZE, uid, SECTION_HUES,

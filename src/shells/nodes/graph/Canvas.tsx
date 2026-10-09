@@ -4,15 +4,14 @@ import {
   ReactFlow, Background, BackgroundVariant, MiniMap, useReactFlow, useViewport, useStore as useFlowStore,
   type FinalConnectionState, type XYPosition,
 } from '@xyflow/react'
-import { Minus, Plus, Maximize } from 'lucide-react'
-import { Kbd, Menu, toast, useHotkeys, useTheme, useValues } from '@kit'
+import { Kbd, ZoomPill, toast, useHotkeys, useTheme, useValues } from '@kit'
+import { QuickAdd, type QuickAddItem } from '@kit/system/quick-add'
 import { specOf, portOf, type PortType } from '../engine/spec'
 import { DEF_LIST, catVar, defOf } from './defs'
 import { graph, useGraph, onNodesChange, onEdgesChange, connect, isValidConnection, addNode, commit, load, type SavedGraph } from './store'
 import { NodeView, portVar } from './NodeView'
 import { TypedConnectionLine, TypedEdge } from './TypedEdge'
 import { doc } from './doc'
-import { QuickAdd, type QuickAddItem } from '../local/QuickAdd'
 
 const nodeTypes = { proc: NodeView }
 const edgeTypes = { typed: TypedEdge }
@@ -60,7 +59,7 @@ export function GraphCanvas() {
   canvasApi.center = () => { const r = wrap.current!.getBoundingClientRect(); return rf.screenToFlowPosition({ x: r.left + r.width / 2, y: r.top + r.height / 2 }) }
 
   // Tab opens add-node at the cursor (Cables). Only when the pointer is over the graph.
-  useHotkeys({ tab: () => { if (pointer.current) openAt(pointer.current) } }, [openAt])
+  useHotkeys({ tab: { run: () => { if (pointer.current) openAt(pointer.current) }, label: 'Add node at cursor', group: 'Graph' } }, [openAt])
 
   const items: QuickAddItem[] = useMemo(() => {
     const from = add?.from
@@ -136,7 +135,7 @@ export function GraphCanvas() {
       onDrop={onDrop}
     >
       <ReactFlow
-        className="studio-graph"
+        className="studio-flow"
         colorMode={theme}
         nodes={nodes}
         edges={edges}
@@ -179,29 +178,18 @@ export function GraphCanvas() {
         </div>
       )}
 
-      <QuickAdd open={!!add} at={add?.screen ?? null} onClose={() => setAdd(null)} items={items} onPick={pick} context={fromLabel} placeholder={add?.from ? 'Add and connect…' : 'Add node…'} empty="No node takes that type" />
+      <QuickAdd open={!!add} at={add?.screen ?? null} onClose={() => setAdd(null)} items={items} onPick={pick} context={fromLabel} placeholder={add?.from ? 'Add and connect…' : 'Add node…'} empty="No node takes that type" label="Add node" />
     </div>
   )
 }
 
-/** Zoom HUD for the graph (the kit ZoomPill is bound to the Stage camera). */
+/** Zoom HUD: the kit pill, driven by React Flow's viewport. Fades while a wire is being dragged. */
 function FlowZoom() {
   const rf = useReactFlow()
   const { zoom } = useViewport()
   const busy = useFlowStore((s) => s.connection.inProgress)
-  const btn = 'flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg outline-none focus-visible:ring-2 focus-visible:ring-signal'
   return (
-    <div className="cluster absolute right-3 bottom-3 z-10 flex h-8 items-center gap-0.5 px-1" style={{ opacity: busy ? 0.4 : 1 }}>
-      <button type="button" aria-label="Zoom out" className={btn} onClick={() => rf.zoomOut({ duration: 150 })}><Minus size={13} strokeWidth={1.5} /></button>
-      <Menu side="top" align="end"
-        trigger={<button type="button" className="h-6 min-w-[46px] rounded-[5px] px-1 tabular text-[11.5px] text-fg hover:bg-hover">{Math.round(zoom * 100)}%</button>}
-        items={[
-          { label: 'Frame all nodes', shortcut: 'f', icon: Maximize, onClick: () => rf.fitView({ padding: 0.18, duration: 250 }) },
-          { label: 'Zoom to 50%', onClick: () => rf.zoomTo(0.5, { duration: 150 }) },
-          { label: 'Zoom to 100%', onClick: () => rf.zoomTo(1, { duration: 150 }) },
-          { label: 'Zoom to 150%', onClick: () => rf.zoomTo(1.5, { duration: 150 }) },
-        ]} />
-      <button type="button" aria-label="Zoom in" className={btn} onClick={() => rf.zoomIn({ duration: 150 })}><Plus size={13} strokeWidth={1.5} /></button>
-    </div>
+    <ZoomPill className={busy ? 'opacity-40' : undefined} zoom={zoom} presets={[0.5, 1, 1.5]}
+      onZoom={(z) => rf.zoomTo(z, { duration: 150 })} onFit={() => rf.fitView({ padding: 0.18, duration: 250 })} />
   )
 }

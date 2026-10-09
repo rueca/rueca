@@ -1,14 +1,13 @@
 /* Left panel: personas. Switching persona swaps the whole map. */
 import { MoreHorizontal, Plus, Copy, Trash2, X } from 'lucide-react'
-import { Panel, PanelHeader, Section, IconButton, Menu, Row, ScrubValue, cn, Kbd } from '@kit'
-import { InlineText } from '../../flows/local/InlineText'
-import { useDoc } from '../../flows/local/doc-store'
-import { initials, type Persona } from '../model'
+import { Panel, PanelHeader, Section, IconButton, Menu, Row, ScrubValue, useDoc, cn, Kbd } from '@kit'
+import { InlineText } from '@kit/ui/inline-text'
+import { deepen, initials, type Persona } from '../model'
 import { doc, useUI, usePersona, switchPersona, addPersona, duplicatePersona, deletePersona, editPersona } from '../store'
 
 export function Avatar({ p, size = 28 }: { p: Pick<Persona, 'name' | 'hue'>; size?: number }) {
   return (
-    <span className="inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white" style={{ width: size, height: size, background: p.hue, fontSize: size * 0.38 }}>
+    <span className="inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white" style={{ width: size, height: size, background: deepen(p.hue), fontSize: size * 0.38 }}>
       {initials(p.name)}
     </span>
   )
@@ -31,7 +30,7 @@ export function PersonasPanel() {
               className={cn('group/row flex items-center gap-2.5 rounded-[8px] p-2 outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-active' : 'hover:bg-hover')}>
               <Avatar p={x} size={30} />
               <div className="min-w-0 flex-1">
-                <div className={cn('truncate text-[12.5px] font-medium', on ? 'text-fg' : 'text-fg/90')}>{x.name}</div>
+                <div className={'truncate text-[12.5px] font-medium text-fg'}>{x.name}</div>
                 <div className="truncate text-[11px] text-fg-faint">{x.role} · {x.stages.length} stages</div>
               </div>
               {i < 9 && <Kbd className="group-hover/row:hidden group-focus-within/row:hidden">{i + 1}</Kbd>}
@@ -52,8 +51,8 @@ export function PersonasPanel() {
         <div className="flex flex-col items-center gap-2 px-3 pt-1 pb-2 text-center">
           <Avatar p={p} size={56} />
           <div className="w-full">
-            <InlineText value={p.name} onCommit={(name) => set({ name }, 'Rename persona')} className="block truncate text-[14px] font-semibold" title="Persona name" />
-            <InlineText value={p.role} onCommit={(role) => set({ role })} className="block truncate text-[11.5px] text-fg-muted" title="Role" />
+            <InlineText bare value={p.name} onCommit={(name) => set({ name }, 'Rename persona')} className="block truncate text-[14px] font-semibold" label="Persona name" />
+            <InlineText bare allowEmpty value={p.role} onCommit={(role) => set({ role })} className="block truncate text-[11.5px] text-fg-muted" label="Role" />
           </div>
           <div className="flex gap-1">
             {['#8b5cf6', '#f97316', '#14b8a6', '#ec4899', '#0ea5e9', '#84cc16'].map((h) => (
@@ -66,7 +65,7 @@ export function PersonasPanel() {
         <div className="px-3 pt-2">
           <div className="relative rounded-[10px] bg-well px-3 py-2.5 text-[12px] leading-relaxed text-fg italic">
             <span aria-hidden className="absolute -top-1 left-2 text-[22px] leading-none text-fg-faint not-italic">“</span>
-            <InlineText value={p.quote} multiline onCommit={(quote) => set({ quote })} placeholder="Add a quote in their words" className="block whitespace-pre-wrap" title="Quote" />
+            <InlineText bare allowEmpty value={p.quote} multiline onCommit={(quote) => set({ quote })} placeholder="Add a quote in their words" className="block whitespace-pre-wrap" label="Quote" />
           </div>
         </div>
       </Section>
@@ -75,7 +74,7 @@ export function PersonasPanel() {
       <ListSection title="Frustrations" items={p.frustrations} onChange={(frustrations) => set({ frustrations }, 'Edit frustrations')} add="Add frustration" />
       <Section title="Scenario">
         <div className="px-3 pb-1 text-[12px] leading-relaxed text-fg-muted">
-          <InlineText value={p.scenario} multiline onCommit={(scenario) => set({ scenario })} placeholder="When, where, with whom?" className="block whitespace-pre-wrap" title="Scenario" />
+          <InlineText bare allowEmpty value={p.scenario} multiline onCommit={(scenario) => set({ scenario })} placeholder="When, where, with whom?" className="block whitespace-pre-wrap" label="Scenario" />
         </div>
       </Section>
     </Panel>
@@ -89,7 +88,7 @@ function ListSection({ title, items, onChange, add }: { title: string; items: st
       {items.map((g, i) => (
         <div key={i} className="group/item flex items-start gap-2 px-3 py-1">
           <span className="mt-[7px] size-1 shrink-0 rounded-full bg-fg-faint" />
-          <InlineText value={g} multiline onCommit={(s) => onChange(s ? items.map((x, j) => (j === i ? s : x)) : items.filter((_, j) => j !== i))} className="block min-w-0 flex-1 text-[12px] leading-relaxed text-fg" title={title} />
+          <InlineText bare allowEmpty value={g} multiline onCommit={(s) => onChange(s ? items.map((x, j) => (j === i ? s : x)) : items.filter((_, j) => j !== i))} className="block min-w-0 flex-1 text-[12px] leading-relaxed text-fg" label={title} />
           <button type="button" aria-label="Remove" onClick={() => onChange(items.filter((_, j) => j !== i))}
             className="mt-0.5 flex size-5 items-center justify-center rounded-[4px] text-fg-faint opacity-0 hover:bg-hover hover:text-fg group-hover/item:opacity-100 focus-visible:opacity-100"><X size={11} /></button>
         </div>

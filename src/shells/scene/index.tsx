@@ -1,6 +1,6 @@
 /* Scene — a product configurator. The artifact is vanilla three.js (viewport.ts)
    mounted through <MountSurface>; everything here is chrome. */
-import { useCallback, useEffect, useMemo, useState, type ComponentProps } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useStore } from 'zustand'
 import {
   Box, Braces, Camera, Circle, CircleDot, Cylinder, Disc, Download, Focus, Grid3x3, Image as ImageIcon, ImageDown, Lightbulb,
@@ -8,17 +8,22 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Stage, MountSurface, ParamActions, Menu,
-  Button, IconButton, CommandPalette, ToolDock, LayerTree, Badge, Swatch, Divider, Kbd, Tip, toast, toastManager, download, copyText, stamp,
-  useParamState, equal, shareMenuItems, cn, type Command, type LayerItem, type MenuItem,
+  Button, IconButton, CommandPalette, ToolDock, LayerTree, Badge, Swatch, Divider, Kbd, Tip, toast, download, copyText, stamp,
+  useParamState, useSafeArea, useStudio, equal, shareMenuItems, cn, type Command, type LayerItem, type MenuItem,
 } from '@kit'
+import { AxisGizmo } from '@kit/stage/overlays'
 import {
   params, ui, OBJ, COLOURWAYS, BUILTIN_VIEWS, LIGHTS, colourwayOf, nameOf, allViews, type V, type Tool, type View, type Vec3,
 } from './state'
-import { mountViewport, engine } from './viewport'
-import { AxisGizmo } from './local/AxisGizmo'
+import { mountViewport, type EngineApi } from './viewport'
 import { Vec3Input } from './local/Vec3Input'
-import { SafeArea } from './local/SafeArea'
 import { SwatchTiles } from './local/SwatchTiles'
+
+/* The three.js viewport is reached through MountSurface's handle — no module-level engine.
+   `ui.ready` flips when it mounts so the chrome re-renders and the ref is current. */
+type Viewport = { el: HTMLDivElement | null; handle: (EngineApi & { dispose: () => void }) | null }
+const viewport: { current: Viewport | null } = { current: null }
+const engine = () => viewport.current?.handle ?? null
 
 const LEFT_W = 248
 const RIGHT_W = 304
@@ -49,19 +54,17 @@ const cycleColourway = (d: number) => {
 /* --- exports --------------------------------------------------------------- */
 const cwName = () => colourwayOf(params.values()) ?? 'custom'
 async function exportPNG(transparent = false) {
-  const e = engine.current
+  const e = engine()
   if (!e) return
-  // The kit's toast() returns an id but has no dismiss; the exported manager does.
-  const id = toast('Rendering at 2×…', { type: 'loading', timeout: 0 })
+  const id = toast('Rendering at 2×…', { type: 'loading' })
   try {
     const blob = await e.render({ scale: 2, transparent })
     download(blob, `aura-${cwName()}${transparent ? '-alpha' : ''}-${stamp()}.png`)
-    toastManager.close(id)
-    toast('PNG rendered', { type: 'success', description: transparent ? 'Transparent background, 2×' : '2× the visible viewport' })
-  } catch { toastManager.close(id); toast('Render failed', { type: 'error' }) }
+    toast.update(id, 'PNG rendered', { type: 'success', description: transparent ? 'Transparent background, 2×' : '2× the visible viewport' })
+  } catch { toast.update(id, 'Render failed', { type: 'error' }) }
 }
 async function exportGLB() {
-  const e = engine.current
+  const e = engine()
   if (!e) return
   try {
     download(await e.glb(), `aura-${cwName()}.glb`)
@@ -69,7 +72,7 @@ async function exportGLB() {
   } catch { toast('GLB export failed', { type: 'error' }) }
 }
 async function copyCamera() {
-  const e = engine.current
+  const e = engine()
   if (!e) return
   await copyText(JSON.stringify(e.cameraJSON(), null, 2))
   toast('Camera copied as JSON', { type: 'success' })
@@ -77,11 +80,11 @@ async function copyCamera() {
 
 /* --- views ----------------------------------------------------------------- */
 function goView(v: View) {
-  engine.current?.goTo({ position: v.position, target: v.target })
+  engine()?.goTo({ position: v.position, target: v.target })
   ui.setState({ activeView: v.id })
 }
 function saveView() {
-  const e = engine.current
+  const e = engine()
   if (!e) return
   const n = ui.getState().views.length + 1
   const v: View = { id: `v${Date.now().toString(36)}`, name: `View ${n}`, ...e.pose() }
@@ -92,7 +95,7 @@ let thumbTimer = 0
 function refreshThumbs(delay = 500) {
   clearTimeout(thumbTimer)
   thumbTimer = window.setTimeout(async () => {
-    const e = engine.current
+    const e = engine()
     if (!e) return
     const thumbs = await e.thumbnails(allViews())
     ui.setState({ thumbs })
@@ -105,14 +108,16 @@ export default function SceneShell() {
   const selected = useStore(ui, (s) => s.selected)
   const tool = useStore(ui, (s) => s.tool)
   const views = useStore(ui, (s) => s.views)
+  const ready = useStore(ui, (s) => s.ready)
   const v = useParamState(params, (s) => s.values) as V
   const cw = colourwayOf(v)
 
   useEffect(() => {
+    if (!ready) return
     refreshThumbs(250)
     const off = params.onCommit(() => refreshThumbs())
     return () => { off(); clearTimeout(thumbTimer) }
-  }, [])
+  }, [ready])
   useEffect(() => { refreshThumbs(50) }, [views])
 
   const setTool = (t: Tool) => ui.setState({ tool: t })
@@ -128,7 +133,7 @@ export default function SceneShell() {
       { id: 'scale', label: 'Scale', group: 'Tools', shortcut: 'r', icon: Scale3d, run: () => setTool('scale') },
       { id: 'deselect', label: 'Deselect (scene settings)', group: 'Selection', shortcut: 'esc', run: () => select(null) },
       { id: 'hide', label: 'Hide / show selection', group: 'Selection', shortcut: 'h', icon: EyeOff, run: () => { const s = ui.getState().selected; if (s && OBJ[s].kind !== 'camera') toggle(`${s}_visible`) } },
-      { id: 'frame', label: 'Frame selection', group: 'View', shortcut: 'f', icon: Focus, run: () => engine.current?.frame() },
+      { id: 'frame', label: 'Frame selection', group: 'View', shortcut: 'f', icon: Focus, run: () => engine()?.frame() },
       { id: 'proj', label: 'Toggle perspective / orthographic', group: 'View', shortcut: 'm', icon: Box, run: () => params.setValue('projection', params.values().projection === 'perspective' ? 'orthographic' : 'perspective') },
       { id: 'grid', label: 'Toggle grid floor', group: 'View', shortcut: 'g', icon: Grid3x3, run: () => toggle('grid') },
       { id: 'turntable', label: 'Toggle turntable', group: 'View', shortcut: 'o', icon: Orbit, run: () => toggle('turntable') },
@@ -160,9 +165,7 @@ export default function SceneShell() {
   ]
 
   const mark = (
-    <a href="#/" aria-label="All shells" className="contents">
-      <svg viewBox="0 0 16 16" width="11" height="11"><path d="M8 1.8 13.5 5v6L8 14.2 2.5 11V5z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /><path d="M2.8 5.2 8 8.2l5.2-3M8 8.2v5.8" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
-    </a>
+    <svg viewBox="0 0 16 16" width="11" height="11"><path d="M8 1.8 13.5 5v6L8 14.2 2.5 11V5z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" /><path d="M2.8 5.2 8 8.2l5.2-3M8 8.2v5.8" fill="none" stroke="currentColor" strokeWidth="1.4" /></svg>
   )
 
   return (
@@ -201,7 +204,7 @@ export default function SceneShell() {
       <Stage
         fill
         overlay={
-          <SafeArea left={LEFT_W} right={RIGHT_W} onRect={(insets) => ui.setState({ insets })}>
+          <Hud>
             <ViewChip v={v} />
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2">
               <ToolDock<Tool>
@@ -219,15 +222,15 @@ export default function SceneShell() {
                   onClick={() => params.setValue('projection', v.projection === 'perspective' ? 'orthographic' : 'perspective')} className="size-8 rounded-[8px]" />
                 <IconButton tipSide="top" icon={Grid3x3} label="Grid floor" shortcut="g" active={!!v.grid} onClick={() => toggle('grid')} className="size-8 rounded-[8px]" />
                 <IconButton tipSide="top" icon={Orbit} label="Turntable" shortcut="o" active={!!v.turntable} onClick={() => toggle('turntable')} className="size-8 rounded-[8px]" />
-                <IconButton tipSide="top" icon={Focus} label="Frame selection" shortcut="f" onClick={() => engine.current?.frame()} className="size-8 rounded-[8px]" />
+                <IconButton tipSide="top" icon={Focus} label="Frame selection" shortcut="f" onClick={() => engine()?.frame()} className="size-8 rounded-[8px]" />
               </ToolDock>
             </div>
             <AxisGizmoSlot />
             <Stats />
-          </SafeArea>
+          </Hud>
         }
       >
-        <MountSurface params={params} mount={(el) => mountViewport(el)} />
+        <MountSurface params={params} ref={viewport} mount={(el) => mountViewport(el)} />
       </Stage>
       <CommandPalette
         commands={commands}
@@ -241,18 +244,45 @@ export default function SceneShell() {
   )
 }
 
-/* Kit <Section> is controlled-only (open + onToggle); this keeps its own state. */
-function Sec(props: Omit<ComponentProps<typeof Section>, 'open' | 'onToggle'>) {
-  const [open, setOpen] = useState(true)
-  return <Section {...props} open={open} onToggle={() => setOpen((o) => !o)} />
+/* --- viewport HUD ---------------------------------------------------------- */
+/* The HUD box: the stage area no floating panel covers (kit useSafeArea), plus a gutter.
+   Its insets go to the viewport, which shifts the camera's projection centre into it. */
+function Hud({ children }: { children: ReactNode }) {
+  const safe = useSafeArea()
+  const { present } = useStudio()
+  const el = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const node = el.current
+    const parent = node?.offsetParent as HTMLElement | null
+    if (!node || !parent) return
+    const report = () => {
+      const a = parent.getBoundingClientRect(), b = node.getBoundingClientRect()
+      const next = { l: b.left - a.left, r: a.right - b.right, t: b.top - a.top, b: a.bottom - b.bottom }
+      const cur = ui.getState().insets
+      if (cur.l !== next.l || cur.r !== next.r || cur.t !== next.t || cur.b !== next.b) ui.setState({ insets: next })
+    }
+    const ro = new ResizeObserver(report)
+    ro.observe(node)
+    ro.observe(parent)
+    report()
+    return () => ro.disconnect()
+  }, [present, safe.left, safe.right, safe.top, safe.bottom])
+  const g = 'var(--gutter)'
+  return (
+    <div ref={el} className="pointer-events-none absolute [&>*]:pointer-events-auto"
+      style={{ left: `calc(${safe.left}px + ${g})`, right: `calc(${safe.right}px + ${g})`, top: `calc(${safe.top}px + ${g})`, bottom: `calc(${safe.bottom}px + ${g})` }}>
+      {children}
+    </div>
+  )
 }
 
-/* --- viewport HUD ---------------------------------------------------------- */
 function AxisGizmoSlot() {
-  const subscribe = useCallback((fn: (m: ArrayLike<number>) => void) => engine.current?.onCamera(fn) ?? (() => {}), [])
+  const ready = useStore(ui, (s) => s.ready)
+  // re-subscribe once the viewport handle exists
+  const subscribe = useCallback((fn: (m: ArrayLike<number>) => void) => engine()?.onCamera(fn) ?? (() => {}), [ready]) // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div className="absolute right-1 bottom-1">
-      <AxisGizmo subscribe={subscribe} onSnap={(a) => engine.current?.snapAxis(a)} />
+      <AxisGizmo subscribe={subscribe} onSnap={(a) => engine()?.snapAxis(a)} />
     </div>
   )
 }
@@ -384,20 +414,20 @@ function InspectorHeader({ id, v }: { id: string | null; v: V }) {
 function SceneSettings({ v, cw }: { v: V; cw: string | null }) {
   return (
     <>
-      <Sec title="Colourway" first>
+      <Section title="Colourway" first>
         <div className="px-3 pt-0.5 pb-1">
           <SwatchTiles value={cw} options={swatchOptions} onChange={applyColourway} onPreview={(p) => ui.setState({ preview: p })} label="Colourway" />
         </div>
         <p className="px-3 pt-1 text-[11px] leading-relaxed text-fg-faint">
           {cw ? 'Colourways change materials and background only — transforms and lights stay put.' : 'Custom colours. Pick a colourway to snap back to a defined variant.'}
         </p>
-      </Sec>
+      </Section>
       <div className="border-t border-line"><Inspector params={params} folders={['look', 'env', 'render', 'viewport']} /></div>
-      <Sec title="Selection">
+      <Section title="Selection">
         <p className="px-3 text-[11.5px] leading-relaxed text-fg-muted">
           Click the product to select it, click again to select a part. <Kbd>W</Kbd> <Kbd>E</Kbd> <Kbd>R</Kbd> switch the gizmo; <Kbd>F</Kbd> frames it. {v.turntable ? 'Turntable is on.' : ''}
         </p>
-      </Sec>
+      </Section>
     </>
   )
 }
@@ -408,7 +438,7 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
     return (
       <>
         <Inspector params={params} folders={['camera']} />
-        <Sec title="Views">
+        <Section title="Views">
           <div className="flex flex-col gap-px">
             {allViews().map((x, i) => (
               <Row key={x.id} label={x.name} trailing={i < 9 ? <Kbd>{i + 1}</Kbd> : undefined}>
@@ -420,7 +450,7 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
             <Button size="md" variant="default" className="flex-1" onClick={saveView}><Plus size={13} strokeWidth={1.5} />Save view</Button>
             <Button size="md" variant="default" className="flex-1" onClick={copyCamera}><Braces size={13} strokeWidth={1.5} />Copy JSON</Button>
           </div>
-        </Sec>
+        </Section>
       </>
     )
   if (kind === 'floor') return <Inspector params={params} folders={['floor']} />
@@ -435,7 +465,7 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
         </>
       )}
       {kind === 'group' && (
-        <Sec title="Parts">
+        <Section title="Parts">
           {['body', 'cap', 'ring', 'base'].map((c) => {
             const Icon = iconOf(c, v)
             return (
@@ -448,7 +478,7 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
               </button>
             )
           })}
-        </Sec>
+        </Section>
       )}
     </>
   )
@@ -469,11 +499,11 @@ function TransformSection({ id, v, positionOnly }: { id: string; v: V; positionO
   }
   const locked = !!v[`${id}_locked`]
   return (
-    <Sec title="Transform" first changed={changed} onReset={changed ? () => params.reset(keys) : undefined}
+    <Section title="Transform" first changed={changed} onReset={changed ? () => params.reset(keys) : undefined}
       actions={locked ? <Tip label="Locked in the outliner — the gizmo is off"><span><Badge>Locked</Badge></span></Tip> : undefined}>
       {row(`${id}_pos`, 'Position', { step: 0.01 })}
       {!positionOnly && row(`${id}_rot`, 'Rotation', { step: 1, unit: '°' })}
       {!positionOnly && row(`${id}_scale`, 'Scale', { step: 0.01, lockable: true, min: 0.01 })}
-    </Sec>
+    </Section>
   )
 }

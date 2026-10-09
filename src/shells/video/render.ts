@@ -4,22 +4,10 @@
    Images are procedural (no network): generated once per (kind, seed, size)
    and cached.
 --------------------------------------------------------------------------- */
-import { ASPECTS, type Bezier, type Clip, type Comp, type FontKey, type ImageGen, type Motion } from './comp'
+import { cubicBezier } from '@kit/core/ease'
+import { ASPECTS, type Clip, type Comp, type FontKey, type ImageGen, type Motion } from './comp'
 
 /* ---------- maths ---------- */
-export function bezier([x1, y1, x2, y2]: Bezier) {
-  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx
-  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by
-  const sx = (t: number) => ((ax * t + bx) * t + cx) * t
-  const sy = (t: number) => ((ay * t + by) * t + cy) * t
-  return (x: number) => {
-    if (x <= 0) return 0
-    if (x >= 1) return 1
-    let t = x
-    for (let i = 0; i < 8; i++) { const d = (3 * ax * t + 2 * bx) * t + cx; if (Math.abs(d) < 1e-6) break; t -= (sx(t) - x) / d }
-    return sy(Math.min(1, Math.max(0, t)))
-  }
-}
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v))
 function rng(seed: number) {
   let a = seed >>> 0 || 1
@@ -103,9 +91,9 @@ function motionAt(c: Clip, local: number, U: number): Fx {
       case 'typewriter': fx.chars = Math.floor(k * 1e6); break
     }
   }
-  if (c.enter.preset !== 'none' && c.enter.dur > 0 && local < c.enter.dur) apply(c.enter, bezier(c.enter.ease)(clamp01(local / c.enter.dur)), 1)
+  if (c.enter.preset !== 'none' && c.enter.dur > 0 && local < c.enter.dur) apply(c.enter, cubicBezier(c.enter.ease)(clamp01(local / c.enter.dur)), 1)
   const exitAt = c.dur - c.exit.dur
-  if (c.exit.preset !== 'none' && c.exit.dur > 0 && local > exitAt) apply(c.exit, 1 - bezier(c.exit.ease)(clamp01((local - exitAt) / c.exit.dur)), -1)
+  if (c.exit.preset !== 'none' && c.exit.dur > 0 && local > exitAt) apply(c.exit, 1 - cubicBezier(c.exit.ease)(clamp01((local - exitAt) / c.exit.dur)), -1)
   return fx
 }
 

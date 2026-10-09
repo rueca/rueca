@@ -43,7 +43,7 @@ export function TextEditor({ id }: { id: string }) {
     }
     S.patchNode(id, (x) => ({ text: { ...x.text!, content }, name: x.name === initial.current.slice(0, 32) || !initial.current ? content.slice(0, 32) : x.name }), { commit: false })
     S.design.setState({ editing: null })
-    S.commit()
+    S.commit('Edit text')
   }
   return (
     <div

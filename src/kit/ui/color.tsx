@@ -8,6 +8,7 @@ import { Pipette } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { clamp, cn } from '../core/cn'
 import { Segmented } from './controls'
+import { OklchField, hexToOklch, oklchToHex, type Oklch } from './oklch'
 
 /* --- maths --- */
 export type HSVA = { h: number; s: number; v: number; a: number }
@@ -109,6 +110,10 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
   const [mode, setMode] = useState<'hex' | 'rgb' | 'hsl' | 'oklch'>('hex')
   const [text, setText] = useState(() => formatColor(value, 'hex'))
   const [recent] = useState(readRecent)
+  // OKLCH mode edits perceptual lightness / chroma / hue directly (Paper). Kept separately so
+  // hue survives through greys and out-of-gamut clamping doesn't fight the sliders.
+  const [lch, setLch] = useState<Oklch>(() => hexToOklch(value))
+  useEffect(() => { if (oklchToHex(lch).toLowerCase() !== value.slice(0, 7).toLowerCase()) setLch(hexToOklch(value)) }, [value]) // eslint-disable-line react-hooks/exhaustive-deps
   // Keep hue stable when the outside value is grey (h is undefined there).
   useEffect(() => {
     if (hsvaToHex(hsva).toLowerCase() !== value.toLowerCase()) {
@@ -142,6 +147,9 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
 
   return (
     <div className="flex w-[240px] flex-col gap-3 p-3">
+      {mode === 'oklch' ? (
+        <OklchField preview={false} value={lch} onChange={(v, f) => { setLch(v); emit({ ...hexToHsva(oklchToHex(v)), a: hsva.a }, f) }} />
+      ) : (
       <div
         {...area}
         className="relative h-[150px] cursor-crosshair rounded-[8px]"
@@ -152,6 +160,7 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
           style={{ left: `${hsva.s * 100}%`, top: `${(1 - hsva.v) * 100}%`, background: solid }}
         />
       </div>
+      )}
       <div className="flex items-center gap-2">
         {'EyeDropper' in window && (
           <button type="button" aria-label="Pick from screen" onClick={pick} className="flex size-7 shrink-0 items-center justify-center rounded-[6px] text-fg-muted hover:bg-hover hover:text-fg">
@@ -159,8 +168,10 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
           </button>
         )}
         <div className="flex flex-1 flex-col gap-2">
-          <Rail label="Hue" value={hsva.h / 360} onChange={(x, f) => emit({ ...hsva, h: x * 360 }, f)}
-            background="linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)" />
+          {mode !== 'oklch' && (
+            <Rail label="Hue" value={hsva.h / 360} onChange={(x, f) => emit({ ...hsva, h: x * 360 }, f)}
+              background="linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)" />
+          )}
           {alpha && (
             <div className="checker rounded-full">
               <Rail label="Opacity" value={hsva.a} onChange={(x, f) => emit({ ...hsva, a: Math.round(x * 100) / 100 }, f)}
@@ -230,4 +241,18 @@ export function ColorField({ value, onChange, alpha = true, swatches, changed, t
       </Popover.Portal>
     </Popover.Root>
   )
+}
+
+/**
+ * Darken a colour until white text on it clears `min` contrast (4.5 = WCAG AA body).
+ * For avatars, tags and pins coloured by identity (--cat-*) that carry white labels.
+ * (After shells/flows & journey `deepen`.)
+ */
+export function readableOn(hex: string, min = 4.5) {
+  const [r, g, b] = hexToRgba(hex)
+  const lin = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }
+  const white = (t: number) => 1.05 / (0.2126 * lin(r * t) + 0.7152 * lin(g * t) + 0.0722 * lin(b * t) + 0.05)
+  let t = 1
+  while (t > 0.2 && white(t) < min) t -= 0.02
+  return rgbaToHex(r * t, g * t, b * t)
 }

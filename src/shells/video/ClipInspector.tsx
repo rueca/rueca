@@ -11,7 +11,7 @@ import {
 } from '@kit'
 import { ASPECTS, EASE, PRESETS, type Aspect, type Clip, type FontKey, type ImageGen, type Motion } from './comp'
 import { FONTS, proceduralImage } from './render'
-import { addClip, deleteClips, duplicateClips, getComp, params, rebaseDesign, splitAt, ui, updateClip, useComp, useUI } from './store'
+import { addClip, commitComp, deleteClips, duplicateClips, getComp, history, params, rebaseDesign, splitAt, ui, updateClip, useComp, useUI } from './store'
 
 const sec = (v: number) => `${(v / 1000).toFixed(2)}s`
 /** A ScrubValue that shows and accepts percent: typing 50 means 50%, not 50×.
@@ -38,7 +38,7 @@ export function ClipInspector() {
         {design !== aspect ? (
           <div className="flex flex-col gap-1.5 px-3 pt-1">
             <p className="text-[11px] leading-relaxed text-fg-muted">You are viewing {aspect}. Sizes are scaled from {design} so nothing collides.</p>
-            <Button size="sm" variant="default" onClick={() => { rebaseDesign(aspect); toast(`${aspect} is now the design frame`, { action: { label: 'Undo', onClick: () => params.undo() } }) }}>Design for {aspect} from here</Button>
+            <Button size="sm" variant="default" onClick={() => { rebaseDesign(aspect); toast(`${aspect} is now the design frame`, { action: { label: 'Undo', onClick: () => history.undo() } }) }}>Design for {aspect} from here</Button>
           </div>
         ) : <p className="px-3 pt-0.5 text-[11px] leading-relaxed text-fg-faint">Switch aspect in the toolbar (1–4) to see the re-layout.</p>}
       </Section>
@@ -114,7 +114,7 @@ function ClipSections({ c }: { c: Clip }) {
         </div>
       }>
         {locked && <p className="px-3 pb-1 text-[11px] text-key">This track is locked. Unlock it in the timeline to edit.</p>}
-        <Row label="Name"><TextInput value={c.name} label="Clip name" onChange={(s) => set({ name: s }, false)} onCommit={() => params.commit()} /></Row>
+        <Row label="Name"><TextInput value={c.name} label="Clip name" onChange={(s) => set({ name: s }, false)} onCommit={() => commitComp('Rename clip')} /></Row>
         <Row label="Start" hint="Where the clip begins.">
           <ScrubValue boxed align="left" value={c.start} min={0} max={duration - 100} step={10} fmt={sec} className="flex-1" label="Start" onChange={(v, f) => set({ start: Math.min(v, duration - c.dur) }, f)} />
           <ScrubValue boxed align="left" prefix="↔" value={c.dur} min={100} max={duration - c.start} step={10} fmt={sec} className="flex-1" label="Duration" onChange={(v, f) => set({ dur: v }, f)} />
@@ -126,7 +126,7 @@ function ClipSections({ c }: { c: Clip }) {
 
       {c.kind === 'text' && (
         <Section title="Text">
-          <Row label="" stacked><TextInput multiline rows={2} value={c.text ?? ''} label="Text content" onChange={(s) => set({ text: s }, false)} onCommit={() => params.commit()} /></Row>
+          <Row label="" stacked><TextInput multiline rows={2} value={c.text ?? ''} label="Text content" onChange={(s) => set({ text: s }, false)} onCommit={() => commitComp('Edit text')} /></Row>
           <Row label="Font">
             <Select value={c.font ?? 'sans'} label="Font" onChange={(f) => set({ font: f as FontKey, weight: f === 'display' ? 800 : c.weight })} options={(Object.keys(FONTS) as FontKey[]).map((k) => ({ value: k, label: FONTS[k].label }))} />
           </Row>

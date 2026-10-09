@@ -4,7 +4,9 @@
    Docked layout: Pages + Layers on the left, the canvas in the middle with a
    bottom tool dock and a selection-aware context bar, Design / Prototype on
    the right. The document is a node tree in its own history store
-   (model/store.ts); studio preferences are a kit param schema (model/prefs).
+   (model/store.ts, selection-aware), adapted to the kit's HistoryButtons;
+   studio preferences are a kit param schema (model/prefs). T is the Text
+   tool, so the theme toggle has no hotkey (it's in ⌘K).
 --------------------------------------------------------------------------- */
 import { useEffect, useState } from 'react'
 import {
@@ -13,7 +15,7 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Brand, Cluster, Panel, PanelHeader, PanelTabs, ToolDock, CommandPalette, IconButton, Button, Menu, Divider,
-  useHotkeys, useTheme, toast, type Command,
+  HistoryButtons, ThemeToggle, useHotkeys, useTheme, toast, type Command, type HotkeyHandler,
 } from '@kit'
 import { useStore } from 'zustand'
 import * as S from './model/store'
@@ -51,8 +53,6 @@ export default function CanvasShell() {
   const selection = S.useDesign((s) => s.selection)
   const doc = S.useDesign((s) => s.doc)
   const pageId = S.useDesign((s) => s.pageId)
-  const canUndo = S.useDesign((s) => s.past.length > 0)
-  const canRedo = S.useDesign((s) => s.future.length > 0)
   const zoom = useStore(camera, (c) => c.zoom)
   const { theme, toggle } = useTheme()
   const [presenting, setPresenting] = useState(false)
@@ -65,32 +65,37 @@ export default function CanvasShell() {
   const small = () => prefs.values().nudgeSmall
   const big = () => prefs.values().nudgeBig
   const off = presenting
+  // tool keys are labelled so the ? sheet lists them (shell priority beats kit defaults)
+  const toolKeys: Record<string, HotkeyHandler> = Object.fromEntries(TOOLS.map((t) => [t.shortcut, { run: () => S.setTool(t.value), label: `${t.label} tool`, group: 'Tools' }]))
   useHotkeys(off ? {} : {
-    v: () => S.setTool('move'), f: () => S.setTool('frame'), r: () => S.setTool('rect'), o: () => S.setTool('ellipse'),
-    t: () => S.setTool('text'), h: () => S.setTool('hand'), c: () => S.setTool('comment'),
-    arrowleft: () => nudge(-small(), 0)(), arrowright: () => nudge(small(), 0)(), arrowup: () => nudge(0, -small())(), arrowdown: () => nudge(0, small())(),
+    ...toolKeys,
+    arrowleft: () => nudge(-small(), 0)(), arrowright: () => nudge(small(), 0)(),
+    arrowup: { run: () => nudge(0, -small())(), label: 'Nudge (⇧ ×10)', group: 'Edit' }, arrowdown: () => nudge(0, small())(),
     'shift+arrowleft': () => nudge(-big(), 0)(), 'shift+arrowright': () => nudge(big(), 0)(), 'shift+arrowup': () => nudge(0, -big())(), 'shift+arrowdown': () => nudge(0, big())(),
-    esc: () => {
-      const s = S.get()
-      if (s.openComment) return S.design.setState({ openComment: null })
-      if (s.tool !== 'move') return S.setTool('move')
-      if (s.selection.length) S.selectParent()
+    esc: {
+      label: 'Deselect / select parent', group: 'Selection', run: () => {
+        const s = S.get()
+        if (s.openComment) return S.design.setState({ openComment: null })
+        if (s.tool !== 'move') return S.setTool('move')
+        if (s.selection.length) S.selectParent()
+      },
     },
-    enter: () => {
-      if (inTree()) return
-      const sel = S.selectedNodes()
-      if (sel.length === 1 && sel[0].type === 'text') S.design.setState({ editing: sel[0].id })
-      else S.selectChildren()
+    enter: {
+      label: 'Select children / edit text', group: 'Selection', run: () => {
+        if (inTree()) return
+        const sel = S.selectedNodes()
+        if (sel.length === 1 && sel[0].type === 'text') S.design.setState({ editing: sel[0].id })
+        else S.selectChildren()
+      },
     },
-    'shift+enter': () => !inTree() && S.selectParent(),
-    'mod+z': () => S.undo(), 'shift+mod+z,mod+y': () => S.redo(),
-    ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => [String(d), () => A.setOpacityKey(d)])),
+    'shift+enter': { run: () => { if (!inTree()) S.selectParent() }, label: 'Select parent', group: 'Selection' },
+    ...Object.fromEntries([1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((d) => [String(d), d === 1 ? { run: () => A.setOpacityKey(d), label: 'Opacity 10–100% (0 = 100%)', group: 'Edit' } : () => A.setOpacityKey(d)])),
   }, [presenting])
 
   const commands: Command[] = [
     ...TOOLS.map((t) => ({ id: `tool-${t.value}`, label: `${t.label} tool`, group: 'Tools', icon: t.icon, run: () => S.setTool(t.value), keywords: [t.shortcut] })),
-    { id: 'undo', label: 'Undo', group: 'Edit', icon: Undo2, run: () => S.undo() },
-    { id: 'redo', label: 'Redo', group: 'Edit', icon: Redo2, run: () => S.redo() },
+    { id: 'undo', label: 'Undo', group: 'Edit', icon: Undo2, run: () => { S.history.undo() } },
+    { id: 'redo', label: 'Redo', group: 'Edit', icon: Redo2, run: () => { S.history.redo() } },
     { id: 'dup', label: 'Duplicate', group: 'Edit', shortcut: 'mod+d', icon: Copy, run: () => S.duplicateSelection() },
     { id: 'copy', label: 'Copy', group: 'Edit', shortcut: 'mod+c', run: () => { const n = S.copySelection(); if (n) toast(`Copied ${n} layer${n > 1 ? 's' : ''}`) } },
     { id: 'cut', label: 'Cut', group: 'Edit', shortcut: 'mod+x', run: () => { if (S.copySelection()) S.deleteSelection() } },
@@ -142,7 +147,7 @@ export default function CanvasShell() {
         <Toolbar
           start={
             <>
-              <Brand name="Canvas" doc={doc.name} mark={<a href="#/" aria-label="All shells" className="contents"><svg viewBox="0 0 16 16" width="11" height="11"><path d="M3 3h10v10H3z" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M3 8h10" stroke="currentColor" strokeWidth="2" /></svg></a>} />
+              <Brand name="Canvas" doc={doc.name} mark={<svg viewBox="0 0 16 16" width="11" height="11"><path d="M3 3h10v10H3z" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M3 8h10" stroke="currentColor" strokeWidth="2" /></svg>} />
               <Menu trigger={<Button size="md" variant="ghost">File</Button>} items={[
                 { label: 'New page', icon: FilePlus, onClick: S.addPage },
                 { label: 'Download .json', icon: FileDown, onClick: A.downloadDocument },
@@ -157,10 +162,9 @@ export default function CanvasShell() {
           end={
             <>
               <Cluster>
-                <IconButton icon={Undo2} label="Undo" shortcut="mod+z" disabled={!canUndo} onClick={() => S.undo()} />
-                <IconButton icon={Redo2} label="Redo" shortcut="shift+mod+z" disabled={!canRedo} onClick={() => S.redo()} />
+                <HistoryButtons history={S.history} />
                 <Divider vertical />
-                <IconButton icon={theme === 'dark' ? Sun : Moon} label={theme === 'dark' ? 'Light theme' : 'Dark theme'} onClick={toggle} />
+                <ThemeToggle hotkey={false} />
                 <IconButton icon={Play} label="Present" shortcut="alt+mod+enter" onClick={() => setPresenting(true)} />
               </Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>}
@@ -201,10 +205,9 @@ export default function CanvasShell() {
       } />
       {!presenting && (
         <CommandPalette commands={commands} extraShortcuts={[
-          ...TOOLS.map((t) => ({ keys: t.shortcut, label: `${t.label} tool`, group: 'Tools' })),
-          { keys: 'arrowup', label: 'Nudge (⇧ ×10)' }, { keys: 'enter', label: 'Select children / edit text' }, { keys: 'shift+enter', label: 'Select parent' },
-          { keys: 'esc', label: 'Deselect / select parent' }, { keys: 'alt', label: 'Hold to measure distances' }, { keys: 'mod', label: 'Hold while clicking: select deepest' },
-          { keys: '1', label: 'Opacity 10–100% (0 = 100%)' }, { keys: 'space', label: 'Hold to pan' }, { keys: 'shift+1', label: 'Zoom to fit' },
+          // held modifiers and the stage's own keys are not dispatcher bindings
+          { keys: 'alt', label: 'Hold to measure distances', group: 'Canvas' }, { keys: 'mod', label: 'Hold while clicking: select deepest', group: 'Canvas' },
+          { keys: 'space', label: 'Hold to pan', group: 'Canvas' },
         ]} />
       )}
       {presenting && <Player onClose={() => setPresenting(false)} />}

@@ -7,17 +7,16 @@ import {
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Slider, ScrubValue, Select, Menu, Button, IconButton,
   Divider, Empty, Monitor, ParamActions, CommandPalette, useValues, useHotkeys, useClock, useClockTime, shareMenuItems, equal, toast, fmtTime,
-  type Command, type MenuItem,
+  createItemParams, bindItem, type Command,
 } from '@kit'
+import { EffectStack, StackAddMenu, type StackAddGroup } from '@kit/ui/stack'
+import { PresetGrid } from '@kit/ui/preset-grid'
 import { BLENDS, CATEGORIES, LAYER_TYPES, type BlendMode, type Layer, type LayerType } from './layers'
 import {
   addLayer, clock, duplicateLayer, getLayers, lookOf, moveBy, moveLayer, params, perf, randomise, removeLayer, ui, updateLayer, type Look,
 } from './state'
 import { ShaderStage, live, LEFT_W, RIGHT_W } from './ShaderStage'
 import { copyShader, downloadShader, exportLoop, exportStill, renderThumb, sizeFor } from './output'
-import { EffectStack } from './local/EffectStack'
-import { PresetGrid } from './local/PresetGrid'
-import { createItemParams, bindItemParams } from './local/itemParams'
 
 /* stable getters so the transport's Monitor never restarts its loop */
 const fpsNow = () => (clock.getState().playing && params.values().speed > 0 ? perf.fps : 0)
@@ -27,16 +26,14 @@ const QUALITY = [{ value: 'auto', label: 'Auto' }, { value: '0.5', label: '50%' 
 const SPEEDS = [0, 0.25, 0.5, 1, 1.5, 2, 3]
 
 const Mark = (
-  <a href="#/" aria-label="All shells" className="contents">
-    <svg viewBox="0 0 16 16" width="11" height="11"><defs><linearGradient id="gs-mark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="currentColor" stopOpacity=".35" /><stop offset="1" stopColor="currentColor" /></linearGradient></defs><rect x="2" y="2" width="12" height="12" rx="3.5" fill="url(#gs-mark)" /></svg>
-  </a>
+  <svg viewBox="0 0 16 16" width="11" height="11"><defs><linearGradient id="gs-mark" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="currentColor" stopOpacity=".35" /><stop offset="1" stopColor="currentColor" /></linearGradient></defs><rect x="2" y="2" width="12" height="12" rx="3.5" fill="url(#gs-mark)" /></svg>
 )
 
 /* proxy stores, one per layer type, bound to whichever layer is selected */
 const proxies = {} as Record<LayerType, ReturnType<typeof createItemParams>>
 const proxyFor = (t: LayerType) => (proxies[t] ??= createItemParams(LAYER_TYPES[t].schema, `shader-${t}`))
 
-const useLayers = () => useValues(params, (v) => v.layers) as unknown as Layer[]
+const useLayers = () => useValues(params, (v) => v.layers)
 const useSelected = () => {
   const id = useStore(ui, (s) => s.selected)
   const layers = useLayers()
@@ -78,11 +75,10 @@ export default function GradientStudio() {
   }
 
   const sid = sel?.id
-  const addItems: MenuItem[] = CATEGORIES.flatMap((cat, i) => [
-    ...(i ? [{ type: 'separator' } as MenuItem] : []),
-    { type: 'label', label: cat } as MenuItem,
-    ...Object.values(LAYER_TYPES).filter((d) => d.category === cat).map((d) => ({ label: d.label, icon: d.icon, hint: d.hint, onClick: () => addLayer(d.type) })),
-  ])
+  const addGroups: StackAddGroup[] = CATEGORIES.map((cat) => ({
+    label: cat,
+    items: Object.values(LAYER_TYPES).filter((d) => d.category === cat).map((d) => ({ label: d.label, icon: d.icon, hint: d.hint, onClick: () => addLayer(d.type) })),
+  }))
 
   const commands: Command[] = [
     { id: 'play', label: 'Play / pause', group: 'Playback', shortcut: 'space', icon: Play, run: () => clock.toggle() },
@@ -155,24 +151,25 @@ export default function GradientStudio() {
       left={
         <Panel header={
           <PanelHeader title="Layers">
-            <Menu align="end" trigger={<IconButton icon={Plus} label="Add effect" />} items={addItems} />
+            <StackAddMenu label="Add effect" groups={addGroups} />
           </PanelHeader>
         }>
           <EffectStack
             items={layers.map((l) => {
               const d = LAYER_TYPES[l.type]
-              return { id: l.id, name: l.name, icon: d.icon, visible: l.visible, opacity: l.opacity, blend: d.kind === 'domain' ? undefined : l.blend, kindLabel: d.kind === 'domain' ? 'Distort' : undefined }
+              return { id: l.id, name: l.name, icon: d.icon, visible: l.visible, opacity: l.opacity, blend: d.kind === 'domain' ? undefined : l.blend, meta: d.kind === 'domain' ? 'Distort' : undefined }
             })}
             selected={sel?.id ?? null}
             onSelect={(id) => ui.setState({ selected: id })}
-            onToggle={(id) => updateLayer(id, (l) => ({ ...l, visible: !l.visible }))}
-            onOpacity={(id, v, final) => updateLayer(id, (l) => ({ ...l, opacity: v }), final)}
-            onBlend={(id, b) => updateLayer(id, (l) => ({ ...l, blend: b as BlendMode }))}
+            label="Layers"
+            onToggle={(id) => updateLayer(id, (l) => ({ ...l, visible: !l.visible }), true, 'Show / hide layer')}
+            onOpacity={(id, v, final) => updateLayer(id, (l) => ({ ...l, opacity: v }), final, 'Layer opacity')}
+            onBlend={(id, b) => updateLayer(id, (l) => ({ ...l, blend: b as BlendMode }), true, 'Blend mode')}
             blendOptions={BLENDS}
             onMove={moveLayer}
             onRemove={removeLayer}
             onDuplicate={duplicateLayer}
-            onRename={(id, name) => updateLayer(id, (l) => ({ ...l, name }))}
+            onRename={(id, name) => updateLayer(id, (l) => ({ ...l, name }), true, 'Rename layer')}
             empty={<Empty icon={Layers2} title="No layers" hint="Start with a fill — a mesh gradient makes a good base." action={<Button size="md" variant="default" onClick={() => addLayer('mesh')}>Add mesh gradient</Button>} />}
           />
           <Looks presets={presets} active={activeLook?.name} onApply={applyLook} onSave={saveLook} />
@@ -214,11 +211,12 @@ export default function GradientStudio() {
 function LayerInspector({ layer }: { layer: Layer }) {
   const def = LAYER_TYPES[layer.type]
   const proxy = proxyFor(layer.type)
-  useLayoutEffect(() => bindItemParams(
-    proxy, params,
-    () => getLayers().find((l) => l.id === layer.id)?.params ?? null,
-    (vals) => updateLayer(layer.id, (l) => ({ ...l, params: vals }), false),
-  ), [proxy, layer.id])
+  useLayoutEffect(() => bindItem(proxy, {
+    read: () => getLayers().find((l) => l.id === layer.id)?.params ?? null,
+    write: (vals) => updateLayer(layer.id, (l) => ({ ...l, params: vals }), false),
+    commit: (label) => params.commit(label ? `${layer.name} · ${label}` : undefined),
+    subscribe: (fn) => params.subscribe(fn),
+  }), [proxy, layer.id, layer.name])
   const set = (patch: Partial<Layer>, final = true) => updateLayer(layer.id, (l) => ({ ...l, ...patch }), final)
   const domain = def.kind === 'domain'
   return (
@@ -244,7 +242,6 @@ function LayerInspector({ layer }: { layer: Layer }) {
 
 /* ---------- looks grid ---------- */
 function Looks({ presets, active, onApply, onSave }: { presets: { name: string; values: any; builtin?: boolean }[]; active?: string; onApply: (n: string) => void; onSave: () => void }) {
-  const [open, setOpen] = useState(true)
   const [thumbs, setThumbs] = useState<Record<string, string>>({})
   const loopLen = useValues(params, (v) => v.loop)
   const key = useMemo(() => JSON.stringify(presets.map((p) => [p.name, lookOf(p.values)])), [presets])
@@ -275,10 +272,12 @@ function Looks({ presets, active, onApply, onSave }: { presets: { name: string; 
 
   return (
     <div className="border-t border-line">
-      <Section title="Looks" hint="Hover to preview on the canvas, click to apply. Applying is one undo step." open={open} onToggle={() => setOpen(!open)} first
+      <Section title="Looks" hint="Hover or focus to preview on the canvas, click to apply. Applying is one undo step." persistKey="shader:looks" first
         actions={<IconButton icon={Plus} label="Save current look" size="icon-sm" onClick={onSave} />}>
         <PresetGrid
-          items={presets.map((p) => ({ id: p.name, name: p.name, thumb: thumbs[p.name], active: p.name === active, removable: !p.builtin }))}
+          label="Looks"
+          value={active ?? null}
+          items={presets.map((p) => ({ id: p.name, name: p.name, thumb: thumbs[p.name], removable: !p.builtin }))}
           onApply={onApply}
           onPreview={preview}
           onRemove={(n) => params.deletePreset(n)}

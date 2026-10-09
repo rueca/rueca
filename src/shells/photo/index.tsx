@@ -1,7 +1,7 @@
 /* Develop — a non-destructive photo editor. The artifact is a WebGL2 shader
    (develop.ts) drawing into a canvas on a kit Artboard; everything else is
    chrome. Docked layout, Lightroom's Develop module as the reference. */
-import { useEffect, useRef, useState, type ComponentProps } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
 import { Popover } from '@base-ui/react/popover'
@@ -10,24 +10,21 @@ import {
   RotateCcw, Triangle, WandSparkles, X, ZoomIn,
 } from 'lucide-react'
 import {
-  Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Artboard, Menu, Button, IconButton, CommandPalette,
-  HistoryButtons, ThemeToggle, Segmented, ScrubValue, TextInput, ImageDrop, Empty, Divider, Kbd, Badge, toast, download, readFileAsDataURL,
-  shareMenuItems, createCamera, useParamState, useHotkeys, clamp, cn, type Command,
+  Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Section, Row, Stage, Artboard, Menu, Button, IconButton, CommandPalette,
+  HistoryButtons, HistoryList, ThemeToggle, Segmented, ScrubValue, TextInput, ImageDrop, Empty, Divider, Kbd, Badge, toast, download,
+  shareMenuItems, createCamera, useParamState, useHotkeys, useHoldKey, clamp, cn, type Command,
 } from '@kit'
+import { ToneCurve, Histogram, histogramBins, type CurvePoint, type Bins } from '@kit/ui/charts'
+import { ParamSlider, GradientSlider } from '@kit/ui/param-slider'
+import { CropOverlay, Navigator, fitInsideRotated, rectForAspect, type CropRect as Rect } from '@kit/stage/overlays'
+import { CompareSplit } from '@kit/stage/CompareSplit'
+import { Filmstrip } from '@kit/ui/preset-grid'
+import { useImageIntake } from '@kit/core/image-intake'
 import {
-  params, ui, history, BANDS, ASPECTS, FULL, LOOK_KEYS, DEFAULTS, lookDefaults, lookValues, activeLook, allLooks, type V, type Look, type CropDraft,
+  params, ui, history, stepLabel, BANDS, ASPECTS, FULL, LOOK_KEYS, DEFAULTS, lookDefaults, lookValues, activeLook, allLooks, type V, type Look, type CropDraft,
 } from './state'
-import { Develop, binsOf, type ViewOpts } from './develop'
+import { Develop, type ViewOpts } from './develop'
 import { generateLandscape } from './landscape'
-import { ToneCurve, type CurvePoint } from './local/ToneCurve'
-import { Histogram, type Bins } from './local/Histogram'
-import { ParamSlider, GradientSlider } from './local/ParamSlider'
-import { CropOverlay, fitInsideRotated, rectForAspect, type Rect } from './local/CropOverlay'
-import { CompareSplit } from './local/CompareSplit'
-import { Filmstrip } from './local/Filmstrip'
-import { HistoryList } from './local/history'
-import { Navigator } from './local/Navigator'
-import { useHoldKey } from './local/useHoldKey'
 
 /* ===== engine glue (module level: outside React, like the artifact) ===== */
 const cam = createCamera()
@@ -71,7 +68,7 @@ function scheduleStats() {
     const k = Math.min(1, 256 / Math.max(w, h))
     const sw = Math.max(1, Math.round(w * k)), sh = Math.max(1, Math.round(h * k))
     const px = dev.pixels(effective(), { crop: vw.crop, angle: vw.angle }, sw, sh)
-    stats.setState({ bins: binsOf(px), nav: new ImageData(px, sw, sh) })
+    stats.setState({ bins: histogramBins(px), nav: new ImageData(px, sw, sh) })
   }, Math.max(0, 80 - (performance.now() - lastStats)))
 }
 let thumbTimer = 0
@@ -112,10 +109,8 @@ function loadSource(src: HTMLImageElement | HTMLCanvasElement, name: string, fre
   dev.setSource(el, w, h)
   ui.setState({ file: name, hasImage: true, imageSize: { w, h }, cropping: null, split: null })
   const v = params.values()
-  if (fresh && (JSON.stringify(v.crop) !== JSON.stringify(FULL) || v.angle !== 0 || v.aspect !== 'free')) {
-    history.label(`Open ${name}`)
-    params.patch({ crop: FULL, angle: 0, aspect: 'free' })
-  }
+  if (fresh && (JSON.stringify(v.crop) !== JSON.stringify(FULL) || v.angle !== 0 || v.aspect !== 'free'))
+    params.patch({ crop: FULL, angle: 0, aspect: 'free' }, { label: `Open ${name}` })
   requestRender()
   refreshThumbs(60)
   requestAnimationFrame(() => cam.fit())
@@ -130,19 +125,13 @@ async function openURL(url: string, name: string) {
     toast(`Opened ${name}`, { type: 'success', description: 'Your current look is kept — pick Original to start clean.' })
   } catch { toast('Could not read that image', { type: 'error' }) }
 }
-async function openFile(file?: File | null) {
-  if (!file) return
-  if (!file.type.startsWith('image/')) return void toast('That file is not an image', { type: 'error' })
-  await openURL(await readFileAsDataURL(file), file.name)
-}
 
 /* ===== actions ===== */
 function applyLook(id: string) {
   const l = lookById(id)
   if (!l) return
   ui.setState({ preview: null })
-  history.label(`Preset: ${l.name}`)
-  params.patch(lookValues(l))
+  params.patch(lookValues(l), { label: `Preset: ${l.name}` })
 }
 function stepLook(d: number) {
   const looks = allLooks()
@@ -150,7 +139,7 @@ function stepLook(d: number) {
   const i = looks.findIndex((l) => l.id === cur)
   applyLook(looks[(i + d + looks.length) % looks.length].id)
 }
-function resetAll() { history.label('Reset adjustments'); params.patch(lookDefaults()) }
+function resetAll() { params.patch(lookDefaults(), { label: 'Reset adjustments' }) }
 function saveLook() {
   const name = prompt('Preset name', `My look ${ui.getState().userLooks.length + 1}`)
   if (!name) return
@@ -167,11 +156,10 @@ function autoTone() {
   const vw = { crop: v.crop as Rect, angle: v.angle, bypass: true }
   const { w, h } = dev.outSize(vw)
   const k = 256 / Math.max(w, h)
-  const b = binsOf(dev.pixels(v, vw, Math.round(w * k), Math.round(h * k)))
+  const b = histogramBins(dev.pixels(v, vw, Math.round(w * k), Math.round(h * k)))
   const pct = (p: number) => { let acc = 0; for (let i = 0; i < 256; i++) { acc += b.l[i]; if (acc >= b.total * p) return i / 255 } return 1 }
   const lo = pct(0.005), mid = pct(0.5), hi = pct(0.995)
   const lin = (x: number) => (x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)
-  history.label('Auto tone')
   params.patch({
     exposure: Math.round(clamp(Math.log2(lin(0.45) / Math.max(1e-4, lin(mid))) * 0.65, -2, 2) * 100) / 100,
     contrast: 8,
@@ -180,7 +168,7 @@ function autoTone() {
     whites: Math.round(clamp((0.97 - hi) * 260, -30, 50)),
     blacks: Math.round(clamp(-(lo - 0.02) * 320, -45, 20)),
     vibrance: 12,
-  })
+  }, { label: 'Auto tone' })
   toast('Auto tone applied', { description: 'Exposure, contrast and end points set from the histogram.' })
 }
 const fileBase = () => ui.getState().file.replace(/\.[a-z0-9]+$/i, '')
@@ -225,8 +213,7 @@ function applyCrop() {
   const v = params.values()
   ui.setState({ cropping: null })
   if (JSON.stringify([d.crop, d.angle, d.aspect]) === JSON.stringify([v.crop, v.angle, v.aspect])) return
-  history.label(d.angle !== v.angle ? `Crop & straighten ${d.angle > 0 ? '+' : ''}${d.angle.toFixed(1)}°` : 'Crop')
-  params.patch({ crop: d.crop, angle: d.angle, aspect: d.aspect })
+  params.patch({ crop: d.crop, angle: d.angle, aspect: d.aspect }, { label: d.angle !== v.angle ? `Crop & straighten ${d.angle > 0 ? '+' : ''}${d.angle.toFixed(1)}°` : 'Crop' })
 }
 const cancelCrop = () => ui.setState({ cropping: null })
 const setDraft = (p: Partial<CropDraft>) => ui.setState((s) => (s.cropping ? { cropping: { ...s.cropping, ...p } } : {}))
@@ -279,25 +266,24 @@ const bandTrack = (hue: number, mode: 'h' | 's' | 'l') =>
     : mode === 's' ? `linear-gradient(90deg,hsl(${hue} 0% 55%),hsl(${hue} 85% 55%))`
       : `linear-gradient(90deg,hsl(${hue} 60% 16%),hsl(${hue} 70% 50%),hsl(${hue} 70% 88%))`
 
-/* Kit <Section> is controlled-only; this keeps its own open state. */
-function Sec({ defaultOpen = true, ...props }: Omit<ComponentProps<typeof Section>, 'open' | 'onToggle'> & { defaultOpen?: boolean }) {
-  const [open, setOpen] = useState(defaultOpen)
-  return <Section {...props} open={open} onToggle={() => setOpen((o) => !o)} />
-}
 const changedOf = (v: V, keys: string[]) => keys.some((k) => JSON.stringify(v[k]) !== JSON.stringify(DEFAULTS[k]))
-const resetKeys = (title: string, keys: string[]) => () => { history.label(`Reset ${title.toLowerCase()}`); params.reset(keys) }
+const resetKeys = (title: string, keys: string[]) => () =>
+  params.patch(Object.fromEntries(keys.map((k) => [k, structuredClone(DEFAULTS[k])])), { label: `Reset ${title.toLowerCase()}` })
+/** A develop slider: Inspector-identical row, painted track, named undo step. */
+const Slide = ({ k, track, label }: { k: string; track?: string; label?: string }) => <ParamSlider params={params} k={k} track={track} label={label} stepLabel={stepLabel(k)} />
 
 /* ========================================================================== */
 export default function DevelopShell() {
   const canvas = useRef<HTMLCanvasElement>(null)
-  const fileInput = useRef<HTMLInputElement>(null)
   const s = useStore(ui)
   const v = useParamState(params, (x) => x.values) as V
   const zoom = useStore(cam, (c) => c.zoom)
   const nav = useStore(stats, (x) => x.nav)
   const [exportOpen, setExportOpen] = useState(false)
   const [failed, setFailed] = useState<string | null>(null)
-  const [dragOver, setDragOver] = useState(false)
+  // Drop anywhere, paste, or Open… The photo is decoded into a texture and never stored in params.
+  // ⌘O is bound by the palette's Open command below.
+  const intake = useImageIntake((img) => openURL(img.url, img.name), { hotkey: false })
 
   useEffect(() => {
     const c = canvas.current
@@ -313,15 +299,8 @@ export default function DevelopShell() {
     })
     let geo = JSON.stringify([params.values().crop, params.values().angle])
     const offC = params.onCommit((nv) => { const g = JSON.stringify([nv.crop, nv.angle]); if (g !== geo) { geo = g; refreshThumbs() } })
-    const onPaste = (e: ClipboardEvent) => {
-      if ((e.target as HTMLElement | null)?.closest?.('input,textarea,[contenteditable]')) return
-      const f = Array.from(e.clipboardData?.files ?? []).find((x) => x.type.startsWith('image/'))
-      if (f) { e.preventDefault(); openFile(f) }
-    }
-    window.addEventListener('paste', onPaste)
     return () => {
       offP(); offU(); offC()
-      window.removeEventListener('paste', onPaste)
       cancelAnimationFrame(raf); raf = 0
       clearTimeout(thumbTimer); clearTimeout(statsTimer); statsTimer = 0
       dev.dispose()
@@ -353,15 +332,13 @@ export default function DevelopShell() {
     { id: 'export', label: 'Export…', group: 'Export', shortcut: 'mod+e', icon: Download, run: () => setExportOpen(true) },
     { id: 'quick', label: 'Quick export JPG, full size', group: 'Export', shortcut: 'shift+mod+e', icon: ImageDown, run: () => exportImage({ format: 'jpeg', quality: 90, long: null, name: fileBase() }) },
     { id: 'cube', label: 'Export look as .cube LUT', group: 'Export', shortcut: 'shift+mod+l', icon: Palette, run: () => exportCube(33) },
-    { id: 'open', label: 'Open photo…', group: 'File', shortcut: 'mod+o', icon: ImageUp, run: () => fileInput.current?.click() },
+    { id: 'open', label: 'Open photo…', group: 'File', shortcut: 'mod+o', icon: ImageUp, run: intake.open },
     { id: 'sample', label: 'Use the sample photo', group: 'File', icon: Images, run: () => openSample(true) },
     { id: 'close', label: 'Close photo', group: 'File', icon: X, run: () => ui.setState({ hasImage: false, cropping: null }) },
   ]
 
   const mark = (
-    <a href="#/" aria-label="All shells" className="contents">
-      <svg viewBox="0 0 16 16" width="11" height="11"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M8 2.4v11.2M8 2.4a5.6 5.6 0 0 1 0 11.2z" fill="currentColor" /></svg>
-    </a>
+    <svg viewBox="0 0 16 16" width="11" height="11"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" strokeWidth="1.8" /><path d="M8 2.4v11.2M8 2.4a5.6 5.6 0 0 1 0 11.2z" fill="currentColor" /></svg>
   )
 
   return (
@@ -386,7 +363,7 @@ export default function DevelopShell() {
           end={
             <>
               <Cluster>
-                <HistoryButtons params={params} />
+                <HistoryButtons history={history} />
                 <Divider vertical />
                 <Menu align="end" trigger={<IconButton icon={Braces} label="Share & copy settings" />}
                   items={[...shareMenuItems(params), { type: 'separator' }, { label: 'Export look as .cube LUT', icon: Palette, shortcut: 'shift+mod+l', onClick: () => exportCube(33) }]} />
@@ -399,13 +376,13 @@ export default function DevelopShell() {
       }
       left={
         <Panel>
-          <Sec title="Navigator" first>
+          <Section title="Navigator" persistKey="photo:navigator" first>
             <Navigator camera={cam} content={out} image={nav} />
-          </Sec>
-          <Sec title="History" actions={<HistoryCount />}>
-            <HistoryList history={history} />
-          </Sec>
-          <Sec title="Photo">
+          </Section>
+          <Section title="History" persistKey="photo:history" actions={<HistoryCount />}>
+            <HistoryList history={history} openLabel="Open" className="px-1.5" />
+          </Section>
+          <Section title="Photo" persistKey="photo:photo">
             <div className="flex flex-col gap-2 px-3">
               <ImageDrop value={null} onChange={(url) => url && openURL(url, 'Pasted photo')} compact />
               <div className="flex items-center justify-between text-[11.5px]">
@@ -413,12 +390,12 @@ export default function DevelopShell() {
                 <span className="tabular text-fg-faint">{W} × {H}</span>
               </div>
               <div className="flex gap-1.5">
-                <Button size="md" variant="default" className="flex-1" onClick={() => fileInput.current?.click()}><ImageUp size={13} strokeWidth={1.5} />Open…</Button>
+                <Button size="md" variant="default" className="flex-1" onClick={intake.open}><ImageUp size={13} strokeWidth={1.5} />Open…</Button>
                 <Button size="md" variant="default" className="flex-1" onClick={() => openSample(true)}><Images size={13} strokeWidth={1.5} />Sample</Button>
               </div>
               <p className="text-[11px] leading-relaxed text-fg-faint">Drop or paste a photo anywhere. Edits never touch the pixels — every setting is re-applied live from the original.</p>
             </div>
-          </Sec>
+          </Section>
         </Panel>
       }
       right={
@@ -429,11 +406,12 @@ export default function DevelopShell() {
       bottom={
         <div className="h-[136px]">
           <Filmstrip
-            items={looks.map((l) => ({ id: l.id, name: l.name, thumb: s.thumbs[l.id], user: l.user, group: l.group }))}
-            active={active}
+            label="Presets"
+            items={looks.map((l) => ({ id: l.id, name: l.name, thumb: s.thumbs[l.id], removable: l.user, group: l.group }))}
+            value={active}
             onApply={applyLook}
             onPreview={(id) => ui.setState({ preview: id })}
-            onDelete={(id) => ui.setState((x) => ({ userLooks: x.userLooks.filter((l) => l.id !== id) }))}
+            onRemove={(id) => ui.setState((x) => ({ userLooks: x.userLooks.filter((l) => l.id !== id) }))}
             trailing={
               <button type="button" onClick={saveLook}
                 className="flex shrink-0 flex-col items-center justify-center gap-1 self-start rounded-[8px] text-[11.5px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"
@@ -445,13 +423,8 @@ export default function DevelopShell() {
         </div>
       }
     >
-      <input ref={fileInput} type="file" accept="image/*" hidden onChange={(e) => { openFile(e.target.files?.[0]); e.target.value = '' }} />
-      <div
-        className="relative h-full w-full"
-        onDragOver={(e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDragOver(true) } }}
-        onDragLeave={(e) => { if (e.currentTarget === e.target) setDragOver(false) }}
-        onDrop={(e) => { e.preventDefault(); setDragOver(false); openFile(e.dataTransfer.files[0]) }}
-      >
+      {intake.input}
+      <div className="relative h-full w-full">
         <Stage camera={cam} contentSize={out} padding={40} overlay={<StageOverlay />}>
           <Artboard width={out.w} height={out.h} label={s.file} background="#111" className={cn(!s.hasImage && 'invisible')}>
             <canvas ref={canvas} className="absolute inset-0 block size-full" style={{ imageRendering: zoom >= 2 ? 'pixelated' : 'auto' }} />
@@ -462,15 +435,17 @@ export default function DevelopShell() {
                 aspect={ratioOf(s.cropping.aspect, W, H)}
                 constrain={(r) => fitInsideRotated(r, s.cropping!.angle, W, H)}
                 onChange={(r) => setDraft({ crop: r })}
+                grid={s.cropping.angle !== 0 ? 'fine' : 'thirds'}
               />
             )}
-            {!s.cropping && s.split !== null && <CompareSplit value={s.split} onChange={(x) => ui.setState({ split: x })} />}
+            {/* the shader draws the split; this is the handle + labels */}
+            {!s.cropping && s.split !== null && <CompareSplit value={s.split} onChange={(x) => ui.setState({ split: x })} peek={s.bypass} peekLabel={null} />}
           </Artboard>
         </Stage>
         {!s.hasImage && (
           <div className="absolute inset-0 flex items-center justify-center bg-field">
             <Empty icon={ImagePlus} title="No photo open" hint="Drop a photo here, paste one with ⌘V, or start from the generated sample."
-              action={<div className="mt-2 flex gap-2"><Button variant="primary" size="md" onClick={() => fileInput.current?.click()}>Open photo…</Button><Button variant="default" size="md" onClick={() => openSample(true)}>Use sample</Button></div>} />
+              action={<div className="mt-2 flex gap-2"><Button variant="primary" size="md" onClick={intake.open}>Open photo…</Button><Button variant="default" size="md" onClick={() => openSample(true)}>Use sample</Button></div>} />
           </div>
         )}
         {failed && (
@@ -478,7 +453,7 @@ export default function DevelopShell() {
             <Empty icon={X} title="The develop engine couldn’t start" hint={`It needs WebGL2. ${failed}`} />
           </div>
         )}
-        {dragOver && <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-[12px] bg-signal-soft text-[13px] font-medium text-signal shadow-[inset_0_0_0_2px_var(--signal)]">Drop to open</div>}
+        {intake.over && <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-[12px] bg-signal-soft text-[13px] font-medium text-signal shadow-[inset_0_0_0_2px_var(--signal)]">Drop to open</div>}
       </div>
       <CommandPalette
         commands={commands}
@@ -497,7 +472,7 @@ export default function DevelopShell() {
 }
 
 function HistoryCount() {
-  const n = useStore(history.store, (h) => h.names.length)
+  const n = useStore(history, (h) => h.past.length + 1)
   return <span className="pr-1 text-[11px] tabular text-fg-faint">{n}</span>
 }
 
@@ -559,6 +534,8 @@ const BASIC_PRES = ['texture', 'clarity', 'dehaze', 'vibrance', 'saturation']
 const CURVE_KEYS = ['curveRGB', 'curveR', 'curveG', 'curveB']
 const HSL_KEYS = BANDS.flatMap((b) => ['h', 's', 'l'].map((c) => `hsl_${b.id}_${c}`))
 const VIG_KEYS = ['vignette', 'vigMid', 'vigFeather']
+const GRAIN_KEYS = ['grain', 'grainSize']
+const SHARP_KEYS = ['sharpen', 'sharpRadius']
 const sub = (t: string) => <div className="px-3 pt-2 pb-0.5 text-[11px] text-fg-faint no-select">{t}</div>
 
 function Adjustments({ v }: { v: V }) {
@@ -567,31 +544,32 @@ function Adjustments({ v }: { v: V }) {
   const basic = [...BASIC_WB, ...BASIC_TONE, ...BASIC_PRES]
   const ch = s.curveChannel
   const ck = { RGB: 'curveRGB', R: 'curveR', G: 'curveG', B: 'curveB' }[ch]
-  const ccolor = { RGB: 'var(--fg)', R: '#ff5a5a', G: '#43c46c', B: '#4f8bff' }[ch]
+  const ccolor = { RGB: 'var(--fg)', R: 'var(--cat-5)', G: 'var(--cat-3)', B: 'var(--cat-1)' }[ch]
   const chist = bins ? { RGB: bins.l, R: bins.r, G: bins.g, B: bins.b }[ch] : null
   const pts = v[ck] as CurvePoint[]
-  const curvePreset = (p: CurvePoint[], name: string) => { history.label(`Tone curve · ${name}`); params.setValue(ck, p) }
+  const curveStep = `Tone curve${ch === 'RGB' ? '' : ` · ${ch}`}`
+  const curvePreset = (p: CurvePoint[], name: string) => params.setValue(ck, p, { label: `${curveStep} · ${name}` })
   return (
     <>
-      <Sec title="Basic" first changed={changedOf(v, basic)} onReset={changedOf(v, basic) ? resetKeys('Basic', basic) : undefined}
+      <Section title="Basic" persistKey="photo:basic" first changed={changedOf(v, basic)} onReset={changedOf(v, basic) ? resetKeys('Basic', basic) : undefined}
         actions={<Button size="sm" variant="default" onClick={autoTone} className="mr-0.5">Auto</Button>}>
         {sub('White balance')}
-        <ParamSlider params={params} k="temp" track={TRACK.temp} />
-        <ParamSlider params={params} k="tint" track={TRACK.tint} />
+        <Slide k="temp" track={TRACK.temp} />
+        <Slide k="tint" track={TRACK.tint} />
         {sub('Tone')}
-        {BASIC_TONE.map((k) => <ParamSlider key={k} params={params} k={k} track={TRACK.tone} />)}
+        {BASIC_TONE.map((k) => <Slide key={k} k={k} track={TRACK.tone} />)}
         {sub('Presence')}
-        <ParamSlider params={params} k="texture" />
-        <ParamSlider params={params} k="clarity" />
-        <ParamSlider params={params} k="dehaze" />
-        <ParamSlider params={params} k="vibrance" track={TRACK.sat} />
-        <ParamSlider params={params} k="saturation" track={TRACK.sat} />
-      </Sec>
-      <Sec title="Tone curve" changed={changedOf(v, CURVE_KEYS)} onReset={changedOf(v, CURVE_KEYS) ? resetKeys('Tone curve', CURVE_KEYS) : undefined}>
+        <Slide k="texture" />
+        <Slide k="clarity" />
+        <Slide k="dehaze" />
+        <Slide k="vibrance" track={TRACK.sat} />
+        <Slide k="saturation" track={TRACK.sat} />
+      </Section>
+      <Section title="Tone curve" persistKey="photo:curve" changed={changedOf(v, CURVE_KEYS)} onReset={changedOf(v, CURVE_KEYS) ? resetKeys('Tone curve', CURVE_KEYS) : undefined}>
         <div className="flex flex-col gap-2 px-3">
           <Segmented size="sm" label="Curve channel" value={ch} onChange={(c) => ui.setState({ curveChannel: c as typeof ch })}
             options={[{ value: 'RGB', label: 'RGB' }, { value: 'R', label: 'Red' }, { value: 'G', label: 'Green' }, { value: 'B', label: 'Blue' }]} />
-          <ToneCurve value={pts} onChange={(p, final) => params.setValue(ck, p, { commit: final })} color={ccolor} histogram={chist} label={`${ch} tone curve`} />
+          <ToneCurve value={pts} onChange={(p, final) => params.setValue(ck, p, { commit: final, label: curveStep })} color={ccolor} histogram={chist} label={`${ch} tone curve`} />
           <div className="flex gap-1">
             {([['Linear', [[0, 0], [1, 1]]], ['Medium', [[0, 0], [0.25, 0.21], [0.75, 0.8], [1, 1]]], ['Strong', [[0, 0], [0.25, 0.17], [0.75, 0.85], [1, 1]]]] as [string, CurvePoint[]][]).map(([n, p]) => (
               <button key={n} type="button" onClick={() => curvePreset(p, n)}
@@ -601,21 +579,30 @@ function Adjustments({ v }: { v: V }) {
             ))}
           </div>
         </div>
-      </Sec>
-      <Sec title="Colour mixer" changed={changedOf(v, HSL_KEYS)} onReset={changedOf(v, HSL_KEYS) ? resetKeys('Colour mixer', HSL_KEYS) : undefined}>
+      </Section>
+      <Section title="Colour mixer" persistKey="photo:mixer" changed={changedOf(v, HSL_KEYS)} onReset={changedOf(v, HSL_KEYS) ? resetKeys('Colour mixer', HSL_KEYS) : undefined}>
         <div className="px-3 pb-1">
           <Segmented size="sm" label="Mixer mode" value={s.hslMode} onChange={(m) => ui.setState({ hslMode: m as 'h' | 's' | 'l' })}
             options={[{ value: 'h', label: 'Hue' }, { value: 's', label: 'Saturation' }, { value: 'l', label: 'Luminance' }]} />
         </div>
         {BANDS.map((b) => (
-          <ParamSlider key={`${b.id}-${s.hslMode}`} params={params} k={`hsl_${b.id}_${s.hslMode}`} label={b.name} track={bandTrack(b.hue, s.hslMode)} />
+          <Slide key={`${b.id}-${s.hslMode}`} k={`hsl_${b.id}_${s.hslMode}`} label={b.name} track={bandTrack(b.hue, s.hslMode)} />
         ))}
-      </Sec>
-      <Sec title="Vignette" changed={changedOf(v, VIG_KEYS)} onReset={changedOf(v, VIG_KEYS) ? resetKeys('Vignette', VIG_KEYS) : undefined}>
-        <ParamSlider params={params} k="vignette" track="linear-gradient(90deg,#141414,#8c8c8c 50%,#f0f0f0)" />
-        {v.vignette !== 0 && <><ParamSlider params={params} k="vigMid" /><ParamSlider params={params} k="vigFeather" /></>}
-      </Sec>
-      <div className="border-t border-line"><Inspector params={params} folders={['grain', 'detail']} /></div>
+      </Section>
+      <Section title="Vignette" persistKey="photo:vignette" changed={changedOf(v, VIG_KEYS)} onReset={changedOf(v, VIG_KEYS) ? resetKeys('Vignette', VIG_KEYS) : undefined}>
+        <Slide k="vignette" track="linear-gradient(90deg,#141414,#8c8c8c 50%,#f0f0f0)" />
+        <Slide k="vigMid" />
+        <Slide k="vigFeather" />
+      </Section>
+      {/* Hand-built (not <Inspector>) so each step is named "Grain 24", not "Amount". */}
+      <Section title="Grain" persistKey="photo:grain" changed={changedOf(v, GRAIN_KEYS)} onReset={changedOf(v, GRAIN_KEYS) ? resetKeys('Grain', GRAIN_KEYS) : undefined}>
+        <Slide k="grain" />
+        <Slide k="grainSize" />
+      </Section>
+      <Section title="Sharpening" persistKey="photo:sharpen" changed={changedOf(v, SHARP_KEYS)} onReset={changedOf(v, SHARP_KEYS) ? resetKeys('Sharpening', SHARP_KEYS) : undefined}>
+        <Slide k="sharpen" />
+        <Slide k="sharpRadius" />
+      </Section>
       <CropSummary v={v} />
     </>
   )
@@ -627,14 +614,14 @@ function CropSummary({ v }: { v: V }) {
   const keys = ['crop', 'angle', 'aspect']
   const changed = changedOf(v, keys)
   return (
-    <Sec title="Crop & straighten" changed={changed} onReset={changed ? resetKeys('Crop', keys) : undefined}>
+    <Section title="Crop & straighten" persistKey="photo:crop" changed={changed} onReset={changed ? resetKeys('Crop', keys) : undefined}>
       <Row label="Aspect"><span className="flex-1 text-right text-[11.5px] text-fg tabular">{ASPECTS.find((a) => a.value === v.aspect)?.label ?? v.aspect}</span></Row>
       <Row label="Straighten"><span className="flex-1 text-right text-[11.5px] text-fg tabular">{v.angle > 0 ? '+' : ''}{Number(v.angle).toFixed(1)}°</span></Row>
       <Row label="Output"><span className="flex-1 text-right text-[11.5px] text-fg tabular">{Math.round(crop.w * size.w)} × {Math.round(crop.h * size.h)}</span></Row>
       <div className="px-3 pt-1.5">
         <Button size="md" variant="default" className="w-full" onClick={enterCrop}><Crop size={13} strokeWidth={1.5} />Edit crop <Kbd>C</Kbd></Button>
       </div>
-    </Sec>
+    </Section>
   )
 }
 

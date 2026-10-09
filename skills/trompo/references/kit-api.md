@@ -1,0 +1,220 @@
+<!-- Copied from docs/KIT.md by `npm run sync`. Edit the source, not this file. -->
+
+> In a project that installed the kit from the registry, `@kit` means `@/components/studio` (or alias it). Live examples of every shell: https://trompo-dev.github.io/trompo/ · source: https://github.com/trompo-dev/trompo/tree/main/src/shells
+
+# Trompo kit — guide
+
+The kit is the **harness**: the design-tool chrome around a prototype. The prototype (the
+*artifact*) can be anything — Canvas 2D, WebGL, vanilla three.js, SVG, DOM/React, an iframe.
+Import everything from `@kit`. Read `src/shells/motion/` for a complete worked example.
+
+## 1. Rules that keep it looking pro
+
+- **Never hardcode a colour in chrome.** Use the tokens (Tailwind utilities below). The only
+  legal home for a hex value is the artifact (inside the artboard / canvas) and `theme.css`.
+- **Neutral chrome, brand inside the artboard.** Artboard text uses `font-artboard`.
+- **Sentence case**, never uppercase micro-caps. Section heads 11.5px medium.
+- **Hierarchy by opacity tier** (`text-fg` / `text-fg-muted` / `text-fg-faint`) at ~one size, not by
+  mixing sizes and weights. Live numbers always `tabular`.
+- **One accent, only on state** (filled slider, selection, focus, primary button). The
+  playhead is `bg-rec` (red/orange) — never the accent.
+- **Radius + shadow, not borders.** Islands use the `panel` utility; toolbar groups `cluster`;
+  popovers `pop`. A boundary inside a panel is `border-line` (6–8%), never a solid grey rule.
+- **Icons**: lucide-react, 14px, strokeWidth 1.5 in chrome (16 in the tool dock).
+- **Hover reveals** secondary affordances (reset, eye/lock, thumbs). But everything hover-only
+  must also appear on `:focus-visible` / `focus-within`.
+- **Every drag has a non-drag alternative** (typed field, stepper, menu item) — WCAG 2.5.7.
+- **Interaction ownership:** an operation lives on the canvas *or* the panel, not mirrored
+  confusingly on both (exception: a numeric field that shadows a canvas handle).
+- Empty selection → the inspector shows document/scene settings (Spline), never a blank panel.
+- Light theme must work. Test both (`T` toggles).
+
+### Tokens (Tailwind utilities)
+Surfaces: `bg-field` (window) · `bg-panel` (islands) · `bg-overlay` (menus) · `bg-well`
+(recessed, segmented background) · `bg-track` (slider groove) · `bg-raised` (pill in a well) ·
+`bg-active` (toggled control on a panel) · `bg-control` (field fill) · `bg-hover` · `bg-press`.
+Text: `text-fg` · `text-fg-muted` · `text-fg-faint`. Lines: `border-line` · `border-line-strong`.
+Accent: `bg-signal` (fills) · `bg-signal-strong` (surfaces carrying text) · `text-signal-fg` ·
+`bg-signal-soft` (selection wash). Semantic: `key` (keyframed, amber) · `rec` (playhead/record/
+error) · `ok`. Lanes: `bg-lane`. Utilities: `panel` `cluster` `pop` `tabular` `no-select`
+`checker`. Categorical (identity, never state): `cat-1`…`cat-8` (ports, lanes, tags). Over
+images: `bg-scrim`. CSS vars: `--row` (28px lane), `--gutter`, `--inspector-w`, and in overlay
+layouts `--safe-top/right/bottom/left` (what the panels cover).
+Token names are namespaced so they never collide with shadcn (`muted`, `accent`, `input` mean
+something else there): ours are `fg-muted`, `signal`, `control`; font is `font-ui`.
+
+## 2. State: schema → params store
+
+```ts
+import { defineSchema, folder, p, createParams, createClock } from '@kit'
+
+export const schema = defineSchema({
+  shape: folder('Shape', {
+    count:  p.number(12, { min: 1, max: 64, step: 1, hint: 'One sentence. This IS the docs.' }),
+    radius: p.number(80, { min: 0, max: 400, unit: 'px' }),
+    mode:   p.select('grid', ['grid', 'radial', 'spiral']),        // ≤4 short → segmented, else dropdown
+    tint:   p.color('#5b8cff'),                                     // alpha default on; { alpha: false }
+    seed:   p.seed(7),
+    angle:  p.angle(45),
+    offset: p.vec2({ x: 0, y: 0 }, { min: -1, max: 1 }),            // display: 'pad' | 'fields'
+    pos:    p.vec3({ x: 0, y: 1, z: 0 }, { step: 0.1 }),
+    size:   p.size({ w: 1080, h: 1350 }, { lock: true }),
+    ease:   p.curve([0.16, 1, 0.3, 1]),
+    spring: p.spring({ stiffness: 180, damping: 18, mass: 1 }),
+    grad:   p.gradient({ angle: 90, stops: [{ pos: 0, color: '#000' }, { pos: 1, color: '#fff' }] }),
+    colors: p.palette(['#111', '#eee']),
+    kinds:  p.multi(['a'], [{ value: 'a', icon: Square }, …]),     // icon tiles, multi-select
+    on:     p.boolean(true),
+    title:  p.text('Hello', { multiline: false }),
+    photo:  p.image(null),
+    range:  p.range([20, 80], { min: 0, max: 100 }),
+    go:     p.action('Randomise', (v) => …),                        // button row, not a value
+    fps:    p.monitor(() => stats.fps, { graph: true }),            // live readout, not a value
+  }),
+  more: folder('Advanced', { … }, { collapsed: true }),
+})
+```
+
+Every def accepts `label`, `hint`, `when: (v) => boolean` (conditional row), `disabled`,
+`live: false` (expensive — apply on commit), `publish: true` (shows in the client view),
+`persist: false` (keep out of localStorage), `share: false` (keep out of links/JSON).
+Keys are **flat across folders** (`v.count`).
+
+More defs: `p.data<Layer[]>([])` — a hidden, typed document value (a layer stack, clips, pattern
+steps): undoable and persisted, never rendered as a row. `p.image()` defaults to persist/share
+off (a photo would blow the storage quota). Numbers take `scale: 'log'`, `soft: [lo, hi]` (drag
+range; typing can exceed it), `parse` (typed text → number, e.g. percent), `display: 'knob'`.
+
+```ts
+export const params = createParams(schema, {
+  id: 'my-tool', version: 2,                          // bump when the schema's shape changes
+  presets: [{ name: 'Calm', values: { … } }],          // merge by default: only the listed keys change
+  presetKeys: ['palette', 'grain'],                    // what "Save preset" captures (default: all shareable)
+})
+params.values()                       // current values (non-reactive)
+params.subscribe((s) => …)            // every change, incl. mid-drag (zustand)
+params.onCommit((v, meta) => …)       // pointer-up only; meta = { label, kind: edit|undo|redo|replace }
+params.setValue('count', 3, { label: 'Count' })   // commits one labelled undo step; { commit: false } mid-drag
+params.patch({ … }); params.reset(['count']); params.undo(); params.redo()
+params.replace(values, { history: false })        // load/import without an undo step
+params.savePreset(name); params.applyPreset(name); params.activePreset(); params.toggleCompare()
+params.toJSON({ changedOnly: true, shareable: true }); params.shareURL()
+const v = useValues(params)            // React
+```
+
+Persistence (localStorage, debounced; a quota failure shows a toast once) and `#p=` URL share
+are automatic.
+
+### Document state + one undo timeline
+
+```ts
+export const doc = createDocStore(initialDoc, { id: 'flows', version: 1 })  // graph, rows, layer tree…
+doc.set((d) => ({ ...d, nodes }), { commit: false })   // mid-drag
+doc.commit('Move 3 nodes')                             // pointer-up = one labelled step
+const nodes = useDoc(doc, (d) => d.nodes)
+export const history = createHistory([params, doc])    // ⌘Z undoes whichever changed last
+<ParamActions params={params} history={history} />     // or <HistoryButtons history={history} />
+<HistoryList history={history} />                      // Lightroom-style named steps, click to jump
+```
+Keep selection and view state OUT of the doc so undo never fights focus.
+
+### One item of a collection in the Inspector
+
+```ts
+const warp = createItemParams(warpSchema, 'warp')      // per item TYPE, not per item
+useEffect(() => bindItem(warp, {
+  read: () => layer(sel)?.params ?? null,
+  write: (v) => doc.set((d) => setLayerParams(d, sel, v), { commit: false }),
+  commit: (label) => doc.commit(label),
+  subscribe: (fn) => doc.subscribe(fn),
+}), [sel])
+<Inspector params={warp} />
+```
+
+## 3. Time: the clock
+
+```ts
+export const clock = createClock({ duration: 4000, mode: 'loop' /* | 'once' | 'pingpong' */, fps: 60, idle: true })
+clock.onTick((t, dt) => …)  clock.time()  clock.seek(ms)  clock.play()/pause()/toggle()/replay()/step(n)
+useClockTime(clock, 15)     // throttled React readout
+```
+Render as a pure function of `(values, t)` so scrubbing and export work. Keep live values in
+refs, never in a rAF effect's dependency array. The clock stops in hidden tabs; `idle: false`
+stops ticks while paused too (default true for artifacts with their own life).
+
+## 4. Surfaces — plugging the artifact in
+
+```tsx
+<CanvasSurface ref={h} params={params} clock={clock} draw={(ctx, { t, w, h, v, dt }) => …} deps={[docVersion]} />
+<WebGLSurface params={params} clock={clock} setup={(gl) => program} draw={(gl, f, program) => …} />
+<MountSurface ref={m} params={params} clock={clock} mount={(el, { values, params, clock }) => ({ engine, dispose })} />
+<FrameSurface src="/proto.html" params={params} />   // postMessage bridge — see public/studio-bridge.js
+```
+`h.current.canvas` gives the canvas for export; `m.current.handle` the object `mount` returned.
+`v` in `draw` is typed from the schema. Without a clock, `animate` runs its own rAF.
+
+## 5. Layout
+
+```tsx
+<Studio layout="islands" | "overlay" | "docked"
+  toolbar={<Toolbar start={…} center={…} end={…} />}
+  left={<Panel header={<PanelHeader title="Layers" />}>…</Panel>}
+  right={<Panel header={<PanelHeader><PanelTabs …/></PanelHeader>}><Inspector params={params} /></Panel>}
+  bottom={<Timeline clock={clock} lanes={lanes} />}
+  leftWidth={240} rightWidth={280}>
+  <Stage>…</Stage>   or   <Stage fill>…</Stage>
+</Studio>
+```
+- `islands`: floating cards with gutter (artboard work). `overlay`: stage full-bleed under
+  floating panels (shaders, 3D, photo). `docked`: flush panels, Figma UI3 (dense editors).
+- `⌘\` hides all chrome (present mode).
+- Toolbar: `<Brand name doc mark>` (the mark links home itself — pass a plain glyph),
+  `<Cluster>` groups, `<ToolDock value onChange tools>` (bottom-centre tools, place it yourself
+  absolutely inside the Stage overlay), `<Button variant="primary">` for the ONE primary action.
+- `<Stage>` = camera (wheel pan, ⌘wheel/pinch zoom, space-drag, Shift+0/1), `contentSize`
+  ({ w, h, x?, y? } — compared by value, inline is fine) for fit, `fitMaxZoom` (default 1),
+  `grid` dots, `overlay` slot for HUD, `hotkeys={false}`. `<Stage fill>` has no camera or Space.
+  `<Artboard width height label x y background selected>` (defaults white; resets font features).
+  `useCamera()` gives the store + `fit()` / `zoomTo()` / `touch()` / `untouch()`.
+  `<ZoomPill zoom onZoom onFit />` works outside a Stage too (React Flow, custom canvases).
+- `useSafeArea()` in overlay layouts → `{ top, right, bottom, left }` covered by panels.
+- `<Panel>` (scrolls) · `<PanelHeader title>` · `<PanelTabs value onChange tabs>` · `<Empty icon title hint action compact>`.
+
+## 6. Components
+
+- `Inspector params folders? keys? published? id?` — schema → sections + rows (folders render in the order given).
+- Hand-built panels that must match: `Section title (open+onToggle | defaultOpen persistKey) onReset changed actions collapsible`,
+  `Row label hint changed onReset stacked trailing labelWidth`, `ParamRow k params` (one schema row),
+  `ParamControl def value onChange` (just the control).
+- Controls: `ScrubValue` (drag/type/expr number) · `Slider` · `Segmented` · `Tiles` · `Switch` ·
+  `Checkbox` · `Select` · `TextInput` · `Menu` (items: item/separator/label/submenu) · `ColorField`
+  / `ColorPanel` / `Swatch` · `AngleDial` · `XYPad` · `Vec3Fields` · `SizeFields` · `SeedField` ·
+  `CurveEditor` / `CurveGlyph` · `SpringEditor` · `GradientEditor` · `PaletteField` · `ImageDrop` ·
+  `Monitor` · `Knob` (rotary, log taper, bipolar) · `Button` (variants ghost/default/primary/outline/danger; sizes sm/md/lg/icon/icon-sm) ·
+  `IconButton icon label shortcut active` · `Tip label shortcut` · `Kbd` · `Badge tone` · `Divider`.
+- `Timeline clock lanes hotkeys?` — read-only beat view + transport (loop / ping-pong / once). Lanes: `{ id, label, start, end }` bars, `{ kind: 'keys', keys: [{ t, value, selected }] }`,
+  `{ kind: 'markers', keys }`; `depth` indents. Derive lanes from the render maths.
+- `LayerTree items selected onSelect onToggle onMove onRename toggles defaultCollapsed expanded onHover` +
+  `updateTree` / `moveInTree` / `findInTree`. Items: `container` (droppable when empty), `toggles`, `meta`, `thumb`.
+- `ParamActions params history? presets compare theme share` (each part switchable; `compare={{ hotkey: false }}`) · `HistoryButtons` · `PresetMenu` ·
+  `CompareButton` · `ThemeToggle` · `shareMenuItems(params)` (link, JSON, **copy as agent prompt**).
+- `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound.
+- `toast(title, opts)` returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
+  `toast.promise(p, { loading, success, error })` · `toast.progress(title, { onCancel })` → `{ set(p), done(msg), fail(msg) }`.
+- IO: `exportCanvasPNG(canvas, name, scale, { smoothing })` · `exportSVG(svg | string)` · `exportJSON(data)` ·
+  `recordFrames({ canvas, draw(t, i), frames, fps, name, onProgress, signal })` (frame-accurate MP4/WebM, WebCodecs) ·
+  `recordCanvas(canvas, ms)` (quick real-time fallback) · `createZip()` (STORE zip: `add(name, bytes)`, `await addBlob(name, blob)`, `toBlob()`) ·
+  `snapshotElement(el, { width, height, scale, background, filter, hide })` (DOM → canvas) · `download` · `copyText` · `readFileAsDataURL`.
+- Hotkeys: `useHotkeys({ 'mod+e': fn, t: { run, label: 'Text tool', group: 'Tools' } }, deps, { priority })`.
+  One dispatcher; shell bindings (priority 10) beat kit defaults (0); labelled bindings appear in the
+  `?` sheet automatically; dev warns on duplicates. `useHoldKey('\\', (down) => …)` for hold-to-peek.
+  Space/Enter on a focused button go to the button.
+
+## 7. Conventions borrowed from Spline · Paper · Figma · Framer · Affinity · Rive
+
+See `research/04-six-tool-matrix.md` (control-by-control defaults) and
+`research/02-pro-tool-patterns.md` (inspector, timeline, layers, canvas, shortcuts). Highlights:
+Space play · `,` `.` frame step · J/K prev/next key · Shift+0/1 zoom · `\` A/B · ⌘K palette ·
+`?` shortcuts · ⌘\ hide UI · keyframe diamond: hollow faint → hollow accent → solid accent ·
+springs default Duration + Bounce · fills/effects as stacks with eye + blend + opacity ·
+Affinity-style selection-aware context bar · Rive Trigger/Boolean/Number inputs.

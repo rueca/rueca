@@ -4,11 +4,9 @@ import {
   Download, Image as ImageIcon, FileSpreadsheet, ClipboardCopy, Braces, Upload, Plus, Columns3, Tag, X, Maximize2, RotateCcw, Trash2, Copy, UserRound, Rows3, ChevronDown,
 } from 'lucide-react'
 import {
-  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Stage, useHotkeys, useValues, toast,
+  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Stage, HistoryButtons, useHotkeys, useValues, useDoc, toast,
   type Command, type MenuItem,
 } from '@kit'
-import { HistoryControls } from '../flows/local/HistoryControls'
-import { useDoc } from '../flows/local/doc-store'
 import { JourneyMap } from './map/JourneyMap'
 import { PersonasPanel } from './panels/Personas'
 import { JourneyInspector } from './panels/Inspector'
@@ -18,10 +16,9 @@ import {
 } from './store'
 import { exportPNG, exportCSV, copyMarkdown, exportJourneyJSON, importJourneyJSON, mapElement } from './export'
 
+// Brand links the mark home itself.
 const Mark = (
-  <a href="#/" aria-label="All shells" className="contents">
-    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1.5 11 C4 11 4.5 5 8 5 S12 10 14.5 7" /><circle cx="1.8" cy="11" r="1" fill="currentColor" /><circle cx="14.2" cy="7" r="1" fill="currentColor" /></svg>
-  </a>
+  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M1.5 11 C4 11 4.5 5 8 5 S12 10 14.5 7" /><circle cx="1.8" cy="11" r="1" fill="currentColor" /><circle cx="14.2" cy="7" r="1" fill="currentColor" /></svg>
 )
 
 export default function JourneyShell() {
@@ -50,12 +47,12 @@ export default function JourneyShell() {
   }
 
   useHotkeys({
-    'alt+arrowleft': () => nudgeCard(-1, 0),
-    'alt+arrowright': () => nudgeCard(1, 0),
-    'alt+arrowup': () => nudgeCard(0, -1),
-    'alt+arrowdown': () => nudgeCard(0, 1),
-    enter: () => { const s = ui.getState().sel; if (s?.kind === 'card') ui.setState({ editing: s.id }) },
-    esc: () => { const s = ui.getState(); if (s.editing) ui.setState({ editing: null }); else if (s.sel) ui.setState({ sel: null }); else if (s.filterTag) ui.setState({ filterTag: null }) },
+    'alt+arrowleft': { run: () => nudgeCard(-1, 0), label: 'Move card / stage left', group: 'Map' },
+    'alt+arrowright': { run: () => nudgeCard(1, 0), label: 'Move card / stage right', group: 'Map' },
+    'alt+arrowup': { run: () => nudgeCard(0, -1), label: 'Move card up', group: 'Map' },
+    'alt+arrowdown': { run: () => nudgeCard(0, 1), label: 'Move card down', group: 'Map' },
+    enter: { run: () => { const s = ui.getState().sel; if (s?.kind === 'card') ui.setState({ editing: s.id }) }, label: 'Edit selected card', group: 'Map' },
+    esc: { run: () => { const s = ui.getState(); if (s.editing) ui.setState({ editing: null }); else if (s.sel) ui.setState({ sel: null }); else if (s.filterTag) ui.setState({ filterTag: null }) }, label: 'Deselect / clear highlight', group: 'Map' },
     ...Object.fromEntries(personas.slice(0, 9).map((x, i) => [String(i + 1), () => switchPersona(x.id)])),
   }, [personas])
 
@@ -125,7 +122,7 @@ export default function JourneyShell() {
           end={
             <>
               <Cluster>
-                <HistoryControls history={history} />
+                <HistoryButtons history={history} />
                 <Divider vertical />
                 <PresetMenu params={params} />
                 <ThemeToggle />
@@ -142,9 +139,7 @@ export default function JourneyShell() {
         <JourneyMap mapRef={mapRef} />
       </Stage>
       <CommandPalette commands={commands} extraShortcuts={[
-        { keys: 'enter', label: 'Edit selected card' }, { keys: 'alt+arrowleft', label: 'Move card / stage left' }, { keys: 'alt+arrowright', label: 'Move card / stage right' },
-        { keys: 'alt+arrowup', label: 'Move card up' }, { keys: 'alt+arrowdown', label: 'Move card down' }, { keys: '1', label: 'Switch persona 1–9' },
-        { keys: 'esc', label: 'Deselect / clear highlight' }, { keys: 'space', label: 'Hold to pan' }, { keys: 'shift+0', label: 'Zoom to 100%' },
+        { keys: '1', label: 'Switch persona 1–9' }, { keys: 'space', label: 'Hold to pan' }, { keys: 'shift+0', label: 'Zoom to 100%' },
       ]} />
     </Studio>
   )

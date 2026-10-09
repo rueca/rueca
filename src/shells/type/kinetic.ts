@@ -5,7 +5,7 @@
 --------------------------------------------------------------------------- */
 import type { V } from './params'
 import { FAMILIES } from './fonts'
-import { cubicBezier } from './local/ease'
+import { cubicBezier } from '@kit/core/ease'
 
 export interface Glyph {
   ch: string

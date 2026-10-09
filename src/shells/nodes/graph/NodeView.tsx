@@ -4,14 +4,13 @@ import { Handle, Position, useConnection, type NodeProps } from '@xyflow/react'
 import { useStore } from 'zustand'
 import { AlertTriangle, EyeOff } from 'lucide-react'
 import { ScrubValue, Tip, cn, useValues } from '@kit'
+import { InlineText } from '@kit/ui/inline-text'
 import { specOf, portOf, type PortSpec, type PortType } from '../engine/spec'
 import { toHex, type RGBA } from '../engine/image'
 import { defOf, catVar } from './defs'
-import { graph, updateData, type GNode } from './store'
+import { graph, updateData, setParams, commit, type GNode } from './store'
 import { useEval } from './evaluator'
 import { doc } from './doc'
-import { storeFor } from './nodeParams'
-import { InlineEdit } from '../local/InlineEdit'
 
 export const portVar = (t: PortType) => `var(--port-${t})`
 
@@ -34,7 +33,7 @@ function Port({ port, side, wired, dim }: { port: PortSpec; side: 'in' | 'out'; 
         type={side === 'in' ? 'target' : 'source'}
         position={side === 'in' ? Position.Left : Position.Right}
         id={port.key}
-        className="gport"
+        className="studio-port"
         data-wired={wired}
         data-dim={dim}
         aria-label={`${side === 'in' ? 'Input' : 'Output'} ${port.label} (${port.type})`}
@@ -71,14 +70,14 @@ export const NodeView = memo(function NodeView({ id, data, selected }: NodeProps
 
   return (
     <div
-      className={cn('gnode relative w-[176px] rounded-[10px] bg-panel transition-opacity', data.bypass && 'opacity-40')}
+      className={cn('studio-node relative w-[176px] rounded-[10px] bg-panel transition-opacity', data.bypass && 'opacity-40')}
       style={{ boxShadow: selected ? '0 0 0 1.5px var(--signal), var(--shadow-panel)' : error ? '0 0 0 1px color-mix(in srgb, var(--rec) 70%, transparent), var(--shadow-panel)' : 'var(--shadow-cluster)' }}
     >
       {/* category stripe */}
       <div className="absolute inset-x-0 top-0 h-[3px] rounded-t-[10px]" style={{ background: cat }} />
       <div className="flex h-8 items-center gap-1.5 pt-[3px] pr-2 pl-2.5">
         <span className="flex shrink-0" style={{ color: cat }}><Icon size={14} strokeWidth={1.5} /></span>
-        <InlineEdit value={data.title} onCommit={(t) => updateData([id], () => ({ title: t }))} className="flex-1 text-[12px] font-medium text-fg" label="Rename node" />
+        <InlineText focusable={false} value={data.title} onCommit={(t) => updateData([id], () => ({ title: t }))} className="flex-1 truncate text-[12px] font-medium text-fg" label="Rename node" />
         {data.bypass && <Tip label="Bypassed (B)"><span className="text-fg-faint"><EyeOff size={12} strokeWidth={1.5} /></span></Tip>}
         {error && <Tip label={error}><span className="text-rec"><AlertTriangle size={13} strokeWidth={1.75} /></span></Tip>}
         {!error && thumb && thumb.ms >= 0.5 && <span className="tabular text-[10.5px] text-fg-faint">{thumb.ms < 10 ? thumb.ms.toFixed(1) : Math.round(thumb.ms)}ms</span>}
@@ -110,7 +109,7 @@ export const NodeView = memo(function NodeView({ id, data, selected }: NodeProps
       )}
 
       {/* body */}
-      {data.kind === 'number' && <NumberBody id={id} value={Number(data.params.value ?? 0)} />}
+      {data.kind === 'number' && <NumberBody id={id} params={data.params} />}
       {data.kind === 'color' && <ColorBody value={(thumb?.value as RGBA | undefined) ? toHex(thumb!.value as RGBA) : String(data.params.color)} />}
       {hasImage && showThumbs && (
         <div className="px-2 pb-2">
@@ -129,11 +128,12 @@ export const NodeView = memo(function NodeView({ id, data, selected }: NodeProps
   )
 })
 
-function NumberBody({ id, value }: { id: string; value: number }) {
+/** Scrub the value right on the card: live while dragging, one undo step on release. */
+function NumberBody({ id, params }: { id: string; params: Record<string, unknown> }) {
   return (
     <div className="nodrag px-2 pb-2">
-      <ScrubValue boxed align="left" value={value} step={0.01} label="Value" className="w-full"
-        onChange={(v, final) => storeFor(id)?.setValue('value', v, { commit: final })} />
+      <ScrubValue boxed align="left" value={Number(params.value ?? 0)} step={0.01} label="Value" className="w-full"
+        onChange={(v, final) => { setParams(id, { ...params, value: v }, !final); if (final) commit() }} />
     </div>
   )
 }

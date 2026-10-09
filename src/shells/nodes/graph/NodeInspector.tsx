@@ -1,15 +1,16 @@
 /* Right panel: the selected node's schema in the kit Inspector; document settings when nothing is selected. */
+import { useLayoutEffect } from 'react'
 import { useStore } from 'zustand'
 import { Copy, Eye, EyeOff, MoreHorizontal, Trash2, ScanEye, MousePointerClick } from 'lucide-react'
 import { Inspector, Panel, PanelHeader, IconButton, Menu, Badge, Section, Row, Button, useValues, cn } from '@kit'
+import { InlineText } from '@kit/ui/inline-text'
 import { specOf } from '../engine/spec'
 import { defOf, catVar } from './defs'
 import { graph, updateData, duplicate, removeNodes, select } from './store'
-import { storeFor } from './nodeParams'
+import { itemStoreFor, bindNode } from './nodeParams'
 import { useEval } from './evaluator'
 import { doc } from './doc'
 import { portVar } from './NodeView'
-import { InlineEdit } from '../local/InlineEdit'
 
 export function NodeInspector() {
   const selKey = useStore(graph, (s) => s.nodes.filter((n) => n.selected).map((n) => n.id).join(','))
@@ -27,10 +28,13 @@ function One({ id }: { id: string }) {
   const status = useEval((s) => s.status[id])
   const thumb = useEval((s) => s.thumbs[id])
   const previewOf = useValues(doc, (v) => v.previewOf)
+  const kind = node?.data.kind
+  // bind before paint so the rows never flash another node's values
+  useLayoutEffect(() => (kind ? bindNode(id) : undefined), [id, kind])
   if (!node) return null
   const def = defOf(node.data.kind)
   const spec = specOf(node.data.kind)
-  const store = storeFor(id)
+  const store = itemStoreFor(node.data.kind)
   const Icon = def.icon
   const wiredFrom = new Map(incoming ? incoming.split('|').map((x) => x.split(':') as [string, string]) : [])
   const error = status?.error ?? thumb?.error
@@ -42,7 +46,7 @@ function One({ id }: { id: string }) {
           <Icon size={15} strokeWidth={1.5} />
         </span>
         <div className="min-w-0 flex-1">
-          <InlineEdit value={node.data.title} onCommit={(t) => updateData([id], () => ({ title: t }))} className="block text-[12.5px] font-semibold text-fg" label="Rename node" />
+          <InlineText value={node.data.title} onCommit={(t) => updateData([id], () => ({ title: t }))} className="block truncate text-[12.5px] font-semibold text-fg" label="Rename node" />
           <div className="mt-0.5 text-[11.5px] leading-snug text-fg-muted">{def.description}</div>
         </div>
         <IconButton icon={node.data.bypass ? EyeOff : Eye} label={node.data.bypass ? 'Enable node' : 'Bypass node'} shortcut="b" active={!!node.data.bypass} size="icon-sm" onClick={() => updateData([id], (d) => ({ bypass: !d.bypass }))} />

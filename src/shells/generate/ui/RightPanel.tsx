@@ -1,6 +1,7 @@
 /* Right panel: Create (sampling settings via the kit Inspector) and Details (how the selected image was made). */
 import { Copy, CornerUpLeft, Sparkles, Maximize2, Wand2, Heart, Download, Trash2, FolderHeart, Lock, Settings2, Columns2, Plus, Info, ChevronDown } from 'lucide-react'
 import { Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Button, IconButton, Menu, Badge, Empty, Tip, toast, copyText, useValues } from '@kit'
+import { promptText } from '@kit/system/dialog'
 import { modelOf, aspectOf, type GenParams } from '../engine/models'
 import { describe } from '../engine/paint'
 import { params } from '../state/params'
@@ -88,7 +89,7 @@ function Details({ id }: { id: string }) {
               { type: 'label', label: 'Boards' },
               ...boards.map((b) => ({ label: b.name, checked: !!rec.boards?.includes(b.id), onClick: () => toggleBoard([rec.id], b.id) })),
               { type: 'separator' },
-              { label: 'New board…', icon: Plus, onClick: () => { const n = prompt('Board name', `Board ${boards.length + 1}`); if (n) { const b = newBoard(n); toggleBoard([rec.id], b.id) } } },
+              { label: 'New board…', icon: Plus, onClick: async () => { const n = await promptText({ title: 'New board', label: 'Board name', defaultValue: `Board ${boards.length + 1}`, confirmLabel: 'Create board', description: 'This image is added to it.' }); if (n) { const b = newBoard(n); toggleBoard([rec.id], b.id) } } },
             ]} />
           <IconButton icon={Download} label="Download PNG" shortcut="mod+e" onClick={async () => { await exportPNG(p, rec.id); toast('PNG exported', { type: 'success', description: `${p.w * scale} × ${p.h * scale}` }) }} />
           <IconButton icon={Copy} label="Copy parameters" onClick={() => copyParams(rec)} />
@@ -163,7 +164,7 @@ function PairThumb({ rec, label }: { rec: ImageRec; label: string }) {
   return (
     <div className="relative overflow-hidden rounded-[7px] bg-well" style={{ aspectRatio: `${rec.params.w} / ${rec.params.h}` }}>
       {pix && <img src={pix.url} alt="" className="h-full w-full object-cover" />}
-      <span className="absolute top-1 left-1 rounded-[4px] bg-black/55 px-1.5 text-[10.5px] font-medium text-white">{label}</span>
+      <span className="absolute top-1 left-1 rounded-[4px] bg-scrim px-1.5 text-[10.5px] font-medium text-white">{label}</span>
     </div>
   )
 }

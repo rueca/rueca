@@ -1,14 +1,18 @@
 /* ---------------------------------------------------------------------------
    Document store with history. Same commit model as the kit's createParams:
    edits made with { commit: false } (mid-drag) are live but not undo steps;
-   commit() on pointer-up pushes ONE step. Undo restores the selection that
-   was current when the step was made (Figma does this).
+   commit(label) on pointer-up pushes ONE named step. Undo restores the
+   selection that was current when the step was made (Figma does this).
+   The engine stays here (selection-aware snapshots); `history` adapts it to
+   the kit's HistoryLike so <HistoryButtons history={history} /> drives it.
 
    The document is too structured for a flat param schema, so it lives here;
    tunable studio preferences (snapping, nudge, export) use createParams.
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
+import type { HistoryLike } from '@kit'
+import type { SnapGuide } from '@kit/stage/snap'
 import { seedDoc } from './seed'
 import { find, update, updateMany, remove, insert, locate, ancestors, cloneFresh, topMost, childrenOf } from './tree'
 import { layoutPage, union, sizeOf } from './layout'
@@ -16,9 +20,10 @@ import { base, frame, solid } from './factory'
 import { uid, type Box, type BoolOp, type Doc, type Node, type Page, type Tool } from './types'
 
 const LS = 'studio:ui-design:doc:v1'
-type Snap = { doc: Doc; selection: string[]; pageId: string }
+/** `label` names the step that LEFT this snapshot (what undo reverts). */
+type Snap = { doc: Doc; selection: string[]; pageId: string; label?: string }
 
-export interface Guide { axis: 'x' | 'y'; at: number; from: number; to: number }
+export type Guide = SnapGuide
 export interface DesignState {
   doc: Doc
   pageId: string
@@ -72,7 +77,7 @@ export const selectionBox = (s: DesignState = get()) => union(s.selection.map((i
 export const inAutoLayout = (id: string, s: DesignState = get()) => !!parentOf(id, s)?.layout
 
 /* --- writing ----------------------------------------------------------------- */
-type Opt = { commit?: boolean }
+type Opt = { commit?: boolean; label?: string }
 
 export function setNodes(fn: (nodes: Node[]) => Node[], o: Opt = {}) {
   const s = get()
@@ -80,16 +85,16 @@ export function setNodes(fn: (nodes: Node[]) => Node[], o: Opt = {}) {
   const next = fn(p.nodes)
   if (next === p.nodes) return
   design.setState({ doc: { ...s.doc, pages: s.doc.pages.map((x) => (x.id === p.id ? { ...x, nodes: next } : x)) } })
-  if (o.commit !== false) commit()
+  if (o.commit !== false) commit(o.label)
 }
 export function setPage(patch: Partial<Page>, o: Opt = {}) {
   const s = get()
   design.setState({ doc: { ...s.doc, pages: s.doc.pages.map((x) => (x.id === s.pageId ? { ...x, ...patch } : x)) } })
-  if (o.commit !== false) commit()
+  if (o.commit !== false) commit(o.label)
 }
 export function setDoc(fn: (d: Doc) => Doc, o: Opt = {}) {
   design.setState({ doc: fn(get().doc) })
-  if (o.commit !== false) commit()
+  if (o.commit !== false) commit(o.label)
 }
 export function patchNode(id: string, patch: Partial<Node> | ((n: Node) => Partial<Node>), o: Opt = {}) {
   setNodes((ns) => update(ns, id, (n) => ({ ...n, ...(typeof patch === 'function' ? patch(n) : patch) })), o)
@@ -99,10 +104,10 @@ export function patchNodes(ids: string[], patch: Partial<Node> | ((n: Node) => P
 }
 export const patchSelection = (patch: Partial<Node> | ((n: Node) => Partial<Node>), o: Opt = {}) => patchNodes(get().selection, patch, o)
 
-export function commit() {
+export function commit(label = 'Edit') {
   const s = get()
   if (s.doc === s.anchor.doc) return
-  design.setState({ past: [...s.past, s.anchor].slice(-200), future: [], anchor: { doc: s.doc, selection: s.selection, pageId: s.pageId } })
+  design.setState({ past: [...s.past, { ...s.anchor, label }].slice(-200), future: [], anchor: { doc: s.doc, selection: s.selection, pageId: s.pageId } })
   persist(s.doc)
 }
 
@@ -111,21 +116,32 @@ const restore = (snap: Snap) => {
   design.setState({ doc: snap.doc, selection: snap.selection.filter(exists), pageId: snap.doc.pages.some((p) => p.id === snap.pageId) ? snap.pageId : snap.doc.pages[0].id, anchor: snap, editing: null })
   persist(snap.doc)
 }
+/** Returns the label of the step undone (undefined when there was none). */
 export function undo() {
   const s = get()
   const prev = s.past.at(-1)
-  if (!prev) return false
-  design.setState({ past: s.past.slice(0, -1), future: [{ ...s.anchor, selection: s.selection }, ...s.future] })
+  if (!prev) return undefined
+  design.setState({ past: s.past.slice(0, -1), future: [{ ...s.anchor, selection: s.selection, label: prev.label }, ...s.future] })
   restore(prev)
-  return true
+  return prev.label
 }
 export function redo() {
   const s = get()
   const [next, ...rest] = s.future
-  if (!next) return false
-  design.setState({ future: rest, past: [...s.past, { ...s.anchor, selection: s.selection }] })
+  if (!next) return undefined
+  design.setState({ future: rest, past: [...s.past, { ...s.anchor, selection: s.selection, label: next.label }] })
   restore(next)
-  return true
+  return next.label
+}
+/** The document history as the kit sees it: <HistoryButtons history={history} />, ⌘Z / ⇧⌘Z. */
+export const history: HistoryLike & { getState: () => DesignState; labels: () => { past: string[]; future: string[] } } = {
+  undo, redo,
+  canUndo: () => get().past.length > 0,
+  canRedo: () => get().future.length > 0,
+  subscribe: design.subscribe,
+  // kit useCanUndo reads through zustand's useStore, which also needs getState (see wave-2 report)
+  getState: design.getState,
+  labels: () => ({ past: get().past.map((p) => p.label ?? 'Edit'), future: get().future.map((f) => f.label ?? 'Edit') }),
 }
 
 export function select(ids: string[]) {
@@ -139,14 +155,14 @@ export const gotoPage = (pageId: string) => design.setState({ pageId, selection:
 export function resetDocument() {
   const d = seedDoc()
   design.setState({ doc: d, pageId: d.pages[0].id, selection: [], editing: null })
-  commit()
+  commit('Reset to demo file')
 }
 
 /* --- structural operations ----------------------------------------------------- */
 export function deleteSelection() {
   const s = get()
   if (!s.selection.length) return
-  setNodes((ns) => remove(ns, new Set(s.selection)))
+  setNodes((ns) => remove(ns, new Set(s.selection)), { label: 'Delete' })
   select([])
 }
 
@@ -171,7 +187,7 @@ export function duplicateSelection(offset = 10, inPlace = false) {
       fresh.push(copy.id)
     }
     return out
-  })
+  }, { label: 'Duplicate' })
   select(fresh)
 }
 
@@ -195,7 +211,7 @@ export function paste() {
     else { c.x += 20; c.y += 20 }
     return c
   })
-  setNodes((ns) => insert(ns, into?.id ?? null, fresh))
+  setNodes((ns) => insert(ns, into?.id ?? null, fresh), { label: 'Paste' })
   select(fresh.map((n) => n.id))
 }
 
@@ -213,7 +229,7 @@ export function reorder(dir: 'forward' | 'backward' | 'front' | 'back') {
       return insert(remove(ns, new Set([id])), loc.parent?.id ?? null, n, to)
     }, { commit: false })
   }
-  commit()
+  commit(dir === 'front' ? 'Bring to front' : dir === 'back' ? 'Send to back' : dir === 'forward' ? 'Bring forward' : 'Send backward')
 }
 
 /** Move a node to a new parent (null = page), keeping its absolute position unless the parent is auto-layout. */
@@ -249,7 +265,7 @@ export function wrapSelection(kind: 'frame' | 'group' = 'frame') {
     auto: parent?.layout ? { dir: 'row', gap: 0 } : null,
     children: order.map((n) => { const b = L.get(n.id)!; return { ...n, x: Math.round(b.x - bb.x), y: Math.round(b.y - bb.y) } }),
   })
-  setNodes((ns) => insert(remove(ns, new Set(ids)), parentId, wrapper, Math.max(0, index)))
+  setNodes((ns) => insert(remove(ns, new Set(ids)), parentId, wrapper, Math.max(0, index)), { label: kind === 'group' ? 'Group selection' : 'Frame selection' })
   select([wrapper.id])
 }
 
@@ -268,7 +284,7 @@ export function ungroup() {
     ns = insert(remove(ns, new Set([id])), loc.parent?.id ?? null, kids, loc.index)
   }
   if (!lifted.length) return
-  setNodes(() => ns)
+  setNodes(() => ns, { label: 'Ungroup' })
   select(lifted)
 }
 
@@ -278,7 +294,7 @@ export function addAutoLayout() {
   const sel = selectedNodes(s)
   if (sel.length === 1 && sel[0].type === 'frame') {
     const f = sel[0]
-    if (f.layout) { patchNode(f.id, { layout: null, sizingW: 'fixed', sizingH: 'fixed', w: boxOf(f.id)!.w, h: boxOf(f.id)!.h }); return }
+    if (f.layout) { patchNode(f.id, { layout: null, sizingW: 'fixed', sizingH: 'fixed', w: boxOf(f.id)!.w, h: boxOf(f.id)!.h }, { label: 'Remove auto layout' }); return }
     const L = layout(s)
     const kids = (f.children ?? []).map((k) => ({ k, b: L.get(k.id)! })).filter((x) => x.b)
     const xs = kids.map((x) => x.b.x), ys = kids.map((x) => x.b.y)
@@ -293,7 +309,7 @@ export function addAutoLayout() {
     }
     const bb = union(kids.map((x) => x.b))
     const pad: [number, number, number, number] = bb ? [Math.max(0, Math.round(bb.y - fb.y)), Math.max(0, Math.round(fb.x + fb.w - bb.x - bb.w)), Math.max(0, Math.round(fb.y + fb.h - bb.y - bb.h)), Math.max(0, Math.round(bb.x - fb.x))] : [16, 16, 16, 16]
-    patchNode(f.id, { layout: { dir, gap, pad, alignX: 'start', alignY: 'start' }, sizingW: 'hug', sizingH: 'hug', children: sorted.map((x) => x.k) })
+    patchNode(f.id, { layout: { dir, gap, pad, alignX: 'start', alignY: 'start' }, sizingW: 'hug', sizingH: 'hug', children: sorted.map((x) => x.k) }, { label: 'Add auto layout' })
     return
   }
   if (!sel.length) return
@@ -306,15 +322,15 @@ export function addAutoLayout() {
   const spreadY = Math.max(...kids.map((x) => x.b.y)) - Math.min(...kids.map((x) => x.b.y))
   const dir = spreadX >= spreadY ? 'row' : 'column'
   const sorted = [...kids].sort((a, b) => (dir === 'row' ? a.b.x - b.b.x : a.b.y - b.b.y)).map((x) => x.k)
-  patchNode(w.id, { name: 'Frame', layout: { dir, gap: 10, pad: [0, 0, 0, 0], alignX: 'start', alignY: 'start' }, sizingW: 'hug', sizingH: 'hug', children: sorted })
+  patchNode(w.id, { name: 'Frame', layout: { dir, gap: 10, pad: [0, 0, 0, 0], alignX: 'start', alignY: 'start' }, sizingW: 'hug', sizingH: 'hug', children: sorted }, { label: 'Add auto layout' })
 }
 
 export function toggleComponent() {
   const sel = selectedNodes()
   if (!sel.length) return
-  if (sel.length === 1 && sel[0].type === 'frame') { patchNode(sel[0].id, { component: !sel[0].component }); return sel[0].component ? 'detached' : 'created' }
+  if (sel.length === 1 && sel[0].type === 'frame') { patchNode(sel[0].id, { component: !sel[0].component }, { label: sel[0].component ? 'Detach component' : 'Create component' }); return sel[0].component ? 'detached' : 'created' }
   wrapSelection('frame')
-  patchSelection({ component: true, name: 'Component' })
+  patchSelection({ component: true, name: 'Component' }, { label: 'Create component' })
   return 'created'
 }
 
@@ -323,7 +339,7 @@ export function booleanOp(op: BoolOp) {
   const s = get()
   const sel = topMost(nodesOf(s), s.selection).map((id) => node(id, s)!).filter(Boolean)
   const existing = sel.length === 1 && sel[0].type === 'boolean' ? sel[0] : null
-  if (existing) { patchNode(existing.id, { bool: op, name: op[0].toUpperCase() + op.slice(1) }); return true }
+  if (existing) { patchNode(existing.id, { bool: op, name: op[0].toUpperCase() + op.slice(1) }, { label: 'Boolean' }); return true }
   if (sel.length < 2 || sel.some((n) => n.type !== 'rect' && n.type !== 'ellipse')) return false
   const L = layout(s)
   const parentId = parentOf(sel[0].id, s)?.id ?? null
@@ -338,7 +354,7 @@ export function booleanOp(op: BoolOp) {
     fills: ordered[0].fills.length ? ordered[0].fills : [solid('#d9d9d9')], strokes: ordered[0].strokes, effects: [],
     children: ordered.map((n) => { const nb = L.get(n.id)!; return { ...n, x: Math.round(nb.x - bb.x), y: Math.round(nb.y - bb.y) } }),
   })
-  setNodes((ns) => insert(remove(ns, new Set(sel.map((n) => n.id))), parentId, b, idx))
+  setNodes((ns) => insert(remove(ns, new Set(sel.map((n) => n.id))), parentId, b, idx), { label: 'Boolean' })
   select([b.id])
   return true
 }
@@ -365,7 +381,7 @@ export function align(edge: 'left' | 'hcenter' | 'right' | 'top' | 'vcenter' | '
       out = update(out, id, (n) => ({ ...n, x: Math.round(n.x + dx), y: Math.round(n.y + dy) }))
     }
     return out
-  })
+  }, { label: 'Align' })
 }
 
 /** Equal spacing between 3+ nodes along an axis. */
@@ -388,7 +404,7 @@ export function distribute(axis: 'x' | 'y') {
       cursor += (axis === 'x' ? it.b.w : it.b.h) + gap
     }
     return out
-  })
+  }, { label: 'Distribute' })
 }
 
 /** Arrow keys. Free nodes nudge; auto-layout children reorder (Figma). */
@@ -409,15 +425,15 @@ export function nudge(dx: number, dy: number) {
     const n = p.children![loc.index]
     ns = insert(remove(ns, new Set([id])), p.id, n, to)
   }
-  setNodes(() => ns)
+  setNodes(() => ns, { label: 'Nudge' })
 }
 
 export function addNode(n: Node, parentId: string | null, index?: number) {
-  setNodes((ns) => insert(ns, parentId, n, index))
+  setNodes((ns) => insert(ns, parentId, n, index), { label: `Add ${n.type}` })
   select([n.id])
 }
 
-export function renameNode(id: string, name: string) { patchNode(id, { name }) }
+export function renameNode(id: string, name: string) { patchNode(id, { name }, { label: 'Rename' }) }
 
 /** Every interaction pointing at a frame that no longer exists is dropped on read. */
 export const frames = (s: DesignState = get()) => page(s).nodes.filter((n) => n.type === 'frame')
@@ -442,14 +458,14 @@ export function selectChildren() {
 
 export function addPage() {
   const id = uid('pg')
-  setDoc((d) => ({ ...d, pages: [...d.pages, { id, name: `Page ${d.pages.length + 1}`, bg: '', nodes: [], comments: [] }] }))
+  setDoc((d) => ({ ...d, pages: [...d.pages, { id, name: `Page ${d.pages.length + 1}`, bg: '', nodes: [], comments: [] }] }), { label: 'Add page' })
   gotoPage(id)
 }
-export function renamePage(id: string, name: string) { setDoc((d) => ({ ...d, pages: d.pages.map((p) => (p.id === id ? { ...p, name } : p)) })) }
+export function renamePage(id: string, name: string) { setDoc((d) => ({ ...d, pages: d.pages.map((p) => (p.id === id ? { ...p, name } : p)) }), { label: 'Rename page' }) }
 export function deletePage(id: string) {
   const s = get()
   if (s.doc.pages.length < 2) return
-  setDoc((d) => ({ ...d, pages: d.pages.filter((p) => p.id !== id) }))
+  setDoc((d) => ({ ...d, pages: d.pages.filter((p) => p.id !== id) }), { label: 'Delete page' })
   if (s.pageId === id) gotoPage(get().doc.pages[0].id)
 }
 

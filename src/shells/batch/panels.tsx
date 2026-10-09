@@ -7,22 +7,20 @@ import {
 } from 'lucide-react'
 import {
   Panel, PanelHeader, Inspector, Section, Row, LayerTree, Menu, Button, IconButton, Segmented, Checkbox, TextInput, SizeFields, Switch, Badge, Swatch, Tip, Empty,
-  useValues, type LayerItem, type MenuItem,
+  useValues, useDoc, type LayerItem, type MenuItem,
 } from '@kit'
 import { doc, params, ui, OVERRIDABLE, COLUMNS, SIZE_PRESETS, type V, type SizeSpec } from './model'
-import { useDoc } from './local/history'
 import { OverrideRows } from './local/OverrideRows'
-import { DataGrid } from './local/DataGrid'
-import { JobQueue, Progress } from './local/JobQueue'
-import { Modal } from './local/Modal'
+import { DataGrid, parseDelimited } from '@kit/ui/data-grid'
+import { JobQueue, Progress, useJobs } from '@kit/system/jobs'
+import { Dialog } from '@kit/system/dialog'
 import { fmtBytes } from '@kit'
 import { drawPost } from './artifact'
 import {
   addPreset, addRow, addSize, clearAllOverrides, clearOverride, editCell, exportCSV, importText, moveSize, overrideCount, pasteBlock, patchSize, pickCSV,
   promoteOverrides, removeRow, removeSize, selectSize, setOverride, setRow,
 } from './actions'
-import { exporter, plannedJobs, runExport, cancelExport, clearExport, downloadJob, downloadZip, setExportSettings } from './exporter'
-import { parseDelimited } from './local/DataGrid'
+import { exporter, jobs, plannedJobs, runExport, cancelExport, clearExport, downloadJob, downloadZip, setExportSettings } from './exporter'
 import { rowsFromMatrix } from './actions'
 
 /** 1080×1920 → 9:16, 1200×627 → 1.91:1 */
@@ -228,18 +226,19 @@ export function BrandTab() {
 
 export function ExportTab() {
   const st = useStore(exporter)
+  const run = useJobs(jobs)
   const sizes = useDoc(doc, (d) => d.sizes)
   const rows = useDoc(doc, (d) => d.rows.length)
   useStore(ui, (s) => s.row)
   const s = st.settings
   const planned = plannedJobs(s)
-  const running = st.status === 'running'
+  const running = run.status === 'running'
   const chosen = (id: string) => (s.sizeIds ? s.sizeIds.includes(id) : sizes.find((x) => x.id === id)?.visible !== false)
   const toggleSize = (id: string) => {
     const cur = sizes.filter((x) => chosen(x.id)).map((x) => x.id)
     setExportSettings({ sizeIds: cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id] })
   }
-  const total = st.jobs.length
+  const total = run.jobs.length
   return (
     <div className="flex h-full flex-col">
       <div className={total ? 'min-h-0 flex-none overflow-y-auto' : 'min-h-0 flex-1 overflow-y-auto'} style={{ maxHeight: total ? '42%' : undefined }}>
@@ -266,19 +265,19 @@ export function ExportTab() {
         {running ? (
           <>
             <div className="flex items-center justify-between text-[11.5px]">
-              <span className="text-fg tabular">Rendering {st.done + 1 > total ? total : st.done + 1} of {total}</span>
+              <span className="text-fg tabular">Rendering {run.done + 1 > total ? total : run.done + 1} of {total}</span>
               <span className="text-fg-faint tabular">{fmtBytes(st.bytes)}</span>
             </div>
-            <Progress value={st.done / Math.max(1, total)} />
+            <Progress value={run.done / Math.max(1, total)} label="Export progress" />
             <Button variant="outline" size="md" className="w-full" onClick={cancelExport}><X size={13} strokeWidth={1.5} />Cancel</Button>
           </>
-        ) : st.status === 'done' || st.status === 'cancelled' ? (
+        ) : run.status === 'done' || run.status === 'cancelled' ? (
           <>
             <div className="flex items-center justify-between text-[11.5px]">
-              <span className="text-fg tabular">{st.done} of {total} rendered{st.status === 'cancelled' ? ' — cancelled' : ''}</span>
-              <span className="text-fg-faint tabular">{(st.elapsed / 1000).toFixed(1)}s</span>
+              <span className="text-fg tabular">{run.done} of {total} rendered{run.status === 'cancelled' ? ' — cancelled' : ''}{run.failed ? ` · ${run.failed} failed` : ''}</span>
+              <span className="text-fg-faint tabular">{(run.elapsed / 1000).toFixed(1)}s</span>
             </div>
-            <Progress value={st.done / Math.max(1, total)} tone={st.status === 'cancelled' ? 'rec' : 'ok'} />
+            <Progress value={run.done / Math.max(1, total)} label="Export progress" tone={run.status === 'cancelled' ? 'rec' : 'ok'} />
             {st.zip && <Button variant="primary" size="lg" className="w-full" onClick={downloadZip}><Package size={14} strokeWidth={1.5} />Download zip · {fmtBytes(st.zip.size)}</Button>}
             <div className="flex gap-2">
               <Button variant="default" size="md" className="flex-1" onClick={() => void runExport()}>Render again</Button>
@@ -296,7 +295,7 @@ export function ExportTab() {
       </div>
       {total > 0 && (
         <div className="min-h-0 flex-1 overflow-y-auto border-t border-line p-1.5">
-          <JobQueue jobs={st.jobs} onOpen={(j) => downloadJob(j.id)} />
+          <JobQueue jobs={run.jobs} onOpen={(j) => downloadJob(j.id)} />
         </div>
       )}
     </div>
@@ -325,9 +324,10 @@ export function DataPanel({ rowIssues, openPaste }: { rowIssues: (i: number) => 
       <DataGrid
         className="h-full"
         columns={COLUMNS}
-        rows={rows as unknown as Record<string, string>[]}
+        rows={rows}
         activeRow={row}
         onActiveRow={setRow}
+        label="Data rows"
         onEdit={editCell}
         onPaste={pasteBlock}
         onAddRow={() => addRow(rows.length - 1)}
@@ -348,7 +348,7 @@ export function PasteDialog({ open, onOpenChange }: { open: boolean; onOpenChang
   const header = first.some((c) => /^(product|name|headline|subhead|button|cta|price|colou?r|badge)$/i.test(c.trim()))
   const done = (mode: 'replace' | 'append') => { importText(text, mode); setText(''); onOpenChange(false) }
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Paste data" width={560}
+    <Dialog open={open} onOpenChange={onOpenChange} title="Paste data" width={560}
       description={<>Paste rows from Sheets, Excel or Numbers (tab- or comma-separated). With a header row, columns are matched by name — {COLUMNS.map((c) => c.label).join(', ')}. Without one, they are read in that order.</>}
       onSubmit={() => parsed.length && done('replace')}
       footer={
@@ -360,7 +360,7 @@ export function PasteDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       }>
       <TextInput multiline mono rows={10} value={text} onChange={setText} label="CSV"
         placeholder={'Product,Headline,Subhead,Button,Price,Colour,Badge\nYuzu & ginger,"Bright, sharp, a little bit wild.",Zero sugar.,Shop now,£2.20,#F2B705,New'} />
-    </Modal>
+    </Dialog>
   )
 }
 
@@ -369,7 +369,7 @@ export function CustomSizeDialog({ open, onOpenChange }: { open: boolean; onOpen
   const [dim, setDim] = useState({ w: 1200, h: 1200 })
   const add = () => { addSize({ name: name.trim() || 'Custom', platform: 'custom', w: dim.w, h: dim.h, safe: { t: 0, r: 0, b: 0, l: 0 }, zones: [] }); onOpenChange(false) }
   return (
-    <Modal open={open} onOpenChange={onOpenChange} title="Add custom size" width={380} onSubmit={add}
+    <Dialog open={open} onOpenChange={onOpenChange} title="Add custom size" width={380} onSubmit={add}
       description="Any width and height. The layout rule is picked from its aspect ratio; override it per size afterwards."
       footer={<><Button size="md" onClick={() => onOpenChange(false)}>Cancel</Button><Button size="md" variant="primary" onClick={add}>Add size</Button></>}>
       <div className="-mx-3 flex flex-col">
@@ -377,7 +377,7 @@ export function CustomSizeDialog({ open, onOpenChange }: { open: boolean; onOpen
         <Row label="Size"><SizeFields value={dim} min={16} max={8000} onChange={(s) => setDim({ w: Math.round(s.w), h: Math.round(s.h) })} /></Row>
         <Row label="Aspect"><span className="tabular text-[11.5px] text-fg-muted">{(dim.w / dim.h).toFixed(2)} · {dim.w / dim.h < 0.82 ? 'stack' : dim.w / dim.h > 1.3 ? 'split' : 'hero'} layout</span></Row>
       </div>
-    </Modal>
+    </Dialog>
   )
 }
 

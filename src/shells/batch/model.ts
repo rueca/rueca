@@ -1,8 +1,7 @@
 /* Batch — the document model: template params, data rows, output sizes, per-size overrides. */
 import { AlignCenter, AlignLeft } from 'lucide-react'
 import { createStore } from 'zustand/vanilla'
-import { defineSchema, folder, p, createParams } from '@kit'
-import { createDocStore, linkHistory } from './local/history'
+import { defineSchema, folder, p, createParams, createDocStore, createHistory } from '@kit'
 
 /* --- template + brand: schema-driven, so the kit Inspector renders them --- */
 const locked = (v: any) => !!v.brandLocked
@@ -134,16 +133,18 @@ export const SIZE_PRESETS: Omit<SizeSpec, 'id'>[] = [
 export interface Doc { rows: DataRow[]; sizes: SizeSpec[]; overrides: Record<string, Overrides> }
 export const DEMO_DOC: Doc = { rows: DEMO_ROWS, sizes: DEFAULT_SIZES, overrides: { 'ig-story': { headlineScale: 112 }, linkedin: { showSubhead: false } } }
 
-export const doc = createDocStore<Doc>(DEMO_DOC, {
-  id: 'batch',
-  migrate: (raw) => {
-    const d = raw as Doc
-    return d && Array.isArray(d.rows) && Array.isArray(d.sizes) && d.overrides ? d : null
-  },
-})
+/** Sessions saved before the kit doc store (key `studio:batch:doc`) carry over once. */
+function legacyDoc(): Doc {
+  try {
+    const d = JSON.parse(localStorage.getItem('studio:batch:doc') ?? 'null') as Doc | null
+    if (d && Array.isArray(d.rows) && Array.isArray(d.sizes) && d.overrides) return d
+  } catch { /* corrupt or private mode */ }
+  return DEMO_DOC
+}
+export const doc = createDocStore<Doc>(legacyDoc(), { id: 'batch', version: 1 })
 
 /** ⌘Z undoes whichever changed last — template/brand values or the document. */
-export const history = linkHistory([params, doc], ['Values', 'Document'])
+export const history = createHistory([params, doc])
 
 /* --- view state (not undoable) --- */
 export const ui = createStore<{ row: number; selected: string | null; safe: boolean; tab: 'design' | 'brand' | 'export'; data: boolean }>(() => ({

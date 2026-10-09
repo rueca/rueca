@@ -12,6 +12,7 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { ChevronRight, Eye, EyeOff, Lock, Unlock } from 'lucide-react'
 import { cn } from '../core/cn'
+import { InlineText } from '../ui/inline-text'
 
 export interface LayerItem {
   id: string
@@ -164,14 +165,10 @@ export function LayerTree({
             ) : Icon ? (
               <Icon size={14} strokeWidth={1.5} className={cn('shrink-0', sel ? 'text-signal' : 'text-fg-faint')} />
             ) : null}
-            {editing === item.id ? (
-              <input autoFocus defaultValue={item.name} onClick={(e) => e.stopPropagation()}
-                onBlur={(e) => { onRename?.(item.id, e.target.value || item.name); setEditing(null) }}
-                onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setEditing(null) }}
-                className="ml-1 h-5 min-w-0 flex-1 rounded-[4px] bg-control px-1 text-[12px] text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
-            ) : (
-              <span className="ml-1 min-w-0 flex-1 truncate">{item.name}</span>
-            )}
+            <span className="ml-1 flex min-w-0 flex-1" onClick={(e) => editing === item.id && e.stopPropagation()}>
+              <InlineText bare focusable={false} editing={editing === item.id} onEditingChange={(b) => setEditing(b ? item.id : null)}
+                value={item.name} onCommit={(v) => onRename?.(item.id, v)} label="Rename layer" className="min-w-0 flex-1 truncate" />
+            </span>
             {item.meta && <span className="shrink-0 text-[11px] text-fg-faint group-hover/row:hidden">{item.meta}</span>}
             {onToggle && rowToggles.length > 0 && (
               // Overlaid on hover so names keep their full width when toggles are hidden;

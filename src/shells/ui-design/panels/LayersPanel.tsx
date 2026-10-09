@@ -1,6 +1,9 @@
 /* Left panel: Pages (collapsible list) over the kit LayerTree. The tree shows
-   the top layer first, so display order is the reverse of paint order. */
-import { useEffect, useMemo, useRef, useState } from 'react'
+   the top layer first, so display order is the reverse of paint order.
+   Expansion is controlled here so a canvas selection reveals its row (Figma):
+   top-level frames start open, nested groups closed; the tree scrolls the
+   selected row into view itself. Hovering a row highlights it on the canvas. */
+import { useEffect, useMemo, useState } from 'react'
 import { ChevronRight, Plus, FileText, Trash2, Check } from 'lucide-react'
 import { LayerTree, IconButton, Menu, cn, type LayerItem } from '@kit'
 import * as S from '../model/store'
@@ -20,7 +23,9 @@ function toItems(nodes: Node[]): LayerItem[] {
       visible: n.visible,
       locked: n.locked,
       meta: n.interactions?.length ? '⚡' : undefined,
-      children: n.type === 'boolean' || !n.children?.length ? (n.children?.length ? toItems(n.children) : undefined) : toItems(n.children),
+      // frames accept drops even when empty
+      container: n.type === 'frame',
+      children: n.children?.length ? toItems(n.children) : undefined,
     }
   })
 }
@@ -33,12 +38,12 @@ export function LayersPanel() {
   const [renaming, setRenaming] = useState<string | null>(null)
   const pg = S.page()
   const items = useMemo(() => toItems(pg.nodes), [pg.nodes])
-  const scroller = useRef<HTMLDivElement>(null)
-  // keep the selected row in view when the selection comes from the canvas
+  const [expanded, setExpanded] = useState<string[]>(() => doc.pages.flatMap((p) => p.nodes.filter((n) => n.children?.length).map((n) => n.id)))
+  // reveal the selection: open every ancestor of a selected layer
   useEffect(() => {
-    const row = scroller.current?.querySelector('[role=treeitem][aria-selected=true]') as HTMLElement | null
-    row?.scrollIntoView({ block: 'nearest' })
-  }, [selection])
+    const need = selection.flatMap((id) => S.ancestors(S.nodesOf(), id).map((a) => a.id))
+    if (need.some((id) => !expanded.includes(id))) setExpanded((e) => [...new Set([...e, ...need])])
+  }, [selection, pageId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const onMove = (id: string, target: string, where: 'before' | 'after' | 'inside') => {
     const ns = S.nodesOf()
@@ -47,7 +52,7 @@ export function LayersPanel() {
     if (!tgt) return
     if (where === 'inside') {
       if (tgt.type !== 'frame') return
-      S.setNodes((all) => S.reparent(all, id, target))
+      S.setNodes((all) => S.reparent(all, id, target), { label: 'Move layer' })
       return
     }
     const loc = locate(ns, target)!
@@ -62,7 +67,7 @@ export function LayersPanel() {
       const ti = rest.findIndex((n) => n.id === target)
       rest.splice(where === 'before' ? ti + 1 : ti, 0, me)
       return parentId ? update(moved, parentId, (p) => ({ ...p, children: rest })) : rest
-    })
+    }, { label: 'Move layer' })
   }
 
   return (
@@ -102,15 +107,23 @@ export function LayersPanel() {
         )}
       </div>
       <div className="flex h-9 flex-none items-center pr-2 pl-3 text-[11.5px] font-medium">Layers</div>
-      <div ref={scroller} className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {items.length ? (
           <LayerTree
             items={items}
             selected={selection}
             onSelect={(ids) => S.select(ids)}
-            onToggle={(id, prop) => { const n = find(S.nodesOf(), id); if (n) S.patchNode(id, prop === 'visible' ? { visible: !n.visible } : { locked: !n.locked }) }}
+            onToggle={(id, prop) => {
+              const n = find(S.nodesOf(), id)
+              if (!n) return
+              if (prop === 'visible') S.patchNode(id, { visible: !n.visible }, { label: n.visible ? 'Hide' : 'Show' })
+              else S.patchNode(id, { locked: !n.locked }, { label: n.locked ? 'Unlock' : 'Lock' })
+            }}
             onMove={onMove}
             onRename={(id, name) => S.renameNode(id, name)}
+            expanded={expanded}
+            onExpandedChange={setExpanded}
+            onHover={S.setHover}
           />
         ) : <div className="px-3 py-2 text-[11.5px] text-fg-faint">No layers on this page.</div>}
       </div>

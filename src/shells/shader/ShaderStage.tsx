@@ -8,11 +8,11 @@ import { TriangleAlert } from 'lucide-react'
 import { useStudio, useValues } from '@kit'
 import { ShaderRenderer } from './renderer'
 import { structureKey } from './codegen'
-import type { Layer } from './layers'
 import { clock, getLayers, params, perf, ui } from './state'
 import { ASPECTS } from './output'
-import { useFitFrame } from './local/useFitFrame'
+import { useFitFrame } from '@kit/stage/fit-frame'
 
+// Panel widths for <Studio>. The frame finds the free space itself (useSafeArea), so it follows present mode too.
 export const LEFT_W = 284
 export const RIGHT_W = 288
 
@@ -28,7 +28,7 @@ export function ShaderStage() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [error, setError] = useState<string | null>(null)
   const aspect = ASPECTS[aspectKey] ?? null
-  const frame = useFitFrame(wrap, aspect, present ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: 60, left: LEFT_W + 24, right: RIGHT_W + 24, bottom: 64 }, present ? 32 : 12)
+  const frame = useFitFrame(wrap, aspect, { pad: present ? 32 : 12 })
   const frameRef = useRef(frame)
   frameRef.current = frame
   useEffect(() => { if (frame.w && frame.h) ui.setState({ frameW: frame.w, frameH: frame.h }) }, [frame.w, frame.h])
@@ -49,7 +49,7 @@ export function ShaderStage() {
     let lastErr: string | null = null
     const mark = () => { dirty = true }
     let key = ''
-    const offP = params.subscribe((st) => { dirty = true; const k = structureKey(st.values.layers as unknown as Layer[]); if (k !== key) { key = k; since = 0 } })
+    const offP = params.subscribe((st) => { dirty = true; const k = structureKey(st.values.layers); if (k !== key) { key = k; since = 0 } })
     const offU = ui.subscribe(mark)
 
     const tick = () => {

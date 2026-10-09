@@ -15,10 +15,8 @@ import {
 import { Section, Row, ScrubValue, Segmented, Select, Checkbox, IconButton, Button, Tip, Menu, ColorField, Badge, cn, type MenuItem } from '@kit'
 import * as S from '../model/store'
 import { common, numField, setAll, MIXED } from './fields'
-import { StackList } from '../local/StackList'
-import { PaintField } from '../local/PaintField'
-import { AlignGrid } from '../local/AlignGrid'
-import { QuadField, type Quad } from '../local/QuadField'
+import { EffectStack } from '@kit/ui/stack'
+import { AlignGrid, QuadField, PaintField, CORNER_NAMES, type Quad } from '@kit/ui/layout-fields'
 import { FONTS, wrapText } from '../model/layout'
 import { imageURL, IMAGE_LABELS } from '../model/images'
 import { solid, shadow } from '../model/factory'
@@ -232,8 +230,7 @@ function AutoLayoutRows({ n }: { n: Node }) {
       </div>
       <Row label="Padding">
         <QuadField mode="pairs" value={L.pad} onChange={(v, f) => set({ pad: v }, f)} max={400}
-          prefix={[<span key="h" className="text-[9px]">↔</span>, <span key="v" className="text-[9px]">↕</span>]} labels={['T', 'R', 'B', 'L']}
-          toggleIcon={<Scan size={12} strokeWidth={1.5} />} />
+          prefix={[<span key="h" className="text-[9px]">↔</span>, <span key="v" className="text-[9px]">↕</span>]} labels={['T', 'R', 'B', 'L']} />
       </Row>
     </>
   )
@@ -246,14 +243,14 @@ function RadiusRow({ nodes }: { nodes: Node[] }) {
     <Row label="Radius">
       <QuadField mode="single" value={value as Quad} mixed={r === MIXED} max={999}
         onChange={(v, f) => setAll(nodes, () => ({ radius: v }), f)}
-        prefix={<span className="text-[10px]">◜</span>} labels={['↖', '↗', '↘', '↙']}
-        toggleIcon={<Scan size={12} strokeWidth={1.5} />} />
+        prefix={<span className="text-[10px]">◜</span>} labels={['↖', '↗', '↘', '↙']} names={CORNER_NAMES} />
     </Row>
   )
 }
 
 /* --- fills / strokes ------------------------------------------------------------ */
 const strip = (ps: Paint[]) => ps.map(({ id: _id, ...rest }) => rest)
+const PAINT_NAME: Record<Paint['kind'], string> = { solid: 'Solid', linear: 'Linear gradient', radial: 'Radial gradient', image: 'Image' }
 
 function PaintSection({ title, nodes, prop, open }: { title: string; nodes: Node[]; prop: 'fills' | 'strokes'; open: { open: boolean; onToggle: () => void } }) {
   const paints = common(nodes, (n) => strip(n[prop]))
@@ -269,8 +266,11 @@ function PaintSection({ title, nodes, prop, open }: { title: string; nodes: Node
   const align = common(nodes, (n) => n.strokeAlign)
   return (
     <Section title={title} {...open} actions={<IconButton icon={Plus} size="icon-sm" label={`Add ${title.toLowerCase()}`} onClick={add} />}>
-      <StackList items={list} mixed={mixed} onChange={set} mixedHint={`Mixed ${title.toLowerCase()}s — click + to replace`}
-        renderRow={(p, upd) => <PaintField value={p} onChange={(np, f) => upd(np, f)} images={IMAGE_LABELS} imageURL={imageURL} />} />
+      {/* kit stack in paint order (top layer first on screen); its opacity field is the paint's opacity */}
+      <EffectStack order="bottom-first" label={`${title}s`} removeIcon="minus" contextMenu={false}
+        items={list.map((p) => ({ ...p, name: PAINT_NAME[p.kind] }))} mixed={mixed} mixedHint={`Mixed ${title.toLowerCase()}s — click + to replace`}
+        onChange={(next, f) => set(next.map(({ name: _n, ...p }) => p), f)}
+        renderRow={(p, { set: upd }) => <PaintField value={p} opacity={false} onChange={(np, f) => upd(np, f)} images={IMAGE_LABELS} imageURL={imageURL} label={title} />} />
       {prop === 'strokes' && list.length > 0 && (
         <Row label="Weight">
           <ScrubValue boxed align="left" prefix="≡" label="Stroke weight" min={0} max={200} step={0.5} {...strokeWidth} className="flex-1" />
@@ -296,8 +296,11 @@ function EffectsSection({ nodes, open }: { nodes: Node[]; open: { open: boolean;
   return (
     <Section title="Effects" {...open}
       actions={<Menu align="end" trigger={<IconButton icon={Plus} size="icon-sm" label="Add effect" />} items={(Object.keys(FX_LABEL) as Effect['kind'][]).map((k) => ({ label: FX_LABEL[k], onClick: () => add(k) }))} />}>
-      <StackList items={list} mixed={mixed} onChange={set} mixedHint="Mixed effects — click + to replace"
-        renderRow={(e, upd) => (
+      {/* an effect's `opacity` is its shadow colour's (edited in the popover) — carried as `alpha` so the stack shows no opacity field */}
+      <EffectStack order="bottom-first" label="Effects" removeIcon="minus" contextMenu={false}
+        items={list.map(({ opacity, ...e }) => ({ ...e, alpha: opacity, name: FX_LABEL[e.kind] }))} mixed={mixed} mixedHint="Mixed effects — click + to replace"
+        onChange={(next, f) => set(next.map(({ name: _n, alpha, ...e }) => ({ ...e, opacity: alpha })), f)}
+        renderRow={(e, { set: upd }) => (
           <>
             <Popover.Root>
               <Tip label="Effect settings">
@@ -322,7 +325,7 @@ function EffectsSection({ nodes, open }: { nodes: Node[]; open: { open: boolean;
                     {e.kind.includes('shadow') && (
                       <Row label="Colour">
                         <ColorField value={e.color} alpha={false} onChange={(c, f) => upd({ color: c.slice(0, 7) }, f)} />
-                        <ScrubValue boxed value={Math.round(e.opacity * 100)} min={0} max={100} unit="%" onChange={(v, f) => upd({ opacity: v / 100 }, f)} className="w-[50px] shrink-0" label="Shadow opacity" />
+                        <ScrubValue boxed value={Math.round(e.alpha * 100)} min={0} max={100} unit="%" onChange={(v, f) => upd({ alpha: v / 100 }, f)} className="w-[50px] shrink-0" label="Shadow opacity" />
                       </Row>
                     )}
                   </Popover.Popup>

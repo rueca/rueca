@@ -1,23 +1,21 @@
 /* ---------------------------------------------------------------------------
-   State. Two stores:
-     params — the kit store. Holds the tunable artboard values AND the whole
-              animation document (as a hidden `doc` value), so undo/redo,
-              persistence, A/B and share links cover keyframe edits for free.
-     ui     — selection, mode, pending (edited-not-keyed) values, preview.
+   State. Three stores, one undo timeline:
+     params  — the kit store: tunable artboard / playback values.
+     doc     — the animation document (objects, animations, state machine) in a
+               kit doc store; `history` joins it to params so ⌘Z undoes
+               whichever changed last.
+     ui      — selection, mode, pending (edited-not-keyed) values, preview.
+               Kept OUT of the doc so undo never fights focus.
    Every document edit goes through the functions below.
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { createClock, createParams, defineSchema, folder, p, type TextDef } from '@kit'
+import { createClock, createDocStore, createHistory, createParams, defineSchema, folder, p, useDoc as useDocStore } from '@kit'
 import {
   DEFAULTS, PROPS_FOR, blendResolved, keyAt, localTime, newId, parseTrack, resolve, trackKey,
   type Anim, type Doc, type Ease, type Key, type PropKey, type Resolved, type Val,
 } from './engine'
 import { demoDoc } from './demo'
-
-/* The kit has no def for structured, hidden document state; a text def that
-   is never rendered carries it (see report: kit gap `p.data()`). */
-const docDef = (value: Doc) => ({ type: 'text', value } as unknown as TextDef)
 
 export const schema = defineSchema({
   artboard: folder('Artboard', {
@@ -31,15 +29,18 @@ export const schema = defineSchema({
     snap: p.boolean(true, { label: 'Snap keys', hint: 'Dragged keys snap to the playhead, other keys and the ends. Hold Alt to disable.' }),
     exportScale: p.select('2', [{ value: '1', label: '1×' }, { value: '2', label: '2×' }, { value: '3', label: '3×' }], { label: 'Export scale', hint: 'Resolution multiplier for PNG and MP4 export.' }),
   }),
-  document: folder('Document', { doc: docDef(demoDoc()) }),
 })
 
-export const params = createParams(schema, { id: 'animate' })
+export const params = createParams(schema, { id: 'animate', version: 2 })
 export type V = ReturnType<typeof params.values>
 
-export const getDoc = () => params.values().doc as unknown as Doc
-export const setDoc = (doc: Doc, final = true) => params.setValue('doc', doc as unknown as string, { commit: final })
-export const useDoc = () => useStore(params, (s) => s.values.doc) as unknown as Doc
+export const doc = createDocStore<Doc>(demoDoc(), { id: 'animate', version: 1 })
+export const history = createHistory([params, doc])
+
+export const getDoc = () => doc.get()
+export const setDoc = (d: Doc, final = true, label?: string) => doc.set(d, { commit: final, label })
+export const commitDoc = (label?: string) => doc.commit(label)
+export const useDoc = () => useDocStore(doc)
 
 /* ---------- ui ---------- */
 export type Mode = 'design' | 'animate'
@@ -56,7 +57,6 @@ export interface UI {
   lastTransition: string | null
   inputs: Record<string, boolean | number>
   fired: string | null
-  segment: { keyId: string; laneId: string; anchor: DOMRect } | null
 }
 export const ui = createStore<UI>(() => ({
   mode: 'animate',
@@ -71,31 +71,31 @@ export const ui = createStore<UI>(() => ({
   lastTransition: null,
   inputs: Object.fromEntries(getDoc().sm.inputs.map((i) => [i.name, i.value])),
   fired: null,
-  segment: null,
 }))
 export const useUI = <T,>(pick: (s: UI) => T) => useStore(ui, pick)
 
 export const currentAnim = (doc = getDoc()): Anim => doc.anims.find((a) => a.id === ui.getState().animId) ?? doc.anims[0]
 
 /* ---------- clock ---------- */
-export const clock = createClock({ duration: currentAnim().duration, loop: true, playing: false, fps: 60 })
+// The kit clock loops, plays once or ping-pongs natively, so clock time IS animation time.
+export const clock = createClock({ duration: currentAnim().duration, mode: currentAnim().loop, playing: false, fps: 60 })
 export function syncClock() {
-  if (ui.getState().preview) { clock.setState({ duration: 1e9, loop: true }); return }
+  if (ui.getState().preview) { clock.setState({ duration: 1e9, mode: 'loop' }); return }
   const a = currentAnim()
-  clock.setState({ duration: a.loop === 'pingpong' ? a.duration * 2 : a.duration, loop: a.loop !== 'once', fps: Number(params.values().fps) })
-  if (clock.time() > clock.getState().duration) clock.seek(0)
+  const fps = Number(params.values().fps)
+  const st = clock.getState()
+  if (st.duration !== a.duration || st.mode !== a.loop || st.fps !== fps) clock.setState({ duration: a.duration, mode: a.loop, fps })
+  if (clock.time() > a.duration) clock.seek(a.duration)
 }
-/** clock time → animation time (ping-pong folds back) */
-export const toAnimTime = (t: number) => {
-  const a = currentAnim()
-  return a.loop === 'pingpong' && t > a.duration ? Math.max(0, 2 * a.duration - t) : Math.min(t, a.duration)
-}
+/** clock time → animation time (clamped; the state-machine preview runs a longer clock) */
+export const toAnimTime = (t: number) => Math.max(0, Math.min(t, currentAnim().duration))
 export const animTime = () => toAnimTime(clock.time())
 export function seek(t: number) {
   if (Object.keys(ui.getState().pending).length) ui.setState({ pending: {} })
   clock.seek(t)
 }
 params.subscribe(() => syncClock())
+doc.subscribe(() => syncClock())
 ui.subscribe((s, prev) => { if (s.animId !== prev.animId || s.preview !== prev.preview) syncClock() })
 
 /* ---------- document edits ---------- */
@@ -126,7 +126,7 @@ export function setKey(obj: string, prop: PropKey, t: number, v: Val, final: boo
     const base = doc.objects.find((o) => o.id === obj)?.base[prop] ?? DEFAULTS[prop]
     if (!keys.length && t > 0 && base !== v) next = [{ id: newId(), t: 0, v: base, ease: DEFAULT_EASE }, ...next]
   }
-  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks: { ...an.tracks, [k]: next } })), final)
+  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks: { ...an.tracks, [k]: next } })), final, 'Set key')
 }
 
 export function removeKeyAt(obj: string, prop: PropKey, t: number) {
@@ -137,7 +137,7 @@ export function removeKeyAt(obj: string, prop: PropKey, t: number) {
   const tracks = { ...a.tracks }
   if (keys.length) tracks[k] = keys
   else delete tracks[k]
-  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })))
+  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })), true, 'Remove key')
 }
 
 /** Inspector / canvas edits. Design mode writes base values; Animate mode keys
@@ -176,7 +176,7 @@ export function editProps(obj: string, patch: Partial<Record<PropKey, Val>>, fin
   if (touched) doc = mapAnim(doc, a.id, (an) => ({ ...an, tracks }))
   ui.setState({ pending })
   if (doc !== getDoc()) setDoc(doc, final)
-  else if (final) params.commit()
+  else if (final) commitDoc()
 }
 export const editProp = (obj: string, prop: PropKey, v: Val, final: boolean) => editProps(obj, { [prop]: v }, final)
 
@@ -194,7 +194,7 @@ export function commitPending(only?: string) {
     tracks[k] = at ? keys.map((x) => (x === at ? { ...x, v } : x)) : sortKeys([...keys, { id: newId(), t, v, ease: DEFAULT_EASE }])
   }
   doc = mapAnim(doc, a.id, (an) => ({ ...an, tracks }))
-  setDoc(doc)
+  setDoc(doc, true, 'Key edits')
   const rest = { ...s.pending }
   entries.forEach(([k]) => delete rest[k])
   ui.setState({ pending: rest })
@@ -221,7 +221,7 @@ export function addKeysAtPlayhead(): number {
     if (keyAt(keys, t)) continue
     tracks[k] = sortKeys([...keys, { id: newId(), t, v: r[p], ease: DEFAULT_EASE }])
   }
-  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })))
+  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })), true, 'Add keys')
   return props.length
 }
 
@@ -249,7 +249,7 @@ export function moveKeys(next: Record<string, number>, final: boolean) {
     }
     tracks[k] = ks
   }
-  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })), final)
+  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })), final, 'Move keys')
 }
 
 export function deleteKeys(ids: string[]) {
@@ -264,7 +264,7 @@ export function deleteKeys(ids: string[]) {
     n += keys.length - ks.length
     if (ks.length) tracks[k] = ks
   }
-  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })))
+  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })), true, 'Delete keys')
   ui.setState({ keySel: [] })
   return n
 }
@@ -274,7 +274,7 @@ export function setEase(ids: string[], ease: Ease, final = true) {
   const doc = getDoc()
   const a = currentAnim(doc)
   const tracks = Object.fromEntries(Object.entries(a.tracks).map(([k, keys]) => [k, keys.map((x) => (set.has(x.id) ? { ...x, ease } : x))]))
-  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })), final)
+  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })), final, 'Easing')
 }
 
 export function findKey(id: string): { track: string; key: Key; next?: Key } | null {
@@ -311,7 +311,7 @@ export function pasteKeys() {
     ids.push(id)
     tracks[c.track] = sortKeys([...keys, { id, t: at, v: c.v, ease: c.ease }])
   }
-  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })))
+  setDoc(mapAnim(doc, a.id, (an) => ({ ...an, tracks })), true, 'Paste keys')
   ui.setState({ keySel: ids })
   return ids.length
 }
@@ -334,7 +334,7 @@ export function addAnim(from?: Anim) {
   let i = 2
   while (doc.anims.some((a) => a.name === name)) name = `${from ? `${from.name} copy` : 'Untitled'} ${i++}`
   const tracks = from ? Object.fromEntries(Object.entries(from.tracks).map(([k, keys]) => [k, keys.map((x) => ({ ...x, id: newId() }))])) : {}
-  setDoc({ ...doc, anims: [...doc.anims, { ...base, id, name, tracks }] })
+  setDoc({ ...doc, anims: [...doc.anims, { ...base, id, name, tracks }] }, true, from ? 'Duplicate animation' : 'New animation')
   ui.setState({ animId: id, keySel: [], pending: {} })
 }
 export function deleteAnim(id: string) {
@@ -342,7 +342,7 @@ export function deleteAnim(id: string) {
   if (doc.anims.length <= 1) return false
   const anims = doc.anims.filter((a) => a.id !== id)
   const sm = { ...doc.sm, entry: doc.sm.entry === id ? anims[0].id : doc.sm.entry, transitions: doc.sm.transitions.filter((t) => t.from !== id && t.to !== id) }
-  setDoc({ ...doc, anims, sm })
+  setDoc({ ...doc, anims, sm }, true, 'Delete animation')
   if (ui.getState().animId === id) ui.setState({ animId: anims[0].id, keySel: [] })
   return true
 }
@@ -366,7 +366,7 @@ export function reorderObject(id: string, target: string, where: 'before' | 'aft
   const ti = rest.findIndex((o) => o.id === target)
   const at = where === 'before' ? ti + 1 : where === 'after' ? ti : rest.length
   rest.splice(at, 0, moved)
-  setDoc({ ...doc, objects: rest })
+  setDoc({ ...doc, objects: rest }, true, 'Reorder layers')
 }
 
 /* ---------- state machine runtime ---------- */

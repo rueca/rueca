@@ -3,14 +3,17 @@
      normally and the shell's canvas camera doesn't eat the wheel
      (iframes swallow wheel/pointer — research/06 #5).
    - The theme toggle on the page is mirrored into the frame.
-   - On a phone the frame shows the same instrument's client view instead. */
+   - On a phone the frame shows the same instrument's client view instead.
+   - On load the frame lifts and tilts up into place; the switcher follows. */
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUpRight, MousePointerClick, X } from 'lucide-react'
+import { MousePointerClick, X } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
 import { cn, useTheme } from '@kit'
 import type { Shell } from '@/gallery/registry'
 import { thumb } from '@/gallery/registry'
 
 const NATIVE = { w: 1440, h: 900 }
+const EASE = [0.22, 1, 0.36, 1] as const
 
 export function LiveShell({ shells }: { shells: Shell[] }) {
   const { theme } = useTheme()
@@ -20,6 +23,7 @@ export function LiveShell({ shells }: { shells: Shell[] }) {
   const [id, setId] = useState(shells[0]?.id)
   const [active, setActive] = useState(false)
   const [ready, setReady] = useState(false)
+  const reduce = useReducedMotion()
 
   useEffect(() => {
     const el = wrap.current!
@@ -51,26 +55,36 @@ export function LiveShell({ shells }: { shells: Shell[] }) {
   const scale = narrow ? 1 : w / NATIVE.w
   const box = narrow ? { w, h: Math.round(Math.min(680, w * 1.55)) } : { w, h: Math.round(NATIVE.h * scale) }
 
+  const switcher = !narrow && shells.length > 1 && (
+    <motion.div className="mt-6 flex justify-center"
+      initial={reduce ? false : { opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: EASE, delay: 1.05 }}>
+      <div className="cluster flex max-w-full gap-0.5 overflow-x-auto p-1 [scrollbar-width:none]" role="group" aria-label="Choose a live shell">
+        {shells.map((s) => (
+          <button key={s.id} type="button" onClick={() => setId(s.id)} aria-pressed={id === s.id}
+            className={cn('h-8 flex-none rounded-[7px] px-3.5 text-[12.5px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-signal',
+              id === s.id ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
+            {s.name}
+          </button>
+        ))}
+      </div>
+    </motion.div>
+  )
+
   return (
     <div>
-      {!narrow && (
-        <div className="mb-3 flex flex-wrap items-center gap-1.5" role="group" aria-label="Choose a live shell">
-          {shells.map((s) => (
-            <button key={s.id} type="button" onClick={() => setId(s.id)} aria-pressed={id === s.id}
-              className={cn('h-7 rounded-full px-3 text-[12px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-signal',
-                id === s.id ? 'bg-fg text-field' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
-              {s.name}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="[perspective:1800px]">
+      <motion.div
+        initial={reduce ? false : { opacity: 0, y: 72, scale: 0.94, rotateX: 16 }}
+        animate={{ opacity: 1, y: 0, scale: 1, rotateX: 0 }}
+        transition={{ duration: 1.25, ease: EASE, delay: 0.35 }}
+        style={{ transformOrigin: '50% 0%' }}>
       <div
         ref={wrap}
-        className="relative overflow-hidden rounded-[14px] bg-field shadow-[var(--shadow-artboard),0_0_0_1px_var(--artboard-ring)]"
+        className="relative overflow-hidden rounded-[16px] bg-field shadow-[var(--shadow-artboard),0_0_0_1px_var(--artboard-ring)]"
         style={{ height: box.h || undefined, aspectRatio: box.h ? undefined : `${NATIVE.w} / ${NATIVE.h}` }}
         onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActive(false) }}
-      >
-        {/* poster until the frame has painted */}
+      >        {/* poster until the frame has painted */}
         <img src={thumb(narrow ? 'present' : current ?? '', theme)} alt="" aria-hidden
           onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden' }}
           className={cn('absolute inset-0 size-full object-cover object-top transition-opacity duration-300', ready ? 'opacity-0' : 'opacity-100')} />
@@ -88,9 +102,11 @@ export function LiveShell({ shells }: { shells: Shell[] }) {
         )}
         {!active && (
           <button type="button" onClick={() => { setActive(true); requestAnimationFrame(() => frame.current?.focus()) }}
-            className="group absolute inset-0 flex items-end justify-center pb-5 outline-none"
+            className={cn('group absolute inset-0 flex justify-center outline-none', narrow ? 'items-end pb-5' : 'items-center')}
             aria-label={`Interact with the ${shell?.name ?? ''} shell`}>
-            <span className="pop flex h-9 items-center gap-2 px-3.5 text-[12.5px] font-medium text-fg opacity-90 transition-opacity group-hover:opacity-100 group-focus-visible:ring-2 group-focus-visible:ring-signal">
+            {/* desktop: only on hover/focus, centred, so it never covers the tool's own controls */}
+            <span className={cn('pop flex h-9 items-center gap-2 px-3.5 text-[12.5px] font-medium text-fg transition-opacity duration-200 group-focus-visible:ring-2 group-focus-visible:ring-signal',
+              narrow ? 'opacity-90' : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100')}>
               <MousePointerClick size={14} strokeWidth={1.5} />
               {narrow ? 'Tap to try the client view' : 'Click to try it — this is the real shell'}
             </span>
@@ -103,14 +119,9 @@ export function LiveShell({ shells }: { shells: Shell[] }) {
           </button>
         )}
       </div>
-      {shell && (
-        <div className="mt-3 flex items-start justify-between gap-4 text-[12.5px]">
-          <p className="min-w-0 text-pretty text-fg-muted"><span className="font-medium text-fg">{shell.name}.</span> {shell.description}</p>
-          <a href={`#/${shell.id}${narrow ? '?client' : ''}`} className="flex flex-none items-center gap-1 text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
-            Full screen<ArrowUpRight size={13} strokeWidth={1.5} />
-          </a>
-        </div>
-      )}
+      </motion.div>
+      </div>
+      {switcher}
     </div>
   )
 }

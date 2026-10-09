@@ -1,9 +1,8 @@
 /* Left island: the file's flows + the screen library (drag or click to add). */
 import { useState } from 'react'
 import { Workflow, Plus, MoreHorizontal, Copy, Trash2, Pencil, Search, Braces } from 'lucide-react'
-import { Panel, PanelHeader, Section, IconButton, Menu, Tip, cn } from '@kit'
-import { useDoc } from '../local/doc-store'
-import { InlineText } from '../local/InlineText'
+import { Panel, PanelHeader, Section, IconButton, Menu, Tip, useDoc, cn } from '@kit'
+import { InlineText } from '@kit/ui/inline-text'
 import { Wireframe } from '../wireframes'
 import { ShapeGlyph } from '../canvas/nodes'
 import { TEMPLATES, type Kind, type Template } from '../model'
@@ -43,8 +42,8 @@ export function LeftPanel() {
               onClick={() => switchFlow(f.id)} onKeyDown={(e) => { if (e.key === 'Enter') switchFlow(f.id) }}
               className={cn('group/row mx-1.5 flex h-8 items-center gap-2 rounded-[6px] pr-1 pl-2 outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
               <Workflow size={14} strokeWidth={1.5} className={on ? 'text-signal' : 'text-fg-faint'} />
-              <InlineText value={f.name} onCommit={(s) => renameFlow(f.id, s)} editing={renaming === f.id} onEditingChange={(b) => setRenaming(b ? f.id : null)}
-                className="min-w-0 flex-1 truncate text-[12px]" title="Flow name" />
+              <InlineText bare focusable={false} value={f.name} onCommit={(s) => renameFlow(f.id, s)} editing={renaming === f.id} onEditingChange={(b) => setRenaming(b ? f.id : null)}
+                className="min-w-0 flex-1 truncate text-[12px]" label="Flow name" />
               <span className="text-[11px] text-fg-faint tabular group-hover/row:hidden group-focus-within/row:hidden">{screens}</span>
               <div className="hidden group-hover/row:block group-focus-within/row:block" onClick={(e) => e.stopPropagation()}>
                 <Menu align="end" trigger={<IconButton icon={MoreHorizontal} size="icon-sm" label="Flow actions" />}

@@ -21,7 +21,7 @@ const GROUPS = [0, 4, 8, 12]
 export function applyPatternPreset(id: string) {
   const pr = PATTERNS[id]
   if (!pr) return
-  params.patch({ pattern: pr.p as unknown as string, bpm: pr.bpm, swing: pr.swing })
+  params.patch({ pattern: pr.p, bpm: pr.bpm, swing: pr.swing }, { label: `Pattern: ${pr.name}` })
   toast(`Pattern: ${pr.name}`, { description: `${pr.bpm} BPM · swing ${pr.swing}%` })
 }
 
@@ -264,7 +264,7 @@ export function Sequencer() {
               onDoubleClick={() => setPattern(setNote(fresh(), i, 36))}
               onWheel={(e) => { if (e.deltaY) setPattern(setNote(fresh(), i, fresh().notes[i] + (e.deltaY < 0 ? 1 : -1))) }}
               className={cn('h-6 min-w-0 flex-1 cursor-ns-resize touch-none truncate rounded-[5px] px-0.5 tabular text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal',
-                active ? 'bg-control text-fg' : 'text-fg-faint/70 hover:bg-hover')}
+                active ? 'bg-control text-fg' : 'text-fg-faint hover:bg-hover')}
             >
               {noteName(pat.notes[i])}
             </button>

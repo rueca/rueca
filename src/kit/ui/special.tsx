@@ -10,6 +10,7 @@ import { Swatch, ColorPanel, hexToRgba } from './color'
 import { Popover } from '@base-ui/react/popover'
 import { readFileAsDataURL } from '../core/io'
 import { Tip } from './tooltip'
+import { EASINGS } from '../core/ease'
 
 function usePointerDrag(onMove: (e: PointerEvent, rect: DOMRect, final: boolean) => void) {
   const ref = useRef<HTMLDivElement>(null)
@@ -85,7 +86,7 @@ export function XYPad({
 }
 
 export function Vec3Fields({ value, onChange, step = 0.1, min, max, changed }: { value: { x: number; y: number; z: number }; onChange: (v: { x: number; y: number; z: number }, final: boolean) => void; step?: number; min?: number; max?: number; changed?: boolean }) {
-  const axes = [['x', 'X', 'text-[#ff6b6b]'], ['y', 'Y', 'text-[#5fd37a]'], ['z', 'Z', 'text-[#5aa8ff]']] as const
+  const axes = [['x', 'X', 'text-cat-5'], ['y', 'Y', 'text-cat-3'], ['z', 'Z', 'text-cat-1']] as const
   return (
     <div className="grid w-full grid-cols-3 gap-1">
       {axes.map(([k, l, c]) => (
@@ -134,15 +135,7 @@ export function SeedField({ value, onChange, changed }: { value: number; onChang
 }
 
 /* --- Cubic-bezier editor with presets. Handles may overshoot vertically. --- */
-export const EASINGS: Record<string, [number, number, number, number]> = {
-  Linear: [0, 0, 1, 1],
-  'Ease in': [0.42, 0, 1, 1],
-  'Ease out': [0, 0, 0.58, 1],
-  'Ease in out': [0.42, 0, 0.58, 1],
-  'Out expo': [0.16, 1, 0.3, 1],
-  'Out back': [0.34, 1.56, 0.64, 1],
-  'In out quint': [0.83, 0, 0.17, 1],
-}
+export { EASINGS }
 export function CurveEditor({ value, onChange, presets = EASINGS, height = 132 }: { value: [number, number, number, number]; onChange: (v: [number, number, number, number], final: boolean) => void; presets?: Record<string, [number, number, number, number]>; height?: number }) {
   const ref = useRef<SVGSVGElement>(null)
   const which = useRef<0 | 1 | null>(null)

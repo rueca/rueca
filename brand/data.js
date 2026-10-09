@@ -440,3 +440,101 @@ export const stories3 = [
   { title: 'Drosselmeyer’s castle', era: 'Hoffmann, 1816', body: 'The godfather clockmaker builds a clockwork castle where tiny figures walk the halls. The children love it for a minute, then want to change what the figures do. Every client demo, ever.' },
   { title: 'The busy board', era: 'Every toddler’s bedroom', body: 'A plank of knobs, latches and switches whose only job is to be fiddled with. Fiddling is how you learn what a thing can do.' },
 ]
+
+/* ---------------------------------------------------------------------------
+   Round 4 — the Thumbwheel idea in a shorter word. Checked 9 Oct 2026.
+--------------------------------------------------------------------------- */
+
+/** Rafael's favourites so far, in his order */
+export const favourites = ['trompo', 'thumbwheel', 'periaktos', 'jigwork']
+
+export const names4 = [
+  { name: 'Molette', lens: 'French', idea: 'The French word for a thumbwheel: the knurled wheel on a lighter, a camera, a mouse’s scroll wheel, an adjustable wrench (clé à molette).',
+    npm: 'free', scope: 'free', gh: 'taken (empty user, 2018) · molette-dev, molettehq free', repos: '15 repos, all ★0', domains: { free: ['.dev', '.studio', '.design', '.tools', '.io'], taken: ['.com', '.app'] },
+    web: 'Nothing in software.', verdict: 'short' },
+  { name: 'Knurly', lens: 'Coined', idea: 'From knurl, the ridged grip on a thumbwheel or a barbell. Sounds like “gnarly”.',
+    npm: 'free', scope: 'free', gh: 'free', repos: '2 repos, ★0', domains: { free: ['.dev', '.studio', '.design', '.tools', '.app'], taken: ['.com (weightlifting apparel)', '.io'] },
+    web: 'A small weightlifting apparel brand. No software.', verdict: 'short' },
+  { name: 'Trimwheel', lens: 'English', idea: 'The wheel pilots roll to fine-tune an aircraft’s pitch.', npm: 'free', scope: '—', gh: 'taken', repos: 'TrimWheel ★9',
+    domains: { free: ['.dev'], taken: ['.com'] }, web: 'Nine letters, so it’s barely shorter.', verdict: 'reserve' },
+  { name: 'Roldana', lens: 'Spanish', idea: 'A grooved little wheel or pulley sheave.', npm: 'free', scope: '—', gh: 'taken (user)', repos: '27 repos',
+    domains: { free: ['.dev', '.studio'], taken: [] }, web: 'It reads as a person’s name to most people.', verdict: 'pass' },
+  { name: 'Rotella', lens: 'Italian', idea: 'Italian for little wheel, and the mouse scroll wheel.', npm: 'free', scope: '—', gh: 'taken', repos: '35 repos',
+    domains: { free: [], taken: [] }, web: 'Shell Rotella is a major motor-oil brand. Out.', verdict: 'pass' },
+  { name: 'JogDial', lens: 'English', idea: 'The jog/shuttle wheel on video decks: scrubbing, literally.', npm: 'free', scope: '—', gh: 'taken', repos: 'JogDial.js ★81',
+    domains: { free: [], taken: [] }, web: 'JogDial.js is already a JS dial library.', verdict: 'pass' },
+  { name: 'Rueda', lens: 'Spanish', idea: 'Wheel.', npm: 'free', scope: '—', gh: 'taken', repos: '2k repos (surname)',
+    domains: { free: [], taken: [] }, web: 'It’s a common surname, so it’s hard to own in search. Ruedita (round 3) is the cuter form, and Latin Americans already call the mouse scroll wheel “la ruedita”.', verdict: 'pass' },
+  { name: 'Knurl', lens: 'English', idea: 'The texture itself.', npm: 'taken', scope: '—', gh: 'taken', repos: 'knurling-rs',
+    domains: { free: [], taken: [] }, web: 'Taken (round 1).', verdict: 'taken' },
+  { name: 'Rowel', lens: 'English', idea: 'The little spiked wheel on a spur.', npm: 'taken', scope: '—', gh: 'taken', repos: 'fwdai/rowel ★950',
+    domains: { free: [], taken: [] }, web: 'Taken.', verdict: 'taken' },
+]
+
+export const alsoChecked4 = ['Thumbl', 'Thumbie', 'Tumbl', 'Duim (Dutch: thumb)', 'Notchy', 'Trundle', 'Jogwheel', 'Rotelle']
+
+export const shortlist4 = [
+  {
+    id: 'molette', name: 'Molette', recommended: true, say: 'mo-LET', short: 'Thumbwheel, in French',
+    why: 'It’s the same object and the same idea in seven letters. The French have one word for every knurled wheel you roll with a thumb: the lighter, the camera dial, the mouse scroll wheel, the adjustable wrench. It sounds soft and a little chic, which makes it feel more like Paper or Rive than a hardware part. Everything that matters is free.',
+    watch: 'English speakers will meet it as a new word. That’s easy (mo-LET, like roulette), but the site has to tell the story once. molette.com and .app are taken, so you’d launch on molette.dev.',
+    font: { family: '"Gabarito", "Inter", sans-serif', weight: 700, tracking: '-0.03em', case: 'lower', label: 'Gabarito Bold' },
+    colors: { light: { ink: '#17181B', acc: '#2443D6', bg: '#F3F1EC' }, dark: { ink: '#F3F1EC', acc: '#7D93FF', bg: '#17181B' } },
+    palette: [{ name: 'Ink', hex: '#17181B' }, { name: 'Paper', hex: '#F3F1EC' }, { name: 'Bleu outremer', hex: '#2443D6' }, { name: 'Steel', hex: '#8C929B' }, { name: 'Spark', hex: '#FF6A2B' }],
+    taglines: ['Roll it till it’s right.', 'Fine-tune anything.', 'One wheel. Every value.'],
+    handle: 'molette-dev', domain: 'molette.dev',
+  },
+  {
+    id: 'knurly', name: 'Knurly', recommended: false, say: 'NUR-lee', short: 'The grip under your thumb',
+    why: 'This one has the most attitude. Knurling is the cross-hatched grip on a thumbwheel, so the name keeps the concept, and it reads like “gnarly”, which gives it a skate-shop energy the others don’t have. It’s six letters, and npm, scope and GitHub are all free.',
+    watch: 'The silent K will be said both ways, which is fine for a playful brand. knurly.com is a small weightlifting-apparel brand.',
+    font: { family: '"Archivo Black", "Inter", sans-serif', weight: 400, tracking: '-0.02em', case: 'lower', label: 'Archivo Black' },
+    colors: { light: { ink: '#151515', acc: '#D3302A', bg: '#F2F2EF' }, dark: { ink: '#F2F2EF', acc: '#FF5A4E', bg: '#151515' } },
+    palette: [{ name: 'Ink', hex: '#151515' }, { name: 'Chalk', hex: '#F2F2EF' }, { name: 'Iron', hex: '#5B6068' }, { name: 'Plate red', hex: '#E23B2E' }, { name: 'Bar yellow', hex: '#F2C230' }],
+    taglines: ['Get a grip on your prototype.', 'Fine-tuning, with grip.', 'Pretty knurly.'],
+    handle: 'knurly', domain: 'knurly.dev',
+  },
+]
+
+/* ---------------------------------------------------------------------------
+   Round 5 — a general search, steered by the favourites. Checked 9 Oct 2026.
+--------------------------------------------------------------------------- */
+
+export const names5 = [
+  { name: 'Turnwork', lens: 'Workshop', idea: 'Turning: shaping wood on a lathe. It’s also what a trompo does, what a periaktos does and what a thumbwheel does. One word under all four favourites.',
+    npm: 'free', scope: 'free', gh: 'free', repos: '2 repos, ★0', domains: { free: ['.dev', '.studio', '.app'], taken: ['.com (held, nothing public)'] },
+    web: 'Nothing named Turnwork. Neighbours are “Turn” products (an ERP, background checks), but they’re a different word.', verdict: 'short' },
+  { name: 'Pegtop', lens: 'Toys', idea: 'The English name for the pear-shaped string top, the trompo’s cousin.', npm: 'free', scope: 'free', gh: 'taken (user, 7 repos) · pegtop-dev free', repos: 'none',
+    domains: { free: ['.dev', '.studio'], taken: ['.com'] }, web: 'Nothing in software. A fallback if Trompo’s food-app neighbours bother you.', verdict: 'reserve' },
+  { name: 'Peonza', lens: 'Toys', idea: 'Spain’s word for a spinning top.', npm: 'free', scope: 'free', gh: 'free', repos: '5 repos, tiny',
+    domains: { free: ['.dev', '.studio'], taken: ['.com', '.app'] }, web: 'Nothing found. Less punchy than Trompo, and Latin Americans say trompo.', verdict: 'reserve' },
+  { name: 'Stagework', lens: 'Workshop', idea: 'Jigwork’s theatre cousin.', npm: 'free', scope: '—', gh: 'free', repos: '23 repos, tiny',
+    domains: { free: ['.dev', '.studio'], taken: ['.com'] }, web: 'Generic, so it’s hard to own in search.', verdict: 'reserve' },
+  { name: 'Twirly', lens: 'Toys', idea: 'Cute spin.', npm: 'free', scope: 'free', gh: 'taken (empty, 2016)', repos: 'twirly ★26, qiskit twirly',
+    domains: { free: ['.dev', '.studio'], taken: ['.app'] }, web: 'Too generic and cute to carry a pro tool.', verdict: 'pass' },
+  { name: 'Telari', lens: 'History', idea: 'Probably the Italian Renaissance name for periaktos-style turning prisms (the Brockett-era term; I couldn’t verify it online). Also Italian for frames.', npm: 'free', scope: 'taken', gh: 'taken (2025)', repos: '24 repos',
+    domains: { free: ['.dev', '.studio', '.design', '.tools', '.io'], taken: ['.com', '.app'] }, web: 'Telari is a new macOS Markdown reader built for typography, which is design-adjacent, and they hold the npm scope. Out.', verdict: 'pass' },
+  { name: 'Tambour', lens: 'Craft', idea: 'An embroidery hoop, also a drum.', npm: 'free', scope: '—', gh: 'taken (org created 2026)', repos: 'tambourine noise',
+    domains: { free: ['.dev', '.studio', '.app'], taken: [] }, web: 'Someone registered the org this year, which looks like a launch.', verdict: 'pass' },
+  { name: 'Diabolo', lens: 'Toys', idea: 'The juggling top spun on a string between two sticks.', npm: 'free', scope: 'taken', gh: 'taken (active)', repos: '249 repos',
+    domains: { free: [], taken: ['.dev', '.studio', '.app'] }, web: 'Domains and scope are all taken.', verdict: 'pass' },
+  { name: 'Kreisel', lens: 'Toys', idea: 'German for spinning top (and gyroscope).', npm: 'free', scope: '—', gh: 'free', repos: '47 repos',
+    domains: { free: ['.dev', '.studio'], taken: [] }, web: 'Hard for English speakers, and it feels harsh.', verdict: 'pass' },
+]
+
+export const alsoChecked5 = ['Fettle', 'Whorl', 'Capstan', 'Windlass', 'Treadle (Chisel simulator)', 'Tourbillon', 'Flywheel', 'Gyre', 'Shim', 'Kerf', 'Bobbin', 'Gobo', 'Snoot',
+  'Kalimba', 'Whammy', 'Camwork', 'Wheelwork', 'Spinwork', 'Rigwork', 'Gearwork', 'Cogwork', 'Toolwork', 'Propwork', 'Dialwork', 'Pinwork', 'Wirework', 'Topwork', 'Tappet', 'Pawl', 'Fresnel',
+  'Cucoloris', 'Niddy-noddy', 'Spinly', 'Rondel', 'Toupie', 'Trottola', 'Tatting', 'Marotte', 'Palanca', 'Manivela', 'Resorte', 'Lanterna', 'Tiller', 'Spintop', 'Winder', 'Kinora', 'Swivel']
+
+export const shortlist5 = [
+  {
+    id: 'turnwork', name: 'Turnwork', recommended: true, say: 'TURN-work', short: 'What all four favourites have in common',
+    why: 'Your favourites share one verb. A trompo turns, a periaktos turns, a thumbwheel turns, and in the workshop “turning” is shaping wood on a lathe, which is Jigwork’s world. Turnwork names the common thread in Jigwork’s form. It’s plain English, impossible to misspell, and npm, scope, GitHub and three domains are all free.',
+    watch: 'It’s the least surprising name on the board, a description more than a spark. turnwork.com is held (nothing public), so you’d launch on turnwork.dev.',
+    font: { family: '"Manrope", "Inter", sans-serif', weight: 800, tracking: '-0.035em', case: 'lower', label: 'Manrope ExtraBold' },
+    colors: { light: { ink: '#1A1714', acc: '#B5651D', bg: '#F4EFE6' }, dark: { ink: '#F4EFE6', acc: '#E8A35A', bg: '#1A1714' } },
+    palette: [{ name: 'Ink', hex: '#1A1714' }, { name: 'Paper', hex: '#F4EFE6' }, { name: 'Oak', hex: '#B5651D' }, { name: 'Shavings', hex: '#E8D3A9' }, { name: 'Walnut', hex: '#5A3A22' }],
+    taglines: ['Turn your prototype into a tool.', 'Shape it on the lathe.', 'Every idea, turned true.'],
+    handle: 'turnwork', domain: 'turnwork.dev',
+  },
+]

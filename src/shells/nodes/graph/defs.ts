@@ -13,8 +13,8 @@ import { BLEND_MODES } from '../engine/ops'
 
 export type Category = 'Generate' | 'Filter' | 'Composite' | 'Colour' | 'Value' | 'Output'
 export const CATEGORIES: Category[] = ['Generate', 'Filter', 'Composite', 'Colour', 'Value', 'Output']
-/** CSS var per category — defined in local/graph-theme.css for both themes. */
-export const catVar = (c: Category) => `var(--cat-${c.toLowerCase()})`
+/** CSS var per category — graph/graph.css maps them onto the kit's categorical tokens. */
+export const catVar = (c: Category) => `var(--node-cat-${c.toLowerCase()})`
 
 type Icon = ComponentType<{ size?: number; strokeWidth?: number; className?: string }>
 

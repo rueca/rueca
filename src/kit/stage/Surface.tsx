@@ -22,7 +22,7 @@ import { cn } from '../core/cn'
 
 export interface FrameInfo<V> { t: number; dt: number; w: number; h: number; dpr: number; v: V; frame: number }
 
-export interface SurfaceHandle { canvas: HTMLCanvasElement | null; el: HTMLElement | null; redraw: () => void }
+export interface SurfaceHandle { canvas: HTMLCanvasElement | null; el: HTMLElement | null; redraw: () => void; /** alias of redraw — call when non-param inputs change */ invalidate: () => void }
 
 interface CanvasCommon<S extends Schema> {
   params: ParamStore<S>
@@ -37,6 +37,8 @@ interface CanvasCommon<S extends Schema> {
   animate?: boolean
   /** extra inputs that should trigger a redraw (a doc store's version, a selection) */
   deps?: unknown[]
+  /** drawing-buffer size per frame (adaptive resolution, native image pixels). Default css size × dpr. */
+  size?: (cssW: number, cssH: number, dpr: number) => { w: number; h: number }
   ref?: Ref<SurfaceHandle>
 }
 
@@ -53,7 +55,9 @@ function useCanvasLoop<S extends Schema, C>(
   const redraw = useRef<(dt?: number) => void>(() => {})
   const { params, clock, width, height, pixelRatio, animate = true } = p
 
-  useImperativeHandle(p.ref, () => ({ canvas: canvas.current, el: canvas.current, redraw: () => redraw.current() }))
+  useImperativeHandle(p.ref, () => ({ get canvas() { return canvas.current }, get el() { return canvas.current }, redraw: () => redraw.current(), invalidate: () => redraw.current() }), [])
+  const sizeRef = useRef(p.size)
+  sizeRef.current = p.size
 
   useEffect(() => {
     const c = canvas.current!
@@ -68,6 +72,11 @@ function useCanvasLoop<S extends Schema, C>(
       redraw.current()
     }
     redraw.current = (dt = 0) => {
+      if (sizeRef.current) {
+        const want = sizeRef.current(w, h, dpr)
+        const bw = Math.max(1, Math.round(want.w)), bh = Math.max(1, Math.round(want.h))
+        if (c.width !== bw || c.height !== bh) { c.width = bw; c.height = bh }
+      }
       const t = clock ? clock.time() : performance.now() - t0
       paintRef.current(ctx, { t, dt, w, h, dpr, v: params.values() as SchemaValues<S>, frame: frame.current++ })
     }
@@ -147,7 +156,8 @@ export function MountSurface<S extends Schema, H extends object = object>({
   const el = useRef<HTMLDivElement>(null)
   const handle = useRef<H | null>(null)
   const mountRef = useRef(mount)
-  useImperativeHandle(ref, () => ({ el: el.current, handle: handle.current }))
+  // getters: the handle exists only after mount() runs, which is after the ref is attached
+  useImperativeHandle(ref, () => ({ get el() { return el.current }, get handle() { return handle.current } }), [])
   useEffect(() => {
     const out = mountRef.current(el.current!, { params, clock, values: () => params.values() as SchemaValues<S> })
     if (out && typeof out === 'object') handle.current = out as H

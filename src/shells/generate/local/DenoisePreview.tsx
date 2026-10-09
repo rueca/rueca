@@ -44,7 +44,7 @@ export function DenoisePreview({ src, progress, label, className, running = true
       <canvas ref={noise} width={96} height={96} className="absolute inset-0 h-full w-full" style={{ opacity: src ? Math.pow(1 - p, 2.2) * 0.9 : 0.55, filter: 'blur(1.5px) saturate(1.4)', mixBlendMode: src ? 'normal' : 'luminosity' }} />
       {!src && <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-transparent via-white/5 to-transparent" />}
       {label && (
-        <div className="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-[7px] bg-black/55 px-2 py-1.5 text-[11px] text-white backdrop-blur-sm">
+        <div className="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-[7px] bg-scrim px-2 py-1.5 text-[11px] text-white backdrop-blur-sm">
           <span className="tabular min-w-0 flex-1 truncate">{label}</span>
         </div>
       )}

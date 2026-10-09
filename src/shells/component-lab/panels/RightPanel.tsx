@@ -1,9 +1,9 @@
 /* Right: Tokens (the look) and Code (the hand-off). */
 import { Download } from 'lucide-react'
-import { Section, Row, Slider, ScrubValue, Inspector, Segmented, Button, Badge, Tip, useValues, equal, exportJSON, download, cn } from '@kit'
+import { Section, Row, Slider, ScrubValue, Inspector, Button, Badge, Tip, useValues, equal, exportJSON, download, cn } from '@kit'
 import { tokens, contrastReport, grade, tokensCSS, tokensDTCG, tokensTailwind, hexOf } from '../tokens'
-import { OklchField } from '../local/OklchField'
-import { CodeBlock } from '../local/CodeBlock'
+import { OklchField } from '@kit/ui/oklch'
+import { CodeBlock } from '@kit/ui/code-block'
 import { useUI, setUI } from '../ui'
 import { jsxFor, STORES } from '../props'
 
@@ -64,22 +64,28 @@ export function CodePanel() {
   useValues(STORES[comp])
   const t = useValues(tokens)
   const file = { button: 'Button.tsx', input: 'TextField.tsx', card: 'Card.tsx' }[comp]
-  const code = codeTab === 'css' ? tokensCSS(t) : codeTab === 'json' ? JSON.stringify(tokensDTCG(t), null, 2) : tokensTailwind(t)
+  const css = tokensCSS(t)
+  const downloadTokens = () => codeTab === 'json' ? exportJSON(tokensDTCG(t), 'tokens.json') : download(new Blob([codeTab === 'css' ? css : tokensTailwind(t)], { type: 'text/css' }), codeTab === 'css' ? 'tokens.css' : 'theme.css')
   return (
     <div className="flex flex-col gap-3 p-3">
       <CodeBlock code={jsxFor(comp)} lang="jsx" title={`${file} · current props`} />
-      <div className="flex items-center gap-2">
-        <div className="flex-1">
-          <Segmented size="sm" value={codeTab} onChange={(v) => setUI({ codeTab: v as 'css' })} label="Token format"
-            options={[{ value: 'css', label: 'CSS vars' }, { value: 'json', label: 'JSON' }, { value: 'tailwind', label: 'Tailwind' }]} />
-        </div>
-        <Tip label="Download this file">
-          <Button size="icon-sm" variant="ghost" aria-label="Download tokens" onClick={() => codeTab === 'json' ? exportJSON(tokensDTCG(t), 'tokens.json') : download(new Blob([code], { type: 'text/css' }), codeTab === 'css' ? 'tokens.css' : 'theme.css')}>
-            <Download size={14} strokeWidth={1.5} />
-          </Button>
-        </Tip>
-      </div>
-      <CodeBlock code={code} lang={codeTab === 'json' ? 'json' : 'css'} title={codeTab === 'css' ? 'tokens.css · light + dark' : codeTab === 'json' ? 'tokens.json · W3C design tokens' : 'theme.css · Tailwind v4 @theme'} maxHeight={520} />
+      <CodeBlock
+        tab={codeTab}
+        onTabChange={(v) => setUI({ codeTab: v as 'css' })}
+        tabs={[
+          { id: 'css', label: 'CSS vars', lang: 'css', code: css, title: 'tokens.css · light + dark' },
+          { id: 'json', label: 'JSON', lang: 'json', code: JSON.stringify(tokensDTCG(t), null, 2), title: 'W3C design tokens' },
+          { id: 'tailwind', label: 'Tailwind', lang: 'css', code: tokensTailwind(t), title: 'theme.css · v4 @theme' },
+        ]}
+        actions={
+          <Tip label="Download this file">
+            <Button size="icon-sm" variant="ghost" aria-label="Download tokens" onClick={downloadTokens}>
+              <Download size={14} strokeWidth={1.5} />
+            </Button>
+          </Tip>
+        }
+        maxHeight={520}
+      />
     </div>
   )
 }

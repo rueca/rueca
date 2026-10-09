@@ -45,7 +45,8 @@ const audit = () => {
   // Text actually rendered in chrome: sample visible text nodes outside canvases/artboards.
   const lowText = []
   // first OPAQUE background up the tree (translucent washes are skipped — an approximation)
-  const bgOf = (el) => { while (el) { const c = getComputedStyle(el).backgroundColor; const m = c && c.match(/[\d.]+/g)?.map(Number); if (m && (m[3] === undefined || m[3] >= 0.95)) return m; el = el.parentElement } return parse(V('--field')) }
+  // null = text sits on an image / gradient / canvas we can't measure — skip it rather than guess
+  const bgOf = (el) => { while (el) { const cs = getComputedStyle(el); if (cs.backgroundImage && cs.backgroundImage !== 'none') return null; if (el.tagName === 'IMG' || el.tagName === 'VIDEO') return null; const m = cs.backgroundColor && cs.backgroundColor.match(/[\d.]+/g)?.map(Number); if (m && (m[3] === undefined || m[3] >= 0.95)) return m; el = el.parentElement } return parse(V('--field')) }
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
   let n, seen = 0
   while ((n = walker.nextNode()) && seen < 600) {
@@ -55,7 +56,10 @@ const audit = () => {
     const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || +cs.opacity < 0.5) continue
     seen++
     const fg = cs.color.match(/[\d.]+/g).map(Number); if (fg[3] !== undefined && fg[3] < 0.5) continue
-    const rr = ratio(fg, bgOf(el))
+    const bg = bgOf(el); if (!bg) continue
+    // text stacked over an image sibling (absolute overlay) — skip
+    if ([...(el.parentElement?.children ?? [])].some((c) => c !== el && (c.tagName === 'IMG' || c.tagName === 'CANVAS' || c.tagName === 'VIDEO'))) continue
+    const rr = ratio(fg, bg)
     if (rr < 3) lowText.push(`${rr} "${n.textContent.trim().slice(0, 24)}"`)
   }
   return { fails, lowText: lowText.slice(0, 8), textSampled: seen }

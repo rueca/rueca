@@ -2,13 +2,13 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
-import { Section, Row, Menu, Button, useValues, useParamState, cn } from '@kit'
+import { Section, Row, Button, PresetMenu, useValues, useParamState, cn } from '@kit'
+import { EnvelopeEditor } from '@kit/ui/envelope'
 import { ChevronDown, Bookmark } from 'lucide-react'
-import { params, SOUNDS, type V } from './params'
+import { params, type V } from './params'
 import { TRACKS } from './pattern'
 import { engine, engineState } from './engine'
 import { PKnob, PSegmented } from './controls'
-import { EnvelopeEditor } from './local/EnvelopeEditor'
 import { drawScope, drawSpectrum, type Ink } from './visual'
 
 const SECTION_KEYS = {
@@ -46,20 +46,18 @@ const Grid = ({ cols, children, className }: { cols: number; children: ReactNode
   <div className={cn('grid gap-x-1 gap-y-2 px-2 pt-1 pb-1', className)} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>{children}</div>
 )
 
+/** Sound presets — the kit PresetMenu over scoped presets: apply, save current sound, delete your own. */
 export function SoundMenu() {
-  const v = useValues(params) as V
-  const active = Object.entries(SOUNDS).find(([, s]) => Object.entries(s).every(([k, x]) => (v as Record<string, unknown>)[k] === x))?.[0]
+  useValues(params)
+  const active = params.activePreset()
   return (
-    <Menu align="end" trigger={
-      <Button size="sm" className="max-w-[130px] gap-1 px-1.5">
+    <PresetMenu params={params} trigger={
+      <Button size="sm" className="max-w-[130px] gap-1 px-1.5" aria-label={`Sound preset: ${active?.name ?? 'Custom'}`}>
         <Bookmark size={12} strokeWidth={1.5} />
-        <span className="truncate">{active ?? 'Custom'}</span>
+        <span className="truncate">{active?.name ?? 'Custom'}</span>
         <ChevronDown size={11} className="text-fg-faint" />
       </Button>
-    } items={[
-      { type: 'label', label: 'Sounds' },
-      ...Object.entries(SOUNDS).map(([name, s]) => ({ label: name, checked: active === name, onClick: () => params.patch(s) })),
-    ]} />
+    } />
   )
 }
 
@@ -81,6 +79,7 @@ export function SynthPanel() {
       <KSection id="env" title="Envelope" hint="Amp and filter envelope. Drag the handles on the curve.">
         <div className="px-3 pt-1">
           <EnvelopeEditor
+            label="Amp and filter envelope"
             value={{ a: v.attack, d: v.decay, s: v.sustain, r: v.release }}
             defaults={{ a: dflt.attack, d: dflt.decay, s: dflt.sustain, r: dflt.release }}
             onChange={(e, final) => params.patch({ attack: e.a, decay: e.d, sustain: e.s, release: e.r }, { commit: final })}

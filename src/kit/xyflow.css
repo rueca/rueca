@@ -1,0 +1,119 @@
+/* ---------------------------------------------------------------------------
+   React Flow (@xyflow/react), dressed in kit tokens. Both themes, the
+   DOM-snapshot export and any node editor follow automatically.
+
+     import '@xyflow/react/dist/base.css'
+     import '@kit/xyflow.css'
+     <ReactFlow className="studio-flow" attributionPosition="bottom-left" … />
+
+   What it styles
+     · canvas vars (edges, selection, minimap, connection line) → tokens
+     · pane + node cursors: arrow by default, grab only where panning is on
+     · node focus ring: give your node's root element the `studio-node` class
+     · handles: small hollow dots that fill with the accent on hover / valid
+         add `handles-on-hover` to the ReactFlow className to show them only
+         while a node is hovered / selected / `is-connecting` (set that class
+         yourself between onConnectStart and onConnectEnd)
+     · typed ports: <Handle className="studio-port" data-wired={…} data-dim={…}
+         style={{ '--port': 'var(--cat-3)' }} /> — hollow until wired, filled when
+         wired, faded when a dragged wire cannot connect (data-dim)
+     · edges: hover → fg-muted, selected → accent
+     · minimap, resize controls, selection rectangle
+     · `is-animating` on the ReactFlow className eases node moves (auto layout)
+     · the attribution stays VISIBLE (React Flow is MIT; they ask for it), set
+         quietly in the corner — don't pass proOptions.hideAttribution.
+
+   Accessibility: focus rings use the accent at 2px; nothing relies on hover
+   alone (selected and connecting states show the same handles).
+   (Promoted from shells/flows/flows.css + shells/nodes/local/graph-theme.css.)
+--------------------------------------------------------------------------- */
+
+.studio-flow {
+  --xy-background-color: transparent;
+  --xy-edge-stroke: var(--fg-faint);
+  --xy-edge-stroke-width: 1.5;
+  --xy-edge-stroke-selected: var(--signal);
+  --xy-connectionline-stroke: var(--signal);
+  --xy-connectionline-stroke-width: 1.5;
+  --xy-selection-background-color: var(--signal-soft);
+  --xy-selection-border: 1px solid var(--signal);
+  --xy-minimap-background-color: var(--panel);
+  --xy-minimap-mask-background-color: color-mix(in srgb, var(--field) 70%, transparent);
+  --xy-minimap-mask-stroke-color: var(--signal);
+  --xy-minimap-mask-stroke-width: 1.5;
+  --xy-minimap-node-background-color: var(--lane);
+  --xy-resize-background-color: var(--signal);
+  --xy-attribution-background-color: transparent;
+  --xy-handle-background-color: var(--panel);
+  font-family: var(--font-ui);
+}
+
+/* cursors: a design tool shows the arrow; grab only where dragging pans */
+.studio-flow .react-flow__pane { cursor: default; }
+.studio-flow .react-flow__pane.draggable { cursor: grab; }
+.studio-flow .react-flow__pane.dragging { cursor: grabbing; }
+.studio-flow .react-flow__node,
+.studio-flow .react-flow__node.selectable,
+.studio-flow .react-flow__node.draggable { cursor: default; }
+.studio-flow .react-flow__node.draggable.dragging { cursor: grabbing; }
+
+/* nodes: the shell owns the look, React Flow only positions */
+.studio-flow .react-flow__node { font-size: 12px; color: var(--fg); }
+.studio-flow .react-flow__node:focus-visible { outline: none; }
+.studio-flow .react-flow__node:focus-visible > .studio-node { outline: 2px solid var(--signal); outline-offset: 2px; }
+.studio-flow.is-animating .react-flow__node { transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* handles: small hollow dots; `scale` (not transform) so React Flow's centring stays intact */
+.studio-flow .react-flow__handle {
+  width: 9px;
+  height: 9px;
+  min-width: 0;
+  min-height: 0;
+  background: var(--panel);
+  border: 1.5px solid var(--fg-faint);
+  border-radius: 99px;
+  transition: opacity 120ms, scale 120ms, background-color 120ms, border-color 120ms;
+}
+.studio-flow .react-flow__handle:hover,
+.studio-flow .react-flow__handle.connectingto,
+.studio-flow .react-flow__handle.valid { background: var(--signal); border-color: var(--signal); scale: 1.25; }
+.studio-flow.handles-on-hover .react-flow__handle { opacity: 0; }
+.studio-flow.handles-on-hover .react-flow__node:hover .react-flow__handle,
+.studio-flow.handles-on-hover .react-flow__node:focus-within .react-flow__handle,
+.studio-flow.handles-on-hover .react-flow__node.selected .react-flow__handle,
+.studio-flow.handles-on-hover.is-connecting .react-flow__handle { opacity: 1; }
+
+/* typed ports (node editors): hollow when free, filled when wired */
+.studio-flow .react-flow__handle.studio-port {
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--port, var(--fg-faint));
+  background: var(--panel);
+  box-shadow: 0 0 0 2px var(--panel);
+  opacity: 1;
+}
+.studio-flow .react-flow__handle.studio-port[data-wired='true'] { background: var(--port, var(--fg-faint)); }
+.studio-flow .react-flow__handle.studio-port:hover,
+.studio-flow .react-flow__handle.studio-port.connectingfrom,
+.studio-flow .react-flow__handle.studio-port.valid { background: var(--port, var(--signal)); border-color: var(--port, var(--signal)); scale: 1.35; }
+.studio-flow .react-flow__handle.studio-port[data-dim='true'] { opacity: 0.25; }
+
+/* edges */
+.studio-flow .react-flow__edge-path { stroke-linecap: round; transition: stroke 120ms, opacity 200ms; }
+.studio-flow .react-flow__edge:hover .react-flow__edge-path { stroke: var(--fg-muted); }
+.studio-flow .react-flow__edge.selected .react-flow__edge-path { stroke: var(--signal); stroke-width: 2; }
+
+/* background, minimap, resizer, selection */
+.studio-flow .react-flow__background-pattern.dots { fill: var(--line-strong); }
+.studio-flow .react-flow__minimap { border-radius: 10px; box-shadow: var(--shadow-cluster); overflow: hidden; }
+.studio-flow .react-flow__minimap-node.selected { fill: var(--signal); }
+.studio-flow .react-flow__resize-control.handle { width: 8px; height: 8px; border-radius: 2px; background: var(--panel); border: 1.5px solid var(--signal); }
+.studio-flow .react-flow__resize-control.line { border-color: transparent; }
+.studio-flow .react-flow__selection { border-radius: 2px; }
+.studio-flow .react-flow__nodesselection-rect { background: transparent; border: 1px solid var(--signal); cursor: default; }
+
+/* attribution: visible, quiet, out of the way */
+.studio-flow .react-flow__attribution { background: transparent; padding: 0; margin: 8px 12px; }
+.studio-flow .react-flow__attribution a { color: var(--fg-faint); font-size: 10px; text-decoration: none; }
+.studio-flow .react-flow__attribution a:hover { color: var(--fg-muted); }
+.studio-flow .react-flow__attribution a:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; border-radius: 3px; }

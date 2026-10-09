@@ -19,7 +19,7 @@ import { useStore } from 'zustand'
 import { Minus, Plus } from 'lucide-react'
 import { clamp, cn } from '../core/cn'
 import { useHotkeys } from '../core/hotkeys'
-import { Menu } from '../ui/controls'
+import { Menu, type MenuItem } from '../ui/controls'
 
 export interface Camera { x: number; y: number; zoom: number }
 export type CameraStore = StoreApi<Camera> & {
@@ -192,26 +192,30 @@ export function Stage({
  * a custom canvas) pass zoom / onZoom / onFit.
  */
 export function ZoomPill({
-  className, zoom: zoomProp, onZoom, onFit, step = 1.25, presets = [0.5, 1, 2], floating = true,
-}: { className?: string; zoom?: number; onZoom?: (z: number) => void; onFit?: () => void; step?: number; presets?: number[]; floating?: boolean }) {
+  className, zoom: zoomProp, onZoom, onFit, step = 1.25, steps, presets = [0.5, 1, 2], floating = true, extra, fitShortcut = 'shift+1',
+}: { className?: string; zoom?: number; onZoom?: (z: number) => void; onFit?: () => void; step?: number; /** a zoom ladder (e.g. integer pixel zooms) instead of ×step */ steps?: number[]; presets?: number[]; floating?: boolean; /** more menu items after "Zoom to fit" (e.g. Zoom to selection) */ extra?: MenuItem[]; /** shown next to Zoom to fit; false hides it */ fitShortcut?: string | false }) {
   const cam = useContext(CamCtx) ?? NO_CAMERA
   const camZoom = useStore(cam, (s) => s.zoom)
   const zoom = zoomProp ?? camZoom
   const set = (z: number) => { if (onZoom) onZoom(z); else { cam.touch(); cam.zoomTo(z) } }
   const fit = () => { if (onFit) onFit(); else { cam.untouch(); cam.fit() } }
+  const go = (dir: 1 | -1) => steps
+    ? (dir > 0 ? steps.find((z) => z > zoom * 1.001) : [...steps].reverse().find((z) => z < zoom * 0.999)) ?? zoom
+    : dir > 0 ? zoom * step : zoom / step
   return (
     <div className={cn('cluster flex h-8 items-center gap-0.5 px-1', floating && 'absolute right-3 bottom-3 z-10', className)}>
-      <button type="button" aria-label="Zoom out" onClick={() => set(zoom / step)} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg"><Minus size={13} /></button>
+      <button type="button" aria-label="Zoom out" onClick={() => set(go(-1))} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg"><Minus size={13} /></button>
       <Menu
         side="top"
         align="end"
         trigger={<button type="button" className="h-6 min-w-[46px] rounded-[5px] px-1 tabular text-[11.5px] text-fg hover:bg-hover">{Math.round(zoom * 100)}%</button>}
         items={[
-          { label: 'Zoom to fit', shortcut: 'shift+1', onClick: fit },
-          ...presets.map((z) => ({ label: `Zoom to ${Math.round(z * 100)}%`, shortcut: z === 1 ? 'shift+0' : undefined, onClick: () => set(z) })),
+          { label: 'Zoom to fit', shortcut: fitShortcut || undefined, onClick: fit },
+          ...(extra ?? []),
+          ...(steps ?? presets).map((z) => ({ label: `Zoom to ${Math.round(z * 100)}%`, shortcut: z === 1 ? 'shift+0' : undefined, onClick: () => set(z) })),
         ]}
       />
-      <button type="button" aria-label="Zoom in" onClick={() => set(zoom * step)} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg"><Plus size={13} /></button>
+      <button type="button" aria-label="Zoom in" onClick={() => set(go(1))} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg"><Plus size={13} /></button>
     </div>
   )
 }

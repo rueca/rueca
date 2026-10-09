@@ -1,8 +1,10 @@
 /* Small building blocks for the landing page. Kit tokens only — no colour
-   literals — so both themes come for free. */
+   literals — so both themes come for free. The one exception is the brand
+   colour inside Mark. */
 import { useState, type ReactNode } from 'react'
 import { Check, Copy, Moon, Sun } from 'lucide-react'
 import { cn, copyText, useTheme, Tip } from '@kit'
+import { motion, useReducedMotion } from 'motion/react'
 
 export function Container({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn('mx-auto w-full max-w-[1120px] px-4 sm:px-8', className)}>{children}</div>
@@ -61,11 +63,22 @@ export function ThemeButton({ className }: { className?: string }) {
   )
 }
 
+/** The Trompo mark (brand/trompo, spec in brand/BRAND.md). The one deliberate colour
+    literal in the site: the band is the brand's rosa mexicano. The body follows the
+    text colour, and the motion swooshes only show from 24px up. */
 export function Mark({ size = 20 }: { size?: number }) {
   return (
-    <span className="flex flex-none items-center justify-center rounded-[5px] bg-fg text-field" style={{ width: size, height: size }}>
-      <svg viewBox="0 0 16 16" width={size * 0.55} height={size * 0.55} aria-hidden><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>
-    </span>
+    <svg viewBox="0 0 32 32" width={size} height={size} aria-hidden className="flex-none text-fg">
+      <rect x="14.4" y="2.5" width="3.2" height="6" rx="1.2" fill="currentColor" />
+      <path d="M5.5 12.5 C5.5 9 10 7.5 16 7.5 C22 7.5 26.5 9 26.5 12.5 C26.5 17.5 20 23.5 16 29.5 C12 23.5 5.5 17.5 5.5 12.5 Z" fill="currentColor" />
+      <path className="fill-[#D1006F] dark:fill-[#FF3EA5]" d="M5.7 11.2 H26.3 C26.5 12 26.5 13 26.3 14 H5.7 C5.5 13 5.5 12 5.7 11.2 Z" />
+      {size >= 24 && (
+        <g className="stroke-[#D1006F] dark:stroke-[#FF3EA5]" fill="none" strokeWidth="1.6" strokeLinecap="round">
+          <path d="M2.5 20 Q4 24 7.5 25.5" />
+          <path d="M29.5 20 Q28 24 24.5 25.5" />
+        </g>
+      )}
+    </svg>
   )
 }
 
@@ -75,3 +88,14 @@ export function Chip({ children, className }: { children: ReactNode; className?:
 
 /** Scroll to a landing section without touching the hash — the hash is the router. */
 export const scrollToSection = (id: string) => document.querySelector(`[data-section="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+
+/** Fades and lifts its children in on first paint — the hero's entrance. */
+export function Rise({ delay = 0, children, className }: { delay?: number; children: ReactNode; className?: string }) {
+  const reduce = useReducedMotion()
+  return (
+    <motion.div className={className} initial={reduce ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay }}>
+      {children}
+    </motion.div>
+  )
+}

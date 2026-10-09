@@ -99,5 +99,6 @@ async function run(job: Job) {
   }
   if (!alive(job.id)) return
   queue.setState((s) => ({ jobs: s.jobs.filter((j) => j.id !== job.id) }))
-  addImages(recs)
+  const n = recs.length, what = job.kind === 'upscale' ? 'Upscale' : job.kind === 'variation' ? 'Vary' : job.kind === 'remix' ? 'Remix' : 'Generate'
+  addImages(recs, `${what} · ${n} image${n === 1 ? '' : 's'}`)
 }

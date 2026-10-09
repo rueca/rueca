@@ -3,14 +3,12 @@ import { memo, useMemo } from 'react'
 import { useStore } from 'zustand'
 import { ArrowLeftRight, Columns2, Download, FileJson, Image as ImageIcon, Sparkles, Star, X, RotateCcw, Copy, Lock, LockOpen } from 'lucide-react'
 import {
-  Stage, Artboard, Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Button, IconButton, Menu, Badge, Empty, Tip, createCamera, useValues, cn, humanize,
+  Stage, Artboard, Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Button, IconButton, Menu, Badge, Empty, Tip, createCamera, useValues, useDoc, cn, humanize,
 } from '@kit'
 import { FAMILY, type DrawCtx } from './families'
 import { doc, settings, ui, colorsOf, markLabel, type Mark, type SV } from './model'
-import { useDoc } from '../batch/local/history'
 import { lockupSVG, markSVG, svgURL } from './render'
-import { VariantGrid } from './local/VariantGrid'
-import { SizeLadder } from './local/SizeLadder'
+import { VariantGrid, VariantAction, SizeLadder } from '@kit/ui/variant-grid'
 import {
   focus, toggleLock, toggleFav, moreLikeThis, applyMutation, keepMutation, favMutation, compareWith, swapCompare, adoptFromCompare, exportMarkSVG,
   exportPNGSet, exportLockup, exportParams, copyMarkSVG, resetMarkParams, toggleCompare, ICON_SIZES,
@@ -54,14 +52,8 @@ export function GridView({ columns }: { columns: React.MutableRefObject<number> 
           onLock={toggleLock}
           onFav={toggleFav}
           onColumns={(n) => { columns.current = n }}
-          actions={(id) => (
-            <Tip label="More like this" shortcut="m">
-              <button type="button" aria-label="More like this" onClick={(e) => { e.stopPropagation(); moreLikeThis(id) }}
-                className="flex size-7 items-center justify-center rounded-[7px] bg-overlay/90 text-fg-muted shadow-[var(--shadow-segment)] outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
-                <Sparkles size={13} strokeWidth={1.5} />
-              </button>
-            </Tip>
-          )}
+          shortcuts={{ lock: 'l', fav: 'f' }}
+          actions={(id) => <VariantAction label="More like this" shortcut="m" icon={Sparkles} onClick={() => moreLikeThis(id)} />}
           render={(id) => <MarkArt m={d.marks[id]} {...c} />}
         />
       </div>

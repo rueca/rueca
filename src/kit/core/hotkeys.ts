@@ -65,6 +65,17 @@ export function matches(combo: string, e: KeyboardEvent) {
   return k === key || code === key || (key === 'plus' && k === '+')
 }
 
+/** Split 'mod+z,mod+y' into alternatives — but ',' and 'shift+,' are keys, not separators. */
+export function splitCombos(s: string) {
+  const out: string[] = []
+  let cur = ''
+  for (const ch of s) {
+    if (ch === ',' && cur && !cur.endsWith('+')) { out.push(cur.trim()); cur = '' } else cur += ch
+  }
+  if (cur) out.push(cur.trim())
+  return out
+}
+
 interface Binding { id: number; combo: string; run: (e: KeyboardEvent) => void; label?: string; group?: string; priority: number; when?: () => boolean; order: number }
 let bindings: Binding[] = []
 let seq = 0
@@ -77,7 +88,7 @@ function install() {
   installed = true
   window.addEventListener('keydown', (e) => {
     if (e.defaultPrevented || typing(e)) return
-    const hits = bindings.filter((b) => b.combo.split(',').some((c) => matches(c.trim(), e)) && (!b.when || b.when()))
+    const hits = bindings.filter((b) => splitCombos(b.combo).some((c) => matches(c, e)) && (!b.when || b.when()))
     if (!hits.length) return
     if (onButton(e, normKey(e.key))) return
     hits.sort((a, b) => b.priority - a.priority || b.order - a.order)
@@ -146,7 +157,8 @@ export function useHoldKey(combo: string, onChange: (down: boolean) => void, opt
 
 /** ⌘⇧Z on Mac, Ctrl+Shift+Z elsewhere — for tooltips and menus. */
 export function prettyCombo(combo: string) {
-  const parts = combo.split(',')[0].trim().split('+')
+  const first = splitCombos(combo)[0] ?? combo
+  const parts = first === '+' ? ['+'] : first.endsWith('+') ? [...first.slice(0, -1).split('+').filter(Boolean), '+'] : first.split('+')
   const map: Record<string, string> = isMac
     ? { mod: '⌘', shift: '⇧', alt: '⌥', ctrl: '⌃', space: 'Space', esc: 'Esc', enter: '↵', backspace: '⌫', delete: '⌦', arrowleft: '←', arrowright: '→', arrowup: '↑', arrowdown: '↓', plus: '+' }
     : { mod: 'Ctrl+', shift: 'Shift+', alt: 'Alt+', ctrl: 'Ctrl+', space: 'Space', esc: 'Esc', enter: 'Enter', backspace: 'Bksp', delete: 'Del', arrowleft: '←', arrowright: '→', arrowup: '↑', arrowdown: '↓', plus: '+' }

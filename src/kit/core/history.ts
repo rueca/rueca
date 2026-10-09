@@ -13,7 +13,7 @@
    kit components accept either.
 --------------------------------------------------------------------------- */
 import { createStore, type StoreApi } from 'zustand/vanilla'
-import { useStore } from 'zustand'
+import { useSyncExternalStore } from 'react'
 import type { CommitMeta } from './params'
 
 export interface Undoable {
@@ -90,6 +90,7 @@ export interface HistoryLike {
 /** React: re-render when undo/redo availability changes. */
 export function useCanUndo(h: HistoryLike) {
   const read = () => `${h.canUndo() ? 1 : 0}${h.canRedo() ? 1 : 0}`
-  const v = useStore(h as unknown as StoreApi<unknown>, read)
+  // useSyncExternalStore, not zustand's useStore: a HistoryLike needn't have getState.
+  const v = useSyncExternalStore(h.subscribe as (cb: () => void) => () => void, read, read)
   return { canUndo: v[0] === '1', canRedo: v[1] === '1' }
 }

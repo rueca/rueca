@@ -2,7 +2,7 @@
 import { memo } from 'react'
 import { Link2 } from 'lucide-react'
 import { cn } from '@kit'
-import { InlineText } from '../../flows/local/InlineText'
+import { InlineText } from '@kit/ui/inline-text'
 import { CHANNELS, TEAMS, type Card } from '../model'
 import { ui, updateCard, editCards } from '../store'
 
@@ -73,6 +73,9 @@ export const JourneyCard = memo(function JourneyCard({
         </div>
       ) : (
         <InlineText
+          bare
+          focusable={false}
+          allowEmpty
           value={card.text}
           multiline
           editing={editing}
@@ -82,7 +85,7 @@ export const JourneyCard = memo(function JourneyCard({
           }}
           onCommit={(text) => updateCard(card.id, { text }, { label: 'Edit card' })}
           placeholder="Type something…"
-          title="Card text"
+          label="Card text"
           className={cn('block w-full whitespace-pre-wrap break-words text-fg', compact ? 'text-[11.5px] leading-snug' : 'text-[12px] leading-snug', lane === 'thoughts' && 'italic')}
         />
       )}

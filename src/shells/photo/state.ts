@@ -5,16 +5,15 @@
    view state — crop draft, split, peek, clipping overlay, hover preview.
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
-import { createParams, defineSchema, folder, humanize, p, type ParamStore, type Schema, type ValueDef } from '@kit'
-import { IDENTITY_CURVE, type CurvePoint } from './local/ToneCurve'
-import type { Rect } from './local/CropOverlay'
-import { createNamedHistory } from './local/history'
+import { createHistory, createParams, defineSchema, folder, humanize, p, type ParamStore, type Schema } from '@kit'
+import { IDENTITY_CURVE, type CurvePoint } from '@kit/ui/charts'
+import type { CropRect as Rect } from '@kit/stage/overlays'
 
 export type V = Record<string, any>
 
-/** An opaque value the kit has no control for (curve points, a crop rect).
-    It still gets defaults, undo, persistence and share links; the shell draws its own UI. */
-const custom = <T,>(value: T, o: { label?: string; hint?: string } = {}) => ({ type: 'custom', value, ...o }) as unknown as ValueDef
+/** A document value the Inspector has no row for (curve points, a crop rect): hidden, but
+    undoable, persisted and — unlike the p.data default — kept in share links. The shell draws its own UI. */
+const doc = <T,>(value: T, label: string) => p.data<T>(value, { label, share: true })
 
 const sgn = (v: number) => (v > 0 ? `+${v}` : `${v}`)
 const bi = (label: string, hint?: string) => p.number(0, { min: -100, max: 100, step: 1, label, hint, fmt: sgn })
@@ -61,10 +60,10 @@ const schema = defineSchema({
     saturation: bi('Saturation'),
   }),
   curve: folder('Tone curve', {
-    curveRGB: custom<CurvePoint[]>(IDENTITY_CURVE, { label: 'RGB curve' }),
-    curveR: custom<CurvePoint[]>(IDENTITY_CURVE, { label: 'Red curve' }),
-    curveG: custom<CurvePoint[]>(IDENTITY_CURVE, { label: 'Green curve' }),
-    curveB: custom<CurvePoint[]>(IDENTITY_CURVE, { label: 'Blue curve' }),
+    curveRGB: doc<CurvePoint[]>(IDENTITY_CURVE, 'RGB curve'),
+    curveR: doc<CurvePoint[]>(IDENTITY_CURVE, 'Red curve'),
+    curveG: doc<CurvePoint[]>(IDENTITY_CURVE, 'Green curve'),
+    curveB: doc<CurvePoint[]>(IDENTITY_CURVE, 'Blue curve'),
   }),
   hsl: folder('Colour mixer', hslParams),
   vignette: folder('Vignette', {
@@ -81,7 +80,7 @@ const schema = defineSchema({
     sharpRadius: p.number(1, { min: 0.5, max: 3, step: 0.1, label: 'Radius', unit: 'px', when: (v: V) => v.sharpen > 0 }),
   }),
   geometry: folder('Crop', {
-    crop: custom<Rect>(FULL, { label: 'Crop' }),
+    crop: doc<Rect>(FULL, 'Crop'),
     angle: p.number(0, { min: -45, max: 45, step: 0.1, unit: '°', label: 'Straighten' }),
     aspect: p.select('free', ASPECTS.map((a) => ({ value: a.value, label: a.label })), { label: 'Aspect' }),
   }),
@@ -147,21 +146,22 @@ export const ui = createStore<UI>(() => ({
 ui.subscribe((s, prev) => { if (s.userLooks !== prev.userLooks) try { localStorage.setItem(LSK, JSON.stringify(s.userLooks)) } catch { /* quota */ } })
 export const allLooks = () => [...LOOKS, ...ui.getState().userLooks.map((l) => ({ ...l, user: true, group: 'Yours' }))]
 
-/* --- history names ------------------------------------------------------- */
+/* --- history: named steps (Lightroom's History panel) --------------------
+   Every commit carries a label — sliders name theirs on release ("Exposure
+   +0.45"), presets, crops and resets pass one — and the kit history keeps
+   them, so <HistoryList history={history} /> reads like Lightroom's. */
 const fmt = (k: string, v: unknown) => {
   if (typeof v !== 'number') return ''
   const d = params.defs[k] as { fmt?: (n: number) => string; unit?: string } | undefined
   return d?.fmt ? d.fmt(v) : `${v}${d?.unit ?? ''}`
 }
-export function describe(prev: V, next: V): string {
-  const changed = Object.keys(next).filter((k) => JSON.stringify(prev[k]) !== JSON.stringify(next[k]))
-  if (!changed.length) return 'Edit'
-  if (changed.every((k) => GEOMETRY_KEYS.includes(k))) return changed.includes('crop') ? 'Crop' : changed.includes('angle') ? `Straighten ${fmt('angle', next.angle)}` : 'Aspect'
-  if (changed.length > 2) return `${changed.length} settings`
-  const k = changed[0]
-  if (k.startsWith('curve')) return `Tone curve${k === 'curveRGB' ? '' : ` · ${k.slice(5)}`}`
+/** The step name for one setting: "Mixer · Red saturation", "Vignette midpoint", "Grain size". */
+export function stepName(k: string): string {
   const label = (params.defs[k] as { label?: string })?.label ?? humanize(k)
-  const name = k.startsWith('hsl_') ? `Mixer · ${label}` : ['vigMid', 'vigFeather'].includes(k) ? `Vignette ${label.toLowerCase()}` : ['grainSize'].includes(k) ? 'Grain size' : ['vignette'].includes(k) ? 'Vignette' : ['grain'].includes(k) ? 'Grain' : ['sharpen'].includes(k) ? 'Sharpening' : label
-  return `${name} ${fmt(k, next[k])}`.trim() + (changed.length === 2 ? ' +1' : '')
+  if (k.startsWith('hsl_')) return `Mixer · ${label}`
+  return ({ vigMid: `Vignette ${label.toLowerCase()}`, vigFeather: `Vignette ${label.toLowerCase()}`, vignette: 'Vignette', grain: 'Grain', grainSize: 'Grain size', sharpen: 'Sharpening', sharpRadius: 'Sharpening radius' } as Record<string, string>)[k] ?? label
 }
-export const history = createNamedHistory(params, describe, 'Open')
+/** ParamSlider's stepLabel for a key: "Exposure +0.45". */
+export const stepLabel = (k: string) => (v: number) => `${stepName(k)} ${fmt(k, v)}`.trim()
+
+export const history = createHistory([params])

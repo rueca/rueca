@@ -1,6 +1,6 @@
 /* Shell-level actions with feedback (toasts). Shared by commands, menus,
    the context bar and the inspector so each verb has one implementation. */
-import { toast, toastManager, download, copyText, exportJSON, stamp } from '@kit'
+import { toast, download, copyText, exportJSON, stamp } from '@kit'
 import * as S from './model/store'
 import { prefs } from './model/prefs'
 import { renderNodeToCanvas } from './render/paint'
@@ -19,7 +19,7 @@ async function exportNodes(nodes: Node[]) {
   if (!nodes.length) { toast('Nothing to export', { description: 'Select a layer or frame first.', type: 'error' }); return }
   const v = prefs.values()
   const scale = Number(v.exportScale)
-  const id = toast(nodes.length > 1 ? `Exporting ${nodes.length} layers…` : `Exporting ${nodes[0].name}…`, { type: 'loading', timeout: 0 })
+  const id = toast(nodes.length > 1 ? `Exporting ${nodes.length} layers…` : `Exporting ${nodes[0].name}…`, { type: 'loading' })
   try {
     for (const n of nodes) {
       const bg = v.exportFormat === 'jpg' ? '#ffffff' : undefined
@@ -28,11 +28,9 @@ async function exportNodes(nodes: Node[]) {
       const blob = await new Promise<Blob | null>((r) => c.toBlob(r, type, 0.92))
       if (blob) download(blob, fileName(n))
     }
-    toast(nodes.length > 1 ? `${nodes.length} files exported` : `${fileName(nodes[0])} exported`, { type: 'success', description: `${scale}× ${v.exportFormat.toUpperCase()}` })
+    toast.update(id, nodes.length > 1 ? `${nodes.length} files exported` : `${fileName(nodes[0])} exported`, { type: 'success', description: `${scale}× ${v.exportFormat.toUpperCase()}` })
   } catch (e) {
-    toast('Export failed', { type: 'error', description: String(e) })
-  } finally {
-    toastManager.close(id)
+    toast.update(id, 'Export failed', { type: 'error', description: String(e), timeout: 5000 })
   }
 }
 
@@ -58,7 +56,7 @@ export async function openDocument(file: File) {
     const doc = JSON.parse(await file.text())
     if (!doc?.pages?.length) throw new Error('Not a design file')
     S.design.setState({ doc, pageId: doc.pages[0].id, selection: [] })
-    S.commit()
+    S.commit('Open file')
     toast(`Opened ${doc.name ?? file.name}`, { type: 'success' })
   } catch (e) { toast('Could not open file', { type: 'error', description: String((e as Error).message ?? e) }) }
 }
@@ -78,19 +76,19 @@ export function toggleHidden() {
   const sel = S.selectedNodes()
   if (!sel.length) return
   const hide = sel.some((n) => n.visible)
-  S.patchSelection({ visible: !hide })
+  S.patchSelection({ visible: !hide }, { label: hide ? 'Hide' : 'Show' })
 }
 export function toggleLocked() {
   const sel = S.selectedNodes()
   if (!sel.length) return
   const lock = sel.some((n) => !n.locked)
-  S.patchSelection({ locked: lock })
+  S.patchSelection({ locked: lock }, { label: lock ? 'Lock' : 'Unlock' })
   if (lock) S.select([])
 }
 
 export function setOpacityKey(digit: number) {
   if (!S.get().selection.length) return
-  S.patchSelection({ opacity: digit === 0 ? 1 : digit / 10 })
+  S.patchSelection({ opacity: digit === 0 ? 1 : digit / 10 }, { label: 'Opacity' })
 }
 
 export function nameOf(id: string) { return find(S.nodesOf(), id)?.name ?? '' }

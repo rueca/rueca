@@ -1,9 +1,9 @@
 /* User-level verbs: generate, variations, remix, upscale, reuse. Shared by the composer, the
    tile hover actions, the details panel, the lightbox and the command palette. */
-import { toast, toastManager, copyText, exportJSON } from '@kit'
+import { toast, copyText, exportJSON } from '@kit'
 import { aspectOf, modelOf, paramsText, type GenParams } from '../engine/models'
 import { params, prompt } from './params'
-import { gallery, setView, byId, deleteImages, visible, viewTitle, newSession, addImages, uid, type ImageRec } from './gallery'
+import { history, snapshot, setView, byId, select, deleteImages, visible, viewTitle, newSession, addImages, uid, type ImageRec } from './gallery'
 import { enqueue } from './queue'
 import { ui, focusPrompt } from './ui'
 import { exportPNG } from './images'
@@ -12,7 +12,7 @@ const rnd = () => Math.floor(Math.random() * 999_999)
 
 /** Where new images go: the session on screen, else the last active one (and show it). */
 function targetSession() {
-  const s = gallery.getState()
+  const s = snapshot()
   if (s.view.type === 'session') return s.view.id
   const id = s.sessions.some((x) => x.id === s.activeSession) ? s.activeSession : s.sessions[0].id
   setView({ type: 'session', id })
@@ -83,23 +83,23 @@ export async function copyParams(rec: ImageRec) {
 
 export function removeWithUndo(ids: string[]) {
   if (!ids.length) return
-  const undo = deleteImages(ids)
-  toast(`Deleted ${ids.length} image${ids.length > 1 ? 's' : ''}`, { action: { label: 'Undo', onClick: undo }, timeout: 5000 })
+  deleteImages(ids)
+  toast(`Deleted ${ids.length} image${ids.length > 1 ? 's' : ''}`, { action: { label: 'Undo', onClick: () => { history.undo(); select(ids, ids[0]) } }, timeout: 5000 })
 }
 
 export async function exportSelected() {
-  const s = gallery.getState()
+  const s = snapshot()
   const recs = s.selection.map((id) => byId(id)).filter(Boolean) as ImageRec[]
   if (!recs.length) { toast('Select an image to export'); return }
-  const id = toast(`Rendering ${recs.length} PNG${recs.length > 1 ? 's' : ''}…`, { type: 'loading', timeout: 0 })
+  const id = toast(`Rendering ${recs.length} PNG${recs.length > 1 ? 's' : ''}…`, { type: 'loading' })
   for (const r of recs) await exportPNG(r.params, r.id)
-  toastManager.update(id, { title: `Exported ${recs.length} PNG${recs.length > 1 ? 's' : ''}`, type: 'success', timeout: 2600, description: recs.length === 1 ? `${recs[0].params.w * (recs[0].params.upscale ?? 1)} × ${recs[0].params.h * (recs[0].params.upscale ?? 1)}` : undefined })
+  toast.update(id, `Exported ${recs.length} PNG${recs.length > 1 ? 's' : ''}`, { type: 'success', description: recs.length === 1 ? `${recs[0].params.w * (recs[0].params.upscale ?? 1)} × ${recs[0].params.h * (recs[0].params.upscale ?? 1)}` : undefined })
 }
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'session'
 
 export function exportSession() {
-  const s = gallery.getState()
+  const s = snapshot()
   const title = viewTitle(s)
   const images = visible(s)
   const data = {

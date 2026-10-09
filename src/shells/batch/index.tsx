@@ -6,17 +6,16 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Button, IconButton, Menu, Divider, PresetMenu, ThemeToggle, CommandPalette,
-  createCamera, shareMenuItems, useHotkeys, useValues, exportCanvasPNG, exportJSON, toast, Badge, Tip, type Command,
+  createCamera, shareMenuItems, useHotkeys, useValues, useDoc, exportCanvasPNG, exportJSON, toast, Badge, Tip, HistoryButtons, type Command,
 } from '@kit'
 import { doc, params, ui, history, effective, SIZE_PRESETS, type V } from './model'
-import { HistoryCluster, useDoc } from './local/history'
 import { drawPost, ensureFonts, loadImage, peekImage } from './artifact'
 import { BatchStage } from './stage'
 import { SizesPanel, DesignTab, BrandTab, ExportTab, DataPanel, PasteDialog, CustomSizeDialog, addSizeItems } from './panels'
 import {
   nextRow, prevRow, setRow, addRow, duplicateRow, removeRow, pickCSV, exportCSV, selectSize, removeSize, clearAllOverrides, clearOverride, resetDemo, addPreset,
 } from './actions'
-import { runExport, cancelExport, exporter, plannedJobs, slug } from './exporter'
+import { runExport, cancelExport, exporter, jobs, plannedJobs, slug } from './exporter'
 
 const camera = createCamera()
 const measure = typeof document !== 'undefined' ? document.createElement('canvas').getContext('2d')! : (null as unknown as CanvasRenderingContext2D)
@@ -40,7 +39,7 @@ export default function BatchShell() {
   const safe = useStore(ui, (s) => s.safe)
   const tab = useStore(ui, (s) => s.tab)
   const showData = useStore(ui, (s) => s.data)
-  const running = useStore(exporter, (s) => s.status === 'running')
+  const running = useStore(jobs, (s) => s.status === 'running')
   const exportCount = useStore(exporter, (s) => plannedJobs(s.settings).length)
   const brand = useValues(params, (v) => (v as V).brandName)
   const locked = useValues(params, (v) => (v as V).brandLocked)
@@ -74,7 +73,7 @@ export default function BatchShell() {
     toast('No layout issues', { type: 'success' })
   }
 
-  useHotkeys({ esc: () => (running ? cancelExport() : selectSize(null)) }, [running])
+  useHotkeys({ esc: { run: () => (running ? cancelExport() : selectSize(null)), label: 'Deselect size / cancel export', group: 'Edit' } }, [running])
 
   const commands: Command[] = [
     { id: 'next', label: 'Next row', group: 'Rows', shortcut: 'arrowright', icon: ChevronRight, run: nextRow },
@@ -147,7 +146,7 @@ export default function BatchShell() {
           end={
             <>
               <Cluster>
-                <HistoryCluster history={history} />
+                <HistoryButtons history={history} />
                 <Divider vertical />
                 <PresetMenu params={params} />
                 <Menu align="end" trigger={<IconButton icon={ArrowRightLeft} label="Share & copy" />} items={shareMenuItems(params)} />
@@ -176,7 +175,7 @@ export default function BatchShell() {
     >
       <BatchStage camera={camera} issues={issues[row] ?? {}} />
       <CommandPalette commands={commands} extraShortcuts={[
-        { keys: 'shift+1', label: 'Zoom to fit' }, { keys: 'shift+0', label: 'Zoom to 100%' }, { keys: 'esc', label: 'Deselect size / cancel export' },
+        { keys: 'shift+1', label: 'Zoom to fit' }, { keys: 'shift+0', label: 'Zoom to 100%' },
         { keys: 'enter', label: 'Edit cell (data table)' }, { keys: 'mod+v', label: 'Paste a block into the table' },
       ]} />
       <PasteDialog open={paste} onOpenChange={setPaste} />

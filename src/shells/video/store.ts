@@ -1,15 +1,14 @@
 /* ---------------------------------------------------------------------------
-   State: the kit params store holds the composition settings AND the clip
-   list (hidden `comp` value) so undo/redo, persistence and share links cover
-   timeline edits. `ui` holds selection and view state.
+   State: the kit params store holds the composition settings (aspect, fps,
+   duration, matte, view); the tracks + clips live in a kit doc store. One
+   `history` joins them, so ⌘Z undoes whichever changed last. `ui` holds
+   selection and tool — kept out of the doc so undo never fights focus.
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
 import { RectangleHorizontal, RectangleVertical, Square, Smartphone } from 'lucide-react'
-import { createClock, createParams, defineSchema, folder, p, type TextDef } from '@kit'
+import { createClock, createDocStore, createHistory, createParams, defineSchema, folder, p, useDoc } from '@kit'
 import { ASPECTS, demoComp, newClip, uid, type Aspect, type Clip, type ClipKind, type Comp, type Track } from './comp'
-
-const docDef = (value: Comp) => ({ type: 'text', value } as unknown as TextDef)
 
 export const schema = defineSchema({
   composition: folder('Composition', {
@@ -28,14 +27,17 @@ export const schema = defineSchema({
     snap: p.boolean(true, { label: 'Snapping', hint: 'Clips snap to the playhead and to each other’s edges.' }),
     quality: p.select('0.5', [{ value: '0.5', label: 'Half' }, { value: '1', label: 'Full' }], { label: 'Preview', hint: 'Preview resolution. Export is always full resolution.' }),
   }),
-  document: folder('Document', { comp: docDef(demoComp()) }),
 })
 
-export const params = createParams(schema, { id: 'video' })
+export const params = createParams(schema, { id: 'video', version: 2 })
 export type V = ReturnType<typeof params.values>
-export const getComp = () => params.values().comp as unknown as Comp
-export const setComp = (c: Comp, final = true) => params.setValue('comp', c as unknown as string, { commit: final })
-export const useComp = () => useStore(params, (s) => s.values.comp) as unknown as Comp
+
+export const doc = createDocStore<Comp>(demoComp(), { id: 'video', version: 1 })
+export const history = createHistory([params, doc])
+export const getComp = () => doc.get()
+export const setComp = (c: Comp, final = true, label?: string) => doc.set(c, { commit: final, label })
+export const commitComp = (label?: string) => doc.commit(label)
+export const useComp = () => useDoc(doc)
 export const frameSize = (v: V = params.values()) => ASPECTS[(v.aspect as Aspect) ?? '9:16']
 
 export interface UI { sel: string[]; tool: 'select' | 'text' | 'shape' }
@@ -81,7 +83,7 @@ export function addClip(kind: ClipKind, patch: Partial<Clip> = {}, at = snapFram
   const placed = placeFor(comp, c0.start, c0.dur, pref)
   comp = placed.comp
   const clip = { ...c0, track: placed.track }
-  setComp({ ...comp, clips: [...comp.clips, clip] })
+  setComp({ ...comp, clips: [...comp.clips, clip] }, true, `Add ${clip.name.toLowerCase()}`)
   ui.setState({ sel: [clip.id] })
   return clip
 }
@@ -92,7 +94,7 @@ export function deleteClips(ids: string[]) {
   const locked = new Set(c.tracks.filter((t) => t.locked).map((t) => t.id))
   const kill = new Set(c.clips.filter((x) => ids.includes(x.id) && !locked.has(x.track)).map((x) => x.id))
   if (!kill.size) return 0
-  setComp({ ...c, clips: c.clips.filter((x) => !kill.has(x.id)) })
+  setComp({ ...c, clips: c.clips.filter((x) => !kill.has(x.id)) }, true, kill.size === 1 ? 'Delete clip' : `Delete ${kill.size} clips`)
   ui.setState({ sel: [] })
   return kill.size
 }
@@ -111,7 +113,7 @@ export function duplicateClips(ids: string[]) {
     comp = { ...comp, clips: [...comp.clips, nc] }
     made.push(nc.id)
   }
-  setComp(comp)
+  setComp(comp, true, 'Duplicate')
   ui.setState({ sel: made })
   return made.length
 }
@@ -127,7 +129,7 @@ export function splitAt(ids: string[], t = snapFrame(clock.time())) {
     return [a, b]
   })
   if (!made.length) return 0
-  setComp({ ...comp, clips })
+  setComp({ ...comp, clips }, true, 'Split')
   ui.setState({ sel: made })
   return made.length
 }
@@ -183,10 +185,12 @@ export function rebaseDesign(aspect: Aspect) {
 export function loadComp(data: unknown) {
   const d = data as Partial<Comp> & { settings?: Partial<V> }
   if (!d || !Array.isArray(d.clips) || !Array.isArray(d.tracks)) throw new Error('Not a Cut composition (needs tracks and clips).')
-  const patch: Record<string, unknown> = { comp: { tracks: d.tracks, clips: d.clips, design: d.design ?? (d.settings?.aspect as Aspect | undefined) ?? '9:16' } }
-  if (d.settings?.aspect) patch.aspect = d.settings.aspect
-  if (d.settings?.fps) patch.fps = d.settings.fps
-  if (d.settings?.duration) patch.duration = d.settings.duration
-  params.patch(patch as never)
+  const patch = { comp: { tracks: d.tracks, clips: d.clips, design: d.design ?? (d.settings?.aspect as Aspect | undefined) ?? '9:16' } }
+  const settings: Record<string, unknown> = {}
+  if (d.settings?.aspect) settings.aspect = d.settings.aspect
+  if (d.settings?.fps) settings.fps = d.settings.fps
+  if (d.settings?.duration) settings.duration = d.settings.duration
+  if (Object.keys(settings).length) params.patch(settings as never, { label: 'Import settings' })
+  setComp(patch.comp as Comp, true, 'Import composition')
   ui.setState({ sel: [] })
 }

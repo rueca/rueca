@@ -234,3 +234,6 @@ function demoUpgrade(): Flow {
 }
 
 export const demoFlows = () => [demoMain(), demoReset(), demoUpgrade()]
+
+/** A user-picked hue, darkened just enough that white text on it clears WCAG AA (≥4.5:1). */
+export { readableOn as deepen } from '@kit'

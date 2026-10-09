@@ -73,12 +73,12 @@ export function HistoryList({ history, params, className, openLabel = 'Open' }: 
   )
 }
 
-export function PresetMenu({ params, trigger }: { params: AnyParams; trigger?: ReactElement }) {
+export function PresetMenu({ params, trigger, title = 'Presets' }: { params: AnyParams; trigger?: ReactElement; title?: string }) {
   const presets = useStore(params, (s) => s.presets)
   useStore(params, (s) => s.values)
   const active = params.activePreset()
   const items: MenuItem[] = [
-    { type: 'label', label: 'Presets' },
+    { type: 'label', label: title },
     ...presets.map((p) => ({ label: p.name, checked: active?.name === p.name, onClick: () => params.applyPreset(p.name) })),
     { type: 'separator' },
     {

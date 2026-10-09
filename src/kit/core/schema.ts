@@ -53,6 +53,8 @@ export interface NumberDef extends Base<number> {
   scale?: 'linear' | 'log'
   /** soft range for dragging; typed values may go out to min/max (Blender) */
   soft?: [number, number]
+  /** paint the slider track (a CSS gradient) — Temp, Tint, Hue rows */
+  track?: string
 }
 export interface RangeDef extends Base<[number, number]> { type: 'range'; min: number; max: number; step?: number; unit?: string; fmt?: (v: number) => string }
 export interface AngleDef extends Base<number> { type: 'angle' }

@@ -10,9 +10,9 @@ import { params, prompt } from '../state/params'
 import { reusePrompt, removeWithUndo, exportSelected } from '../state/actions'
 import { enqueue } from '../state/queue'
 import { usePix } from '../state/images'
-import { Masonry } from '../local/Masonry'
+import { Masonry } from '@kit/ui/masonry'
 import { DenoisePreview } from '../local/DenoisePreview'
-import { InlineEdit } from '../local/InlineEdit'
+import { InlineText } from '@kit/ui/inline-text'
 import { Tile } from './Tile'
 
 const COL = { s: 170, m: 250, l: 380 }
@@ -110,7 +110,7 @@ export function Gallery() {
       <div className="flex h-11 flex-none items-center gap-2 px-1">
         <div className="flex min-w-0 flex-1 items-baseline gap-2">
           {session
-            ? <InlineEdit value={session.name} onCommit={(n) => renameSession(session.id, n)} className="text-[14px] font-semibold text-fg" label="Rename session" />
+            ? <InlineText value={session.name} onCommit={(n) => renameSession(session.id, n)} className="truncate text-[14px] font-semibold text-fg" label="Rename session" />
             : <span className="truncate text-[14px] font-semibold text-fg">{viewTitle(state)}</span>}
           <span className="tabular text-[12px] text-fg-faint">{list.length} image{list.length === 1 ? '' : 's'}</span>
         </div>

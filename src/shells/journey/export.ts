@@ -1,5 +1,5 @@
 /* Journey — PNG (DOM snapshot of the board), CSV, Markdown, JSON. */
-import { copyText, download, exportCanvasPNG, exportJSON, toast, toastManager } from '@kit'
+import { copyText, download, exportCanvasPNG, exportJSON, toast } from '@kit'
 import { snapshotElement } from '@kit'
 import { CHANNELS, LANES, emoji, fmtEmotion, type JourneyDoc, type Persona } from './model'
 import { doc, persona, ui, history } from './store'
@@ -31,7 +31,7 @@ export async function exportPNG(scale = 2) {
     toast('Export failed', { type: 'error', description: String(e) })
   } finally {
     ui.setState(prev)
-    toastManager.close(id)
+    toast.dismiss(id)
   }
 }
 
@@ -93,7 +93,7 @@ export async function copyMarkdown() {
 }
 
 export function exportJourneyJSON() {
-  exportJSON({ app: 'prototype-studio/journey', version: 1, doc: doc.get() }, `${slug(doc.get().title)}.json`)
+  exportJSON({ app: 'trompo/journey', version: 1, doc: doc.get() }, `${slug(doc.get().title)}.json`)
 }
 
 export function importJourneyJSON() {

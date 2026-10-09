@@ -82,6 +82,9 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
 
   const display = mixed ? 'Mixed' : fmt ? fmt(value) : `${value.toFixed(decimalsOf(step))}${unit ?? ''}`
 
+  // With a custom parse, edit in display units ("30%" → parse) rather than the raw number.
+  const editText = () => (parse && fmt ? fmt(value) : String(roundTo(value, step)))
+
   useEffect(() => { if (editing) { input.current?.focus(); input.current?.select() } }, [editing])
 
   const onPointerDown = (e: React.PointerEvent) => {
@@ -116,7 +119,7 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
     el.current?.releasePointerCapture(e.pointerId)
     if (document.pointerLockElement) document.exitPointerLock()
     if (d.moved) { setScrubbing(false); if (mixed && onDelta) onDelta(roundTo(d.acc2 ?? 0, step), true); else commitNum(d.start, true) }
-    else { setDraft(mixed ? '' : String(roundTo(value, step))); setEditing(true) }
+    else { setDraft(mixed ? '' : editText()); setEditing(true) }
   }
 
   const finishEdit = (apply: boolean) => {
@@ -132,7 +135,7 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
     const mult = e.shiftKey ? 10 : e.altKey ? 0.1 : 1
     if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); commitNum(value + step * mult, true) }
     if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { e.preventDefault(); commitNum(value - step * mult, true) }
-    if (e.key === 'Enter') { setDraft(String(value)); setEditing(true) }
+    if (e.key === 'Enter') { setDraft(editText()); setEditing(true) }
     if (e.key === 'Home' && Number.isFinite(min)) commitNum(min, true)
     if (e.key === 'End' && Number.isFinite(max)) commitNum(max, true)
   }

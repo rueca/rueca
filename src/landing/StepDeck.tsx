@@ -6,7 +6,8 @@
      finished cards: lift 48px, grow 2%, fade out
    The landing scrolls inside a div, not the window, so progress is measured
    against the nearest scrolling ancestor. Text stays in the DOM for every step,
-   and reduced motion turns every animation into a cut. */
+   and reduced motion turns every animation into a cut. Phones get plain
+   stacked cards instead of the pinned deck. */
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { ArrowUp, Check, FileCode2, Paperclip, Upload } from 'lucide-react'
@@ -28,7 +29,61 @@ function scrollParent(el: HTMLElement | null): HTMLElement | null {
   return null
 }
 
+function useMedia(query: string) {
+  const [match, setMatch] = useState(() => typeof matchMedia !== 'undefined' && matchMedia(query).matches)
+  useEffect(() => {
+    const m = matchMedia(query)
+    const on = () => setMatch(m.matches)
+    on(); m.addEventListener('change', on)
+    return () => m.removeEventListener('change', on)
+  }, [query])
+  return match
+}
+
+/** true once the element is mostly on screen — plays a phone card's visual when it arrives */
+function useArrived<T extends HTMLElement>() {
+  const ref = useRef<T>(null)
+  const [seen, setSeen] = useState(false)
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSeen(true); io.disconnect() } }, { threshold: 0.45 })
+    io.observe(ref.current!)
+    return () => io.disconnect()
+  }, [])
+  return [ref, seen] as const
+}
+
+function Visual({ i, active }: { i: number; active: boolean }) {
+  return i === 0 ? <ChatVisual active={active} /> : i === 1 ? <DropVisual active={active} /> : <ShellVisual active={active} />
+}
+
+/* Phones: no pinning. Each step is a plain card — text, then its visual,
+   which plays when the card scrolls into view (Granola, Framer do the same). */
+function StackedSteps({ steps }: { steps: DeckStep[] }) {
+  return <div className="flex flex-col gap-4">{steps.map((s, i) => <StackedCard key={s.n} step={s} i={i} />)}</div>
+}
+
+function StackedCard({ step: s, i }: { step: DeckStep; i: number }) {
+  const [ref, seen] = useArrived<HTMLElement>()
+  return (
+    <article ref={ref} className="panel flex flex-col gap-5 p-5">
+      <div>
+        <div className="tabular text-[13px] text-fg-faint">Step {s.n}</div>
+        <h3 className="mt-2 text-[24px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance">{s.title}</h3>
+        <p className="mt-3 text-[14px] leading-[1.6] text-pretty text-fg-muted">{s.body}</p>
+      </div>
+      <div className="relative h-[400px] overflow-hidden rounded-[10px] bg-field shadow-[inset_0_0_0_1px_var(--line)]">
+        <Visual i={i} active={seen} />
+      </div>
+    </article>
+  )
+}
+
 export function StepDeck({ steps }: { steps: DeckStep[] }) {
+  const phone = useMedia('(max-width: 767px)')
+  return phone ? <StackedSteps steps={steps} /> : <PinnedDeck steps={steps} />
+}
+
+function PinnedDeck({ steps }: { steps: DeckStep[] }) {
   const deck = useRef<HTMLDivElement>(null)
   const [progress, setProgress] = useState(0)
   const n = steps.length
@@ -67,7 +122,7 @@ export function StepDeck({ steps }: { steps: DeckStep[] }) {
   }
 
   return (
-    <div ref={deck} className="[--deck-step:80svh] lg:[--deck-step:70svh]"
+    <div ref={deck} className="[--deck-step:75svh] lg:[--deck-step:70svh]"
       style={{ height: `calc(100svh - ${NAV_H}px + ${n - 1} * var(--deck-step))` }}>
       <div className="sticky flex flex-col justify-center gap-4 lg:gap-5" style={{ top: NAV_H, height: `calc(100svh - ${NAV_H}px)` }}>
         {/* progress — each tab fills while its step is on screen; click to jump */}
@@ -105,9 +160,7 @@ export function StepDeck({ steps }: { steps: DeckStep[] }) {
                   <p className="mt-3 max-w-[420px] text-[14px] leading-[1.6] text-pretty text-fg-muted lg:mt-4 lg:text-[15px]">{s.body}</p>
                 </div>
                 <div className="relative min-h-0 overflow-hidden rounded-[10px] bg-field shadow-[inset_0_0_0_1px_var(--line)]">
-                  {i === 0 && <ChatVisual active={d === 0} />}
-                  {i === 1 && <DropVisual active={d === 0} />}
-                  {i === 2 && <ShellVisual active={d === 0} />}
+                  <Visual i={i} active={d === 0} />
                 </div>
               </article>
             )
@@ -133,10 +186,10 @@ function Beat({ on, delay = 0, children, className, from = 8 }: { on: boolean; d
   )
 }
 
-function Gradient({ className, drift = true }: { className?: string; drift?: boolean }) {
+function Gradient({ className, drift = true, blur = 28 }: { className?: string; drift?: boolean; blur?: number }) {
   const reduce = useReducedMotion()
   const blob = (color: string, x: string, y: string, size: string, path: number[][]) => (
-    <motion.div className="absolute rounded-full blur-[28px]" style={{ background: color, left: x, top: y, width: size, height: size }}
+    <motion.div className="absolute rounded-full" style={{ background: color, left: x, top: y, width: size, height: size, filter: `blur(${blur}px)` }}
       animate={drift && !reduce ? { x: path.map((p) => p[0]), y: path.map((p) => p[1]) } : undefined}
       transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }} />
   )
@@ -158,7 +211,11 @@ function AgentMark() {
 function ChatVisual({ active }: { active: boolean }) {
   return (
     <div className="flex h-full flex-col p-4 text-[12.5px] leading-[1.5] sm:p-5">
-      <div className="flex flex-1 flex-col justify-end gap-3.5">
+      <div className="flex items-center justify-between border-b border-line pb-3 text-[11.5px] text-fg-faint">
+        <span className="flex items-center gap-2"><AgentMark />New session</span>
+        <span className="tabular">~/projects/launch-site</span>
+      </div>
+      <div className="flex flex-1 flex-col justify-end gap-3.5 pt-4">
         <Beat on={active} className="ml-auto max-w-[82%] rounded-[12px] rounded-br-[4px] bg-active px-3.5 py-2.5 text-fg">
           Make me a tool to tune the hero gradient: the colours, some grain, and how fast it drifts.
         </Beat>
@@ -191,7 +248,7 @@ function DropVisual({ active }: { active: boolean }) {
   return (
     <div className="flex h-full flex-col gap-3 p-4 text-[12.5px] sm:p-5">
       <div className={cn('relative flex flex-1 items-center justify-center rounded-[10px] border border-dashed transition-colors duration-500',
-        landed ? 'border-signal bg-signal-soft' : 'border-line-strong')}>
+        landed ? 'border-signal' : 'border-line-strong')}>
         <div className={cn('absolute top-3 left-3 flex items-center gap-1.5 text-[11.5px] transition-opacity duration-300', landed ? 'opacity-0' : 'text-fg-faint')}>
           <Upload size={13} strokeWidth={1.5} />Drop a file, paste a link, or name it
         </div>
@@ -200,7 +257,7 @@ function DropVisual({ active }: { active: boolean }) {
           initial={false}
           animate={landed ? { opacity: 1, x: 0, y: 0, rotate: 0, scale: 1 } : { opacity: 0, x: 90, y: -70, rotate: 8, scale: 0.96 }}
           transition={landed && !reduce ? { duration: 0.7, ease: EASE, delay: 0.15 } : { duration: 0 }}>
-          <div className="relative size-11 flex-none overflow-hidden rounded-[7px]"><Gradient drift={false} /></div>
+          <div className="relative size-11 flex-none overflow-hidden rounded-[7px]"><Gradient drift={false} blur={6} /></div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 truncate font-medium text-fg"><FileCode2 size={13} strokeWidth={1.5} className="flex-none text-fg-faint" />hero-gradient.html</div>
             <div className="text-[11.5px] text-fg-faint">Your existing page · 14 KB</div>
@@ -275,7 +332,9 @@ function ShellVisual({ active }: { active: boolean }) {
       {/* timeline */}
       <div className="flex h-9 flex-none items-center gap-2 rounded-[8px] bg-panel px-2.5 shadow-[var(--shadow-cluster)]">
         <span className="tabular flex-none text-fg-faint">0:02</span>
-        <div className="relative h-3 flex-1 rounded-[3px] bg-lane/40">
+        <div className="relative h-3 flex-1">
+          <div className="absolute inset-y-0 left-[4%] w-[46%] rounded-[3px] bg-lane" />
+          <div className="absolute inset-y-0 left-[54%] w-[38%] rounded-[3px] bg-lane" />
           <motion.div className="absolute inset-y-[-3px] w-px bg-rec" initial={false}
             animate={active && !reduce ? { left: ['8%', '92%'] } : { left: '40%' }}
             transition={active && !reduce ? { duration: 6, repeat: Infinity, ease: 'linear' } : { duration: 0 }} />

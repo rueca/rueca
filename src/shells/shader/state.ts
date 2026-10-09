@@ -1,20 +1,17 @@
 /* ---------------------------------------------------------------------------
    Document state. Everything undoable lives in ONE param store — including the
-   layer stack, which rides along as a JSON value in a hidden folder (the kit
-   has no collection param yet). So ⌘Z, presets, A/B, share links and
-   persistence all cover adding, deleting, reordering and editing layers.
+   layer stack, a hidden `p.data<Layer[]>()` value. So ⌘Z, looks, A/B, share
+   links and persistence all cover adding, deleting, reordering and editing
+   layers.
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
-import { createClock, createParams, defineSchema, folder, p, type TextDef } from '@kit'
-import { makeLayer, newId, type Layer, type LayerType } from './layers'
+import { createClock, createParams, defineSchema, folder, p } from '@kit'
+import { LAYER_TYPES, makeLayer, newId, type Layer, type LayerType } from './layers'
 import { randomPalette, rng } from './color'
-
-/** Smuggle an arbitrary JSON value through the schema (kit gap: no p.list / p.json). */
-const json = <T,>(value: T, label: string): TextDef => ({ type: 'text', value: value as unknown as string, label })
 
 /* ---------- looks (built-in presets) ---------- */
 const L = makeLayer
-const look = (name: string, bg: string, seed: number, layers: Layer[]) => ({ name, values: { bg, seed, layers: layers as unknown as string } })
+const look = (name: string, bg: string, seed: number, layers: Layer[]) => ({ name, values: { bg, seed, layers } })
 
 export const LOOKS = [
   look('Aurora', '#04050d', 4127, [
@@ -86,13 +83,15 @@ export const schema = defineSchema({
     fps: p.monitor(() => perf.fps, { label: 'Frame rate', graph: true, min: 0, max: 75, fmt: (v) => `${Math.round(v)} fps` }),
     drawing: p.monitor(() => perf.res, { label: 'Drawing at' }),
   }, { collapsed: true }),
-  stack: folder('Stack', { layers: json(LOOKS[0].values.layers, 'Layers') }, { when: () => false }),
+  // never rendered as a row; the layers panel edits it. Shared, so a link carries the whole look.
+  stack: folder('Stack', { layers: p.data<Layer[]>(LOOKS[0].values.layers, { label: 'Layers', share: true }) }),
 })
 
-export const params = createParams(schema, { id: 'shader', presets: LOOKS })
+export const LOOK_KEYS = ['layers', 'bg', 'seed'] as const
+// "Save current look" captures the stack + background + seed, never canvas or playback settings.
+export const params = createParams(schema, { id: 'shader', presets: LOOKS, presetKeys: [...LOOK_KEYS] })
 export type V = ReturnType<typeof params.values>
 
-export const LOOK_KEYS = ['layers', 'bg', 'seed'] as const
 export const lookOf = (v: V) => ({ layers: v.layers, bg: v.bg, seed: v.seed })
 
 /* ---------- clock: one loop, rate = speed ---------- */
@@ -108,11 +107,12 @@ export interface Look { layers: Layer[]; bg: string; seed: number }
 export const ui = createStore<{ selected: string | null; preview: Look | null; frameW: number; frameH: number }>(() => ({ selected: null, preview: null, frameW: 1280, frameH: 720 }))
 
 /* ---------- layer operations: each is one undo step ---------- */
-export const getLayers = (v: V = params.values()) => v.layers as unknown as Layer[]
-export const setLayers = (next: Layer[], commit = true) => params.setValue('layers', next as unknown as string, { commit })
+export const getLayers = (v: V = params.values()) => v.layers
+export const setLayers = (next: Layer[], commit = true, label?: string) => params.setValue('layers', next, { commit, label })
+const nameOf = (id: string) => getLayers().find((l) => l.id === id)?.name ?? 'layer'
 
-export function updateLayer(id: string, fn: (l: Layer) => Layer, commit = true) {
-  setLayers(getLayers().map((l) => (l.id === id ? fn(l) : l)), commit)
+export function updateLayer(id: string, fn: (l: Layer) => Layer, commit = true, label?: string) {
+  setLayers(getLayers().map((l) => (l.id === id ? fn(l) : l)), commit, label)
 }
 
 export function addLayer(type: LayerType) {
@@ -122,7 +122,7 @@ export function addLayer(type: LayerType) {
   const layer = makeLayer(type)
   const next = [...layers]
   next.splice(sel ? at : 0, 0, layer)
-  setLayers(next)
+  setLayers(next, true, `Add ${LAYER_TYPES[type].label.toLowerCase()}`)
   ui.setState({ selected: layer.id })
 }
 
@@ -131,7 +131,7 @@ export function removeLayer(id: string) {
   const i = layers.findIndex((l) => l.id === id)
   if (i < 0) return
   const next = layers.filter((l) => l.id !== id)
-  setLayers(next)
+  setLayers(next, true, `Remove ${nameOf(id)}`)
   ui.setState({ selected: next[Math.min(i, next.length - 1)]?.id ?? null })
 }
 
@@ -143,7 +143,7 @@ export function duplicateLayer(id: string) {
   const copy: Layer = { ...src, id: newId(), name: `${src.name} copy` }
   const next = [...layers]
   next.splice(i, 0, copy)
-  setLayers(next)
+  setLayers(next, true, `Duplicate ${src.name}`)
   ui.setState({ selected: copy.id })
 }
 
@@ -153,7 +153,7 @@ export function moveLayer(id: string, to: number) {
   if (from < 0) return
   const [it] = layers.splice(from, 1)
   layers.splice(Math.max(0, Math.min(layers.length, to)), 0, it)
-  setLayers(layers)
+  setLayers(layers, true, `Move ${it.name}`)
 }
 
 export const moveBy = (id: string, d: number) => { const i = getLayers().findIndex((l) => l.id === id); if (i >= 0) moveLayer(id, i + d) }
@@ -173,5 +173,5 @@ export function randomise() {
       default: return l
     }
   })
-  params.patch({ seed, layers: layers as unknown as string })
+  params.patch({ seed, layers }, { label: 'Randomise' })
 }

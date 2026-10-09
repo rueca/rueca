@@ -1,38 +1,65 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "prototype-studio",
-  "homepage": "https://OWNER.github.io/prototype-studio",
+  "name": "trompo",
+  "homepage": "https://trompo-dev.github.io/trompo",
   "items": [
     {
       "name": "studio",
       "type": "registry:block",
       "title": "Studio kit (everything)",
       "description": "The whole harness: schema → inspector, clock, surfaces, layout, stage, timeline, layers, palette, toasts and theme.",
-      "dependencies": [],
+      "dependencies": [
+        "@xyflow/react@^12.12.0"
+      ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/actions.json",
-        "https://OWNER.github.io/prototype-studio/r/button.json",
-        "https://OWNER.github.io/prototype-studio/r/color.json",
-        "https://OWNER.github.io/prototype-studio/r/controls.json",
-        "https://OWNER.github.io/prototype-studio/r/core.json",
-        "https://OWNER.github.io/prototype-studio/r/inspector.json",
-        "https://OWNER.github.io/prototype-studio/r/layers.json",
-        "https://OWNER.github.io/prototype-studio/r/palette.json",
-        "https://OWNER.github.io/prototype-studio/r/scrub.json",
-        "https://OWNER.github.io/prototype-studio/r/slider.json",
-        "https://OWNER.github.io/prototype-studio/r/special.json",
-        "https://OWNER.github.io/prototype-studio/r/stage.json",
-        "https://OWNER.github.io/prototype-studio/r/studio-layout.json",
-        "https://OWNER.github.io/prototype-studio/r/theme.json",
-        "https://OWNER.github.io/prototype-studio/r/timeline.json",
-        "https://OWNER.github.io/prototype-studio/r/toast.json",
-        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+        "https://trompo-dev.github.io/trompo/r/actions.json",
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/charts.json",
+        "https://trompo-dev.github.io/trompo/r/chip-input.json",
+        "https://trompo-dev.github.io/trompo/r/code-block.json",
+        "https://trompo-dev.github.io/trompo/r/color.json",
+        "https://trompo-dev.github.io/trompo/r/controls.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/data-grid.json",
+        "https://trompo-dev.github.io/trompo/r/dialog.json",
+        "https://trompo-dev.github.io/trompo/r/easing.json",
+        "https://trompo-dev.github.io/trompo/r/envelope.json",
+        "https://trompo-dev.github.io/trompo/r/inline-text.json",
+        "https://trompo-dev.github.io/trompo/r/inspector.json",
+        "https://trompo-dev.github.io/trompo/r/jobs.json",
+        "https://trompo-dev.github.io/trompo/r/key-button.json",
+        "https://trompo-dev.github.io/trompo/r/knob.json",
+        "https://trompo-dev.github.io/trompo/r/layers.json",
+        "https://trompo-dev.github.io/trompo/r/layout-fields.json",
+        "https://trompo-dev.github.io/trompo/r/masonry.json",
+        "https://trompo-dev.github.io/trompo/r/oklch.json",
+        "https://trompo-dev.github.io/trompo/r/palette.json",
+        "https://trompo-dev.github.io/trompo/r/param-slider.json",
+        "https://trompo-dev.github.io/trompo/r/preset-grid.json",
+        "https://trompo-dev.github.io/trompo/r/prompt-box.json",
+        "https://trompo-dev.github.io/trompo/r/quick-add.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json",
+        "https://trompo-dev.github.io/trompo/r/slider.json",
+        "https://trompo-dev.github.io/trompo/r/special.json",
+        "https://trompo-dev.github.io/trompo/r/stack.json",
+        "https://trompo-dev.github.io/trompo/r/stage.json",
+        "https://trompo-dev.github.io/trompo/r/studio-layout.json",
+        "https://trompo-dev.github.io/trompo/r/theme.json",
+        "https://trompo-dev.github.io/trompo/r/timeline.json",
+        "https://trompo-dev.github.io/trompo/r/toast.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json",
+        "https://trompo-dev.github.io/trompo/r/variant-grid.json"
       ],
       "files": [
         {
           "path": "src/kit/index.ts",
           "type": "registry:lib",
           "target": "@components/studio/index.ts"
+        },
+        {
+          "path": "src/kit/xyflow.css",
+          "type": "registry:file",
+          "target": "@components/studio/xyflow.css"
         }
       ]
     },
@@ -40,16 +67,16 @@
       "name": "actions",
       "type": "registry:component",
       "title": "Actions",
-      "description": "Actions — part of the Prototype Studio kit.",
+      "description": "Actions — part of the Trompo kit.",
       "dependencies": [
         "lucide-react@^1.54.0",
         "zustand@^5.0.15"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/button.json",
-        "https://OWNER.github.io/prototype-studio/r/controls.json",
-        "https://OWNER.github.io/prototype-studio/r/core.json",
-        "https://OWNER.github.io/prototype-studio/r/toast.json"
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/controls.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/toast.json"
       ],
       "files": [
         {
@@ -78,19 +105,78 @@
       "name": "button",
       "type": "registry:component",
       "title": "Button",
-      "description": "Button — part of the Prototype Studio kit.",
+      "description": "Button — part of the Trompo kit.",
       "dependencies": [
         "class-variance-authority@^0.7.1"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/core.json",
-        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
       ],
       "files": [
         {
           "path": "src/kit/ui/button.tsx",
           "type": "registry:component",
           "target": "@components/studio/ui/button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "charts",
+      "type": "registry:component",
+      "title": "Charts",
+      "description": "Charts — part of the Trompo kit.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/charts.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/charts.tsx"
+        }
+      ]
+    },
+    {
+      "name": "chip-input",
+      "type": "registry:component",
+      "title": "Chip Input",
+      "description": "Chip Input — part of the Trompo kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/chip-input.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/chip-input.tsx"
+        }
+      ]
+    },
+    {
+      "name": "code-block",
+      "type": "registry:component",
+      "title": "Code Block",
+      "description": "Code Block — part of the Trompo kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/toast.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/code-block.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/code-block.tsx"
         }
       ]
     },
@@ -104,8 +190,9 @@
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/controls.json",
-        "https://OWNER.github.io/prototype-studio/r/core.json"
+        "https://trompo-dev.github.io/trompo/r/controls.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/oklch.json"
       ],
       "files": [
         {
@@ -119,14 +206,14 @@
       "name": "controls",
       "type": "registry:component",
       "title": "Controls",
-      "description": "Controls — part of the Prototype Studio kit.",
+      "description": "Controls — part of the Trompo kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/core.json",
-        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
       ],
       "files": [
         {
@@ -138,16 +225,17 @@
     },
     {
       "name": "core",
-      "type": "registry:lib",
+      "type": "registry:component",
       "title": "Core",
       "description": "Schema, param store (undo, presets, A/B, share), clock, hotkeys, IO and theme hook. Framework-agnostic.",
       "dependencies": [
         "clsx@^2.1.1",
+        "mediabunny@^1.61.3",
         "tailwind-merge@^3.7.0",
         "zustand@^5.0.15"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/theme.json"
+        "https://trompo-dev.github.io/trompo/r/theme.json"
       ],
       "files": [
         {
@@ -161,9 +249,34 @@
           "target": "@components/studio/core/cn.ts"
         },
         {
+          "path": "src/kit/core/doc.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/doc.ts"
+        },
+        {
+          "path": "src/kit/core/ease.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/ease.ts"
+        },
+        {
+          "path": "src/kit/core/geometry.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/geometry.ts"
+        },
+        {
+          "path": "src/kit/core/history.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/history.ts"
+        },
+        {
           "path": "src/kit/core/hotkeys.ts",
           "type": "registry:lib",
           "target": "@components/studio/core/hotkeys.ts"
+        },
+        {
+          "path": "src/kit/core/image-intake.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/core/image-intake.tsx"
         },
         {
           "path": "src/kit/core/io.ts",
@@ -181,9 +294,127 @@
           "target": "@components/studio/core/schema.ts"
         },
         {
+          "path": "src/kit/core/snapshot.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/snapshot.ts"
+        },
+        {
           "path": "src/kit/core/theme.ts",
           "type": "registry:lib",
           "target": "@components/studio/core/theme.ts"
+        },
+        {
+          "path": "src/kit/core/video.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/video.ts"
+        },
+        {
+          "path": "src/kit/core/zip.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/zip.ts"
+        }
+      ]
+    },
+    {
+      "name": "data-grid",
+      "type": "registry:component",
+      "title": "Data Grid",
+      "description": "Data Grid — part of the Trompo kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/color.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/data-grid.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/data-grid.tsx"
+        }
+      ]
+    },
+    {
+      "name": "dialog",
+      "type": "registry:component",
+      "title": "Dialog",
+      "description": "Dialog — part of the Trompo kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/system/dialog.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/system/dialog.tsx"
+        }
+      ]
+    },
+    {
+      "name": "easing",
+      "type": "registry:component",
+      "title": "Easing",
+      "description": "Easing — part of the Trompo kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/controls.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json",
+        "https://trompo-dev.github.io/trompo/r/slider.json",
+        "https://trompo-dev.github.io/trompo/r/special.json",
+        "https://trompo-dev.github.io/trompo/r/toast.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/easing.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/easing.tsx"
+        }
+      ]
+    },
+    {
+      "name": "envelope",
+      "type": "registry:component",
+      "title": "Envelope",
+      "description": "Envelope — part of the Trompo kit.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/envelope.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/envelope.tsx"
+        }
+      ]
+    },
+    {
+      "name": "inline-text",
+      "type": "registry:component",
+      "title": "Inline Text",
+      "description": "Inline Text — part of the Trompo kit.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/inline-text.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/inline-text.tsx"
         }
       ]
     },
@@ -197,20 +428,81 @@
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/button.json",
-        "https://OWNER.github.io/prototype-studio/r/color.json",
-        "https://OWNER.github.io/prototype-studio/r/controls.json",
-        "https://OWNER.github.io/prototype-studio/r/core.json",
-        "https://OWNER.github.io/prototype-studio/r/scrub.json",
-        "https://OWNER.github.io/prototype-studio/r/slider.json",
-        "https://OWNER.github.io/prototype-studio/r/special.json",
-        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/color.json",
+        "https://trompo-dev.github.io/trompo/r/controls.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/knob.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json",
+        "https://trompo-dev.github.io/trompo/r/slider.json",
+        "https://trompo-dev.github.io/trompo/r/special.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
       ],
       "files": [
         {
           "path": "src/kit/inspector/Inspector.tsx",
           "type": "registry:component",
           "target": "@components/studio/inspector/Inspector.tsx"
+        }
+      ]
+    },
+    {
+      "name": "jobs",
+      "type": "registry:component",
+      "title": "Jobs",
+      "description": "Jobs — part of the Trompo kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0",
+        "zustand@^5.0.15"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/system/jobs.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/system/jobs.tsx"
+        }
+      ]
+    },
+    {
+      "name": "key-button",
+      "type": "registry:component",
+      "title": "Key Button",
+      "description": "Key Button — part of the Trompo kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/key-button.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/key-button.tsx"
+        }
+      ]
+    },
+    {
+      "name": "knob",
+      "type": "registry:component",
+      "title": "Knob",
+      "description": "Knob — part of the Trompo kit.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/knob.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/knob.tsx"
         }
       ]
     },
@@ -223,7 +515,8 @@
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/core.json"
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/inline-text.json"
       ],
       "files": [
         {
@@ -234,18 +527,80 @@
       ]
     },
     {
+      "name": "layout-fields",
+      "type": "registry:component",
+      "title": "Layout Fields",
+      "description": "Layout Fields — part of the Trompo kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/color.json",
+        "https://trompo-dev.github.io/trompo/r/controls.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json",
+        "https://trompo-dev.github.io/trompo/r/special.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/layout-fields.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/layout-fields.tsx"
+        }
+      ]
+    },
+    {
+      "name": "masonry",
+      "type": "registry:component",
+      "title": "Masonry",
+      "description": "Masonry — part of the Trompo kit.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/masonry.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/masonry.tsx"
+        }
+      ]
+    },
+    {
+      "name": "oklch",
+      "type": "registry:component",
+      "title": "Oklch",
+      "description": "Oklch — part of the Trompo kit.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/controls.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/oklch.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/oklch.tsx"
+        }
+      ]
+    },
+    {
       "name": "palette",
       "type": "registry:component",
       "title": "Palette",
-      "description": "Palette — part of the Prototype Studio kit.",
+      "description": "Palette — part of the Trompo kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "cmdk@^1.1.1",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/button.json",
-        "https://OWNER.github.io/prototype-studio/r/core.json"
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/core.json"
       ],
       "files": [
         {
@@ -256,13 +611,91 @@
       ]
     },
     {
+      "name": "param-slider",
+      "type": "registry:component",
+      "title": "Param Slider",
+      "description": "Param Slider — part of the Trompo kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/inspector.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/param-slider.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/param-slider.tsx"
+        }
+      ]
+    },
+    {
+      "name": "preset-grid",
+      "type": "registry:component",
+      "title": "Preset Grid",
+      "description": "Preset Grid — part of the Trompo kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/preset-grid.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/preset-grid.tsx"
+        }
+      ]
+    },
+    {
+      "name": "prompt-box",
+      "type": "registry:component",
+      "title": "Prompt Box",
+      "description": "Prompt Box — part of the Trompo kit.",
+      "dependencies": [],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/prompt-box.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/prompt-box.tsx"
+        }
+      ]
+    },
+    {
+      "name": "quick-add",
+      "type": "registry:component",
+      "title": "Quick Add",
+      "description": "Quick Add — part of the Trompo kit.",
+      "dependencies": [
+        "cmdk@^1.1.1",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/system/quick-add.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/system/quick-add.tsx"
+        }
+      ]
+    },
+    {
       "name": "scrub",
       "type": "registry:component",
       "title": "Scrub value",
       "description": "Drag, type or write expressions into a number. Shift ×10, Alt ×0.1.",
       "dependencies": [],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/core.json"
+        "https://trompo-dev.github.io/trompo/r/core.json"
       ],
       "files": [
         {
@@ -276,12 +709,12 @@
       "name": "slider",
       "type": "registry:component",
       "title": "Slider",
-      "description": "Slider — part of the Prototype Studio kit.",
+      "description": "Slider — part of the Trompo kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/core.json"
+        "https://trompo-dev.github.io/trompo/r/core.json"
       ],
       "files": [
         {
@@ -295,22 +728,46 @@
       "name": "special",
       "type": "registry:component",
       "title": "Special",
-      "description": "Special — part of the Prototype Studio kit.",
+      "description": "Special — part of the Trompo kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/color.json",
-        "https://OWNER.github.io/prototype-studio/r/core.json",
-        "https://OWNER.github.io/prototype-studio/r/scrub.json",
-        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+        "https://trompo-dev.github.io/trompo/r/color.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
       ],
       "files": [
         {
           "path": "src/kit/ui/special.tsx",
           "type": "registry:component",
           "target": "@components/studio/ui/special.tsx"
+        }
+      ]
+    },
+    {
+      "name": "stack",
+      "type": "registry:component",
+      "title": "Stack",
+      "description": "Stack — part of the Trompo kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0",
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/controls.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/stack.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/stack.tsx"
         }
       ]
     },
@@ -324,10 +781,44 @@
         "zustand@^5.0.15"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/controls.json",
-        "https://OWNER.github.io/prototype-studio/r/core.json"
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/controls.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/scrub.json",
+        "https://trompo-dev.github.io/trompo/r/studio-layout.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
       ],
       "files": [
+        {
+          "path": "src/kit/stage/CompareSplit.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/stage/CompareSplit.tsx"
+        },
+        {
+          "path": "src/kit/stage/ContextBar.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/stage/ContextBar.tsx"
+        },
+        {
+          "path": "src/kit/stage/fit-frame.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/stage/fit-frame.ts"
+        },
+        {
+          "path": "src/kit/stage/Guides.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/stage/Guides.tsx"
+        },
+        {
+          "path": "src/kit/stage/overlays.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/stage/overlays.tsx"
+        },
+        {
+          "path": "src/kit/stage/snap.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/stage/snap.ts"
+        },
         {
           "path": "src/kit/stage/Stage.tsx",
           "type": "registry:component",
@@ -337,6 +828,16 @@
           "path": "src/kit/stage/Surface.tsx",
           "type": "registry:component",
           "target": "@components/studio/stage/Surface.tsx"
+        },
+        {
+          "path": "src/kit/stage/TransformBox.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/stage/TransformBox.tsx"
+        },
+        {
+          "path": "src/kit/stage/ViewportFrame.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/stage/ViewportFrame.tsx"
         }
       ]
     },
@@ -347,11 +848,16 @@
       "description": "Islands, overlay and docked layouts, toolbar, brand, clusters, tool dock, panels.",
       "dependencies": [],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/core.json",
-        "https://OWNER.github.io/prototype-studio/r/toast.json",
-        "https://OWNER.github.io/prototype-studio/r/tooltip.json"
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/toast.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
       ],
       "files": [
+        {
+          "path": "src/kit/layout/SplitPane.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/layout/SplitPane.tsx"
+        },
         {
           "path": "src/kit/layout/Studio.tsx",
           "type": "registry:component",
@@ -388,19 +894,36 @@
       "title": "Timeline",
       "description": "Ruler, lanes, keys, markers and a playhead driven by the clock.",
       "dependencies": [
+        "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/button.json",
-        "https://OWNER.github.io/prototype-studio/r/controls.json",
-        "https://OWNER.github.io/prototype-studio/r/core.json",
-        "https://OWNER.github.io/prototype-studio/r/studio-layout.json"
+        "https://trompo-dev.github.io/trompo/r/button.json",
+        "https://trompo-dev.github.io/trompo/r/controls.json",
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/slider.json",
+        "https://trompo-dev.github.io/trompo/r/studio-layout.json"
       ],
       "files": [
+        {
+          "path": "src/kit/timeline/KeyTimeline.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/timeline/KeyTimeline.tsx"
+        },
+        {
+          "path": "src/kit/timeline/ruler.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/timeline/ruler.tsx"
+        },
         {
           "path": "src/kit/timeline/Timeline.tsx",
           "type": "registry:component",
           "target": "@components/studio/timeline/Timeline.tsx"
+        },
+        {
+          "path": "src/kit/timeline/TrackTimeline.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/timeline/TrackTimeline.tsx"
         }
       ]
     },
@@ -408,7 +931,7 @@
       "name": "toast",
       "type": "registry:component",
       "title": "Toast",
-      "description": "Toast — part of the Prototype Studio kit.",
+      "description": "Toast — part of the Trompo kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
@@ -426,18 +949,38 @@
       "name": "tooltip",
       "type": "registry:component",
       "title": "Tooltip",
-      "description": "Tooltip — part of the Prototype Studio kit.",
+      "description": "Tooltip — part of the Trompo kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0"
       ],
       "registryDependencies": [
-        "https://OWNER.github.io/prototype-studio/r/core.json"
+        "https://trompo-dev.github.io/trompo/r/core.json"
       ],
       "files": [
         {
           "path": "src/kit/ui/tooltip.tsx",
           "type": "registry:component",
           "target": "@components/studio/ui/tooltip.tsx"
+        }
+      ]
+    },
+    {
+      "name": "variant-grid",
+      "type": "registry:component",
+      "title": "Variant Grid",
+      "description": "Variant Grid — part of the Trompo kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [
+        "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/variant-grid.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/variant-grid.tsx"
         }
       ]
     }

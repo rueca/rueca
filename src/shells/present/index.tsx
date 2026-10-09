@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Download, Eye, Shuffle, Send, ChevronUp, PencilRuler } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Stage, CanvasSurface, ParamActions, Button, IconButton,
-  CommandPalette, Badge, copyText, toast, download, useValues, useHotkeys, cn, type SurfaceHandle, type Command,
+  CommandPalette, Badge, copyText, toast, download, useValues, cn, type SurfaceHandle, type Command,
 } from '@kit'
 import { params, clock, draw, FRAMES, PALETTES, type V } from './artifact'
 
@@ -40,7 +40,6 @@ export default function Present() {
   const shuffle = () => params.patch({ seed: Math.floor(Math.random() * 99999), palette: Object.keys(PALETTES)[Math.floor(Math.random() * 4)] })
   const save = () => renderDownload(params.values() as V).then(() => toast('Saved to downloads', { type: 'success' }))
   const send = async () => { await copyText(params.shareURL() + '&client'); toast('Link copied — send it to your designer', { type: 'success' }) }
-  useHotkeys({ 'shift+r': shuffle })
 
   const commands: Command[] = [
     { id: 'client', label: client ? 'Designer view' : 'Client view', shortcut: 'mod+shift+p', icon: Eye, run: () => setClient((c) => !c) },
@@ -70,7 +69,7 @@ export default function Present() {
       layout="overlay"
       toolbar={
         <Toolbar
-          start={<Brand name="Pattern" doc="Harbour Co. brand system" mark={<a href="#/" aria-label="All shells" className="contents"><svg viewBox="0 0 16 16" width="11" height="11"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg></a>} />}
+          start={<Brand name="Pattern" doc="Harbour Co. brand system" mark={<svg viewBox="0 0 16 16" width="11" height="11"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>} />}
           end={
             <>
               <Cluster><ParamActions params={params} presets={false} /></Cluster>

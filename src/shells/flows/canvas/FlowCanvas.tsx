@@ -3,18 +3,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ReactFlow, Background, BackgroundVariant, MiniMap, ConnectionMode, SelectionMode, ViewportPortal, applyNodeChanges, useReactFlow, useViewport, useNodesInitialized,
-  type NodeChange, type EdgeChange, type Connection, type OnConnectStart,
+  type NodeChange, type EdgeChange, type Connection, type OnConnectStart, type FinalConnectionState,
 } from '@xyflow/react'
 import '@xyflow/react/dist/base.css'
+import '@kit/xyflow.css'
 import '../flows.css'
-import { Hand, MessageCircle, MousePointer2, Square, StickyNote, Diamond, ChevronLeft, ChevronRight, X, Workflow, Play, Pause } from 'lucide-react'
-import { ToolDock, Divider, IconButton, Button, Empty, useHotkeys, useValues, useStudio, cn, toast } from '@kit'
+import { Hand, MessageCircle, MousePointer2, Square, StickyNote, Diamond, ChevronLeft, ChevronRight, X, Workflow, Play, Pause, Circle, CircleDot, Frame } from 'lucide-react'
+import { ToolDock, Divider, IconButton, Button, Empty, ZoomPill, useHotkeys, useValues, useStudio, cn, toast } from '@kit'
+import { QuickAdd, type QuickAddItem } from '@kit/system/quick-add'
 import { nodeTypes, STATUS } from './nodes'
 import { edgeTypes, TRIGGER_ICON } from './edges'
 import { CommentLayer } from './comments'
-import { ZoomControls } from '../local/ZoomControls'
 import { happyPath } from '../layout'
-import { makeEdge, type FlowEdge, type FlowNode, type Kind, type Template } from '../model'
+import { makeEdge, TEMPLATES, type FlowEdge, type FlowNode, type Kind, type Template } from '../model'
 import {
   params, ui, useUI, useFlow, setNodes, setEdges, settle, select, addNode, addScreen, activeFlow, viewport, doc, sizeOf, type Tool,
 } from '../store'
@@ -44,6 +45,18 @@ function useRFNodes(nodes: FlowNode[], sel: string[], measured: Record<string, {
   }, [nodes, sel, measured])
 }
 
+/* What the add-at-cursor search offers: shapes first, then every screen template. */
+const OPPOSITE: Record<string, string> = { r: 'l', l: 'r', t: 'b', b: 't' }
+const ADD_ITEMS: QuickAddItem[] = [
+  { id: 'shape:decision', label: 'Decision', group: 'Shapes', icon: Diamond, keywords: ['condition', 'branch', 'if'] },
+  { id: 'shape:end', label: 'End point', group: 'Shapes', icon: CircleDot, keywords: ['finish', 'terminal'] },
+  { id: 'shape:start', label: 'Start point', group: 'Shapes', icon: Circle, keywords: ['begin', 'terminal'] },
+  { id: 'shape:note', label: 'Sticky note', group: 'Shapes', icon: StickyNote, keywords: ['comment', 'annotation'] },
+  { id: 'shape:section', label: 'Section', group: 'Shapes', icon: Frame, keywords: ['group', 'swimlane'] },
+  ...TEMPLATES.map((t) => ({ id: `screen:${t.value}`, label: t.label, group: `Screens · ${t.group}`, icon: Square, keywords: ['screen', t.group] })),
+]
+interface AddAt { screen: { x: number; y: number }; flow: { x: number; y: number }; from?: { node: string; handle: string; name: string } }
+
 export function FlowCanvas() {
   const flow = useFlow()
   const v = useValues(params)
@@ -57,6 +70,7 @@ export function FlowCanvas() {
   const { present, setPresent } = useStudio()
   const wrap = useRef<HTMLDivElement>(null)
   const [connecting, setConnecting] = useState(false)
+  const [adding, setAdding] = useState<AddAt | null>(null)
 
   const nodes = useRFNodes(flow.nodes, sel.nodes, measured)
   const edges = useMemo(() => flow.edges.map((e) => (sel.edges.includes(e.id) ? { ...e, selected: true } : e)), [flow.edges, sel.edges])
@@ -154,6 +168,28 @@ export function FlowCanvas() {
   }, [])
 
   const onConnectStart: OnConnectStart = useCallback(() => setConnecting(true), [])
+  // Drop a connection on empty canvas → search what to add there, already connected (FigJam / Whimsical).
+  const onConnectEnd = useCallback((e: MouseEvent | TouchEvent, st: FinalConnectionState) => {
+    setConnecting(false)
+    if (st.isValid || st.toNode || !st.fromNode || st.fromNode.type === 'note' || st.fromNode.type === 'section') return
+    const pt = 'changedTouches' in e ? e.changedTouches[0] : e
+    const screen = { x: pt.clientX, y: pt.clientY }
+    setAdding({ screen, flow: rf.screenToFlowPosition(screen), from: { node: st.fromNode.id, handle: st.fromHandle?.id ?? 'r', name: (st.fromNode.data as FlowNode['data']).name } })
+  }, [rf])
+  const openAddAt = (screen: { x: number; y: number }) => setAdding({ screen, flow: rf.screenToFlowPosition(screen) })
+  const pickAdd = (id: string) => {
+    const a = adding
+    if (!a) return
+    const [type, value] = id.split(':')
+    const node = type === 'screen' ? addScreen(value as Template, a.flow)
+      : value === 'start' || value === 'end' ? addNode('terminal', a.flow, { role: value, name: value === 'end' ? 'End' : 'Start' })
+        : addNode(value as Kind, a.flow)
+    if (a.from && node.type !== 'note' && node.type !== 'section') {
+      const from = activeFlow().nodes.find((n) => n.id === a.from!.node)
+      const e = makeEdge(a.from.node, node.id, { trigger: from?.type === 'decision' ? 'condition' : 'tap' }, [a.from.handle, OPPOSITE[a.from.handle] ?? 'l'])
+      setEdges((es) => [...es, e], { label: 'Connect' })
+    }
+  }
 
   const onPaneClick = useCallback((e: React.MouseEvent) => {
     const st = ui.getState()
@@ -231,7 +267,7 @@ export function FlowCanvas() {
   return (
     <div ref={wrap} className="relative h-full w-full" onDragOver={onDragOver} onDrop={onDrop}>
       <ReactFlow<FlowNode, FlowEdge>
-        className={cn('flows-rf', connecting && 'is-connecting', animating && 'is-animating', tool === 'comment' && '[&_.react-flow__pane]:!cursor-crosshair [&_.react-flow__node]:!cursor-crosshair')}
+        className={cn('studio-flow handles-on-hover flows-rf', connecting && 'is-connecting', animating && 'is-animating', tool === 'comment' && '[&_.react-flow__pane]:!cursor-crosshair [&_.react-flow__node]:!cursor-crosshair')}
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
@@ -240,7 +276,8 @@ export function FlowCanvas() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onConnectStart={onConnectStart}
-        onConnectEnd={() => setConnecting(false)}
+        onConnectEnd={onConnectEnd}
+        onDoubleClick={(e) => { if (tool === 'select' && interactive && (e.target as HTMLElement).classList.contains('react-flow__pane')) openAddAt({ x: e.clientX, y: e.clientY }) }}
         onReconnect={onReconnect}
         onPaneClick={onPaneClick}
         onNodeClick={onNodeClick}
@@ -266,7 +303,7 @@ export function FlowCanvas() {
         snapGrid={[v.grid, v.grid]}
         minZoom={0.1}
         maxZoom={3}
-        proOptions={{ hideAttribution: true }}
+        attributionPosition="bottom-left"
       >
         {v.background !== 'none' && (
           <Background variant={v.background === 'lines' ? BackgroundVariant.Lines : BackgroundVariant.Dots} gap={v.background === 'lines' ? v.grid * 2 : 20} size={1.2}
@@ -298,8 +335,7 @@ export function FlowCanvas() {
               <IconButton icon={StickyNote} label="Sticky note" shortcut="n" tipSide="top" className="size-8 rounded-[8px]" onClick={() => addNode('note')} />
             </ToolDock>
           </div>
-          <ZoomControls className="absolute right-3 bottom-3 z-10" zoom={zoom} onZoom={(z) => rf.zoomTo(z, { duration: 200 })} onFit={() => viewport.fit?.()}
-            extra={[{ label: 'Zoom to selection', shortcut: 'shift+2', onClick: () => sel.nodes.length && viewport.focus?.(sel.nodes) }]} />
+          <ZoomPill zoom={zoom} onZoom={(z) => rf.zoomTo(z, { duration: 200 })} onFit={() => viewport.fit?.()} />
           {tool === 'comment' && (
             <div className="cluster absolute top-3 left-1/2 z-10 flex h-8 -translate-x-1/2 items-center gap-2 px-3 text-[11.5px] text-fg-muted">
               <MessageCircle size={13} strokeWidth={1.5} className="text-signal" />Click anywhere to leave a comment
@@ -310,6 +346,9 @@ export function FlowCanvas() {
       ) : (
         <WalkHUD index={walk!} onStep={stepTo} onExit={exitWalk} playing={playing} onPlay={() => setPlaying((p) => !p)} canPlay={v.autoplay > 0} />
       )}
+      <QuickAdd open={!!adding} at={adding?.screen ?? null} onClose={() => setAdding(null)} items={adding?.from ? ADD_ITEMS.filter((i) => i.id !== 'shape:note' && i.id !== 'shape:section') : ADD_ITEMS} onPick={pickAdd}
+        label="Add to flow" placeholder={adding?.from ? 'Add and connect…' : 'Add screen or shape…'}
+        context={adding?.from ? <>Connect from <span className="text-fg">{adding.from.name}</span></> : undefined} />
     </div>
   )
 }

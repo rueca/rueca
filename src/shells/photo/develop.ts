@@ -13,10 +13,9 @@
    navigator, preset thumbnails), full-size exports, and a .cube LUT (an
    identity lattice pushed through the global colour ops only).
 --------------------------------------------------------------------------- */
-import { sampleCurve, type CurvePoint } from './local/ToneCurve'
-import type { Rect } from './local/CropOverlay'
+import { sampleCurve, type CurvePoint } from '@kit/ui/charts'
+import type { CropRect as Rect } from '@kit/stage/overlays'
 import { BANDS, type V } from './state'
-import type { Bins } from './local/Histogram'
 
 export interface ViewOpts {
   crop: Rect
@@ -410,7 +409,7 @@ export class Develop {
     gl.deleteTexture(inTex)
     gl.deleteTexture(outTex)
     gl.bindTexture(gl.TEXTURE_2D, this.src)
-    const lines = [`TITLE "${title.replace(/"/g, '')}"`, `# Exported from Develop (Prototype Studio)`, `LUT_3D_SIZE ${n}`, 'DOMAIN_MIN 0.0 0.0 0.0', 'DOMAIN_MAX 1.0 1.0 1.0', '']
+    const lines = [`TITLE "${title.replace(/"/g, '')}"`, `# Exported from Develop (Trompo)`, `LUT_3D_SIZE ${n}`, 'DOMAIN_MIN 0.0 0.0 0.0', 'DOMAIN_MAX 1.0 1.0 1.0', '']
     for (let b = 0; b < n; b++)
       for (let g = 0; g < n; g++)
         for (let r = 0; r < n; r++) {
@@ -427,16 +426,4 @@ export class Develop {
     gl.deleteProgram(this.prog)
     // No loseContext(): React StrictMode remounts on the same <canvas>, and a lost context never comes back.
   }
-}
-
-/** RGB + luma bins from top-down RGBA pixels. */
-export function binsOf(px: Uint8ClampedArray): Bins {
-  const r = new Uint32Array(256), g = new Uint32Array(256), b = new Uint32Array(256), l = new Uint32Array(256)
-  for (let i = 0; i < px.length; i += 4) {
-    r[px[i]]++
-    g[px[i + 1]]++
-    b[px[i + 2]]++
-    l[Math.round(px[i] * 0.2126 + px[i + 1] * 0.7152 + px[i + 2] * 0.0722)]++
-  }
-  return { r, g, b, l, total: px.length / 4 }
 }

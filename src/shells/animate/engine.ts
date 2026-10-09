@@ -4,14 +4,11 @@
    of (doc, animation, t). Nothing here touches React or the DOM.
 --------------------------------------------------------------------------- */
 import { interpolate, formatHex8, formatHex } from 'culori'
+import { cssEasing, easeAt, type Bezier, type Ease } from '@kit/core/ease'
 
 /* ---------- model ---------- */
-export type Bezier = [number, number, number, number]
-export type Ease =
-  | { kind: 'bezier'; p: Bezier }
-  /** Apple / Framer style: perceptual duration (ms) + bounce (0 = no overshoot) */
-  | { kind: 'spring'; duration: number; bounce: number }
-  | { kind: 'hold' }
+/** Segment easing is the kit's `Ease`: bezier | spring (Duration + Bounce) | hold. */
+export type { Bezier, Ease }
 export type Val = number | string
 export interface Key { id: string; t: number; v: Val; ease: Ease }
 
@@ -75,80 +72,6 @@ export const DEFAULTS: Record<PropKey, Val> = { x: 0, y: 0, rotation: 0, scale: 
 
 export const trackKey = (obj: string, prop: PropKey) => `${obj}.${prop}`
 export const parseTrack = (k: string) => { const i = k.lastIndexOf('.'); return { obj: k.slice(0, i), prop: k.slice(i + 1) as PropKey } }
-
-/* ---------- easing ---------- */
-export const EASE_PRESETS: Record<string, Ease> = {
-  Linear: { kind: 'bezier', p: [0, 0, 1, 1] },
-  'Ease in': { kind: 'bezier', p: [0.42, 0, 1, 1] },
-  'Ease out': { kind: 'bezier', p: [0, 0, 0.58, 1] },
-  'Ease in out': { kind: 'bezier', p: [0.42, 0, 0.58, 1] },
-  Back: { kind: 'bezier', p: [0.34, 1.56, 0.64, 1] },
-  Hold: { kind: 'hold' },
-}
-export const BEZIER_PRESETS: Record<string, Bezier> = {
-  Linear: [0, 0, 1, 1], 'Ease in': [0.42, 0, 1, 1], 'Ease out': [0, 0, 0.58, 1], 'Ease in out': [0.42, 0, 0.58, 1],
-  Back: [0.34, 1.56, 0.64, 1], 'Out expo': [0.16, 1, 0.3, 1], Anticipate: [0.36, -0.4, 0.6, 1],
-}
-export const SPRING_PRESETS: Record<string, { duration: number; bounce: number }> = {
-  Gentle: { duration: 700, bounce: 0.1 }, Quick: { duration: 300, bounce: 0.15 }, Bouncy: { duration: 500, bounce: 0.45 }, Slow: { duration: 1000, bounce: 0.2 },
-}
-
-export function bezier([x1, y1, x2, y2]: Bezier) {
-  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx
-  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by
-  const sx = (t: number) => ((ax * t + bx) * t + cx) * t
-  const sy = (t: number) => ((ay * t + by) * t + cy) * t
-  return (x: number) => {
-    if (x <= 0) return 0
-    if (x >= 1) return 1
-    let t = x
-    for (let i = 0; i < 8; i++) {
-      const d = (3 * ax * t + 2 * bx) * t + cx
-      if (Math.abs(d) < 1e-6) break
-      t -= (sx(t) - x) / d
-    }
-    let lo = 0, hi = 1
-    if (Math.abs(sx(t) - x) > 1e-4) { // bisection fallback
-      t = x
-      for (let i = 0; i < 30; i++) { const v = sx(t); if (Math.abs(v - x) < 1e-5) break; if (v < x) lo = t; else hi = t; t = (lo + hi) / 2 }
-    }
-    return sy(t)
-  }
-}
-
-/** Spring response 0→1 at τ ms. ω0 = 2π/duration, ζ = 1 − bounce (bounce < 0 → overdamped). */
-export function spring(duration: number, bounce: number) {
-  const w0 = (2 * Math.PI) / Math.max(0.05, duration / 1000)
-  const b = Math.max(-0.9, Math.min(0.95, bounce))
-  const z = b >= 0 ? 1 - b : 1 / (1 + b)
-  return (ms: number) => {
-    const t = ms / 1000
-    if (z < 1) {
-      const wd = w0 * Math.sqrt(1 - z * z)
-      return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + ((z * w0) / wd) * Math.sin(wd * t))
-    }
-    if (z === 1) return 1 - Math.exp(-w0 * t) * (1 + w0 * t)
-    const s = Math.sqrt(z * z - 1), r1 = -w0 * (z - s), r2 = -w0 * (z + s)
-    return 1 - (r2 * Math.exp(r1 * t) - r1 * Math.exp(r2 * t)) / (r2 - r1)
-  }
-}
-/** physics ↔ perceptual conversions, for the "Physics" view of a spring */
-export const springToPhysics = (duration: number, bounce: number, mass = 1) => {
-  const w0 = (2 * Math.PI) / (duration / 1000)
-  const z = bounce >= 0 ? 1 - bounce : 1 / (1 + bounce)
-  return { stiffness: Math.round(w0 * w0 * mass), damping: Math.round(2 * z * w0 * mass * 10) / 10, mass }
-}
-export const physicsToSpring = (k: number, d: number, m: number) => {
-  const w0 = Math.sqrt(k / m), z = d / (2 * Math.sqrt(k * m))
-  return { duration: Math.round(((2 * Math.PI) / w0) * 1000), bounce: Math.round((z <= 1 ? 1 - z : 1 / z - 1) * 100) / 100 }
-}
-
-/** eased progress for segment progress p ∈ [0,1] of a segment `seg` ms long */
-export function easeAt(e: Ease, p: number, seg: number): number {
-  if (e.kind === 'hold') return p >= 1 ? 1 : 0
-  if (e.kind === 'bezier') return bezier(e.p)(p)
-  return spring(e.duration, e.bounce)(p * seg)
-}
 
 /* ---------- interpolation ---------- */
 const mixers = new Map<string, (t: number) => unknown>()
@@ -232,15 +155,6 @@ export const bindText = (s: string, inputs: SMInput[]) =>
   s.replace(/\{(\w+)\}/g, (_, n) => { const i = inputs.find((x) => x.name === n); return i ? String(typeof i.value === 'number' ? Math.round(i.value) : i.value) : `{${n}}` })
 
 /* ---------- CSS export ---------- */
-function cssEase(e: Ease, seg: number) {
-  if (e.kind === 'hold') return 'steps(1, end)'
-  if (e.kind === 'bezier') return `cubic-bezier(${e.p.join(', ')})`
-  // CSS linear() approximates a spring with sampled points.
-  const f = spring(e.duration, e.bounce)
-  const n = 24
-  return `linear(${Array.from({ length: n + 1 }, (_, i) => Number(f((i / n) * seg).toFixed(4))).join(', ')})`
-}
-
 /** One @keyframes per CSS property (individual `translate` / `rotate` / `scale`
     transforms), so every property keeps its own key times and easing — no
     resampling. Springs become `linear()` easings. */
@@ -273,7 +187,7 @@ export function toCSSKeyframes(doc: Doc, anim: Anim, objId: string): string {
       const owner = tracks.map((ks) => ({ ks, i: ks.findIndex((k) => Math.abs(k.t - t) <= 0.5) })).find((x) => x.i >= 0)
       const k = owner ? owner.ks[owner.i] : null
       const next = owner ? owner.ks[owner.i + 1] : null
-      const ease = k && next ? ` animation-timing-function: ${cssEase(k.ease, next.t - k.t)};` : ''
+      const ease = k && next ? ` animation-timing-function: ${cssEasing(k.ease, next.t - k.t)};` : ''
       return `  ${+((t / anim.duration) * 100).toFixed(2)}% { ${g.css}: ${g.value(res(t))};${ease} }`
     })
     const name = `${base}-${g.css}`

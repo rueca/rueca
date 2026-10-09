@@ -9,7 +9,7 @@ import { byId } from '../state/gallery'
 import { useQueue } from '../state/queue'
 import { usePix } from '../state/images'
 import { generate } from '../state/actions'
-import { PromptBox } from '../local/PromptBox'
+import { PromptBox } from '@kit/ui/prompt-box'
 import { aspectIcon } from './AspectGlyph'
 
 const ENHANCE = ['soft volumetric light', 'fine detail', 'considered composition', 'subtle film grain']

@@ -1,7 +1,7 @@
 /* Preview: one focused, live instance in a resizable viewport. */
 import { Smartphone, Tablet, Monitor, Sun, Moon } from 'lucide-react'
 import { Segmented } from '@kit'
-import { ViewportFrame, type ViewportPreset } from '../local/ViewportFrame'
+import { ViewportFrame, type ViewportPreset } from '@kit/stage/ViewportFrame'
 import { useUI, setUI } from '../ui'
 import { LabRoot, Instance } from './Instance'
 

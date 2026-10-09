@@ -5,30 +5,26 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Artboard, Menu, Button, IconButton, Divider, Badge,
-  PaletteField, ImageDrop, HistoryButtons, ThemeToggle, CommandPalette, useValues, useCamera, shareMenuItems, equal, toast,
-  copyText, download, stamp, cn, toastManager, type Command, type MenuItem,
+  PaletteField, ImageDrop, ParamActions, CommandPalette, useValues, useCamera, useHoldKey, shareMenuItems, equal, toast,
+  copyText, download, stamp, cn, type Command, type MenuItem,
 } from '@kit'
-import { Link } from 'lucide-react'
+import { CompareSplit } from '@kit/stage/CompareSplit'
+import { PresetGrid } from '@kit/ui/preset-grid'
+import { useImageIntake } from '@kit/core/image-intake'
 import { EFFECTS, PALETTES, image, params, view } from './state'
 import { RASTER, type EffectId, type Result } from './engine'
 import { out, loadImage, loadSample, start } from './run'
 import { colorAt, drawVector, halftoneSVG, outSize, rasterCanvas, renderOutput } from './draw'
 import { extractPalette } from './image'
-import { BeforeAfter } from './local/BeforeAfter'
 import { PalettePicker } from './local/PalettePicker'
 import { ZoomSteps } from './local/ZoomSteps'
-import { useHoldKey } from './local/useHoldKey'
-import { useImageIntake } from './local/useImageIntake'
-import { PresetGrid } from '../shader/local/PresetGrid'
 
 const MAX_CANVAS = 16_777_216 // Safari's canvas area limit; Chrome allows more but files get silly
 
 const Mark = (
-  <a href="#/" aria-label="All shells" className="contents">
-    <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor">
-      {[0, 1, 2, 3].flatMap((y) => [0, 1, 2, 3].filter((x) => (x + y) % 2 === 0 || (x === 3 && y === 3)).map((x) => <rect key={`${x}${y}`} x={2 + x * 3} y={2 + y * 3} width="2.4" height="2.4" />))}
-    </svg>
-  </a>
+  <svg viewBox="0 0 16 16" width="11" height="11" fill="currentColor">
+    {[0, 1, 2, 3].flatMap((y) => [0, 1, 2, 3].filter((x) => (x + y) % 2 === 0 || (x === 3 && y === 3)).map((x) => <rect key={`${x}${y}`} x={2 + x * 3} y={2 + y * 3} width="2.4" height="2.4" />))}
+  </svg>
 )
 
 /* ---------- exports ---------- */
@@ -63,10 +59,11 @@ function downloadTXT() {
 }
 
 async function take(file: Blob, name: string) {
-  const id = toast('Opening image…', { type: 'loading', timeout: 0 })
-  try { await loadImage(file, name); toast(`Opened ${name}`, { type: 'success' }) }
-  catch (e) { toast('Could not open image', { type: 'error', description: (e as Error).message }) }
-  finally { toastManager.close(id) }
+  await toast.promise(loadImage(file, name), {
+    loading: 'Opening image…',
+    success: `Opened ${name}`,
+    error: 'Could not open image',
+  }).catch(() => { /* the toast already said so */ })
 }
 
 export default function DitherLab() {
@@ -78,10 +75,12 @@ export default function DitherLab() {
   const thumbs = useStore(out, (s) => s.thumbs)
   const split = useStore(view, (s) => s.split)
   const grid = useStore(view, (s) => s.grid)
-  const intake = useImageIntake((f) => take(f, f.name || 'Pasted image.png'))
+  // Drop anywhere on the window, paste, or Open… — the image stays out of params (see state.ts).
+  // ⌘O is bound by the palette's Open command, so the hook doesn't bind it too.
+  const intake = useImageIntake((img) => take(img.file, img.name), { hotkey: false })
   useHoldKey('\\', (held) => view.setState({ peek: held }))
 
-  const active = presets.find((p) => equal(p.values, v))
+  const active = presets.length ? params.activePreset() : undefined // looks are partial: match only their keys
   const isRaster = RASTER.includes(v.effect as EffectId)
   const size = result ? outSize(result) : { w: img.w, h: img.h }
   // fit to the IMAGE, not the output: pixel size trims a few px and must not re-fit the camera
@@ -130,10 +129,8 @@ export default function DitherLab() {
           end={
             <>
               <Cluster>
-                <HistoryButtons params={params} />
-                <Divider vertical />
-                <Menu align="end" trigger={<IconButton icon={Link} label="Share & copy" />} items={shareMenuItems(params)} />
-                <ThemeToggle />
+                {/* No A/B: \ is hold-for-original here, and looks cover comparison */}
+                <ParamActions params={params} presets={false} compare={false} />
               </Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>}
                 items={[
@@ -164,7 +161,9 @@ export default function DitherLab() {
           <div className="border-t border-line">
             <Section title="Looks" hint="Your image under each look. Hover to preview on the stage, click to apply." first>
               <PresetGrid
-                items={presets.map((p) => ({ id: p.name, name: p.name, thumb: thumbs[p.name], active: p.name === active?.name, removable: !p.builtin }))}
+                label="Looks"
+                value={active?.name ?? null}
+                items={presets.map((p) => ({ id: p.name, name: p.name, thumb: thumbs[p.name], removable: !p.builtin }))}
                 onApply={(n) => { view.setState({ preview: null }); params.applyPreset(n) }}
                 onPreview={(n) => view.setState({ preview: n })}
                 onRemove={(n) => params.deletePreset(n)}
@@ -185,7 +184,7 @@ export default function DitherLab() {
         </Panel>
       }
     >
-      <div className="relative h-full" {...intake.dropProps}>
+      <div className="relative h-full">
         <Stage contentSize={contentSize} grid hud={false}
           overlay={<><ZoomSteps /><StatusPill /><ViewDock /></>}>
           <Canvas result={result} split={split} grid={grid} />
@@ -201,8 +200,6 @@ export default function DitherLab() {
         { keys: '\\', label: 'Hold to see the original' },
         { keys: 'shift+1', label: 'Zoom to fit' },
         { keys: 'shift+0', label: 'Zoom to 100%' },
-        { keys: '=', label: 'Zoom in (pixel steps)' },
-        { keys: '-', label: 'Zoom out (pixel steps)' },
         { keys: 'space', label: 'Hold and drag to pan' },
         { keys: 'mod+v', label: 'Paste an image' },
       ]} />
@@ -253,6 +250,9 @@ function Canvas({ result, split, grid }: { result: Result | null; split: boolean
   const after = useRef<HTMLCanvasElement>(null)
   const size = result ? outSize(result) : { w: img.w, h: img.h }
 
+  // a new image always fits, even after the user zoomed the last one
+  useEffect(() => { cam.untouch(); const id = requestAnimationFrame(() => cam.fit()); return () => cancelAnimationFrame(id) }, [cam, img.w, img.h])
+
   // the original
   useEffect(() => {
     const c = before.current
@@ -285,10 +285,10 @@ function Canvas({ result, split, grid }: { result: Result | null; split: boolean
   return (
     <Artboard width={size.w} height={size.h} label={img.name} background={result && result.kind !== 'raster' ? result.paper : '#000'}>
       <div className="absolute inset-0" onPointerMove={onMove} onPointerLeave={() => view.setState({ hover: null })}>
-        <BeforeAfter
+        <CompareSplit
           split={split}
-          pos={pos}
-          onPos={(p) => view.setState({ pos: p })}
+          value={pos}
+          onChange={(p) => view.setState({ pos: p })}
           peek={peek}
           zoom={zoom}
           before={<canvas ref={before} className="block size-full" style={zoom >= 2 ? px : undefined} aria-label="Original image" />}

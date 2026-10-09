@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Stage, CanvasSurface, ParamActions, Menu, Button, IconButton, CommandPalette, ScrubValue, Segmented,
-  Divider, Badge, Tip, useValues, createClock, exportCanvasPNG, exportJSON, download, copyText, toast, toastManager, cn, shareMenuItems,
+  Divider, Badge, Tip, useValues, createClock, exportCanvasPNG, exportJSON, download, copyText, toast, cn, shareMenuItems,
   type SurfaceHandle, type Command, type MenuItem,
 } from '@kit'
 import { params, patternOf, setPattern, SOUNDS, type V } from './params'
@@ -18,16 +18,12 @@ import { SynthPanel, MonitorPanel, SoundMenu } from './panels'
 /** A free-running clock just to tick the stage canvas (audio time is the real master). */
 const visClock = createClock({ duration: 3_600_000, loop: true })
 
-const Mark = (
-  <a href="#/" aria-label="All shells" className="contents">
-    <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><path d="M2 8.5h2.2l1.6-4 2.4 8 2-6 1.2 2H14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
-  </a>
-)
+const Mark = <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><path d="M2 8.5h2.2l1.6-4 2.4 8 2-6 1.2 2H14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
 
 function patternDoc(v: V) {
   const { pattern, ...rest } = params.toJSON() as Record<string, unknown>
   void pattern
-  return { app: 'prototype-studio/synth', version: 1, bpm: v.bpm, swing: v.swing, pattern: patternOf(v), settings: rest }
+  return { app: 'trompo/synth', version: 1, bpm: v.bpm, swing: v.swing, pattern: patternOf(v), settings: rest }
 }
 
 function importDoc(json: unknown) {
@@ -63,9 +59,9 @@ export default function SynthShell() {
       const cur = params.values() as V
       const { blob, seconds } = await renderLoopWAV(cur, bars)
       download(blob, `synth-${cur.bpm}bpm-${bars}bar.wav`)
-      toastManager.update(id, { title: 'WAV exported', description: `${seconds.toFixed(2)}s · 44.1 kHz · 16-bit · loop-ready`, type: 'success', timeout: 3200 })
+      toast.update(id, 'WAV exported', { description: `${seconds.toFixed(2)}s · 44.1 kHz · 16-bit · loop-ready`, type: 'success', timeout: 3200 })
     } catch (e) {
-      toastManager.update(id, { title: 'Render failed', description: String((e as Error)?.message ?? e), type: 'error', timeout: 5000 })
+      toast.update(id, 'Render failed', { description: String((e as Error)?.message ?? e), type: 'error', timeout: 5000 })
     }
   }
   const exportPatternJSON = () => { exportJSON(patternDoc(params.values() as V), `synth-pattern-${v.bpm}bpm.json`); toast('Pattern exported', { type: 'success' }) }
@@ -104,7 +100,7 @@ export default function SynthShell() {
     ...TRACKS.map((t, i) => ({ id: `mute-${t.id}`, label: `Mute ${t.name.toLowerCase()}`, group: 'Mixer', shortcut: String(i + 1), icon: Volume2, run: () => toggleKey(`${t.id}Mute`) })),
     ...TRACKS.map((t, i) => ({ id: `solo-${t.id}`, label: `Solo ${t.name.toLowerCase()}`, group: 'Mixer', shortcut: `shift+${i + 1}`, run: () => toggleKey(`${t.id}Solo`) })),
     { id: 'unmute', label: 'Unmute and unsolo all', group: 'Mixer', run: () => params.patch(Object.fromEntries(TRACKS.flatMap((t) => [[`${t.id}Mute`, false], [`${t.id}Solo`, false]])) as Partial<V>) },
-    ...Object.entries(SOUNDS).map(([name, s]) => ({ id: `snd-${name}`, label: `Sound: ${name}`, group: 'Sound', run: () => params.patch(s) })),
+    ...Object.keys(SOUNDS).map((name) => ({ id: `snd-${name}`, label: `Sound: ${name}`, group: 'Sound', run: () => params.applyPreset(name) })),
     ...TRACKS.map((t) => ({ id: `aud-${t.id}`, label: `Audition ${t.name.toLowerCase()}`, group: 'Sound', run: () => engine.audition(t.id as TrackId) })),
     { id: 'visual', label: v.visual === 'orbit' ? 'Visual: Horizon' : 'Visual: Orbit', group: 'View', shortcut: 'v', icon: Eye, run: () => params.setValue('visual', params.values().visual === 'orbit' ? 'horizon' : 'orbit') },
     { id: 'reset', label: 'Reset everything', group: 'Values', run: () => params.reset() },
@@ -223,10 +219,10 @@ export default function SynthShell() {
       <CommandPalette
         commands={commands}
         extraShortcuts={[
-          { keys: 'enter', label: 'Toggle focused step' },
-          { keys: 'shift+arrowup', label: 'Focused step velocity +' },
-          { keys: 'alt+arrowup', label: 'Focused bass note +1' },
-          { keys: '\\', label: 'A/B compare' },
+          { keys: 'enter', label: 'Toggle focused step', group: 'Sequencer' },
+          { keys: 'shift+arrowup', label: 'Focused step velocity +', group: 'Sequencer' },
+          { keys: 'alt+arrowup', label: 'Focused bass note +1', group: 'Sequencer' },
+          { keys: 'delete', label: 'Clear focused step', group: 'Sequencer' },
         ]}
       />
     </Studio>

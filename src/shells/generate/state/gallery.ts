@@ -4,6 +4,8 @@
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
+import { createDocStore, createHistory, useDoc } from '@kit'
+import { params } from './params'
 import type { GenParams } from '../engine/models'
 import { seedGallery } from './seed'
 
@@ -25,10 +27,10 @@ export interface Session { id: string; name: string; createdAt: number }
 export interface Board { id: string; name: string }
 export type View = { type: 'session'; id: string } | { type: 'all' } | { type: 'favourites' } | { type: 'board'; id: string }
 
-export interface GalleryState {
-  sessions: Session[]
-  boards: Board[]
-  images: ImageRec[]
+/** The document: what undo covers. */
+export interface Library { sessions: Session[]; boards: Board[]; images: ImageRec[] }
+/** View state: never undone, so ⌘Z never yanks the user to another session. */
+export interface ViewState {
   view: View
   activeSession: string
   selection: string[]
@@ -37,38 +39,67 @@ export interface GalleryState {
   density: 's' | 'm' | 'l'
   favOnly: boolean
 }
+export type GalleryState = Library & ViewState
 
-const LS = 'studio:generate:gallery'
 export const uid = (p = '') => `${p}${Math.random().toString(36).slice(2, 8)}`
 
-function initial(): GalleryState {
-  const base = { selection: [], anchor: null, groupBy: 'prompt' as const, density: 'm' as const, favOnly: false }
-  try {
-    const s = localStorage.getItem(LS)
-    if (s) {
-      const g = JSON.parse(s)
-      if (Array.isArray(g.sessions) && Array.isArray(g.images)) return { ...base, ...g, selection: [], anchor: null }
-    }
-  } catch { /* corrupt */ }
-  const seeded = seedGallery()
-  return { ...base, ...seeded, view: { type: 'session', id: seeded.sessions[0].id }, activeSession: seeded.sessions[0].id }
+const LEGACY = 'studio:generate:gallery' // before the kit doc store: library + view in one key
+const VIEW = 'studio:generate:view'
+const read = (key: string) => { try { return JSON.parse(localStorage.getItem(key) ?? 'null') } catch { return null } }
+
+function initialLibrary(): Library {
+  const g = read(LEGACY)
+  if (g && Array.isArray(g.sessions) && Array.isArray(g.images)) return { sessions: g.sessions, boards: g.boards ?? [], images: g.images }
+  return seedGallery()
 }
 
-export const gallery = createStore<GalleryState>(initial)
-export const useGallery = <T,>(pick: (s: GalleryState) => T) => useStore(gallery, pick)
+/** sessions · boards · image records — undoable, persisted (pixels re-render from params). */
+export const library = createDocStore<Library>(initialLibrary(), { id: 'generate', version: 1 })
+/** One ⌘Z timeline: generation settings and the library (deletes, favourites, boards, renames). */
+export const history = createHistory([params, library])
+
+function initialView(): ViewState {
+  const base = { selection: [], anchor: null, groupBy: 'prompt' as const, density: 'm' as const, favOnly: false }
+  const saved = read(VIEW) ?? read(LEGACY)
+  const lib = library.get()
+  const first = lib.sessions[0]?.id ?? ''
+  const ok = (id?: string) => !!id && lib.sessions.some((x) => x.id === id)
+  const view: View = saved?.view && (saved.view.type !== 'session' || ok(saved.view.id)) ? saved.view : { type: 'session', id: first }
+  return { ...base, groupBy: saved?.groupBy ?? 'prompt', density: saved?.density ?? 'm', view, activeSession: ok(saved?.activeSession) ? saved.activeSession : first }
+}
+export const gallery = createStore<ViewState>(initialView)
 
 let saveT: ReturnType<typeof setTimeout> | undefined
 gallery.subscribe((s, prev) => {
-  if (s.images === prev.images && s.sessions === prev.sessions && s.boards === prev.boards && s.view === prev.view && s.groupBy === prev.groupBy && s.density === prev.density) return
+  if (s.view === prev.view && s.groupBy === prev.groupBy && s.density === prev.density && s.activeSession === prev.activeSession) return
   clearTimeout(saveT)
   saveT = setTimeout(() => {
-    const { sessions, boards, images, view, activeSession, groupBy, density } = gallery.getState()
-    try { localStorage.setItem(LS, JSON.stringify({ sessions, boards, images, view, activeSession, groupBy, density })) } catch { /* quota */ }
+    const { view, activeSession, groupBy, density } = gallery.getState()
+    try { localStorage.setItem(VIEW, JSON.stringify({ view, activeSession, groupBy, density })) } catch { /* quota */ }
   }, 250)
 })
 
+// Undo can remove the session or board on screen — fall back to one that exists.
+library.subscribe((l, prev) => {
+  if (l.doc === prev.doc) return
+  const v = gallery.getState()
+  const at = v.view
+  const gone = (at.type === 'session' && !l.doc.sessions.some((x) => x.id === at.id)) || (at.type === 'board' && !l.doc.boards.some((x) => x.id === at.id))
+  if (gone) gallery.setState({ view: { type: 'session', id: l.doc.sessions[0]?.id ?? '' }, activeSession: l.doc.sessions[0]?.id ?? '', selection: [], anchor: null })
+  else if (v.selection.length) { const ids = new Set(l.doc.images.map((i) => i.id)); const sel = v.selection.filter((x) => ids.has(x)); if (sel.length !== v.selection.length) gallery.setState({ selection: sel, anchor: sel.at(-1) ?? null }) }
+})
+
+/** Library + view as one object (non-reactive). */
+export const snapshot = (): GalleryState => ({ ...library.get(), ...gallery.getState() })
+/** React: library + view. Re-renders on either; pick what you need. */
+export function useGallery<T>(pick: (s: GalleryState) => T): T {
+  const lib = useDoc(library)
+  const view = useStore(gallery)
+  return pick({ ...lib, ...view })
+}
+
 /* --- derived --- */
-export function visible(s: GalleryState = gallery.getState()) {
+export function visible(s: GalleryState = snapshot()) {
   const v = s.view
   let list = s.images
   if (v.type === 'session') list = list.filter((i) => i.sessionId === v.id)
@@ -98,7 +129,7 @@ export const viewTitle = (s: GalleryState) => {
   if (v.type === 'board') return s.boards.find((b) => b.id === v.id)?.name ?? 'Board'
   return s.sessions.find((x) => x.id === v.id)?.name ?? 'Session'
 }
-export const byId = (id: string | null | undefined) => (id ? gallery.getState().images.find((i) => i.id === id) : undefined)
+export const byId = (id: string | null | undefined) => (id ? library.get().images.find((i) => i.id === id) : undefined)
 
 /* --- actions --- */
 export function setView(view: View) {
@@ -106,68 +137,70 @@ export function setView(view: View) {
 }
 
 export function newSession(name?: string) {
-  const s = gallery.getState()
-  const n = name ?? `Session ${s.sessions.length + 1}`
+  const n = name ?? `Session ${library.get().sessions.length + 1}`
   const session: Session = { id: uid('s-'), name: n, createdAt: Date.now() }
-  gallery.setState({ sessions: [session, ...s.sessions] })
+  library.set((l) => ({ ...l, sessions: [session, ...l.sessions] }), { label: 'New session' })
   setView({ type: 'session', id: session.id })
   return session
 }
-export const renameSession = (id: string, name: string) => gallery.setState((s) => ({ sessions: s.sessions.map((x) => (x.id === id ? { ...x, name } : x)) }))
+export const renameSession = (id: string, name: string) =>
+  library.set((l) => ({ ...l, sessions: l.sessions.map((x) => (x.id === id ? { ...x, name } : x)) }), { label: 'Rename session' })
 
+/** Delete a session and its images — one undo step. Returns false when there was nothing to delete. */
 export function deleteSession(id: string) {
-  const s = gallery.getState()
-  const session = s.sessions.find((x) => x.id === id)
-  if (!session) return null
-  const removed = s.images.filter((i) => i.sessionId === id)
-  let sessions = s.sessions.filter((x) => x.id !== id)
+  const l = library.get()
+  if (!l.sessions.some((x) => x.id === id)) return false
+  let sessions = l.sessions.filter((x) => x.id !== id)
   if (!sessions.length) sessions = [{ id: uid('s-'), name: 'Session 1', createdAt: Date.now() }]
-  gallery.setState({ sessions, images: s.images.filter((i) => i.sessionId !== id) })
-  if (s.activeSession === id || (s.view.type === 'session' && s.view.id === id)) setView({ type: 'session', id: sessions[0].id })
-  return () => gallery.setState((g) => ({ sessions: [...g.sessions.filter((x) => x.id !== session.id), session].sort((a, b) => b.createdAt - a.createdAt), images: [...g.images, ...removed].sort((a, b) => b.createdAt - a.createdAt) }))
+  library.set({ ...l, sessions, images: l.images.filter((i) => i.sessionId !== id) }, { label: 'Delete session' })
+  const v = gallery.getState()
+  if (v.activeSession === id || (v.view.type === 'session' && v.view.id === id)) setView({ type: 'session', id: sessions[0].id })
+  return true
 }
 
 export function newBoard(name: string) {
   const b: Board = { id: uid('b-'), name }
-  gallery.setState((s) => ({ boards: [...s.boards, b] }))
+  library.set((l) => ({ ...l, boards: [...l.boards, b] }), { label: 'New board' })
   return b
 }
-export const renameBoard = (id: string, name: string) => gallery.setState((s) => ({ boards: s.boards.map((b) => (b.id === id ? { ...b, name } : b)) }))
+export const renameBoard = (id: string, name: string) =>
+  library.set((l) => ({ ...l, boards: l.boards.map((b) => (b.id === id ? { ...b, name } : b)) }), { label: 'Rename board' })
 export function deleteBoard(id: string) {
-  gallery.setState((s) => ({ boards: s.boards.filter((b) => b.id !== id), images: s.images.map((i) => (i.boards?.includes(id) ? { ...i, boards: i.boards.filter((x) => x !== id) } : i)) }))
+  library.set((l) => ({ ...l, boards: l.boards.filter((b) => b.id !== id), images: l.images.map((i) => (i.boards?.includes(id) ? { ...i, boards: i.boards.filter((x) => x !== id) } : i)) }), { label: 'Delete board' })
   const v = gallery.getState().view
   if (v.type === 'board' && v.id === id) setView({ type: 'all' })
 }
 
-export function addImages(recs: ImageRec[]) {
-  gallery.setState((s) => ({ images: [...recs, ...s.images] }))
+/** New images land as one undoable step ("Generate 4 images"). */
+export function addImages(recs: ImageRec[], label = `Add ${recs.length} image${recs.length === 1 ? '' : 's'}`) {
+  if (!recs.length) return
+  library.set((l) => ({ ...l, images: [...recs, ...l.images] }), { label })
 }
 
-const patch = (ids: string[], fn: (i: ImageRec) => Partial<ImageRec>) => {
+const patch = (ids: string[], fn: (i: ImageRec) => Partial<ImageRec>, label: string) => {
   const set = new Set(ids)
-  gallery.setState((s) => ({ images: s.images.map((i) => (set.has(i.id) ? { ...i, ...fn(i) } : i)) }))
+  library.set((l) => ({ ...l, images: l.images.map((i) => (set.has(i.id) ? { ...i, ...fn(i) } : i)) }), { label })
 }
 export function toggleFavourite(ids: string[]) {
-  const all = gallery.getState().images.filter((i) => ids.includes(i.id)).every((i) => i.favourite)
-  patch(ids, () => ({ favourite: !all }))
+  const all = library.get().images.filter((i) => ids.includes(i.id)).every((i) => i.favourite)
+  patch(ids, () => ({ favourite: !all }), all ? 'Unfavourite' : 'Favourite')
   return !all
 }
 export function toggleBoard(ids: string[], boardId: string) {
-  const all = gallery.getState().images.filter((i) => ids.includes(i.id)).every((i) => i.boards?.includes(boardId))
-  patch(ids, (i) => ({ boards: all ? (i.boards ?? []).filter((b) => b !== boardId) : [...new Set([...(i.boards ?? []), boardId])] }))
+  const all = library.get().images.filter((i) => ids.includes(i.id)).every((i) => i.boards?.includes(boardId))
+  patch(ids, (i) => ({ boards: all ? (i.boards ?? []).filter((b) => b !== boardId) : [...new Set([...(i.boards ?? []), boardId])] }), all ? 'Remove from board' : 'Add to board')
   return !all
 }
 
-/** Delete; returns an undo function. Selection moves to the next image (Lightroom). */
+/** Delete — one undo step. Selection moves to the next image (Lightroom). */
 export function deleteImages(ids: string[]) {
-  const s = gallery.getState()
+  const s = snapshot()
   const set = new Set(ids)
   const list = visible(s)
   const lastIdx = Math.max(...list.map((i, k) => (set.has(i.id) ? k : -1)))
   const next = list.slice(lastIdx + 1).find((i) => !set.has(i.id)) ?? [...list].reverse().find((i) => !set.has(i.id))
-  const removed = s.images.filter((i) => set.has(i.id))
-  gallery.setState({ images: s.images.filter((i) => !set.has(i.id)), selection: next ? [next.id] : [], anchor: next?.id ?? null })
-  return () => gallery.setState((g) => ({ images: [...g.images, ...removed].sort((a, b) => b.createdAt - a.createdAt), selection: ids, anchor: ids[0] }))
+  library.set((l) => ({ ...l, images: l.images.filter((i) => !set.has(i.id)) }), { label: `Delete ${ids.length} image${ids.length === 1 ? '' : 's'}` })
+  gallery.setState({ selection: next ? [next.id] : [], anchor: next?.id ?? null })
 }
 
 /* --- selection --- */
@@ -175,7 +208,7 @@ export function select(ids: string[], anchor?: string) { gallery.setState({ sele
 
 /** Click semantics: plain = single, mod = toggle, shift = range from the anchor (Finder / Lightroom). */
 export function clickSelect(id: string, e: { shiftKey?: boolean; metaKey?: boolean; ctrlKey?: boolean }) {
-  const s = gallery.getState()
+  const s = snapshot()
   if (e.shiftKey && s.anchor) {
     const list = visible(s).map((i) => i.id)
     const a = list.indexOf(s.anchor), b = list.indexOf(id)
@@ -190,7 +223,7 @@ export function clickSelect(id: string, e: { shiftKey?: boolean; metaKey?: boole
 
 /** ← / → browse in gallery order. */
 export function step(dir: 1 | -1) {
-  const s = gallery.getState()
+  const s = snapshot()
   const list = visible(s)
   if (!list.length) return
   const cur = s.anchor ? list.findIndex((i) => i.id === s.anchor) : -1

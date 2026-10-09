@@ -2,10 +2,11 @@
 import { useRef, useState } from 'react'
 import { Images, Heart, FolderHeart, Plus, MoreHorizontal, Pencil, Braces, Trash2, FolderOpen, MessagesSquare } from 'lucide-react'
 import { Panel, PanelHeader, IconButton, Menu, toast, cn } from '@kit'
-import { useGallery, setView, newSession, renameSession, deleteSession, newBoard, renameBoard, deleteBoard, type View, type ImageRec } from '../state/gallery'
+import { InlineText } from '@kit/ui/inline-text'
+import { promptText } from '@kit/system/dialog'
+import { useGallery, history, setView, newSession, renameSession, deleteSession, newBoard, renameBoard, deleteBoard, type View, type ImageRec } from '../state/gallery'
 import { usePix } from '../state/images'
 import { exportSession, importSession } from '../state/actions'
-import { InlineEdit } from '../local/InlineEdit'
 
 const same = (a: View, b: View) => a.type === b.type && ('id' in a ? a.id : '') === ('id' in b ? b.id : '')
 
@@ -52,7 +53,7 @@ export function Sidebar() {
           <Menu align="end" trigger={<IconButton icon={MoreHorizontal} label="Library options" size="icon-sm" />}
             items={[
               { label: 'Import session JSON…', icon: FolderOpen, shortcut: 'mod+o', onClick: () => file.current?.click() },
-              { label: 'New board…', icon: FolderHeart, onClick: () => { const n = prompt('Board name', `Board ${boards.length + 1}`); if (n) { const b = newBoard(n); setView({ type: 'board', id: b.id }) } } },
+              { label: 'New board…', icon: FolderHeart, onClick: async () => { const n = await promptText({ title: 'New board', label: 'Board name', defaultValue: `Board ${boards.length + 1}`, confirmLabel: 'Create board' }); if (n) { const b = newBoard(n); setView({ type: 'board', id: b.id }) } } },
             ]} />
           <IconButton icon={Plus} label="New session" shortcut="n" size="icon-sm" onClick={() => newSession()} />
         </PanelHeader>
@@ -68,14 +69,14 @@ export function Sidebar() {
             <div key={b.id} className="group/row relative">
               {editing === b.id ? (
                 <div className="flex h-8 items-center gap-2 px-2"><FolderHeart size={14} strokeWidth={1.5} className="text-fg-muted" />
-                  <InlineEdit value={b.name} editing onEditingChange={(e) => !e && setEditing(null)} onCommit={(n) => renameBoard(b.id, n)} className="flex-1 text-[12px]" />
+                  <InlineText value={b.name} editing onEditingChange={(e) => !e && setEditing(null)} onCommit={(n) => renameBoard(b.id, n)} className="flex-1 text-[12px]" label="Board name" />
                 </div>
               ) : <NavRow view={{ type: 'board', id: b.id }} icon={FolderHeart} label={b.name} count={images.filter((i) => i.boards?.includes(b.id)).length} active={active} />}
               <div className="absolute top-1 right-7 opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100">
                 <Menu align="end" trigger={<IconButton icon={MoreHorizontal} label="Board options" size="icon-sm" />}
                   items={[
                     { label: 'Rename', icon: Pencil, onClick: () => setEditing(b.id) },
-                    { label: 'Delete board', icon: Trash2, danger: true, onClick: () => { deleteBoard(b.id); toast(`Deleted board “${b.name}”`, { description: 'Images stay in their sessions.' }) } },
+                    { label: 'Delete board', icon: Trash2, danger: true, onClick: () => { deleteBoard(b.id); toast(`Deleted board “${b.name}”`, { description: 'Images stay in their sessions.', action: { label: 'Undo', onClick: () => history.undo() } }) } },
                   ]} />
               </div>
             </div>
@@ -96,7 +97,7 @@ export function Sidebar() {
                 <Thumb rec={latest} />
                 <span className="flex min-w-0 flex-1 flex-col">
                   {editing === s.id
-                    ? <InlineEdit value={s.name} editing onEditingChange={(e) => !e && setEditing(null)} onCommit={(n) => renameSession(s.id, n)} className="text-[12px]" />
+                    ? <InlineText value={s.name} editing onEditingChange={(e) => !e && setEditing(null)} onCommit={(n) => renameSession(s.id, n)} className="text-[12px]" label="Session name" />
                     : <span className={cn('truncate text-[12px]', active ? 'font-medium text-fg' : 'text-fg')}>{s.name}</span>}
                   <span className="tabular truncate text-[11px] text-fg-faint">{list.length} images · {ago(latest?.createdAt ?? s.createdAt)}</span>
                 </span>
@@ -109,8 +110,7 @@ export function Sidebar() {
                     { type: 'separator' },
                     {
                       label: 'Delete session', icon: Trash2, danger: true, onClick: () => {
-                        const undo = deleteSession(s.id)
-                        if (undo) toast(`Deleted “${s.name}”`, { description: `${list.length} images`, action: { label: 'Undo', onClick: undo }, timeout: 6000 })
+                        if (deleteSession(s.id)) toast(`Deleted “${s.name}”`, { description: `${list.length} images`, action: { label: 'Undo', onClick: () => history.undo() }, timeout: 6000 })
                       },
                     },
                   ]} />

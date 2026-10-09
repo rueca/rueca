@@ -6,7 +6,7 @@
 <title>Brand board</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700&family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Instrument+Serif&family=Inter:wght@400;500;600&family=Young+Serif&family=Schibsted+Grotesk:wght@800&family=Fraunces:opsz,wght@9..144,600&family=Marcellus&family=EB+Garamond:wght@500&family=Fredoka:wght@600&family=Nunito:wght@800&family=Sniglet:wght@800&family=Syne:wght@700&display=swap" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@125,700&family=Bricolage+Grotesque:opsz,wght@12..96,700&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&family=Instrument+Serif&family=Inter:wght@400;500;600&family=Young+Serif&family=Schibsted+Grotesk:wght@800&family=Fraunces:opsz,wght@9..144,600&family=Marcellus&family=EB+Garamond:wght@500&family=Fredoka:wght@600&family=Nunito:wght@800&family=Sniglet:wght@800&family=Syne:wght@700&family=Gabarito:wght@700&family=Archivo+Black&family=Manrope:wght@800&display=swap" />
 <script>
   try {
     var t = localStorage.getItem('studio:theme');
@@ -220,26 +220,60 @@
   .stories .era { font: 11.5px "Geist Mono", monospace; color: var(--faint); display: block; margin: 2px 0 8px; }
   .stories p { margin: 0; color: var(--muted); font-size: 13px; }
   .lens { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+  .favs { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); }
+  .fav { border-radius: var(--r); min-height: 120px; display: grid; place-items: center; text-decoration: none; box-shadow: var(--shadow); padding: 20px 12px; transition: transform .15s; }
+  .fav:hover { transform: translateY(-2px); }
+  .fav .lockup { gap: 10px; }
+  .decision { display: flex; align-items: center; gap: 18px; margin: 0 0 22px; padding: 22px 24px; border-radius: var(--r); text-decoration: none; box-shadow: var(--shadow); }
+  .decision .meta { display: grid; gap: 2px; }
+  .decision .meta b { font-weight: 500; font-size: 13px; opacity: .65; }
+  .decision .meta span { font-size: 15px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="crumb">Brand board <span>Prototype Studio · working name</span></div>
+    <div class="crumb">Brand board <span>Trompo · chosen 9 Oct 2026</span></div>
     <nav class="nav" aria-label="Sections">
-      <a href="#round3">Round 3</a><a href="#round2">Round 2</a><a href="#positioning">Positioning</a><a href="#names">Names</a><a href="#shortlist">Round 1</a><a href="#voice">Voice</a><a href="#next">Next</a>
+      <a href="#favourites">Favourites</a><a href="#round5">Round 5</a><a href="#round4">Shorter</a><a href="#round3">Round 3</a><a href="#round2">Round 2</a><a href="#positioning">Positioning</a><a href="#names">Names</a><a href="#shortlist">Round 1</a><a href="#voice">Voice</a><a href="#next">Next</a>
     </nav>
     <button class="btn solid" id="theme" type="button" aria-label="Toggle theme (T)">Theme</button>
   </header>
 
   <h1>Naming and brand</h1>
-  <p class="lede">Three rounds, 177 names, all checked against npm, GitHub, domains and the web. Round 2 went looking in Spanish and Latin, in the history of tools, among inventors and in pop culture. Round 3 went cute: lil- names, toys and fictional makers. Each shortlist has drawn marks, a wordmark and a palette. The final name and look are your call.</p>
+  <a class="decision" href="#c-trompo" id="decision"></a>
+  <p class="lede">Five rounds, 249 names, all checked against npm, GitHub, domains and the web. Round 2 went looking in Spanish and Latin, in the history of tools, among inventors and in pop culture. Round 3 went cute: lil- names, toys and fictional makers. Round 4 looked for the Thumbwheel idea in a shorter word. Round 5 was a general search steered by your favourites. Each shortlist has drawn marks, a wordmark and a palette. The name is settled. The mark, type and palette are drafts to push on.</p>
 
   <div class="calls">
-    <div class="panel call"><span class="k">Your call · 1</span><b>Pick the name</b><p>Overall, my pick is <strong>Cruceta</strong>, the marionette’s control bar: we don’t make your prototype, we make it move. If you want cute, it’s <strong>Trompo</strong>. Thumbwheel is still the safest English pick.</p></div>
+    <div class="panel call"><span class="k">Decided · 9 Oct</span><b>The name is Trompo</b><p>It was picked from a final four of Trompo, Thumbwheel, Periaktos and Jigwork. The runner-up and safe fallback is <strong>Thumbwheel</strong>. Everything below is kept as the record of how we got here.</p></div>
     <div class="panel call"><span class="k">Your call · 2</span><b>Pick the look</b><p>The marks are first drafts on a 32-unit grid, drawn to survive 16px. Push on the forms, the type and the palette. These are the places your eye beats mine.</p></div>
     <div class="panel call"><span class="k">Your call · 3</span><b>Approve the voice</b><p>Seven rules and the do/don’t pairs. If one doesn’t sound like you, cut it.</p></div>
   </div>
+
+  <section id="favourites" style="margin-top:56px">
+    <div class="sh"><span class="n">★</span><h2>Favourites</h2><p>Your picks so far · click to jump to the card</p></div>
+    <div class="favs" id="favs"></div>
+  </section>
+
+  <section id="round5">
+    <div class="sh"><span class="n">R5</span><h2>Round 5: a general search</h2><p>Checked 9 Oct 2026</p></div>
+    <div class="cands" id="cands5"></div>
+    <h3 class="sub">Every name in round 5</h3>
+    <div class="panel tbl"><table><thead><tr>
+      <th>Name</th><th>Lens</th><th>npm</th><th>@scope</th><th>GitHub handle</th><th>Repo clashes</th><th>Domains</th><th>Already out there</th><th>Verdict</th>
+    </tr></thead><tbody id="rows5"></tbody></table></div>
+    <p class="note" id="also5"></p>
+  </section>
+
+  <section id="round4">
+    <div class="sh"><span class="n">R4</span><h2>Round 4: Thumbwheel, but shorter</h2><p>Checked 9 Oct 2026</p></div>
+    <div class="cands" id="cands4"></div>
+    <h3 class="sub">Every name in round 4</h3>
+    <div class="panel tbl"><table><thead><tr>
+      <th>Name</th><th>Lens</th><th>npm</th><th>@scope</th><th>GitHub handle</th><th>Repo clashes</th><th>Domains</th><th>Already out there</th><th>Verdict</th>
+    </tr></thead><tbody id="rows4"></tbody></table></div>
+    <p class="note" id="also4"></p>
+  </section>
 
   <section id="round3">
     <div class="sh"><span class="n">R3</span><h2>Round 3: cute prefixes, toys, fictional makers</h2><p>Checked 9 Oct 2026</p></div>
@@ -320,7 +354,7 @@
 
 <script type="module">
   import { marks } from './marks.js'
-  import { names, alsoChecked, shortlist, positioning, voice, checkedOn, round2Lenses, names2, alsoChecked2, shortlist2, stories, round3Lenses, names3, alsoChecked3, shortlist3, stories3 } from './data.js'
+  import { names, alsoChecked, shortlist, positioning, voice, checkedOn, round2Lenses, names2, alsoChecked2, shortlist2, stories, round3Lenses, names3, alsoChecked3, shortlist3, stories3, favourites, names4, alsoChecked4, shortlist4, names5, alsoChecked5, shortlist5 } from './data.js'
 
   const $ = (id) => document.getElementById(id)
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
@@ -422,8 +456,28 @@
       </article>`
     }).join('')
   }
-  const renderAll = () => { renderCands(); renderCands(shortlist2, names2, 'cands2'); renderCands(shortlist3, names3, 'cands3') }
+  const renderAll = () => { renderCands(); renderCands(shortlist2, names2, 'cands2'); renderCands(shortlist3, names3, 'cands3'); renderCands(shortlist4, names4, 'cands4'); renderCands(shortlist5, names5, 'cands5'); renderFavs(); renderDecision() }
+  function renderDecision() {
+    const scheme = isDark() ? 'dark' : 'light'
+    const c = shortlist3.find((x) => x.id === 'trompo'), k = c.colors[scheme]
+    $('decision').style.background = k.bg
+    $('decision').innerHTML = `${lockup(c, scheme, 52, 44)}<div class="meta" style="color:${k.ink}"><b>The name</b><span>Give it a spin.</span></div>`
+  }
+  function renderFavs() {
+    const scheme = isDark() ? 'dark' : 'light'
+    const all = [...shortlist, ...shortlist2, ...shortlist3, ...shortlist4, ...shortlist5]
+    $('favs').innerHTML = favourites.map((id) => all.find((c) => c.id === id)).filter(Boolean)
+      .map((c) => `<a class="fav" href="#c-${c.id}" style="background:${c.colors[scheme].bg}" aria-label="${esc(c.name)}">${lockup(c, scheme, 34, 28)}</a>`).join('')
+  }
   renderAll()
+
+  /* round 5 */
+  $('rows5').innerHTML = names5.map((n) => rowHTML(n, true)).join('')
+  $('also5').textContent = `Also checked and dropped (taken, or a live product): ${alsoChecked5.join(', ')}.`
+
+  /* round 4 */
+  $('rows4').innerHTML = names4.map((n) => rowHTML(n, true)).join('')
+  $('also4').textContent = `Also checked and dropped: ${alsoChecked4.join(', ')}.`
 
   /* round 3 */
   $('lenses3').innerHTML = round3Lenses.map((l) => `<div class="panel"><b>${esc(l.title)}</b><p>${esc(l.body)}</p></div>`).join('')

@@ -177,4 +177,56 @@ export const marks = {
       'Tornasol mark',
     )
   },
+
+  /* Round 4 — shorter Thumbwheel ------------------------------------------- */
+
+  /* Molette: the knurled wheel of a lighter or a mouse, seen face-on. Fine ridges round the rim, one bright notch. */
+  molette({ ink, acc, bg }, size = 32, small = size < 24) {
+    const n = small ? 16 : 28
+    const ticks = Array.from({ length: n }, (_, i) => {
+      const a = (i / n) * Math.PI * 2
+      const r1 = 11, r2 = 13.6
+      return `<line x1="${(16 + r1 * Math.cos(a)).toFixed(2)}" y1="${(16 + r1 * Math.sin(a)).toFixed(2)}" x2="${(16 + r2 * Math.cos(a)).toFixed(2)}" y2="${(16 + r2 * Math.sin(a)).toFixed(2)}" stroke="${ink}" stroke-width="${small ? 1.8 : 1.3}" stroke-linecap="round"/>`
+    }).join('')
+    return svg(
+      ticks + `<circle cx="16" cy="16" r="11.2" fill="${ink}"/>` +
+        `<circle cx="16" cy="16" r="3" fill="${bg}"/>` +
+        `<line x1="16" x2="16" y1="7.5" y2="11" stroke="${acc}" stroke-width="2.6" stroke-linecap="round"/>`,
+      size,
+      'Molette mark',
+    )
+  },
+
+  /* Knurly: a grip with diamond knurling, the texture that tells your thumb where to hold. */
+  knurly({ ink, acc, bg }, size = 32, small = size < 24) {
+    const id = 'kn' + Math.random().toString(36).slice(2, 8)
+    const step = small ? 6 : 4
+    let hatch = ''
+    for (let k = -32; k <= 64; k += step) {
+      hatch += `<line x1="${k}" y1="0" x2="${k + 32}" y2="32" stroke="${bg}" stroke-width="1.1"/><line x1="${k}" y1="32" x2="${k + 32}" y2="0" stroke="${bg}" stroke-width="1.1"/>`
+    }
+    return svg(
+      `<defs><clipPath id="${id}"><rect x="7" y="3" width="18" height="26" rx="9"/></clipPath></defs>` +
+        `<rect x="7" y="3" width="18" height="26" rx="9" fill="${ink}"/>` +
+        `<g clip-path="url(#${id})">${hatch}</g>` +
+        `<rect x="4" y="14.6" width="24" height="2.8" rx="1.4" fill="${acc}"/>`,
+      size,
+      'Knurly mark',
+    )
+  },
+
+  /* Round 5 ---------------------------------------------------------------- */
+
+  /* Turnwork: a spindle turned on a lathe, held between centres. The bright bead is the detail you’re shaping. */
+  turnwork({ ink, acc }, size = 32, small = size < 24) {
+    const top = 'M6 13.6 L8 13.6 C9.5 13.6 9.5 10.2 11.5 10.2 C13 10.2 13.4 13.2 14.3 13.2 L17.7 13.2 C18.6 13.2 19 9.4 22 9.4 C24.6 9.4 24.8 13 26 13 L26 19 C24.8 19 24.6 22.6 22 22.6 C19 22.6 18.6 18.8 17.7 18.8 L14.3 18.8 C13.4 18.8 13 21.8 11.5 21.8 C9.5 21.8 9.5 18.4 8 18.4 L6 18.4 Z'
+    return svg(
+      `<path d="M1.5 16 L5 13.2 L5 18.8 Z" fill="${ink}" stroke="${ink}" stroke-width="1" stroke-linejoin="round"/>` +
+        `<path d="M30.5 16 L27 13.2 L27 18.8 Z" fill="${ink}" stroke="${ink}" stroke-width="1" stroke-linejoin="round"/>` +
+        `<path d="${top}" fill="${ink}"/>` +
+        `<rect x="14.4" y="${small ? 10.5 : 11}" width="3.2" height="${small ? 11 : 10}" rx="1.6" fill="${acc}"/>`,
+      size,
+      'Turnwork mark',
+    )
+  },
 }

@@ -1,5 +1,6 @@
 /* The artifact: pure functions of (values, t). The studio never reaches in here. */
 import { defineSchema, folder, p, createParams, createClock, EASINGS } from '@kit'
+import { cubicBezier } from '@kit/core/ease'
 
 export const schema = defineSchema({
   geometry: folder('Geometry', {
@@ -39,18 +40,6 @@ export const totalMs = (v: V) => v.duration + v.stagger * v.rings + (v.returnSwe
 export const clock = createClock({ duration: totalMs(params.values()), loop: true })
 params.subscribe((s) => clock.setState({ duration: totalMs(s.values as V) }))
 
-function bezier(x1: number, y1: number, x2: number, y2: number) {
-  const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx
-  const cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by
-  const sx = (t: number) => ((ax * t + bx) * t + cx) * t
-  const sy = (t: number) => ((ay * t + by) * t + cy) * t
-  return (x: number) => {
-    let t = x
-    for (let i = 0; i < 6; i++) { const d = (3 * ax * t + 2 * bx) * t + cx; if (Math.abs(d) < 1e-6) break; t -= (sx(t) - x) / d }
-    return sy(Math.min(1, Math.max(0, t)))
-  }
-}
-
 /** Beats — the SAME function the timeline reads. */
 export function beats(v: V) {
   const out: { ring: number; start: number; end: number; kind: 'out' | 'back' }[] = []
@@ -65,7 +54,7 @@ export function beats(v: V) {
 export function draw(ctx: CanvasRenderingContext2D, v: V, t: number, w: number, h: number) {
   ctx.fillStyle = v.bg
   ctx.fillRect(0, 0, w, h)
-  const ease = bezier(...v.ease)
+  const ease = cubicBezier(v.ease)
   const cx = w / 2, cy = h * 0.42
   const level = new Array(v.rings).fill(0)
   for (const b of beats(v)) {

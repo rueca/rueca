@@ -14,7 +14,7 @@ half an hour once the decisions are made.
 | **npm scope** | — | **Not needed at launch.** The registry serves from your site, and the bridge script can be served by jsDelivr straight from GitHub. Reserve the name anyway (`npm login`, then publish an empty placeholder, or create an org scope `@<name>`). |
 | **Tagline / description** | `tagline`, `description` | Show on the landing page, in the plugin listing and in the README. |
 | **What goes public** | — | `research/` (useful context, names competitors frankly) and `docs/SESSION-CONTEXT.md` (internal hand-off notes). I'd keep research and delete SESSION-CONTEXT. Your call. |
-| **Old skill** | `~/.claude/skills/prototype-studio/` | Once you install the plugin, remove the old copy, or both versions trigger on the same requests. |
+| **Old skill** | `~/.claude/skills/trompo/` | Once you install the plugin, remove the old copy, or both versions trigger on the same requests. |
 
 Then run:
 

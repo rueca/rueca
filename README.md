@@ -1,9 +1,9 @@
-# Prototype Studio
+# Trompo
 
 **A design-tool harness for the prototype you already have.**
 
 A prototype needs two things: the thing you are designing, and a tool around it to
-feel and tune it. Prototype Studio is that tool — the inspector, timeline, layers,
+feel and tune it. Trompo is that tool — the inspector, timeline, layers,
 presets, export and client view of a real design app — dropped in around any
 prototype, in any runtime, installed component by component and kept up to date.
 
@@ -11,15 +11,15 @@ It ships three ways: an **agent skill** that teaches your coding agent to build 
 harness properly, a **Claude Code plugin** that bundles it, and a **component
 registry** for the kit itself.
 
-**[Live site and example tools →](https://OWNER.github.io/prototype-studio)**
+**[Live site and example tools →](https://trompo-dev.github.io/trompo)**
 
 ## Install
 
 **Claude Code** (recommended)
 
 ```
-/plugin marketplace add OWNER/prototype-studio
-/plugin install prototype-studio@prototype-studio
+/plugin marketplace add trompo-dev/trompo
+/plugin install trompo@trompo
 ```
 
 Then ask for a prototype, a playground or "a tool to tune this". Update with
@@ -29,18 +29,18 @@ Then ask for a prototype, a playground or "a tool to tune this". Update with
 [Agent Skills](https://agentskills.io) format)
 
 ```bash
-npx skills add OWNER/prototype-studio
+npx skills add trompo-dev/trompo
 ```
 
 **Just the kit** (React + Tailwind v4, via the shadcn CLI)
 
 ```bash
-npx shadcn@latest add https://OWNER.github.io/prototype-studio/r/studio.json
+npx shadcn@latest add https://trompo-dev.github.io/trompo/r/studio.json
 ```
 
 Or one piece at a time — `theme`, `core`, `inspector`, `timeline`, `stage`, `layers`,
 `scrub`, `color`, `palette`… Each pulls what it needs. The full list is at
-[`/r/registry.json`](https://OWNER.github.io/prototype-studio/r/registry.json). Files land in
+[`/r/registry.json`](https://trompo-dev.github.io/trompo/r/registry.json). Files land in
 your project (`components/studio/`), so you own them. Then add the theme as the **last**
 line of your main CSS, so it wins over shadcn's default tokens:
 
@@ -88,7 +88,7 @@ The full API is in [`docs/KIT.md`](docs/KIT.md).
 
 | Path | What |
 |---|---|
-| `skills/prototype-studio/` | The agent skill — a lean `SKILL.md` plus reference files it loads only when needed |
+| `skills/trompo/` | The agent skill — a lean `SKILL.md` plus reference files it loads only when needed |
 | `src/kit/` | The kit: schema, param store, clock, surfaces, inspector, timeline, layers, stage, palette |
 | `src/shells/` | Example tools, each a different kind of instrument built from the same kit |
 | `src/landing/` | The landing page |

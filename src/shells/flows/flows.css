@@ -1,59 +1,14 @@
-/* React Flow, dressed in kit tokens. Everything maps to theme.css vars, so
-   both themes (and the DOM-snapshot export) follow automatically. */
+/* Flows-only canvas styling. The generic React Flow theme (tokens, handles,
+   edges, minimap, attribution) is the kit's: src/kit/xyflow.css. */
 
-.flows-rf {
-  --xy-background-color: transparent;
-  --xy-edge-stroke: var(--fg-faint);
-  --xy-edge-stroke-width: 1.5;
-  --xy-edge-stroke-selected: var(--signal);
-  --xy-connectionline-stroke: var(--signal);
-  --xy-connectionline-stroke-width: 1.5;
-  --xy-selection-background-color: var(--signal-soft);
-  --xy-selection-border: 1px solid var(--signal);
-  --xy-minimap-background-color: var(--panel);
-  --xy-minimap-mask-background-color: color-mix(in srgb, var(--field) 72%, transparent);
-  --xy-minimap-mask-stroke-color: var(--signal);
-  --xy-minimap-mask-stroke-width: 1.5;
-  --xy-minimap-node-background-color: var(--lane);
-  --xy-resize-background-color: var(--signal);
-  font-family: var(--font-ui);
-}
-
-/* nodes: the kit owns the look, React Flow only positions */
-.flows-rf .react-flow__node { font-size: 12px; color: var(--fg); }
-.flows-rf .react-flow__node:focus-visible { outline: none; }
-.flows-rf .react-flow__node:focus-visible > .flows-node { box-shadow: var(--shadow-cluster), 0 0 0 2px var(--signal); }
+/* sections sit behind and let clicks through, except their tab and resizer */
 .flows-rf .react-flow__node-section { pointer-events: none !important; }
 .flows-rf .react-flow__node-section .flows-section-tab,
 .flows-rf .react-flow__node-section .react-flow__resize-control { pointer-events: all; }
-.flows-rf.is-animating .react-flow__node { transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1); }
 .flows-rf.is-animating .react-flow__node-section > div { transition: width 420ms cubic-bezier(0.16, 1, 0.3, 1), height 420ms cubic-bezier(0.16, 1, 0.3, 1); }
-
-/* handles: hidden until the node is hovered / selected / a connection is live */
-.flows-rf .react-flow__handle {
-  width: 9px; height: 9px; min-width: 0; min-height: 0;
-  background: var(--panel);
-  border: 1.5px solid var(--fg-faint);
-  border-radius: 99px;
-  opacity: 0;
-  transition: opacity 120ms, transform 120ms, background-color 120ms, border-color 120ms;
-}
-.flows-rf .react-flow__node:hover .react-flow__handle,
-.flows-rf .react-flow__node.selected .react-flow__handle,
-.flows-rf.is-connecting .react-flow__handle { opacity: 1; }
-.flows-rf .react-flow__handle:hover,
-.flows-rf .react-flow__handle.connectingto,
-.flows-rf .react-flow__handle.valid { background: var(--signal); border-color: var(--signal); transform: translate(-50%, -50%) scale(1.25); }
-.flows-rf .react-flow__handle-top { top: 0; left: 50%; transform: translate(-50%, -50%); }
-.flows-rf .react-flow__handle-bottom { top: 100%; left: 50%; transform: translate(-50%, -50%); }
-.flows-rf .react-flow__handle-left { top: 50%; left: 0; transform: translate(-50%, -50%); }
-.flows-rf .react-flow__handle-right { top: 50%; left: 100%; transform: translate(-50%, -50%); }
 .flows-rf .react-flow__node-note .react-flow__handle { display: none; }
 
-/* edges */
-.flows-rf .react-flow__edge-path { transition: stroke 120ms, opacity 200ms; }
-.flows-rf .react-flow__edge:hover .react-flow__edge-path { stroke: var(--fg-muted); }
-.flows-rf .react-flow__edge.selected .react-flow__edge-path { stroke: var(--signal); stroke-width: 2; }
+/* edges: arrowheads, the walkthrough path, dimming */
 .flows-rf .flows-arrow { fill: var(--fg-faint); }
 .flows-rf .react-flow__edge:hover .flows-arrow { fill: var(--fg-muted); }
 .flows-rf .react-flow__edge.selected .flows-arrow { fill: var(--signal); }
@@ -64,16 +19,10 @@
 .flows-rf .flows-edge-label.is-dim { opacity: 0.2; }
 @keyframes flows-dash { to { stroke-dashoffset: -11; } }
 
-/* minimap + resizer */
-.flows-rf .react-flow__minimap { border-radius: 10px; box-shadow: var(--shadow-cluster); overflow: hidden; margin: 0; }
+/* minimap node kinds */
 .flows-rf .react-flow__minimap-node.mm-section { fill: color-mix(in srgb, var(--lane) 35%, transparent); }
 .flows-rf .react-flow__minimap-node.mm-note { fill: var(--key); opacity: 0.6; }
 .flows-rf .react-flow__minimap-node.mm-terminal { fill: var(--fg-muted); }
-.flows-rf .react-flow__minimap-node.selected { fill: var(--signal); }
-.flows-rf .react-flow__resize-control.handle { width: 8px; height: 8px; border-radius: 2px; background: var(--panel); border: 1.5px solid var(--signal); }
-.flows-rf .react-flow__resize-control.line { border-color: transparent; }
-.flows-rf .react-flow__selection { border-radius: 2px; }
-.flows-rf .react-flow__nodesselection-rect { background: transparent; border: 1px solid var(--signal); }
 
 /* wireframe tones (see wireframes.tsx) */
 .wf-bg { fill: var(--panel); }
@@ -91,3 +40,4 @@
 .wf-field { fill: var(--panel); stroke: color-mix(in srgb, var(--fg) 18%, var(--panel)); stroke-width: 1; }
 .wf-field-on { stroke: var(--signal); }
 .wf-road { fill: none; stroke: color-mix(in srgb, var(--fg) 4%, var(--panel)); stroke-width: 5; }
+.flows-rf .react-flow__minimap { margin: 0; }

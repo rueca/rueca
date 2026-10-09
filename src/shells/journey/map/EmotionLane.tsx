@@ -2,7 +2,7 @@
    curve. Drag a point (snaps to 0.5, ⌥ for free), or focus it and use ↑ ↓. */
 import { useRef } from 'react'
 import { cn, useValues } from '@kit'
-import { smoothArea, smoothPath } from '../local/smooth'
+import { smoothArea, smoothPath } from '@kit/core/geometry'
 import { emoji, fmtEmotion, type Stage } from '../model'
 import { params, ui, updateStage, doc, useUI } from '../store'
 

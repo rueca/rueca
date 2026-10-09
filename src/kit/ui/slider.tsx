@@ -5,7 +5,7 @@ import { cn } from '../core/cn'
    luminance room below it). The thumb hides until hover so a column of
    twenty reads as data, not noise. Accent only on the filled portion. */
 export function Slider({
-  value, onChange, min = 0, max = 1, step = 0.01, className, label, disabled, origin,
+  value, onChange, min = 0, max = 1, step = 0.01, className, label, disabled, origin, track,
 }: {
   value: number | [number, number]
   onChange: (v: any, final: boolean) => void
@@ -13,6 +13,8 @@ export function Slider({
   className?: string; label?: string; disabled?: boolean
   /** fill from this value instead of min — e.g. 0 for a −1…1 bias */
   origin?: number
+  /** a painted track (CSS gradient) instead of the groove + fill — the thumb stays visible */
+  track?: string
 }) {
   const range = Array.isArray(value)
   const fillFrom = !range && origin !== undefined ? ((origin - min) / (max - min)) * 100 : null
@@ -29,8 +31,8 @@ export function Slider({
       className={cn('group/slider relative flex h-6 w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}
     >
       <Base.Control className="flex h-6 w-full cursor-default items-center">
-        <Base.Track className="relative h-[3px] w-full rounded-full bg-track">
-          {fillFrom === null ? (
+        <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[3px] bg-track')} style={track ? { background: track } : undefined}>
+          {track ? null : fillFrom === null ? (
             <Base.Indicator className="rounded-full bg-signal" />
           ) : (
             <div
@@ -45,7 +47,7 @@ export function Slider({
               aria-label={label}
               className={cn(
                 'size-3 rounded-full bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,.25),0_1px_3px_rgba(0,0,0,.4)] outline-none',
-                'opacity-0 transition-opacity duration-100 group-hover/slider:opacity-100',
+                track ? '' : 'opacity-0 transition-opacity duration-100 group-hover/slider:opacity-100',
                 'focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal data-[dragging]:opacity-100',
               )}
             />

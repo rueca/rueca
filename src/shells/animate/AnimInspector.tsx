@@ -6,10 +6,10 @@ import {
   Badge, Button, ColorField, IconButton, Inspector, Row, ScrubValue, Section, Segmented, TextInput, cn, useClockTime, type ScrubProps,
 } from '@kit'
 import { PROPS, PROPS_FOR, keyAt, resolve, trackKey, type Obj, type PropDef, type PropKey, type Val } from './engine'
-import { KeyButton, type KeyState } from './local/KeyButton'
-import { EaseGlyph, EasingEditor, easeName } from './local/EasingEditor'
+import { KeyButton, type KeyState } from '@kit/ui/key-button'
+import { EaseGlyph, EasingEditor, easeName } from '@kit/ui/easing'
 import {
-  animTime, clock, currentAnim, deleteKeys, editProp, findKey, moveKeys, params, patchObject, seek, setEase, toggleKey, ui, updateAnim, useDoc, useUI,
+  animTime, clock, commitDoc, currentAnim, deleteKeys, editProp, findKey, moveKeys, params, patchObject, seek, setEase, toggleKey, ui, updateAnim, useDoc, useUI,
 } from './store'
 
 const GROUPS = ['Transform', 'Shape', 'Fill', 'Stroke'] as const
@@ -75,7 +75,7 @@ function ObjectSections({ o, first }: { o: Obj; first: boolean }) {
           onChange={(n, f) => editProp(o.id, p, n, f)} />
     return (
       <Row key={p} label={d.label} className={cn('group/row', st === 'edited' && animate && 'bg-key/10')}
-        trailing={animate ? <KeyButton state={st} onToggle={() => toggleKey(o.id, p)} {...nav(p)} /> : undefined}>
+        trailing={animate ? <KeyButton state={st} shortcut="k" property={d.label} onToggle={() => toggleKey(o.id, p)} {...nav(p)} /> : undefined}>
         {control}
       </Row>
     )
@@ -90,10 +90,10 @@ function ObjectSections({ o, first }: { o: Obj; first: boolean }) {
           <IconButton size="icon-sm" icon={o.locked ? Lock : LockOpen} label={o.locked ? 'Unlock' : 'Lock'} onClick={() => patchObject(o.id, { locked: !o.locked })} />
         </div>
       }>
-        <Row label="Name"><TextInput value={o.name} label="Name" onChange={(s) => patchObject(o.id, { name: s }, false)} onCommit={() => params.commit()} /></Row>
+        <Row label="Name"><TextInput value={o.name} label="Name" onChange={(s) => patchObject(o.id, { name: s }, false)} onCommit={() => commitDoc('Rename')} /></Row>
         {o.kind === 'text' && (
           <>
-            <Row label="Text" hint="Static. Use {likes} to bind a state-machine number input."><TextInput value={o.text ?? ''} label="Text" mono onChange={(s) => patchObject(o.id, { text: s }, false)} onCommit={() => params.commit()} /></Row>
+            <Row label="Text" hint="Static. Use {likes} to bind a state-machine number input."><TextInput value={o.text ?? ''} label="Text" mono onChange={(s) => patchObject(o.id, { text: s }, false)} onCommit={() => commitDoc('Edit text')} /></Row>
             <Row label="Font size"><ScrubValue boxed align="left" value={o.fontSize ?? 16} min={6} max={200} step={1} unit="px" className="flex-1" onChange={(n, f) => patchObject(o.id, { fontSize: n }, f)} /></Row>
           </>
         )}
@@ -178,7 +178,7 @@ function DocumentSections() {
   return (
     <>
       <Section title={`Animation · ${anim.name}`} first={!(mode === 'animate' && ui.getState().keySel.length)}>
-        <Row label="Name"><TextInput value={anim.name} label="Animation name" onChange={(s) => updateAnim({ name: s }, false)} onCommit={() => params.commit()} /></Row>
+        <Row label="Name"><TextInput value={anim.name} label="Animation name" onChange={(s) => updateAnim({ name: s }, false)} onCommit={() => commitDoc('Rename')} /></Row>
         <Row label="Duration" hint="Drag the end marker on the ruler, or type a length.">
           <ScrubValue boxed align="left" value={anim.duration} min={100} max={20000} step={10} unit="ms" className="flex-1" label="Duration"
             onChange={(n, f) => updateAnim({ duration: n }, f)} />

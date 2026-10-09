@@ -1,7 +1,7 @@
 /* Marks — actions shared by the grid, focus view, panels and the palette. Doc changes are undoable. */
-import { copyText, download, exportJSON, toast, toastManager } from '@kit'
+import { copyText, download, exportJSON, toast } from '@kit'
 import { FAMILY, mulberry32, mutateParams, sampleParams, type FamilyId } from './families'
-import { doc, settings, ui, newMark, uid, colorsOf, markLabel, type Doc, type Mark } from './model'
+import { doc, history, settings, ui, newMark, uid, colorsOf, markLabel, type Doc, type Mark } from './model'
 import { lockupSVG, markSVG, svgToPNG } from './render'
 import { createZip } from '@kit'
 
@@ -29,7 +29,7 @@ export function reroll() {
       return m.id
     })
     return gc({ ...d, marks, grid })
-  })
+  }, { label: 'Reroll' })
   if (!changed) toast('Every variant is locked', { description: 'Unlock one (L) to reroll it.' })
 }
 
@@ -51,27 +51,27 @@ export function fitCount() {
     const marks = { ...x.marks }
     const add = Array.from({ length: n - x.grid.length }, () => { const m = newMark(fams[Math.floor(r() * fams.length)], r, s.randomise); marks[m.id] = m; return m.id })
     return { ...x, marks, grid: [...x.grid, ...add] }
-  })
+  }, { label: 'Variant count' })
 }
 
 export function toggleLock(id = cursorId()) {
   const m = mark(id)
   if (!m) return
-  doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, locked: !m.locked } } }))
+  doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, locked: !m.locked } } }), { label: m.locked ? 'Unlock' : 'Keep' })
 }
 export function setAllLocked(locked: boolean) {
-  doc.set((d) => ({ ...d, marks: Object.fromEntries(Object.entries(d.marks).map(([k, m]) => [k, d.grid.includes(k) ? { ...m, locked } : m])) }))
+  doc.set((d) => ({ ...d, marks: Object.fromEntries(Object.entries(d.marks).map(([k, m]) => [k, d.grid.includes(k) ? { ...m, locked } : m])) }), { label: locked ? 'Keep all' : 'Unlock all' })
 }
 export function toggleFav(id = cursorId()) {
   const m = mark(id)
   if (!m) return
   const on = doc.get().favs.includes(m.id)
-  doc.set((d) => gc({ ...d, favs: on ? d.favs.filter((x) => x !== m.id) : [m.id, ...d.favs] }))
+  doc.set((d) => gc({ ...d, favs: on ? d.favs.filter((x) => x !== m.id) : [m.id, ...d.favs] }), { label: on ? 'Unfavourite' : 'Favourite' })
   toast(on ? 'Removed from favourites' : 'Added to favourites', { description: markLabel(m) })
 }
 export function clearFavs() {
-  doc.set((d) => gc({ ...d, favs: [] }))
-  toast('Favourites cleared', { action: { label: 'Undo', onClick: () => doc.undo() } })
+  doc.set((d) => gc({ ...d, favs: [] }), { label: 'Clear favourites' })
+  toast('Favourites cleared', { action: { label: 'Undo', onClick: () => history.undo() } })
 }
 
 /* --- focus --- */
@@ -112,10 +112,10 @@ export function adoptFromCompare(key?: string) {
   const a = mark(s.focus), b = mark(s.compare)
   if (!a || !b) return
   if (a.family !== b.family) {
-    doc.set((d) => ({ ...d, marks: { ...d.marks, [a.id]: { ...a, family: b.family, v: { ...b.v } } } }))
+    doc.set((d) => ({ ...d, marks: { ...d.marks, [a.id]: { ...a, family: b.family, v: { ...b.v } } } }), { label: 'Use B' })
     return
   }
-  doc.set((d) => ({ ...d, marks: { ...d.marks, [a.id]: { ...a, v: key ? { ...a.v, [key]: b.v[key] } : { ...b.v } } } }))
+  doc.set((d) => ({ ...d, marks: { ...d.marks, [a.id]: { ...a, v: key ? { ...a.v, [key]: b.v[key] } : { ...b.v } } } }), { label: key ? `Use B · ${key}` : 'Use all of B' })
 }
 
 /* --- more like this --- */
@@ -134,7 +134,7 @@ export function applyMutation(mu: Mark) {
   const id = ui.getState().focus
   const m = mark(id)
   if (!m) return
-  doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, family: mu.family, v: { ...mu.v } } } }))
+  doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, family: mu.family, v: { ...mu.v } } } }), { label: 'Apply variation' })
 }
 /** Put a mutation into the grid, replacing the first unlocked slot after the focused one. */
 export function keepMutation(mu: Mark) {
@@ -148,13 +148,13 @@ export function keepMutation(mu: Mark) {
     if (slot === undefined) grid.push(m.id)
     else grid[slot] = m.id
     return gc({ ...x, marks: { ...x.marks, [m.id]: m }, grid })
-  })
+  }, { label: 'Keep variation' })
   ui.setState((s) => ({ mutations: s.mutations.filter((x) => x.id !== mu.id) }))
   toast('Kept in the grid (locked)', { description: markLabel(m) })
 }
 export function favMutation(mu: Mark) {
   const m: Mark = { ...mu, id: uid() }
-  doc.set((x) => ({ ...x, marks: { ...x.marks, [m.id]: m }, favs: [m.id, ...x.favs] }))
+  doc.set((x) => ({ ...x, marks: { ...x.marks, [m.id]: m }, favs: [m.id, ...x.favs] }), { label: 'Favourite variation' })
   toast('Added to favourites', { description: markLabel(m) })
 }
 
@@ -163,17 +163,17 @@ export function resetMarkParams(id = ui.getState().focus) {
   const m = mark(id)
   if (!m) return
   const fam = FAMILY[m.family]
-  doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, v: { ...(fam.params.getState().defaults as Record<string, unknown>), seed: m.v.seed } } } }))
+  doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, v: { ...(fam.params.getState().defaults as Record<string, unknown>), seed: m.v.seed } } } }), { label: 'Reset shape' })
 }
 export function newSeed(id = cursorId()) {
   const m = mark(id)
   if (!m) return
-  doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, v: { ...m.v, seed: Math.floor(Math.random() * 99999) } } } }))
+  doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, v: { ...m.v, seed: Math.floor(Math.random() * 99999) } } } }), { label: 'New seed' })
 }
 export function rerollParams(id = cursorId()) {
   const m = mark(id)
   if (!m) return
-  doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, v: sampleParams(FAMILY[m.family], rng(), true) } } }))
+  doc.set((d) => ({ ...d, marks: { ...d.marks, [m.id]: { ...m, v: sampleParams(FAMILY[m.family], rng(), true) } } }), { label: 'Shuffle params' })
 }
 
 /* --- export --- */
@@ -196,7 +196,7 @@ export function exportParams(id = cursorId()) {
   const m = mark(id)
   if (!m) return
   const s = settings.values()
-  exportJSON({ generator: 'Marks — Prototype Studio', family: m.family, params: { ...(FAMILY[m.family].params.getState().defaults as object), ...m.v }, colors: { ink: s.ink, paper: s.paper, accent: s.accent }, initials: m.family === 'monogram' ? s.initials : undefined }, `${base(m)}.json`)
+  exportJSON({ generator: 'Marks — Trompo', family: m.family, params: { ...(FAMILY[m.family].params.getState().defaults as object), ...m.v }, colors: { ink: s.ink, paper: s.paper, accent: s.accent }, initials: m.family === 'monogram' ? s.initials : undefined }, `${base(m)}.json`)
 }
 export function exportLockup(mode: 'light' | 'dark', id = cursorId()) {
   const m = mark(id)
@@ -215,7 +215,7 @@ export async function exportPNGSet(id = cursorId()) {
   if (!m) return
   const s = settings.values()
   const c = cols()
-  const t = toast('Rendering icons…', { type: 'loading', timeout: 0 })
+  const t = toast('Rendering icons…', { type: 'loading' })
   try {
     const zip = createZip()
     for (const ic of ICON_SIZES) {
@@ -232,10 +232,8 @@ export async function exportPNGSet(id = cursorId()) {
     zip.add('params.json', JSON.stringify({ family: m.family, params: m.v, colors: { ink: s.ink, paper: s.paper, accent: s.accent } }, null, 2))
     zip.add('README.txt', `${s.name} — ${markLabel(m)}\n\n<link rel="icon" href="/favicon.svg" type="image/svg+xml">\n<link rel="icon" href="/favicon-32.png" sizes="32x32">\n<link rel="apple-touch-icon" href="/apple-touch-icon.png">\n`)
     download(zip.toBlob(), `${base(m)}-icons.zip`)
-    toast('Icon set exported', { type: 'success', description: '32, 180, 512, 1024 px + SVGs and params' })
+    toast.update(t, 'Icon set exported', { type: 'success', description: '32, 180, 512, 1024 px + SVGs and params' })
   } catch {
-    toast('Icon export failed', { type: 'error' })
-  } finally {
-    toastManager.close(t)
+    toast.update(t, 'Icon export failed', { type: 'error', timeout: 5000 })
   }
 }

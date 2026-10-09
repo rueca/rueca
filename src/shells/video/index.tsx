@@ -6,17 +6,15 @@ import {
 } from 'lucide-react'
 import {
   Artboard, Brand, Button, CanvasSurface, Cluster, CommandPalette, Empty, IconButton, Menu, Panel, PanelHeader, ParamActions, Section, Segmented, Stage,
-  Studio, Toolbar, cn, download, exportJSON, fmtTime, shareMenuItems, toast, useCamera, useClock, useClockTime, useHotkeys, useValues,
+  Studio, Toolbar, cn, download, exportJSON, fmtTime, recordFrames, shareMenuItems, toast, useCamera, useClock, useClockTime, useHotkeys, useValues,
   type Command, type MenuItem, type SurfaceHandle,
 } from '@kit'
 import { ASPECTS, demoComp, type Aspect, type Clip, type ClipKind } from './comp'
 import { clipBox, drawComp, frameUnit, hitTest } from './render'
 import { ClipInspector, thumbURL } from './ClipInspector'
-import { TrackTimeline, type TTClip } from './local/TrackTimeline'
-import { encodeVideo } from './local/encodeVideo'
-import { progressToast } from './local/progressToast'
+import { TrackTimeline, type TimelineClip } from '@kit/timeline/TrackTimeline'
 import {
-  addClip, addTrack, clock, deleteClips, duplicateClips, frameMs, getComp, loadComp, params, patchTrack, removeEmptyTracks, setComp,
+  addClip, addTrack, clock, commitComp, deleteClips, duplicateClips, frameMs, getComp, history, loadComp, params, patchTrack, removeEmptyTracks, setComp,
   settleClips, snapFrame, splitAt, ui, updateClip, updateClips, useComp, useUI, type V,
 } from './store'
 
@@ -175,7 +173,7 @@ function CanvasOverlay({ W, H }: { W: number; H: number }) {
       el.current?.removeEventListener('pointermove', move)
       el.current?.removeEventListener('pointerup', up)
       setGuides({ x: false, y: false })
-      if (moved) params.commit()
+      if (moved) commitComp('Move on canvas')
     }
     el.current!.addEventListener('pointermove', move)
     el.current!.addEventListener('pointerup', up)
@@ -232,7 +230,7 @@ export default function VideoShell() {
   const fps = Number(v.fps)
 
   // timeline clips derived from the composition
-  const ttClips: TTClip[] = useMemo(() => comp.clips.map((c) => ({
+  const ttClips: TimelineClip[] = useMemo(() => comp.clips.map((c) => ({
     id: c.id, track: c.track, start: c.start, dur: c.dur, label: c.name, color: KIND_COLOR[c.kind], icon: KIND_ICON[c.kind],
     detail: c.kind === 'text' ? `“${c.text}”` : c.kind === 'image' ? c.image : c.kind === 'shape' ? c.shape : undefined,
     thumb: c.kind === 'image' ? thumbURL(c.image ?? 'mesh', c.seed ?? 1) : undefined,
@@ -253,14 +251,24 @@ export default function VideoShell() {
     const dur = v.duration
     clock.pause()
     try { await Promise.all([800, 700, 600, 500].map((wt) => document.fonts.load(`${wt} 64px "Inter Variable"`))) } catch { /* fonts optional */ }
-    const job = encodeVideo({ width: W, height: H, fps, duration: dur, draw: (ctx, tm) => drawComp(ctx, snapshot, tm, W, H, { matte }), onProgress: (p, f, total) => pt.set(p, `Exporting MP4 · frame ${f}/${total}`) })
-    const pt = progressToast('Exporting MP4', { onCancel: job.cancel })
+    const EW = Math.round(W / 2) * 2, EH = Math.round(H / 2) * 2 // H.264 wants even sizes
+    const canvas = document.createElement('canvas')
+    canvas.width = EW; canvas.height = EH
+    const ctx = canvas.getContext('2d', { alpha: false })!
+    const total = Math.max(1, Math.round((dur / 1000) * fps))
+    const ac = new AbortController()
+    const pt = toast.progress('Exporting MP4', { onCancel: () => ac.abort() })
+    let last = -1
     try {
-      const blob = await job.done
-      if (!blob) { pt.fail('Export cancelled'); return }
-      download(blob, `orbit-teaser-${v.aspect.replace(':', 'x')}.mp4`)
-      pt.done('MP4 exported', `${W} × ${H} · ${fps} fps · ${(dur / 1000).toFixed(1)}s · ${(blob.size / 1e6).toFixed(1)} MB`)
-    } catch (e) { pt.fail('Export failed', (e as Error).message) }
+      const blob = await recordFrames({
+        canvas, fps, frames: total, name: `orbit-teaser-${v.aspect.replace(':', 'x')}.mp4`, signal: ac.signal,
+        draw: (ms) => { ctx.setTransform(EW / W, 0, 0, EH / H, 0, 0); drawComp(ctx, snapshot, ms, W, H, { matte }) },
+        onProgress: (p) => { const q = Math.round(p * 100); if (q !== last) { last = q; pt.set(p, `frame ${Math.round(p * total)}/${total}`) } },
+      })
+      if (blob) pt.done('MP4 exported', { description: `${EW} × ${EH} · ${fps} fps · ${(dur / 1000).toFixed(1)}s · ${(blob.size / 1e6).toFixed(1)} MB` })
+      else if (ac.signal.aborted) pt.fail('Export cancelled', { timeout: 2600 })
+      else pt.fail('This browser cannot encode video', { description: 'Try Chrome, Edge or Safari 17+.' })
+    } catch (e) { pt.fail('Export failed', { description: (e as Error).message }) }
   }
   const exportPNG = () => {
     const c = document.createElement('canvas')
@@ -275,7 +283,7 @@ export default function VideoShell() {
   const importComp = () => fileIn.current?.click()
   const onFile = async (f?: File | null) => {
     if (!f) return
-    try { loadComp(JSON.parse(await f.text())); toast(`Loaded ${f.name}`, { type: 'success', action: { label: 'Undo', onClick: () => params.undo() } }) }
+    try { loadComp(JSON.parse(await f.text())); toast(`Loaded ${f.name}`, { type: 'success', action: { label: 'Undo', onClick: () => history.undo() } }) }
     catch (e) { toast('Could not load that file', { type: 'error', description: (e as Error).message }) }
   }
 
@@ -295,14 +303,23 @@ export default function VideoShell() {
     const orig = Object.fromEntries(cs.map((c) => [c.id, { start: c.start, track: c.track }]))
     updateClips(Object.fromEntries(cs.map((c) => [c.id, { start: Math.max(0, Math.min(v.duration - c.dur, c.start + frames * frameMs())) }])), false)
     settleClips(ids, orig)
-    params.commit()
+    commitComp('Move clips')
   }
+  const E = 'Edit', C = 'Clips'
   useHotkeys({
-    delete: () => deleteClips(ui.getState().sel),
-    esc: () => ui.setState({ sel: [] }),
-    arrowleft: nudge(-0.005, 0), arrowright: nudge(0.005, 0), arrowup: nudge(0, -0.005), arrowdown: nudge(0, 0.005),
-    'shift+arrowleft': nudge(-0.05, 0), 'shift+arrowright': nudge(0.05, 0), 'shift+arrowup': nudge(0, -0.05), 'shift+arrowdown': nudge(0, 0.05),
-    'alt+arrowleft': shift(-1), 'alt+arrowright': shift(1), 'shift+alt+arrowleft': shift(-10), 'shift+alt+arrowright': shift(10),
+    esc: { run: () => ui.setState({ sel: [] }), label: 'Deselect', group: E },
+    arrowleft: { run: nudge(-0.005, 0), label: 'Nudge left', group: E },
+    arrowright: { run: nudge(0.005, 0), label: 'Nudge right', group: E },
+    arrowup: { run: nudge(0, -0.005), label: 'Nudge up', group: E },
+    arrowdown: { run: nudge(0, 0.005), label: 'Nudge down', group: E },
+    'shift+arrowleft': { run: nudge(-0.05, 0), label: 'Nudge left ×10', group: E },
+    'shift+arrowright': { run: nudge(0.05, 0), label: 'Nudge right ×10', group: E },
+    'shift+arrowup': { run: nudge(0, -0.05), label: 'Nudge up ×10', group: E },
+    'shift+arrowdown': { run: nudge(0, 0.05), label: 'Nudge down ×10', group: E },
+    'alt+arrowleft': { run: shift(-1), label: 'Move clip a frame earlier', group: C },
+    'alt+arrowright': { run: shift(1), label: 'Move clip a frame later', group: C },
+    'shift+alt+arrowleft': { run: shift(-10), label: 'Move clip 10 frames earlier', group: C },
+    'shift+alt+arrowright': { run: shift(10), label: 'Move clip 10 frames later', group: C },
   }, [v.duration])
 
   const exportItems: MenuItem[] = [
@@ -331,7 +348,7 @@ export default function VideoShell() {
     { id: 'add-progress', label: 'Add progress bar', group: 'Clips', icon: Minus, run: () => addClip('progress') },
     { id: 'split', label: 'Split at playhead', group: 'Clips', shortcut: 'mod+b', icon: Scissors, run: () => { const n = splitAt(ui.getState().sel); if (!n) toast('Select a clip under the playhead to split') } },
     { id: 'dup', label: 'Duplicate selection', group: 'Clips', shortcut: 'mod+d', icon: Copy, run: () => duplicateClips(ui.getState().sel) },
-    { id: 'del', label: 'Delete selection', group: 'Clips', shortcut: 'backspace', icon: Trash2, run: () => { const n = deleteClips(ui.getState().sel); if (n) toast(`Deleted ${n} ${n === 1 ? 'clip' : 'clips'}`, { action: { label: 'Undo', onClick: () => params.undo() } }) } },
+    { id: 'del', label: 'Delete selection', group: 'Clips', shortcut: 'backspace,delete', icon: Trash2, run: () => { const n = deleteClips(ui.getState().sel); if (n) toast(`Deleted ${n} ${n === 1 ? 'clip' : 'clips'}`, { action: { label: 'Undo', onClick: () => history.undo() } }) } },
     { id: 'all', label: 'Select all clips', group: 'Clips', shortcut: 'mod+a', run: () => ui.setState({ sel: getComp().clips.map((c) => c.id) }) },
     { id: 'track', label: 'New track', group: 'Clips', icon: Plus, run: addTrack },
     ...(Object.keys(ASPECTS) as Aspect[]).map((a, i) => ({ id: `aspect-${a}`, label: `Aspect ${a} — ${ASPECTS[a].label}`, group: 'Composition', shortcut: String(i + 1), icon: ASPECT_ICON[a], run: () => setAspect(a) })),
@@ -341,7 +358,7 @@ export default function VideoShell() {
     { id: 'png', label: 'Export PNG (current frame)', group: 'Export', shortcut: 'mod+e', icon: ImageIcon, run: exportPNG },
     { id: 'json', label: 'Export composition JSON', group: 'Export', icon: Braces, run: exportComp },
     { id: 'import', label: 'Import composition JSON…', group: 'Export', icon: FileUp, run: importComp },
-    { id: 'blank', label: 'New blank composition', group: 'Composition', run: () => { setComp({ tracks: [], clips: [] }); ui.setState({ sel: [] }); toast('Blank composition', { action: { label: 'Undo', onClick: () => params.undo() } }) } },
+    { id: 'blank', label: 'New blank composition', group: 'Composition', run: () => { setComp({ tracks: [], clips: [] }); ui.setState({ sel: [] }); toast('Blank composition', { action: { label: 'Undo', onClick: () => history.undo() } }) } },
     { id: 'demo', label: 'Load the demo teaser', group: 'Composition', icon: RotateCcw, run: () => { setComp(demoComp()); ui.setState({ sel: [] }) } },
   ]
 
@@ -354,7 +371,7 @@ export default function VideoShell() {
       toolbar={
         <Toolbar
           start={<Brand name="Cut" doc="Orbit launch teaser" mark={
-            <a href="#/" aria-label="All shells" className="contents"><svg viewBox="0 0 16 16" width="11" height="11"><path d="M3 3h10v10H3z" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M6.5 5.5l4 2.5-4 2.5z" fill="currentColor" /></svg></a>
+            <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><path d="M3 3h10v10H3z" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M6.5 5.5l4 2.5-4 2.5z" fill="currentColor" /></svg>
           } />}
           center={
             <Cluster className="gap-1.5 pr-2">
@@ -367,7 +384,7 @@ export default function VideoShell() {
           }
           end={
             <>
-              <Cluster><ParamActions params={params} presets={false} /></Cluster>
+              <Cluster><ParamActions params={params} history={history} presets={false} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />
             </>
           }
@@ -386,9 +403,10 @@ export default function VideoShell() {
           toolbar={<Transport />}
           onSeek={(t) => { clock.pause(); clock.seek(t) }}
           onSelect={(ids, mode) => ui.setState((s) => ({ sel: mode === 'replace' ? ids : s.sel.includes(ids[0]) ? s.sel.filter((x) => x !== ids[0]) : [...s.sel, ...ids] }))}
+          onDelete={(ids) => { const n = deleteClips(ids); if (n) toast(`Deleted ${n} ${n === 1 ? 'clip' : 'clips'}`, { action: { label: 'Undo', onClick: () => history.undo() } }) }}
           onChange={(changes, final, original) => {
             updateClips(changes, false)
-            if (final) { settleClips(Object.keys(changes), original); params.commit() }
+            if (final) { settleClips(Object.keys(changes), original); commitComp(Object.values(changes).some((c) => c.dur !== undefined) ? 'Trim clip' : 'Move clips') }
           }}
           onTrackToggle={(id, prop) => { const tr = comp.tracks.find((x) => x.id === id)!; patchTrack(id, { [prop]: !tr[prop] }) }}
           onTrackRename={(id, name) => patchTrack(id, { name })}
@@ -407,20 +425,13 @@ export default function VideoShell() {
         </div>
       ) : undefined}>
         <Artboard width={W} height={H} label={`${v.aspect} · ${ASPECTS[v.aspect as Aspect].label}`} background={v.matte} className={cn(v.aspect === '9:16' && 'rounded-[28px]')}>
-          <CanvasSurface ref={surface} params={params} clock={clock} width={W} height={H} pixelRatio={Number(v.quality)}
-            draw={(ctx, f) => drawComp(ctx, (f.v as V).comp as unknown as typeof comp, f.t, f.w, f.h, { matte: (f.v as V).matte })} />
+          <CanvasSurface ref={surface} params={params} clock={clock} width={W} height={H} pixelRatio={Number(v.quality)} deps={[comp]}
+            draw={(ctx, f) => drawComp(ctx, getComp(), f.t, f.w, f.h, { matte: (f.v as V).matte })} />
           <CanvasOverlay W={W} H={H} />
         </Artboard>
       </Stage>
       <input ref={fileIn} type="file" accept="application/json,.json" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = '' }} />
-      <CommandPalette commands={commands} extraShortcuts={[
-        { keys: 'delete', label: 'Delete selection' },
-        { keys: 'arrowleft', label: 'Nudge position (shift ×10)' },
-        { keys: 'alt+arrowleft', label: 'Move clip a frame (shift ×10)' },
-        { keys: 'esc', label: 'Deselect' },
-        { keys: 'shift+1', label: 'Zoom to fit' },
-        { keys: '\\', label: 'A/B compare' },
-      ]} />
+      <CommandPalette commands={commands} />
     </Studio>
   )
 }

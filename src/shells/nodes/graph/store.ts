@@ -7,6 +7,7 @@
    compare and trivially serialisable.
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
+import type { HistoryLike } from '@kit'
 import { useStore } from 'zustand'
 import { applyEdgeChanges, applyNodeChanges, type Connection, type Edge, type EdgeChange, type Node, type NodeChange, type XYPosition } from '@xyflow/react'
 import { portOf, type EngineGraph, type PortType } from '../engine/spec'
@@ -110,6 +111,14 @@ export function redo() {
   if (!next) return
   graph.setState({ future: rest, past: [...s.past, s.committed] })
   restore(next)
+}
+
+/** The graph's undo stack in the shape kit history UI takes (<HistoryButtons history={graphHistory} />). */
+export const graphHistory: HistoryLike = {
+  subscribe: graph.subscribe,
+  undo, redo,
+  canUndo: () => graph.getState().past.length > 0,
+  canRedo: () => graph.getState().future.length > 0,
 }
 
 /** Replace the whole document (load sample / import / new). One undo step. */

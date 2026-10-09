@@ -1,5 +1,5 @@
 /* Flows — getting things out: PNG (DOM snapshot of the viewport), JSON, Mermaid. */
-import { copyText, download, exportCanvasPNG, exportJSON, toast, toastManager } from '@kit'
+import { copyText, download, exportCanvasPNG, exportJSON, toast } from '@kit'
 import { snapshotElement } from '@kit'
 import { activeFlow, importFlow, select, sizeOf, ui, viewport } from './store'
 import type { Flow } from './model'
@@ -32,13 +32,13 @@ export async function exportPNG(scale = 2) {
     toast('Export failed', { type: 'error', description: String(err) })
   } finally {
     ui.setState({ sel: prevSel })
-    toastManager.close(id)
+    toast.dismiss(id)
   }
 }
 
 export function exportFlowJSON() {
   const f = activeFlow()
-  exportJSON({ app: 'prototype-studio/flows', version: 1, flow: { ...f, nodes: f.nodes.map(({ measured: _m, selected: _s, ...n }) => n) } }, `${slug(f.name)}.json`)
+  exportJSON({ app: 'trompo/flows', version: 1, flow: { ...f, nodes: f.nodes.map(({ measured: _m, selected: _s, ...n }) => n) } }, `${slug(f.name)}.json`)
   toast('JSON downloaded', { type: 'success' })
 }
 

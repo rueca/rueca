@@ -1,7 +1,7 @@
 /* Document mutations, shared by panels, the stage and the command palette. Each is one undo step. */
 import { toast, readFileAsDataURL } from '@kit'
-import { doc, ui, params, blankRow, uid, COLUMNS, DEMO_DOC, SIZE_PRESETS, type DataRow, type Doc, type OverrideKey, type SizeSpec } from './model'
-import { parseDelimited, toCSV } from './local/DataGrid'
+import { doc, ui, params, history, blankRow, uid, COLUMNS, DEMO_DOC, SIZE_PRESETS, type DataRow, type Doc, type OverrideKey, type SizeSpec } from './model'
+import { parseDelimited, toCSV } from '@kit/ui/data-grid'
 import { download } from '@kit'
 import { slug } from './exporter'
 
@@ -25,7 +25,7 @@ export const nextRow = () => setRow(ui.getState().row + 1)
 export const prevRow = () => setRow(ui.getState().row - 1)
 
 export function editCell(r: number, key: string, value: string, final = true) {
-  doc.set((d) => ({ ...d, rows: d.rows.map((row, i) => (i === r ? { ...row, [key]: value } : row)) }), { commit: final })
+  doc.set((d) => ({ ...d, rows: d.rows.map((row, i) => (i === r ? { ...row, [key]: value } : row)) }), { commit: final, label: 'Edit cell' })
 }
 
 export function addRow(after = ui.getState().row) {
@@ -33,14 +33,14 @@ export function addRow(after = ui.getState().row) {
     const rows = [...d.rows]
     rows.splice(after + 1, 0, blankRow())
     return { ...d, rows }
-  })
+  }, { label: 'Add row' })
   setRow(after + 1)
 }
 
 export function duplicateRow(i = ui.getState().row) {
   const src = doc.get().rows[i]
   if (!src) return
-  doc.set((d) => { const rows = [...d.rows]; rows.splice(i + 1, 0, { ...src, name: `${src.name} copy` }); return { ...d, rows } })
+  doc.set((d) => { const rows = [...d.rows]; rows.splice(i + 1, 0, { ...src, name: `${src.name} copy` }); return { ...d, rows } }, { label: 'Duplicate row' })
   setRow(i + 1)
 }
 
@@ -48,9 +48,9 @@ export function removeRow(i = ui.getState().row) {
   const d = doc.get()
   if (!d.rows[i]) return
   const name = d.rows[i].name
-  doc.set({ ...d, rows: d.rows.filter((_, k) => k !== i) })
+  doc.set({ ...d, rows: d.rows.filter((_, k) => k !== i) }, { label: 'Delete row' })
   if (ui.getState().row >= d.rows.length - 1) setRow(Math.max(0, d.rows.length - 2))
-  toast(`Deleted “${name}”`, { action: { label: 'Undo', onClick: () => doc.undo() } })
+  toast(`Deleted “${name}”`, { action: { label: 'Undo', onClick: () => history.undo() } })
 }
 
 /** Is this matrix row a header (names our columns)? */
@@ -87,15 +87,15 @@ export function pasteBlock(r: number, c: number, matrix: string[][]) {
       })
     })
     return { ...d, rows }
-  })
-  toast(`Pasted ${matrix.length} × ${Math.max(...matrix.map((m) => m.length))} cells`, { action: { label: 'Undo', onClick: () => doc.undo() } })
+  }, { label: 'Paste cells' })
+  toast(`Pasted ${matrix.length} × ${Math.max(...matrix.map((m) => m.length))} cells`, { action: { label: 'Undo', onClick: () => history.undo() } })
 }
 
 export function importRows(rows: DataRow[], mode: 'replace' | 'append') {
   if (!rows.length) { toast('No rows found', { type: 'error' }); return }
-  doc.set((d) => ({ ...d, rows: mode === 'replace' ? rows : [...d.rows, ...rows] }))
+  doc.set((d) => ({ ...d, rows: mode === 'replace' ? rows : [...d.rows, ...rows] }), { label: mode === 'replace' ? 'Replace rows' : 'Append rows' })
   if (mode === 'replace') setRow(0)
-  toast(`${mode === 'replace' ? 'Replaced with' : 'Added'} ${rows.length} rows`, { type: 'success', action: { label: 'Undo', onClick: () => doc.undo() } })
+  toast(`${mode === 'replace' ? 'Replaced with' : 'Added'} ${rows.length} rows`, { type: 'success', action: { label: 'Undo', onClick: () => history.undo() } })
 }
 
 export const importText = (text: string, mode: 'replace' | 'append') => importRows(rowsFromMatrix(parseDelimited(text)), mode)
@@ -121,7 +121,7 @@ export const selectSize = (id: string | null) => ui.setState({ selected: id })
 
 export function addSize(spec: Omit<SizeSpec, 'id'>) {
   const id = `${slug(spec.name)}-${uid()}`
-  doc.set((d) => ({ ...d, sizes: [...d.sizes, { ...spec, id, visible: true }] }))
+  doc.set((d) => ({ ...d, sizes: [...d.sizes, { ...spec, id, visible: true }] }), { label: `Add ${spec.name}` })
   selectSize(id)
   toast(`Added ${spec.name}`, { description: `${spec.w} × ${spec.h}` })
 }
@@ -130,13 +130,13 @@ export const addPreset = (name: string) => { const p = SIZE_PRESETS.find((s) => 
 export function removeSize(id: string) {
   const s = doc.get().sizes.find((x) => x.id === id)
   if (!s) return
-  doc.set((d) => { const { [id]: _drop, ...overrides } = d.overrides; void _drop; return { ...d, sizes: d.sizes.filter((x) => x.id !== id), overrides } })
+  doc.set((d) => { const { [id]: _drop, ...overrides } = d.overrides; void _drop; return { ...d, sizes: d.sizes.filter((x) => x.id !== id), overrides } }, { label: `Remove ${s.name}` })
   if (ui.getState().selected === id) selectSize(null)
-  toast(`Removed ${s.name}`, { action: { label: 'Undo', onClick: () => doc.undo() } })
+  toast(`Removed ${s.name}`, { action: { label: 'Undo', onClick: () => history.undo() } })
 }
 
 export function patchSize(id: string, patch: Partial<SizeSpec>, final = true) {
-  doc.set((d) => ({ ...d, sizes: d.sizes.map((s) => (s.id === id ? { ...s, ...patch } : s)) }), { commit: final })
+  doc.set((d) => ({ ...d, sizes: d.sizes.map((s) => (s.id === id ? { ...s, ...patch } : s)) }), { commit: final, label: 'Edit size' })
 }
 
 export function moveSize(id: string, target: string, where: 'before' | 'after' | 'inside') {
@@ -147,12 +147,12 @@ export function moveSize(id: string, target: string, where: 'before' | 'after' |
     const at = rest.findIndex((s) => s.id === target)
     rest.splice(where === 'before' ? at : at + 1, 0, moving)
     return { ...d, sizes: rest }
-  })
+  }, { label: 'Reorder sizes' })
 }
 
 /* --- overrides --- */
 export function setOverride(sizeId: string, key: string, value: unknown, final = true) {
-  doc.set((d) => ({ ...d, overrides: { ...d.overrides, [sizeId]: { ...d.overrides[sizeId], [key]: value } } }), { commit: final })
+  doc.set((d) => ({ ...d, overrides: { ...d.overrides, [sizeId]: { ...d.overrides[sizeId], [key]: value } } }), { commit: final, label: 'Override' })
 }
 export function clearOverride(sizeId: string, key?: string) {
   doc.set((d) => {
@@ -162,12 +162,12 @@ export function clearOverride(sizeId: string, key?: string) {
     if (!key || !Object.keys(cur).length) delete overrides[sizeId]
     else overrides[sizeId] = cur as Doc['overrides'][string]
     return { ...d, overrides }
-  })
+  }, { label: key ? 'Revert override' : 'Clear overrides' })
 }
 export function clearAllOverrides() {
   if (!Object.keys(doc.get().overrides).length) return
-  doc.set((d) => ({ ...d, overrides: {} }))
-  toast('Cleared all overrides', { action: { label: 'Undo', onClick: () => doc.undo() } })
+  doc.set((d) => ({ ...d, overrides: {} }), { label: 'Clear all overrides' })
+  toast('Cleared all overrides', { action: { label: 'Undo', onClick: () => history.undo() } })
 }
 /** Push a size's overrides up into the template, then clear them everywhere they now match. */
 export function promoteOverrides(sizeId: string) {
@@ -181,10 +181,10 @@ export const overrideCount = (d: Doc, id: string) => Object.keys(d.overrides[id]
 export type { OverrideKey }
 
 export function resetDemo() {
-  doc.set(DEMO_DOC)
+  doc.set(DEMO_DOC, { label: 'Restore demo' })
   setRow(0)
   selectSize(null)
-  toast('Demo data restored', { action: { label: 'Undo', onClick: () => doc.undo() } })
+  toast('Demo data restored', { action: { label: 'Undo', onClick: () => history.undo() } })
 }
 
 export async function setLogoFromFile(file: File) {

@@ -4,25 +4,24 @@
    Islands layout: components + generated props on the left, the preview or
    the states matrix on the stage, tokens / code on the right. The component
    set has its OWN token theme and light/dark switch, independent of the
-   studio chrome. Undo spans props and tokens (local/linkedHistory).
+   studio chrome. Undo spans props and tokens (kit createHistory).
 --------------------------------------------------------------------------- */
-import { useStore } from 'zustand'
 import { Download, Braces, FileCode2, Wind, Code, Undo2, Redo2, Eye, Grid3x3, Sun, Moon, Smartphone, Tablet, Monitor, RotateCcw } from 'lucide-react'
 import {
   Studio, Toolbar, Brand, Cluster, Panel, PanelHeader, PanelTabs, Stage, CommandPalette, IconButton, Button, Menu, Divider, Segmented,
-  CompareButton, PresetMenu, ThemeToggle, shareMenuItems, useHotkeys, copyText, toast, download, exportJSON, type Command,
+  CompareButton, PresetMenu, ThemeToggle, HistoryButtons, createHistory, shareMenuItems, useHotkeys, copyText, toast, download, exportJSON, type Command,
 } from '@kit'
 import { tokens, tokensCSS, tokensDTCG, tokensTailwind } from './tokens'
 import { buttonProps, inputProps, cardProps, jsxFor, STORES } from './props'
 import { LIB_CSS } from './lib/styles'
-import { linkHistory } from './local/linkedHistory'
 import { useUI, setUI, ui } from './ui'
 import { LeftPanel, COMPONENTS } from './panels/LeftPanel'
 import { TokensPanel, CodePanel } from './panels/RightPanel'
 import { Preview, VIEWPORTS } from './views/Preview'
 import { Matrix } from './views/Matrix'
 
-const history = linkHistory([buttonProps, inputProps, cardProps, tokens])
+/** One ⌘Z timeline across the three prop stores and the token theme. */
+const history = createHistory([buttonProps, inputProps, cardProps, tokens])
 
 const exportCSS = () => { download(new Blob([tokensCSS(tokens.values())], { type: 'text/css' }), 'tokens.css'); toast('tokens.css downloaded', { type: 'success', description: 'Light + dark CSS variables' }) }
 const exportDTCG = () => { exportJSON(tokensDTCG(tokens.values()), 'tokens.json'); toast('tokens.json downloaded', { type: 'success', description: 'W3C design tokens format' }) }
@@ -35,8 +34,6 @@ export default function ComponentLab() {
   const comp = useUI((s) => s.comp)
   const rightTab = useUI((s) => s.rightTab)
   const previewTheme = useUI((s) => s.previewTheme)
-  const canUndo = useStore(history.state, (s) => s.canUndo)
-  const canRedo = useStore(history.state, (s) => s.canRedo)
 
   const cycleViewport = (dir: 1 | -1) => {
     const w = ui.getState().width
@@ -46,10 +43,8 @@ export default function ComponentLab() {
   }
 
   useHotkeys({
-    'mod+z': () => history.undo(),
-    'shift+mod+z,mod+y': () => history.redo(),
-    '[': () => cycleViewport(-1),
-    ']': () => cycleViewport(1),
+    '[': { run: () => cycleViewport(-1), label: 'Previous viewport', group: 'View' },
+    ']': { run: () => cycleViewport(1), label: 'Next viewport', group: 'View' },
   })
 
   const commands: Command[] = [
@@ -79,7 +74,7 @@ export default function ComponentLab() {
       rightWidth={308}
       toolbar={
         <Toolbar
-          start={<Brand name="Component lab" doc="Acme UI" mark={<a href="#/" aria-label="All shells" className="contents"><svg viewBox="0 0 16 16" width="11" height="11"><rect x="2.5" y="4.5" width="11" height="7" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2" /></svg></a>} />}
+          start={<Brand name="Component lab" doc="Acme UI" mark={<svg viewBox="0 0 16 16" width="11" height="11"><rect x="2.5" y="4.5" width="11" height="7" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2" /></svg>} />}
           center={
             <Cluster className="px-1">
               <div className="w-[200px]">
@@ -91,8 +86,7 @@ export default function ComponentLab() {
           end={
             <>
               <Cluster>
-                <IconButton icon={Undo2} label="Undo" shortcut="mod+z" disabled={!canUndo} onClick={() => history.undo()} />
-                <IconButton icon={Redo2} label="Redo" shortcut="shift+mod+z" disabled={!canRedo} onClick={() => history.redo()} />
+                <HistoryButtons history={history} />
                 <CompareButton params={tokens} />
                 <Divider vertical />
                 <PresetMenu params={tokens} />
@@ -127,7 +121,7 @@ export default function ComponentLab() {
           {view === 'preview' ? <Preview key={comp} /> : <Matrix />}
         </Stage>
       </div>
-      <CommandPalette commands={commands} extraShortcuts={[{ keys: '[', label: 'Previous viewport' }, { keys: ']', label: 'Next viewport' }]} />
+      <CommandPalette commands={commands} />
     </Studio>
   )
 }

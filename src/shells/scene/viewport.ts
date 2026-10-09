@@ -1,8 +1,9 @@
 /* ---------------------------------------------------------------------------
    The viewport — plain three.js, no React. Mounted through the kit's
    <MountSurface>, which hands it a <div>. It reads the two stores (params
-   and ui), writes back to them (gizmo drags, picking), and exposes an
-   imperative `engine` for the chrome's exports and camera commands.
+   and ui), writes back to them (gizmo drags, picking), and returns an
+   imperative EngineApi that MountSurface exposes as its `handle` — the
+   chrome's exports and camera commands go through that.
 
    Rendering is on demand: a rAF loop that only draws when something moved.
    Pipeline: RenderPass → bloom → selection outline → OutputPass (tone map).
@@ -21,7 +22,7 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js'
 import { GLTFExporter } from 'three/examples/jsm/exporters/GLTFExporter.js'
 import { params, ui, OBJ, MESHES, LIGHTS, COLOURWAYS, type V, type Vec3, type Pose, type View, type MatType, type LightType, type XYZ } from './state'
 import { bodyGeometry, capGeometry, ringGeometry, baseGeometry, pedestalGeometry, knitNormalMap, lightGlyph, toonRamp } from './geometry'
-import type { AxisId } from './local/AxisGizmo'
+import type { AxisId } from '@kit/stage/overlays'
 
 export interface EngineApi {
   canvas: HTMLCanvasElement
@@ -35,7 +36,6 @@ export interface EngineApi {
   thumbnails: (views: View[]) => Promise<Record<string, string>>
   onCamera: (fn: (m: ArrayLike<number>) => void) => () => void
 }
-export const engine: { current: EngineApi | null } = { current: null }
 
 const D2R = Math.PI / 180
 const TONE: Record<string, THREE.ToneMapping> = { aces: THREE.ACESFilmicToneMapping, agx: THREE.AgXToneMapping, neutral: THREE.NeutralToneMapping, none: THREE.NoToneMapping }
@@ -48,7 +48,7 @@ interface MeshSlot { mesh: THREE.Mesh; mats: Record<MatType, THREE.Material> }
 type AnyLight = THREE.DirectionalLight | THREE.SpotLight | THREE.PointLight
 interface LightSlot { rig: THREE.Group; light: AnyLight | null; type: LightType | null; proxy: THREE.Sprite; beam: THREE.Line }
 
-export function mountViewport(el: HTMLDivElement): () => void {
+export function mountViewport(el: HTMLDivElement): EngineApi & { dispose: () => void } {
   /* --- renderer ---------------------------------------------------------- */
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
@@ -599,12 +599,10 @@ export function mountViewport(el: HTMLDivElement): () => void {
   window.addEventListener('studio:theme', onTheme)
   raf = requestAnimationFrame(tick)
 
-  engine.current = {
-    canvas, goTo, pose, snapAxis, frame, render: renderImage, glb, cameraJSON, thumbnails,
-    onCamera: (fn) => { camListeners.add(fn); camera.updateMatrixWorld(); fn(camera.matrixWorldInverse.elements); return () => camListeners.delete(fn) },
-  }
+  // Tell the chrome the handle exists (it re-renders, so MountSurface's ref picks it up).
+  ui.setState({ ready: true })
 
-  return () => {
+  const dispose = () => {
     cancelAnimationFrame(raf)
     ro.disconnect()
     offParams()
@@ -628,6 +626,11 @@ export function mountViewport(el: HTMLDivElement): () => void {
     pmrem.dispose()
     renderer.dispose()
     canvas.remove()
-    if (engine.current?.canvas === canvas) engine.current = null
+    ui.setState({ ready: false })
+  }
+
+  return {
+    canvas, goTo, pose, snapAxis, frame, render: renderImage, glb, cameraJSON, thumbnails, dispose,
+    onCamera: (fn) => { camListeners.add(fn); camera.updateMatrixWorld(); fn(camera.matrixWorldInverse.elements); return () => { camListeners.delete(fn) } },
   }
 }

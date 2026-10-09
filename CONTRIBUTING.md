@@ -1,8 +1,8 @@
-# Contributing to Prototype Studio
+# Contributing to Trompo
 
 Thanks for helping. This project is three things that share one source of truth: the
 **kit** (`src/kit/`), the **example tools** ("shells", `src/shells/`) that prove the kit
-holds up, and the **skill** (`skills/prototype-studio/`) that teaches agents to use it.
+holds up, and the **skill** (`skills/trompo/`) that teaches agents to use it.
 
 ## Setup
 
@@ -41,7 +41,7 @@ the client view or the landing page, at **375px wide**.
    to the skill's shell table.
 
 A shell should stand in for a *kind* of tool nobody has covered yet (see the archetype
-table in `skills/prototype-studio/references/layouts.md`). Open a "New shell" issue
+table in `skills/trompo/references/layouts.md`). Open a "New shell" issue
 first if you're unsure.
 
 ## Changing the kit

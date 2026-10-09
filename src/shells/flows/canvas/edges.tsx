@@ -4,7 +4,7 @@ import { memo } from 'react'
 import { BaseEdge, EdgeLabelRenderer, getBezierPath, getSmoothStepPath, getStraightPath, type EdgeProps } from '@xyflow/react'
 import { CornerDownLeft, CornerUpLeft, GitBranch, Hand, MoveHorizontal, Pointer, Timer, type LucideIcon } from 'lucide-react'
 import { cn, useValues } from '@kit'
-import { InlineText } from '../local/InlineText'
+import { InlineText } from '@kit/ui/inline-text'
 import type { FlowEdge, Trigger } from '../model'
 import { params, select, updateEdgeData, useUI } from '../store'
 
@@ -53,7 +53,7 @@ export const FlowEdgeView = memo(function FlowEdgeView(props: EdgeProps<FlowEdge
             onClick={(e) => { e.stopPropagation(); select([], [id]) }}
           >
             <Icon size={11} strokeWidth={1.75} className="shrink-0 opacity-80" />
-            <InlineText value={data?.label ?? ''} placeholder={data?.trigger === 'condition' ? 'If…' : 'Label'} onCommit={(label) => updateEdgeData(id, { label })} className="truncate" inputClassName="w-[110px]" title="Connection label" />
+            <InlineText bare focusable={false} allowEmpty value={data?.label ?? ''} placeholder={data?.trigger === 'condition' ? 'If…' : 'Label'} onCommit={(label) => updateEdgeData(id, { label })} className="truncate" inputClassName="w-[110px]" label="Connection label" />
           </div>
         </EdgeLabelRenderer>
       )}

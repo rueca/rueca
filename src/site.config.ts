@@ -12,16 +12,17 @@
 --------------------------------------------------------------------------- */
 export const site = {
   /** display name — headings, tab titles, toolbar brand */
-  name: 'Prototype Studio',
+  name: 'Trompo',
   /** machine name: skill id, plugin id, registry namespace, package name. lowercase-kebab, ≤64 chars */
-  slug: 'prototype-studio',
+  slug: 'trompo',
   tagline: 'A design-tool harness for the prototype you already have.',
   description:
     'Inspector, timeline, layers, presets and export — dropped in around any prototype, in any runtime, installed component by component and kept up to date. Ships as an agent skill, a Claude Code plugin and a component registry.',
   /** GitHub owner/repo */
-  repo: 'OWNER/prototype-studio',
-  /** where the site and the component registry are served from, no trailing slash */
-  url: 'https://OWNER.github.io/prototype-studio',
+  repo: 'trompo-dev/trompo',
+  /** where the site and the component registry are served from, no trailing slash.
+      GitHub Pages until trompo.dev is bought and live — then switch and re-sync. */
+  url: 'https://trompo-dev.github.io/trompo',
   author: { name: 'Rafael Cespedes', url: '' },
   license: 'MIT',
   version: '0.1.0',

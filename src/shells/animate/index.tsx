@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Popover } from '@base-ui/react/popover'
 import {
   ArrowLeftRight, ArrowRight, Boxes, Braces, Circle, CircleDot, Clipboard, ClipboardPaste, Code, Copy, Diamond, Download, Ellipsis, Eye,
   Film, Image as ImageIcon, Layers, Magnet, MousePointer2, Pause, PenTool, Play, Plus, Repeat, RotateCcw, SkipBack, Square, StepBack, StepForward,
@@ -7,22 +6,20 @@ import {
 } from 'lucide-react'
 import {
   Artboard, Brand, Button, Cluster, CommandPalette, Divider, Empty, IconButton, LayerTree, Menu, Panel, PanelHeader, PanelTabs, ParamActions,
-  Segmented, Stage, Studio, Tip, Toolbar, cn, copyText, download, exportJSON, fmtTime, shareMenuItems, toast, useClock, useClockTime, useHotkeys, useValues,
+  Segmented, Stage, Studio, Tip, Toolbar, cn, copyText, download, exportJSON, fmtTime, recordFrames, shareMenuItems, toast, useClock, useClockTime, useHotkeys, useValues,
   type Command, type LayerItem, type MenuItem,
 } from '@kit'
+import { KeyTimeline, type KeyLane } from '@kit/timeline/KeyTimeline'
+import { KeyButton, KeyDiamond } from '@kit/ui/key-button'
+import { EaseGlyph, EasingEditor } from '@kit/ui/easing'
 import { PROPS, PROPS_FOR, childrenOf, keyAt, objHasKeys, resolve, toCSSKeyframes, trackKey, type Anim, type Obj, type PropKey } from './engine'
 import { drawCanvas } from './demo'
 import { LiveScene } from './SceneView'
 import { AnimInspector } from './AnimInspector'
-import { KeyframeTimeline, type KTLane } from './local/KeyframeTimeline'
-import { KeyButton, KeyDiamond } from './local/KeyButton'
-import { EaseGlyph, EasingEditor } from './local/EasingEditor'
 import { InputsList, StateMachineGraph, TransitionsList } from './local/StateMachinePanel'
-import { encodeVideo } from '../video/local/encodeVideo'
-import { progressToast } from '../video/local/progressToast'
 import {
   addAnim, addKeysAtPlayhead, animTime, clock, commitPending, copyKeys, currentAnim, deleteAnim, deleteKeys, editProps, findKey, getDoc,
-  moveKeys, nudgeKeys, params, pasteKeys, patchObject, reorderObject, runtime, seek, setDoc, setEase, toAnimTime, toggleKey, ui, updateAnim,
+  history, moveKeys, nudgeKeys, params, pasteKeys, patchObject, reorderObject, runtime, seek, setDoc, setEase, toAnimTime, toggleKey, ui, updateAnim,
   useDoc, useUI,
 } from './store'
 import { demoDoc } from './demo'
@@ -166,7 +163,7 @@ function AnimationsPanel() {
                     { label: 'Duplicate', icon: Copy, onClick: () => addAnim(a) },
                     { label: 'Set as entry state', checked: doc.sm.entry === a.id, onClick: () => setDoc({ ...getDoc(), sm: { ...getDoc().sm, entry: a.id } }) },
                     { type: 'separator' },
-                    { label: 'Delete', icon: Trash2, danger: true, disabled: doc.anims.length <= 1, onClick: () => { if (deleteAnim(a.id)) toast(`Deleted “${a.name}”`, { action: { label: 'Undo', onClick: () => params.undo() } }) } },
+                    { label: 'Delete', icon: Trash2, danger: true, disabled: doc.anims.length <= 1, onClick: () => { if (deleteAnim(a.id)) toast(`Deleted “${a.name}”`, { action: { label: 'Undo', onClick: () => history.undo() } }) } },
                   ]} />
               </div>
             )
@@ -241,7 +238,6 @@ export default function AnimateShell() {
   const autoKey = useUI((s) => s.autoKey)
   const preview = useUI((s) => s.preview)
   const pending = useUI((s) => s.pending)
-  const segment = useUI((s) => s.segment)
   const smState = useUI((s) => s.smState)
   const svgRef = useRef<SVGSVGElement>(null)
   const anim = currentAnim(doc)
@@ -250,7 +246,7 @@ export default function AnimateShell() {
 
   /* timeline lanes, derived from the document */
   const lanes = useMemo(() => {
-    const out: KTLane[] = []
+    const out: KeyLane[] = []
     const r = resolve(doc, anim, t, pending)
     const walk = (parent: string | null) => {
       for (const o of childrenOf(doc, parent).slice().reverse()) {
@@ -273,7 +269,7 @@ export default function AnimateShell() {
               id: k, kind: 'prop', label: PROPS[p].label, depth: depthOf(o) + 1,
               value: fmtVal(p, r[o.id][p]),
               keys: keys.map((x) => ({ id: x.id, t: x.t, selected: keySel.includes(x.id), out: x.ease.kind === 'hold' ? 'hold' : 'ease', glyph: <EaseGlyph ease={x.ease} className="size-3.5" /> })),
-              trailing: <KeyButton state={pending[k] !== undefined ? 'edited' : ks ? 'key' : 'animated'} onToggle={() => toggleKey(o.id, p)} />,
+              trailing: <KeyButton state={pending[k] !== undefined ? 'edited' : ks ? 'key' : 'animated'} property={`${o.name} ${PROPS[p].label}`} onToggle={() => toggleKey(o.id, p)} />,
             })
           }
         }
@@ -308,23 +304,29 @@ export default function AnimateShell() {
   }
   const exportVideo = async () => {
     const a = anim
-    const W = doc.width * scale, H = doc.height * scale
+    const W = Math.round((doc.width * scale) / 2) * 2, H = Math.round((doc.height * scale) / 2) * 2 // H.264 wants even sizes
     const fps = Number(v.fps)
+    // one full cycle: a ping-pong animation plays forward then back
     const dur = a.loop === 'pingpong' ? a.duration * 2 : a.duration
+    const fold = (ms: number) => (a.loop === 'pingpong' && ms > a.duration ? 2 * a.duration - ms : ms)
     const docNow = getDoc()
-    const job = encodeVideo({
-      width: W, height: H, fps, duration: dur,
-      timeAt: (ms) => (a.loop === 'pingpong' && ms > a.duration ? 2 * a.duration - ms : ms),
-      draw: (ctx, tm) => drawCanvas(ctx, docNow, resolve(docNow, a, tm), [v.bgTop, v.bgBottom], W, H),
-      onProgress: (p) => pt.set(p),
-    })
-    const pt = progressToast(`Rendering “${a.name}”`, { onCancel: job.cancel })
+    const bg: [string, string] = [v.bgTop, v.bgBottom]
+    const canvas = document.createElement('canvas')
+    canvas.width = W; canvas.height = H
+    const ctx = canvas.getContext('2d', { alpha: false })!
+    const ac = new AbortController()
+    const pt = toast.progress(`Rendering “${a.name}”`, { onCancel: () => ac.abort() })
+    let last = -1
     try {
-      const blob = await job.done
-      if (!blob) { pt.fail('Export cancelled'); return }
-      download(blob, `${a.name.toLowerCase()}.mp4`)
-      pt.done('MP4 exported', `${W} × ${H} · ${fps} fps · ${(dur / 1000).toFixed(2)}s`)
-    } catch (e) { pt.fail('Video export failed', (e as Error).message) }
+      const blob = await recordFrames({
+        canvas, fps, frames: Math.max(1, Math.round((dur / 1000) * fps)), name: `${a.name.toLowerCase()}.mp4`, signal: ac.signal,
+        draw: (ms) => drawCanvas(ctx, docNow, resolve(docNow, a, fold(ms)), bg, W, H),
+        onProgress: (p) => { const q = Math.round(p * 100); if (q !== last) { last = q; pt.set(p) } },
+      })
+      if (blob) pt.done('Video exported', { description: `${W} × ${H} · ${fps} fps · ${(dur / 1000).toFixed(2)}s` })
+      else if (ac.signal.aborted) pt.fail('Export cancelled', { timeout: 2600 })
+      else pt.fail('This browser cannot encode video', { description: 'Try Chrome, Edge or Safari 17+.' })
+    } catch (e) { pt.fail('Video export failed', { description: (e as Error).message }) }
   }
   const exportCSS = async () => {
     if (!sel) { toast('Select a layer to export its CSS', { type: 'error' }); return }
@@ -380,7 +382,7 @@ export default function AnimateShell() {
     { id: 'select-all', label: 'Select all keyframes', group: 'Keyframes', shortcut: 'mod+a', run: () => ui.setState({ keySel: Object.values(anim.tracks).flatMap((ks) => ks.map((k) => k.id)) }) },
     { id: 'copy', label: 'Copy keyframes', group: 'Keyframes', shortcut: 'mod+c', icon: Clipboard, run: () => { const n = copyKeys(keySel); if (n) toast(`Copied ${n} keys`) } },
     { id: 'paste', label: 'Paste keyframes at playhead', group: 'Keyframes', shortcut: 'mod+v', icon: ClipboardPaste, run: () => { const n = pasteKeys(); if (n) toast(`Pasted ${n} keys`) } },
-    { id: 'delete', label: 'Delete selected keyframes', group: 'Keyframes', shortcut: 'backspace', icon: Trash2, run: () => { const n = deleteKeys(keySel); if (n) toast(`Deleted ${n} keys`, { action: { label: 'Undo', onClick: () => params.undo() } }) } },
+    { id: 'delete', label: 'Delete selected keyframes', group: 'Keyframes', shortcut: 'backspace,delete', icon: Trash2, run: () => { const n = deleteKeys(ui.getState().keySel); if (n) toast(`Deleted ${n} ${n === 1 ? 'key' : 'keys'}`, { action: { label: 'Undo', onClick: () => history.undo() } }) } },
     ease('Linear', { kind: 'bezier', p: [0, 0, 1, 1] }),
     ease('Ease in', { kind: 'bezier', p: [0.42, 0, 1, 1] }),
     ease('Ease out', { kind: 'bezier', p: [0, 0, 0.58, 1] }),
@@ -397,29 +399,28 @@ export default function AnimateShell() {
     { id: 'svg', label: 'Export SVG (current frame)', group: 'Export', icon: PenTool, run: exportSVGFrame },
     { id: 'css', label: 'Export CSS @keyframes (selected layer)', group: 'Export', icon: Code, run: exportCSS },
     { id: 'json', label: 'Export animation JSON', group: 'Export', icon: Braces, run: exportDocJSON },
-    { id: 'reset-doc', label: 'Reset demo scene', group: 'Document', icon: RotateCcw, run: () => { setDoc(demoDoc()); ui.setState({ keySel: [], pending: {}, animId: 'press', sel: 'heart' }); toast('Demo scene restored', { action: { label: 'Undo', onClick: () => params.undo() } }) } },
+    { id: 'reset-doc', label: 'Reset demo scene', group: 'Document', icon: RotateCcw, run: () => { setDoc(demoDoc()); ui.setState({ keySel: [], pending: {}, animId: 'press', sel: 'heart' }); toast('Demo scene restored', { action: { label: 'Undo', onClick: () => history.undo() } }) } },
   ]
 
+  const K = 'Keyframes', L = 'Layer'
   useHotkeys({
-    delete: () => { const n = deleteKeys(ui.getState().keySel); if (n) toast(`Deleted ${n} keys`) },
-    esc: () => { if (ui.getState().segment) ui.setState({ segment: null }); else if (ui.getState().keySel.length) ui.setState({ keySel: [] }); else ui.setState({ sel: null }) },
-    'alt+arrowleft': () => nudgeKeys(ui.getState().keySel, -1),
-    'alt+arrowright': () => nudgeKeys(ui.getState().keySel, 1),
-    'shift+alt+arrowleft': () => nudgeKeys(ui.getState().keySel, -10),
-    'shift+alt+arrowright': () => nudgeKeys(ui.getState().keySel, 10),
-    arrowleft: (e) => nudgeObj(-1, 0, e), arrowright: (e) => nudgeObj(1, 0, e), arrowup: (e) => nudgeObj(0, -1, e), arrowdown: (e) => nudgeObj(0, 1, e),
-    'shift+arrowleft': (e) => nudgeObj(-10, 0, e), 'shift+arrowright': (e) => nudgeObj(10, 0, e), 'shift+arrowup': (e) => nudgeObj(0, -10, e), 'shift+arrowdown': (e) => nudgeObj(0, 10, e),
-    enter: () => commitPending(),
+    esc: { run: () => { if (ui.getState().keySel.length) ui.setState({ keySel: [] }); else ui.setState({ sel: null }) }, label: 'Deselect', group: 'Edit' },
+    'alt+arrowleft': { run: () => nudgeKeys(ui.getState().keySel, -1), label: 'Nudge keys a frame earlier', group: K },
+    'alt+arrowright': { run: () => nudgeKeys(ui.getState().keySel, 1), label: 'Nudge keys a frame later', group: K },
+    'shift+alt+arrowleft': { run: () => nudgeKeys(ui.getState().keySel, -10), label: 'Nudge keys 10 frames earlier', group: K },
+    'shift+alt+arrowright': { run: () => nudgeKeys(ui.getState().keySel, 10), label: 'Nudge keys 10 frames later', group: K },
+    arrowleft: { run: (e) => nudgeObj(-1, 0, e), label: 'Nudge layer left', group: L },
+    arrowright: { run: (e) => nudgeObj(1, 0, e), label: 'Nudge layer right', group: L },
+    arrowup: { run: (e) => nudgeObj(0, -1, e), label: 'Nudge layer up', group: L },
+    arrowdown: { run: (e) => nudgeObj(0, 1, e), label: 'Nudge layer down', group: L },
+    'shift+arrowleft': { run: (e) => nudgeObj(-10, 0, e), label: 'Nudge layer 10px left', group: L },
+    'shift+arrowright': { run: (e) => nudgeObj(10, 0, e), label: 'Nudge layer 10px right', group: L },
+    'shift+arrowup': { run: (e) => nudgeObj(0, -10, e), label: 'Nudge layer 10px up', group: L },
+    'shift+arrowdown': { run: (e) => nudgeObj(0, 10, e), label: 'Nudge layer 10px down', group: L },
+    enter: { run: () => commitPending(), label: 'Key edited values', group: K },
   }, [])
 
-  /* segment easing popover */
-  const segInfo = segment ? findKey(segment.keyId) : null
-
-  const brandMark = (
-    <a href="#/" aria-label="All shells" className="contents">
-      <svg viewBox="0 0 16 16" width="11" height="11"><rect x="4" y="4" width="8" height="8" rx="1.5" transform="rotate(45 8 8)" fill="currentColor" /></svg>
-    </a>
-  )
+  const brandMark = <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><rect x="4" y="4" width="8" height="8" rx="1.5" transform="rotate(45 8 8)" fill="currentColor" /></svg>
 
   const objName = doc.objects.find((o) => o.id === sel)?.name
   return (
@@ -445,7 +446,7 @@ export default function AnimateShell() {
           }
           end={
             <>
-              <Cluster><ParamActions params={params} presets={false} /></Cluster>
+              <Cluster><ParamActions params={params} history={history} presets={false} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />
             </>
           }
@@ -465,15 +466,23 @@ export default function AnimateShell() {
         </Panel>
       }
       bottom={mode === 'animate' || preview ? (
-        <KeyframeTimeline
+        <KeyTimeline
           clock={clock} mapTime={toAnimTime} duration={anim.duration} fps={Number(v.fps)} lanes={lanes} snap={v.snap}
           autoKey={autoKey && !preview}
           toolbar={<Transport />}
           onSeek={(tm) => { clock.pause(); seek(tm) }}
           onSelectKeys={(ids, m) => ui.setState((s) => ({ keySel: m === 'replace' ? ids : m === 'add' ? [...new Set([...s.keySel, ...ids])] : s.keySel.filter((x) => !ids.includes(x)) }))}
           onMoveKeys={moveKeys}
-          onSegmentClick={(laneId, keyId, anchor) => ui.setState({ segment: { laneId, keyId, anchor } })}
-          activeSegment={segment?.keyId}
+          onDeleteKeys={(ids) => { const n = deleteKeys(ids); if (n) toast(`Deleted ${n} ${n === 1 ? 'key' : 'keys'}`, { action: { label: 'Undo', onClick: () => history.undo() } }) }}
+          segmentEditor={({ keyId }) => {
+            const info = findKey(keyId)
+            if (!info?.next) return null
+            const ids = keySel.includes(keyId) && keySel.length > 1 ? keySel : [keyId]
+            return (
+              <EasingEditor key={keyId} value={info.key.ease} span={info.next.t - info.key.t} onChange={(e, f) => setEase(ids, e, f)}
+                footer={<span className="tabular">{ids.length > 1 ? `Applies to ${ids.length} keys` : `${doc.objects.find((o) => o.id === info.track.split('.')[0])?.name} › ${PROPS[info.track.split('.')[1] as PropKey]?.label} · ${(info.key.t / 1000).toFixed(2)}s → ${(info.next.t / 1000).toFixed(2)}s`}</span>} />
+            )
+          }}
           onToggleLane={(id) => { const o = id.slice(2); ui.setState((s) => ({ closed: { ...s.closed, [o]: !s.closed[o] } })) }}
           onLaneClick={(id) => ui.setState({ sel: id.startsWith('o:') ? id.slice(2) : id.split('.')[0] })}
           onDurationChange={(ms, f) => updateAnim({ duration: ms }, f)}
@@ -517,30 +526,7 @@ export default function AnimateShell() {
         </Artboard>
       </Stage>
 
-      <Popover.Root open={!!segment && !!segInfo?.next} onOpenChange={(o) => { if (!o) ui.setState({ segment: null }) }}>
-        <Popover.Portal>
-          <Popover.Positioner side="top" align="center" sideOffset={8} collisionPadding={12} className="z-[100]"
-            anchor={segment ? { getBoundingClientRect: () => segment.anchor } : undefined}>
-            <Popover.Popup className="pop outline-none">
-              {segInfo?.next && (
-                <EasingEditor key={segInfo.key.id} value={segInfo.key.ease} span={segInfo.next.t - segInfo.key.t}
-                  onChange={(e, f) => setEase(keySel.includes(segInfo.key.id) && keySel.length > 1 ? keySel : [segInfo.key.id], e, f)}
-                  footer={<span className="tabular">{doc.objects.find((o) => o.id === segInfo.track.split('.')[0])?.name} › {PROPS[segInfo.track.split('.')[1] as PropKey]?.label} · {(segInfo.key.t / 1000).toFixed(2)}s → {(segInfo.next.t / 1000).toFixed(2)}s</span>} />
-              )}
-            </Popover.Popup>
-          </Popover.Positioner>
-        </Popover.Portal>
-      </Popover.Root>
-
-      <CommandPalette commands={commands} extraShortcuts={[
-        { keys: 'delete', label: 'Delete keyframes' },
-        { keys: 'alt+arrowleft', label: 'Nudge keys a frame' },
-        { keys: 'arrowleft', label: 'Nudge layer (shift ×10)' },
-        { keys: 'enter', label: 'Key edited values' },
-        { keys: 'esc', label: 'Deselect' },
-        { keys: 'shift+1', label: 'Zoom to fit' },
-        { keys: '\\', label: 'A/B compare' },
-      ]} />
+      <CommandPalette commands={commands} />
     </Studio>
   )
 }

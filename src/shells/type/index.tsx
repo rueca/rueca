@@ -4,8 +4,8 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Stage, Artboard, CanvasSurface, Timeline,
-  ParamActions, Menu, Button, IconButton, Segmented, CommandPalette, Badge, useValues, exportCanvasPNG, recordCanvas, download, copyText,
-  toast, toastManager, cn, type SurfaceHandle, type Lane, type Command, type MenuItem, shareMenuItems,
+  ParamActions, Menu, Button, IconButton, Segmented, CommandPalette, Badge, useValues, exportCanvasPNG, recordCanvas, recordFrames, download, copyText,
+  toast, cn, type SurfaceHandle, type Lane, type Command, type MenuItem, shareMenuItems,
 } from '@kit'
 import { params, clock, family, FORMATS, PAIRS, type Mode, type V } from './params'
 import { FAMILIES, SPECIMEN_FAMILY, fontDataURI, loadSpecimenFonts } from './fonts'
@@ -25,11 +25,7 @@ const MODES: { value: Mode; label: string; hint: string }[] = [
 ]
 const readMode = (): Mode => { try { const m = localStorage.getItem(MODE_KEY); if (m === 'specimen' || m === 'kinetic' || m === 'scale') return m } catch { /* noop */ } return 'specimen' }
 
-const Mark = (
-  <a href="#/" aria-label="All shells" className="contents">
-    <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><path d="M3 3.5h10M8 3.5V13M5.5 13h5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
-  </a>
-)
+const Mark = <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><path d="M3 3.5h10M8 3.5V13M5.5 13h5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
 
 async function embedFonts(): Promise<EmbedFont[]> {
   return Promise.all((FAMILIES.inter.embed ?? []).map(async (f) => ({ family: SPECIMEN_FAMILY, dataURI: await fontDataURI(f.url), style: f.style })))
@@ -81,7 +77,7 @@ export default function TypeShell() {
     ]
     if (v.outro) {
       const o0 = Math.min(...T.map((L) => L.outStart)), o1 = Math.max(...T.map((L) => L.outEnd))
-      out.push({ id: 'out', label: 'Out', start: o0, end: o1, color: '#a78bfa' })
+      out.push({ id: 'out', label: 'Out', start: o0, end: o1, color: 'var(--cat-7)' })
     }
     out.push({ id: 'cues', label: 'Cues', kind: 'markers', color: 'var(--key)', keys: [{ t: 0, value: 'in' }, { t: inEnd, value: 'hold' }, ...(v.outro ? [{ t: inEnd + v.hold, value: 'out' }] : [])] })
     return out
@@ -109,24 +105,41 @@ export default function TypeShell() {
     const id = toast('Rendering PNG…', { type: 'loading', timeout: 0 })
     try {
       const svg = await buildSVG()
-      if (!svg) return
+      if (!svg) { toast.dismiss(id); return }
       download(await svgToPNG(svg, size.w, size.h, 2), `${name}@2x.png`)
-      toastManager.update(id, { title: 'PNG exported', description: `${size.w * 2} × ${size.h * 2}`, type: 'success', timeout: 2600 })
+      toast.update(id, 'PNG exported', { description: `${size.w * 2} × ${size.h * 2}`, type: 'success' })
     } catch {
-      toastManager.update(id, { title: 'PNG export failed', type: 'error', timeout: 4000 })
+      toast.update(id, 'PNG export failed', { type: 'error', timeout: 4000 })
     }
   }
+  /** One loop, frame by frame (WebCodecs MP4); real-time WebM capture only as a fallback. */
   const recordVideo = async () => {
-    const c = surface.current?.canvas
-    if (!c) return
-    const id = toast('Recording one loop…', { type: 'loading', timeout: 0 })
-    clock.setState({ region: null })
-    clock.replay()
+    const vals = params.values() as V
+    const fps = 60
+    const out = document.createElement('canvas')
+    out.width = KINETIC.w; out.height = KINETIC.h
+    const ctx = out.getContext('2d', { alpha: false })!
+    const ms = clock.getState().duration
+    const ac = new AbortController()
+    const pt = toast.progress('Rendering one loop', { onCancel: () => ac.abort() })
+    let last = -1
     try {
-      await recordCanvas(c, clock.getState().duration, 60, `${name}.webm`)
-      toastManager.update(id, { title: 'Video exported', type: 'success', timeout: 2600 })
+      const blob = await recordFrames({
+        canvas: out, fps, frames: Math.round((ms / 1000) * fps), name: `${name}.mp4`, signal: ac.signal,
+        draw: (t) => { ctx.setTransform(1, 0, 0, 1, 0, 0); drawKinetic(ctx, vals, t, KINETIC.w, KINETIC.h) },
+        onProgress: (p) => { const q = Math.round(p * 100); if (q !== last) { last = q; pt.set(p) } },
+      })
+      if (blob) { pt.done('Video exported', { description: `${KINETIC.w} × ${KINETIC.h} · ${fps} fps` }); return }
+      if (ac.signal.aborted) { pt.fail('Export cancelled', { timeout: 2600 }); return }
+      const c = surface.current?.canvas
+      if (!c) { pt.fail('Nothing to record'); return }
+      toast.update(pt.id, 'Recording one loop…', { type: 'loading', timeout: 0 })
+      clock.setState({ region: null })
+      clock.replay()
+      await recordCanvas(c, ms, fps, `${name}.webm`)
+      pt.done('Video exported', { description: 'Real-time WebM — this browser has no frame encoder.' })
     } catch {
-      toastManager.update(id, { title: 'Recording failed', type: 'error', timeout: 4000 })
+      pt.fail('Recording failed')
     }
   }
   const copy = async (text: string, what: string) => { await copyText(text); toast(`${what} copied`, { type: 'success' }) }
@@ -277,13 +290,7 @@ export default function TypeShell() {
       {!fontsReady && <div className="pointer-events-none absolute top-3 left-1/2 -translate-x-1/2"><Badge>Loading Inter…</Badge></div>}
       <CommandPalette
         commands={commands}
-        extraShortcuts={[
-          ...(mode === 'kinetic' ? [{ keys: 'space', label: 'Play / pause' }, { keys: ',', label: 'Previous frame' }, { keys: '.', label: 'Next frame' }, { keys: 'j', label: 'Previous key' }, { keys: 'k', label: 'Next key' }] : []),
-          { keys: 'esc', label: 'Stop editing text' },
-          { keys: '\\', label: 'A/B compare' },
-          { keys: 'shift+1', label: 'Zoom to fit' },
-          { keys: 'shift+0', label: 'Zoom to 100%' },
-        ]}
+        extraShortcuts={[{ keys: 'esc', label: 'Stop editing text', group: 'Text' }]}
       />
     </Studio>
   )

@@ -6,11 +6,10 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Button, IconButton, Menu, Divider, Segmented, PresetMenu, ThemeToggle, CommandPalette, Kbd,
-  shareMenuItems, useValues, type Command,
+  HistoryButtons, shareMenuItems, useValues, useDoc, type Command,
 } from '@kit'
 import { FAMILIES, FAMILY, type FamilyId } from './families'
 import { doc, settings, ui, history, markLabel, resetDemoDoc, type SV } from './model'
-import { HistoryCluster, useDoc } from '../batch/local/history'
 import { GridView, FocusView, BottomPanel, FavouritesPanel, SettingsPanel, MarkPanel, focusCamera } from './views'
 import {
   reroll, fitCount, focus, step, toggleLock, toggleFav, moreLikeThis, toggleCompare, swapCompare, cursorId, exportMarkSVG, exportPNGSet, exportLockup,
@@ -127,7 +126,7 @@ export default function MarksShell() {
           end={
             <>
               <Cluster>
-                <HistoryCluster history={history} />
+                <HistoryButtons history={history} />
                 <Divider vertical />
                 <PresetMenu params={settings} />
                 <ThemeToggle />
@@ -146,9 +145,8 @@ export default function MarksShell() {
       bottom={inFocus && ladder ? <BottomPanel /> : undefined}
     >
       {inFocus ? <FocusView /> : <GridView columns={columns} />}
-      <CommandPalette commands={commands} extraShortcuts={inFocus
-        ? [{ keys: 'space', label: 'Hold and drag to pan' }, { keys: 'shift+1', label: 'Zoom to fit' }, { keys: 'shift+0', label: 'Zoom to 100%' }]
-        : [{ keys: 'enter', label: 'Open variant' }, { keys: 'mod+k', label: 'Commands' }]} />
+      {/* commands with shortcuts and the Stage's zoom keys list themselves in the ? sheet */}
+      <CommandPalette commands={commands} extraShortcuts={inFocus ? [{ keys: 'space', label: 'Hold and drag to pan', group: 'View' }] : []} />
     </Studio>
   )
 }

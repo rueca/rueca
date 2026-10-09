@@ -3,7 +3,7 @@
    upscale of the screen), frame-accurate seamless loops, and the shader
    itself as code. Plus the look thumbnails, rendered by the same shader.
 --------------------------------------------------------------------------- */
-import { copyText, download, recordCanvas, stamp, toast, toastManager } from '@kit'
+import { copyText, download, recordCanvas, stamp, toast } from '@kit'
 import { ShaderRenderer } from './renderer'
 import { buildShader, uniformValues } from './codegen'
 import { clock, getLayers, params, type V } from './state'
@@ -52,28 +52,28 @@ export async function exportLoop(w: number, h: number, live: HTMLCanvasElement |
   const layers = getLayers(v)
   const r = getExportRenderer(w, h)
   const ctrl = (recording = new AbortController())
-  const id = toast(`Rendering loop · ${w} × ${h}`, { type: 'loading', timeout: 0, description: `0 / ${frames} frames`, action: { label: 'Cancel', onClick: () => ctrl.abort() } })
+  const job = toast.progress(`Rendering loop · ${w} × ${h}`, { onCancel: () => ctrl.abort() })
   const t0 = performance.now()
   try {
     const blob = await recordFrames({
       canvas: r.canvas, fps, frames, stepMs: (1000 / fps) * speed, signal: ctrl.signal,
       name: `${slug()}-loop-${w}x${h}.mp4`,
       draw: (t) => r.render(layers, docAt(v, t)),
-      onProgress: (pr) => { const i = Math.round(pr * frames); if (i % 6 === 0 || i === frames) toastManager.update(id, { description: `${i} / ${frames} frames · ${Math.round(pr * 100)}%` }) },
+      onProgress: (pr) => { const i = Math.round(pr * frames); if (i % 6 === 0 || i === frames) job.set(pr, `${i} / ${frames} frames`) },
     })
     if (blob) {
-      toastManager.update(id, { title: 'Loop exported', type: 'success', description: `${seconds.toFixed(1)}s · ${(blob.size / 1e6).toFixed(1)} MB · ${((performance.now() - t0) / 1000).toFixed(1)}s to render`, timeout: 4000, actionProps: undefined })
+      job.done('Loop exported', { description: `${seconds.toFixed(1)}s · ${(blob.size / 1e6).toFixed(1)} MB · ${((performance.now() - t0) / 1000).toFixed(1)}s to render`, timeout: 4000 })
     } else if (ctrl.signal.aborted) {
-      toastManager.update(id, { title: 'Recording cancelled', type: 'default', description: undefined, timeout: 2000, actionProps: undefined })
+      toast.update(job.id, 'Recording cancelled', { timeout: 2000 })
     } else if (live) {
       // No WebCodecs: real-time capture of the live canvas, one loop long.
-      toastManager.update(id, { title: 'Recording in real time…', description: 'This browser can’t encode frame by frame.' })
+      toast.update(job.id, 'Recording in real time…', { type: 'loading', timeout: 0, description: 'This browser can’t encode frame by frame.' })
       clock.seek(0); clock.play()
       await recordCanvas(live, seconds * 1000, fps, `${slug()}-loop.webm`)
-      toastManager.update(id, { title: 'Loop exported', type: 'success', description: 'Real-time capture', timeout: 3000, actionProps: undefined })
+      job.done('Loop exported', { description: 'Real-time capture', timeout: 3000 })
     }
   } catch (e) {
-    toastManager.update(id, { title: 'Export failed', type: 'error', description: (e as Error).message.slice(0, 140), timeout: 5000, actionProps: undefined })
+    job.fail('Export failed', { description: (e as Error).message.slice(0, 140) })
   } finally {
     recording = null
   }

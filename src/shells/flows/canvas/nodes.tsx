@@ -3,9 +3,9 @@ import { memo, type CSSProperties, type ReactNode } from 'react'
 import { Handle, NodeResizer, Position, useStore, type NodeProps } from '@xyflow/react'
 import { MessageCircle } from 'lucide-react'
 import { cn, useValues } from '@kit'
-import { InlineText } from '../local/InlineText'
+import { InlineText } from '@kit/ui/inline-text'
 import { Wireframe } from '../wireframes'
-import { STICKY, templateLabel, type FlowNode, type Status } from '../model'
+import { STICKY, deepen, templateLabel, type FlowNode, type Status } from '../model'
 import { params, updateNodeData, useUI, useFlow, setNodes, doc } from '../store'
 
 export const STATUS: Record<Status, { label: string; dot: string; text: string }> = {
@@ -52,10 +52,10 @@ export const ScreenNode = memo(function ScreenNode({ id, data, selected }: NodeP
   const thumbs = useValues(params, (v) => v.thumbnails)
   const { dim, ring } = useNodeState(id, !!selected)
   return (
-    <div className={cn('flows-node w-[176px] rounded-[12px] bg-panel p-1.5 transition-[box-shadow,opacity] duration-200', dim && 'opacity-25')} style={{ boxShadow: ring }}>
+    <div className={cn('flows-node studio-node w-[176px] rounded-[12px] bg-panel p-1.5 transition-[box-shadow,opacity] duration-200', dim && 'opacity-25')} style={{ boxShadow: ring }}>
       <div className="flex h-7 items-center gap-1.5 px-1.5">
         <StatusDot status={data.status} />
-        <InlineText value={data.name} onCommit={rename(id)} className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg" title="Screen name" />
+        <InlineText bare focusable={false} value={data.name} onCommit={rename(id)} className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg" label="Screen name" />
         <CommentBadge id={id} />
       </div>
       {thumbs ? (
@@ -74,7 +74,7 @@ export const DecisionNode = memo(function DecisionNode({ id, data, selected }: N
   const { dim, walkState } = useNodeState(id, !!selected)
   const on = selected || walkState === 'current'
   return (
-    <div className={cn('flows-node relative size-[136px] transition-opacity duration-200', dim && 'opacity-25')}>
+    <div className={cn('flows-node studio-node relative size-[136px] transition-opacity duration-200', dim && 'opacity-25')}>
       <svg viewBox="0 0 136 136" className="absolute inset-0 overflow-visible">
         {walkState === 'current' && <polygon points="68,-8 144,68 68,144 -8,68" className="fill-signal-soft" />}
         <polygon points="68,2 134,68 68,134 2,68" strokeLinejoin="round"
@@ -82,7 +82,7 @@ export const DecisionNode = memo(function DecisionNode({ id, data, selected }: N
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-7 text-center">
         <StatusDot status={data.status} />
-        <InlineText value={data.name} onCommit={rename(id)} className="line-clamp-3 w-full text-center text-[11.5px] leading-snug font-medium text-fg" title="Condition" />
+        <InlineText bare focusable={false} value={data.name} onCommit={rename(id)} className="line-clamp-3 w-full text-center text-[11.5px] leading-snug font-medium text-fg" label="Condition" />
       </div>
       <Handles />
     </div>
@@ -93,10 +93,10 @@ export const TerminalNode = memo(function TerminalNode({ id, data, selected }: N
   const { dim, ring } = useNodeState(id, !!selected)
   const end = data.role === 'end'
   return (
-    <div className={cn('flows-node flex h-10 w-[152px] items-center gap-2 rounded-full bg-panel pr-4 pl-3 transition-[box-shadow,opacity] duration-200', dim && 'opacity-25')} style={{ boxShadow: ring }}>
+    <div className={cn('flows-node studio-node flex h-10 w-[152px] items-center gap-2 rounded-full bg-panel pr-4 pl-3 transition-[box-shadow,opacity] duration-200', dim && 'opacity-25')} style={{ boxShadow: ring }}>
       {end ? <span className="flex size-4 shrink-0 items-center justify-center rounded-full shadow-[inset_0_0_0_1.5px_var(--fg-muted)]"><span className="size-2 rounded-full bg-fg" /></span>
         : <span className="size-4 shrink-0 rounded-full bg-ok shadow-[0_0_0_3px_color-mix(in_srgb,var(--ok)_25%,transparent)]" />}
-      <InlineText value={data.name} onCommit={rename(id)} className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg" title={end ? 'End' : 'Start'} />
+      <InlineText bare focusable={false} value={data.name} onCommit={rename(id)} className="min-w-0 flex-1 truncate text-[12px] font-medium text-fg" label={end ? 'End' : 'Start'} />
       <Handles />
     </div>
   )
@@ -106,9 +106,9 @@ export const NoteNode = memo(function NoteNode({ id, data, selected }: NodeProps
   const { dim } = useNodeState(id, !!selected)
   const bg = STICKY[data.color ?? 'yellow']
   return (
-    <div className={cn('flows-node flex min-h-[120px] w-[176px] flex-col rounded-[4px] p-3 text-[12.5px] leading-snug transition-opacity duration-200', dim && 'opacity-25')}
+    <div className={cn('flows-node studio-node flex min-h-[120px] w-[176px] flex-col rounded-[4px] p-3 text-[12.5px] leading-snug transition-opacity duration-200', dim && 'opacity-25')}
       style={{ background: bg, color: '#1d1d1f', boxShadow: selected ? `0 0 0 2px var(--signal), 0 6px 16px -6px rgb(0 0 0 / .35)` : '0 1px 1px rgb(0 0 0 / .08), 0 6px 16px -6px rgb(0 0 0 / .35)' }}>
-      <InlineText value={data.name} multiline onCommit={rename(id)} className="block w-full flex-1 whitespace-pre-wrap" placeholder="Add a note" title="Sticky note" />
+      <InlineText bare focusable={false} allowEmpty value={data.name} multiline onCommit={rename(id)} className="block w-full flex-1 whitespace-pre-wrap" placeholder="Add a note" label="Sticky note" />
       <div className="mt-2 text-[10.5px] opacity-55">{data.attach ? 'Annotation' : 'Sticky'}</div>
     </div>
   )
@@ -129,8 +129,8 @@ export const SectionNode = memo(function SectionNode({ id, data, selected, width
           background: `color-mix(in srgb, ${hue} 7%, transparent)`,
           boxShadow: `inset 0 0 0 ${selected ? 2 : 1}px ${selected ? 'var(--signal)' : `color-mix(in srgb, ${hue} 32%, transparent)`}`,
         }}>
-        <div className="flows-section-tab absolute top-3 left-3 flex h-7 max-w-[calc(100%-24px)] origin-top-left cursor-grab items-center gap-2 rounded-[8px] px-2.5 text-[12.5px] font-semibold text-white" style={{ background: hue, transform: `scale(${titleScale})` }}>
-          <InlineText value={data.name} onCommit={rename(id)} className="truncate" inputClassName="min-w-[120px]" title="Section name" />
+        <div className="flows-section-tab absolute top-3 left-3 flex h-7 max-w-[calc(100%-24px)] origin-top-left cursor-grab items-center gap-2 rounded-[8px] px-2.5 text-[12.5px] font-semibold text-white" style={{ background: deepen(hue), transform: `scale(${titleScale})` }}>
+          <InlineText bare focusable={false} value={data.name} onCommit={rename(id)} className="truncate" inputClassName="min-w-[120px]" label="Section name" />
         </div>
       </div>
     </>

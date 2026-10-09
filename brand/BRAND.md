@@ -1,15 +1,44 @@
-# Brand — naming, positioning, voice
+# Brand — Trompo
 
-Board: http://localhost:5273/brand/ (marks, palettes and the in-product previews live there).
-Source data: `brand/data.js` · marks: `brand/marks.js` · checked 9 Oct 2026.
+Board: http://localhost:5273/brand/ · source data: `brand/data.js` · marks: `brand/marks.js` · exported files: `brand/trompo/`
 
-**Status: options. The name and the look are Rafael's call.** The working name is "Prototype Studio".
+## Decision (9 Oct 2026): **Trompo**
 
-## Recommendation
+Chosen by Rafael from a final four of Trompo, Thumbwheel, Periaktos and Jigwork, after five rounds and 249 names.
+The runner-up and safe fallback is **Thumbwheel**. The rest of this file is the record of how we got here.
 
-**Thumbwheel.** It names the core gesture (scrubbing a value until it feels right), and it's the only
-candidate free everywhere: npm, the `@thumbwheel` scope, the GitHub handle, and `.dev` / `.studio` / `.design` / `.tools`.
-**Wingspace** is the runner-up if you'd rather lead with the client-facing, "your work centre stage" story.
+**The idea.** A trompo is the Latin American spinning top: wind the string, throw it, and it comes alive. The
+harness does the same to a prototype: it's inert on its own and alive once it has controls. Developers already say
+"spin up", so "spin up a tool around your prototype" comes for free.
+
+| | |
+|---|---|
+| Name | **Trompo**, said TROM-po. Display name `Trompo`, slug `trompo` |
+| Tagline | *Give it a spin.* Alternates: *Wind it up. Let it go.* · *Every prototype wants to spin.* |
+| Mark | A spinning top with a pink band and two motion swooshes. The swooshes drop below 24px. Files: `brand/trompo/mark-light.svg`, `mark-dark.svg`, `mark-small.svg`, `app-icon.svg`, `favicon.svg` (theme-aware) |
+| Wordmark | Fredoka SemiBold, lowercase, −0.02em (Google Fonts, OFL) |
+| Palette | Ink `#1C1A19` · Paper `#F6F1EA` · Rosa mexicano `#E4007C` (mark accent `#D1006F` on light, `#FF3EA5` on dark) · Wood `#C58B4E` · Turquesa `#1E9AA0` |
+| Rule | Brand colour lives on the site and the mark only. The product chrome stays neutral (Inter and kit tokens). |
+
+### Claim these the same day (needs Rafael's accounts)
+
+| What | Where | Note |
+|---|---|---|
+| GitHub org **`trompo-dev`** | github.com/organizations/plan | The plain `trompo` handle is an empty account from 2009. You can ask GitHub to release it under its name-squatting policy later. |
+| npm scope **`@trompo`** | npmjs.com/org/create | Free for public packages. The unscoped `trompo` package name is also free, so publish a placeholder to hold it. |
+| Domain **trompo.dev** | any registrar (Vercel quotes $9.99 for the first year, $13/yr renewal) | Optional extras: trompo.io ($14.99, then $46), trompo.studio ($21.99, then $45.76) |
+| Trademark search | USPTO / EUIPO, classes 9 and 42 | Neighbours: Trompo App (Spanish food delivery), Twisted Trompo (restaurant ordering) |
+
+### Rename in the code
+
+- ✅ 9 Oct: `src/site.config.ts` now has name `Trompo`, slug `trompo`, repo `trompo-dev/trompo`, url `https://trompo-dev.github.io/trompo`. Switch the url to `https://trompo.dev` once the domain is live, then run `npm run sync`.
+- ✅ 9 Oct: `npm run sync` moved `skills/prototype-studio` → `skills/trompo` and rewrote the docs, plugin, registry and package.json.
+- ✅ 9 Oct: the landing `Mark` (`src/landing/parts.tsx`) is the Trompo top, and `public/favicon.svg` is the favicon.
+- ⏳ The other session renames the leftover `prototype-studio` strings in `src/shells` and `src/kit/index.ts` once its builders finish. The `studio:` storage keys stay as they are, so people's saved settings survive.
+
+---
+
+# Round 1
 
 ## Positioning
 
@@ -200,3 +229,53 @@ Watch out: a small Spanish food-delivery app and a restaurant ordering app share
 - **Penelope's loom**: she unpicked her weaving every night, the oldest undo.
 - **Drosselmeyer's clockwork castle**: the children want to change what the figures do.
 - **The busy board**: fiddling is how you learn what a thing can do.
+
+---
+
+# Favourites and round 4: Thumbwheel, shorter
+
+**Rafael's favourites so far:** Trompo, Thumbwheel, Periaktos, Jigwork. They're pinned at the top of the board.
+
+**Thumbwheel in a shorter word:**
+- **Molette** (7 letters) is the French word for exactly this object: the knurled wheel on a lighter, a camera dial, a mouse scroll wheel, the adjustable wrench (clé à molette).
+  - Free: npm, `@molette`, `.dev` `.studio` `.design` `.tools` `.io`, and `molette-dev` on GitHub.
+  - Taken: the .com and .app.
+  - No software uses it.
+- **Knurly** (6 letters) comes from knurl, the cross-hatched grip, and sounds like "gnarly".
+  - Free: npm, `@knurly`, the GitHub handle, and `.dev` `.studio` `.design` `.tools` `.app`.
+  - The .com is a small weightlifting-apparel brand.
+- **Reserve:** Trimwheel (the pilot's pitch-trim wheel), but it's only one letter shorter.
+- **Out:**
+  - Rotella: Shell Rotella motor oil.
+  - JogDial: JogDial.js already exists.
+  - Rueda: a common surname. Ruedita covers it, and Latin Americans already call the mouse scroll wheel "la ruedita".
+  - Knurl and Rowel: taken.
+
+Mark note: the Molette draft's ridged rim edges towards a gear (the settings icon). Since it's the same object,
+the Thumbwheel mark could simply carry over to Molette.
+
+---
+
+# Round 5: a general search
+
+56 more names (249 total), steered by the favourites: real objects, turning/tuning/holding, two syllables.
+Most plain dictionary words came back taken.
+
+**New find: Turnwork.** All four favourites turn: a trompo, a periaktos, a thumbwheel, and in the workshop "turning"
+means shaping wood on a lathe, which is Jigwork's world. Turnwork names that common thread in Jigwork's form.
+- Free: npm, `@turnwork`, the GitHub handle, `.dev` `.studio` `.app`.
+- The .com is held, with nothing public on it.
+- Downside: it describes more than it sparks.
+
+**Reserve:**
+- Pegtop: the English trompo, a fallback if Trompo's food-app neighbours bother you.
+- Peonza: Spain's word for a spinning top.
+- Stagework
+
+**Out:**
+- Telari: probably the Italian Renaissance word for the turning prisms, but it's now a macOS Markdown reader for typography, which also holds the npm scope.
+- Diabolo: domains and scope taken.
+- Tambour: a GitHub org appeared in 2026.
+- Twirly: too generic.
+- Kreisel: harsh in English.
+- About 45 workshop, stage, textile and music words were taken outright.

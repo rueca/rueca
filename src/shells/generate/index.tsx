@@ -7,7 +7,7 @@ import {
   Studio, Toolbar, Brand, Cluster, Button, Menu, ParamActions, CommandPalette, toast, type Command,
 } from '@kit'
 import { params } from './state/params'
-import { gallery, useGallery, viewTitle, visible, step, select, toggleFavourite, byId, newSession } from './state/gallery'
+import { gallery, history, snapshot, useGallery, viewTitle, visible, step, select, toggleFavourite, byId, newSession, setView } from './state/gallery'
 import { ui } from './state/ui'
 import { focusPrompt } from './state/ui'
 import { cancelAll } from './state/queue'
@@ -19,17 +19,18 @@ import { RightPanel } from './ui/RightPanel'
 import { Overlays } from './ui/Overlays'
 import { QueueStatus } from './ui/QueueStatus'
 
-const one = () => { const s = gallery.getState(); return s.selection.length ? byId(s.anchor ?? s.selection[0]) ?? byId(s.selection[0]) : undefined }
+const one = () => { const s = snapshot(); return s.selection.length ? byId(s.anchor ?? s.selection[0]) ?? byId(s.selection[0]) : undefined }
 const need = (fn: (r: NonNullable<ReturnType<typeof byId>>) => void) => () => { const r = one(); if (r) fn(r); else toast('Select an image first') }
 
 function compare() {
-  const s = gallery.getState()
+  const s = snapshot()
   if (s.selection.length !== 2) { toast('Select two images to compare', { description: '⌘-click or Shift-click a second image.' }); return }
   ui.setState({ overlay: { type: 'compare', a: s.selection[0], b: s.selection[1], mode: 'wipe' } })
 }
 
 export default function GenerateShell() {
   const title = useGallery((s) => viewTitle(s))
+  const sessions = useGallery((s) => s.sessions)
   const file = useRef<HTMLInputElement>(null)
 
   const commands: Command[] = [
@@ -58,15 +59,12 @@ export default function GenerateShell() {
     { id: 'json', label: 'Export session JSON', group: 'Export', shortcut: 'shift+mod+e', icon: Braces, run: exportSession },
     { id: 'import', label: 'Import session JSON…', group: 'Export', shortcut: 'mod+o', icon: FolderOpen, run: () => file.current?.click() },
     { id: 'new', label: 'New session', group: 'Sessions', shortcut: 'n', icon: Plus, run: () => newSession() },
-    ...gallery.getState().sessions.map((s) => ({ id: `s-${s.id}`, label: `Open session: ${s.name}`, group: 'Sessions', run: () => gallery.setState({ view: { type: 'session' as const, id: s.id }, activeSession: s.id, selection: [] }) })),
+    ...sessions.map((s) => ({ id: `s-${s.id}`, label: `Open session: ${s.name}`, group: 'Sessions', run: () => setView({ type: 'session', id: s.id }) })),
     ...params.getState().presets.map((p) => ({ id: `p-${p.name}`, label: `Settings preset: ${p.name}`, group: 'Presets', run: () => params.applyPreset(p.name) })),
   ]
 
-  const mark = (
-    <a href="#/" aria-label="All shells" className="contents">
-      <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M8 1.5l1.6 4.2 4.4.3-3.4 2.8 1.1 4.3L8 10.7l-3.7 2.4 1.1-4.3L2 6l4.4-.3z" /></svg>
-    </a>
-  )
+  // Brand links the mark home itself.
+  const mark = <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor"><path d="M8 1.5l1.6 4.2 4.4.3-3.4 2.8 1.1 4.3L8 10.7l-3.7 2.4 1.1-4.3L2 6l4.4-.3z" /></svg>
 
   return (
     <Studio
@@ -78,7 +76,7 @@ export default function GenerateShell() {
           center={<QueueStatus />}
           end={
             <>
-              <Cluster><ParamActions params={params} /></Cluster>
+              <Cluster><ParamActions params={params} history={history} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>}
                 items={[
                   { type: 'label', label: 'Selection' },

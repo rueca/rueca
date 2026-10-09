@@ -5,26 +5,23 @@ import {
   Upload, Map as MapIcon, Maximize2, RotateCcw, Share2, ClipboardCopy, Link,
 } from 'lucide-react'
 import {
-  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Tip, useValues, toast, copyText,
+  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Tip, HistoryButtons, useValues, useDoc, toast, copyText,
   type Command, type MenuItem,
 } from '@kit'
 import { FlowCanvas, startWalkthrough } from './canvas/FlowCanvas'
 import { LeftPanel } from './panels/LeftPanel'
 import { RightPanel } from './panels/RightPanel'
-import { HistoryControls } from './local/HistoryControls'
-import { useDoc } from './local/doc-store'
 import { TEMPLATES } from './model'
 import {
   params, history, doc, ui, useUI, useFlow, tidy, addNode, addScreen, deleteSelection, duplicate, copySelection, paste, select, switchFlow, newFlow, resetDemo, viewport, activeFlow,
 } from './store'
 import { exportPNG, exportFlowJSON, importFlowJSON, copyMermaid, downloadMermaid } from './export'
 
+// Brand links the mark home itself.
 const Mark = (
-  <a href="#/" aria-label="All shells" className="contents">
-    <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="1.5" y="2" width="5" height="4" rx="1" /><rect x="9.5" y="10" width="5" height="4" rx="1" /><path d="M6.5 4h3a2 2 0 0 1 2 2v4" />
-    </svg>
-  </a>
+  <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="1.5" y="2" width="5" height="4" rx="1" /><rect x="9.5" y="10" width="5" height="4" rx="1" /><path d="M6.5 4h3a2 2 0 0 1 2 2v4" />
+  </svg>
 )
 
 export default function FlowsShell() {
@@ -95,7 +92,7 @@ export default function FlowsShell() {
             end={
               <>
                 <Cluster>
-                  <HistoryControls history={history} />
+                  <HistoryButtons history={history} />
                   <Divider vertical />
                   <PresetMenu params={params} />
                   <ThemeToggle />

@@ -70,7 +70,7 @@ export default function DropIn() {
     <Studio
       toolbar={
         <Toolbar
-          start={<Brand name="Drop-in" doc="northwind / hero.html" mark={<a href="#/" aria-label="All shells" className="contents"><svg viewBox="0 0 16 16" width="11" height="11"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg></a>} />}
+          start={<Brand name="Drop-in" doc="northwind / hero.html" mark={<svg viewBox="0 0 16 16" width="11" height="11"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>} />}
           center={
             <Cluster className="gap-1">
               <div className="w-[132px]">

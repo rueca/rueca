@@ -9,15 +9,14 @@
 --------------------------------------------------------------------------- */
 import { camera, toWorld } from './camera'
 import { hitPath, containerAt, pickTarget } from './hit'
-import { snapRect, snapEdges, type SRect } from '../local/snap'
+import { snapRect, snapEdges, type SRect } from '@kit/stage/snap'
+import { resizeRect, rotateDelta, type Handle } from '@kit/stage/TransformBox'
 import * as S from '../model/store'
 import { prefs } from '../model/prefs'
 import { find, ancestors, locate, remove, insert, topMost, update } from '../model/tree'
 import { union, contains, intersects, sizeOf } from '../model/layout'
 import { frame, rect, ellipse, text } from '../model/factory'
 import { uid, type Box, type Node } from '../model/types'
-
-type Handle = 'nw' | 'n' | 'ne' | 'e' | 'se' | 's' | 'sw' | 'w'
 
 const LABEL_H = 22
 
@@ -198,7 +197,7 @@ function move(e: React.PointerEvent, p0: { x: number; y: number }, narrowTo?: st
     S.design.setState({ guides })
   }, () => {
     S.design.setState({ gesture: null, guides: [], insertion: null, dropTarget: null })
-    if (started) S.commit()
+    if (started) S.commit('Move')
     else if (narrowTo) S.select([narrowTo])
   })
 }
@@ -237,39 +236,19 @@ export function startResize(e: React.PointerEvent, h: Handle) {
   const p0 = toWorld(e.clientX, e.clientY)
   const hx = h.includes('w') ? 'l' : h.includes('e') ? 'r' : null
   const hy = h.includes('n') ? 't' : h.includes('s') ? 'b' : null
+  const snapOn = (ev: PointerEvent) => prefs.values().snapObjects && !ev.metaKey
   const parentId = S.parentOf(ids[0])?.id ?? null
   const targets = snapTargets(parentId, new Set(ids))
   S.design.setState({ gesture: 'resize' })
 
   track((ev) => {
     const p = toWorld(ev.clientX, ev.clientY)
-    const dx = p.x - p0.x, dy = p.y - p0.y
-    let l = bb.x, t = bb.y, r = bb.x + bb.w, b = bb.y + bb.h
-    if (hx === 'l') l += dx
-    if (hx === 'r') r += dx
-    if (hy === 't') t += dy
-    if (hy === 'b') b += dy
-    if (ev.altKey) { // from centre
-      if (hx === 'l') r = bb.x + bb.w - dx
-      if (hx === 'r') l = bb.x - dx
-      if (hy === 't') b = bb.y + bb.h - dy
-      if (hy === 'b') t = bb.y - dy
-    }
+    // ⇧ keeps the aspect ratio, ⌥ resizes from the centre, ⌘ skips snapping (kit maths)
     let guides: S.Guide[] = []
-    if (ev.shiftKey) {
-      const ratio = bb.w / bb.h
-      let w = r - l, hh = b - t
-      if (hx && hy) { if (Math.abs(w / bb.w) > Math.abs(hh / bb.h)) hh = w / ratio; else w = hh * ratio }
-      else if (hx) hh = w / ratio
-      else w = hh * ratio
-      if (hx === 'l') l = r - w; else if (hx === 'r') r = l + w; else { const cx = bb.x + bb.w / 2; l = cx - w / 2; r = cx + w / 2 }
-      if (hy === 't') t = b - hh; else if (hy === 'b') b = t + hh; else { const cy = bb.y + bb.h / 2; t = cy - hh / 2; b = cy + hh / 2 }
-    } else if (prefs.values().snapObjects && !ev.metaKey) {
-      const sn = snapEdges({ l, t, r, b }, { l: hx === 'l', r: hx === 'r', t: hy === 't', b: hy === 'b' }, targets, threshold())
-      ;({ l, t, r, b } = sn); guides = sn.guides
-    }
-    if (r - l < 1) { if (hx === 'l') l = r - 1; else r = l + 1 }
-    if (b - t < 1) { if (hy === 't') t = b - 1; else b = t + 1 }
+    const { l, t, r, b } = resizeRect(bb, h, p.x - p0.x, p.y - p0.y, {
+      aspect: ev.shiftKey, fromCenter: ev.altKey, min: 1,
+      snap: snapOn(ev) ? (e, mv) => { const sn = snapEdges(e, mv, targets, threshold()); guides = sn.guides; return sn } : undefined,
+    })
     const sxk = (r - l) / bb.w, syk = (b - t) / bb.h
     const Lnow = S.layout()
     S.setNodes((ns) => {
@@ -298,7 +277,7 @@ export function startResize(e: React.PointerEvent, h: Handle) {
       return out
     }, { commit: false })
     S.design.setState({ guides })
-  }, () => { S.design.setState({ gesture: null, guides: [] }); S.commit() })
+  }, () => { S.design.setState({ gesture: null, guides: [] }); S.commit('Resize') })
 }
 
 /* --- rotate ---------------------------------------------------------------------- */
@@ -312,16 +291,13 @@ export function startRotate(e: React.PointerEvent) {
   if (!n || !b) return
   const c = { x: b.x + b.w / 2, y: b.y + b.h / 2 }
   const p0 = toWorld(e.clientX, e.clientY)
-  const a0 = Math.atan2(p0.y - c.y, p0.x - c.x)
   const r0 = n.rotation
   S.design.setState({ gesture: 'rotate' })
   track((ev) => {
-    const p = toWorld(ev.clientX, ev.clientY)
-    let r = r0 - ((Math.atan2(p.y - c.y, p.x - c.x) - a0) * 180) / Math.PI
-    if (ev.shiftKey) r = Math.round(r / 15) * 15
-    r = ((((r + 180) % 360) + 360) % 360) - 180
+    // node rotation is counter-clockwise (Figma); the kit maths is CSS clockwise
+    const r = -rotateDelta(c, p0, toWorld(ev.clientX, ev.clientY), -r0, ev.shiftKey ? 15 : undefined)
     S.patchNode(id, { rotation: Math.round(r * 10) / 10 }, { commit: false })
-  }, () => { S.design.setState({ gesture: null }); S.commit() })
+  }, () => { S.design.setState({ gesture: null }); S.commit('Rotate') })
 }
 
 /* --- draw ------------------------------------------------------------------------- */
@@ -376,7 +352,7 @@ function draw(e: React.PointerEvent, p0: { x: number; y: number }) {
       S.select([n.id])
     }
     S.design.setState({ gesture: null, guides: [], tool: 'move', editing: tool === 'text' ? id : null })
-    if (tool !== 'text') S.commit()
+    if (tool !== 'text') S.commit(`Draw ${tool === 'rect' ? 'rectangle' : tool}`)
   })
 }
 
@@ -431,7 +407,7 @@ export function startConnect(e: React.PointerEvent, fromId: string, onPreview: (
     if (!target) return
     S.patchNode(fromId, (n) => ({
       interactions: [...(n.interactions ?? []).filter((i) => !(i.trigger === 'tap' && i.action === 'navigate')), { id: uid('i'), trigger: 'tap', action: 'navigate', target: target.id, transition: 'smart', duration: 350, easing: [0.16, 1, 0.3, 1] }],
-    }))
+    }), { label: 'Link to frame' })
   })
 }
 

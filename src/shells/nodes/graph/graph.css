@@ -1,0 +1,16 @@
+/* Nodes — the two categorical scales a node editor needs, mapped onto the
+   kit's categorical tokens (--cat-1…8, tuned for both themes). Everything
+   else about React Flow comes from src/kit/xyflow.css. */
+:root {
+  /* port types — wires and port rings */
+  --port-image: var(--cat-6);
+  --port-number: var(--fg-muted);
+  --port-color: var(--cat-8);
+  /* node categories — stripe, icon tile, library dot, minimap */
+  --node-cat-generate: var(--cat-7);
+  --node-cat-filter: var(--cat-1);
+  --node-cat-composite: var(--cat-2);
+  --node-cat-colour: var(--cat-4);
+  --node-cat-value: var(--fg-muted);
+  --node-cat-output: var(--cat-3);
+}

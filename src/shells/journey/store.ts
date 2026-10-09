@@ -1,8 +1,7 @@
 /* Journey — view params, the undoable map document, transient UI state. */
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { defineSchema, folder, p, createParams, createCamera, toast } from '@kit'
-import { createDocStore, createHistory, useDoc } from '../flows/local/doc-store'
+import { defineSchema, folder, p, createParams, createCamera, createDocStore, createHistory, useDoc, toast } from '@kit'
 import { LANES, PERSONA_HUES, blankStages, demoDoc, uid, type Card, type JourneyDoc, type LaneId, type Persona, type Stage } from './model'
 
 /* ---------------------------------------------------------------- params */

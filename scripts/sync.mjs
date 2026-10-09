@@ -48,8 +48,12 @@ const ident = { name: site.name, slug: site.slug, repo: site.repo, url: site.url
 const prev = existsSync(r(LOCK)) ? JSON.parse(read(LOCK)) : ident
 if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(site.slug) || site.slug.length > 64) throw new Error(`site.slug "${site.slug}" must be lowercase-kebab, ≤64 chars`)
 if (prev.slug !== site.slug && existsSync(r('skills', prev.slug))) {
-  if (CHECK) changed.push(`skills/${prev.slug} → skills/${site.slug}`)
-  else renameSync(r('skills', prev.slug), r('skills', site.slug))
+  if (CHECK) {
+    // A rename is pending: nothing downstream can be checked until the folder moves.
+    console.error(`sync --check: rename pending (skills/${prev.slug} → skills/${site.slug}). Run \`npm run sync\`.`)
+    process.exit(1)
+  }
+  renameSync(r('skills', prev.slug), r('skills', site.slug))
 }
 const SKILL = `skills/${site.slug}`
 // longest first, so the url and repo (which contain the slug) are replaced whole

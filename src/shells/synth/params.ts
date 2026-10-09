@@ -1,14 +1,10 @@
 /* The instrument's state. Panels are hand-built (knobs, envelope, grid), but
    every value is a schema param so undo, share links, persistence and the
-   "copy as agent prompt" export all work. */
-import { defineSchema, folder, p, createParams, type TextDef, type NumberDef, type BoolDef } from '@kit'
+   "copy as agent prompt" export all work. The pattern is a hidden `p.data`
+   document value; sounds are scoped presets (they never touch the pattern). */
+import { defineSchema, folder, p, createParams, type NumberDef, type BoolDef } from '@kit'
 import { DEFAULT_PATTERN, type Pattern, type TrackId } from './pattern'
 import { SineIcon, TriangleIcon, SawIcon, SquareIcon } from './local/WaveIcons'
-
-/** An opaque, never-rendered document value (the pattern). See report: the kit lacks p.data(). */
-function pData<T>(value: T): TextDef {
-  return { type: 'text', value: value as unknown as string, when: () => false }
-}
 
 const ms = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(2)}s` : `${Math.round(n)}ms`)
 const hz = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 1 : 2)}k` : `${Math.round(n)}`)
@@ -81,23 +77,28 @@ export const schema = defineSchema({
     visual: p.select('orbit', [{ value: 'orbit', label: 'Orbit' }, { value: 'horizon', label: 'Horizon' }]),
   }),
   doc: folder('Pattern', {
-    pattern: pData<Pattern>(DEFAULT_PATTERN),
+    pattern: p.data<Pattern>(DEFAULT_PATTERN, { share: true, hint: 'The 16-step pattern: drum velocities, bass velocities and notes.' }),
   }),
 })
 
-export const params = createParams(schema, { id: 'synth' })
-export type V = ReturnType<typeof params.values>
-export const patternOf = (v: V) => v.pattern as unknown as Pattern
-export const setPattern = (p: Pattern, commit = true) => params.setValue('pattern', p as unknown as string, { commit })
-
-/** Sound presets patch only the synth keys — the kit's presets would reset the pattern too. */
-export const SOUNDS: Record<string, Partial<V>> = {
+/** Sounds: synth-voice presets. Scoped — applying one changes only these keys, never the pattern or mix. */
+export const SOUND_KEYS = ['wave', 'detune', 'sub', 'glide', 'gate', 'attack', 'decay', 'sustain', 'release', 'filterType', 'cutoff', 'resonance', 'envAmt', 'drive'] as const
+export const SOUNDS = {
   Acid: { wave: 'sawtooth', detune: 0, sub: 0.2, glide: 70, gate: 0.55, attack: 2, decay: 180, sustain: 0.1, release: 90, filterType: 'lowpass', cutoff: 380, resonance: 17, envAmt: 0.8, drive: 0.55 },
   'Round sub': { wave: 'sine', detune: 0, sub: 0.6, glide: 20, gate: 0.85, attack: 8, decay: 400, sustain: 0.8, release: 220, filterType: 'lowpass', cutoff: 900, resonance: 1, envAmt: 0.1, drive: 0.15 },
   Pluck: { wave: 'square', detune: 14, sub: 0.15, glide: 0, gate: 0.3, attack: 1, decay: 120, sustain: 0, release: 140, filterType: 'lowpass', cutoff: 1400, resonance: 5, envAmt: 0.65, drive: 0.1 },
   'Wide saw': { wave: 'sawtooth', detune: 28, sub: 0.35, glide: 35, gate: 0.7, attack: 12, decay: 300, sustain: 0.5, release: 260, filterType: 'lowpass', cutoff: 1100, resonance: 4, envAmt: 0.4, drive: 0.3 },
   Hollow: { wave: 'triangle', detune: 6, sub: 0.1, glide: 50, gate: 0.6, attack: 20, decay: 260, sustain: 0.45, release: 300, filterType: 'bandpass', cutoff: 700, resonance: 6, envAmt: 0.5, drive: 0.4 },
 }
+
+export const params = createParams(schema, {
+  id: 'synth',
+  presets: Object.entries(SOUNDS).map(([name, values]) => ({ name, values })),
+  presetKeys: [...SOUND_KEYS],
+})
+export type V = ReturnType<typeof params.values>
+export const patternOf = (v: V) => v.pattern
+export const setPattern = (pat: Pattern, commit = true) => params.setValue('pattern', pat, { commit })
 
 export const audible = (v: V, id: TrackId) => {
   const anySolo = v.kickSolo || v.snareSolo || v.hatSolo || v.bassSolo

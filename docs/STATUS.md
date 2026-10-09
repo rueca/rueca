@@ -22,13 +22,36 @@ Brand board: http://localhost:5273/brand/
 - **19 shells**, all typecheck: motion, dropin, present (mine) · type, synth · batch, marks · animate, video ·
   shader, dither · flows, journey · nodes, generate · scene, photo · ui-design, component-lab. All builders finished.
 - **Packaging fork** (separate Desktop session "Packaging agent"): landing page (`src/landing/`), gallery at
-  `#/shells`, lean skill rewrite in `skills/prototype-studio/` (SKILL.md + references), `.claude-plugin/`,
+  `#/shells`, lean skill rewrite in `skills/trompo/` (SKILL.md + references), `.claude-plugin/`,
   shadcn registry (`registry.json`, `public/r/*.json`, verified installing into a fresh project), README,
   LICENSE (MIT), CONTRIBUTING, `.github/` Pages workflow, `docs/LAUNCH.md` (decisions + commands).
 - **Branding fork** (session "Branding agent"): `brand/` board + `brand/BRAND.md`. Recommendation **Thumbwheel**
   (free on npm, GitHub, .dev/.studio/.design/.tools); runner-up Wingspace; also Jigwork, Clampwork.
 - **Provenance**: `THIRD_PARTY_NOTICES.md` (webgl-noise, Hoskins hash, OKLab); IQ-derived constants replaced
   in shader + photo; registry re-synced.
+
+## Progress since the break (2026-10-09 evening)
+- Tokens namespaced (accent→signal, input→control, muted→fg-muted, faint→fg-faint, font-sans→font-ui) via scripts/codemod-tokens.py.
+- Kit core rebuilt: createDocStore/useDoc, createHistory/HistoryList, p.data, persist/share flags, scoped presets,
+  params.replace/version/labels, createItemParams/bindItem, hotkey dispatcher with priorities/labels/useHoldKey,
+  clock once/loop/pingpong + hidden-tab pause, Stage fit-by-value/fitMaxZoom/touch, ZoomPill props, useSafeArea,
+  toast.update/dismiss/promise/progress, WebGLSurface, MountSurface handle, Inspector fixes (folder order, per-instance
+  memory, segmented fit, bipolar origin, knob, log, ParamRow/ParamControl), Section uncontrolled, LayerTree props,
+  Knob/recordFrames/zip/snapshot promoted. KIT.md updated. Commit a8f56e4.
+- Wave 2 running: 4 agents promoting shell components into new kit files and migrating shells
+  (motion: animate/video/type/motion/synth · graphics: shader/dither/photo/scene · design: ui-design/component-lab/
+  marks/present/dropin · data: batch/flows/journey/nodes/generate). Brief: scratchpad wave2-brief.md. Each reports
+  exports to add to src/kit/index.ts and changes needed in existing kit files — apply those, then QA all.
+
+**Name: Trompo** (chosen by Rafael). DONE by branding session: site.config, sync (skills/trompo), landing mark, favicon.
+TODO: guard `sync --check` against a pending rename (crashes reading skills/<new-slug>); update SESSION-CONTEXT name.
+After wave 2: rename hard-coded "trompo" in shells (marks/actions.ts, motion/meta.ts, synth/index.tsx,
+journey/export.ts, batch/exporter.ts, flows/export.ts, photo/develop.ts) + src/kit/index.ts, then `npm run sync`.
+Keep `studio:` localStorage keys.
+
+Landing: shells section is a pinned rail (src/landing/ShellRail.tsx) with its own thumbnails —
+after shells change visibly run `npm run thumbs:rail [id]` (scripts/thumbs-rail.mjs). TODO: synth's
+"Click to start audio" overlay shows in captures — hide it when `?qa` is in the URL.
 
 ## Next (in order)
 1. **Review QA results** in `research/qa-report.json`. Handoff run: tsc clean; 0 console errors across all 19 shells × 2 themes; low-contrast text flags (<3:1) in ui-design (dark 1), video (light 8), flows (4/3), generate (dark 3), journey (8/2), synth (dark 8) — check each; some may be artwork text the audit can't tell from chrome (mark artwork roots with `data-studio-artifact`).
@@ -52,11 +75,11 @@ Brand board: http://localhost:5273/brand/
 3. **Refactor shells** onto the promoted kit pieces (delete their `local/` copies), React Flow attribution visible
    in flows + nodes, motion shell's stuck loading toast.
 4. **Re-run QA on all shells**, refresh thumbnails, `npm run sync`.
-5. **Skill**: reconcile packaging fork's `skills/prototype-studio/` with the consolidated kit; add parallel-agent
+5. **Skill**: reconcile packaging fork's `skills/trompo/` with the consolidated kit; add parallel-agent
    guidance (own ports/profiles for headless Chrome, own scratch dirs, restart dev server after new files).
    Then plan evals (`claude plugin eval`).
 6. **Rafael decides**: name (Thumbwheel?), repo owner, domain, npm scope, distribution (registry + plugin ±
-   npm), whether to replace his installed `~/.claude/skills/prototype-studio` with the new one. See `docs/LAUNCH.md`.
+   npm), whether to replace his installed `~/.claude/skills/trompo` with the new one. See `docs/LAUNCH.md`.
 
 ## Gotchas while resuming
 - Dev server must be restarted after many new files (Tailwind v4 dev may miss classes from new files).

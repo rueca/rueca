@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Check, MoreHorizontal, Send, Trash2, RotateCcw } from 'lucide-react'
 import { cn, IconButton, Menu, Button } from '@kit'
-import { PEOPLE, type Comment } from '../model'
+import { PEOPLE, deepen, type Comment } from '../model'
 import { useFlow, useUI, ui, addComment, updateComment, commentPos } from '../store'
 
 export const ago = (t: number) => {
@@ -18,7 +18,7 @@ export function Avatar({ who, size = 20, className }: { who: string; size?: numb
   const p = PEOPLE[who] ?? PEOPLE.you
   return (
     <span className={cn('inline-flex shrink-0 items-center justify-center rounded-full font-semibold text-white', className)}
-      style={{ width: size, height: size, background: p.hue, fontSize: size * 0.42 }} aria-label={p.name}>{p.initials}</span>
+      style={{ width: size, height: size, background: deepen(p.hue), fontSize: size * 0.42 }} aria-label={p.name}>{p.initials}</span>
   )
 }
 
@@ -43,7 +43,7 @@ export function CommentLayer({ zoom }: { zoom: number }) {
       })}
       {draft && (
         <div className="absolute" style={{ left: draft.x, top: draft.y, transform: `scale(${k})`, transformOrigin: '0 100%', zIndex: 30 }}>
-          <div className="absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] bg-signal text-[11px] font-semibold text-white shadow-[0_0_0_2px_var(--panel),var(--shadow-cluster)]">+</div>
+          <div className="absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] bg-signal-strong text-[11px] font-semibold text-signal-fg shadow-[0_0_0_2px_var(--panel),var(--shadow-cluster)]">+</div>
           <Composer onPost={(text) => { const c = addComment(draft, text); ui.setState({ draft: null, openComment: c.id }) }} onCancel={() => ui.setState({ draft: null })} />
         </div>
       )}
@@ -57,7 +57,7 @@ function Pin({ c, open }: { c: Comment; open: boolean }) {
     <button type="button" aria-label={`Comment by ${p.name}`}
       onClick={(e) => { e.stopPropagation(); ui.setState({ openComment: open ? null : c.id, draft: null }) }}
       className={cn('absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-[10.5px] font-semibold text-white outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-signal', c.resolved && 'opacity-50')}
-      style={{ pointerEvents: 'all', background: p.hue, boxShadow: `0 0 0 2px ${open ? 'var(--signal)' : 'var(--panel)'}, var(--shadow-cluster)` }}>
+      style={{ pointerEvents: 'all', background: deepen(p.hue), boxShadow: `0 0 0 2px ${open ? 'var(--signal)' : 'var(--panel)'}, var(--shadow-cluster)` }}>
       {c.resolved ? <Check size={12} strokeWidth={2.5} /> : p.initials}
       {c.replies.length > 0 && !c.resolved && <span className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-panel text-[8.5px] text-fg tabular shadow-[0_0_0_1px_var(--line-strong)]">{c.replies.length + 1}</span>}
     </button>

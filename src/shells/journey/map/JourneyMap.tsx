@@ -4,15 +4,14 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { Plus, Route, LayoutTemplate } from 'lucide-react'
-import { cn, useValues, Tip, Button, Empty } from '@kit'
+import { cn, useValues, useDoc, Tip, Button, Empty } from '@kit'
 import { JourneyCard } from './Card'
 import { EmotionLane } from './EmotionLane'
-import { LANES, emoji, initials, type Card, type LaneId, type Persona } from '../model'
+import { LANES, deepen, emoji, initials, type Card, type LaneId, type Persona } from '../model'
 import {
   params, ui, useUI, usePersona, camera, doc, moveCard, addCard, addStage, reorderStage, toggleLink, cellCards, updateStage, startFromTemplate,
 } from '../store'
-import { InlineText } from '../../flows/local/InlineText'
-import { useDoc } from '../../flows/local/doc-store'
+import { InlineText } from '@kit/ui/inline-text'
 
 export const LANE_W = 176
 const ADD_W = 56
@@ -147,9 +146,9 @@ export function JourneyMap({ mapRef }: { mapRef: React.RefObject<HTMLDivElement 
       style={{ width, boxShadow: 'var(--shadow-artboard), 0 0 0 1px var(--artboard-ring)' }}>
       {/* title band */}
       <div className="flex items-center gap-3 border-b border-line px-5 py-4">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold text-white" style={{ background: p.hue }}>{initials(p.name)}</span>
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold text-white" style={{ background: deepen(p.hue) }}>{initials(p.name)}</span>
         <div className="min-w-0 flex-1">
-          <InlineText value={title} onCommit={(t) => doc.set((d) => ({ ...d, title: t }), { label: 'Rename map' })} className="block truncate text-[17px] font-semibold tracking-[-0.01em]" title="Map title" />
+          <InlineText bare focusable={false} value={title} onCommit={(t) => doc.set((d) => ({ ...d, title: t }), { label: 'Rename map' })} className="block truncate text-[17px] font-semibold tracking-[-0.01em]" label="Map title" />
           <div className="truncate text-[12px] text-fg-muted">{p.name} · {p.role}{p.quote && <span className="text-fg-faint"> — “{p.quote}”</span>}</div>
         </div>
         <Legend />
@@ -170,7 +169,7 @@ export function JourneyMap({ mapRef }: { mapRef: React.RefObject<HTMLDivElement 
               className={cn('group/stage relative cursor-grab border-l border-line px-3 pt-3 pb-2.5 active:cursor-grabbing', selStage === s.id && 'bg-signal-soft')}>
               <div className="flex items-center gap-1.5">
                 <span className={cn('flex h-[18px] min-w-[18px] items-center justify-center rounded-[5px] px-1 text-[10.5px] font-semibold tabular', selStage === s.id ? 'bg-signal-strong text-signal-fg' : 'bg-active text-fg-muted')}>{i + 1}</span>
-                <InlineText value={s.name} onCommit={(name) => updateStage(s.id, { name }, { label: 'Rename stage' })} className="min-w-0 flex-1 truncate text-[13.5px] font-semibold tracking-[-0.01em]" title="Stage name" />
+                <InlineText bare focusable={false} value={s.name} onCommit={(name) => updateStage(s.id, { name }, { label: 'Rename stage' })} className="min-w-0 flex-1 truncate text-[13.5px] font-semibold tracking-[-0.01em]" label="Stage name" />
                 <span className="text-[14px]" aria-hidden>{emoji(s.emotion)}</span>
               </div>
               <div className="mt-0.5 truncate text-[11px] text-fg-faint tabular">{s.duration || '—'}</div>

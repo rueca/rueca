@@ -1,5 +1,8 @@
 # Session context (handoff for agents) — 2026-10-09
 
+> **Name: Trompo** (chosen 2026-10-09; was "Prototype Studio"). Skill at `skills/trompo/`, identity in
+> `src/site.config.ts`, brand in `brand/BRAND.md`. Mentions of "Prototype Studio" below are historical.
+
 ## Who and what
 - **Rafael Cespedes** — designer (not an engineer). Builds "instruments" for clients: prototypes, asset
   generators, demos, each needing design-tool UI (inspector, timeline, layers, export). He originally wrote a

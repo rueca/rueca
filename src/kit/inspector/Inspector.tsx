@@ -254,7 +254,7 @@ export function ParamControl({ def: d, value: v, onChange: set, changed, default
               <Slider value={toLog(Math.max(lo, v), lo, hi)} min={0} max={1} step={0.001} label={label}
                 onChange={(t, f) => set(Number(fromLog(t, lo, hi).toPrecision(4)), f)} />
             ) : (
-              <Slider value={Math.min(hi, Math.max(lo, v))} onChange={(n, f) => set(n, f)} min={lo} max={hi} step={d.step ?? 1} label={label} origin={origin} />
+              <Slider value={Math.min(hi, Math.max(lo, v))} onChange={(n, f) => set(n, f)} min={lo} max={hi} step={d.step ?? 1} label={label} origin={origin} track={d.track} />
             )}
             {scrub}
           </>
