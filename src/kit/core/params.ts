@@ -22,7 +22,7 @@
 --------------------------------------------------------------------------- */
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { defaultsOf, defIndex, equal, humanize, isValueDef, type Schema, type SchemaValues, type Values, type ParamDef } from './schema'
+import { coerce, defaultsOf, defIndex, equal, humanize, isValueDef, type Schema, type SchemaValues, type Values, type ParamDef } from './schema'
 
 export interface Preset<V> {
   name: string
@@ -129,19 +129,35 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
   const pick = (v: Values, f: 'persist' | 'share') => Object.fromEntries(Object.entries(v).filter(([k]) => flag(k, f)))
   const labelOf = (k: string) => { const d = defs[k] as any; return d?.label ?? humanize(k) }
 
-  // Only keep keys the schema still knows, so a renamed param never poisons state.
-  const sanitize = (src: Partial<V> | null | undefined): Partial<V> => {
+  const dev = typeof import.meta !== 'undefined' && (import.meta as any).env?.DEV
+  const warn = (msg: string) => { if (dev) console.warn(`[trompo] ${opts.id}: ${msg}`) }
+  // Only keep keys the schema knows, and only values that fit their def — a renamed param,
+  // a hand-edited share link or a framed page sending "30" for a number never poisons state.
+  const sanitize = (src: Partial<V> | null | undefined, from = 'input'): Partial<V> => {
     const out: Partial<V> = {}
-    if (!src || typeof src !== 'object') return out
-    for (const k of Object.keys(src)) if (k in defaults) (out as Values)[k] = (src as Values)[k]
+    if (!src || typeof src !== 'object' || Array.isArray(src)) return out
+    for (const k of Object.keys(src)) {
+      const def = defs[k]
+      if (!def || !isValueDef(def)) { warn(`ignored unknown key "${k}" from ${from}`); continue }
+      const r = coerce(def, (src as Values)[k])
+      if (r.ok) (out as Values)[k] = r.value
+      else warn(`rejected "${k}" from ${from}: ${r.reason}`)
+    }
     return out
   }
 
+  // A schema whose own defaults don't validate is a bug in the schema — say so loudly in dev.
+  if (dev) for (const [k, d] of Object.entries(defs)) {
+    if (!isValueDef(d)) continue
+    const r = coerce(d, (defaults as Values)[k])
+    if (!r.ok) console.error(`[trompo] ${opts.id}: default for "${k}" does not fit its ${d.type} def — ${r.reason}`)
+  }
+
   let initial = { ...defaults }
-  if (opts.persist !== false) initial = { ...initial, ...sanitize(LS.get<Partial<V>>(keyLS)) }
+  if (opts.persist !== false) initial = { ...initial, ...sanitize(LS.get<Partial<V>>(keyLS), 'localStorage') }
   if (opts.url !== false && typeof location !== 'undefined') {
     const m = location.hash.match(/[#&]p=([^&]+)/)
-    if (m) try { initial = { ...initial, ...sanitize(JSON.parse(b64.dec(m[1]))) } } catch { /* bad link */ }
+    if (m) try { initial = { ...initial, ...sanitize(JSON.parse(b64.dec(m[1])), 'share link') } } catch { warn('ignored an unreadable share link') }
   }
 
   const builtin: Preset<V>[] = (opts.presets ?? []).map((pr) => ({ name: pr.name, values: sanitize(pr.values), mode: pr.mode, builtin: true }))
@@ -211,16 +227,20 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     id: opts.id,
     values: () => store.getState().values,
     setValue: (key: any, value: any, o: { commit?: boolean; label?: string } = {}) => {
-      store.setState((s) => ({ values: { ...s.values, [key]: value } }))
+      const clean = sanitize({ [key]: value } as Partial<V>, 'setValue')
+      if (!(key in clean)) return
+      store.setState((s) => ({ values: { ...s.values, ...clean } }))
       if (o.commit !== false) commit(o.label)
     },
     patch: (partial: Partial<V>, o: { commit?: boolean; label?: string } = {}) => {
-      store.setState((s) => ({ values: { ...s.values, ...partial } }))
+      const clean = sanitize(partial, 'patch')
+      if (!Object.keys(clean).length) return
+      store.setState((s) => ({ values: { ...s.values, ...clean } }))
       if (o.commit !== false) commit(o.label)
     },
     commit,
     replace: (values: Partial<V>, o: { history?: boolean; label?: string } = {}) => {
-      const next = { ...store.getState().values, ...sanitize(values) } as V
+      const next = { ...store.getState().values, ...sanitize(values, 'replace') } as V
       if (o.history === false) {
         store.setState({ values: next, committed: next })
         save(next)

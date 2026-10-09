@@ -14,7 +14,7 @@ import { TRIGGER_ICON } from '../canvas/edges'
 import { Avatar, ago } from '../canvas/comments'
 import { startWalkthrough } from '../canvas/FlowCanvas'
 import { happyPath } from '../layout'
-import { PEOPLE, SECTION_HUES, STICKY, TEMPLATES, TRIGGERS, templateLabel, uid, type FlowEdge, type FlowNode, type Status, type StickyColor, type Template, type Trigger, type EdgeStyle } from '../model'
+import { makeEdge, PEOPLE, SECTION_HUES, STICKY, TEMPLATES, TRIGGERS, templateLabel, uid, type FlowEdge, type FlowNode, type Status, type StickyColor, type Template, type Trigger, type EdgeStyle } from '../model'
 import {
   params, doc, ui, useUI, useFlow, select, updateNodeData, updateEdgeData, setNodes, setEdges, editFlow, deleteSelection, duplicate, addScreen, sizeOf, commentPos, viewport,
 } from '../store'
@@ -129,7 +129,16 @@ function NodeInspector({ node }: { node: FlowNode }) {
 
       {flowish && (
         <Section title="Connections" actions={<IconButton icon={Plus} size="icon-sm" label="Add next screen" shortcut="s" onClick={() => addScreen('home')} />}>
-          {!ins.length && !outs.length && <div className="px-3 py-1 text-[11.5px] text-fg-faint">Drag from a handle to connect, or add the next screen.</div>}
+          {!ins.length && !outs.length && <div className="px-3 py-1 text-[11.5px] text-fg-faint">Drag from a handle, pick a screen below, or add the next screen.</div>}
+          {/* The keyboard / single-pointer way to connect (WCAG 2.1.1, 2.5.7). */}
+          <Row label="Connect to">
+            <Select label="Connect to" value="" placeholder="Choose a node…"
+              options={flow.nodes.filter((n) => n.id !== node.id && n.type !== 'section' && n.type !== 'note' && !outs.some((e) => e.target === n.id)).map((n) => ({ value: n.id, label: n.data.name || n.type || 'Node' }))}
+              onChange={(target) => {
+                const e = makeEdge(node.id, target, { trigger: node.type === 'decision' ? 'condition' : 'tap' }, ['r', 'l'])
+                setEdges((es) => [...es, e], { label: 'Connect' })
+              }} />
+          </Row>
           {[...ins.map((e) => ({ e, dir: 'in' as const })), ...outs.map((e) => ({ e, dir: 'out' as const }))].map(({ e, dir }) => {
             const T = TRIGGER_ICON[e.data?.trigger ?? 'tap']
             return (

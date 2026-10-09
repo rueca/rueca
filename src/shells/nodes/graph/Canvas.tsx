@@ -59,7 +59,13 @@ export function GraphCanvas() {
   canvasApi.center = () => { const r = wrap.current!.getBoundingClientRect(); return rf.screenToFlowPosition({ x: r.left + r.width / 2, y: r.top + r.height / 2 }) }
 
   // Tab opens add-node at the cursor (Cables). Only when the pointer is over the graph.
-  useHotkeys({ tab: { run: () => { if (pointer.current) openAt(pointer.current) }, label: 'Add node at cursor', group: 'Graph' } }, [openAt])
+  // Guarded: Tab is the keyboard's way through the UI, so only take it when the pointer is over the
+  // graph AND focus isn't on a control (body or inside the graph). Otherwise Tab moves focus as usual.
+  useHotkeys({ tab: {
+    run: () => { if (pointer.current) openAt(pointer.current) },
+    when: () => !!pointer.current && (document.activeElement === document.body || !!wrap.current?.contains(document.activeElement)),
+    label: 'Add node at cursor', group: 'Graph',
+  } }, [openAt])
 
   const items: QuickAddItem[] = useMemo(() => {
     const from = add?.from

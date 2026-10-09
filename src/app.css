@@ -1,0 +1,17 @@
+/* This app's page base — NOT part of the kit. A host app keeps its own; the kit only styles
+   `.studio` and `.pop` surfaces (see kit/theme.css). */
+html, body, #root { height: 100%; }
+html.dark { color-scheme: dark; }
+html.light { color-scheme: light; }
+body {
+  margin: 0;
+  background: var(--field);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11", "ss01";
+}
+button { cursor: default; }

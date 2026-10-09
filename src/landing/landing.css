@@ -1,0 +1,67 @@
+/* ---------------------------------------------------------------------------
+   Accent rule for the marketing pages (landing, shells gallery):
+     .site     — the page's own accents use the brand pink (brand/BRAND.md).
+                 Button surfaces stay #D1006F in both themes: white on the
+                 brighter dark-theme pink is only ~3:1.
+     .preview  — anything that SHOWS the product (mock UI, component thumbs)
+                 gets a neutral accent: white in dark, black in light.
+   The real blue accent only appears in the full-screen tools. Live iframes and
+   captured thumbnails get the neutral accent from neutral.ts instead.
+--------------------------------------------------------------------------- */
+.site {
+  --signal: #ff3ea5;
+  --signal-strong: #d1006f;
+  --signal-fg: #ffffff;
+  --signal-soft: rgba(255, 62, 165, 0.16);
+}
+:root.light .site {
+  --signal: #d1006f;
+  --signal-soft: rgba(209, 0, 111, 0.12);
+}
+.site .preview {
+  --signal: var(--fg);
+  --signal-strong: var(--fg);
+  --signal-fg: var(--field);
+  --signal-soft: color-mix(in srgb, var(--fg) 10%, transparent);
+}
+
+/* ---------------------------------------------------------------------------
+   Load + scroll reveals, ported from trove.quest (same curve, same timings).
+   Elements opt in with data-reveal="rise|head|fade|cards|words"; useReveals()
+   marks <html data-reveals> and sets data-in on each element the first time it
+   scrolls into view. Nothing hides until that script has run, so if it never
+   runs the page is simply there. Reduced motion: a 200ms fade, nothing moves.
+--------------------------------------------------------------------------- */
+.site {
+  --ease-mind: cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes reveal-rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes reveal-head { from { opacity: 0; transform: translateY(16px); } }
+@keyframes reveal-fade { from { opacity: 0; } }
+@keyframes reveal-word { from { opacity: 0; transform: translateY(0.35em); } }
+@keyframes card-in { from { opacity: 0; transform: translateY(6px); } }
+
+html[data-reveals] [data-reveal]:not([data-in]) { opacity: 0; }
+html[data-reveals] [data-reveal][data-in] { animation: reveal-rise 0.6s var(--ease-mind) var(--reveal-delay, 0s) both; }
+html[data-reveals] [data-reveal='head'][data-in] { animation-name: reveal-head; animation-duration: 0.7s; }
+html[data-reveals] [data-reveal='fade'][data-in] { animation-name: reveal-fade; }
+
+/* a grid whose children arrive one after another (.card-in, --card-in-delay) */
+html[data-reveals] [data-reveal='cards']:not([data-in]) { opacity: 1; }
+html[data-reveals] [data-reveal='cards'][data-in] { animation: none; }
+html[data-reveals] [data-reveal='cards']:not([data-in]) .card-in { opacity: 0; }
+html[data-reveals] [data-reveal='cards'][data-in] .card-in { animation: card-in 0.4s var(--ease-mind) var(--card-in-delay, 0ms) both; }
+
+/* a headline that arrives word by word */
+.reveal-word, .reveal-word > span { display: inline-block; }
+html[data-reveals] [data-reveal='words']:not([data-in]) { opacity: 1; }
+html[data-reveals] [data-reveal='words'][data-in] { animation: none; }
+html[data-reveals] [data-reveal='words']:not([data-in]) .reveal-word > span { opacity: 0; }
+html[data-reveals] [data-reveal='words'][data-in] .reveal-word > span { animation: reveal-word 0.9s var(--ease-mind) calc(0.12s + var(--word, 0) * 45ms) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-reveals] [data-reveal][data-in],
+  html[data-reveals] [data-reveal='words'][data-in] .reveal-word > span,
+  html[data-reveals] [data-reveal='cards'][data-in] .card-in { animation: reveal-fade 0.2s linear both; }
+  html[data-reveals] [data-reveal='cards'][data-in], html[data-reveals] [data-reveal='words'][data-in] { animation: none; }
+}

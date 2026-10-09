@@ -52,66 +52,28 @@ export const steps = [
     short: 'Describe',
     title: 'Name what you want to tune',
     body: 'Tell the agent what should be adjustable: size, colour, speed, mood. Each becomes a control, with undo, presets, before/after and a shareable link already included.',
-    tags: ['Undo', 'Presets', 'Before/after', 'Share link'],
   },
   {
     n: 2,
     short: 'Drop in',
     title: 'Bring the thing you are designing',
     body: 'An animation, a shader, a 3D scene, a page you already built. The agent connects it to the controls without rebuilding it.',
-    tags: ['Canvas', 'WebGL', 'three.js', 'Any web page'],
   },
   {
     n: 3,
     short: 'Tune',
     title: 'Get a tool that feels like a real one',
     body: 'Inspector, timeline, layers, command palette and export, laid out the way Figma, Framer and Rive do it. Keep tuning, or hand it to a client.',
-    tags: ['Inspector', 'Timeline', 'Layers', 'Export'],
-  },
-]
-
-export const environments = [
-  {
-    id: 'canvas',
-    title: 'Animations and shaders',
-    body: 'Motion studies, gradients, generative art. Scrub through time, slow it down, export stills or video.',
-    shells: ['motion', 'shader'],
-  },
-  {
-    id: 'three',
-    title: '3D scenes',
-    body: 'Tune lights, materials and camera on a live scene, with an outliner like the 3D tools you know.',
-    shells: ['scene'],
-  },
-  {
-    id: 'bridge',
-    title: 'A page you already built',
-    body: 'Plain HTML, a Webflow export, a sketch made in anything else. It plugs in as it is — no rewrite.',
-    shells: ['dropin'],
-  },
-  {
-    id: 'client',
-    title: 'A client’s phone',
-    body: 'Choose which controls a client can touch. They get the artwork full screen with a simple panel; you keep everything else.',
-    shells: ['present'],
   },
 ]
 
 export const kitGroups = [
-  { title: 'State & time', items: ['defineSchema', 'createParams', 'createClock', 'useValues', 'presets', 'undo / redo', 'A/B', 'share URL'], body: 'A framework-agnostic store and clock, so the artifact can be anything.' },
-  { title: 'Fields', items: ['ScrubValue', 'Slider', 'Segmented', 'ColorField · OKLCH', 'CurveEditor', 'SpringEditor', 'GradientEditor', 'PaletteField', 'XYPad', 'AngleDial', 'Vec3Fields', 'SizeFields', 'SeedField', 'ImageDrop', 'Monitor'], body: 'Drag, type or write an expression. Shift ×10, Alt ×0.1, every drag has a typed alternative.' },
-  { title: 'Layout', items: ['Studio', 'Toolbar', 'Cluster', 'Panel', 'Stage', 'Artboard', 'ToolDock', 'ZoomPill'], body: 'Islands, overlay or docked. Wheel pan, pinch zoom, Shift+1 fit, ⌘\\ hides the chrome.' },
-  { title: 'Time & structure', items: ['Timeline', 'keys & markers', 'LayerTree', 'Inspector'], body: 'Lanes derived from the same maths that renders. Layers with eye, lock, rename and drag.' },
-  { title: 'System', items: ['CommandPalette', 'shortcut sheet', 'toast', 'ParamActions', 'ThemeToggle', 'copy as agent prompt'], body: '⌘K for everything, ? for every shortcut, and a hand-off an agent can act on.' },
-  { title: 'Export', items: ['PNG @2×', 'SVG', 'WebM / MP4', 'JSON', 'copy link'], body: 'Frame-accurate, because the render is a pure function of values and time.' },
-]
-
-/** The four control surfaces — rendered as live swatches that flip with the theme. */
-export const surfaces = [
-  { token: 'well', note: 'recessed — segmented background' },
-  { token: 'track', note: 'a groove; lighter than the panel in dark' },
-  { token: 'raised', note: 'the active pill inside a well' },
-  { token: 'active', note: 'a toggled control on a panel' },
+  { title: 'Controls', items: ['Scrub fields', 'Sliders', 'Toggles', 'Colour picker', 'Gradients', 'Palettes', 'Curves', 'Springs', 'Angle dial', 'XY pad', 'Image drop', 'Live readouts'], body: 'Drag a number, type it, or write a quick sum. Every control works from the keyboard too.' },
+  { title: 'Layout', items: ['Floating panels', 'Docked panels', 'Full-bleed stage', 'Artboards', 'Pan and zoom', 'Tool dock'], body: 'Floating, docked or full-bleed, with a canvas that pans and zooms the way Figma does.' },
+  { title: 'Time', items: ['Timeline', 'Keyframes', 'Markers', 'Play and scrub', 'Slow motion'], body: 'A timeline drawn from the same maths as the animation, so the two never disagree.' },
+  { title: 'Structure', items: ['Layers', 'Inspector', 'Show and hide', 'Lock', 'Rename', 'Reorder'], body: 'Layers with the eye, lock and drag you expect, and an inspector that builds itself.' },
+  { title: 'Working', items: ['Undo and redo', 'Presets', 'Before and after', 'Share link', 'Command palette', 'Shortcuts'], body: 'Undo anything, save looks, compare two versions, and send a link that opens exactly where you left off.' },
+  { title: 'Hand-off', items: ['PNG', 'SVG', 'Video', 'Settings file', 'Copy as agent prompt'], body: 'Export stills and frame-accurate video, or pass the settings to an engineer or another agent.' },
 ]
 
 export const faq = [

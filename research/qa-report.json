@@ -1,66 +1,34 @@
 [
   {
-    "id": "present",
+    "id": "motion",
     "theme": "dark",
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 31
+    "textSampled": 78
   },
   {
-    "id": "present",
+    "id": "motion",
     "theme": "light",
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 31
+    "textSampled": 78
   },
   {
-    "id": "shader",
+    "id": "nodes",
     "theme": "dark",
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 49
+    "textSampled": 103
   },
   {
-    "id": "shader",
+    "id": "nodes",
     "theme": "light",
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 49
-  },
-  {
-    "id": "scene",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 69
-  },
-  {
-    "id": "scene",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 69
-  },
-  {
-    "id": "synth",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 152
-  },
-  {
-    "id": "synth",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 152
+    "textSampled": 103
   }
 ]

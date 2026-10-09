@@ -21,6 +21,7 @@ import { cn } from '../core/cn'
 import { useHotkeys } from '../core/hotkeys'
 import { TipProvider } from '../ui/tooltip'
 import { Toaster } from '../system/toast'
+import { ErrorBoundary } from '../system/error-boundary'
 
 type Layout = 'islands' | 'overlay' | 'docked'
 const StudioCtx = createContext<{ present: boolean; setPresent: (b: boolean) => void; layout: Layout }>({ present: false, setPresent: () => {}, layout: 'islands' })
@@ -38,6 +39,13 @@ export function Studio({
     esc: present ? () => setPresent(false) : undefined,
   }, [present], { priority: 0 })
   const rw = rightWidth ? `${rightWidth}px` : 'var(--inspector-w)'
+  // Each region gets its own boundary: a crash in the artwork leaves the panels usable and vice versa.
+  const guard = (node: ReactNode, label: string) => node && <ErrorBoundary label={label} compact>{node}</ErrorBoundary>
+  toolbar = guard(toolbar, 'The toolbar')
+  left = guard(left, 'The left panel')
+  right = guard(right, 'The inspector')
+  bottom = guard(bottom, 'The timeline')
+  children = <ErrorBoundary label="The artwork">{children}</ErrorBoundary>
 
   const shell =
     layout === 'overlay' ? (

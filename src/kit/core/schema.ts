@@ -162,3 +162,69 @@ export const humanize = (key: string) =>
   key.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').replace(/^./, (c) => c.toUpperCase())
 
 export const equal = (a: unknown, b: unknown) => a === b || JSON.stringify(a) === JSON.stringify(b)
+
+/* ---------------------------------------------------------------------------
+   Validation. Every way a value enters a store — setValue, patch, presets,
+   localStorage, share links, the iframe bridge — goes through coerce(). A
+   string from an <input> ("30") becomes 30; a value that can't be made to fit
+   the def is REJECTED (the store keeps its current value) instead of reaching
+   a renderer that would crash on it. (Break-it QA round, DX1.)
+--------------------------------------------------------------------------- */
+const HEX = /^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i
+const num = (v: unknown): number | undefined => {
+  const n = typeof v === 'number' ? v : typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN
+  return Number.isFinite(n) ? n : undefined
+}
+const nums = (v: unknown, n: number): number[] | undefined => {
+  if (!Array.isArray(v) || v.length !== n) return undefined
+  const out = v.map(num)
+  return out.every((x) => x !== undefined) ? (out as number[]) : undefined
+}
+const obj = (v: unknown, keys: string[]): Record<string, number> | undefined => {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return undefined
+  const out: Record<string, number> = {}
+  for (const k of keys) { const n = num((v as Record<string, unknown>)[k]); if (n === undefined) return undefined; out[k] = n }
+  return out
+}
+const optValues = (o: Option[]) => o.map((x) => (typeof x === 'string' ? x : x.value))
+
+/** Coerce `value` to fit `def`, or report it invalid. */
+export function coerce(def: ParamDef, value: unknown): { ok: true; value: unknown } | { ok: false; reason: string } {
+  const bad = (reason: string) => ({ ok: false as const, reason })
+  if (!isValueDef(def)) return bad('not a value param')
+  switch (def.type) {
+    case 'number': case 'angle': case 'seed': {
+      let n = num(value)
+      if (n === undefined) return bad('expected a number')
+      if (def.type === 'number') { if (def.min !== undefined) n = Math.max(def.min, n); if (def.max !== undefined) n = Math.min(def.max, n) }
+      if (def.type === 'seed') n = Math.round(n)
+      return { ok: true, value: n }
+    }
+    case 'range': { const r = nums(value, 2); if (!r) return bad('expected [lo, hi]'); const lo = Math.max(def.min, Math.min(r[0], r[1])), hi = Math.min(def.max, Math.max(r[0], r[1])); return { ok: true, value: [lo, hi] } }
+    case 'curve': { const c = nums(value, 4); return c ? { ok: true, value: c } : bad('expected [x1, y1, x2, y2]') }
+    case 'vec2': { const o = obj(value, ['x', 'y']); return o ? { ok: true, value: o } : bad('expected { x, y }') }
+    case 'vec3': { const o = obj(value, ['x', 'y', 'z']); return o ? { ok: true, value: o } : bad('expected { x, y, z }') }
+    case 'size': { const o = obj(value, ['w', 'h']); return o && o.w > 0 && o.h > 0 ? { ok: true, value: o } : bad('expected { w, h } > 0') }
+    case 'spring': { const o = obj(value, ['stiffness', 'damping', 'mass']); return o ? { ok: true, value: o } : bad('expected { stiffness, damping, mass }') }
+    case 'color': return typeof value === 'string' && HEX.test(value.trim()) ? { ok: true, value: value.trim() } : bad('expected a hex colour')
+    case 'palette': return Array.isArray(value) && value.length > 0 && value.every((c) => typeof c === 'string' && HEX.test(c)) ? { ok: true, value } : bad('expected hex colours')
+    case 'gradient': {
+      const g = value as { angle?: unknown; stops?: unknown }
+      const angle = num(g?.angle)
+      const stops = Array.isArray(g?.stops) ? g.stops.map((s: any) => ({ pos: num(s?.pos), color: s?.color })) : null
+      if (angle === undefined || !stops || stops.length < 2 || stops.some((s) => s.pos === undefined || typeof s.color !== 'string' || !HEX.test(s.color))) return bad('expected { angle, stops[] }')
+      return { ok: true, value: { angle, stops } }
+    }
+    case 'select': { const s = typeof value === 'number' ? String(value) : value; return typeof s === 'string' && optValues(def.options).includes(s) ? { ok: true, value: s } : bad(`expected one of ${optValues(def.options).join(', ')}`) }
+    case 'multi': { const ok = optValues(def.options); return Array.isArray(value) && value.every((x) => typeof x === 'string' && ok.includes(x)) ? { ok: true, value } : bad('expected a subset of the options') }
+    case 'boolean': return typeof value === 'boolean' ? { ok: true, value } : value === 'true' || value === 'false' ? { ok: true, value: value === 'true' } : bad('expected true / false')
+    case 'text': { if (typeof value === 'number') value = String(value); if (typeof value !== 'string') return bad('expected text'); return { ok: true, value: def.maxLength ? value.slice(0, def.maxLength) : value } }
+    case 'image': return value === null || typeof value === 'string' ? { ok: true, value } : bad('expected an image URL or null')
+    case 'data': {
+      // Opaque, but at least the same shape family as the default (array vs object vs primitive).
+      const d = def.value as unknown
+      const same = Array.isArray(d) ? Array.isArray(value) : d !== null && typeof d === 'object' ? value !== null && typeof value === 'object' && !Array.isArray(value) : typeof value === typeof d
+      return same ? { ok: true, value } : bad('data shape does not match the default')
+    }
+  }
+}

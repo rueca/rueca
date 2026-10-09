@@ -4,7 +4,6 @@
 import { useState, type ReactNode } from 'react'
 import { Check, Copy, Moon, Sun } from 'lucide-react'
 import { cn, copyText, useTheme, Tip } from '@kit'
-import { motion, useReducedMotion } from 'motion/react'
 
 export function Container({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn('mx-auto w-full max-w-[1120px] px-4 sm:px-8', className)}>{children}</div>
@@ -12,7 +11,7 @@ export function Container({ children, className }: { children: ReactNode; classN
 
 export function Section({ id, children, className }: { id?: string; children: ReactNode; className?: string }) {
   return (
-    <section id={id} data-section={id} className={cn('scroll-mt-16 py-16 sm:py-24', className)}>
+    <section id={id} data-section={id} className={cn('scroll-mt-16 py-16 sm:py-20', className)}>
       <Container>{children}</Container>
     </section>
   )
@@ -22,9 +21,9 @@ export function Section({ id, children, className }: { id?: string; children: Re
 export function Heading({ kicker, title, lede, className }: { kicker?: string; title: ReactNode; lede?: ReactNode; className?: string }) {
   return (
     <div className={cn('max-w-[640px]', className)}>
-      {kicker && <div className="mb-3 text-[13px] font-medium text-fg-faint">{kicker}</div>}
-      <h2 className="text-[26px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance text-fg sm:text-[32px]">{title}</h2>
-      {lede && <p className="mt-4 text-[15px] leading-[1.6] text-pretty text-fg-muted">{lede}</p>}
+      {kicker && <div data-reveal="fade" className="mb-3 text-[13px] font-medium text-signal">{kicker}</div>}
+      <h2 data-reveal="head" className="text-[26px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance text-fg sm:text-[32px]">{title}</h2>
+      {lede && <p data-reveal style={{ '--reveal-delay': '80ms' } as React.CSSProperties} className="mt-4 text-[15px] leading-[1.6] text-pretty text-fg-muted">{lede}</p>}
     </div>
   )
 }
@@ -34,7 +33,7 @@ export function CommandLine({ text, className }: { text: string; className?: str
   const [done, setDone] = useState(false)
   const slash = text.startsWith('/')
   return (
-    <div className={cn('group flex h-10 min-w-0 items-center gap-2 rounded-[9px] bg-well pr-1 pl-3.5', className)}>
+    <div className={cn('group flex h-10 min-w-0 items-center gap-2 rounded-[9px] bg-control pr-1 pl-3.5 shadow-[inset_0_0_0_1px_var(--line)] dark:bg-fg/[0.035]', className)}>
       <span className="flex-none font-mono text-[12px] text-fg-faint select-none">{slash ? '›' : '$'}</span>
       <code className="min-w-0 flex-1 truncate font-mono text-[12.5px] text-fg" title={text}>{text}</code>
       <Tip label={done ? 'Copied' : 'Copy'}>
@@ -89,13 +88,3 @@ export function Chip({ children, className }: { children: ReactNode; className?:
 /** Scroll to a landing section without touching the hash — the hash is the router. */
 export const scrollToSection = (id: string) => document.querySelector(`[data-section="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
-/** Fades and lifts its children in on first paint — the hero's entrance. */
-export function Rise({ delay = 0, children, className }: { delay?: number; children: ReactNode; className?: string }) {
-  const reduce = useReducedMotion()
-  return (
-    <motion.div className={className} initial={reduce ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay }}>
-      {children}
-    </motion.div>
-  )
-}

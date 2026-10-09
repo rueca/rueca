@@ -23,7 +23,7 @@ export const site = {
   /** where the site and the component registry are served from, no trailing slash.
       GitHub Pages until trompo.dev is bought and live — then switch and re-sync. */
   url: 'https://trompo-dev.github.io/trompo',
-  author: { name: 'Rafael Cespedes', url: '' },
+  author: { name: 'Rafael Cespedes', url: 'https://rafaelcespedes.com' },
   license: 'MIT',
   version: '0.1.0',
 } as const

@@ -48,7 +48,7 @@
   .crumb { font-size: 13px; font-weight: 500; display: flex; gap: 8px; align-items: center; }
   .crumb span { color: var(--faint); font-weight: 400; }
   .nav { display: none; gap: 2px; }
-  @media (min-width: 900px) { .nav { display: flex; } }
+  @media (min-width: 900px) { .nav { display: flex; min-width: 0; overflow-x: auto; scrollbar-width: none; mask-image: linear-gradient(90deg, #000 92%, transparent); } .nav a { white-space: nowrap; flex: none; } .crumb { flex: none; } }
   .nav a, .btn { height: 28px; padding: 0 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); text-decoration: none; border: 0; background: none; cursor: pointer; }
   .nav a:hover, .btn:hover { background: var(--hover); color: var(--fg); }
   .btn.solid { background: var(--panel); box-shadow: var(--shadow); color: var(--fg); }
@@ -228,6 +228,45 @@
   .decision .meta { display: grid; gap: 2px; }
   .decision .meta b { font-weight: 500; font-size: 13px; opacity: .65; }
   .decision .meta span { font-size: 15px; }
+  .tryline { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; max-width: 520px; }
+  .tryline span { font-size: 12.5px; color: var(--muted); }
+  .tryline input { flex: 1; height: 34px; border-radius: 8px; border: 0; padding: 0 12px; background: var(--panel); color: var(--fg); font: inherit; box-shadow: var(--shadow); }
+  .pairs6 { display: grid; gap: 20px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr)); }
+  .pair6 { overflow: hidden; display: flex; flex-direction: column; }
+  .pair6 .ph { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; padding: 16px 18px 12px; }
+  .pair6 .ph b { font-weight: 600; font-size: 15px; }
+  .pair6 .ph .short { color: var(--muted); font-size: 12.5px; }
+  .pair6 .ph .kb { margin-left: auto; font: 11.5px "Geist Mono", monospace; color: var(--faint); }
+  .spec { margin: 0 12px; border-radius: 10px; padding: 26px 24px 22px; display: grid; gap: 14px; }
+  .spec .lk { display: flex; align-items: center; gap: 12px; }
+  .spec h4 { margin: 4px 0 0; font-size: clamp(30px, 4.4vw, 42px); line-height: 1.04; text-wrap: balance; }
+  .spec p { margin: 0; font-size: 16px; line-height: 1.6; max-width: 540px; }
+  .spec .cta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 4px; }
+  .spec .btn2 { height: 36px; padding: 0 16px; border-radius: 8px; display: grid; place-items: center; font-size: 14px; color: #fff; background: #D1006F; }
+  .spec .cmd { height: 36px; padding: 0 12px; border-radius: 8px; display: grid; place-items: center; font-size: 13px; white-space: nowrap; overflow: hidden; max-width: 100%; }
+  .spec .ui { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; opacity: .7; }
+  .roles { display: grid; grid-template-columns: 64px 1fr; gap: 6px 12px; padding: 16px 18px 4px; font-size: 13px; align-items: baseline; }
+  .roles .k { color: var(--faint); font-size: 11.5px; }
+  .roles code { background: none; padding: 0; color: var(--faint); font-size: 11px; }
+  .makers { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 18px 0; }
+  .makers span { font-size: 11.5px; padding: 2px 8px; border-radius: 99px; background: var(--hover); color: var(--muted); }
+  .pair6 .txt { padding: 12px 18px 18px; display: grid; gap: 10px; font-size: 13px; }
+  .pair6 .txt p { margin: 0; } .pair6 .txt .w { color: var(--muted); }
+  .wmocks { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
+  .wmock { overflow: hidden; }
+  .wmock .cap { padding: 12px 16px 14px; font-size: 13px; }
+  .wmock .cap b { font-weight: 600; display: block; } .wmock .cap span { color: var(--muted); font-size: 12.5px; }
+  .wmock .art { aspect-ratio: 4 / 3; position: relative; overflow: hidden; }
+  .wdirs { display: grid; gap: 16px; }
+  .wdir { padding: 16px 18px 18px; display: grid; gap: 12px; }
+  .wdir .hd { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .wdir .hd b { font-weight: 600; font-size: 15px; } .wdir .hd span { color: var(--muted); font-size: 12.5px; }
+  .wdir .shots { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+  .wdir .shots a { display: block; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line); aspect-ratio: 16 / 10; background: var(--well); }
+  .wdir .shots img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+  .wdir .cols { display: grid; gap: 10px 20px; grid-template-columns: 1fr; font-size: 13px; }
+  @media (min-width: 900px) { .wdir .cols { grid-template-columns: 1.4fr 1fr 1fr; } }
+  .wdir .cols p { margin: 0; } .wdir .cols .k { display: block; font-size: 11px; color: var(--faint); margin-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -235,7 +274,7 @@
   <header class="top">
     <div class="crumb">Brand board <span>Trompo · chosen 9 Oct 2026</span></div>
     <nav class="nav" aria-label="Sections">
-      <a href="#favourites">Favourites</a><a href="#round5">Round 5</a><a href="#round4">Shorter</a><a href="#round3">Round 3</a><a href="#round2">Round 2</a><a href="#positioning">Positioning</a><a href="#names">Names</a><a href="#shortlist">Round 1</a><a href="#voice">Voice</a><a href="#next">Next</a>
+      <a href="#wire">Wireframe</a><a href="#type">Type</a><a href="#favourites">Favourites</a><a href="#round5">Round 5</a><a href="#round4">Shorter</a><a href="#round3">Round 3</a><a href="#round2">Round 2</a><a href="#positioning">Positioning</a><a href="#names">Names</a><a href="#shortlist">Round 1</a><a href="#voice">Voice</a><a href="#next">Next</a>
     </nav>
     <button class="btn solid" id="theme" type="button" aria-label="Toggle theme (T)">Theme</button>
   </header>
@@ -249,6 +288,24 @@
     <div class="panel call"><span class="k">Your call · 2</span><b>Pick the look</b><p>The marks are first drafts on a 32-unit grid, drawn to survive 16px. Push on the forms, the type and the palette. These are the places your eye beats mine.</p></div>
     <div class="panel call"><span class="k">Your call · 3</span><b>Approve the voice</b><p>Seven rules and the do/don’t pairs. If one doesn’t sound like you, cut it.</p></div>
   </div>
+
+  <section id="wire" style="margin-top:56px">
+    <div class="sh"><span class="n">⌗</span><h2>Wireframe identity: research</h2><p>9 Oct 2026 · screenshots are local only (git-ignored)</p></div>
+    <p class="lede" id="wireIdea" style="margin-bottom:22px"></p>
+    <h3 class="sub" style="margin-top:0">The same artboard, four ways</h3>
+    <div class="wmocks" id="wmocks"></div>
+    <h3 class="sub">Six directions found</h3>
+    <div class="wdirs" id="wdirs"></div>
+    <h3 class="sub">Avoid</h3>
+    <div class="wdirs" id="wavoid"></div>
+  </section>
+
+  <section id="type" style="margin-top:56px">
+    <div class="sh"><span class="n">Aa</span><h2>Type pairings</h2><p>Google Fonts · SIL Open Font License · sizes are real downloads</p></div>
+    <p class="lede" style="margin-bottom:18px"><strong>Chosen 9 Oct: Geométrica</strong>, which is Gabarito for the wordmark and headlines, Lexend for body and Geist Mono for code. The other five are kept for the record. The product chrome stays Inter. Type a headline to try it in all six.</p>
+    <label class="tryline"><span>Headline</span><input id="tryHead" type="text" value="Give it a spin." maxlength="60" /></label>
+    <div class="pairs6" id="pairs6"></div>
+  </section>
 
   <section id="favourites" style="margin-top:56px">
     <div class="sh"><span class="n">★</span><h2>Favourites</h2><p>Your picks so far · click to jump to the card</p></div>
@@ -354,7 +411,7 @@
 
 <script type="module">
   import { marks } from './marks.js'
-  import { names, alsoChecked, shortlist, positioning, voice, checkedOn, round2Lenses, names2, alsoChecked2, shortlist2, stories, round3Lenses, names3, alsoChecked3, shortlist3, stories3, favourites, names4, alsoChecked4, shortlist4, names5, alsoChecked5, shortlist5 } from './data.js'
+  import { names, alsoChecked, shortlist, positioning, voice, checkedOn, round2Lenses, names2, alsoChecked2, shortlist2, stories, round3Lenses, names3, alsoChecked3, shortlist3, stories3, favourites, names4, alsoChecked4, shortlist4, names5, alsoChecked5, shortlist5, pairings, typeLink, wireframeIdea, wireframeDirections, wireframeAvoid, wireframeProposal } from './data.js'
 
   const $ = (id) => document.getElementById(id)
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
@@ -456,7 +513,93 @@
       </article>`
     }).join('')
   }
-  const renderAll = () => { renderCands(); renderCands(shortlist2, names2, 'cands2'); renderCands(shortlist3, names3, 'cands3'); renderCands(shortlist4, names4, 'cands4'); renderCands(shortlist5, names5, 'cands5'); renderFavs(); renderDecision() }
+  const renderAll = () => { renderCands(); renderCands(shortlist2, names2, 'cands2'); renderCands(shortlist3, names3, 'cands3'); renderCands(shortlist4, names4, 'cands4'); renderCands(shortlist5, names5, 'cands5'); renderFavs(); renderDecision(); renderPairs(); renderWire() }
+  /* Wireframe identity: four mock artboards + the reference directions */
+  function renderWire() {
+    const dark = isDark()
+    const P = dark ? { paper: '#1C1A19', ink: '#F6F1EA', block: 'rgba(246,241,234,.09)', block2: 'rgba(246,241,234,.05)', line: 'rgba(246,241,234,.16)', faint: 'rgba(246,241,234,.45)', pink: '#FF3EA5' }
+                   : { paper: '#F6F1EA', ink: '#1C1A19', block: 'rgba(28,26,25,.08)', block2: 'rgba(28,26,25,.045)', line: 'rgba(28,26,25,.16)', faint: 'rgba(28,26,25,.45)', pink: '#D1006F' }
+    const mono = `font-family:'Geist Mono',ui-monospace,monospace;font-size:9.5px;letter-spacing:.01em;color:${P.faint}`
+    // our own signature placeholder: a soft, grainy pastel spinning top (stand-in for a real photograph)
+    let gid = 0
+    const sig = () => { const id = 'sg' + (++gid) + (dark ? 'd' : 'l'); return `<svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;display:block">
+      <defs><linearGradient id="${id}b" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#E9DCCF"/><stop offset="1" stop-color="#D9C7D3"/></linearGradient>
+      <radialGradient id="${id}t" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#F2B9CF"/><stop offset=".6" stop-color="#C77A9A"/><stop offset="1" stop-color="#8E4E6A"/></radialGradient>
+      <filter id="${id}n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.5  0 0 0 0 0.45  0 0 0 0 0.45  0 0 0 .55 0"/><feComposite in2="SourceGraphic" operator="in"/></filter>
+      <filter id="${id}s"><feGaussianBlur stdDeviation="3"/></filter></defs>
+      <rect width="160" height="120" fill="url(#${id}b)"/>
+      <ellipse cx="86" cy="104" rx="26" ry="5" fill="#6d4a5a" opacity=".25" filter="url(#${id}s)"/>
+      <g transform="rotate(-14 80 60)"><rect x="77.5" y="18" width="5" height="12" rx="2" fill="#7a4b5f"/>
+      <path d="M52 44 C52 35 64 30 80 30 C96 30 108 35 108 44 C108 58 92 74 80 98 C68 74 52 58 52 44 Z" fill="url(#${id}t)"/>
+      <path d="M52.5 41 H107.5 C108 43 108 46 107.5 48 H52.5 C52 46 52 43 52.5 41 Z" fill="#B8205E" opacity=".75"/></g>
+      <rect width="160" height="120" filter="url(#${id}n)" opacity=".35"/></svg>` }
+    const lines = (n, w = [92, 78, 64]) => Array.from({ length: n }, (_, i) => `<div style="height:5px;border-radius:3px;background:${P.block};width:${w[i % w.length]}%;margin-top:5px"></div>`).join('')
+    const mocks = [
+      ['Cargo', 'One signature image, repeated, tiny numbered captions', `<div style="position:absolute;inset:0;background:${P.paper};padding:14px 16px;display:grid;grid-template-rows:auto 1fr;gap:10px">
+        <div style="display:flex;justify-content:space-between;font-size:8.5px;color:${P.ink}"><span>Trompo® Shell</span><span style="opacity:.6">Index · Info</span></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-content:start">${[1, 2, 3, 4, 5, 6].map((n) => `<div><div style="aspect-ratio:4/3;overflow:hidden">${sig()}</div><div style="font-size:7.5px;color:${P.ink};margin-top:3px">0${n}&nbsp; Project name <span style="opacity:.5">Jan 01</span></div></div>`).join('')}</div></div>`],
+      ['Apple HIG', 'One hue, flat tints, guides and dimension marks', `<div style="position:absolute;inset:0;background:${dark ? '#2a1420' : '#FBE3EE'};padding:22px">
+        <div style="position:absolute;inset:22px;border:1px dashed ${P.pink}66"></div>
+        <div style="position:relative;height:100%;display:grid;grid-template-rows:14px 1fr 34px;gap:10px">
+          <div style="border-radius:4px;background:${P.pink}40"></div>
+          <div style="display:grid;grid-template-columns:1.3fr 1fr;gap:10px"><div style="border-radius:6px;background:${P.pink}33;position:relative"><div style="position:absolute;left:10px;right:10px;bottom:-9px;border-top:1px solid ${P.pink};"></div><span style="position:absolute;left:50%;bottom:-17px;transform:translateX(-50%);font:600 8px 'Geist Mono',monospace;color:${P.pink}">640</span></div>
+          <div style="display:grid;gap:6px"><div style="border-radius:4px;background:${P.pink}26"></div><div style="border-radius:4px;background:${P.pink}26"></div></div></div>
+          <div style="display:flex;gap:8px;align-items:center"><div style="width:60px;height:20px;border-radius:10px;background:${P.pink}"></div><div style="flex:1;height:5px;border-radius:3px;background:${P.pink}33"></div></div>
+        </div><span style="position:absolute;left:6px;top:50%;transform:translateY(-50%) rotate(-90deg);font:600 8px 'Geist Mono',monospace;color:${P.pink}">24</span></div>`],
+      ['Lo-fi greys', 'Labelled blocks, skeleton text, one annotation colour', `<div style="position:absolute;inset:0;background:${P.paper};padding:16px;display:grid;grid-template-rows:16px 1fr auto;gap:10px">
+        <div style="display:flex;gap:6px;align-items:center"><div style="width:16px;height:16px;border-radius:4px;background:${P.block}"></div><div style="width:60px;height:5px;border-radius:3px;background:${P.block}"></div><div style="margin-left:auto;width:40px;height:14px;border-radius:7px;background:${P.block}"></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div style="border-radius:8px;background:${P.block2};display:grid;place-items:center;position:relative"><span style="${mono}">image · 4:3</span>
+          <span style="position:absolute;right:-6px;top:10px;transform:translateX(100%);font:500 8px 'Geist Mono',monospace;color:${P.pink};white-space:nowrap">← hero</span></div>
+          <div style="padding-top:6px"><div style="height:9px;width:80%;border-radius:3px;background:${P.block};"></div>${lines(4)}<div style="margin-top:12px;width:56px;height:18px;border-radius:5px;box-shadow:0 0 0 1.5px ${P.pink};display:grid;place-items:center;${mono};color:${P.pink}">button</div></div></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${[1, 2, 3].map(() => `<div style="height:34px;border-radius:6px;background:${P.block2};padding:6px">${lines(2, [70, 50])}</div>`).join('')}</div></div>`],
+      ['Proposal: the harness, drawn', 'Scaffold + labelled placeholders + signature image + pink annotation', `<div style="position:absolute;inset:0;background:${dark ? '#151413' : '#EDE7DD'};">
+        <div style="position:absolute;inset:20px 18px 18px 26px;background:${P.paper};box-shadow:0 0 0 1px ${P.line}">
+          ${[['-5px', '-5px'], ['calc(100% - 5px)', '-5px'], ['-5px', 'calc(100% - 5px)'], ['calc(100% - 5px)', 'calc(100% - 5px)']].map(([x, y]) => `<svg width="10" height="10" style="position:absolute;left:${x};top:${y}"><path d="M5 0V10M0 5H10" stroke="${P.ink}" stroke-width="1" opacity=".55"/></svg>`).join('')}
+          <span style="position:absolute;left:12px;top:-14px;${mono}">landing · 1440 × 900</span>
+          <div style="position:absolute;inset:12px;display:grid;grid-template-rows:12px 1fr auto;gap:9px">
+            <div style="display:flex;gap:6px;align-items:center"><div style="width:44px;height:5px;border-radius:3px;background:${P.block}"></div><div style="margin-left:auto;width:34px;height:12px;border-radius:6px;background:${P.block}"></div></div>
+            <div style="display:grid;grid-template-columns:1fr 1.15fr;gap:12px"><div style="padding-top:4px"><div style="height:8px;width:86%;border-radius:3px;background:${P.ink};opacity:.82"></div><div style="height:8px;width:62%;border-radius:3px;background:${P.ink};opacity:.82;margin-top:4px"></div>${lines(3)}<div style="margin-top:10px;width:48px;height:15px;border-radius:5px;background:${P.ink};opacity:.85"></div></div>
+              <div style="position:relative;border-radius:6px;overflow:hidden">${sig()}<span style="position:absolute;left:6px;bottom:5px;${mono};color:#fff;opacity:.9">image · 4:3</span></div></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">${[1, 2, 3].map((n) => `<div style="height:28px;border-radius:5px;background:${P.block2};padding:5px 6px;position:relative">${lines(2, [70, 46])}${n === 2 ? `<span style="position:absolute;left:50%;top:calc(100% + 3px);transform:translateX(-50%);font:600 8px 'Geist Mono',monospace;color:${P.pink};white-space:nowrap">card × 3</span>` : ''}</div>`).join('')}</div>
+          </div>
+          <div style="position:absolute;left:-17px;top:12px;bottom:12px;border-left:1px solid ${P.pink}"></div><span style="position:absolute;left:-22px;top:50%;transform:translateY(-50%) rotate(-90deg);font:600 7.5px 'Geist Mono',monospace;color:${P.pink};white-space:nowrap">900</span>
+        </div></div>`],
+    ]
+    $('wmocks').innerHTML = mocks.map(([t, d, html]) => `<div class="panel wmock"><div class="art">${html}</div><div class="cap"><b>${esc(t)}</b><span>${esc(d)}</span></div></div>`).join('')
+  }
+  $('wireIdea').textContent = wireframeIdea
+  const shot = (r) => `<a href="references/wireframe/${r}.png" target="_blank" rel="noopener" title="${r}"><img loading="lazy" src="references/wireframe/${r}.png" alt="${r}"></a>`
+  $('wdirs').innerHTML = wireframeDirections.map((d) => `<div class="panel wdir"><div class="hd"><b>${esc(d.name)}</b><span>${esc(d.who)}</span></div>
+    <div class="shots">${d.refs.map(shot).join('')}</div>
+    <div class="cols"><p><span class="k">What makes it tasteful</span>${esc(d.how)}</p><p><span class="k">Borrow</span>${esc(d.borrow)}</p><p class="muted"><span class="k">Risk</span>${esc(d.risk)}</p></div></div>`).join('')
+  $('wavoid').innerHTML = wireframeAvoid.map((d) => `<div class="panel wdir"><div class="hd"><b>${esc(d.name)}</b><span>${esc(d.who)}</span></div><div class="shots">${d.refs.map(shot).join('')}</div><p style="margin:0;font-size:13px" class="muted">${esc(d.why)}</p></div>`).join('')
+  // Type pairings: load their fonts once, render each as a live specimen in Trompo's colours.
+  { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = typeLink; document.head.append(l) }
+  const fontCss = (r) => `font-family:'${r.family}';font-weight:${r.weight};${r.tracking ? `letter-spacing:${r.tracking};` : ''}${r.settings ? `font-variation-settings:${r.settings.replace(/"/g, "'")};` : ''}${r.stretch ? `font-stretch:${r.stretch};` : ''}`
+  function renderPairs() {
+    const scheme = isDark() ? 'dark' : 'light'
+    const k = shortlist3.find((x) => x.id === 'trompo').colors[scheme]
+    const head = esc(($('tryHead')?.value || 'Give it a spin.'))
+    const mute = scheme === 'dark' ? 'rgba(246,241,234,.72)' : 'rgba(28,26,25,.72)'
+    const chip = scheme === 'dark' ? 'rgba(246,241,234,.08)' : 'rgba(28,26,25,.06)'
+    $('pairs6').innerHTML = pairings.map((p, i) => `<article class="panel pair6" id="t-${p.id}">
+      <div class="ph"><b>${esc(p.name)}</b>${p.chosen ? '<span class="rec">Chosen</span>' : p.recommended ? '<span class="rec">Recommended</span>' : ''}<span class="short">${esc(p.short)}</span><span class="kb">${p.kb} KB</span></div>
+      <div class="spec" style="background:${k.bg};color:${k.ink}">
+        <div class="lk">${marks.trompo(k, 40)}<span style="${fontCss(p.display)}font-size:38px;line-height:1">trompo</span></div>
+        <h4 style="${fontCss(p.display)}">${head}</h4>
+        <p style="${fontCss(p.body)}color:${mute}">Put a real design tool around the prototype you already have: inspector, timeline, layers and export, in any runtime.</p>
+        <div class="cta"><span class="btn2" style="${fontCss({ ...p.body, weight: 600 })}">Install</span><span class="cmd" style="${fontCss(p.mono)}background:${chip}">npx skills add trompo-dev/trompo</span></div>
+        <div class="ui" style="${fontCss(p.body)}"><span>Inspector</span><span>Timeline</span><span>Layers</span><span style="${fontCss(p.mono)}">0.75 · 120 ms</span></div>
+      </div>
+      <div class="roles">
+        <span class="k">Display</span><span style="${fontCss({ ...p.display, tracking: 0 })}font-size:15px">${esc(p.display.label)} ${p.display.settings ? `<code>${esc(p.display.settings)}</code>` : ''}</span>
+        <span class="k">Body</span><span style="${fontCss(p.body)}">${esc(p.body.label)}</span>
+        <span class="k">Mono</span><span style="${fontCss(p.mono)}font-size:12.5px">${esc(p.mono.label)}</span>
+      </div>
+      <div class="makers">${p.makers.map((m) => `<span>${esc(m)}</span>`).join('')}</div>
+      <div class="txt"><p>${esc(p.why)}</p><p class="w">${esc(p.watch)}</p></div>
+    </article>`).join('')
+  }
   function renderDecision() {
     const scheme = isDark() ? 'dark' : 'light'
     const c = shortlist3.find((x) => x.id === 'trompo'), k = c.colors[scheme]
@@ -470,6 +613,8 @@
       .map((c) => `<a class="fav" href="#c-${c.id}" style="background:${c.colors[scheme].bg}" aria-label="${esc(c.name)}">${lockup(c, scheme, 34, 28)}</a>`).join('')
   }
   renderAll()
+
+  $('tryHead').addEventListener('input', renderPairs)
 
   /* round 5 */
   $('rows5').innerHTML = names5.map((n) => rowHTML(n, true)).join('')

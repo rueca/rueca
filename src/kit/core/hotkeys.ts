@@ -115,6 +115,14 @@ export function useHotkeys(map: Record<string, HotkeyHandler>, deps: unknown[] =
         run: (e: KeyboardEvent) => { const cur = ref.current[combo]; if (typeof cur === 'function') cur(e); else if (cur) cur.run(e) },
       }
     })
+    // Tab is how keyboard users move through the UI. A bare Tab / Shift+Tab binding must say WHEN it
+    // applies, or it would trap focus for everyone (break-it QA A1). Unguarded ones are dropped.
+    const isTab = (c: string) => splitCombos(c).some((x) => x === 'tab' || x === 'shift+tab')
+    for (const b of mine) if (isTab(b.combo) && !b.when) {
+      if (import.meta.env?.DEV) console.warn(`[trompo] hotkey "${b.combo}" ignored: bare Tab bindings need a \`when\` guard so keyboard focus still moves.`)
+    }
+    const kept = mine.filter((b) => !(isTab(b.combo) && !b.when))
+    mine.length = 0; mine.push(...kept)
     if (import.meta.env?.DEV) for (const b of mine) {
       const clash = bindings.find((o) => o.priority === b.priority && o.combo === b.combo)
       if (clash) console.warn(`[studio] hotkey "${b.combo}" bound twice at priority ${b.priority}${clash.label ? ` (also "${clash.label}")` : ''}. The newest wins; pass { priority } to choose.`)

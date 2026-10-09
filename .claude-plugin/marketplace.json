@@ -1,7 +1,8 @@
 {
   "name": "trompo",
   "owner": {
-    "name": "Rafael Cespedes"
+    "name": "Rafael Cespedes",
+    "url": "https://rafaelcespedes.com"
   },
   "description": "A design-tool harness for the prototype you already have.",
   "plugins": [

@@ -56,7 +56,7 @@ for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attem
   await page.waitForTimeout(800) // let a canvas / WebGL artifact draw a frame
 
   // Find the artboard: --artboard selector → the kit's hook [data-studio-artifact] (on Artboard, and on
-  // <Stage fill>'s display:contents wrapper) → the biggest canvas/iframe/media if it fills a good part of
+  // <Stage fill>'s display:contents wrapper) → .font-artboard (older kits) → the biggest canvas/iframe/media if it fills a good part of
   // the stage (hand-built pages) → the stage itself (graphs, sheets, grids have no single artboard).
   // Kit panels (.panel .cluster .pop) are always hidden so their own accent states don't count.
   const locate = (sel) => {
@@ -72,8 +72,9 @@ for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attem
     const biggest = (q) => [...document.querySelectorAll(q)].sort((a, b) => area(b) - area(a))[0]
     const stage = document.querySelector('main') ?? document.body
     const media = biggest('canvas, iframe, video, img')
-    let el = (sel && document.querySelector(sel)) ?? biggest('[data-studio-artifact]')
-    let how = el && !sel ? 'kit artifact' : 'artboard'
+    let el = sel && document.querySelector(sel), how = 'selector'
+    if (!el) { el = biggest('[data-studio-artifact]'); how = 'kit artifact' }
+    if (!el) { el = biggest('.font-artboard'); how = 'kit artboard' } // kits installed before the hook existed
     if (!el && media && area(media) >= area(stage) * 0.25) { el = media; how = 'largest media' }
     if (!el) { el = stage; how = 'whole stage' }
     if (area(el) < 64 * 64) return null

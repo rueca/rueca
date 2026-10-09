@@ -24,6 +24,7 @@
         "https://trompo-dev.github.io/trompo/r/dialog.json",
         "https://trompo-dev.github.io/trompo/r/easing.json",
         "https://trompo-dev.github.io/trompo/r/envelope.json",
+        "https://trompo-dev.github.io/trompo/r/error-boundary.json",
         "https://trompo-dev.github.io/trompo/r/inline-text.json",
         "https://trompo-dev.github.io/trompo/r/inspector.json",
         "https://trompo-dev.github.io/trompo/r/jobs.json",
@@ -398,6 +399,23 @@
           "path": "src/kit/ui/envelope.tsx",
           "type": "registry:component",
           "target": "@components/studio/ui/envelope.tsx"
+        }
+      ]
+    },
+    {
+      "name": "error-boundary",
+      "type": "registry:component",
+      "title": "Error Boundary",
+      "description": "Error Boundary — part of the Trompo kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "src/kit/system/error-boundary.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/system/error-boundary.tsx"
         }
       ]
     },
@@ -849,6 +867,7 @@
       "dependencies": [],
       "registryDependencies": [
         "https://trompo-dev.github.io/trompo/r/core.json",
+        "https://trompo-dev.github.io/trompo/r/error-boundary.json",
         "https://trompo-dev.github.io/trompo/r/toast.json",
         "https://trompo-dev.github.io/trompo/r/tooltip.json"
       ],

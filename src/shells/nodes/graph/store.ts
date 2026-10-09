@@ -10,7 +10,7 @@ import { createStore } from 'zustand/vanilla'
 import type { HistoryLike } from '@kit'
 import { useStore } from 'zustand'
 import { applyEdgeChanges, applyNodeChanges, type Connection, type Edge, type EdgeChange, type Node, type NodeChange, type XYPosition } from '@xyflow/react'
-import { portOf, type EngineGraph, type PortType } from '../engine/spec'
+import { portOf, specOf, type EngineGraph, type PortType } from '../engine/spec'
 import { defOf, defaultParams } from './defs'
 import { SAMPLES } from './samples'
 
@@ -179,6 +179,33 @@ export function connect(c: Connection) {
   const edges = s.edges.filter((e) => !(e.target === c.target && e.targetHandle === c.targetHandle))
   graph.setState({ edges: [...edges, mkEdge(s.nodes, { source: c.source, sourceHandle: c.sourceHandle ?? 'out', target: c.target, targetHandle: c.targetHandle ?? 'in' })] })
   commit()
+}
+
+/** Remove the wire into one input (keyboard / inspector path — WCAG 2.1.1). */
+export function disconnect(target: string, targetHandle: string) {
+  const s = graph.getState()
+  const edges = s.edges.filter((e) => !(e.target === target && e.targetHandle === targetHandle))
+  if (edges.length === s.edges.length) return
+  graph.setState({ edges })
+  commit()
+}
+
+/** Every output that could legally feed this input: matching type, no loop. */
+export function sourcesFor(target: string, targetHandle: string) {
+  const s = graph.getState()
+  const t = s.nodes.find((n) => n.id === target)
+  if (!t) return []
+  const inp = portOf(t.data.kind, targetHandle, 'in')
+  if (!inp) return []
+  const out: { value: string; label: string; source: string; sourceHandle: string }[] = []
+  for (const n of s.nodes) {
+    if (n.id === target || createsCycle(n.id, target)) continue
+    for (const o of specOf(n.data.kind).outputs) {
+      if (o.type !== inp.type) continue
+      out.push({ value: `${n.id}:${o.key}`, label: specOf(n.data.kind).outputs.length > 1 ? `${n.data.title} · ${o.label}` : n.data.title, source: n.id, sourceHandle: o.key })
+    }
+  }
+  return out
 }
 
 const uid = (kind: string) => `${kind}-${Math.random().toString(36).slice(2, 7)}`

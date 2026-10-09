@@ -16,9 +16,29 @@ harness does the same to a prototype: it's inert on its own and alive once it ha
 | Name | **Trompo**, said TROM-po. Display name `Trompo`, slug `trompo` |
 | Tagline | *Give it a spin.* Alternates: *Wind it up. Let it go.* · *Every prototype wants to spin.* |
 | Mark | A spinning top with a pink band and two motion swooshes. The swooshes drop below 24px. Files: `brand/trompo/mark-light.svg`, `mark-dark.svg`, `mark-small.svg`, `app-icon.svg`, `favicon.svg` (theme-aware) |
-| Wordmark | Fredoka SemiBold, lowercase, −0.02em (Google Fonts, OFL) |
+| Logo files | `brand/trompo/lockup-light.svg` / `lockup-dark.svg` (mark + wordmark) and `wordmark-light.svg` / `wordmark-dark.svg`. Gabarito 800 is outlined to paths, kerned with HarfBuzz and tracked −0.035em, so they need no font installed. The mark is 1.18× the type size, with a 0.32em gap |
+| Wordmark | **Gabarito ExtraBold (800)**, lowercase, −0.035em. Explored in Fredoka; switched 9 Oct |
+| Type | **Geométrica**: Gabarito (display and headlines, 600–900) · Lexend (body, ~350–400, 16px+) · Geist Mono (code). All OFL; self-host via `@fontsource-variable/gabarito`, `/lexend`, `/geist-mono`. About 96 KB Latin. Site and marketing only: the product chrome stays Inter |
 | Palette | Ink `#1C1A19` · Paper `#F6F1EA` · Rosa mexicano `#E4007C` (mark accent `#D1006F` on light, `#FF3EA5` on dark) · Wood `#C58B4E` · Turquesa `#1E9AA0` |
 | Rule | Brand colour lives on the site and the mark only. The product chrome stays neutral (Inter and kit tokens). **The pink is never the chrome accent** (decided 9 Oct): at hue 353–360° it sits 25–32° from the record red, and it would stamp clients' tools with our brand. The accent stays system blue, and the skill checks it against each prototype (`skills/trompo/scripts/accent-check.mjs`). |
+
+### Type (chosen 9 Oct 2026: Geométrica)
+
+Six pairings are rendered live on the board under **Type**. All are Google Fonts under the SIL Open Font License,
+free to use commercially, self-host and bundle. Sizes are the Latin woff2 files Chrome actually downloads.
+Whatever is picked, the product chrome stays Inter.
+
+| Pairing | Display / body / mono | Size | Character |
+|---|---|---|---|
+| **Geométrica** ★ | Gabarito ExtraBold / Lexend / Geist Mono | 96 KB | Round bowls echo the top. Calm, readable body. Lightest. Mostly Latin American makers (Brazil, Mexico, Argentina) |
+| Hecho en Buenos Aires | Archivo Expanded / Chivo / Chivo Mono | 146 KB | One Argentine foundry (Omnibus-Type), a matched system. Most editorial |
+| Del juguete a la herramienta | Recursive Casual / Linear / Mono | 139 KB | One family whose Casual axis runs toy → tool, the brand idea in type. Boldest |
+| Juguete | Fredoka / Instrument Sans / Geist Mono | 108 KB | The current wordmark. Friendliest, and most at risk of reading as "for kids" |
+| Taller | Bricolage Grotesque / Geist / Geist Mono | 127 KB | Hand-made workshop grotesque, dev-tool body. A bit familiar already |
+| Suave | Fraunces SOFT / Inter / JetBrains Mono | 205 KB | Soft serif with the product's own Inter. Warmest, heaviest |
+
+**Chosen: Geométrica**, Rafael's pick from the six. It sits best beside the mark, it's the lightest, and it stays readable at length.
+If you want the type itself to carry the "toy outside, tool inside" story, Recursive is the bolder alternative.
 
 ### Claim these the same day (needs Rafael's accounts)
 
@@ -279,3 +299,31 @@ means shaping wood on a lathe, which is Jigwork's world. Turnwork names that com
 - Twirly: too generic.
 - Kreisel: harsh in English.
 - About 45 workshop, stage, textile and music words were taken outright.
+
+---
+
+# Wireframe identity: research (9 Oct 2026, exploring)
+
+**Idea (Rafael):** Trompo is a harness that holds any content, so the shells demo with tasteful wireframe
+placeholders instead of high-fidelity UI. Board section **Wireframe** has 33 reference screenshots in six
+directions, and the same artboard mocked up four ways. The screenshots are third-party work: they live in
+`brand/references/wireframe/`, which is git-ignored and must never be published.
+
+| Direction | Reference | What makes it tasteful |
+|---|---|---|
+| One curated placeholder, repeated | Cargo Basic templates | No grey boxes. One muted photo repeated in every slot, with tiny numbered captions. Calm, deliberate, and obviously placeholder |
+| Single-hue construction diagram | Apple HIG | UI drawn in tints of one hue, with guide lines and dimension marks. An explanation of the UI, not the UI |
+| Lo-fi component greys | Relume, Whimsical, Figma kits | Labelled grey blocks. The good ones add callouts in a single accent |
+| Visible structure | Vercel Geist grid, Dub | Hairline grids and crosshairs left visible: the scaffold is the ornament. Closest to "harness" |
+| Typographic austerity | Teenage Engineering, Are.na | Small type, lists and labels do the work. Placeholders become words |
+| Skeleton loaders | shadcn, Mobbin | Soft rounded bars. On their own they read as "loading", so use them as an ingredient only |
+
+**Avoid:** hand-drawn or sketchy (Excalidraw, Balsamiq), which reads unfinished, and decorative abstract shapes (Material), which are illustration rather than placeholder.
+
+**Proposal: "the harness, drawn":**
+1. **Scaffold.** A hairline frame, crosshair corners and a size label around every artboard.
+2. **Placeholders.** Labelled warm-grey blocks and skeleton text lines, with Geist Mono labels ("image · 16:9").
+3. **Signature image.** One placeholder image we own, used everywhere a photo goes, Cargo-style. A dithered or photographed spinning top would make the placeholder itself a piece of Trompo.
+4. **Annotation.** Callouts and dimensions in Trompo pink, inside the artboard only (the chrome accent stays blue).
+
+Open: whether Rafael likes the direction, and what the signature image should be. The board's version is an SVG stand-in.

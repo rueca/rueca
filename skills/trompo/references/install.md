@@ -28,25 +28,28 @@ npx shadcn@latest add https://trompo-dev.github.io/trompo/r/studio.json -y
   `layers`, `scrub`, `color`, …) install alone and pull what they need. List:
   `https://trompo-dev.github.io/trompo/r/registry.json`. The bridge is its own item
   (`bridge`, lands in `public/`).
-- Files land in `<components>/studio/` (usually `src/components/studio/`). Import
-  from `@/components/studio`. The kit docs write `@kit` — either alias it in
-  `vite.config.ts` + `tsconfig`, or rewrite the import.
-- **Theme: add it as the LAST line of the main CSS** (e.g. `src/index.css`):
-  ```css
-  @import "./components/studio/theme.css";
-  ```
-  Last, not first: shadcn's own theme also defines `muted`, `accent`, `input` and
-  `font-ui`. Imported first, the kit loses — labels vanish in dark, the accent turns
-  white, the font becomes Geist. Tailwind v4 accepts an `@import` at the end.
-  For a dedicated harness project you can delete shadcn's tokens from the file
-  entirely and keep just `@import "tailwindcss";` plus this line.
+- Files land in `<components>/studio/` (usually `src/components/studio/`). The barrel
+  `index.ts` ships only with the full `studio` item — after installing single pieces, import
+  from the file (`@/components/studio/ui/slider`). The kit docs write `@kit`: alias it to that
+  folder in `vite.config.ts` + `tsconfig`, or rewrite the imports.
+- **Theme:** `@import "./components/studio/theme.css";` in the main CSS. Kit token names are
+  namespaced (`fg-muted`, `signal`, `control`, `font-ui`, …) so they coexist with shadcn's
+  (`muted`, `accent`, `input`) — order doesn't matter. The kit styles only `.studio` (the
+  `<Studio>` root) and `.pop` popups; it never touches your `<body>`. Using kit controls outside
+  `<Studio>`? Put `className="studio"` on their container.
 - **Theme class before first paint.** Put this in `index.html` `<head>` so the stored
-  theme never flashes (the kit's `useTheme` / `ThemeToggle` read the same key):
+  theme never flashes (the kit's `useTheme` / `ThemeToggle` read the same key). Without a
+  `.dark`/`.light` class the tokens follow the OS:
   ```html
   <script>try{var t=localStorage.getItem('studio:theme');document.documentElement.classList.add((t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light')}catch(e){document.documentElement.classList.add('dark')}</script>
   ```
-- `CanvasSurface`'s `draw` callback receives loosely typed values; cast once:
-  `const v = f.v as ReturnType<typeof params.values>`.
+- **Installing from a fork, a staging copy or localhost:** registry items reference each other
+  by absolute URL. Rebuild them against your host first:
+  `npm run sync -- --registry-url http://localhost:5273` (then serve `public/r/`).
+- **Using the kit from source in another project** (monorepo, `npm link`, a path alias outside
+  the project root): add `resolve: { dedupe: ['react', 'react-dom'] }` to Vite (or every page
+  throws "Invalid hook call"), and `@source "<path to kit>";` in your CSS (or Tailwind never sees
+  the kit's classes and it renders unstyled).
 - If `shadcn init` refuses (no Tailwind detected, odd setup), write the files
   directly — they are just source. Fetch the item JSON and write each
   `files[].content` to its target.

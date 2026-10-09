@@ -55,8 +55,9 @@ node <skill>/scripts/accent-check.mjs http://localhost:5173/#/my-tool
 node <skill>/scripts/accent-check.mjs <url> --artboard "#preview"   # if it picks the wrong element
 ```
 
-It finds the artboard (`--artboard` selector → the kit's Artboard → the largest
-canvas/iframe/media → the whole stage), hides all chrome including floating panels,
+It finds the artboard (`--artboard` selector → the kit's `[data-studio-artifact]`
+hook → `.font-artboard` on older kits → the largest canvas/iframe/media on hand-built
+pages → the whole stage), hides all chrome including floating panels,
 and screenshots what's left. Rendered pixels work the same for DOM, SVG, Canvas,
 WebGL and iframes. Then it buckets the pixels by OKLCH hue and checks the accent
 against them and against `rec`, `key` and `ok`.

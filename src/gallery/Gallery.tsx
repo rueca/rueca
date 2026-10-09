@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useTheme, cn, TipProvider } from '@kit'
 import type { ShellMeta } from '@/shells/types'
 import { site } from '@/site.config'
+import '@/landing/landing.css'
 import { Mark, ThemeButton } from '@/landing/parts'
 import { ShellCard, categoriesOf } from './ShellCard'
 
@@ -28,7 +29,7 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
   const list = shells.filter((s) => cat === 'All' || s.category === cat)
   return (
     <TipProvider>
-      <div className="h-full overflow-y-auto bg-field text-fg">
+      <div className="site h-full overflow-y-auto bg-field text-fg">
         <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-24 sm:px-8 sm:pt-8">
           <header className="flex items-center justify-between gap-4">
             <a href="#/" className="flex items-center gap-2 rounded-[6px] text-[13px] font-medium text-fg outline-none focus-visible:ring-2 focus-visible:ring-signal">

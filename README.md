@@ -132,4 +132,4 @@ culori.
 
 ## License
 
-[MIT](LICENSE) © 2026 Rafael Cespedes
+[MIT](LICENSE) © 2026 [Rafael Cespedes](https://rafaelcespedes.com)

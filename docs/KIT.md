@@ -99,7 +99,11 @@ const v = useValues(params)            // React
 ```
 
 Persistence (localStorage, debounced; a quota failure shows a toast once) and `#p=` URL share
-are automatic.
+are automatic. **Every write is validated against the schema** (setValue, patch, presets, saved
+values, share links, the iframe bridge): `"30"` becomes `30`, out-of-range numbers clamp, values that
+can't fit (a number for a colour, an unknown option) are rejected and the store keeps its value,
+unknown keys are ignored — dev builds log why. A schema whose own defaults don't validate logs an
+error at startup.
 
 ### Document state + one undo timeline
 
@@ -143,10 +147,11 @@ stops ticks while paused too (default true for artifacts with their own life).
 ```tsx
 <CanvasSurface ref={h} params={params} clock={clock} draw={(ctx, { t, w, h, v, dt }) => …} deps={[docVersion]} />
 <WebGLSurface params={params} clock={clock} setup={(gl) => program} draw={(gl, f, program) => …} />
-<MountSurface ref={m} params={params} clock={clock} mount={(el, { values, params, clock }) => ({ engine, dispose })} />
+<MountSurface ref={m} params={params} clock={clock} mount={(el, api) => { const engine = start(el, api.values()); api.params.subscribe((s) => engine.update(s.values)); return { engine, dispose: () => engine.stop() } }} />
 <FrameSurface src="/proto.html" params={params} />   // postMessage bridge — see public/studio-bridge.js
 ```
 `h.current.canvas` gives the canvas for export; `m.current.handle` the object `mount` returned.
+**`api.values` is a function** — call `api.values()` for a snapshot; subscribe for changes.
 `v` in `draw` is typed from the schema. Without a clock, `animate` runs its own rAF.
 
 ## 5. Layout
@@ -164,6 +169,12 @@ stops ticks while paused too (default true for artifacts with their own life).
 - `islands`: floating cards with gutter (artboard work). `overlay`: stage full-bleed under
   floating panels (shaders, 3D, photo). `docked`: flush panels, Figma UI3 (dense editors).
 - `⌘\` hides all chrome (present mode).
+- Each region (toolbar, panels, timeline, stage) sits in an `ErrorBoundary`: a crash shows "Try
+  again / Reset saved settings / Reload" in that region instead of blanking the app.
+- Kit base styles (font, size, scrollbars, focus ring, colour-scheme) apply inside `.studio` (the
+  Studio root) and `.pop` popups only — the kit never restyles a host app's `<body>`. Using kit
+  controls outside `<Studio>`? Put `className="studio"` on their container. With no `.dark`/`.light`
+  class on `<html>`, tokens follow the OS theme.
 - Toolbar: `<Brand name doc mark>` (the mark links home itself — pass a plain glyph),
   `<Cluster>` groups, `<ToolDock value onChange tools>` (bottom-centre tools, place it yourself
   absolutely inside the Stage overlay), `<Button variant="primary">` for the ONE primary action.

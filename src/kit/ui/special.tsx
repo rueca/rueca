@@ -303,30 +303,47 @@ export function GradientEditor({ value, onChange, angle = true }: { value: { ang
 }
 
 /* --- Palette: a row of swatches; click to edit, + to add. --- */
-export function PaletteField({ value, onChange, max = 8 }: { value: string[]; onChange: (v: string[], final: boolean) => void; max?: number }) {
+/* Palette: swatches; click one to edit. Remove three ways, none hover-only (WCAG 2.1.1 / 2.5.8):
+   a "Remove colour" button inside the popover, Delete/Backspace on a focused swatch, and the
+   pointer badge on hover. */
+export function PaletteField({ value, onChange, max = 8, min = 1 }: { value: string[]; onChange: (v: string[], final: boolean) => void; max?: number; min?: number }) {
+  const remove = (i: number) => value.length > min && onChange(value.filter((_, j) => j !== i), true)
   return (
-    <div className="flex w-full flex-wrap gap-1">
+    <div className="flex w-full flex-wrap gap-1" role="group" aria-label="Colours">
       {value.map((c, i) => (
         <Popover.Root key={i}>
-          <Popover.Trigger aria-label={`Colour ${i + 1}`} className="group/sw relative size-6 rounded-[5px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
-            <Swatch color={c} size={24} className="rounded-[5px]" />
-            {value.length > 1 && (
-              <span role="button" aria-label="Remove colour" onClick={(e) => { e.stopPropagation(); onChange(value.filter((_, j) => j !== i), true) }}
-                className="absolute -top-1 -right-1 hidden size-3.5 items-center justify-center rounded-full bg-overlay text-fg-muted shadow-[var(--shadow-segment)] group-hover/sw:flex">
+          <div className="group/sw relative">
+            <Popover.Trigger aria-label={`Colour ${i + 1}, ${c}${value.length > min ? '. Delete to remove' : ''}`}
+              onKeyDown={(e) => { if ((e.key === 'Delete' || e.key === 'Backspace') && value.length > min) { e.preventDefault(); remove(i) } }}
+              className="relative block size-6 rounded-[5px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
+              <Swatch color={c} size={24} className="rounded-[5px]" />
+            </Popover.Trigger>
+            {value.length > min && (
+              <button type="button" tabIndex={-1} aria-hidden onClick={() => remove(i)}
+                className="absolute -top-1.5 -right-1.5 hidden size-4 items-center justify-center rounded-full bg-overlay text-fg-muted shadow-[var(--shadow-segment)] hover:text-fg group-hover/sw:flex">
                 <X size={9} strokeWidth={2} />
-              </span>
+              </button>
             )}
-          </Popover.Trigger>
+          </div>
           <Popover.Portal>
             <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[100]">
-              <Popover.Popup className="pop outline-none"><ColorPanel value={c} onChange={(nc, f) => onChange(value.map((x, j) => (j === i ? nc : x)), f)} /></Popover.Popup>
+              <Popover.Popup className="pop outline-none">
+                <ColorPanel value={c} onChange={(nc, f) => onChange(value.map((x, j) => (j === i ? nc : x)), f)} />
+                {value.length > min && (
+                  <div className="border-t border-line px-3 py-2">
+                    <Popover.Close onClick={() => remove(i)} className="flex h-7 w-full items-center justify-center gap-1.5 rounded-[6px] text-[12px] text-fg-muted outline-none hover:bg-hover hover:text-rec focus-visible:ring-2 focus-visible:ring-signal">
+                      <X size={12} strokeWidth={1.75} />Remove colour
+                    </Popover.Close>
+                  </div>
+                )}
+              </Popover.Popup>
             </Popover.Positioner>
           </Popover.Portal>
         </Popover.Root>
       ))}
       {value.length < max && (
         <button type="button" aria-label="Add colour" onClick={() => onChange([...value, value.at(-1) ?? '#ffffff'], true)}
-          className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint shadow-[inset_0_0_0_1px_var(--line-strong)] hover:text-fg">+</button>
+          className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint shadow-[inset_0_0_0_1px_var(--line-strong)] outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">+</button>
       )}
     </div>
   )

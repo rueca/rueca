@@ -397,7 +397,7 @@ export const shortlist3 = [
     id: 'trompo', name: 'Trompo', recommended: true, say: 'TROM-po', short: 'Wind it, throw it, watch it spin',
     why: 'This is the cute name that still sounds like a product. Six letters, two syllables, easy in English, and a toy every Latin American kid knows. The spinning top is a lovely metaphor for a prototype: inert in your hand, alive once you give it a spin. The mark draws itself.',
     watch: 'A small Spanish food-delivery app and a restaurant ordering app use “Trompo”, so you’d need to own it in design-tool search. Some people will think of tacos al pastor first, which might be a plus.',
-    font: { family: '"Fredoka", "Inter", sans-serif', weight: 600, tracking: '-0.02em', case: 'lower', label: 'Fredoka SemiBold' },
+    font: { family: '"Gabarito", "Inter", sans-serif', weight: 800, tracking: '-0.035em', case: 'lower', label: 'Gabarito ExtraBold (chosen 9 Oct; explored in Fredoka)' },
     colors: { light: { ink: '#1C1A19', acc: '#D1006F', bg: '#F6F1EA' }, dark: { ink: '#F6F1EA', acc: '#FF3EA5', bg: '#1C1A19' } },
     palette: [{ name: 'Ink', hex: '#1C1A19' }, { name: 'Paper', hex: '#F6F1EA' }, { name: 'Rosa mexicano', hex: '#E4007C' }, { name: 'Wood', hex: '#C58B4E' }, { name: 'Turquesa', hex: '#1E9AA0' }],
     taglines: ['Give it a spin.', 'Wind it up. Let it go.', 'Every prototype wants to spin.'],
@@ -538,3 +538,142 @@ export const shortlist5 = [
     handle: 'turnwork', domain: 'turnwork.dev',
   },
 ]
+
+/* ---------------------------------------------------------------------------
+   Type — font pairings for Trompo. All Google Fonts, all SIL Open Font License
+   (free for commercial use, self-hosting and bundling). Sizes are the Latin
+   woff2 Chrome downloads for the exact axes requested, measured 9 Oct 2026.
+--------------------------------------------------------------------------- */
+
+export const typeLink = 'https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Instrument+Sans:wght@400..700&family=Geist+Mono:wght@400..600&family=Archivo:wdth,wght@100..125,400..800&family=Chivo:wght@300..700&family=Chivo+Mono:wght@400..600&family=Recursive:wght,CASL,MONO@300..900,0..1,0..1&family=Gabarito:wght@600..900&family=Lexend:wght@300..600&family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Geist:wght@400..600&family=Fraunces:opsz,wght,SOFT@9..144,400..800,0..100&family=Inter:wght@400..700&family=JetBrains+Mono:wght@400..600&display=swap'
+
+/** role = { family, weight, tracking, settings (font-variation-settings), stretch } */
+export const pairings = [
+  {
+    id: 'gabarito', recommended: true, chosen: true, name: 'Geométrica', short: 'Round where the top is round, sharp where it spins',
+    display: { family: 'Gabarito', weight: 800, tracking: '-0.035em', label: 'Gabarito ExtraBold' },
+    body: { family: 'Lexend', weight: 350, tracking: '0', label: 'Lexend Light-Regular' },
+    mono: { family: 'Geist Mono', weight: 450, label: 'Geist Mono' },
+    makers: ['Naipe Foundry · Brazil', 'Santiago Orozco · Mexico, Héctor Gatti · Argentina (Lexend)', 'Basement Studio · Argentina (Geist Mono)'],
+    kb: 96,
+    why: 'Gabarito’s bowls are near-perfect circles with flat, confident terminals. The lowercase o, p and m echo the top’s round body, and at ExtraBold it holds its own beside the mark. Lexend was designed for reading ease, with wide letter spacing and open shapes, so long copy stays calm under a loud headline. It’s the lightest pairing, and most of its makers are Latin American.',
+    watch: 'Lexend’s wide spacing reads slightly airy. Keep body text at 16px or above. Gabarito only runs from 400 to 900, so it’s a display face, not a text face.',
+  },
+  {
+    id: 'omnibus', name: 'Hecho en Buenos Aires', short: 'One Argentine foundry, a whole type system',
+    display: { family: 'Archivo', weight: 800, tracking: '-0.02em', stretch: '125%', label: 'Archivo Expanded ExtraBold' },
+    body: { family: 'Chivo', weight: 400, tracking: '0', label: 'Chivo Regular' },
+    mono: { family: 'Chivo Mono', weight: 450, label: 'Chivo Mono' },
+    makers: ['Omnibus-Type · Buenos Aires (all three)'],
+    kb: 146,
+    why: 'All three faces come from Omnibus-Type in Buenos Aires, so they share proportions and details, which is the closest thing to a custom brand family for free. Archivo’s width axis goes from condensed to expanded, so headlines can be wide and confident while UI labels stay compact. Chivo Mono matches the body exactly. It’s the most “designed”, editorial option.',
+    watch: 'Expanded type eats horizontal space. Long headlines wrap early on phones, so drop to 112% width below 600px. It’s less playful than the toy names suggest.',
+  },
+  {
+    id: 'recursive', name: 'Del juguete a la herramienta', short: 'One family, one axis from toy to tool',
+    display: { family: 'Recursive', weight: 850, tracking: '-0.02em', settings: '"CASL" 1, "MONO" 0', label: 'Recursive Casual Black' },
+    body: { family: 'Recursive', weight: 400, tracking: '0', settings: '"CASL" 0, "MONO" 0', label: 'Recursive Linear' },
+    mono: { family: 'Recursive', weight: 450, settings: '"CASL" 0, "MONO" 1', label: 'Recursive Mono Linear' },
+    makers: ['Arrow Type · Stephen Nixon (USA)'],
+    kb: 139,
+    why: 'This one tells the brand story in type. Recursive has a Casual axis that slides from brush-written and playful to crisp and technical, so the headline sits at the toy end and the body and code sit at the tool end. That’s Trompo’s whole idea, toy outside and pro tool inside. It’s one file for display, body and mono, so everything is guaranteed to match, and the site can even animate the axis as a spin-up effect.',
+    watch: 'Casual at heavy weights can feel comic or “handwritten” if overused, so keep it to the wordmark and hero. It’s one 139 KB file: heavier than two small fonts, lighter than three.',
+  },
+  {
+    id: 'juguete', name: 'Juguete', short: 'Soft, round, friendly: the current wordmark',
+    display: { family: 'Fredoka', weight: 600, tracking: '-0.02em', label: 'Fredoka SemiBold' },
+    body: { family: 'Instrument Sans', weight: 400, tracking: '0', label: 'Instrument Sans' },
+    mono: { family: 'Geist Mono', weight: 450, label: 'Geist Mono' },
+    makers: ['Milena Brandão · Brazil (Fredoka)', 'Rodrigo Fuenzalida · Chile (Instrument Sans)', 'Basement Studio · Argentina (Geist Mono)'],
+    kb: 108,
+    why: 'This is the wordmark you’ve been looking at, with a sharper body face to keep it grown-up. Fredoka’s rounded terminals match the top exactly. Instrument Sans is crisp and slightly condensed, so the soft headline and precise text balance each other.',
+    watch: 'Fredoka is everywhere in kids’ apps and games, so this is the option most likely to read as “for children”. That’s the risk of leaning toy.',
+  },
+  {
+    id: 'bricolage', name: 'Taller', short: 'Quirky workshop grotesque, tech body',
+    display: { family: 'Bricolage Grotesque', weight: 750, tracking: '-0.03em', settings: '"opsz" 96', label: 'Bricolage Grotesque Bold (opsz 96)' },
+    body: { family: 'Geist', weight: 400, tracking: '0', label: 'Geist' },
+    mono: { family: 'Geist Mono', weight: 450, label: 'Geist Mono' },
+    makers: ['Mathieu Triay (Bricolage)', 'Basement Studio · Argentina, with Vercel (Geist)'],
+    kb: 127,
+    why: 'At large optical sizes, Bricolage’s ink traps and pinched curves feel hand-made, like a sign painted in a workshop. Geist is the body face a lot of developer tools now use, so the site would feel at home next to the docs and CLIs Trompo’s audience lives in.',
+    watch: 'Bricolage became a 2024–25 “indie launch” favourite, so it’s already a little familiar. Geist is so common in dev tools that the body won’t say Trompo by itself.',
+  },
+  {
+    id: 'fraunces', name: 'Suave', short: 'A soft serif with the product’s own Inter',
+    display: { family: 'Fraunces', weight: 650, tracking: '-0.02em', settings: '"opsz" 144, "SOFT" 100', label: 'Fraunces SemiBold, SOFT 100' },
+    body: { family: 'Inter', weight: 400, tracking: '0', label: 'Inter' },
+    mono: { family: 'JetBrains Mono', weight: 450, label: 'JetBrains Mono' },
+    makers: ['Undercase Type · Phaedra Charles, Flavia Zimbardi (Fraunces)', 'Rasmus Andersson (Inter)'],
+    kb: 205,
+    why: 'Fraunces has a Softness axis that rounds every corner, so at SOFT 100 it’s a serif that still feels like a toy. The body is Inter, the same face as the product chrome, so the site and the tool feel continuous. It’s the warmest, most crafted-looking option.',
+    watch: 'It’s the heaviest at 205 KB, and the serif pulls the brand towards editorial or food packaging. Inter on its own reads as generic, so the serif has to carry all the personality.',
+  },
+]
+
+/* ---------------------------------------------------------------------------
+   Wireframe identity — research, 9 Oct 2026. Screenshots live in
+   brand/references/wireframe/ (git-ignored: third-party work, never publish).
+--------------------------------------------------------------------------- */
+
+export const wireframeIdea = 'Trompo is a harness: it holds whatever you put in it. So the shells should demo with tasteful placeholders instead of finished, high-fidelity UI. That keeps the focus on the tool, lets any content feel at home, and turns “empty” into the look. The question is how to make placeholders look designed, not unfinished.'
+
+export const wireframeDirections = [
+  {
+    id: 'cargo', name: 'One curated placeholder, repeated', who: 'Cargo (Basic templates)',
+    refs: ['cargo-feed-01', 'cargo-grid-01', 'cargo-grid-05', 'cargo-slide-04'],
+    how: 'Cargo doesn’t use grey boxes. Every Basic template uses the same single photograph, a muted pastel shot of someone resting their head on a table, repeated in every slot. Tiny captions sit under it (“01 Project Name · Jan 01”) with generous white space. You read it instantly as placeholder, but it looks deliberate and calm. The layouts change and the placeholder never does.',
+    borrow: 'One signature placeholder image, used everywhere a picture would go. It becomes part of the brand. Pair it with numbered, small captions.',
+    risk: 'It needs a genuinely good image that we own. A stock photo would cheapen it, and Cargo’s photo is theirs.',
+  },
+  {
+    id: 'hig', name: 'Single-hue construction diagram', who: 'Apple Human Interface Guidelines',
+    refs: ['apple-hig-layout', 'apple-hig-sidebars'],
+    how: 'Apple draws UI as a diagram in one hue, all yellow or all red. Shapes are flat tints of that hue, with guide lines, margins and measurement brackets drawn on top. It looks like an explanation of the UI, not the UI itself, and it’s beautiful because it’s monochrome and exact.',
+    borrow: 'Draw the artboard content in tints of one colour, with hairline guides and dimension marks as the decoration. It could use Trompo pink inside the artboard, or a neutral.',
+    risk: 'If every shell is one hue, the hue has to change per shell or it gets monotonous. Labels must stay crisp at small sizes.',
+  },
+  {
+    id: 'lofi', name: 'Lo-fi component greys', who: 'Relume · Whimsical · Figma kits (Fragments, Lookscout)',
+    refs: ['relume-components-2', 'whimsical-wireframes', 'figma-fragments', 'figma-lookscout'],
+    how: 'This is the literal wireframe: neutral grey blocks with rounded corners, real labels (Relume names its thumbnails “Application Shell 1, 2, 3”), and image boxes with a soft icon. The good ones (Fragments) add annotation callouts in one accent colour, which makes it feel like a design review rather than a sketch.',
+    borrow: 'Labelled grey blocks for UI, plus a single annotation colour for callouts (“button”, “hero 16:9”, “→ next screen”).',
+    risk: 'It’s the most generic option, and every wireframe kit looks like this. It needs our type and annotation style to feel like Trompo.',
+  },
+  {
+    id: 'grid', name: 'Visible structure: the frame is the ornament', who: 'Vercel (Geist grid) · Dub',
+    refs: ['vercel-geist-grid', 'vercel-home-2', 'dub-home'],
+    how: 'Hairline grid lines, cell borders and crosshair marks at intersections stay visible on the finished page. The structure that’s usually hidden becomes the decoration. This is the closest match to “harness”: scaffolding drawn around content.',
+    borrow: 'Draw the harness itself: hairline frames around the artboard, crosshair corners, rulers and size labels (“1440 × 900”). The placeholder content sits inside the scaffold.',
+    risk: 'It’s fashionable right now with developer-tool sites, so on its own it reads as “another dev tool”. Combine it with something warmer.',
+  },
+  {
+    id: 'manual', name: 'Typographic austerity: the manual', who: 'Teenage Engineering guides · Are.na',
+    refs: ['te-op1-guide', 'te-ep133-guide-2', 'arena-home'],
+    how: 'Almost no images. Small type, lists, labels, numbers and the occasional technical line drawing do all the work. The confidence of saying very little with very good type is the aesthetic.',
+    borrow: 'Placeholders as words: “image · 16:9”, “headline”, “button”, set in Geist Mono at small size. Numbered items and index lists.',
+    risk: 'Too austere for client-facing demos on its own, and it depends heavily on perfect typography.',
+  },
+  {
+    id: 'skeleton', name: 'Skeleton loaders', who: 'shadcn/ui · Mobbin',
+    refs: ['shadcn-skeleton', 'mobbin-skeleton'],
+    how: 'Soft rounded bars and circles in one light grey, sometimes shimmering, mirroring a layout while it loads.',
+    borrow: 'The softness and the rounded bars, used for text lines inside the other directions.',
+    risk: 'Everyone reads skeletons as “still loading”, so on its own it looks broken, not designed. Use it as an ingredient only.',
+  },
+]
+
+export const wireframeAvoid = [
+  { name: 'Hand-drawn / sketchy', who: 'Excalidraw · Balsamiq', refs: ['excalidraw', 'balsamiq'], why: 'It signals “unfinished” or “joke”, the opposite of a pro tool. It’s fine for whiteboards, wrong for a brand.' },
+  { name: 'Decorative abstract shapes', who: 'Material Design', refs: ['material-layout'], why: 'Colourful blobs are illustration, not placeholder, and they would compete with real content.' },
+]
+
+export const wireframeProposal = {
+  name: 'Proposal: the harness, drawn',
+  parts: [
+    ['Scaffold', 'Hairline frame around every artboard, crosshair corners, a size label (“1440 × 900”) and rulers. The harness is visible. (Vercel)'],
+    ['Placeholders', 'Labelled warm-grey blocks with soft skeleton text lines. Labels in Geist Mono at 10–11px: “image · 16:9”, “headline”, “button”. (Relume, Teenage Engineering)'],
+    ['Signature image', 'One placeholder picture we own, used everywhere a photo goes. A dithered spinning top, made with our own dither shell, would make the placeholder itself a piece of Trompo. (Cargo)'],
+    ['Annotation', 'Callouts and dimension marks in Trompo pink, inside the artboard only. The chrome accent stays blue, per the accent rule. (Apple HIG, Fragments)'],
+  ],
+}

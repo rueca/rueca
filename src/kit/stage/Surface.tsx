@@ -182,15 +182,22 @@ export function FrameSurface<S extends Schema>({ src, params, className, title =
     if (!params) return
     const post = () => frame.current?.contentWindow?.postMessage({ type: 'studio:params', values: params.toJSON({ shareable: false }) }, '*')
     const off = params.subscribe(post)
+    let commitTimer: ReturnType<typeof setTimeout> | undefined
     const onMsg = (e: MessageEvent) => {
       if (e.source !== frame.current?.contentWindow) return
       if (e.data?.type === 'studio:ready') post()
-      if (e.data?.type === 'studio:set') params.setValue(e.data.key, e.data.value)
+      if (e.data?.type === 'studio:set' && typeof e.data.key === 'string') {
+        // Validated by the store (wrong types are coerced or rejected). Typing in the page
+        // arrives per keystroke — coalesce into one undo step after a short pause.
+        params.setValue(e.data.key, e.data.value, { commit: false })
+        clearTimeout(commitTimer)
+        commitTimer = setTimeout(() => params.commit(), 400)
+      }
     }
     window.addEventListener('message', onMsg)
     const f = frame.current
     f?.addEventListener('load', post)
-    return () => { off(); window.removeEventListener('message', onMsg); f?.removeEventListener('load', post) }
+    return () => { off(); clearTimeout(commitTimer); params.commit(); window.removeEventListener('message', onMsg); f?.removeEventListener('load', post) }
   }, [params])
   return <iframe ref={frame} src={src} title={title} className={cn('block h-full w-full border-0 bg-white', className)} />
 }

@@ -79,7 +79,6 @@
   --gutter: 12px;
   --inspector-w: 280px;
 
-  color-scheme: dark;
 }
 
 :root.light {
@@ -125,7 +124,54 @@
   --shadow-artboard: 0 20px 60px -18px rgba(0, 0, 0, 0.3);
   --artboard-ring: rgba(0, 0, 0, 0.08);
 
-  color-scheme: light;
+}
+
+/* No theme class on <html>: follow the OS rather than forcing dark on a host app. */
+@media (prefers-color-scheme: light) {
+  :root:not(.dark) {
+    --field: #ececec;
+    --panel: #ffffff;
+    --overlay: #ffffff;
+
+    --well: #dedede;     /* #ebebeb gave the white pill 1.19, #e3e3e3 1.28 */
+    --track: #d9d9d9;
+    --raised: #ffffff;
+    --active: #e6e6e6;   /* NOT --raised: white on a white panel is invisible */
+    --control: #f2f2f2;
+
+    --fg: #1a1a1a;
+    --fg-muted: #5e5e5e;
+    --fg-faint: #7e7e7e; /* #9a9a9a was only 2.8:1 on white */
+
+    --line: rgba(0, 0, 0, 0.08);
+    --line-strong: rgba(0, 0, 0, 0.16);
+    --hover: rgba(0, 0, 0, 0.04);
+    --press: rgba(0, 0, 0, 0.07);
+
+    --signal: #0b84e0;
+    --signal-strong: #0a6fc0;
+    --signal-fg: #ffffff;
+    --signal-soft: rgba(11, 132, 224, 0.12);
+
+    --key: #c98a00;
+    --rec: #e5383b;
+    --ok: #1fa971;
+
+    --lane: #c6c6c6;
+    --cat-1: #2f6fe0; --cat-2: #c26a00; --cat-3: #12965c; --cat-4: #b43fb0;
+    --cat-5: #d23a3a; --cat-6: #0f8fa3; --cat-7: #7354e0; --cat-8: #8a8100;
+    --scrim: rgba(0, 0, 0, 0.45);
+    --grid: rgba(0, 0, 0, 0.05);
+
+    /* light shadows must be far softer or they read as dirt */
+    --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.07);
+    --shadow-cluster: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
+    --shadow-segment: 0 1px 2px rgba(0, 0, 0, 0.14), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+    --shadow-artboard: 0 20px 60px -18px rgba(0, 0, 0, 0.3);
+    --artboard-ring: rgba(0, 0, 0, 0.08);
+
+  }
 }
 
 :root[data-density="compact"] { --row: 24px; --gutter: 8px; --inspector-w: 256px; }
@@ -171,34 +217,36 @@
 }
 
 @layer base {
-  html, body, #root { height: 100%; }
-  body {
-    margin: 0;
-    background: var(--field);
-    color: var(--fg);
+  /* Scoped to Trompo's own surfaces. The kit must not restyle a host app's <body> (break-it DX3):
+     the app's own index CSS sets html/body (see src/app.css). Popups portal to <body>, so `.pop`
+     carries the same base. */
+  :where(.studio, .pop) {
+    color-scheme: dark;
     font-family: var(--font-ui);
-    font-size: 12px;
-    line-height: 1.4;
+    font-feature-settings: "cv11", "ss01"; /* Inter: single-storey a, open digits */
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    font-feature-settings: "cv11", "ss01"; /* Inter: single-storey a, open digits */
   }
-  button { cursor: default; }
+  :where(.studio) { color: var(--fg); font-size: 12px; line-height: 1.4; }
+  :root.light :where(.studio, .pop) { color-scheme: light; }
+  @media (prefers-color-scheme: light) { :root:not(.dark) :where(.studio, .pop) { color-scheme: light; } }
+  :where(.studio) button { cursor: default; }
 
   /* Browsers paint a light native scrollbar on dark UI: a bright slab against the
      canvas. Thin, translucent, inset via a transparent border + background-clip. */
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
-  ::-webkit-scrollbar-thumb {
+  :where(.studio, .pop) ::-webkit-scrollbar, :where(.studio, .pop)::-webkit-scrollbar { width: 10px; height: 10px; }
+  :where(.studio, .pop) ::-webkit-scrollbar-track, :where(.studio, .pop) ::-webkit-scrollbar-corner { background: transparent; }
+  :where(.studio, .pop) ::-webkit-scrollbar-thumb {
     background: var(--line-strong);
     border: 3px solid transparent;
     background-clip: content-box;
     border-radius: 99px;
   }
-  ::-webkit-scrollbar-thumb:hover { background: var(--fg-faint); background-clip: content-box; }
+  :where(.studio, .pop) ::-webkit-scrollbar-thumb:hover { background: var(--fg-faint); background-clip: content-box; }
 
-  :focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; }
-  ::selection { background: var(--signal-soft); }
+  :where(.studio, .pop) :focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; }
+  :where(.studio, .pop) ::selection { background: var(--signal-soft); }
+}
 }
 
 @utility tabular { font-variant-numeric: tabular-nums; }

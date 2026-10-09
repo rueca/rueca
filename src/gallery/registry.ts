@@ -20,4 +20,5 @@ export const SHELLS: Shell[] = Object.entries(metas)
 /** Routes the app owns besides shells. A shell can never take these ids. */
 export const RESERVED_ROUTES = ['', 'shells'] as const
 
-export const thumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/${id}-${theme}.png`
+/** Marketing thumbnail: the neutral-accent capture from scripts/thumbs-rail.mjs (qa.mjs's PNGs stay QA artefacts). */
+export const thumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/rail/${id}-${theme}.jpg`

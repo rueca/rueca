@@ -53,6 +53,24 @@ Landing: shells section is a pinned rail (src/landing/ShellRail.tsx) with its ow
 after shells change visibly run `npm run thumbs:rail [id]` (scripts/thumbs-rail.mjs). TODO: synth's
 "Click to start audio" overlay shows in captures — hide it when `?qa` is in the URL.
 
+## Wave 2 + rename: DONE (commits cf4bca5, 8d960cf)
+~35 components promoted (see KIT.md §6b), all 19 shells migrated, QA clean, build ok, renamed to Trompo,
+skill architecture/gotchas updated, sync check passes.
+
+**Note:** ~/.claude/skills/trompo is a symlink to this repo's skills/trompo — edits there are live in Rafael's
+personal skill. Old prototype-studio skill archived at ~/.claude/skill-backups/.
+
+## Break-it QA round: dx + a11y reported; P0/P1 from them FIXED (see research/08-qa-round.md "Fix log").
+Still running at hand-off: interaction (5311), state (5312), layout (5313), perf (5316). Their reports arrive as
+notifications — append to research/08-qa-round.md, fix P0/P1, then P2. Then send Branding "go fonts".
+
+## Break-it QA round (original plan) (6 read-only agents, brief: scratchpad/breakit-brief.md)
+interaction (5311) · state/persistence (5312) · layout/responsive/themes (5313) · a11y + axe (5314) ·
+developer/agent experience incl. registry + plugin (5315) · performance/leaks/scale (5316).
+When they report: triage into research/08-qa-round.md, fix P0/P1 first, re-run QA, commit.
+THEN message the Branding session "go fonts" — site typeface Geométrica (Gabarito / Lexend / Geist Mono, landing only)
+is approved and waiting on the QA round so npm i doesn't disturb the test servers.
+
 ## Next (in order)
 1. **Review QA results** in `research/qa-report.json`. Handoff run: tsc clean; 0 console errors across all 19 shells × 2 themes; low-contrast text flags (<3:1) in ui-design (dark 1), video (light 8), flows (4/3), generate (dark 3), journey (8/2), synth (dark 8) — check each; some may be artwork text the audit can't tell from chrome (mark artwork roots with `data-studio-artifact`).
 2. **Consolidation pass on the kit** — work through `research/07-kit-gaps.md`. Top items (requested by 4–6 builders):

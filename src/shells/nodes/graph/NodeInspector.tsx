@@ -2,11 +2,11 @@
 import { useLayoutEffect } from 'react'
 import { useStore } from 'zustand'
 import { Copy, Eye, EyeOff, MoreHorizontal, Trash2, ScanEye, MousePointerClick } from 'lucide-react'
-import { Inspector, Panel, PanelHeader, IconButton, Menu, Badge, Section, Row, Button, useValues, cn } from '@kit'
+import { Inspector, Panel, PanelHeader, IconButton, Menu, Badge, Section, Row, Button, Select, useValues } from '@kit'
 import { InlineText } from '@kit/ui/inline-text'
 import { specOf } from '../engine/spec'
 import { defOf, catVar } from './defs'
-import { graph, updateData, duplicate, removeNodes, select } from './store'
+import { graph, updateData, duplicate, removeNodes, select, connect, disconnect, sourcesFor } from './store'
 import { itemStoreFor, bindNode } from './nodeParams'
 import { useEval } from './evaluator'
 import { doc } from './doc'
@@ -70,13 +70,19 @@ function One({ id }: { id: string }) {
         <Section title="Inputs" first={false}>
           {spec.inputs.map((p) => {
             const src = wiredFrom.get(p.key)
+            const current = graph.getState().edges.find((e) => e.target === id && e.targetHandle === p.key)
+            const NONE = '__none'
+            // The keyboard way to wire (WCAG 2.1.1): pick the source here instead of dragging a wire.
+            const options = [{ value: NONE, label: p.optional ? 'Not connected (optional)' : 'Not connected' }, ...sourcesFor(id, p.key)]
             return (
-              <Row key={p.key} label={p.label} hint={p.param ? `Wiring this overrides the ${p.param} value below.` : undefined}>
-                <span className="size-2 shrink-0 rounded-full" style={{ background: src ? portVar(p.type) : 'transparent', boxShadow: `inset 0 0 0 1.5px ${portVar(p.type)}` }} />
-                <span className={cn('min-w-0 flex-1 truncate text-[11.5px]', src ? 'text-fg' : p.optional ? 'text-fg-faint' : 'text-rec')}>
-                  {src ?? (p.optional ? 'Optional' : 'Not connected')}
-                </span>
-                <span className="text-[11px] text-fg-faint">{p.type}</span>
+              <Row key={p.key} label={p.label} hint={`${p.type} input.${p.param ? ` Wiring this overrides the ${p.param} value below.` : ''}${src ? '' : p.optional ? '' : ' Required.'}`}>
+                <span className="size-2 shrink-0 rounded-full" aria-hidden style={{ background: src ? portVar(p.type) : 'transparent', boxShadow: `inset 0 0 0 1.5px ${portVar(p.type)}` }} />
+                <Select label={`${p.label} source`} value={current ? `${current.source}:${current.sourceHandle}` : NONE} options={options}
+                  className={!current && !p.optional ? 'text-rec' : undefined}
+                  onChange={(v) => {
+                    if (v === NONE) disconnect(id, p.key)
+                    else { const [source, sourceHandle] = v.split(':'); connect({ source, sourceHandle, target: id, targetHandle: p.key }) }
+                  }} />
               </Row>
             )
           })}
