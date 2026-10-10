@@ -70,8 +70,11 @@ Geist Mono code — landing + gallery only; product chrome stays Inter.
   Esc mid-scrub, wheel), focused fields own their keys, bare-Space shortcuts fire on release (Space+drag pans
   without playing), typed `p.select`/`p.multi` values, grid semantics for EffectStack + DataGrid, KeyTimeline per-lane
   `[ ]`, ViewportFrame `chrome={false}`, preset name clashes + active-preset tracking, OKLCH text entry.
-- Eval suite: evals/ (6 cases + fixtures, README has the run commands). NOT run yet — each run is a full Claude
-  session on Rafael's account. Suggested first run: one case, `--runs 1`.
+- Eval suite (evals/, run from the ~/trompo-eval worktree — Drive sync breaks runs inside ~/Documents):
+  with skill vs without — client-view 1.00/0.00, docs-state 1.00/0.00, tuning-tool 1.00/0.50,
+  wrap-existing-html 0.75/0.25 (grader since widened), vanilla-three 1.00/1.00 (doesn't discriminate),
+  no-trigger 1.00/1.00 (skill correctly stays out). ~$7 spent in total, 2026-10-10. Next: --runs 3 for noise,
+  and a harder three.js rubric (outliner/gizmo/undo) so that case measures something.
 - Branding session is converting shell demo content to the "wire aesthetic v2" (brand/BRAND.md): it owns
   ui-design, dropin, batch, video, animate, motion, component-lab, photo, dither, generate, flows, journey (+ scene
   optional) until it says it's done. Message it before touching those shells.
