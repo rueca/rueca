@@ -89,7 +89,10 @@ Geist Mono code — landing + gallery only; product chrome stays Inter.
    (Packaging owns src/landing); comment-pin initials label (ui-design); video timeline labels.
 3. Untested areas worth one more agent later: undo storms in flows/journey/generate, photo HistoryList jump,
    canvas zoom extremes, real pointer lock.
-4. Launch decisions (Rafael): domain rueca.dev, repo rueca/rueca, npm scope, publish — see docs/LAUNCH.md.
+4. Launch: rueca.dev BOUGHT (Vercel, team RC IDP). GitHub org `rueca` created; repo rueca/rueca is PRIVATE, main pushed
+   2026-10-10, CI green (build + tests; the Pages deploy skips while private). At launch: make it public, then either
+   GitHub Pages + DNS records in Vercel, or host the site on Vercel (the domain is already there). npm scope @rueca is
+   free (Rafael creates the npm org when publishing). See docs/LAUNCH.md.
 - Machine: ~/Documents is synced by Google Drive (fileproviderd busy) — move the repo out of synced folders; quit
   leftover headless Chrome processes (I'm not permitted to kill them).
 
