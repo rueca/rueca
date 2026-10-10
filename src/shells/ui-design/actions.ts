@@ -1,6 +1,6 @@
 /* Shell-level actions with feedback (toasts). Shared by commands, menus,
    the context bar and the inspector so each verb has one implementation. */
-import { toast, download, copyText, exportJSON, stamp } from '@kit'
+import { toast, download, copyText, exportJSON, matchesShape, stamp } from '@kit'
 import * as S from './model/store'
 import { prefs } from './model/prefs'
 import { renderNodeToCanvas } from './render/paint'
@@ -55,6 +55,8 @@ export async function openDocument(file: File) {
   try {
     const doc = JSON.parse(await file.text())
     if (!doc?.pages?.length) throw new Error('Not a design file')
+    // Pages/nodes must look like ours before they replace the document (break-it S2: `{"pages":[{}]}`).
+    if (!matchesShape(doc, S.get().doc)) throw new Error('This file’s pages or layers have the wrong shape')
     S.design.setState({ doc, pageId: doc.pages[0].id, selection: [] })
     S.commit('Open file')
     toast(`Opened ${doc.name ?? file.name}`, { type: 'success' })

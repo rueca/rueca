@@ -1,5 +1,5 @@
 /* Flows — getting things out: PNG (DOM snapshot of the viewport), JSON, Mermaid. */
-import { copyText, download, exportCanvasPNG, exportJSON, toast } from '@kit'
+import { copyText, download, exportCanvasPNG, exportJSON, matchesShape, toast } from '@kit'
 import { snapshotElement } from '@kit'
 import { activeFlow, importFlow, select, sizeOf, ui, viewport } from './store'
 import type { Flow } from './model'
@@ -53,6 +53,12 @@ export function importFlowJSON() {
       const data = JSON.parse(await file.text())
       const flow: Flow = data.flow ?? data
       if (!Array.isArray(flow.nodes) || !Array.isArray(flow.edges)) throw new Error('No nodes / edges in this file')
+      // Same shape as a real flow (id, type, position, data on every node…) — a Nodes graph export or a
+      // hand-edited file would otherwise crash the canvas and persist (break-it S2).
+      const ref = activeFlow()
+      if (!matchesShape(flow.nodes, ref.nodes) || !matchesShape(flow.edges, ref.edges)) throw new Error('This isn’t a Flows file (nodes or connections have the wrong shape)')
+      const KINDS = new Set(['screen', 'decision', 'terminal', 'note', 'section', 'start', 'end', ...ref.nodes.map((n) => n.type ?? '')])
+      if (flow.nodes.some((n) => !KINDS.has(n.type ?? ''))) throw new Error('This file has node types Flows doesn’t know (is it a Nodes graph?)')
       importFlow({ id: '', name: flow.name ?? file.name.replace(/\.json$/, ''), description: flow.description ?? '', owner: flow.owner ?? 'you', nodes: flow.nodes, edges: flow.edges, comments: flow.comments ?? [], updated: Date.now() })
       toast(`Imported “${flow.name ?? file.name}”`, { type: 'success' })
     } catch (e) {

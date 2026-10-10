@@ -114,6 +114,10 @@ export async function importSession(file: File) {
   try {
     const d = JSON.parse(await file.text())
     if (d.format !== 'studio.generate.session' || !Array.isArray(d.images)) throw new Error('Not a session export')
+    // Skip entries the renderer can't draw rather than poisoning the session (break-it S2).
+    const usable = d.images.filter((i: any) => i && typeof i === 'object' && i.params && typeof i.params === 'object' && typeof i.params.prompt === 'string' && Number.isFinite(i.params.seed))
+    if (!usable.length) throw new Error('No usable images in this file')
+    d.images = usable
     const sess = newSession(String(d.name ?? 'Imported'))
     addImages(d.images.map((i: any, k: number) => ({ id: uid('i-'), sessionId: sess.id, jobId: 'import', createdAt: Date.now() - k, params: i.params, kind: i.kind ?? 'generate', favourite: !!i.favourite, boards: [], ms: 0 })))
     toast(`Imported “${sess.name}”`, { type: 'success', description: `${d.images.length} images` })

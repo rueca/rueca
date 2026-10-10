@@ -6,6 +6,10 @@ import { defineSchema, folder, p, createParams, type NumberDef, type BoolDef } f
 import { DEFAULT_PATTERN, type Pattern, type TrackId } from './pattern'
 import { SineIcon, TriangleIcon, SawIcon, SquareIcon } from './local/WaveIcons'
 
+// Patterns arrive from share links and imports — five numeric step lanes (break-it S4).
+const validPattern = (v: unknown) => !!v && typeof v === 'object' &&
+  (['kick', 'snare', 'hat', 'bass', 'notes'] as const).every((k) => { const a = (v as Record<string, unknown>)[k]; return Array.isArray(a) && a.length > 0 && a.every((n) => typeof n === 'number' && Number.isFinite(n)) })
+
 const ms = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(2)}s` : `${Math.round(n)}ms`)
 const hz = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 1 : 2)}k` : `${Math.round(n)}`)
 const pct = (n: number) => `${Math.round(n * 100)}%`
@@ -77,7 +81,7 @@ export const schema = defineSchema({
     visual: p.select('orbit', [{ value: 'orbit', label: 'Orbit' }, { value: 'horizon', label: 'Horizon' }]),
   }),
   doc: folder('Pattern', {
-    pattern: p.data<Pattern>(DEFAULT_PATTERN, { share: true, hint: 'The 16-step pattern: drum velocities, bass velocities and notes.' }),
+    pattern: p.data<Pattern>(DEFAULT_PATTERN, { share: true, validate: validPattern, hint: 'The 16-step pattern: drum velocities, bass velocities and notes.' }),
   }),
 })
 

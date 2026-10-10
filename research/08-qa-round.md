@@ -67,7 +67,7 @@ NOT YET: flows "Connect to" picker not exercised in a browser test (typechecks; 
 | ID | Sev | Where | Problem | Fix |
 |---|---|---|---|---|
 | F1 | P1 ✅ FIXED (Esc at priority 100 with `when: present`; exit button visible at 30%) | Studio.tsx present Esc (prio 0) vs shell `esc` (prio 10) | Esc doesn't leave present mode in 10/19 shells; "Show interface" button is opacity-0 | Present-mode Esc at high priority with `when: () => present`; make the exit button visible on hover/focus |
-| F2 | P2 | present shell client branch | No `<Toaster/>` outside Studio → "Saved"/"Link copied" never show on phone | Mount Toaster + TipProvider in client branch (or make Toaster self-mount like DialogHost) |
+| F2 | P2 ✅ toast() self-mounts a single Toaster anywhere | present shell client branch | No `<Toaster/>` outside Studio → "Saved"/"Link copied" never show on phone | Mount Toaster + TipProvider in client branch (or make Toaster self-mount like DialogHost) |
 | F3 | P2 | Stage HUD/overlays | ⌘\ leaves zoom pill, tool dock, minimap, gizmo, readouts on screen | Stage hud/overlay read `useStudio().present` and hide |
 | F4 | P2 | flows @1024 | zoom pill overlaps ToolDock | dock respects pill / safe bottom-right |
 | F5 | P2 | scene ≤1280 | stats readout under tool dock | move stats left / hide narrow |
@@ -76,7 +76,7 @@ NOT YET: flows "Connect to" picker not exercised in a browser test (typechecks; 
 | F8 | P2 (code-read) | z-index: popups z-[100] < Dialog z-[151] | Select/Menu/Tooltip inside a kit Dialog render behind backdrop | raise popup positioners (z-[160]) |
 | F9 | P3 | Brand | long doc name truncates app name to "M…" | name span flex-none |
 | F10 | P3 | dither HUD, component-lab ViewportFrame @1024 | clipped without ellipsis | truncate / icon-only |
-| F11 | P3 | present ClientSheet | chevron direction inverted | swap |
+| F11 | P3 ✅ | present ClientSheet | chevron direction inverted | swap |
 | F12 | P3 | audit | hex in scene/local/Vec3Input.tsx; icon sizes/strokes vary widely (kit itself breaks the 14/1.5 rule); 8.5–9px text in ui-design/flows; ColorField unchanged hex in fg-faint; generate tile hover = base; radii 3–14px mix | update KIT §1 rule to reality or align |
 Held up: theme flip mid-session; safe-area vars; no horizontal scroll; long/Arabic/CJK/emoji text; present + gallery on phone.
 Desktop shells at 390px just squeeze (batch, journey, scene, video clip mid-control) — consider a "best on a larger screen" notice. 768 mostly usable.
@@ -105,9 +105,9 @@ Load average ~480. Many headless Chrome processes (playwright) left by QA agents
 | ID | Sev | Problem | Status |
 |---|---|---|---|
 | S1 | P0 | corrupt saved doc/ui keys white-screen shells on every load (module-level loaders, above Studio) | FIXED: route-level ErrorBoundary in gallery/App.tsx with "Reset saved settings" scoped to `studio:<shell>`; createDocStore `validate` hook + default `matchesShape(initial)` check; rejected docs parked at `<key>:rejected` (never destroyed); photo looks + scene ui loaders guarded. Repros (flows {}, motion presets {}, animate null, photo looks {}, scene ui null) all load. |
-| S2 | P0 | imports that pass a shallow check get saved and kill the shell after reload | PARTLY: doc.replace() now refuses docs that fail validate/shape and throws (nothing persisted). TODO per shell: catch + toast on import; add real `validate` to each createDocStore (ui-design, video, journey, flows, generate). |
+| S2 | P0 ✅ | imports that pass a shallow check get saved and kill the shell after reload | FIXED: matchesShape checks array items' common keys; ui-design/video/flows/generate imports shape-guarded, flows rejects unknown node types (Nodes graph files), generate skips unusable images; journey via doc.replace validation. Verified: all rejected, shells alive after reload. Was PARTLY: doc.replace() now refuses docs that fail validate/shape and throws (nothing persisted). TODO per shell: catch + toast on import; add real `validate` to each createDocStore (ui-design, video, journey, flows, generate). |
 | S3 | P1 | non-array presets key crashes params shells | FIXED (Array.isArray + name guard) |
-| S4 | P1 | p.data from share links white-screens shader/synth/photo | FIXED in kit: DataDef `validate` hook; share:false keys dropped from links. TODO: shader/synth/photo add `validate` to their p.data defs (they set share:true). |
+| S4 | P1 ✅ | p.data from share links white-screens shader/synth/photo | shader validLayers, synth validPattern, photo matchesShape validators added. Kit: DataDef `validate` hook; share:false keys dropped from links. TODO: shader/synth/photo add `validate` to their p.data defs (they set share:true). |
 | S5 | P1 | share link overrides later edits on every reload | FIXED: a link applies once per tab session (sessionStorage marker) |
 | S6 | P2 | edit + immediate reload lost (debounce) | FIXED: flush on pagehide / visibilitychange (params + doc) |
 | S7 | P2 | two tabs clobber each other | FIXED for params (storage event adopt when not mid-edit). Doc stores: TODO |
@@ -116,7 +116,7 @@ Load average ~480. Many headless Chrome processes (playwright) left by QA agents
 | S10 | P2 | photo/dither intake: no toast on reject, silent downscale | TODO |
 | S11 | P3 | legacyKeys never removed; scan stops at first | FIXED |
 | S12 | P3 | double quota toasts / silent forever after | FIXED: shared module flag, re-armed on success |
-| S13 | P3 | present: `&client` appended repeatedly | TODO |
+| S13 | P3 ✅ | present: `&client` appended repeatedly | FIXED |
 Held up: 40+ exports valid (zip CRC, WAV, PNG/SVG/JSON/CSV); garbage imports toast; version migrate works.
 Not tested: MP4/WebM/GLB/.cube capture (machine overloaded).
 

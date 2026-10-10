@@ -7,7 +7,7 @@
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
 import { RectangleHorizontal, RectangleVertical, Square, Smartphone } from 'lucide-react'
-import { createClock, createDocStore, createHistory, createParams, defineSchema, folder, p, useDoc } from '@kit'
+import { createClock, createDocStore, createHistory, createParams, defineSchema, folder, matchesShape, p, useDoc } from '@kit'
 import { ASPECTS, demoComp, newClip, uid, type Aspect, type Clip, type ClipKind, type Comp, type Track } from './comp'
 
 export const schema = defineSchema({
@@ -185,6 +185,9 @@ export function rebaseDesign(aspect: Aspect) {
 export function loadComp(data: unknown) {
   const d = data as Partial<Comp> & { settings?: Partial<V> }
   if (!d || !Array.isArray(d.clips) || !Array.isArray(d.tracks)) throw new Error('Not a Cut composition (needs tracks and clips).')
+  // Every clip and track must look like the ones we have (break-it S2: `clips: [null]` killed the shell).
+  const cur = getComp()
+  if (!matchesShape(d.clips, cur.clips) || !matchesShape(d.tracks, cur.tracks)) throw new Error('Clips or tracks have the wrong shape.')
   const patch = { comp: { tracks: d.tracks, clips: d.clips, design: d.design ?? (d.settings?.aspect as Aspect | undefined) ?? '9:16' } }
   const settings: Record<string, unknown> = {}
   if (d.settings?.aspect) settings.aspect = d.settings.aspect

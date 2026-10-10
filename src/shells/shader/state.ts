@@ -68,6 +68,12 @@ export const LOOKS = [
 /* ---------- schema ---------- */
 export const perf = { fps: 60, ms: 16.7, scale: 1, res: '—' }
 
+// Layers arrive from share links and saved looks — check each one names a known type (break-it S4).
+const validLayers = (v: unknown) => Array.isArray(v) && v.every((l) =>
+  !!l && typeof l === 'object' && typeof (l as Layer).id === 'string' && (l as Layer).type in LAYER_TYPES &&
+  typeof (l as Layer).visible === 'boolean' && typeof (l as Layer).opacity === 'number' &&
+  !!(l as Layer).params && typeof (l as Layer).params === 'object')
+
 export const schema = defineSchema({
   canvas: folder('Canvas', {
     aspect: p.select('free', [{ value: 'free', label: 'Fill' }, { value: '16:9', label: '16:9' }, { value: '1:1', label: '1:1' }, { value: '9:16', label: '9:16' }], { hint: 'Fill uses the whole window. Fixed ratios frame the artwork for export.' }),
@@ -84,7 +90,7 @@ export const schema = defineSchema({
     drawing: p.monitor(() => perf.res, { label: 'Drawing at' }),
   }, { collapsed: true }),
   // never rendered as a row; the layers panel edits it. Shared, so a link carries the whole look.
-  stack: folder('Stack', { layers: p.data<Layer[]>(LOOKS[0].values.layers, { label: 'Layers', share: true }) }),
+  stack: folder('Stack', { layers: p.data<Layer[]>(LOOKS[0].values.layers, { label: 'Layers', share: true, validate: validLayers }) }),
 })
 
 export const LOOK_KEYS = ['layers', 'bg', 'seed'] as const

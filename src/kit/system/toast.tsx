@@ -1,5 +1,7 @@
 /* Toasts — bottom-centre, above the dock. Call `toast('Copied')` from anywhere, React or not. */
 import { Toast } from '@base-ui/react/toast'
+import { useEffect, useId, useState } from 'react'
+import { createRoot } from 'react-dom/client'
 import { X } from 'lucide-react'
 
 export const toastManager = Toast.createToastManager()
@@ -15,8 +17,22 @@ const toProps = (title: string, o: ToastOpts) => ({
   actionProps: o.action ? { children: o.action.label, onClick: o.action.onClick } : undefined,
 })
 
+// toast() must work anywhere — outside <Studio>, in a client view, on a plain page (break-it F2/DX16).
+// If no <Toaster> is mounted when one is shown, mount one on <body> once.
+// Exactly one Toaster renders: the first to mount owns the viewport, others stay empty.
+let owner: string | null = null
+let selfHost: HTMLElement | null = null
+function ensureHost() {
+  if (owner || selfHost || typeof document === 'undefined') return
+  selfHost = document.createElement('div')
+  selfHost.dataset.trompoToaster = ''
+  document.body.appendChild(selfHost)
+  createRoot(selfHost).render(<Toaster />)
+}
+
 /** Show a toast; returns its id. Loading toasts stay until updated or dismissed. */
 export function toast(title: string, opts: ToastOpts = {}) {
+  ensureHost()
   return toastManager.add(toProps(title, opts))
 }
 /** Change a toast in place (e.g. loading → success). */
@@ -52,6 +68,15 @@ if (typeof window !== 'undefined') {
 }
 
 export function Toaster() {
+  const id = useId()
+  const [active, setActive] = useState(false)
+  useEffect(() => {
+    if (owner) return
+    owner = id
+    setActive(true)
+    return () => { if (owner === id) owner = null }
+  }, [id])
+  if (!active) return null
   return (
     <Toast.Provider toastManager={toastManager} limit={3}>
       <Toast.Portal>

@@ -186,7 +186,15 @@ export function matchesShape(value: unknown, template: unknown, depth = 3): bool
   if (Array.isArray(template)) {
     if (!template.length) return true
     const t0 = template[0]
-    return (value as unknown[]).every((v) => kind(v) === kind(t0) && (kind(t0) !== 'object' || depth <= 1 || true))
+    if (!(value as unknown[]).every((v) => kind(v) === kind(t0))) return false
+    if (kind(t0) !== 'object') return true
+    // Items may differ (a flow's screens vs notes), so only keys EVERY template item has are required.
+    const items = template as Record<string, unknown>[]
+    const common = Object.keys(items[0]).filter((k) => items.every((it) => it && it[k] !== undefined && it[k] !== null))
+    // …and only their kinds, not their insides (one item's `data` needn't look like another's).
+    const shallow = (x: unknown) => (Array.isArray(x) ? [] : x !== null && typeof x === 'object' ? {} : x)
+    const sample: Record<string, unknown> = Object.fromEntries(common.map((k) => [k, shallow(items[0][k])]))
+    return (value as Record<string, unknown>[]).every((v) => matchesShape(v, sample, depth - 1))
   }
   if (kind(template) === 'object') {
     const t = template as Record<string, unknown>, v = value as Record<string, unknown>

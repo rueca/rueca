@@ -32,14 +32,14 @@ for (const [rname, [rw, rh]] of Object.entries(RATIOS)) {
       const S = Math.min(w, h) * 0.64 / 32, cx = w * 0.53, cy = h * 0.5
       // floor shadow under the tip, pushed away from the light
       x.save(); x.filter = `blur(${S * 1.5}px)`; x.fillStyle = 'rgba(0,0,0,.5)'
-      x.beginPath(); x.ellipse(cx + S * 3.4, cy + S * 13.6, S * 8.5, S * 1.5, 0, 0, Math.PI * 2); x.fill(); x.restore()
+      x.beginPath(); x.ellipse(cx + S * 3.8, cy + S * 14.6, S * 8.5, S * 1.5, 0, 0, Math.PI * 2); x.fill(); x.restore()
       x.save(); x.translate(cx, cy); x.rotate(-0.2); x.scale(S, S); x.translate(-16, -16)
-      // side of the body: a revolved profile from the shoulder rim down to the point
-      const side = new Path2D('M5.4 11 C5.4 17.5 11.5 22.5 16 29.6 C20.5 22.5 26.6 17.5 26.6 11 Z')
+      // side of the body: a revolved trompo profile, convex at the shoulder, slightly concave towards the point
+      const side = new Path2D('M5.4 11 C5.2 15.2 8.4 19.6 12.2 23.8 C13.8 25.6 15.2 27.2 16 28.8 C16.8 27.2 18.2 25.6 19.8 23.8 C23.6 19.6 26.8 15.2 26.6 11 Z')
       const g1 = x.createLinearGradient(5.4, 0, 26.6, 0)
       g1.addColorStop(0, '#303030'); g1.addColorStop(0.24, '#8e8e8e'); g1.addColorStop(0.38, '#cfcfcf'); g1.addColorStop(0.66, '#6c6c6c'); g1.addColorStop(1, '#1e1e1e')
       x.fillStyle = g1; x.fill(side)
-      const g2 = x.createLinearGradient(0, 11, 0, 29.6)
+      const g2 = x.createLinearGradient(0, 11, 0, 28.8)
       g2.addColorStop(0, 'rgba(0,0,0,0)'); g2.addColorStop(1, 'rgba(0,0,0,.5)')
       x.fillStyle = g2; x.fill(side)
       // the band: a ring around the body just under the shoulder (front arcs of two ellipses)
@@ -50,9 +50,13 @@ for (const [rname, [rw, rh]] of Object.entries(RATIOS)) {
       x.fillStyle = g3; x.fill(); x.restore()
       // top face: mid-tone (so it dithers into texture, not into nothing) with a defined rim
       const g4 = x.createRadialGradient(12.5, 10, 0.3, 16, 11, 11)
-      g4.addColorStop(0, '#e2e2e2'); g4.addColorStop(1, '#8c8c8c')
+      g4.addColorStop(0, '#d4d4d4'); g4.addColorStop(1, '#7a7a7a')
       x.fillStyle = g4; x.beginPath(); x.ellipse(16, 11, 10.6, 2.8, 0, 0, Math.PI * 2); x.fill()
-      x.strokeStyle = '#3c3c3c'; x.lineWidth = 0.35; x.stroke()
+      x.strokeStyle = '#4c4c4c'; x.lineWidth = 0.25; x.stroke()
+      // the metal point (la punta)
+      const g6 = x.createLinearGradient(15, 0, 17, 0)
+      g6.addColorStop(0, '#1c1c1c'); g6.addColorStop(0.45, '#bdbdbd'); g6.addColorStop(1, '#141414')
+      x.fillStyle = g6; x.beginPath(); x.moveTo(15.1, 28.1); x.lineTo(16.9, 28.1); x.lineTo(16, 31); x.closePath(); x.fill()
       // stem seated on the top face, with its own little shadow
       x.fillStyle = 'rgba(0,0,0,.35)'; x.beginPath(); x.ellipse(16.6, 11.2, 2.2, 0.7, 0, 0, Math.PI * 2); x.fill()
       const g5 = x.createLinearGradient(14.6, 0, 17.4, 0)

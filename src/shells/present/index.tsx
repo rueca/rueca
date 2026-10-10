@@ -39,7 +39,7 @@ export default function Present() {
 
   const shuffle = () => params.patch({ seed: Math.floor(Math.random() * 99999), palette: Object.keys(PALETTES)[Math.floor(Math.random() * 4)] })
   const save = () => renderDownload(params.values() as V).then(() => toast('Saved to downloads', { type: 'success' }))
-  const send = async () => { await copyText(params.shareURL() + '&client'); toast('Link copied — send it to your designer', { type: 'success' }) }
+  const send = async () => { const u = params.shareURL(); await copyText(/[#&]client\b/.test(u) ? u : `${u}&client`); toast('Link copied — send it to your designer', { type: 'success' }) }
 
   const commands: Command[] = [
     { id: 'client', label: client ? 'Designer view' : 'Client view', shortcut: 'mod+shift+p', icon: Eye, run: () => setClient((c) => !c) },
@@ -56,7 +56,8 @@ export default function Present() {
 
   if (client) return (
     <>
-      <div className="relative h-full w-full overflow-hidden bg-field">
+      {/* `studio` = kit base styles (font, focus ring) outside <Studio> */}
+      <div className="studio relative h-full w-full overflow-hidden bg-field">
         {art}
         <ClientSheet onShuffle={shuffle} onSave={save} onSend={send} onExit={narrow ? undefined : () => setClient(false)} />
       </div>
@@ -103,7 +104,7 @@ function ClientSheet({ onShuffle, onSave, onSend, onExit }: { onShuffle: () => v
             <div className="text-[14px] font-semibold">Make it yours</div>
             <div className="text-[12px] text-fg-muted">Shuffle, tweak, download</div>
           </div>
-          <ChevronUp size={18} strokeWidth={1.5} className={cn('text-fg-faint transition-transform', !open && 'rotate-180')} />
+          <ChevronUp size={18} strokeWidth={1.5} className={cn('text-fg-faint transition-transform', open && 'rotate-180')} />
         </button>
         <div className="min-h-0 overflow-y-auto border-t border-line">
           <Inspector params={params} published />
