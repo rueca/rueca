@@ -60,6 +60,23 @@ personal skill. Old prototype-studio skill archived at ~/.claude/skill-backups/.
 Site type (branding session, Rafael's picks): Gabarito display (big stacked hero "Give it / a spin."), Hanken Grotesk body,
 Geist Mono code — landing + gallery only; product chrome stays Inter.
 
+## Cleanup QA round — 2026-10-10 (evening)
+- Six read-only agents ran on a frozen snapshot; findings + fixes in research/09-cleanup-qa.md. All P0/P1 in the
+  kit and shells are FIXED and live (6fd3253): marks lost work on reload (P0), share links (persist, hash-keyed,
+  versioned, apply when pasted), version bumps no longer orphan docs/presets, ui-design/synth/generate/nodes load
+  guards, keyboard focus on kit buttons, panel tab order + landmarks, click-through under empty panel areas,
+  install docs that work end to end, Vercel docs + CI, cache headers, lazy mediabunny, link-preview meta, QA
+  screenshots out of public/. 55 unit tests, QA 38/38.
+- Handed to the landing owners (ship with the landing push, which waits on Rafael's sign-off): narrow kit
+  imports (−117 KB gz eager, done by Packaging), gallery WebP thumbs (done), lazy Landing + NotFound route
+  (done), Synth iframe focus steal (`inert`), landing/gallery `<main>`, dimmed rail text, reduced-motion scroll,
+  StepDeck regions, ShellRail unused import (breaks tsc).
+- Backlog (P2/P3, kit/shells): `--signal-text` token for accent text on tinted surfaces (C4), fg-faint on
+  tinted surfaces (C5), video unnamed spinbuttons (C7), React Flow refit on present/Esc (L2), nodes preview HUD
+  overlap at 1024 (L3), batch toolbar/labels at 1024 (L4/L5), TrackTimeline 16px overflow (L6), unused
+  `statusbar` prop (L7), dead exports + shell duplicates of kit pieces (D3, M1–M5), og.png + touch icon,
+  em dashes in chrome copy, type-scale tokens.
+
 ## Current state — 2026-10-10 (afternoon)
 - Break-it QA round COMPLETE: all six agents reported (interaction re-ran as interaction-2). Every P0/P1 and the P2s
   are fixed and verified headlessly; the log is in research/08-qa-round.md (latest: "interaction-2" sections).
