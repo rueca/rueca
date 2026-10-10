@@ -33,7 +33,8 @@
      right-click      Rename · Duplicate · Show/Hide · Move up/down · Remove
    Opacity is a kit ScrubValue (drag, type, arrows); the blend chip is a menu.
 
-   Accessibility: role="listbox" of role="option" rows with aria-selected;
+   Accessibility: role="grid" of focusable role="row"s with aria-selected (a
+   listbox can't hold buttons — axe nested-interactive); one gridcell per row;
    every icon button has an aria-label; hover-revealed controls also show on
    focus-within. Index semantics: `onMove(id, toIndex)` gets the item's new
    index in YOUR `items` array, whatever `order` is.
@@ -213,7 +214,7 @@ export function EffectStack<T extends StackItem>({
   const noop = drag ? (() => { const f = dIndexOf(drag.id); return drag.to === f || drag.to === f + 1 })() : true
 
   const listEl = (
-    <div ref={list} role="listbox" aria-label={label} className={cn('flex flex-col py-1', className)}>
+    <div ref={list} role="grid" aria-label={label} className={cn('flex flex-col py-1', className)}>
       {display.map((it, i) => {
         const sel = selected === it.id
         const Icon = it.icon
@@ -228,7 +229,7 @@ export function EffectStack<T extends StackItem>({
             {drag && !noop && drag.to === i && <InsertLine />}
             <div
               ref={(el) => { rows.current[it.id] = el }}
-              role="option"
+              role="row"
               aria-selected={sel}
               aria-expanded={renderDetails ? open : undefined}
               aria-label={name || undefined}
@@ -259,6 +260,7 @@ export function EffectStack<T extends StackItem>({
               )}
               style={{ minHeight: rowHeight }}
             >
+              <div role="gridcell" className="contents">
               {showGrip && (
                 <span aria-hidden onPointerDown={(e) => { e.stopPropagation(); startDrag(e, it.id, true) }}
                   className={cn('flex h-6 w-3 shrink-0 cursor-grab items-center justify-center text-fg-faint opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100', (!canMove || display.length < 2) && 'invisible')}>
@@ -337,9 +339,10 @@ export function EffectStack<T extends StackItem>({
                   </Tip>
                 )}
               </div>
+              </div>
             </div>
             {open && (
-              <div role="group" aria-label={`${name} settings`} className="pt-1 pb-2">{renderDetails!(it, c)}</div>
+              <div role="row"><div role="gridcell" aria-label={`${name} settings`} className="pt-1 pb-2">{renderDetails!(it, c)}</div></div>
             )}
             {drag && !noop && drag.to === display.length && i === display.length - 1 && <InsertLine bottom />}
           </div>
