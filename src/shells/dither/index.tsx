@@ -5,17 +5,18 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Artboard, Menu, Button, IconButton, Divider, Badge,
-  PaletteField, ImageDrop, ParamActions, CommandPalette, useValues, useCamera, useHoldKey, shareMenuItems, equal, toast,
+  PaletteField, ImageDrop, ParamActions, CommandPalette, useValues, useCamera, useHoldKey, shareMenuItems, equal, toast, promptText,
   copyText, download, stamp, cn, type Command, type MenuItem,
 } from '@kit'
 import { CompareSplit } from '@kit/stage/CompareSplit'
 import { PresetGrid } from '@kit/ui/preset-grid'
 import { useImageIntake } from '@kit/core/image-intake'
+import { rejectReason, useIntakeRejects } from '../intake'
 import { EFFECTS, PALETTES, image, params, view } from './state'
 import { RASTER, type EffectId, type Result } from './engine'
 import { out, loadImage, loadSample, start } from './run'
 import { colorAt, drawVector, halftoneSVG, outSize, rasterCanvas, renderOutput } from './draw'
-import { extractPalette } from './image'
+import { extractPalette, MAX_SIDE } from './image'
 import { PalettePicker } from './local/PalettePicker'
 import { ZoomSteps } from './local/ZoomSteps'
 
@@ -59,11 +60,15 @@ function downloadTXT() {
 }
 
 async function take(file: Blob, name: string) {
-  await toast.promise(loadImage(file, name), {
+  // refuse empties / non-images out loud (drops of non-images are caught by useIntakeRejects) — break-it S10
+  const bad = rejectReason({ name, type: file.type, size: file.size })
+  if (bad) { toast(bad, { type: 'error', description: 'Open a PNG, JPEG, WebP or GIF.' }); return }
+  const r = await toast.promise(loadImage(file, name), {
     loading: 'Opening image…',
     success: `Opened ${name}`,
     error: 'Could not open image',
-  }).catch(() => { /* the toast already said so */ })
+  }).catch(() => null /* the toast already said so */)
+  if (r?.scaled) toast(`Scaled down to ${r.w} × ${r.h}`, { description: `The original is ${r.from.w} × ${r.from.h}; dithering works on at most ${MAX_SIDE}px on the long edge.` })
 }
 
 export default function DitherLab() {
@@ -78,6 +83,7 @@ export default function DitherLab() {
   // Drop anywhere on the window, paste, or Open… — the image stays out of params (see state.ts).
   // ⌘O is bound by the palette's Open command, so the hook doesn't bind it too.
   const intake = useImageIntake((img) => take(img.file, img.name), { hotkey: false })
+  useIntakeRejects()
   useHoldKey('\\', (held) => view.setState({ peek: held }))
 
   const active = presets.length ? params.activePreset() : undefined // looks are partial: match only their keys
@@ -169,7 +175,7 @@ export default function DitherLab() {
                 onRemove={(n) => params.deletePreset(n)}
               />
               <div className="px-3 pb-1">
-                <Button size="sm" variant="ghost" className="w-full" onClick={() => { const name = prompt('Name this look', `Look ${presets.filter((p) => !p.builtin).length + 1}`); if (name) { params.savePreset(name); toast(`Saved “${name}”`, { type: 'success' }) } }}>
+                <Button size="sm" variant="ghost" className="w-full" onClick={async () => { const name = await promptText({ title: 'Name this look', label: 'Name', defaultValue: `Look ${presets.filter((p) => !p.builtin).length + 1}`, confirmLabel: 'Save look' }); if (name) { params.savePreset(name); toast(`Saved “${name}”`, { type: 'success' }) } }}>
                   Save current as look…
                 </Button>
               </div>
@@ -330,9 +336,9 @@ function StatusPill() {
       {error ? <span className="size-1.5 shrink-0 rounded-full bg-rec" />
         : busy ? <span className="size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" />
         : <span className="size-1.5 shrink-0 rounded-full bg-ok" />}
-      <span className="min-w-0 shrink-[100] truncate text-fg">{error ? error : preview ? `Preview: ${preview}` : effectLabel(effect)}</span>
+      <span className={cn('min-w-0 shrink-[100] truncate text-fg', !error && !preview && 'max-[1180px]:hidden')}>{error ? error : preview ? `Preview: ${preview}` : effectLabel(effect)}</span>
       <span className="min-w-0 truncate tabular text-fg-muted">{detail}</span>
-      {r && <span className="min-w-0 shrink-[20] truncate tabular text-fg-faint" title={threaded ? 'Processed in a worker' : 'Processed on the main thread'}>{Math.round(r.ms)} ms</span>}
+      {r && <span className="hidden shrink-0 tabular text-fg-faint min-[1180px]:inline" title={threaded ? 'Processed in a worker' : 'Processed on the main thread'}>{Math.round(r.ms)} ms</span>}
       {r?.draft && <Badge tone="key">Draft</Badge>}
       {hover && (
         <span className="flex shrink-0 items-center gap-1.5 border-l border-line pl-2 tabular text-fg-muted">

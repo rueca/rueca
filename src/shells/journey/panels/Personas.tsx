@@ -51,13 +51,16 @@ export function PersonasPanel() {
         <div className="flex flex-col items-center gap-2 px-3 pt-1 pb-2 text-center">
           <Avatar p={p} size={56} />
           <div className="w-full">
-            <InlineText bare value={p.name} onCommit={(name) => set({ name }, 'Rename persona')} className="block truncate text-[14px] font-semibold" label="Persona name" />
-            <InlineText bare allowEmpty value={p.role} onCommit={(role) => set({ role })} className="block truncate text-[11.5px] text-fg-muted" label="Role" />
+            <InlineText bare value={p.name} onCommit={(name) => set({ name }, 'Rename persona')} className="block min-h-6 truncate text-[14px] leading-6 font-semibold" label="Persona name" />
+            <InlineText bare allowEmpty value={p.role} onCommit={(role) => set({ role })} className="block min-h-6 truncate text-[11.5px] leading-6 text-fg-muted" label="Role" />
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-0.5">
             {['#8b5cf6', '#f97316', '#14b8a6', '#ec4899', '#0ea5e9', '#84cc16'].map((h) => (
-              <button key={h} type="button" aria-label={`Colour ${h}`} onClick={() => set({ hue: h }, 'Persona colour')}
-                className="size-4 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-signal" style={{ background: h, boxShadow: p.hue === h ? '0 0 0 2px var(--panel), 0 0 0 3.5px var(--fg-muted)' : undefined }} />
+              // 24px target around a 16px swatch (WCAG 2.5.8, break-it A15); the selected one also says so (not colour only)
+              <button key={h} type="button" aria-label={`Colour ${h}`} aria-pressed={p.hue === h} onClick={() => set({ hue: h }, 'Persona colour')}
+                className="group/sw flex size-6 items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-signal">
+                <span className="size-4 rounded-full" style={{ background: h, boxShadow: p.hue === h ? '0 0 0 2px var(--panel), 0 0 0 3.5px var(--fg-muted)' : undefined }} />
+              </button>
             ))}
           </div>
         </div>

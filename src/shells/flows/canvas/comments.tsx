@@ -54,12 +54,12 @@ export function CommentLayer({ zoom }: { zoom: number }) {
 function Pin({ c, open }: { c: Comment; open: boolean }) {
   const p = PEOPLE[c.author] ?? PEOPLE.you
   return (
-    <button type="button" aria-label={`Comment by ${p.name}`}
+    <button type="button" aria-label={`Comment by ${p.name}${c.resolved ? ', resolved' : c.replies.length ? `, ${c.replies.length + 1} messages` : ''}`}
       onClick={(e) => { e.stopPropagation(); ui.setState({ openComment: open ? null : c.id, draft: null }) }}
       className={cn('absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-[10.5px] font-semibold text-white outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-signal', c.resolved && 'opacity-50')}
       style={{ pointerEvents: 'all', background: deepen(p.hue), boxShadow: `0 0 0 2px ${open ? 'var(--signal)' : 'var(--panel)'}, var(--shadow-cluster)` }}>
-      {c.resolved ? <Check size={12} strokeWidth={2.5} /> : p.initials}
-      {c.replies.length > 0 && !c.resolved && <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-panel px-0.5 text-[10.5px] leading-none text-fg tabular shadow-[0_0_0_1px_var(--line-strong)]">{c.replies.length + 1}</span>}
+      {c.resolved ? <Check size={12} strokeWidth={2.5} /> : <span aria-hidden>{p.initials}</span>}
+      {c.replies.length > 0 && !c.resolved && <span aria-hidden className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-panel px-0.5 text-[10.5px] leading-none text-fg tabular shadow-[0_0_0_1px_var(--line-strong)]">{c.replies.length + 1}</span>}
     </button>
   )
 }

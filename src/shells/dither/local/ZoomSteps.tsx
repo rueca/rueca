@@ -34,7 +34,7 @@ export function ZoomSteps({ className }: { className?: string }) {
       <Menu
         side="top"
         align="end"
-        trigger={<button type="button" aria-label="Zoom level" className="h-6 min-w-[50px] rounded-[5px] px-1 tabular text-[11.5px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">{Math.round(zoom * 100)}%</button>}
+        trigger={<button type="button" aria-label={`Zoom level ${Math.round(zoom * 100)}%`} className="h-6 min-w-[50px] rounded-[5px] px-1 tabular text-[11.5px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">{Math.round(zoom * 100)}%</button>}
         items={[
           { label: 'Zoom to fit', shortcut: 'shift+1', onClick: () => { cam.untouch(); cam.fit() } },
           { type: 'separator' },

@@ -464,7 +464,7 @@ export function KeyTimeline(props: KeyTimelineProps) {
       {props.segmentEditor && (
         <Popover.Root open={!!seg} onOpenChange={(o) => { if (!o) closeSeg() }}>
           <Popover.Portal>
-            <Popover.Positioner side="top" align="center" sideOffset={8} collisionPadding={12} className="z-[100]"
+            <Popover.Positioner side="top" align="center" sideOffset={8} collisionPadding={12} className="z-[160]"
               anchor={seg ? { getBoundingClientRect: () => seg.rect } : undefined}>
               <Popover.Popup className="pop outline-none">
                 {seg && props.segmentEditor({ laneId: seg.laneId, keyId: seg.keyId }, closeSeg)}

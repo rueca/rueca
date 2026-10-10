@@ -115,6 +115,8 @@ export function DataGrid<R extends object>({
   }
 
   const onKeyDown = (e: React.KeyboardEvent) => {
+    // keys inside a cell's own control (colour picker, editor) belong to that control
+    if (e.target !== e.currentTarget) return
     if (editing) return
     if (!sel) {
       // first arrow / Enter into an unselected grid picks the active row's first cell
@@ -258,11 +260,11 @@ function ColorCell({ value, onChange, disabled }: { value: string; onChange: (v:
   return (
     <Popover.Root>
       <Popover.Trigger aria-label="Pick colour" onPointerDown={(e) => e.stopPropagation()}
-        className="flex shrink-0 rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
+        className="-m-[5px] flex shrink-0 rounded-[4px] p-[5px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
         <Swatch color={valid ? value : 'transparent'} size={14} />
       </Popover.Trigger>
       <Popover.Portal>
-        <Popover.Positioner side="top" align="start" sideOffset={8} collisionPadding={12} className="z-[100]">
+        <Popover.Positioner side="top" align="start" sideOffset={8} collisionPadding={12} className="z-[160]">
           <Popover.Popup className="pop outline-none"><ColorPanel value={valid ? value : '#888888'} alpha={false} onChange={onChange} /></Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>

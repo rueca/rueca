@@ -10,7 +10,7 @@ import { createStore } from 'zustand/vanilla'
 import { Processor } from './processor'
 import type { Result, Settings } from './engine'
 import { image, params, settingsOf, view } from './state'
-import { asSource, decode, previewURL, shrink } from './image'
+import { asSource, decodeSized, previewURL, shrink } from './image'
 import { paintSample } from './sample'
 import { renderOutput } from './draw'
 
@@ -72,8 +72,9 @@ function setSource(img: ImageData) {
 
 /** Load a user image. Throws a readable error. */
 export async function loadImage(input: Blob | string, name: string) {
-  const data = await decode(input)
+  const { data, from } = await decodeSized(input)
   image.setState({ data, w: data.width, h: data.height, name, sample: false, url: previewURL(data) })
+  return { w: data.width, h: data.height, from, scaled: data.width !== from.w || data.height !== from.h }
 }
 
 export function loadSample() {

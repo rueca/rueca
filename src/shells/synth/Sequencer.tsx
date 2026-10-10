@@ -165,7 +165,9 @@ export function Sequencer() {
   )
 
   return (
-    <div className="flex flex-col gap-1 px-3 pt-2 pb-3" role="grid" aria-label="Step sequencer" aria-rowcount={rows.length}>
+    // Each track is a group of toggle buttons (aria-pressed); arrow keys move between steps. Not role="grid": gridcell + aria-pressed
+    // is invalid ARIA (break-it A20).
+    <div className="flex flex-col gap-1 px-3 pt-2 pb-3" role="group" aria-label="Step sequencer — arrow keys move between steps">
       {/* step LEDs — the playhead */}
       <div className="flex items-end gap-2" aria-hidden>
         <div className="w-[148px] shrink-0 text-[10.5px] text-fg-faint">{started ? (step >= 0 ? `Step ${step + 1}` : 'Stopped') : 'Audio off'}</div>
@@ -182,7 +184,7 @@ export function Sequencer() {
         const muted = !!(v as Record<string, unknown>)[`${t.id}Mute`]
         const solo = !!(v as Record<string, unknown>)[`${t.id}Solo`]
         return (
-          <div key={t.id} role="row" className="flex items-center gap-2">
+          <div key={t.id} role="group" aria-label={`${t.name} track`} className="flex items-center gap-2">
             <div className="flex w-[148px] shrink-0 items-center gap-1.5">
               <span className="size-2 shrink-0 rounded-full" style={{ background: t.color, opacity: on ? 1 : 0.35 }} aria-hidden />
               <Tip label={`Audition ${t.name.toLowerCase()}`} side="top">
@@ -210,7 +212,6 @@ export function Sequencer() {
                   key={i}
                   ref={ref(r, i)}
                   type="button"
-                  role="gridcell"
                   tabIndex={tab(r, i)}
                   aria-label={`${t.name} step ${i + 1}${vel ? `, velocity ${Math.round(vel * 100)}%` : ', off'}`}
                   aria-pressed={vel > 0}
@@ -240,8 +241,8 @@ export function Sequencer() {
       })}
 
       {/* bass notes */}
-      <div role="row" className="flex items-center gap-2">
-        <div className="flex w-[148px] shrink-0 items-center gap-1.5 pl-3.5 text-[11px] text-fg-muted">
+      <div role="group" aria-label="Bass notes" className="flex items-center gap-2">
+        <div className="flex w-[148px] shrink-0 items-center gap-1.5 pl-3.5 text-[11px] text-fg-muted" aria-hidden>
           Bass notes
           <span className="text-fg-faint">· drag</span>
         </div>
@@ -252,7 +253,6 @@ export function Sequencer() {
               key={i}
               ref={ref(4, i)}
               type="button"
-              role="gridcell"
               tabIndex={tab(4, i)}
               aria-label={`Bass note step ${i + 1}: ${noteName(pat.notes[i])}`}
               onPointerDown={noteDown(i)}

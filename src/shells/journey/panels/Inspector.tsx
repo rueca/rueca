@@ -88,7 +88,7 @@ function CardInspector({ card, p }: { card: Card; p: Persona }) {
             </div>
           ) : answeredBy.map((o) => (
             <button key={o.id} type="button" onClick={() => ui.setState({ sel: { kind: 'card', id: o.id } })}
-              className="mx-1.5 flex items-center gap-2 rounded-[6px] px-1.5 py-1.5 text-left text-[11.5px] hover:bg-hover">
+              className="mx-1.5 flex min-h-6 items-center gap-2 rounded-[6px] px-1.5 py-1.5 text-left text-[11.5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
               <span className="h-3 w-[3px] shrink-0 rounded-full bg-ok" />
               <span className="min-w-0 flex-1 truncate text-fg">{o.text}</span>
               <span className="shrink-0 text-[10.5px] text-fg-faint">{stageName(o.stage)}</span>
@@ -201,7 +201,7 @@ function MapInspector({ p }: { p: Persona }) {
             <div className="pb-1 text-[11px] text-fg-faint">Open pain points</div>
             {open.slice(0, 4).map((pn) => (
               <button key={pn.id} type="button" onClick={() => ui.setState({ sel: { kind: 'card', id: pn.id } })}
-                className="flex w-full items-center gap-2 rounded-[6px] py-1 text-left text-[11.5px] hover:text-fg">
+                className="flex min-h-6 w-full items-center gap-2 rounded-[6px] py-1 text-left text-[11.5px] outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
                 <span className="h-3 w-[3px] shrink-0 rounded-full bg-rec" /><span className="min-w-0 flex-1 truncate text-fg-muted">{pn.text}</span>
               </button>
             ))}

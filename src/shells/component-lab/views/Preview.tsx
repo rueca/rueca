@@ -1,6 +1,6 @@
 /* Preview: one focused, live instance in a resizable viewport. */
 import { Smartphone, Tablet, Monitor, Sun, Moon } from 'lucide-react'
-import { Segmented } from '@kit'
+import { Segmented, useStudio } from '@kit'
 import { ViewportFrame, type ViewportPreset } from '@kit/stage/ViewportFrame'
 import { useUI, setUI } from '../ui'
 import { LabRoot, Instance } from './Instance'
@@ -15,8 +15,12 @@ export function Preview() {
   const comp = useUI((s) => s.comp)
   const width = useUI((s) => s.width)
   const theme = useUI((s) => s.previewTheme)
+  const { present } = useStudio()
   return (
     <ViewportFrame
+      // ⌘\ present: keep the frame at its width, hide the viewport bar, ruler and resize handles (break-it F3).
+      // Kit gap: ViewportFrame could take a `chrome={false}` prop instead of these structural selectors.
+      className={present ? '[&>div:first-child]:hidden [&_.mb-2.h-5]:invisible [&_[role=slider]]:hidden' : undefined}
       width={width}
       onWidth={(w) => setUI({ width: w })}
       presets={VIEWPORTS}

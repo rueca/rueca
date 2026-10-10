@@ -1,5 +1,5 @@
 /* Document mutations, shared by panels, the stage and the command palette. Each is one undo step. */
-import { toast, readFileAsDataURL } from '@kit'
+import { toast, readFileAsDataURL, confirm } from '@kit'
 import { doc, ui, params, history, blankRow, uid, COLUMNS, DEMO_DOC, SIZE_PRESETS, type DataRow, type Doc, type OverrideKey, type SizeSpec } from './model'
 import { parseDelimited, toCSV } from '@kit/ui/data-grid'
 import { download } from '@kit'
@@ -91,8 +91,18 @@ export function pasteBlock(r: number, c: number, matrix: string[][]) {
   toast(`Pasted ${matrix.length} × ${Math.max(...matrix.map((m) => m.length))} cells`, { action: { label: 'Undo', onClick: () => history.undo() } })
 }
 
+/** Each row is a full set of rendered sizes — beyond this the stage and export grind (break-it S9). */
+export const MAX_ROWS = 2000
+const MAX_FILE = 5 * 1024 * 1024
+
 export function importRows(rows: DataRow[], mode: 'replace' | 'append') {
   if (!rows.length) { toast('No rows found', { type: 'error' }); return }
+  const room = mode === 'replace' ? MAX_ROWS : Math.max(0, MAX_ROWS - doc.get().rows.length)
+  if (!room) { toast(`Already at ${MAX_ROWS.toLocaleString()} rows`, { type: 'error', description: 'Remove some rows before adding more.' }); return }
+  if (rows.length > room) {
+    toast(`Only the first ${room.toLocaleString()} of ${rows.length.toLocaleString()} rows were imported`, { description: `A batch holds up to ${MAX_ROWS.toLocaleString()} rows.` })
+    rows = rows.slice(0, room)
+  }
   doc.set((d) => ({ ...d, rows: mode === 'replace' ? rows : [...d.rows, ...rows] }), { label: mode === 'replace' ? 'Replace rows' : 'Append rows' })
   if (mode === 'replace') setRow(0)
   toast(`${mode === 'replace' ? 'Replaced with' : 'Added'} ${rows.length} rows`, { type: 'success', action: { label: 'Undo', onClick: () => history.undo() } })
@@ -106,9 +116,31 @@ export function pickCSV() {
   input.accept = '.csv,.tsv,text/csv,text/tab-separated-values,text/plain'
   input.onchange = async () => {
     const f = input.files?.[0]
-    if (f) importText(await f.text(), 'replace')
+    if (f) await importCSVFile(f)
   }
   input.click()
+}
+
+/** A picked or dropped file: type + size guard, then confirm before it replaces the current rows (break-it S9). */
+export async function importCSVFile(f: File) {
+  const ext = f.name.toLowerCase().match(/\.([a-z0-9]+)$/)?.[1] ?? ''
+  // extension first (Windows reports .csv as application/vnd.ms-excel), else a text MIME type
+  const ok = ['csv', 'tsv', 'txt'].includes(ext) || f.type.startsWith('text/') || /csv|tab-separated/.test(f.type)
+  if (!ok) {
+    toast(`“${f.name}” isn't a CSV file`, { type: 'error', description: 'Save it as CSV from Sheets, Excel or Numbers, then import that.' })
+    return
+  }
+  if (f.size > MAX_FILE) { toast(`“${f.name}” is too large`, { type: 'error', description: `Files up to ${MAX_FILE / 1024 / 1024} MB.` }); return }
+  if (!f.size) { toast(`“${f.name}” is empty`, { type: 'error' }); return }
+  const rows = rowsFromMatrix(parseDelimited(await f.text()))
+  if (!rows.length) { toast('No rows found', { type: 'error', description: `Nothing in “${f.name}” could be read as rows.` }); return }
+  const cur = doc.get().rows.length
+  if (cur && !(await confirm({
+    title: `Replace ${cur} row${cur === 1 ? '' : 's'}?`,
+    description: `“${f.name}” has ${rows.length.toLocaleString()} row${rows.length === 1 ? '' : 's'}${rows.length > MAX_ROWS ? ` (the first ${MAX_ROWS.toLocaleString()} will be used)` : ''}. You can undo this.`,
+    confirmLabel: 'Replace rows',
+  }))) return
+  importRows(rows, 'replace')
 }
 
 export function exportCSV() {

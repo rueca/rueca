@@ -6,7 +6,10 @@ export const MAX_SIDE = 2400
 const canvas = (w: number, h: number) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c }
 
 /** Decode a file (or data URL) into ImageData, capped at MAX_SIDE on the long edge. */
-export async function decode(input: Blob | string): Promise<ImageData> {
+export async function decode(input: Blob | string): Promise<ImageData> { return (await decodeSized(input)).data }
+
+/** decode() plus the original size, so callers can say when an image was scaled down. */
+export async function decodeSized(input: Blob | string): Promise<{ data: ImageData; from: { w: number; h: number } }> {
   let bmp: ImageBitmap | HTMLImageElement
   if (typeof input === 'string') {
     bmp = await new Promise<HTMLImageElement>((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('Could not read that image')); im.src = input })
@@ -22,7 +25,7 @@ export async function decode(input: Blob | string): Promise<ImageData> {
   ctx.imageSmoothingQuality = 'high'
   ctx.drawImage(bmp, 0, 0, w, h)
   if ('close' in bmp) bmp.close()
-  return ctx.getImageData(0, 0, w, h)
+  return { data: ctx.getImageData(0, 0, w, h), from: { w: sw, h: sh } }
 }
 
 const toCanvas = (img: ImageData) => { const c = canvas(img.width, img.height); c.getContext('2d')!.putImageData(img, 0, 0); return c }

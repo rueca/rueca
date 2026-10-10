@@ -3,7 +3,7 @@
    to load it into the props; double-click to open it in the preview. */
 import { useLayoutEffect, useRef, useState } from 'react'
 import { Sun, Moon, Columns2 } from 'lucide-react'
-import { Segmented, Tip, cn } from '@kit'
+import { Segmented, Tip, cn, useStudio } from '@kit'
 import { useUI, setUI } from '../ui'
 import { MATRIX, STORES, type CompId } from '../props'
 import { LabRoot, Instance } from './Instance'
@@ -63,6 +63,7 @@ export function Matrix() {
   const theme = useUI((s) => s.previewTheme)
   const both = useUI((s) => s.matrixThemes) === 'both'
   const m = MATRIX[comp]
+  const { present } = useStudio()   // ⌘\ hides the matrix bar (break-it F3)
   // fit the grid to the stage width (down to 60%), then scroll
   const box = useRef<HTMLDivElement>(null)
   const [avail, setAvail] = useState(900)
@@ -77,7 +78,7 @@ export function Matrix() {
   const zoom = Math.max(0.6, Math.min(1, avail / gridW))
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-none items-center justify-center gap-2 px-4 pt-3 pb-2">
+      <div className={cn('flex flex-none items-center justify-center gap-2 px-4 pt-3 pb-2', present && 'invisible')}>
         <span className="text-[11.5px] text-fg-muted tabular">{m.variants.length} variants × {m.states.length} states{zoom < 1 ? ` · ${Math.round(zoom * 100)}%` : ''}</span>
         <div className="w-[120px]">
           <Segmented size="sm" iconOnly value={both ? 'both' : theme} label="Matrix theme"

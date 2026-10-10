@@ -35,7 +35,8 @@ export const JourneyCard = memo(function JourneyCard({
       role="button"
       tabIndex={0}
       aria-pressed={selected}
-      aria-label={card.text || 'Empty card'}
+      // named by its content (text + severity / channel) so the name contains what is visible (WCAG 2.5.3)
+      aria-label={card.text ? undefined : 'Empty card'}
       onPointerDown={(e) => onPointerDown(e, card)}
       onDoubleClick={(e) => { e.stopPropagation(); ui.setState({ sel: { kind: 'card', id: card.id }, editing: card.id }) }}
       onKeyDown={(e) => { if (e.key === 'Enter' && !editing) { e.preventDefault(); e.stopPropagation(); ui.setState({ editing: card.id }) } }}
@@ -58,7 +59,7 @@ export const JourneyCard = memo(function JourneyCard({
       )}
       {(lane === 'pains' || lane === 'opps') && (
         <div className="flex items-center gap-1.5 text-[10.5px] text-fg-faint">
-          <span className="flex gap-[2px]" aria-label={`${lane === 'pains' ? 'Severity' : 'Impact'} ${LEVEL[card.level ?? 2]}`}>
+          <span className="flex gap-[2px]" aria-hidden>
             {[1, 2, 3].map((i) => <span key={i} className="size-[5px] rounded-full" style={{ background: i <= (card.level ?? 2) ? (lane === 'pains' ? 'var(--rec)' : 'var(--ok)') : 'var(--line-strong)' }} />)}
           </span>
           {lane === 'pains' ? 'Severity' : 'Impact'} · {LEVEL[card.level ?? 2]}
@@ -97,7 +98,9 @@ export const JourneyCard = memo(function JourneyCard({
       )}
 
       {onLinkStart && (
-        <button type="button" data-export="skip" aria-label="Drag to link an opportunity"
+        // pointer-only shortcut, so not a control: keyboard users link from the inspector's "Answers pain points"
+        // checkboxes — no 6px tab stop nested inside the card button (break-it A18 / A20)
+        <span data-export="skip" aria-hidden
           onPointerDown={(e) => { e.stopPropagation(); onLinkStart(e, card) }}
           className={cn('absolute -bottom-[7px] left-1/2 z-10 size-3 -translate-x-1/2 cursor-crosshair rounded-full bg-panel opacity-0 shadow-[0_0_0_1.5px_var(--ok)] transition-opacity group-hover/card:opacity-100 focus-visible:opacity-100', selected && 'opacity-100')} />
       )}

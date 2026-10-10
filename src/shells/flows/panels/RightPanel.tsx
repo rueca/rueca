@@ -324,7 +324,7 @@ function DocInspector() {
           <Stat label="Links" value={flow.edges.length} />
         </div>
         <div className="px-3 pt-2.5">
-          <div className="flex h-1.5 overflow-hidden rounded-full bg-track" aria-label="Status breakdown">
+          <div className="flex h-1.5 overflow-hidden rounded-full bg-track" role="img" aria-label={`Status breakdown: ${counts.shipped} shipped, ${counts.ready} ready, ${counts.draft} draft`}>
             {(['shipped', 'ready', 'draft'] as Status[]).map((s) => <div key={s} className={cn(STATUS[s].dot, s === 'draft' && 'bg-line-strong')} style={{ width: `${(counts[s] / total) * 100}%` }} />)}
           </div>
           <div className="mt-1.5 flex gap-3 text-[11px] text-fg-muted">

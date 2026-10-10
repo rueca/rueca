@@ -354,7 +354,7 @@ export function EffectStack<T extends StackItem>({
     <ContextMenu.Root>
       <ContextMenu.Trigger render={listEl} />
       <ContextMenu.Portal>
-        <ContextMenu.Positioner className="z-[100] outline-none">
+        <ContextMenu.Positioner className="z-[160] outline-none">
           <ContextMenu.Popup className="pop min-w-[200px] origin-[var(--transform-origin)] p-1 outline-none transition-[opacity,transform] duration-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
             {ctxItem && (
               <>

@@ -37,7 +37,7 @@ export function PreviewPane() {
           options={[{ value: 'output', label: 'Output', hint: 'Show the Output node' }, { value: 'selection', label: 'Selection', hint: 'Show the selected node (P)' }]} />
       </div>
       <div className="pointer-events-none absolute top-3 right-3 z-10 flex items-center gap-1.5">
-        {busy && <span className="size-3 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" aria-label="Cooking" />}
+        {busy && <span role="img" className="size-3 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" aria-label="Cooking" />}
         {preview?.draft && <Badge tone="key">Draft</Badge>}
         {preview && !error && <Badge className="bg-panel shadow-[var(--shadow-cluster)]">{preview.res}px · {preview.ms < 10 ? preview.ms.toFixed(1) : Math.round(preview.ms)} ms</Badge>}
       </div>

@@ -148,3 +148,4 @@ delegated to one cleanup agent — see its report.
 Still open: PERF-6 (landing iframe off-screen), DX10 (accent-check prints
 :root not :root:root — branding-owned script), DX16 p.select union typing, interaction agent re-run.
 PERF-5 ✅ FIXED: ui-design icons rasterised via detached createRoot+flushSync (no react-dom/server); verified 390×844 frame with 14 icons renders.
+DX10 ✅ FIXED by branding session (accent-check + visual-rules print :root:root / .light / prefers-color-scheme blocks).

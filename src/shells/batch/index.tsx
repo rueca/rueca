@@ -136,8 +136,8 @@ export default function BatchShell() {
               <Divider vertical />
               <IconButton icon={SquareDashed} label={safe ? 'Hide safe areas' : 'Show safe areas'} shortcut="s" active={safe} onClick={toggleSafe} />
               <Tip label={totalIssues ? `${totalIssues} layout issues across all rows — jump to next` : 'Every row fits every size'} shortcut="i">
-                <Button size="md" className="gap-1 px-2" onClick={nextIssue} aria-label="Layout issues">
-                  <span className={totalIssues ? 'size-1.5 rounded-full bg-key' : 'size-1.5 rounded-full bg-ok'} />
+                <Button size="md" className="gap-1 px-2" onClick={nextIssue} aria-label={totalIssues ? `${totalIssues} layout issues` : 'Fits — no layout issues'}>
+                  <span aria-hidden className={totalIssues ? 'size-1.5 rounded-full bg-key' : 'size-1.5 rounded-full bg-ok'} />
                   <span className="tabular">{totalIssues || 'Fits'}</span>
                 </Button>
               </Tip>

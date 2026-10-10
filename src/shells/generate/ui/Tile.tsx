@@ -8,7 +8,7 @@ import { ui } from '../state/ui'
 import { variations, upscale, remix, copyParams, removeWithUndo } from '../state/actions'
 
 /** Image scrim controls: these sit on arbitrary pixels, so they are dark glass in both themes. */
-const glass = 'flex size-7 items-center justify-center rounded-[7px] bg-scrim text-white outline-none backdrop-blur-md transition-colors hover:bg-scrim focus-visible:ring-2 focus-visible:ring-signal'
+const glass = 'flex size-7 items-center justify-center rounded-[7px] bg-scrim text-white outline-none backdrop-blur-md transition-[filter] hover:brightness-150 focus-visible:ring-2 focus-visible:ring-signal'
 
 export const Tile = memo(function Tile({ rec, selected, multi }: { rec: ImageRec; selected: boolean; multi: boolean }) {
   const pix = usePix(rec.id, rec.params, 'thumb')
@@ -31,10 +31,10 @@ export const Tile = memo(function Tile({ rec, selected, multi }: { rec: ImageRec
 
       {/* select tick: visible on hover, focus, or while multi-selecting */}
       <button type="button" aria-label={selected ? 'Deselect' : 'Add to selection'} onClick={() => clickSelect(rec.id, { metaKey: true })}
-        className={cn('absolute top-2 left-2 flex size-5 items-center justify-center rounded-full outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-signal',
+        className={cn('absolute top-1 left-1 flex size-6 items-center justify-center rounded-full outline-none transition-opacity focus-visible:ring-2 focus-visible:ring-signal',
           selected ? 'bg-signal-strong text-signal-fg opacity-100' : 'bg-scrim text-transparent opacity-0 shadow-[inset_0_0_0_1.5px_rgba(255,255,255,.8)] group-hover/tile:opacity-100 group-focus-within/tile:opacity-100',
           multi && 'opacity-100')}>
-        <Check size={11} strokeWidth={3} />
+        <Check size={12} strokeWidth={3} />
       </button>
 
       <button type="button" aria-label={rec.favourite ? 'Remove from favourites' : 'Favourite'} aria-pressed={!!rec.favourite} onClick={() => toggleFavourite([rec.id])}

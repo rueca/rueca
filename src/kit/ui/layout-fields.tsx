@@ -244,7 +244,7 @@ export function PaintField<T extends Paint>({
           <span className={cn('min-w-0 flex-1 truncate text-[11px] text-fg', value.kind === 'solid' && 'tabular uppercase')}>{chip}</span>
         </Popover.Trigger>
         <Popover.Portal>
-          <Popover.Positioner side="left" align="start" sideOffset={12} collisionPadding={12} className="z-[100]">
+          <Popover.Positioner side="left" align="start" sideOffset={12} collisionPadding={12} className="z-[160]">
             <Popover.Popup className="pop w-[264px] origin-[var(--transform-origin)] outline-none transition-[opacity,transform] duration-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
               {kinds.length > 1 && (
                 <div className="border-b border-line p-2">

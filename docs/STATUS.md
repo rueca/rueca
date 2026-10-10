@@ -60,6 +60,9 @@ skill architecture/gotchas updated, sync check passes.
 **Note:** ~/.claude/skills/trompo is a symlink to this repo's skills/trompo — edits there are live in Rafael's
 personal skill. Old prototype-studio skill archived at ~/.claude/skill-backups/.
 
+Site type (branding session, Rafael's picks): Gabarito display (big stacked hero "Give it / a spin."), Hanken Grotesk body,
+Geist Mono code — landing + gallery only; product chrome stays Inter.
+
 ## Break-it QA round: 5 of 6 reported (interaction stalled); all P0/P1 FIXED except S2/S4 shell-side validation —
 see research/08-qa-round.md "Status after this pass". Next: S2/S4 shell validators, then P2 backlog, re-run interaction
 agent on a quiet machine (close orphaned headless Chrome first — load avg hit ~480), apply Geométrica fonts.

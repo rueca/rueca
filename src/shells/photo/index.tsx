@@ -20,6 +20,7 @@ import { CropOverlay, Navigator, fitInsideRotated, rectForAspect, type CropRect 
 import { CompareSplit } from '@kit/stage/CompareSplit'
 import { Filmstrip } from '@kit/ui/preset-grid'
 import { useImageIntake } from '@kit/core/image-intake'
+import { rejectReason, useIntakeRejects } from '../intake'
 import {
   params, ui, history, stepLabel, BANDS, ASPECTS, FULL, LOOK_KEYS, DEFAULTS, lookDefaults, lookValues, activeLook, allLooks, type V, type Look, type CropDraft,
 } from './state'
@@ -87,9 +88,10 @@ function refreshThumbs(delay = 180) {
   }, delay)
 }
 
-function loadSource(src: HTMLImageElement | HTMLCanvasElement, name: string, fresh: boolean) {
+function loadSource(src: HTMLImageElement | HTMLCanvasElement, name: string, fresh: boolean): { w: number; h: number; from: { w: number; h: number } } | undefined {
   const dev = eng.dev
   if (!dev) return
+  const from = { w: src instanceof HTMLImageElement ? src.naturalWidth : src.width, h: src instanceof HTMLImageElement ? src.naturalHeight : src.height }
   let w = src instanceof HTMLImageElement ? src.naturalWidth : src.width
   let h = src instanceof HTMLImageElement ? src.naturalHeight : src.height
   let el: TexImageSource = src
@@ -114,6 +116,7 @@ function loadSource(src: HTMLImageElement | HTMLCanvasElement, name: string, fre
   requestRender()
   refreshThumbs(60)
   requestAnimationFrame(() => cam.fit())
+  return { w, h, from }
 }
 const openSample = (fresh: boolean) => { sample ??= generateLandscape(); loadSource(sample, 'Ridgeline at dusk.jpg', fresh) }
 async function openURL(url: string, name: string) {
@@ -121,9 +124,13 @@ async function openURL(url: string, name: string) {
     const img = new Image()
     img.src = url
     await img.decode()
-    loadSource(img, name, true)
-    toast(`Opened ${name}`, { type: 'success', description: 'Your current look is kept — pick Original to start clean.' })
-  } catch { toast('Could not read that image', { type: 'error' }) }
+    const r = loadSource(img, name, true)
+    // say so when the photo was scaled to fit the GPU texture limit — export "Full" means this size (break-it S10)
+    const scaled = r && (r.w !== r.from.w || r.h !== r.from.h)
+    toast(`Opened ${name}`, { type: 'success', description: scaled
+      ? `Scaled down to ${r.w} × ${r.h} for editing (the original is ${r.from.w} × ${r.from.h}). Your current look is kept.`
+      : 'Your current look is kept — pick Original to start clean.', timeout: scaled ? 7000 : undefined })
+  } catch { toast(`Could not read “${name}”`, { type: 'error', description: 'Open a PNG, JPEG, WebP or GIF.' }) }
 }
 
 /* ===== actions ===== */
@@ -248,6 +255,20 @@ function setAngle(angle: number) {
   setDraft({ angle, crop: fitDraft({ ...d, angle }, ratioOf(d.aspect, W, H)) })
 }
 const resetCrop = () => setDraft({ crop: FULL, angle: 0, aspect: 'free' })
+/** Typed crop size in image pixels — the non-drag way to size a crop (WCAG 2.5.7, break-it A16). Keeps the
+    centre and the aspect lock; the result is clamped inside the (rotated) image. */
+function setCropSize(dim: 'w' | 'h', px: number) {
+  const d = ui.getState().cropping
+  if (!d) return
+  const { w: W, h: H } = ui.getState().imageSize
+  const r = ratioOf(d.aspect, W, H)
+  let cw = d.crop.w * W, ch = d.crop.h * H
+  if (dim === 'w') { cw = px; if (r) ch = px / r } else { ch = px; if (r) cw = px * r }
+  const k = Math.min(1, W / cw, H / ch)
+  const nw = (cw * k) / W, nh = (ch * k) / H
+  const cx = d.crop.x + d.crop.w / 2, cy = d.crop.y + d.crop.h / 2
+  setDraft({ crop: fitInsideRotated({ x: clamp(cx - nw / 2, 0, 1 - nw), y: clamp(cy - nh / 2, 0, 1 - nh), w: nw, h: nh }, d.angle, W, H) })
+}
 
 const toggleCrop = () => (ui.getState().cropping ? applyCrop() : enterCrop())
 const toggleSplit = () => ui.setState((s) => ({ split: s.split === null ? 0.5 : null }))
@@ -283,7 +304,12 @@ export default function DevelopShell() {
   const [failed, setFailed] = useState<string | null>(null)
   // Drop anywhere, paste, or Open… The photo is decoded into a texture and never stored in params.
   // ⌘O is bound by the palette's Open command below.
-  const intake = useImageIntake((img) => openURL(img.url, img.name), { hotkey: false })
+  const intake = useImageIntake((img) => {
+    const bad = rejectReason(img)
+    if (bad) { toast(bad, { type: 'error', description: 'Open a PNG, JPEG, WebP or GIF.' }); return }
+    void openURL(img.url, img.name)
+  }, { hotkey: false })
+  useIntakeRejects()   // non-image drops / pastes get a toast instead of nothing
 
   useEffect(() => {
     const c = canvas.current
@@ -314,7 +340,9 @@ export default function DevelopShell() {
   useEffect(() => { const id = requestAnimationFrame(() => cam.fit()); return () => cancelAnimationFrame(id) }, [out.w, out.h])
 
   useHoldKey('\\', (held) => ui.setState({ bypass: held }))
-  useHotkeys(s.cropping ? { enter: applyCrop, esc: cancelCrop, x: flipAspect } : {}, [!!s.cropping])
+  // Enter on a focused number field (W, H, angle) edits that field — it must not apply the crop underneath it
+  const inField = () => !!(document.activeElement as HTMLElement | null)?.closest('[role="spinbutton"],[role="slider"],input,textarea')
+  useHotkeys(s.cropping ? { enter: { run: applyCrop, when: () => !inField() }, esc: cancelCrop, x: flipAspect } : {}, [!!s.cropping])
 
   const looks = allLooks()
   const active = activeLook(v, looks)
@@ -404,22 +432,22 @@ export default function DevelopShell() {
         </Panel>
       }
       bottom={
-        <div className="h-[136px]">
+        // "Save look" sits beside the strip, not inside it: a listbox may only hold options (axe aria-required-children, break-it A20)
+        <div className="flex h-[136px] items-start">
           <Filmstrip
+            className="min-w-0 flex-1"
             label="Presets"
             items={looks.map((l) => ({ id: l.id, name: l.name, thumb: s.thumbs[l.id], removable: l.user, group: l.group }))}
             value={active}
             onApply={applyLook}
             onPreview={(id) => ui.setState({ preview: id })}
             onRemove={(id) => ui.setState((x) => ({ userLooks: x.userLooks.filter((l) => l.id !== id) }))}
-            trailing={
-              <button type="button" onClick={saveLook}
-                className="flex shrink-0 flex-col items-center justify-center gap-1 self-start rounded-[8px] text-[11.5px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"
-                style={{ width: 120, height: 80, marginTop: 4, boxShadow: 'inset 0 0 0 1px var(--line-strong)' }}>
-                <Plus size={16} strokeWidth={1.5} />Save look
-              </button>
-            }
           />
+          <button type="button" onClick={saveLook}
+            className="mt-[28px] mr-3 flex shrink-0 flex-col items-center justify-center gap-1 rounded-[8px] text-[11.5px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"
+            style={{ width: 120, height: 80, boxShadow: 'inset 0 0 0 1px var(--line-strong)' }}>
+            <Plus size={16} strokeWidth={1.5} />Save look
+          </button>
         </div>
       }
     >
@@ -490,6 +518,8 @@ function StageOverlay() {
           <Segmented size="sm" label="Aspect" value={presetOf(d.aspect)} onChange={setAspect} options={ASPECTS.map((a) => ({ value: a.value, label: a.label }))} />
         </div>
         <IconButton size="icon-sm" icon={d.aspect.split(':').map(Number).reduce((a, b) => a / b) < 1 ? RectangleVertical : RectangleHorizontal} label="Swap orientation" shortcut="x" onClick={flipAspect} />
+        <ScrubValue boxed prefix="W" value={Math.round(d.crop.w * s.imageSize.w)} onChange={(x) => setCropSize('w', x)} min={16} max={s.imageSize.w} step={1} unit="px" label="Crop width" className="w-[78px] shrink-0" />
+        <ScrubValue boxed prefix="H" value={Math.round(d.crop.h * s.imageSize.h)} onChange={(x) => setCropSize('h', x)} min={16} max={s.imageSize.h} step={1} unit="px" label="Crop height" className="w-[78px] shrink-0" />
         <Divider vertical />
         <span className="shrink-0 text-[11.5px] text-fg-muted">Straighten</span>
         <div className="w-[112px] shrink-0"><GradientSlider value={d.angle} onChange={(a) => setAngle(a)} min={-45} max={45} step={0.1} origin={0} label="Straighten" /></div>

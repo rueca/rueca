@@ -182,7 +182,7 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
           onChange={(e) => setDraft(e.target.value)}
           onBlur={() => finishEdit(true)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') finishEdit(true)
+            if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); finishEdit(true) }
             if (e.key === 'Escape') finishEdit(false)
             e.stopPropagation()
           }}

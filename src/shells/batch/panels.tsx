@@ -51,7 +51,7 @@ export function SizesPanel({ openCustom }: { openCustom: () => void }) {
     const n = overrideCount(d, s.id)
     return {
       id: s.id, name: s.name, icon: shapeIcon(s), visible: s.visible !== false, locked: !!s.locked,
-      meta: <span className="flex items-center gap-1.5 tabular">{n > 0 && <span className="size-1.5 rounded-full bg-signal" aria-label={`${n} overrides`} />}{ratio(s.w, s.h)}</span>,
+      meta: <span className="flex items-center gap-1.5 tabular">{n > 0 && <span role="img" className="size-1.5 rounded-full bg-signal" aria-label={`${n} overrides`} title={`${n} overrides`} />}{ratio(s.w, s.h)}</span>,
     }
   })
   return (
@@ -321,8 +321,15 @@ export function DataPanel({ rowIssues, openPaste }: { rowIssues: (i: number) => 
         </PanelHeader>
       }
     >
+      {/* Shell-side patches for the kit DataGrid (break-it A15/A20 — proper fix belongs in kit/ui/data-grid.tsx):
+          the grid's keydown handler swallowed Enter/Space on the colour cell's "Pick colour" button, so let those
+          reach the button; and pad that 14px swatch button to a 24px target. */}
+      <div className="contents" onKeyDownCapture={(e) => {
+        const t = e.target as HTMLElement
+        if ((e.key === 'Enter' || e.key === ' ') && t.getAttribute('aria-label') === 'Pick colour') e.stopPropagation()
+      }}>
       <DataGrid
-        className="h-full"
+        className="h-full [&_[aria-label='Pick_colour']]:-m-[5px] [&_[aria-label='Pick_colour']]:p-[5px]"
         columns={COLUMNS}
         rows={rows}
         activeRow={row}
@@ -335,6 +342,7 @@ export function DataPanel({ rowIssues, openPaste }: { rowIssues: (i: number) => 
         rowIssues={rowIssues}
         empty={<div className="px-3 py-4 text-[11.5px] text-fg-muted">No rows. Paste from a spreadsheet (⌘V) or add one.</div>}
       />
+      </div>
     </Panel>
   )
 }

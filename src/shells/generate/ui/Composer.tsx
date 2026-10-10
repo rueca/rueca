@@ -42,7 +42,7 @@ export function Composer() {
   }
 
   return (
-    <div className="panel pointer-events-auto flex w-full max-w-[780px] flex-col gap-2 p-2.5">
+    <div className="@container panel pointer-events-auto flex w-full max-w-[780px] flex-col gap-2 p-2.5">
       {remix && (
         <div className="flex items-center gap-2 rounded-[8px] bg-signal-soft py-1 pr-1 pl-1">
           <span className="size-6 overflow-hidden rounded-[5px] bg-well">{remixPix && <img src={remixPix.url} alt="" className="h-full w-full object-cover" />}</span>
@@ -80,10 +80,12 @@ export function Composer() {
           />
         </div>
       )}
-      <div className="flex items-center gap-1.5">
-        <div className="w-[150px]"><Select value={v.model} onChange={setModel} label="Model" options={MODELS.map((x) => ({ value: x.id, label: x.name, hint: x.blurb }))} /></div>
+      {/* Narrow bars (1024–1280 windows): the settings summary shrinks to its icon, then hides, and Generate wraps
+          onto its own line rather than overflowing the panel (break-it F6). */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <div className="w-[112px] @[560px]:w-[150px]"><Select value={v.model} onChange={setModel} label="Model" options={MODELS.map((x) => ({ value: x.id, label: x.name, hint: x.blurb }))} /></div>
         <Menu side="top" trigger={
-          <Button size="sm" variant="default" className="h-6 gap-1 px-2" aria-label="Aspect ratio">
+          <Button size="sm" variant="default" className="h-6 gap-1 px-2" aria-label={`Aspect ratio ${a.id}`}>
             {(() => { const I = aspectIcon(a.w, a.h); return <I size={13} /> })()}
             <span className="tabular">{a.id}</span><ChevronDown size={11} className="text-fg-faint" />
           </Button>}
@@ -94,14 +96,13 @@ export function Composer() {
           <Button size="icon-sm" variant="ghost" active={negativeOpen || !!t.negative} aria-label="Negative prompt" onClick={() => ui.setState({ negativeOpen: !negativeOpen })}><MinusCircle size={14} strokeWidth={1.5} /></Button>
         </Tip>
         <Tip label="Enhance prompt"><Button size="icon-sm" variant="ghost" aria-label="Enhance prompt" disabled={!t.prompt.trim()} onClick={enhance}><Wand2 size={14} strokeWidth={1.5} /></Button></Tip>
-        <button type="button" onClick={() => ui.setState({ tab: 'create' })}
-          className="flex h-6 min-w-0 items-center gap-1.5 rounded-[5px] px-1.5 text-[11.5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+        <button type="button" onClick={() => ui.setState({ tab: 'create' })} aria-label={`Settings: ${v.steps} steps, CFG ${v.guidance}, seed ${v.lockSeed ? 'locked' : 'random'}`}
+          className="hidden h-6 min-w-0 items-center gap-1.5 rounded-[5px] px-1.5 text-[11.5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal @[460px]:flex">
           <SlidersHorizontal size={13} strokeWidth={1.5} className="shrink-0" />
-          <span className="tabular truncate">{v.steps} steps · CFG {v.guidance}</span>
+          <span className="hidden tabular truncate @[700px]:inline">{v.steps} steps · CFG {v.guidance}</span>
           {v.lockSeed ? <Lock size={11} strokeWidth={1.75} className="shrink-0" /> : <Shuffle size={11} strokeWidth={1.75} className="shrink-0" />}
         </button>
-        <div className="flex-1" />
-        <Button variant="primary" size="lg" onClick={generate} className={cn('gap-2 pr-2')} aria-label="Generate">
+        <Button variant="primary" size="lg" onClick={generate} className={cn('ml-auto shrink-0 gap-2 pr-2')} aria-label="Generate">
           <Sparkles size={14} strokeWidth={1.75} />
           {busy ? 'Queue' : 'Generate'}
           <Kbd className="bg-signal-fg/15 text-signal-fg">{prettyCombo('mod+enter')}</Kbd>

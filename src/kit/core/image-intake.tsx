@@ -41,6 +41,8 @@ export interface ImageIntakeOptions {
   hotkey?: string | false
   paste?: boolean
   enabled?: boolean
+  /** called when a dropped / pasted / picked file can't be used — toast it (break-it S10) */
+  onReject?: (file: File | null, reason: 'type' | 'empty') => void
 }
 
 export interface ImageIntake {
@@ -74,11 +76,15 @@ export function useImageIntake(onImage: (img: IntakeImage) => void, opts: ImageI
   const input = useRef<HTMLInputElement>(null)
   const cb = useRef(onImage)
   cb.current = onImage
+  const rejectRef = useRef(opts.onReject)
+  rejectRef.current = opts.onReject
   const lastURL = useRef<string | null>(null)
 
   const take = (files: Iterable<File> | ArrayLike<File> | null | undefined) => {
-    const f = Array.from(files ?? []).find((x) => accepts(accept, x))
-    if (!f) return false
+    const list = Array.from(files ?? [])
+    const f = list.find((x) => accepts(accept, x))
+    if (!f) { if (list.length) rejectRef.current?.(list[0], 'type'); return false }
+    if (f.size === 0) { rejectRef.current?.(f, 'empty'); return false }
     if (lastURL.current) URL.revokeObjectURL(lastURL.current)
     const url = URL.createObjectURL(f)
     lastURL.current = url

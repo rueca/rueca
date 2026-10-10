@@ -75,7 +75,7 @@ function ObjectSections({ o, first }: { o: Obj; first: boolean }) {
           onChange={(n, f) => editProp(o.id, p, n, f)} />
     return (
       <Row key={p} label={d.label} className={cn('group/row', st === 'edited' && animate && 'bg-key/10')}
-        trailing={animate ? <KeyButton state={st} shortcut="k" property={d.label} onToggle={() => toggleKey(o.id, p)} {...nav(p)} /> : undefined}>
+        trailing={animate ? <KeyButton state={st} shortcut="k" property={d.label} onToggle={() => toggleKey(o.id, p)} {...nav(p)} className="[&>button]:w-6" /> : undefined}>
         {control}
       </Row>
     )

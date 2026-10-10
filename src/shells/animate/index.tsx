@@ -141,18 +141,22 @@ function AnimationsPanel() {
             const Icon = LOOP_ICON[a.loop]
             const on = a.id === animId && !preview
             return (
-              <div key={a.id} role="button" tabIndex={0}
+              // The row is a plain container: its name is the button, the ⋯ menu a sibling — no button inside a button (axe nested-interactive, break-it A20).
+              <div key={a.id}
                 onClick={() => { ui.setState({ animId: a.id, preview: false, keySel: [], pending: {} }); clock.pause(); seek(0) }}
                 onDoubleClick={() => setRenaming(a.id)}
-                onKeyDown={(e) => { if (e.key === 'Enter') setRenaming(a.id) }}
-                className={cn('group/row mx-1.5 flex h-8 items-center gap-2 rounded-[6px] pr-1 pl-2 text-[12px] outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-signal-soft' : 'hover:bg-hover')}>
+                className={cn('group/row mx-1.5 flex h-8 cursor-default items-center gap-2 rounded-[6px] pr-1 pl-2 text-[12px] has-[[data-row-main]:focus-visible]:ring-2 has-[[data-row-main]:focus-visible]:ring-signal', on ? 'bg-signal-soft' : 'hover:bg-hover')}>
                 <Film size={14} strokeWidth={1.5} className={on ? 'text-signal' : 'text-fg-faint'} />
                 {renaming === a.id ? (
                   <input autoFocus defaultValue={a.name} onClick={(e) => e.stopPropagation()}
                     onBlur={(e) => { updateAnim({ name: e.target.value || a.name }, true, a.id); setRenaming(null) }}
                     onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setRenaming(null) }}
                     className="h-5 min-w-0 flex-1 rounded-[4px] bg-control px-1 text-[12px] text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
-                ) : <span className="min-w-0 flex-1 truncate text-fg">{a.name}</span>}
+                ) : (
+                  <button type="button" data-row-main aria-current={on || undefined} title="Double-click or F2 to rename"
+                    onKeyDown={(e) => { if (e.key === 'F2') { e.preventDefault(); setRenaming(a.id) } }}
+                    className="min-w-0 flex-1 self-stretch truncate text-left text-fg outline-none">{a.name}</button>
+                )}
                 {doc.sm.entry === a.id && <span className="text-[10.5px] text-fg-faint">entry</span>}
                 <Tip label={a.loop === 'loop' ? 'Loops' : a.loop === 'once' ? 'Plays once' : 'Ping-pong'}><span className="text-fg-faint"><Icon size={12} strokeWidth={1.5} /></span></Tip>
                 <span className="w-9 text-right tabular text-[11px] text-fg-faint">{(a.duration / 1000).toFixed(1)}s</span>
@@ -168,7 +172,7 @@ function AnimationsPanel() {
               </div>
             )
           })}
-          <p className="px-3.5 pt-2 pb-1 text-[11px] leading-relaxed text-fg-faint">Double-click to rename. Keys 1–9 switch animations.</p>
+          <p className="px-3.5 pt-2 pb-1 text-[11px] leading-relaxed text-fg-faint">Double-click (or F2) to rename. Keys 1–9 switch animations.</p>
         </div>
       ) : (
         <div className="flex flex-col">
@@ -526,7 +530,11 @@ export default function AnimateShell() {
         </Artboard>
       </Stage>
 
-      <CommandPalette commands={commands} />
+      <CommandPalette commands={commands} extraShortcuts={[
+        // the kit timeline's bracket keys (focus the key area first) — they jump across ALL lanes, not per lane (break-it A17)
+        { keys: ']', label: 'Timeline: select every key at the next keyframe time (all lanes)', group: 'Timeline' },
+        { keys: '[', label: 'Timeline: select every key at the previous keyframe time (all lanes)', group: 'Timeline' },
+      ]} />
     </Studio>
   )
 }

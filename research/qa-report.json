@@ -1,50 +1,18 @@
 [
   {
-    "id": "batch",
+    "id": "animate",
     "theme": "dark",
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 157
+    "textSampled": 98
   },
   {
-    "id": "batch",
+    "id": "animate",
     "theme": "light",
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 157
-  },
-  {
-    "id": "flows",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 125
-  },
-  {
-    "id": "flows",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 125
-  },
-  {
-    "id": "generate",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 77
-  },
-  {
-    "id": "generate",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 77
+    "textSampled": 98
   }
 ]

@@ -36,6 +36,7 @@ function Port({ port, side, wired, dim }: { port: PortSpec; side: 'in' | 'out'; 
         className="studio-port"
         data-wired={wired}
         data-dim={dim}
+        role="img" // a named port (its type colour is also in the name, not colour-only); wiring by keyboard is the inspector's Source picker
         aria-label={`${side === 'in' ? 'Input' : 'Output'} ${port.label} (${port.type})`}
         style={{ '--port': portVar(port.type) } as CSSProperties}
       />
