@@ -1,25 +1,25 @@
-/* "How it works" as a pinned card deck (after trove.quest's "How a save becomes a
-   reference"). The deck is tall; a sticky frame inside it holds a progress row
-   and a stack of cards. Scroll position picks the active step; cards change on
-   a timed transition, not scrubbed, so nothing jitters mid-scroll.
-     behind the active card: 4% smaller and 14px lower per step
-     finished cards: lift 48px, grow 2%, fade out
-   The landing scrolls inside a div, not the window, so progress is measured
-   against the nearest scrolling ancestor. Text stays in the DOM for every step,
-   and reduced motion turns every animation into a cut. Phones get plain
-   stacked cards instead of the pinned deck. */
+/* "How it works", after lovable.dev's "For building and beyond".
+   Desktop: the section heading and an accordion of the steps sit in a pinned
+   left column; one large visual per step scrolls past normally on the right.
+   Whichever visual crosses the middle of the screen opens its step (scroll-spy),
+   and clicking a step brings its visual into view. Nothing is scroll-jacked.
+   Below laptop width, or on a short screen, it is a plain stack of
+   title, text and visual (as Lovable does). The landing scrolls inside a div,
+   so everything is measured against the nearest scrolling ancestor. Each
+   visual plays its little animation once, as it scrolls into view; reduced
+   motion turns those into cuts. */
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
-import { ArrowUp, Check, FileCode2, Paperclip, Upload } from 'lucide-react'
+import { ArrowUp, Check, FileCode2, Upload } from 'lucide-react'
 import { cn } from '@kit/core/cn'
 import { site } from '@/site.config'
+import { Cursor, DotGrid, focal, ghost } from './KitThumbs'
+import { DYES, Scaffold, Swatches, Threads } from './brandArt'
 
 export interface DeckStep { n: number; short: string; title: string; body: string }
 
 const NAV_H = 56
 const EASE = [0.22, 1, 0.36, 1] as const
-/** the one asset that travels through all three steps */
-const ART = ['#c06c84', '#ff9a76', '#ffd6a5', '#f76b8a']
 
 function scrollParent(el: HTMLElement | null): HTMLElement | null {
   for (let p = el?.parentElement; p; p = p.parentElement) {
@@ -71,20 +71,23 @@ function StackedCard({ step: s, i }: { step: DeckStep; i: number }) {
         <h3 className="mt-2 text-[24px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance">{s.title}</h3>
         <p className="mt-3 text-[14px] leading-[1.6] text-pretty text-fg-muted">{s.body}</p>
       </div>
-      <div className="preview relative h-[400px] overflow-hidden rounded-[10px] bg-field shadow-[inset_0_0_0_1px_var(--line)]">
+      <div className="relative h-[470px] overflow-hidden rounded-[10px] bg-field shadow-[inset_0_0_0_1px_var(--line)]">
         <Visual i={i} active={seen} />
       </div>
     </article>
   )
 }
 
-export function StepDeck({ steps }: { steps: DeckStep[] }) {
-  const phone = useMedia('(max-width: 767px)')
-  return phone ? <StackedSteps steps={steps} /> : <PinnedDeck steps={steps} />
+export function StepDeck({ steps, head }: { steps: DeckStep[]; head?: ReactNode }) {
+  // Lovable only pins at lg and up, and only when the screen is tall enough to hold the column
+  const stacked = useMedia('(max-width: 1023px), (max-height: 739px)')
+  return stacked
+    ? <div>{head}<div className="mt-8"><StackedSteps steps={steps} /></div></div>
+    : <FollowAlong steps={steps} head={head} />
 }
 
-/** Pinned frames hug their content and sit centred below the nav while pinned,
-    so a pinned section adds no empty space before the next one. */
+/** A pinned frame that hugs its content and sits centred below the nav while
+    pinned, so a pinned section adds no empty space. Shared with the shell rail. */
 export function usePinFrame(frame: React.RefObject<HTMLElement | null>) {
   const [box, setBox] = useState({ frameH: 0, vh: 0 })
   useLayoutEffect(() => {
@@ -100,86 +103,84 @@ export function usePinFrame(frame: React.RefObject<HTMLElement | null>) {
   return { ...box, top }
 }
 
-function PinnedDeck({ steps }: { steps: DeckStep[] }) {
-  const deck = useRef<HTMLDivElement>(null)
-  const frame = useRef<HTMLDivElement>(null)
-  const { frameH, top: stickyTop } = usePinFrame(frame)
-  const pin = useRef(stickyTop); pin.current = stickyTop
-  const [progress, setProgress] = useState(0)
-  const n = steps.length
-  const active = Math.min(n - 1, Math.floor(progress * n))
+function FollowAlong({ steps, head }: { steps: DeckStep[]; head?: ReactNode }) {
+  const column = useRef<HTMLDivElement>(null)
+  const panels = useRef<(HTMLDivElement | null)[]>([])
+  const { top } = usePinFrame(column)
+  const [active, setActive] = useState(0)
 
+  // scroll-spy: the visual crossing the middle band of the screen is the active step
   useEffect(() => {
-    const el = deck.current!
-    const scroller = scrollParent(el)
-    const target: HTMLElement | Window = scroller ?? window
-    let raf = 0
-    const measure = () => {
-      raf = 0
-      const top = scroller ? scroller.getBoundingClientRect().top : 0
-      const range = el.offsetHeight - (frame.current?.offsetHeight ?? 0)
-      const past = top + pin.current - el.getBoundingClientRect().top
-      setProgress(range > 0 ? Math.min(1, Math.max(0, past / range)) : 0)
-    }
-    const on = () => { if (!raf) raf = requestAnimationFrame(measure) }
-    measure()
-    target.addEventListener('scroll', on, { passive: true })
-    addEventListener('resize', on)
-    return () => { target.removeEventListener('scroll', on); removeEventListener('resize', on); cancelAnimationFrame(raf) }
-  }, [])
+    const els = panels.current.filter(Boolean) as HTMLDivElement[]
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) if (e.isIntersecting) setActive(els.indexOf(e.target as HTMLDivElement))
+    }, { root: scrollParent(els[0]), rootMargin: '-45% 0px -45% 0px' })
+    els.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [steps.length])
 
-  const jump = (i: number) => {
-    const el = deck.current!
+  // clicking a step centres its visual
+  const show = (i: number) => {
+    const el = panels.current[i]
+    if (!el) return
     const scroller = scrollParent(el)
-    const range = el.offsetHeight - frameH
-    const deckTop = scroller
-      ? el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - stickyTop
-      : el.getBoundingClientRect().top + scrollY - stickyTop
-    const y = deckTop + ((i + 0.5) / n) * range
-    ;(scroller ?? window).scrollTo({ top: y, behavior: 'smooth' })
+    const r = el.getBoundingClientRect()
+    if (!scroller) { scrollTo({ top: r.top + scrollY - (innerHeight - r.height) / 2, behavior: 'smooth' }); return }
+    const sr = scroller.getBoundingClientRect()
+    scroller.scrollTo({ top: scroller.scrollTop + r.top - sr.top - (scroller.clientHeight - r.height) / 2, behavior: 'smooth' })
   }
 
   return (
-    <div ref={deck} className="[--deck-step:75svh] lg:[--deck-step:70svh]"
-      style={{ height: `calc(${frameH}px + ${n - 1} * var(--deck-step))` }}>
-      <div ref={frame} className="sticky flex flex-col gap-4 lg:gap-5" style={{ top: stickyTop }}>
-        <div className="relative h-[calc(100svh-56px-112px)] max-h-[640px] min-h-[420px]">
-          {steps.map((s, i) => {
-            const d = i - active
-            const past = d < 0
-            return (
-              <article key={s.n} aria-hidden={d !== 0} role="tabpanel"
-                className="panel absolute inset-0 grid origin-bottom grid-rows-[auto_1fr] gap-5 overflow-hidden p-5 transition-[transform,opacity] duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none sm:p-7 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)] lg:grid-rows-1 lg:gap-8 lg:p-8"
-                style={{
-                  transform: past ? 'translateY(-48px) scale(1.02)' : `translateY(${d * 14}px) scale(${1 - d * 0.04})`,
-                  opacity: past ? 0 : 1,
-                  zIndex: past ? n + 1 : n - d,
-                  pointerEvents: d === 0 ? 'auto' : 'none',
-                }}>
-                <div className="flex flex-col lg:justify-center">
-                  <div className="tabular text-[13px] text-fg-faint">Step {s.n}</div>
-                  <h3 className="mt-2 text-[24px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance lg:mt-3 lg:text-[32px]">{s.title}</h3>
-                  <p className="mt-3 max-w-[420px] text-[14px] leading-[1.6] text-pretty text-fg-muted lg:mt-4 lg:text-[15px]">{s.body}</p>
+    <div className="grid grid-cols-[minmax(0,0.75fr)_minmax(0,1.25fr)] gap-12 xl:gap-16">
+      <div className="relative">
+        <div ref={column} className="sticky flex flex-col gap-10" style={{ top }}>
+          {head}
+          <div data-reveal style={{ '--reveal-delay': '120ms' } as React.CSSProperties} className="flex flex-col">
+            {steps.map((s, i) => {
+              const on = active === i
+              return (
+                <div key={s.n} className="relative border-l border-line pl-5">
+                  {/* the active step's marker, in the site accent */}
+                  <span className={cn('absolute top-0 -left-px w-px bg-signal transition-[height] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', on ? 'h-full' : 'h-0')} />
+                  <h3>
+                    <button type="button" aria-expanded={on} onClick={() => show(i)}
+                      className={cn('flex w-full items-baseline gap-3 rounded-[4px] py-3 text-left text-[17px] font-semibold tracking-[-0.01em] outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
+                        on ? 'text-fg' : 'text-fg-faint hover:text-fg-muted')}>
+                      <span className="tabular text-[13px] font-medium text-fg-faint">{s.n}</span>{s.title}
+                    </button>
+                  </h3>
+                  {/* expands with a grid-rows transition, so the height animates without measuring */}
+                  <div role="region" className={cn('grid transition-[grid-template-rows,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', on ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0')}>
+                    <p className="overflow-hidden pl-[26px] text-[14.5px] leading-[1.6] text-pretty text-fg-muted">
+                      <span className="block pb-4">{s.body}</span>
+                    </p>
+                  </div>
                 </div>
-                <div className="preview relative min-h-0 overflow-hidden rounded-[10px] bg-field shadow-[inset_0_0_0_1px_var(--line)]">
-                  <Visual i={i} active={d === 0} />
-                </div>
-              </article>
-            )
-          })}
+              )
+            })}
+          </div>
         </div>
-        {/* step pills under the stack, styled like the shells gallery's category pills;
-            click to jump. pt clears the waiting cards, which peek up to 28px below */}
-        <div className="flex justify-center gap-1.5 pt-7" role="tablist" aria-label="Steps">
-          {steps.map((s, i) => (
-            <button key={s.n} type="button" role="tab" aria-selected={active === i} onClick={() => jump(i)}
-              className={cn('h-7 rounded-full px-3 text-[12px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-signal',
-                active === i ? 'bg-fg text-field' : 'bg-panel text-fg-muted shadow-[var(--shadow-cluster)] hover:text-fg')}>
-              <span className="tabular mr-1.5 opacity-60">{s.n}</span>{s.short}
-            </button>
-          ))}
-        </div>
+      </div>
 
+      <div className="flex flex-col gap-24">
+        {steps.map((s, i) => <Panel key={s.n} i={i} title={s.title} focused={active === i} refFn={(el) => { panels.current[i] = el }} />)}
+      </div>
+    </div>
+  )
+}
+
+/** One visual on the right. It plays when it scrolls into view and then stays
+    finished, so every visual reads complete as you scroll past (as Lovable's do).
+    Only the active step's visual is in focus; the others fade back so they never
+    blend into each other. */
+function Panel({ i, title, focused, refFn }: { i: number; title: string; focused: boolean; refFn: (el: HTMLDivElement | null) => void }) {
+  const [ref, seen] = useArrived<HTMLDivElement>()
+  return (
+    // outer: the scroll-in reveal · inner: the focus fade (both touch opacity, so they can't share an element)
+    <div ref={(el) => { ref.current = el; refFn(el) }} data-reveal aria-label={title} role="img">
+      <div className={cn('relative aspect-[16/11] overflow-hidden rounded-[12px] bg-field shadow-[inset_0_0_0_1px_var(--line)] transition-[opacity,scale] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+        focused ? 'opacity-100' : 'scale-[0.98] opacity-30')}>
+        <Visual i={i} active={seen} />
       </div>
     </div>
   )
@@ -200,55 +201,66 @@ function Beat({ on, delay = 0, children, className, from = 8 }: { on: boolean; d
   )
 }
 
-function Gradient({ className, drift = true, blur = 28 }: { className?: string; drift?: boolean; blur?: number }) {
-  const reduce = useReducedMotion()
-  const blob = (color: string, x: string, y: string, size: string, path: number[][]) => (
-    <motion.div className="absolute rounded-full" style={{ background: color, left: x, top: y, width: size, height: size, filter: `blur(${blur}px)` }}
-      animate={drift && !reduce ? { x: path.map((p) => p[0]), y: path.map((p) => p[1]) } : undefined}
-      transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }} />
-  )
-  return (
-    <div className={cn('absolute inset-0 overflow-hidden', className)} style={{ background: ART[0] }}>
-      {blob(ART[1], '-10%', '-20%', '70%', [[0, 0], [30, 20], [0, 0]])}
-      {blob(ART[2], '45%', '30%', '60%', [[0, 0], [-40, -10], [0, 0]])}
-      {blob(ART[3], '10%', '55%', '55%', [[0, 0], [20, -30], [0, 0]])}
-    </div>
-  )
+function AgentMark() {
+  return <span className="flex size-5 flex-none items-center justify-center rounded-[6px] bg-fg text-[10px] font-semibold text-field">A</span>
 }
 
-function AgentMark() {
-  return <span className="flex size-5 flex-none items-center justify-center rounded-[5px] bg-fg text-[10px] font-semibold text-field">A</span>
-}
+/* The three visuals follow the Kit thumbnails' approach (KitThumbs.tsx): one crisp
+   focal card with real labels, faded context behind it, a dot grid that fades to the
+   edges, and a cursor where something is being done. They show the product, so the
+   tool in step 3 stays in neutral kit chrome (landing.css .preview); the agent
+   session and the files in steps 1–2 aren't the product, so they wear the
+   page's own warm surfaces and type. Rueca brand on top: the artwork is
+   flat dyed threads (no gradients, no glow), the panel carries the drawn scaffold. */
+
 
 /* ── 1 · conversation ────────────────────────────────────────────────── */
 
 function ChatVisual({ active }: { active: boolean }) {
   return (
-    <div className="flex h-full flex-col p-4 text-[12.5px] leading-[1.5] sm:p-5">
-      <div className="flex items-center justify-between border-b border-line pb-3 text-[11.5px] text-fg-faint">
-        <span className="flex items-center gap-2"><AgentMark />New session</span>
-        <span className="tabular">~/projects/launch-site</span>
+    <div className="relative flex h-full items-center justify-center p-5 text-[12px] leading-[1.45] sm:p-8">
+      <DotGrid size={14} />
+      <Scaffold inset={12} />
+      {/* context: the project the agent is working in */}
+      <div className={cn(ghost, 'absolute top-[12%] left-[6%] hidden h-[62%] w-[26%] flex-col gap-2 p-3 lg:flex')}>
+        <span className="text-[10.5px] text-fg-faint">launch-site</span>
+        {['index.html', 'hero-threads.html', 'styles.css', 'assets'].map((f, i) => (
+          <span key={f} className={cn('truncate text-[10.5px]', i === 1 ? 'text-fg-muted' : 'text-fg-faint')}>{f}</span>
+        ))}
       </div>
-      <div className="flex flex-1 flex-col justify-end gap-3.5 pt-4">
-        <Beat on={active} className="ml-auto max-w-[82%] rounded-[12px] rounded-br-[4px] bg-active px-3.5 py-2.5 text-fg">
-          Make me a tool to tune the hero gradient: the colours, some grain, and how fast it drifts.
+      {/* focal: the session */}
+      <div className={cn(focal, 'relative flex w-full max-w-[400px] flex-col gap-3 p-3.5 lg:ml-[20%]')}>
+        <div className="flex items-center justify-between border-b border-line pb-2.5 text-[11px] text-fg-faint">
+          <span className="flex items-center gap-2"><AgentMark /><span className="text-fg-muted">New session</span></span>
+          <span className="font-code hidden text-[10.5px] sm:inline">~/projects/launch-site</span>
+        </div>
+        <Beat on={active} className="ml-auto max-w-[86%] rounded-[12px] rounded-br-[4px] bg-control px-3 py-2 text-fg">
+          Make me a tool to tune the hero threads: the colours, some grain, and how fast they drift.
         </Beat>
-        <Beat on={active} delay={0.5} className="flex max-w-[88%] gap-2.5">
+        <Beat on={active} delay={0.5} className="flex gap-2.5">
           <AgentMark />
-          <div className="flex flex-col gap-2">
-            <span className="inline-flex w-fit items-center gap-1.5 rounded-[6px] bg-hover px-2 py-1 text-[11.5px] text-fg-muted">
-              <span className="size-1.5 rounded-full bg-ok" />Using the {site.slug} skill
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <span className="inline-flex w-fit items-center gap-1.5 rounded-[6px] bg-hover px-2 py-0.5 text-[11px] text-fg-muted">
+              <span className="size-1.5 rounded-full" style={{ background: DYES.hoja }} />Using the {site.slug} skill
             </span>
-            <span className="text-fg">I’ll set up a colour stack, a grain slider and a drift speed, with presets and a before/after view.</span>
+            <div className="rounded-[8px] bg-control/70 p-2 shadow-[inset_0_0_0_1px_var(--line)]">
+              {['Colour stack', 'Grain slider', 'Drift speed'].map((t, i) => (
+                <Beat key={t} on={active} delay={0.8 + i * 0.18} from={4} className="flex items-center gap-2 py-0.5 text-[11.5px] text-fg">
+                  <span className="flex size-3.5 items-center justify-center rounded-full text-[#231B16]" style={{ background: DYES.hoja }}><Check size={9} strokeWidth={3} /></span>{t}
+                </Beat>
+              ))}
+              <div className="mt-1 text-[10.5px] text-fg-faint">+ presets, before/after, share link</div>
+            </div>
           </div>
         </Beat>
-        <Beat on={active} delay={1.1} className="ml-auto max-w-[70%] rounded-[12px] rounded-br-[4px] bg-active px-3.5 py-2.5 text-fg">
+        <Beat on={active} delay={1.5} className="ml-auto max-w-[80%] rounded-[12px] rounded-br-[4px] bg-control px-3 py-2 text-fg">
           Perfect. Keep the brand colours as presets.
         </Beat>
-      </div>
-      <div className="mt-4 flex h-10 items-center gap-2 rounded-[10px] bg-panel pr-1.5 pl-3 text-fg-faint shadow-[var(--shadow-cluster)]">
-        <span className="flex-1 truncate">Reply…</span>
-        <span className="flex size-7 items-center justify-center rounded-[7px] bg-fg text-field"><ArrowUp size={14} strokeWidth={2} /></span>
+        <div className="relative flex h-9 items-center gap-2 rounded-[10px] bg-control pr-1 pl-3 text-fg-faint shadow-[inset_0_0_0_1px_var(--line)]">
+          <span className="flex-1 truncate">Reply…</span>
+          <span className="flex size-7 items-center justify-center rounded-[8px] bg-fg text-field"><ArrowUp size={13} strokeWidth={2} /></span>
+          <Beat on={active} delay={1.9} from={6} className="absolute right-1 bottom-0"><Cursor className="static" /></Beat>
+        </div>
       </div>
     </div>
   )
@@ -260,32 +272,42 @@ function DropVisual({ active }: { active: boolean }) {
   const reduce = useReducedMotion()
   const landed = active || !!reduce
   return (
-    <div className="flex h-full flex-col gap-3 p-4 text-[12.5px] sm:p-5">
-      <div className={cn('relative flex flex-1 items-center justify-center rounded-[10px] border border-dashed transition-colors duration-500',
-        landed ? 'border-signal' : 'border-line-strong')}>
-        <div className={cn('absolute top-3 left-3 flex items-center gap-1.5 text-[11.5px] transition-opacity duration-300', landed ? 'opacity-0' : 'text-fg-faint')}>
-          <Upload size={13} strokeWidth={1.5} />Drop a file, paste a link, or name it
-        </div>
-        {/* the file card flies in from the corner */}
-        <motion.div className="flex w-[min(260px,80%)] items-center gap-3 rounded-[10px] bg-panel p-2.5 shadow-[var(--shadow-pop)]"
-          initial={false}
-          animate={landed ? { opacity: 1, x: 0, y: 0, rotate: 0, scale: 1 } : { opacity: 0, x: 90, y: -70, rotate: 8, scale: 0.96 }}
-          transition={landed && !reduce ? { duration: 0.7, ease: EASE, delay: 0.15 } : { duration: 0 }}>
-          <div className="relative size-11 flex-none overflow-hidden rounded-[7px]"><Gradient drift={false} blur={6} /></div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5 truncate font-medium text-fg"><FileCode2 size={13} strokeWidth={1.5} className="flex-none text-fg-faint" />hero-gradient.html</div>
-            <div className="text-[11.5px] text-fg-faint">Your existing page · 14 KB</div>
-          </div>
-        </motion.div>
+    <div className="relative flex h-full items-center justify-center p-5 text-[12px] sm:p-8">
+      <DotGrid size={14} />
+      <Scaffold inset={12} />
+      {/* context: the file window the asset comes from */}
+      <div className={cn(ghost, 'absolute top-[14%] left-[6%] hidden w-[34%] flex-col p-2 lg:flex')}>
+        <div className="flex items-center gap-1 px-1 pb-2">{[0, 1, 2].map((i) => <span key={i} className="size-1.5 rounded-full bg-fg/15" />)}<span className="ml-2 text-[10.5px] text-fg-faint">launch-site</span></div>
+        {['index.html', 'hero-threads.html', 'styles.css', 'assets'].map((f, i) => (
+          <span key={f} className={cn('flex items-center gap-2 rounded-[5px] px-1.5 py-1 text-[11px]', i === 1 ? 'bg-hover text-fg-muted' : 'text-fg-faint')}>
+            <FileCode2 size={11} strokeWidth={1.5} className="flex-none" />{f}
+          </span>
+        ))}
       </div>
-      <Beat on={active} delay={0.75} className="flex flex-wrap items-center gap-1.5">
-        <span className="mr-1 flex items-center gap-1.5 text-fg-muted"><Check size={13} strokeWidth={2} className="text-ok" />Connected, nothing rebuilt</span>
-        {['Colours', 'Grain', 'Drift'].map((c) => <span key={c} className="rounded-[6px] bg-hover px-2 py-1 text-[11.5px] text-fg">{c}</span>)}
-      </Beat>
-      <div className="flex h-10 items-center gap-2 rounded-[10px] bg-panel pr-1.5 pl-3 shadow-[var(--shadow-cluster)]">
-        <Paperclip size={13} strokeWidth={1.5} className="flex-none text-fg-faint" />
-        <span className={cn('truncate transition-colors', landed ? 'text-fg' : 'text-fg-faint')}>{landed ? 'Here’s the page, keep it exactly as it is.' : 'Reply…'}</span>
-        <span className="ml-auto flex size-7 flex-none items-center justify-center rounded-[7px] bg-fg text-field"><ArrowUp size={14} strokeWidth={2} /></span>
+      {/* focal: the session's drop zone */}
+      <div className={cn(focal, 'relative flex w-full max-w-[360px] flex-col gap-3 p-3.5 lg:ml-[26%]')}>
+        <div className="flex items-center gap-2 text-[11px] text-fg-muted"><AgentMark />Attach to session</div>
+        <div className={cn('relative flex h-[120px] items-center justify-center rounded-[10px] border border-dashed transition-colors duration-500', landed ? 'border-fg/40 bg-hover' : 'border-line-strong')}>
+          <span className={cn('absolute top-2.5 left-3 flex items-center gap-1.5 text-[11px] text-fg-faint transition-opacity duration-300', landed && 'opacity-0')}>
+            <Upload size={12} strokeWidth={1.5} />Drop a file, paste a link, or name it
+          </span>
+          {/* the file, dragged in from the window on the left with the cursor on it */}
+          <motion.div className={cn(focal, 'relative flex w-[min(250px,86%)] items-center gap-3 p-2.5')}
+            initial={false}
+            animate={landed ? { opacity: 1, x: 0, y: 0, rotate: 0 } : { opacity: 0, x: -150, y: -40, rotate: -6 }}
+            transition={landed && !reduce ? { duration: 0.8, ease: EASE, delay: 0.15 } : { duration: 0 }}>
+            <span className="relative size-10 flex-none overflow-hidden rounded-[7px] shadow-[0_0_0_1px_var(--line)]"><Threads /></span>
+            <div className="min-w-0">
+              <div className="truncate text-[12px] font-medium text-fg">hero-threads.html</div>
+              <div className="text-[11px] text-fg-faint">Your existing page · 14 KB</div>
+            </div>
+            <Cursor className="right-6 bottom-1" />
+          </motion.div>
+        </div>
+        <Beat on={active} delay={0.95} className={cn(focal, 'flex flex-col gap-2 p-2.5 shadow-[0_0_0_1px_var(--line)]')}>
+          <span className="flex items-center gap-1.5 text-[11.5px] text-fg"><span className="flex size-3.5 items-center justify-center rounded-full text-[#231B16]" style={{ background: DYES.hoja }}><Check size={9} strokeWidth={3} /></span>Connected, nothing rebuilt</span>
+          <div className="flex flex-wrap gap-1">{['Colours', 'Grain', 'Drift'].map((c) => <span key={c} className="rounded-[6px] bg-hover px-2 py-0.5 text-[11px] text-fg">{c}</span>)}</div>
+        </Beat>
       </div>
     </div>
   )
@@ -293,65 +315,59 @@ function DropVisual({ active }: { active: boolean }) {
 
 /* ── 3 · rendered inside a shell ─────────────────────────────────────── */
 
-function MiniSlider({ label, from, to, on, delay, unit = '' }: { label: string; from: number; to: number; on: boolean; delay: number; unit?: string }) {
-  const reduce = useReducedMotion()
-  const v = on || reduce ? to : from
-  return (
-    <div className="flex h-7 items-center gap-2">
-      <span className="w-12 flex-none text-fg-muted">{label}</span>
-      <div className="relative h-1 flex-1 rounded-full bg-track">
-        <motion.div className="absolute inset-y-0 left-0 rounded-full bg-signal" initial={false} animate={{ width: `${v}%` }}
-          transition={on && !reduce ? { duration: 0.9, ease: EASE, delay } : { duration: 0 }} />
-      </div>
-      <span className={cn('tabular w-9 flex-none text-right transition-colors duration-700', on ? 'text-fg' : 'text-fg-faint')}>{v}{unit}</span>
-    </div>
-  )
-}
-
 function ShellVisual({ active }: { active: boolean }) {
   const reduce = useReducedMotion()
+  const grain = active || reduce ? 58 : 24
   return (
-    <div className="flex h-full flex-col gap-2 p-2.5 text-[11.5px] sm:gap-2.5 sm:p-3">
-      {/* toolbar */}
-      <div className="flex h-8 flex-none items-center justify-between gap-2 rounded-[8px] bg-panel px-2.5 shadow-[var(--shadow-cluster)]">
-        <div className="flex min-w-0 items-center gap-2"><span className="size-3.5 flex-none rounded-[4px] bg-fg" /><span className="truncate font-medium text-fg">Hero gradient</span></div>
-        <span className="flex h-6 flex-none items-center rounded-[6px] bg-signal-strong px-2.5 font-medium text-signal-fg">Export</span>
-      </div>
-      <div className="flex min-h-0 flex-1 gap-2 sm:gap-2.5">
-        {/* stage with the artboard */}
-        <div className="relative flex min-w-0 flex-1 items-center justify-center rounded-[8px] bg-well">
-          <motion.div className="relative aspect-[4/5] h-[78%] overflow-hidden rounded-[6px] shadow-[var(--shadow-artboard),0_0_0_1px_var(--artboard-ring)]"
-            initial={false} animate={active || reduce ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.94 }}
-            transition={active && !reduce ? { duration: 0.6, ease: EASE, delay: 0.1 } : { duration: 0 }}>
-            <Gradient drift={active} />
-            <div className="absolute inset-0 opacity-[0.18] mix-blend-overlay" style={{ backgroundImage: 'radial-gradient(rgb(0 0 0 / 0.9) 0.6px, transparent 0.6px)', backgroundSize: '3px 3px' }} />
-          </motion.div>
+    <div className="relative flex h-full items-center justify-center p-4 text-[11px] sm:p-6">
+      <DotGrid size={14} />
+      <Scaffold inset={12} />
+      {/* context: another window behind, for depth */}
+      <div className={cn(ghost, 'preview absolute top-[8%] left-[10%] h-[70%] w-[72%]')} />
+      {/* focal: the tool */}
+      <div className={cn(focal, 'preview relative flex h-full max-h-[340px] w-full max-w-[540px] flex-col gap-2 p-2')}>
+        <div className="flex h-7 flex-none items-center justify-between px-1.5">
+          <div className="flex min-w-0 items-center gap-2"><span className="size-3 flex-none rounded-[3px] bg-fg" /><span className="truncate font-medium text-fg">Hero threads</span></div>
+          <span className="flex h-6 flex-none items-center rounded-[6px] bg-signal-strong px-2.5 font-medium text-signal-fg">Export</span>
         </div>
-        {/* inspector */}
-        <div className="hidden w-[44%] max-w-[210px] flex-none flex-col rounded-[8px] bg-panel p-2.5 shadow-[var(--shadow-cluster)] sm:flex">
-          <div className="mb-1.5 font-medium text-fg">Gradient</div>
-          <div className="flex h-7 items-center gap-2">
-            <span className="w-12 flex-none text-fg-muted">Colours</span>
-            <div className="flex gap-1">{ART.map((c) => <span key={c} className="size-4 rounded-[4px] shadow-[inset_0_0_0_1px_rgb(0_0_0/0.08)]" style={{ background: c }} />)}</div>
+        <div className="flex min-h-0 flex-1 gap-2">
+          <div className="relative flex min-w-0 flex-1 items-center justify-center overflow-hidden rounded-[8px] bg-well">
+            <motion.div className="relative aspect-[4/5] h-[80%] overflow-hidden rounded-[6px] shadow-[var(--shadow-artboard),0_0_0_1px_var(--artboard-ring)]"
+              initial={false} animate={active || reduce ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.94 }}
+              transition={active && !reduce ? { duration: 0.6, ease: EASE, delay: 0.1 } : { duration: 0 }}>
+              <motion.div className="absolute inset-0" initial={false} animate={active && !reduce ? { x: [0, -8, 0] } : { x: 0 }}
+                transition={active && !reduce ? { duration: 7, repeat: Infinity, ease: 'easeInOut' } : { duration: 0 }}><Threads /></motion.div>
+            </motion.div>
           </div>
-          <MiniSlider label="Grain" from={0} to={18} on={active} delay={0.6} />
-          <MiniSlider label="Drift" from={50} to={72} on={active} delay={0.9} unit="%" />
-          <div className="mt-auto flex gap-1">
-            {['Brand', 'Calm', 'Loud'].map((p, i) => (
-              <span key={p} className={cn('flex h-6 flex-1 items-center justify-center rounded-[5px]', i === 0 ? 'bg-active text-fg' : 'text-fg-faint')}>{p}</span>
-            ))}
+          <div className="hidden w-[42%] max-w-[200px] flex-none flex-col gap-2 rounded-[8px] bg-control/50 p-2.5 shadow-[inset_0_0_0_1px_var(--line)] sm:flex">
+            <span className="font-medium text-fg">Threads</span>
+            <div className="flex items-center gap-2"><span className="w-11 flex-none text-fg-muted">Colours</span><Swatches className="flex-1 justify-end" /></div>
+            <div className="flex items-center gap-2">
+              <span className="w-11 flex-none text-fg-muted">Grain</span>
+              <div className="relative h-4 flex-1 rounded-[4px] bg-track/70">
+                <motion.span className="absolute inset-y-0 left-0 flex items-center justify-end rounded-[4px] bg-signal pr-1" initial={false} animate={{ width: `${grain}%` }}
+                  transition={active && !reduce ? { duration: 1, ease: EASE, delay: 0.6 } : { duration: 0 }}>
+                  <span className="tabular text-[9px] leading-none font-medium text-signal-fg">18</span>
+                </motion.span>
+                <motion.span className="absolute top-[55%]" initial={false} animate={{ left: `${grain}%` }}
+                  transition={active && !reduce ? { duration: 1, ease: EASE, delay: 0.6 } : { duration: 0 }}><Cursor className="static" /></motion.span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2"><span className="w-11 flex-none text-fg-muted">Drift</span><span className="flex h-4 flex-1 items-center justify-between rounded-[4px] bg-control px-1.5"><span className="text-fg-faint">↔</span><span className="tabular text-fg">0.72</span></span></div>
+            <div className="flex items-center gap-2"><span className="w-11 flex-none text-fg-muted">Loop</span><span className="ml-auto flex h-3.5 w-6 items-center rounded-full bg-signal p-0.5"><span className="ml-auto size-2.5 rounded-full bg-signal-fg" /></span></div>
+            <div className="mt-auto flex gap-1">{['Brand', 'Calm', 'Loud'].map((n, i) => <span key={n} className={cn('flex h-5 flex-1 items-center justify-center rounded-[5px] text-[10px]', i === 0 ? 'bg-panel text-fg shadow-[0_0_0_1px_var(--line-strong)]' : 'text-fg-faint')}>{n}</span>)}</div>
           </div>
         </div>
-      </div>
-      {/* timeline */}
-      <div className="flex h-9 flex-none items-center gap-2 rounded-[8px] bg-panel px-2.5 shadow-[var(--shadow-cluster)]">
-        <span className="tabular flex-none text-fg-faint">0:02</span>
-        <div className="relative h-3 flex-1">
-          <div className="absolute inset-y-0 left-[4%] w-[46%] rounded-[3px] bg-lane" />
-          <div className="absolute inset-y-0 left-[54%] w-[38%] rounded-[3px] bg-lane" />
-          <motion.div className="absolute inset-y-[-3px] w-px bg-rec" initial={false}
-            animate={active && !reduce ? { left: ['8%', '92%'] } : { left: '40%' }}
-            transition={active && !reduce ? { duration: 6, repeat: Infinity, ease: 'linear' } : { duration: 0 }} />
+        <div className="flex h-7 flex-none items-center gap-2 px-1.5">
+          <span className="tabular flex-none text-fg-faint">0:02</span>
+          <div className="relative h-2.5 flex-1">
+            <span className="absolute inset-y-[3px] left-[4%] w-[44%] rounded-full bg-lane" />
+            <span className="absolute inset-y-[3px] left-[52%] w-[40%] rounded-full bg-lane" />
+            {[0.04, 0.48, 0.52, 0.92].map((x) => <span key={x} className="absolute top-1/2 size-[7px] -translate-1/2 rotate-45 rounded-[1.5px] bg-fg/50" style={{ left: `${x * 100}%` }} />)}
+            <motion.span className="absolute inset-y-[-4px] w-px bg-rec" initial={false}
+              animate={active && !reduce ? { left: ['8%', '92%'] } : { left: '40%' }}
+              transition={active && !reduce ? { duration: 6, repeat: Infinity, ease: 'linear' } : { duration: 0 }} />
+          </div>
         </div>
       </div>
     </div>

@@ -1,12 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { ArrowLeft } from 'lucide-react'
 import { useTheme } from '@kit/core/theme'
 import { cn } from '@kit/core/cn'
 import { TipProvider } from '@kit/ui/tooltip'
 import type { ShellMeta } from '@/shells/types'
-import { site } from '@/site.config'
 import '@/landing/landing.css'
-import { Mark, ThemeButton } from '@/landing/parts'
+import { SiteNav } from '@/landing/SiteNav'
 import { ShellCard, categoriesOf } from './ShellCard'
 
 export function CategoryChips({ shells, value, onChange }: { shells: ShellMeta[]; value: string; onChange: (c: string) => void }) {
@@ -27,26 +26,21 @@ export function CategoryChips({ shells, value, onChange }: { shells: ShellMeta[]
 /** #/shells — every test shell. Each is a different kind of instrument built from the same kit. */
 export function Gallery({ shells }: { shells: ShellMeta[] }) {
   const { theme } = useTheme()
+  const root = useRef<HTMLDivElement>(null)
   const [cat, setCat] = useState('All')
   const list = shells.filter((s) => cat === 'All' || s.category === cat)
   return (
     <TipProvider>
-      <div className="site h-full overflow-y-auto bg-field text-fg">
-        <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-24 sm:px-8 sm:pt-8">
-          <header className="flex items-center justify-between gap-4">
-            <a href="#/" className="flex items-center gap-2 rounded-[6px] text-[13px] font-medium text-fg outline-none focus-visible:ring-2 focus-visible:ring-signal">
-              <Mark /><span className="font-display text-[17px] font-extrabold lowercase tracking-[-0.035em]">{site.name}</span>
-            </a>
-            <ThemeButton />
-          </header>
-          <a href="#/" className="mt-10 inline-flex items-center gap-1.5 text-[12.5px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+      <div ref={root} className="site h-full overflow-y-auto bg-field text-fg">
+        <SiteNav scroller={root} />
+        <div className="mx-auto max-w-[1120px] px-4 pb-24 sm:px-8">
+          <a href="#/" className="mt-6 inline-flex items-center gap-1.5 text-[12.5px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
             <ArrowLeft size={13} strokeWidth={1.5} />Overview
           </a>
-          <h1 className="mt-3 font-display text-[30px] font-bold tracking-[-0.025em]">Shells</h1>
+          <h1 className="mt-3 font-display text-[clamp(52px,9vw,96px)] leading-[0.84] font-black tracking-[-0.045em]">Shells</h1>
           <p className="mt-2 max-w-[600px] text-[13.5px] leading-relaxed text-fg-muted">
-            One kit, many instruments. Each shell is a different kind of tool built from the same components, to prove
-            the harness holds up across environments. Press <span className="text-fg">⌘K</span> inside any shell for
-            commands, <span className="text-fg">?</span> for shortcuts.
+            Every one is built from the same kit. Inside any of them, press <span className="text-fg">⌘K</span> for
+            commands and <span className="text-fg">?</span> for shortcuts.
           </p>
           <div className="mt-8"><CategoryChips shells={shells} value={cat} onChange={setCat} /></div>
           <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-4">

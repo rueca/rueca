@@ -1,45 +1,135 @@
-@import "@fontsource-variable/gabarito";
-@import "@fontsource-variable/hanken-grotesk";
+@import "@fontsource-variable/libre-franklin";
 @import "@fontsource-variable/geist-mono";
+@import "@fontsource/caveat/latin-500.css";
 
 /* ---------------------------------------------------------------------------
-   Brand type for the marketing pages ("Geométrica", brand/BRAND.md):
-     Hanken Grotesk — body, the page's base font (warm, plain grotesque; replaced Lexend 10 Oct)
-     Gabarito — headlines and the wordmark (.font-display)
-     Geist Mono — commands and code (.font-code, code, kbd, pre)
+   Rueca brand type for the marketing pages (brand/BRAND.md, chosen 11 Oct 2026):
+     Martina Plantijn — headlines and the wordmark (.font-display), on trial
+                  since 11 Oct (was Dominicale). A paid Klim face that isn't
+                  licensed yet, so it loads from the visitor's own fonts (local())
+                  and everyone else gets Alegreya at the same weight. Once
+                  licensed, add its woff2 as the first url() below and drop the
+                  local() lines. To go back to Dominicale, swap the local() names.
+     Libre Franklin — body, the page's base font (chosen 11 Oct: a Franklin Gothic
+                  revival, the same era as Martina's Plantin; replaced Hanken Grotesk)
+     Caveat — handwritten notes and labels (.font-hand)
+     Geist Mono — commands and code only (.font-code, code, kbd, pre)
    Anything that SHOWS the product goes back to the kit's chrome fonts: .preview,
    [data-studio-embed], and kit surfaces (.studio / .pop set their own font).
 --------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Rueca Display";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: local("Martina Plantijn"), local("Martina Plantijn VF"), local("TestMartinaPlantijnVF-Roman"), local("Test Martina Plantijn VF"),
+    url("../../node_modules/@fontsource-variable/alegreya/files/alegreya-latin-wght-normal.woff2") format("woff2-variations");
+}
 .site {
-  --font-display: "Gabarito Variable", Gabarito, ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Hanken Grotesk Variable", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Rueca Display", Georgia, ui-serif, serif;
+  --font-body: "Libre Franklin Variable", "Libre Franklin", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
   --font-code: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
   font-family: var(--font-body);
 }
-.site .font-display { font-family: var(--font-display); }
+/* Martina and the Alegreya fallback are both variable: one weight for both, no synthetic bold. */
+.site .font-display { font-family: var(--font-display); font-synthesis: none; font-variation-settings: "wght" 700; }
+.site .font-hand { font-family: var(--font-hand); font-weight: 500; }
 .site :is(.font-code, code, kbd, pre) { font-family: var(--font-code); }
 .site :is(.preview, [data-studio-embed]) { font-family: var(--font-ui); }
 .site :is(.preview, [data-studio-embed]) :is(code, kbd, pre) { font-family: var(--font-mono); }
 
 /* ---------------------------------------------------------------------------
+   Rueca palette (brand/data.js → ruecaPalette / ruecaRamps): rustic ground and
+   ink, flat dyed brights. The marketing pages re-point the kit's surface tokens
+   at the paper; anything that shows the product resets them to the kit's own
+   neutral values, so previews still look like the real tool.
+
    Accent rule for the marketing pages (landing, shells gallery):
-     .site     — the page's own accents use the brand pink (brand/BRAND.md).
-                 Button surfaces stay #D1006F in both themes: white on the
-                 brighter dark-theme pink is only ~3:1.
+     .site     — the page's own accents use Achiote (annatto orange-red) with
+                 walnut text on it (5.5:1); never white on a bright.
      .preview  — anything that SHOWS the product (mock UI, component thumbs)
                  gets a neutral accent: white in dark, black in light.
    The real blue accent only appears in the full-screen tools. Live iframes and
    captured thumbnails get the neutral accent from neutral.ts instead.
 --------------------------------------------------------------------------- */
 .site {
-  --signal: #ff3ea5;
-  --signal-strong: #d1006f;
-  --signal-fg: #ffffff;
-  --signal-soft: rgba(255, 62, 165, 0.16);
+  /* dark: walnut night, tint halved 11 Oct so the shells’ neutral UI sits comfortably on it */
+  --field: #151210;
+  --panel: #201c19;
+  --overlay: #282320;
+  --control: #2b2623;
+  --well: #1a1714;
+  --fg: #f3f1eb;
+  --fg-muted: #b9b3ac;
+  --fg-faint: #99928c;
+  --line: rgba(243, 238, 227, 0.08);
+  --line-strong: rgba(243, 238, 227, 0.15);
+  --hover: rgba(243, 238, 227, 0.05);
+  --press: rgba(243, 238, 227, 0.08);
+  --signal: #f06a3e;
+  --signal-strong: #e8582c;
+  --signal-fg: #181411;
+  --signal-soft: rgba(240, 106, 62, 0.16);
+  /* brand inks for illustration and notes */
+  --ink-achiote: #f06a3e;
+  --ink-anil: #8fa7fe;
+  --ink-gualda: #d2a628;
+  --ink-malva: #b39af8;
 }
 :root.light .site {
-  --signal: #d1006f;
-  --signal-soft: rgba(209, 0, 111, 0.12);
+  /* light: undyed wool paper, walnut ink; tint halved 11 Oct (see dark) */
+  --field: #f3f1eb;
+  --panel: #faf8f4;
+  --overlay: #faf8f4;
+  --control: #ece9e2;
+  --well: #e8e4dd;
+  --fg: #181411;
+  --fg-muted: #58524d;
+  --fg-faint: #68625d;
+  --line: rgba(35, 27, 22, 0.1);
+  --line-strong: rgba(35, 27, 22, 0.18);
+  --hover: rgba(35, 27, 22, 0.05);
+  --press: rgba(35, 27, 22, 0.08);
+  --signal: #e8582c;
+  --signal-strong: #e8582c;
+  --signal-fg: #181411;
+  --signal-soft: rgba(232, 88, 44, 0.12);
+  --ink-achiote: #b8381b;
+  --ink-anil: #3440c8;
+  --ink-gualda: #f2c744;
+  --ink-malva: #a88bf6;
+}
+/* Hero background texture (WheelField.tsx): the logo's two wheels and band, drawn in short
+   dashes that turn in place. Faint ink, faded out toward the text and the preview below.
+   Motion and its reduced-motion still frame live in the component (canvas). */
+.site .wheel-field { opacity: 0.14; -webkit-mask-image: radial-gradient(ellipse 62% 70% at 78% 40%, #000 22%, transparent 78%); mask-image: radial-gradient(ellipse 62% 70% at 78% 40%, #000 22%, transparent 78%); }
+:root.light .site .wheel-field { opacity: 0.18; }
+
+/* Section kickers (Heading in parts.tsx) are handwritten and take the dyed brights in turn,
+   one per section: Achiote, Malva, Hoja, Cielo, Gualda, Cochinilla (brand/data.js ruecaRamps).
+   Light uses each family's 700 step (≥5.2:1 on the paper), dark its 300–400 (≥6.8:1). */
+.site { --kick-1: #fe8562; --kick-2: #a88bf6; --kick-3: #5dc39b; --kick-4: #5db4e8; --kick-5: #f2c744; --kick-6: #feaea0; }
+:root.light .site { --kick-1: #a53016; --kick-2: #694b9d; --kick-3: #067056; --kick-4: #1b668e; --kick-5: #7c5800; --kick-6: #983e36; }
+.site section:nth-of-type(6n + 1) [data-kicker] { color: var(--kick-1); }
+.site section:nth-of-type(6n + 2) [data-kicker] { color: var(--kick-2); }
+.site section:nth-of-type(6n + 3) [data-kicker] { color: var(--kick-3); }
+.site section:nth-of-type(6n + 4) [data-kicker] { color: var(--kick-4); }
+.site section:nth-of-type(6n + 5) [data-kicker] { color: var(--kick-5); }
+.site section:nth-of-type(6n + 6) [data-kicker] { color: var(--kick-6); }
+
+/* product previews: back to the kit's neutral chrome (values from src/kit/theme.css) */
+.site :is(.preview, [data-studio-embed]) {
+  --field: #131313; --panel: #1e1e1e; --overlay: #262626; --control: #2a2a2a; --well: #141414;
+  --fg: #ffffff; --fg-muted: #a8a8a8; --fg-faint: #8a8a8a;
+  --line: rgba(255, 255, 255, 0.07); --line-strong: rgba(255, 255, 255, 0.13);
+  --hover: rgba(255, 255, 255, 0.05); --press: rgba(255, 255, 255, 0.08);
+}
+:root.light .site :is(.preview, [data-studio-embed]) {
+  --field: #ececec; --panel: #ffffff; --overlay: #ffffff; --control: #f2f2f2; --well: #dedede;
+  --fg: #1a1a1a; --fg-muted: #5e5e5e; --fg-faint: #737373;
+  --line: rgba(0, 0, 0, 0.08); --line-strong: rgba(0, 0, 0, 0.16);
+  --hover: rgba(0, 0, 0, 0.04); --press: rgba(0, 0, 0, 0.07);
 }
 .site .preview {
   --signal: var(--fg);

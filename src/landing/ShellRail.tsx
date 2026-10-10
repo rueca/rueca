@@ -5,17 +5,24 @@
      sticky frame inside it; the row is translated by -progress × overflow
    It runs a little faster than the scroll (SPEED) so 19 cards don't take nine
    screens, but it still follows the scroll exactly — no snapping.
+   The card that settles in the centre runs the real shell (LiveFrame) — only
+   one at a time; it drops back to its thumbnail when it moves away.
    Phones get a native swipe row instead of pinning. The landing scrolls inside
    a div, so everything is measured against the nearest scrolling ancestor. */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion, useMotionValue, useTransform } from 'motion/react'
 import { ArrowUpRight } from 'lucide-react'
+import { cn } from '@kit'
 import type { Shell } from '@/gallery/registry'
 import { Container, Heading } from './parts'
+import { LiveFrame } from './LiveFrame'
 import { usePinFrame } from './StepDeck'
 
 /** the row moves this much faster than the page scrolls — 19 big cards at 1:1 would be ~19 screens */
 const SPEED = 2.5
+
+/** one card width, used by the cards and by the row's centring padding */
+const CARD_W = 'max(320px, min(70vw, calc((100svh - 320px) * 1.6)))'
 
 const rail = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/rail/${id}-${theme}.jpg`
 
@@ -42,7 +49,7 @@ export function ShellRail({ shells, theme }: { shells: Shell[]; theme: string })
   const phone = useMedia('(max-width: 767px)')
   const head = (
     <Heading kicker="Shells" title={`${shells.length} instruments, one kit.`}
-      lede="Each one is a different kind of tool, and a starting point for yours." />
+      lede="Each is a different kind of tool. Start yours from any of them." />
   )
   return phone
     ? <SwipeRow shells={shells} theme={theme} head={head} />
@@ -58,6 +65,10 @@ function PinnedRow({ shells, theme, head }: { shells: Shell[]; theme: string; he
   const [dist, setDist] = useState(0)
   const [frameW, setFrameW] = useState(0)
   const [count, setCount] = useState(1)
+  // the card nearest the middle; it goes live only once scrolling has settled on it
+  const [centre, setCentre] = useState(0)
+  const [live, setLive] = useState<number | null>(null)
+  const [focus, setFocus] = useState(0)
   const { frameH, top: stickyTop } = usePinFrame(frame)
   const pin = useRef(stickyTop); pin.current = stickyTop
   const x = useMotionValue(0)
@@ -98,12 +109,29 @@ function PinnedRow({ shells, theme, head }: { shells: Shell[]; theme: string; he
       const p = dist > 0 ? Math.min(1, Math.max(0, (past * SPEED) / dist)) : 0
       x.set(-p * dist)
       setCount(Math.round(p * (shells.length - 1)) + 1)
+      // which card's centre is closest to the frame's centre (cards are children of the track)
+      const cards = track.current ? [...track.current.children] as HTMLElement[] : []
+      const mid = (frame.current?.clientWidth ?? 0) / 2
+      let best = 0, bestD = Infinity
+      cards.forEach((c, i) => { const d = Math.abs(c.offsetLeft - p * dist + c.offsetWidth / 2 - mid); if (d < bestD) { bestD = d; best = i } })
+      // only live while the rail is actually on screen and pinned
+      setFocus(best)
+      const r = el.getBoundingClientRect(), vh = scroller ? scroller.clientHeight : innerHeight
+      setCentre(r.bottom > top + vh * 0.25 && r.top < top + vh * 0.75 ? best : -1)
     }
     const on = () => { if (!raf) raf = requestAnimationFrame(update) }
     update()
     target.addEventListener('scroll', on, { passive: true })
     return () => { target.removeEventListener('scroll', on); cancelAnimationFrame(raf) }
   }, [dist, shells.length, x])
+
+  // settle: go live 350ms after the centre card stops changing; leaving drops back to the thumbnail
+  useEffect(() => {
+    setLive(null)
+    if (centre < 0) return
+    const t = setTimeout(() => setLive(centre), 350)
+    return () => clearTimeout(t)
+  }, [centre])
 
   // a sideways trackpad swipe over the row scrolls the page, so it moves the row too
   useEffect(() => {
@@ -142,9 +170,11 @@ function PinnedRow({ shells, theme, head }: { shells: Shell[]; theme: string; he
           </div>
         </Container>
 
-        <motion.div ref={track} onFocus={onFocus} style={{ x }}
-          className="relative flex w-max gap-6 px-[max(16px,calc((100vw-1120px)/2+32px))] will-change-transform">
-          {shells.map((s, i) => <RailCard key={s.id} shell={s} theme={theme} delay={Math.min(i, 4) * 90} />)}
+        <motion.div ref={track} onFocus={onFocus}
+          // padded by half the leftover width at each end, so every card passes exactly through the
+          // middle: the focused card is always the centred one, with even peeks either side
+          className="relative flex w-max gap-6 will-change-transform" style={{ x, paddingInline: `calc((100% - ${CARD_W}) / 2)` }}>
+          {shells.map((s, i) => <RailCard key={s.id} shell={s} theme={theme} delay={Math.min(i, 4) * 90} live={live === i} focused={focus === i} />)}
         </motion.div>
 
         <Container>
@@ -158,18 +188,28 @@ function PinnedRow({ shells, theme, head }: { shells: Shell[]; theme: string; he
   )
 }
 
-function RailCard({ shell: s, theme, delay }: { shell: Shell; theme: string; delay: number }) {
+function RailCard({ shell: s, theme, delay, live, focused }: { shell: Shell; theme: string; delay: number; live: boolean; focused: boolean }) {
+  // the centred card is in focus; the rest fade back (inner elements: the outer one owns the card-in reveal)
+  const fade = cn('transition-[opacity,scale] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none', focused ? 'opacity-100' : 'scale-[0.94] opacity-35')
   return (
-    <a href={`#/${s.id}`} data-rail-card data-shell-id={s.id} style={{ '--card-in-delay': `${delay}ms` } as React.CSSProperties}
-      className="card-in group flex w-[max(320px,min(70vw,calc((100svh-320px)*1.6)))] flex-none flex-col gap-3.5 rounded-[12px] outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-4 focus-visible:ring-offset-field">
-      <div className="panel relative aspect-[16/10] overflow-hidden">
-        <img src={rail(s.id, theme)} alt={`${s.name}, a ${s.category.toLowerCase()} tool built with the kit`} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
+    <div data-rail-card data-shell-id={s.id}
+      className="card-in group flex flex-none flex-col gap-3.5" style={{ '--card-in-delay': `${delay}ms`, width: CARD_W } as React.CSSProperties}>
+      <div className={cn('panel relative aspect-[16/10] overflow-hidden', fade)}>
+        {/* thumbnail: always there, so loading and leaving never flash empty */}
+        <a href={`#/${s.id}`} tabIndex={live ? -1 : 0} aria-label={`Open ${s.name}`}
+          className="absolute inset-0 rounded-[inherit] outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-inset">
+          <img src={rail(s.id, theme)} alt={`${s.name}, a ${s.category.toLowerCase()} tool built with the kit`} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
+        </a>
+        {/* the centred card runs the real shell on top — one live at a time */}
+        {live && <LiveFrame id={s.id} name={s.name} />}
       </div>
-      <div className="flex items-center justify-between gap-3 px-0.5">
+      <a href={`#/${s.id}`} className={cn('flex items-center justify-between gap-3 rounded-[6px] px-0.5 outline-none focus-visible:ring-2 focus-visible:ring-signal', fade)}>
         <span className="truncate text-[15px] font-medium text-fg">{s.name}</span>
-        <ArrowUpRight size={14} strokeWidth={1.5} className="flex-none text-fg-faint transition-colors group-hover:text-fg" />
-      </div>
-    </a>
+        <span className="flex flex-none items-center gap-1 text-[12.5px] text-fg-faint transition-colors group-hover:text-fg">
+          {live && <span className="hidden sm:inline">Full screen</span>}<ArrowUpRight size={14} strokeWidth={1.5} />
+        </span>
+      </a>
+    </div>
   )
 }
 

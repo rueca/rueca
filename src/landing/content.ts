@@ -16,90 +16,96 @@ export const installs = [
   {
     id: 'plugin',
     label: 'Claude Code',
-    title: 'Plugin — skill, scripts and kit in one',
+    title: 'Skill, scripts and kit in one',
     lines: [`/plugin marketplace add ${site.repo}`, `/plugin install ${site.slug}@${site.slug}`],
-    note: 'Then ask for a prototype, a playground or “a tool to tune this”. The skill decides the surface, picks a shell archetype, scaffolds the kit and runs QA in both themes.',
+    note: 'Then ask your agent for a prototype or “a tool to tune this”.',
   },
   {
     id: 'skill',
     label: 'Any agent',
-    title: 'Agent skill — the open standard',
+    title: 'For Cursor, Codex, Copilot and others',
     lines: [`npx skills add ${site.repo}`],
-    note: 'Installs skills/' + site.slug + ' for Cursor, Codex, Copilot, Gemini and other agents that read the Agent Skills format (agentskills.io).',
+    note: 'Works with any agent that reads the open Agent Skills format.',
   },
   {
     id: 'kit',
     label: 'Kit only',
-    title: 'Components — via the shadcn CLI',
+    title: 'Just the components',
     lines: [`npx shadcn@latest add ${registryItem('studio')}`],
-    note: 'Or one piece at a time — theme, core, inspector, timeline, stage, layers, scrub, color and more; each pulls what it needs. Source lands in your repo; import components/studio/theme.css as the last line of your CSS. Re-run add with --overwrite to update (--diff previews).',
+    note: 'Add everything, or one piece at a time. The files land in your project and you can update them later. Setup notes are in the README.',
   },
   {
     id: 'local',
     label: 'Run locally',
     title: 'Clone the shells',
     lines: [`git clone ${repoURL}`, `cd ${site.repo.split('/')[1]} && npm install && npm run dev`],
-    note: 'Every shell in the gallery is a folder in src/shells. Copy one as the start of your own instrument.',
+    note: 'Each example tool is a folder. Copy one to start your own.',
   },
 ] as const
 
 /** Shells offered in the hero switcher, in order; missing ones are skipped. */
-export const HERO_SHELLS = ['shader', 'motion', 'scene', 'dropin', 'present', 'animate', 'nodes', 'type']
+/** The hero: a short stacked line in the display serif, then the plain promise (display face: see landing.css). Brand line, see brand/BRAND.md. */
+export const hero = {
+  lines: ['Spin up', 'a real tool.'],
+  lede: 'The inspector, timeline, layers and export of a design tool, wrapped around the prototype you already have.',
+}
+
+export const HERO_SHELLS = ['shader', 'animate', 'motion', 'scene', 'dropin', 'present', 'nodes', 'type']
 
 export const steps = [
   {
     n: 1,
     short: 'Describe',
     title: 'Name what you want to tune',
-    body: 'Tell the agent what should be adjustable: size, colour, speed, mood. Each becomes a control, with undo, presets, before/after and a shareable link already included.',
+    body: 'Tell the agent what to make adjustable: size, colour, speed, mood. Each one becomes a control, with undo, presets and a share link built in.',
   },
   {
     n: 2,
     short: 'Drop in',
     title: 'Bring the thing you are designing',
-    body: 'An animation, a shader, a 3D scene, a page you already built. The agent connects it to the controls without rebuilding it.',
+    body: 'An animation, a shader, a 3D scene or a page you already built. The agent wires it to the controls without rebuilding it.',
   },
   {
     n: 3,
     short: 'Tune',
     title: 'Get a tool that feels like a real one',
-    body: 'Inspector, timeline, layers, command palette and export, laid out the way Figma, Framer and Rive do it. Keep tuning, or hand it to a client.',
+    body: 'Inspector, timeline, layers and export, laid out like Figma, Framer and Rive. Keep tuning, or hand it to a client.',
   },
 ]
 
 export const kitGroups = [
-  { title: 'Controls', items: ['Scrub fields', 'Sliders', 'Toggles', 'Colour picker', 'Gradients', 'Palettes', 'Curves', 'Springs', 'Angle dial', 'XY pad', 'Image drop', 'Live readouts'], body: 'Drag a number, type it, or write a quick sum. Every control works from the keyboard too.' },
-  { title: 'Layout', items: ['Floating panels', 'Docked panels', 'Full-bleed stage', 'Artboards', 'Pan and zoom', 'Tool dock'], body: 'Floating, docked or full-bleed, with a canvas that pans and zooms the way Figma does.' },
-  { title: 'Time', items: ['Timeline', 'Keyframes', 'Markers', 'Play and scrub', 'Slow motion'], body: 'A timeline drawn from the same maths as the animation, so the two never disagree.' },
-  { title: 'Structure', items: ['Layers', 'Inspector', 'Show and hide', 'Lock', 'Rename', 'Reorder'], body: 'Layers with the eye, lock and drag you expect, and an inspector that builds itself.' },
-  { title: 'Working', items: ['Undo and redo', 'Presets', 'Before and after', 'Share link', 'Command palette', 'Shortcuts'], body: 'Undo anything, save looks, compare two versions, and send a link that opens exactly where you left off.' },
-  { title: 'Hand-off', items: ['PNG', 'SVG', 'Video', 'Settings file', 'Copy as agent prompt'], body: 'Export stills and frame-accurate video, or pass the settings to an engineer or another agent.' },
+  { title: 'Controls', items: ['Scrub fields', 'Sliders', 'Toggles', 'Colour picker', 'Gradients', 'Palettes', 'Curves', 'Springs', 'Angle dial', 'XY pad', 'Image drop', 'Live readouts'], body: 'Drag a number, type it, or do quick maths in the field. Everything works from the keyboard.' },
+  { title: 'Layout', items: ['Floating panels', 'Docked panels', 'Full-bleed stage', 'Artboards', 'Pan and zoom', 'Tool dock'], body: 'Floating, docked or full-bleed, with a canvas that pans and zooms like Figma.' },
+  { title: 'Time', items: ['Timeline', 'Keyframes', 'Markers', 'Play and scrub', 'Slow motion'], body: 'A timeline that always matches the animation.' },
+  { title: 'Structure', items: ['Layers', 'Inspector', 'Show and hide', 'Lock', 'Rename', 'Reorder'], body: 'Layers you can hide, lock and drag, and an inspector that builds itself.' },
+  { title: 'Working', items: ['Undo and redo', 'Presets', 'Before and after', 'Share link', 'Command palette', 'Shortcuts'], body: 'Undo anything, save looks, compare versions, and share a link to the exact state.' },
+  { title: 'Hand-off', items: ['PNG', 'SVG', 'Video', 'Settings file', 'Copy as agent prompt'], body: 'Export stills and video, or hand the settings to an engineer or another agent.' },
 ]
 
 export const faq = [
   {
     q: 'How is this different from Toolcraft?',
-    a: 'Toolcraft (Pixel Point, MIT) has an agent generate a whole bespoke design app from a large starter, React-only and desktop-only. Here the harness drops in around a prototype you already have — canvas, three.js or an iframe of anything — and the kit installs component by component, so it can be updated later. Toolcraft is the better fit when you want a full standalone app; several of its ideas (soft vs hard ranges, interaction ownership, transient history lanes) are credited below.',
+    a: 'Toolcraft has your agent generate a whole design app from a large starter, for React and desktop only. This wraps the prototype you already have, in any framework, and installs piece by piece so you can update it. Pick Toolcraft for a standalone app. We borrowed three of its ideas: sliders with a soft range you can type past, giving each action one home (the canvas or the panel, not both), and keeping playback out of your undo history.',
   },
   {
     q: 'And DialKit, Leva, Tweakpane?',
-    a: 'They are tuning panels: excellent for developers, and DialKit’s springs and agent hand-off are lovely. This is the rest of the tool around the panel — stage and camera, timeline, layers, export, command palette, a client view — styled to be shown to a client rather than to a console.',
+    a: 'They’re tuning panels, great for developers, and DialKit’s springs are lovely. This adds the rest of the tool around the panel: canvas, timeline, layers, export and a client view, polished enough to show a client.',
   },
   {
     q: 'Do I need React?',
-    a: 'The harness is React; the artifact does not have to be. The store and clock are vanilla, MountSurface hands a node to any renderer, and the bridge drives a prototype in any framework through postMessage.',
+    a: 'The tool is built in React. Your prototype can be anything: a canvas, a three.js scene, or a page built in another framework.',
   },
   {
     q: 'Does it work on a phone?',
-    a: 'The client view does — big touch targets, a bottom sheet, only the params you publish. The full designer view is built for a desktop.',
+    a: 'The client view does, with big touch targets and only the controls you choose to share. The full design view is for desktop.',
   },
   {
     q: 'Will it make my prototype look generic?',
-    a: 'The chrome is neutral on purpose: no brand, no accent outside state. The artboard has its own font token, so restyling the tool can never restyle the thing being designed.',
+    a: 'No. The tool stays neutral on purpose, and your artboard keeps its own fonts and colours, so restyling the tool never touches your design.',
   },
   {
     q: 'Is it free?',
-    a: `Yes — ${site.license}. Use it for client work; credit is appreciated, not required.`,
+    a: `Yes, ${site.license}. Use it for client work. Credit is welcome, not required.`,
   },
 ]
 
