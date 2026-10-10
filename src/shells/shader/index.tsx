@@ -71,7 +71,7 @@ export default function GradientStudio() {
   }
   const saveLook = () => {
     const name = prompt('Name this look', `Look ${presets.filter((p) => !p.builtin).length + 1}`)
-    if (name) { params.savePreset(name); toast(`Saved “${name}”`, { type: 'success' }) }
+    if (name) toast(`Saved “${params.savePreset(name)}”`, { type: 'success' })
   }
 
   const sid = sel?.id

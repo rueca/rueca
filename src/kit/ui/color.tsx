@@ -136,10 +136,26 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
 
   const applyText = () => {
     const t = text.trim()
-    if (mode === 'hex' && /^#?[0-9a-f]{3,8}$/i.test(t)) emit(hexToHsva(t.startsWith('#') ? t : `#${t}`), true)
+    // tabbing through untouched must not commit (it used to reset alpha — break-it V15)
+    if (t === formatColor(value, mode)) return
+    if (mode === 'hex' && /^#?[0-9a-f]{3,8}$/i.test(t)) {
+      const h = hexToHsva(t.startsWith('#') ? t : `#${t}`)
+      // a hex without alpha digits keeps the current opacity
+      emit(t.replace('#', '').length > 6 || t.replace('#', '').length === 4 ? h : { ...h, a: hsva.a }, true)
+    }
     else if (mode === 'rgb') {
       const n = t.match(/[\d.]+/g)?.map(Number)
       if (n && n.length >= 3) emit({ ...rgbToHsv(n[0], n[1], n[2]), a: n[3] !== undefined ? n[3] / 100 : hsva.a }, true)
+      else setText(formatColor(value, mode))
+    } else if (mode === 'oklch') {
+      // "62% 0.18 265" (L may be 0–1 or a percent); typed text used to be ignored in this mode
+      const n = t.match(/-?[\d.]+/g)?.map(Number)
+      if (n && n.length >= 3 && n.every(Number.isFinite)) {
+        const l = /%/.test(t.split(/\s+/)[0]) || n[0] > 1 ? n[0] / 100 : n[0]
+        const v = { l: clamp(l, 0, 1), c: clamp(n[1], 0, 0.5), h: ((n[2] % 360) + 360) % 360 }
+        setLch(v)
+        emit({ ...hexToHsva(oklchToHex(v)), a: n[3] !== undefined ? clamp(n[3] / 100, 0, 1) : hsva.a }, true)
+      } else setText(formatColor(value, mode))
     } else setText(formatColor(value, mode))
   }
 

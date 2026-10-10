@@ -63,61 +63,29 @@ personal skill. Old prototype-studio skill archived at ~/.claude/skill-backups/.
 Site type (branding session, Rafael's picks): Gabarito display (big stacked hero "Give it / a spin."), Hanken Grotesk body,
 Geist Mono code — landing + gallery only; product chrome stays Inter.
 
-## Break-it QA round — state at 2026-10-10 ~01:40
-- 6 agents ran (dx, a11y, layout, perf, state reported; interaction stalled twice → re-running as "interaction-2",
-  findings appended live to scratchpad/breakit-interaction2/findings.md).
-- ALL P0/P1 FIXED and verified. Kit P2 pass done. Shell P2 pass done (cleanup agent). Details + remaining items:
-  research/08-qa-round.md (see "Open (kit)" and the last lines).
-- Remaining open: stack.tsx listbox→grid row pattern (axe nested-interactive); KeyTimeline per-lane [ ]; ViewportFrame
-  chrome prop + icon presets; data-grid row buttons in gridcell; then remove shell overrides (batch/panels.tsx,
-  animate KeyButton class) and move photo/dither to kit intake `onReject`; landing iframe off-screen pause (PERF-6);
-  p.select union typing.
-- Machine: ~/Documents appears synced by Google Drive (fileproviderd busy) — recommend moving the repo out of synced
-  folders; ~40 leftover test Chrome processes (couldn't kill — not permitted) → Rafael to quit them.
-
-## Break-it QA round: 5 of 6 reported (interaction stalled); all P0/P1 FIXED except S2/S4 shell-side validation —
-see research/08-qa-round.md "Status after this pass". Next: S2/S4 shell validators, then P2 backlog, re-run interaction
-agent on a quiet machine (close orphaned headless Chrome first — load avg hit ~480), apply Geométrica fonts.
-
-## (earlier) dx + a11y reported; P0/P1 from them FIXED (see research/08-qa-round.md "Fix log").
-Still running at hand-off: interaction (5311), state (5312), layout (5313), perf (5316). Their reports arrive as
-notifications — append to research/08-qa-round.md, fix P0/P1, then P2. Then APPLY the Geométrica site fonts myself (Branding session paused) — exact plan in brand/SESSION-NOTES.md
-"In progress / open" item 1; touches only src/landing/*, src/gallery/Gallery.tsx, package.json.
-
-## Break-it QA round (original plan) (6 read-only agents, brief: scratchpad/breakit-brief.md)
-interaction (5311) · state/persistence (5312) · layout/responsive/themes (5313) · a11y + axe (5314) ·
-developer/agent experience incl. registry + plugin (5315) · performance/leaks/scale (5316).
-When they report: triage into research/08-qa-round.md, fix P0/P1 first, re-run QA, commit.
-THEN message the Branding session "go fonts" — site typeface Geométrica (Gabarito / Lexend / Geist Mono, landing only)
-is approved and waiting on the QA round so npm i doesn't disturb the test servers.
+## Current state — 2026-10-10 (afternoon)
+- Break-it QA round COMPLETE: all six agents reported (interaction re-ran as interaction-2). Every P0/P1 and the P2s
+  are fixed and verified headlessly; the log is in research/08-qa-round.md (latest: "interaction-2" sections).
+- Kit additions this pass: number-field fixes (Infinity guard, mixed deltas, percent editing, typing starts an edit,
+  Esc mid-scrub, wheel), focused fields own their keys, bare-Space shortcuts fire on release (Space+drag pans
+  without playing), typed `p.select`/`p.multi` values, grid semantics for EffectStack + DataGrid, KeyTimeline per-lane
+  `[ ]`, ViewportFrame `chrome={false}`, preset name clashes + active-preset tracking, OKLCH text entry.
+- Eval suite: evals/ (6 cases + fixtures, README has the run commands). NOT run yet — each run is a full Claude
+  session on Rafael's account. Suggested first run: one case, `--runs 1`.
+- Branding session is converting shell demo content to the "wire aesthetic v2" (brand/BRAND.md): it owns
+  ui-design, dropin, batch, video, animate, motion, component-lab, photo, dither, generate, flows, journey (+ scene
+  optional) until it says it's done. Message it before touching those shells.
 
 ## Next (in order)
-1. **Review QA results** in `research/qa-report.json`. Handoff run: tsc clean; 0 console errors across all 19 shells × 2 themes; low-contrast text flags (<3:1) in ui-design (dark 1), video (light 8), flows (4/3), generate (dark 3), journey (8/2), synth (dark 8) — check each; some may be artwork text the audit can't tell from chrome (mark artwork roots with `data-studio-artifact`).
-2. **Consolidation pass on the kit** — work through `research/07-kit-gaps.md`. Top items (requested by 4–6 builders):
-   - Document store + unified history (`createDocStore`, `createHistory([doc, params])`, history adaptor for
-     HistoryButtons; named steps). Builders' versions: batch/local/history.tsx, flows/local/doc-store.ts,
-     photo/local/history.tsx.
-   - `p.data<T>()` / `p.list` hidden document params; `params.item()` / `<SchemaInspector schema values onChange>`.
-   - Scoped / partial presets.
-   - Timeline split: transport + optional hotkeys + editable key lanes (promote animate/local/KeyframeTimeline,
-     video/local/TrackTimeline); clock loop modes (once / loop / ping-pong); pause when tab hidden.
-   - toast update/dismiss/promise; `recordFrames` (mediabunny) + progress toast; zip writer; DOM→PNG snapshot.
-   - Hotkey priority/scope + duplicate warnings; Space conflicts (stage pan vs play vs reroll); `compare={false}`.
-   - Stage: fit by value not identity, fitMaxZoom, fill mode without pan; ZoomControls with plain props; SafeArea.
-   - Token namespacing to avoid shadcn collisions (`muted`/`accent`/`input`) — mechanical rename kit + shells.
-   - Promote: Knob, EffectStack, PresetGrid, CompareSplit, SplitPane, QuickAdd, InlineText, DataGrid,
-     JobQueue, Modal, Masonry, ToneCurve, Histogram, AxisGizmo, ParamSlider (painted tracks), useHoldKey,
-     xyflow token theme.
-   - Bugs: segmented truncation, bipolar slider origin, LayerTree toggles/tabindex, Section uncontrolled,
-     image params in localStorage (quota fails silently), CanvasSurface forwardRef generic, Artboard font-feature leak.
-3. **Refactor shells** onto the promoted kit pieces (delete their `local/` copies), React Flow attribution visible
-   in flows + nodes, motion shell's stuck loading toast.
-4. **Re-run QA on all shells**, refresh thumbnails, `npm run sync`.
-5. **Skill**: reconcile packaging fork's `skills/trompo/` with the consolidated kit; add parallel-agent
-   guidance (own ports/profiles for headless Chrome, own scratch dirs, restart dev server after new files).
-   Then plan evals (`claude plugin eval`).
-6. **Rafael decides**: name (Thumbwheel?), repo owner, domain, npm scope, distribution (registry + plugin ±
-   npm), whether to replace his installed `~/.claude/skills/trompo` with the new one. See `docs/LAUNCH.md`.
+1. Rafael: try a single eval case (see evals/README.md) and decide whether to run the suite.
+2. Remaining small items: shell overrides (batch/panels.tsx wrapper, animate KeyButton class) and photo/dither
+   intake → kit `onReject` (wait for Branding to finish those shells); PERF-6 landing iframe off-screen pause
+   (Packaging owns src/landing); comment-pin initials label; synth knob value fields; video timeline labels.
+3. Untested areas worth one more agent later: undo storms in flows/journey/generate, photo HistoryList jump,
+   canvas zoom extremes, real pointer lock.
+4. Launch decisions (Rafael): domain trompo.dev, repo trompo-dev/trompo, npm scope, publish — see docs/LAUNCH.md.
+- Machine: ~/Documents is synced by Google Drive (fileproviderd busy) — move the repo out of synced folders; quit
+  leftover headless Chrome processes (I'm not permitted to kill them).
 
 ## Gotchas while resuming
 - Dev server must be restarted after many new files (Tailwind v4 dev may miss classes from new files).

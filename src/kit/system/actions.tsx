@@ -22,6 +22,7 @@ import { cn } from '../core/cn'
 import { Button, IconButton } from '../ui/button'
 import { Menu, Divider, type MenuItem } from '../ui/controls'
 import { toast } from './toast'
+import { promptText } from './dialog'
 
 /** ⌘Z / ⇧⌘Z for a params store, a doc store, or a joined History. */
 export function useHistoryHotkeys(history: HistoryLike) {
@@ -82,9 +83,9 @@ export function PresetMenu({ params, trigger, title = 'Presets' }: { params: Any
     ...presets.map((p) => ({ label: p.name, checked: active?.name === p.name, onClick: () => params.applyPreset(p.name) })),
     { type: 'separator' },
     {
-      label: 'Save current as preset…', icon: Plus, onClick: () => {
-        const name = prompt('Preset name', `Preset ${presets.filter((p) => !p.builtin).length + 1}`)
-        if (name) { params.savePreset(name); toast(`Saved “${name}”`, { type: 'success' }) }
+      label: 'Save current as preset…', icon: Plus, onClick: async () => {
+        const name = await promptText({ title: 'Save preset', label: 'Name', defaultValue: `Preset ${presets.filter((p) => !p.builtin).length + 1}`, confirmLabel: 'Save' })
+        if (name) toast(`Saved “${params.savePreset(name)}”`, { type: 'success' })
       },
     },
     ...(active && !active.builtin ? [{ label: `Delete “${active.name}”`, icon: Trash2, danger: true, onClick: () => params.deletePreset(active.name) } as MenuItem] : []),

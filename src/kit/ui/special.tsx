@@ -260,8 +260,11 @@ export function GradientEditor({ value, onChange, angle = true }: { value: { ang
             aria-valuenow={Math.round(s.pos * 100)}
             tabIndex={0}
             onKeyDown={(e) => {
-              if (e.key === 'ArrowRight') setStop(i, { pos: clamp(s.pos + 0.01, 0, 1) }, true)
-              if (e.key === 'ArrowLeft') setStop(i, { pos: clamp(s.pos - 0.01, 0, 1) }, true)
+              // the stop owns these keys — never let Backspace reach a canvas "delete node" handler (break-it V14)
+              if (/^(Arrow|Delete|Backspace)/.test(e.key)) { e.preventDefault(); e.stopPropagation() }
+              const step = e.shiftKey ? 0.1 : 0.01
+              if (e.key === 'ArrowRight' || e.key === 'ArrowUp') setStop(i, { pos: clamp(s.pos + step, 0, 1) }, true)
+              if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') setStop(i, { pos: clamp(s.pos - step, 0, 1) }, true)
               if ((e.key === 'Delete' || e.key === 'Backspace') && value.stops.length > 2) { onChange({ ...value, stops: value.stops.filter((_, j) => j !== i) }, true); setSel(0) }
             }}
             onPointerDown={(e) => { e.stopPropagation(); setSel(i); dragging.current = i; (e.target as HTMLElement).setPointerCapture(e.pointerId) }}
@@ -314,7 +317,7 @@ export function PaletteField({ value, onChange, max = 8, min = 1 }: { value: str
         <Popover.Root key={i}>
           <div className="group/sw relative">
             <Popover.Trigger aria-label={`Colour ${i + 1}, ${c}${value.length > min ? '. Delete to remove' : ''}`}
-              onKeyDown={(e) => { if ((e.key === 'Delete' || e.key === 'Backspace') && value.length > min) { e.preventDefault(); remove(i) } }}
+              onKeyDown={(e) => { if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); e.stopPropagation(); if (value.length > min) remove(i) } }}
               className="relative block size-6 rounded-[5px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
               <Swatch color={c} size={24} className="rounded-[5px]" />
             </Popover.Trigger>

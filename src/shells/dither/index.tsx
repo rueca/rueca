@@ -175,7 +175,7 @@ export default function DitherLab() {
                 onRemove={(n) => params.deletePreset(n)}
               />
               <div className="px-3 pb-1">
-                <Button size="sm" variant="ghost" className="w-full" onClick={async () => { const name = await promptText({ title: 'Name this look', label: 'Name', defaultValue: `Look ${presets.filter((p) => !p.builtin).length + 1}`, confirmLabel: 'Save look' }); if (name) { params.savePreset(name); toast(`Saved “${name}”`, { type: 'success' }) } }}>
+                <Button size="sm" variant="ghost" className="w-full" onClick={async () => { const name = await promptText({ title: 'Name this look', label: 'Name', defaultValue: `Look ${presets.filter((p) => !p.builtin).length + 1}`, confirmLabel: 'Save look' }); if (name) toast(`Saved “${params.savePreset(name)}”`, { type: 'success' }) }}>
                   Save current as look…
                 </Button>
               </div>

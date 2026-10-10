@@ -68,7 +68,8 @@ export interface ParamStore<S extends Schema, V extends Values = SchemaValues<S>
   canRedo(): boolean
   onCommit(fn: (v: V, meta: CommitMeta) => void): () => void
   /** save a preset; `keys` limits it to part of the schema (default: the store's presetKeys, else all shareable values) */
-  savePreset(name: string, opts?: { keys?: (keyof V)[] }): void
+  /** saves the current values; returns the name actually used (a clash with a built-in gets "Name 2") */
+  savePreset(name: string, opts?: { keys?: (keyof V)[] }): string
   applyPreset(name: string): void
   deletePreset(name: string): void
   /** the preset whose keys all match the current values, if any */
@@ -205,6 +206,7 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
   }))
 
   const commitListeners = new Set<(v: V, meta: CommitMeta) => void>()
+  let lastPreset: string | undefined
   const emit = (v: V, meta: CommitMeta) => commitListeners.forEach((fn) => fn(v, meta))
   // Another tab saved: adopt its values (when we're not mid-edit) so the two don't clobber each other (S7).
   if (typeof window !== 'undefined' && opts.persist !== false) window.addEventListener('storage', (e) => {
@@ -336,13 +338,18 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
       const s = store.getState()
       const keys = (o.keys ?? opts.presetKeys ?? (Object.keys(s.values).filter((k) => flag(k, 'share') && isValueDef(defs[k]) && defs[k].type !== 'data') as (keyof V)[])) as string[]
       const values = Object.fromEntries(keys.map((k) => [k, structuredClone((s.values as Values)[k])])) as Partial<V>
-      const presets = [...s.presets.filter((p) => p.name !== name || p.builtin), { name, values, mode: 'merge' as const }]
+      // a built-in's name would make the user's copy unreachable — presets apply by name (break-it V12)
+      let final = name.trim() || 'Preset'
+      for (let i = 2; s.presets.some((p) => p.builtin && p.name === final); i++) final = `${name.trim()} ${i}`
+      const presets = [...s.presets.filter((p) => p.name !== final || p.builtin), { name: final, values, mode: 'merge' as const }]
+      lastPreset = final
       store.setState({ presets })
       persistUser()
+      return final
     },
     applyPreset: (name: string) => {
       const pr = store.getState().presets.find((p) => p.name === name)
-      if (pr) apply(pr)
+      if (pr) { lastPreset = pr.name; apply(pr) }
     },
     deletePreset: (name: string) => {
       store.setState((s) => ({ presets: s.presets.filter((p) => p.name !== name || p.builtin) }))
@@ -350,12 +357,14 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     },
     activePreset: () => {
       const s = store.getState()
-      return s.presets.find((p) => {
+      // Two presets can match the same values (a user copy of "Calm"); the one last applied or saved wins (break-it V13)
+      const matches = (p: Preset<V>) => {
         const keys = Object.keys(p.values)
         if (!keys.length) return false
         const base = p.mode === 'replace' ? { ...defaults, ...p.values } : p.values
         return Object.keys(base).every((k) => equal((s.values as Values)[k], (base as Values)[k]))
-      })
+      }
+      return s.presets.find((p) => p.name === lastPreset && matches(p)) ?? s.presets.find(matches)
     },
     toggleCompare: () => {
       const s = store.getState()

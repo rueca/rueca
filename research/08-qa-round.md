@@ -182,3 +182,18 @@ Agent still running when this was written; findings V1–V11 so far, all fixed a
 | V11 | P2 | Percent fields without `parse` edited in raw units ("5%" → pinned 30%) | ScrubValue reads percent scale off `fmt(1)` and edits in percent (fixes synth, nodes, animate, type in one place) |
 
 Kit lesson: number-field behaviour lives in one component, so every shell got these fixes for free — the only shell change was ui-design's multi-select plumbing.
+
+### interaction-2 final report — remaining items (fixed)
+| # | Sev | Finding | Fix |
+|---|---|---|---|
+| V12 | P1 | Saving a preset under a built-in's name made an unreachable duplicate | `savePreset` returns the name used; clashes become "Dense 2"; kit PresetMenu uses the styled `promptText` dialog, not `prompt()` |
+| V13 | P2 | Active-preset label took the first match, so "My calm" showed as "Calm" and couldn't be deleted | params remembers the last applied/saved preset and prefers it when several match |
+| V14 | P1 | Backspace on a focused gradient stop deleted the whole node (React Flow's delete key) | stops (and palette swatches) own Arrow/Delete/Backspace and stop propagation; ↑/↓ and Shift ×10 added |
+| V15 | P2 | Tabbing through the hex field reset alpha | no-op when unchanged; 6-digit hex keeps current alpha |
+| F4 | P2 | Typing into the colour field in Lch mode was ignored | OKLCH text parsed ("50% 0.1 30") |
+| F8 | P1 | Space+drag panned AND toggled playback (motion, video, animate) | dispatcher fires bare-Space bindings on release, skipped if the pointer went down while held |
+| F12 | P2 | nodes: "f" in preview-only view → NaN zoom, 81 console errors | fit skipped while the graph is hidden |
+| F19 | P3 | ⌘-Tab away while holding Space left the grab cursor stuck | Stage drops the hand tool on window blur |
+
+Not bugs: F13 (history after 3 undos lands where it should — the uncommitted change is flushed as its own step).
+Untested by the agent: real pointer lock, undo storms in flows/journey/generate, photo HistoryList jump, canvas zoom extremes.

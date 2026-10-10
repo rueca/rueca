@@ -231,7 +231,10 @@ stops ticks while paused too (default true for artifacts with their own life).
 - Hotkeys: `useHotkeys({ 'mod+e': fn, t: { run, label: 'Text tool', group: 'Tools' } }, deps, { priority })`.
   One dispatcher; shell bindings (priority 10) beat kit defaults (0); labelled bindings appear in the
   `?` sheet automatically; dev warns on duplicates. `useHoldKey('\\', (down) => …)` for hold-to-peek.
-  Space/Enter on a focused button go to the button.
+  Space/Enter on a focused button go to the button. A bare `space` binding (play / pause) fires on
+  release and only if the pointer wasn't pressed meanwhile, so Space+drag pans without toggling playback.
+  A focused number field or slider owns digits, Backspace, Delete and arrows; typing a digit into a focused
+  ScrubValue starts editing with it (Figma).
 
 ## 6b. Specialist components (promoted from the shells)
 

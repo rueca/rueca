@@ -94,6 +94,10 @@ let installed = false
 function install() {
   if (installed || typeof window === 'undefined') return
   installed = true
+  // A bare Space binding (play / pause) fires on RELEASE, and only if the pointer wasn't pressed while
+  // Space was held — Space+drag is the hand tool, so panning must not also toggle playback (break-it F8).
+  let spacePending: { run: (e: KeyboardEvent) => void } | null = null
+  let spaceUsed = false
   window.addEventListener('keydown', (e) => {
     if (e.defaultPrevented || typing(e) || onField(e)) return
     const hits = bindings.filter((b) => splitCombos(b.combo).some((c) => matches(c, e)) && (!b.when || b.when()))
@@ -101,8 +105,20 @@ function install() {
     if (onButton(e, normKey(e.key))) return
     hits.sort((a, b) => b.priority - a.priority || b.order - a.order)
     e.preventDefault()
+    if (normKey(e.key) === 'space' && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+      if (!e.repeat && !spacePending) { spacePending = hits[0]; spaceUsed = false }
+      return
+    }
     hits[0].run(e)
   })
+  window.addEventListener('pointerdown', () => { if (spacePending) spaceUsed = true }, true)
+  window.addEventListener('keyup', (e) => {
+    if (normKey(e.key) !== 'space' || !spacePending) return
+    const b = spacePending
+    spacePending = null
+    if (!spaceUsed) b.run(e)
+  })
+  window.addEventListener('blur', () => { spacePending = null })
 }
 
 export function useHotkeys(map: Record<string, HotkeyHandler>, deps: unknown[] = [], opts: { priority?: number; group?: string; enabled?: boolean } = {}) {

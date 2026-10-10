@@ -133,9 +133,12 @@ export function Stage({
     if (fill) return
     const down = (e: KeyboardEvent) => { if (e.code === 'Space' && !e.repeat && !(e.target as HTMLElement).closest?.('input,textarea,select,[contenteditable],button')) setSpace(true) }
     const up = (e: KeyboardEvent) => e.code === 'Space' && setSpace(false)
+    // ⌘-Tab away with Space held: the keyup lands in another app, so drop the hand tool on blur (break-it F19)
+    const blur = () => setSpace(false)
     window.addEventListener('keydown', down)
     window.addEventListener('keyup', up)
-    return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up) }
+    window.addEventListener('blur', blur)
+    return () => { window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', blur) }
   }, [fill])
 
   useHotkeys(fill || !hotkeys ? {} : {
