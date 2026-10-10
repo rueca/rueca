@@ -63,6 +63,18 @@ personal skill. Old prototype-studio skill archived at ~/.claude/skill-backups/.
 Site type (branding session, Rafael's picks): Gabarito display (big stacked hero "Give it / a spin."), Hanken Grotesk body,
 Geist Mono code — landing + gallery only; product chrome stays Inter.
 
+## Break-it QA round — state at 2026-10-10 ~01:40
+- 6 agents ran (dx, a11y, layout, perf, state reported; interaction stalled twice → re-running as "interaction-2",
+  findings appended live to scratchpad/breakit-interaction2/findings.md).
+- ALL P0/P1 FIXED and verified. Kit P2 pass done. Shell P2 pass done (cleanup agent). Details + remaining items:
+  research/08-qa-round.md (see "Open (kit)" and the last lines).
+- Remaining open: stack.tsx listbox→grid row pattern (axe nested-interactive); KeyTimeline per-lane [ ]; ViewportFrame
+  chrome prop + icon presets; data-grid row buttons in gridcell; then remove shell overrides (batch/panels.tsx,
+  animate KeyButton class) and move photo/dither to kit intake `onReject`; landing iframe off-screen pause (PERF-6);
+  p.select union typing.
+- Machine: ~/Documents appears synced by Google Drive (fileproviderd busy) — recommend moving the repo out of synced
+  folders; ~40 leftover test Chrome processes (couldn't kill — not permitted) → Rafael to quit them.
+
 ## Break-it QA round: 5 of 6 reported (interaction stalled); all P0/P1 FIXED except S2/S4 shell-side validation —
 see research/08-qa-round.md "Status after this pass". Next: S2/S4 shell validators, then P2 backlog, re-run interaction
 agent on a quiet machine (close orphaned headless Chrome first — load avg hit ~480), apply Geométrica fonts.
