@@ -1,6 +1,7 @@
 # Builds the site (landing + example tools + component registry) and deploys it
 # to GitHub Pages on every push to main. Pull requests build and check only.
 # One-time setup: repo Settings → Pages → Source: "GitHub Actions".
+# While the repo is private (free plan: no Pages) it only builds and tests; deploy steps skip.
 name: Site
 
 on:
@@ -34,20 +35,20 @@ jobs:
         run: npm test
       - name: Pages base path
         id: pages
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && !github.event.repository.private
         uses: actions/configure-pages@v5
       - name: Build
         run: npm run build
         env:
           # /<repo>/ for a project site, / for a custom domain or a PR build
           BASE_PATH: ${{ steps.pages.outputs.base_path }}/
-      - if: github.event_name != 'pull_request'
+      - if: github.event_name != 'pull_request' && !github.event.repository.private
         uses: actions/upload-pages-artifact@v4
         with:
           path: dist
 
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && !github.event.repository.private
     needs: build
     runs-on: ubuntu-latest
     environment:
