@@ -41,11 +41,13 @@ npx shadcn@latest add https://rueca.dev/r/studio.json
 Or one piece at a time — `theme`, `core`, `inspector`, `timeline`, `stage`, `layers`,
 `scrub`, `color`, `palette`… Each pulls what it needs. The full list is at
 [`/r/registry.json`](https://rueca.dev/r/registry.json). Files land in
-your project (`components/studio/`), so you own them. Then add the theme as the **last**
-line of your main CSS, so it wins over shadcn's default tokens:
+your project (`components/studio/`), so you own them. Then add the theme to your main CSS
+(anywhere: kit tokens are namespaced, so they never collide with shadcn's) and give the page a
+height, because `<Studio>` fills its parent:
 
 ```css
 @import "./components/studio/theme.css";
+html, body, #root { height: 100%; margin: 0; }
 ```
 
 Re-run `add` with `--overwrite` to update a piece, `--diff` to preview the change first.

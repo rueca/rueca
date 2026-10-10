@@ -128,7 +128,7 @@ const itemOf = (file) => {
 }
 const ABOUT = {
   studio: ['Studio kit (everything)', 'The whole harness: schema → inspector, clock, surfaces, layout, stage, timeline, layers, palette, toasts and theme.'],
-  theme: ['Studio theme', 'Contrast-audited dark + light tokens via @theme inline. Import it as the last line of your main CSS.'],
+  theme: ['Studio theme', 'Contrast-audited dark + light tokens via @theme inline. Import it in your main CSS; names are namespaced, so order does not matter.'],
   core: ['Core', 'Schema, param store (undo, presets, A/B, share), clock, hotkeys, IO and theme hook. Framework-agnostic.'],
   inspector: ['Inspector', 'Turns a schema into sections and rows with reset, hints and the changed-from-default cue.'],
   timeline: ['Timeline', 'Ruler, lanes, keys, markers and a playhead driven by the clock.'],

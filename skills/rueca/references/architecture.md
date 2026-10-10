@@ -24,8 +24,9 @@ generate from it. **Adding a knob is one line and nothing else.**
 - Give every param a `hint`. Six months later nobody remembers what "Perspective"
   meant; the tooltip *is* the documentation.
 - Keys are flat across folders (`v.count`, not `v.geometry.count`).
-- Mark expensive params `live: false` — they apply on commit (pointer-up), not
-  mid-drag.
+- Expensive params: mark them `live: false` (a marker for readers and tools) and do the
+  expensive work in `params.onCommit((v) => …)`, which fires on pointer-up, not mid-drag.
+  Surfaces still redraw on every change; keep `draw` cheap and rebuild heavy things on commit.
 - Mark client-facing params `publish: true` — they appear in the present/client view.
 - Use `when: (v) => …` for conditional rows instead of hand-hiding controls.
 - Soft range for scrubbing, hard range for typing (Blender): `min/max` is what the

@@ -1,4 +1,4 @@
-# Status — where we left off (2026-10-09, afternoon)
+# Status — where we left off (updated 2026-10-10, cleanup QA round)
 
 Start here when resuming. Also read `docs/SESSION-CONTEXT.md` (who/what/decisions) and
 `research/07-kit-gaps.md` (the consolidation backlog).
@@ -8,7 +8,7 @@ Start here when resuming. Also read `docs/SESSION-CONTEXT.md` (who/what/decision
 npm run dev            # http://localhost:5273  → landing · #/shells → gallery · #/<id> → a shell
 node scripts/qa.mjs    # headless Chrome QA: console errors + contrast, both themes, refreshes thumbnails
 npm run sync           # regenerate skill references, registry (public/r), plugin manifests
-npm run check          # sync --check + tsc (what CI runs)
+npm run check          # sync --check + tsc + unit tests (what CI runs)
 ```
 Brand board: http://localhost:5273/brand/
 
@@ -24,9 +24,9 @@ Brand board: http://localhost:5273/brand/
 - **Packaging fork** (separate Desktop session "Packaging agent"): landing page (`src/landing/`), gallery at
   `#/shells`, lean skill rewrite in `skills/rueca/` (SKILL.md + references), `.claude-plugin/`,
   shadcn registry (`registry.json`, `public/r/*.json`, verified installing into a fresh project), README,
-  LICENSE (MIT), CONTRIBUTING, `.github/` Pages workflow, `docs/LAUNCH.md` (decisions + commands).
-- **Branding fork** (session "Branding agent"): `brand/` board + `brand/BRAND.md`. Recommendation **Thumbwheel**
-  (free on npm, GitHub, .dev/.studio/.design/.tools); runner-up Wingspace; also Jigwork, Clampwork.
+  LICENSE (MIT), CONTRIBUTING, `.github/` CI workflow (hosting is Vercel), `docs/LAUNCH.md` (decisions + commands).
+- **Branding fork** (session "Branding agent"): `brand/` board + `brand/BRAND.md`. Name history: Thumbwheel →
+  Trompo → **Rueca** (final).
 - **Provenance**: `THIRD_PARTY_NOTICES.md` (webgl-noise, Hoskins hash, OKLab); IQ-derived constants replaced
   in shader + photo; registry re-synced.
 
@@ -43,11 +43,8 @@ Brand board: http://localhost:5273/brand/
   marks/present/dropin · data: batch/flows/journey/nodes/generate). Brief: scratchpad wave2-brief.md. Each reports
   exports to add to src/kit/index.ts and changes needed in existing kit files — apply those, then QA all.
 
-**Name: Rueca** (chosen by Rafael). DONE by branding session: site.config, sync (skills/rueca), landing mark, favicon.
-TODO: guard `sync --check` against a pending rename (crashes reading skills/<new-slug>); update SESSION-CONTEXT name.
-After wave 2: rename hard-coded "rueca" in shells (marks/actions.ts, motion/meta.ts, synth/index.tsx,
-journey/export.ts, batch/exporter.ts, flows/export.ts, photo/develop.ts) + src/kit/index.ts, then `npm run sync`.
-Keep `studio:` localStorage keys.
+**Name: Rueca.** The name lives only in `src/site.config.ts`; `npm run sync` spreads it. The kit is brand-neutral
+(`[studio]` logs, `studio:` storage keys — keep them).
 
 Landing: shells section is a pinned rail (src/landing/ShellRail.tsx) with its own thumbnails —
 after shells change visibly run `npm run thumbs:rail [id]` (scripts/thumbs-rail.mjs). TODO: synth's
@@ -99,5 +96,5 @@ Geist Mono code — landing + gallery only; product chrome stays Inter.
 
 ## Gotchas while resuming
 - Dev server must be restarted after many new files (Tailwind v4 dev may miss classes from new files).
-- The home folder `/Users/raf` is itself a git repo; this project has its own repo (local only, nothing pushed).
+- The home folder `/Users/raf` is itself a git repo; this project has its own repo (origin github.com/rueca/rueca, private).
 - Builders used scratch dirs under the session scratchpad; nothing important lives there.

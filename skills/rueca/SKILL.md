@@ -27,7 +27,7 @@ you read rides along in every later turn.
    - React project, or a new one → the kit. Not installed yet? Install it:
      `npx shadcn@latest add https://rueca.dev/r/studio.json -y` (lands in
      `src/components/studio/`; import from `@/components/studio`; add
-     `@import "./components/studio/theme.css";` to the main CSS). New project or `shadcn init`
+     `@import "./components/studio/theme.css";` and `html, body, #root { height: 100% }` to the main CSS). New project or `shadcn init`
      trouble → `references/install.md`. **Can't install right now** (no shell, or told not to run
      anything)? Still write against the kit and put the install command in your handoff — never
      hand-build what the kit already gives you (undo, presets, A/B, share links, persistence, the
@@ -75,7 +75,7 @@ const draw = (ctx: CanvasRenderingContext2D, { t, w, h, v }: { t: number; w: num
 export function Tool() {
   const v = useValues(params)
   const exportPNG = () => renderCanvasPNG(draw, { width: v.size.w, height: v.size.h, v: params.values(), t: clock.time(), scale: 2 })
-    .then(() => toast('Exported PNG'))
+    .then(() => toast('Exported PNG'), (e) => toast('Export failed', { type: 'error', description: String(e) }))
   useHotkeys({ 'mod+e': { run: exportPNG, label: 'Export PNG', group: 'File' } }, [v.size.w, v.size.h])
   return (
     <Studio

@@ -1,0 +1,32 @@
+# Checks every push and pull request. Hosting is Vercel (vercel.json): it builds and deploys main itself.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Generated files are up to date
+        run: node scripts/sync.mjs --check
+      - name: Unit tests
+        run: npm test
+      - name: Build
+        run: npm run build

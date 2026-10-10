@@ -35,8 +35,8 @@ Accent: `bg-signal` (fills) · `bg-signal-strong` (surfaces carrying text) · `t
 `bg-signal-soft` (selection wash). Semantic: `key` (keyframed, amber) · `rec` (playhead/record/
 error) · `ok`. Lanes: `bg-lane`. Utilities: `panel` `cluster` `pop` `tabular` `no-select`
 `checker`. Categorical (identity, never state): `cat-1`…`cat-8` (ports, lanes, tags). Over
-images: `bg-scrim`. CSS vars: `--row` (28px lane), `--gutter`, `--inspector-w`, and in overlay
-layouts `--safe-top/right/bottom/left` (what the panels cover).
+images: `bg-scrim`. CSS vars: `--row` (28px lane), `--gutter`, `--inspector-w`, and in islands and
+overlay layouts `--safe-top/right/bottom/left` (what the panels cover).
 Token names are namespaced so they never collide with shadcn (`muted`, `accent`, `input` mean
 something else there): ours are `fg-muted`, `signal`, `control`; font is `font-ui`.
 
@@ -73,7 +73,7 @@ export const schema = defineSchema({
 ```
 
 Every def accepts `label`, `hint`, `when: (v) => boolean` (conditional row), `disabled`,
-`live: false` (expensive — apply on commit), `publish: true` (shows in the client view),
+`live: false` (marks it expensive — the kit doesn't hold it back; do the heavy work in `params.onCommit`), `publish: true` (shows in the client view),
 `persist: false` (keep out of localStorage), `share: false` (keep out of links/JSON).
 Keys are **flat across folders** (`v.count`).
 
@@ -205,7 +205,7 @@ stops ticks while paused too (default true for artifacts with their own life).
   `<Artboard width height label x y background selected>` (defaults white; resets font features).
   `useCamera()` gives the store + `fit()` / `zoomTo()` / `touch()` / `untouch()`.
   `<ZoomPill zoom onZoom onFit />` works outside a Stage too (React Flow, custom canvases).
-- `useSafeArea()` in overlay layouts → `{ top, right, bottom, left }` covered by panels.
+- `useSafeArea()` in islands and overlay layouts (zero in docked) → `{ top, right, bottom, left }` covered by panels.
 - `<Panel>` (scrolls) · `<PanelHeader title>` · `<PanelTabs value onChange tabs>` · `<Empty icon title hint action compact>`.
 
 ## 6. Components

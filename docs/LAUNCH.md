@@ -1,74 +1,32 @@
 # Launch checklist
 
-Everything is built and wired. What's left is **your decisions** (part 1), then **one
-sitting of commands** (part 2), then **checks** (part 3). The whole thing takes about
-half an hour once the decisions are made.
+Status 2026-10-10: everything is built, decided and hosted. The name is **Rueca**
+(`src/site.config.ts`), the site is live at **https://rueca.dev** on Vercel (team RC IDP,
+project `rueca`, deploys every push to `main`, `www` → apex), and the code is in
+**github.com/rueca/rueca — still private**. What's left is part 2 (going public), then the
+checks in part 3.
 
-## 1. Decide (all in `src/site.config.ts`)
+## 1. Decisions (done — all in `src/site.config.ts`)
 
-| Decision | Where | Notes |
+| Decision | Value | Notes |
 |---|---|---|
-| **Name** | `name`, `slug` | Display name and the machine name (lowercase-kebab). The slug becomes the skill name, plugin name, package name and repo name, and is what people type: `/plugin install <slug>@<slug>`. Check it's free on GitHub and npm before deciding. Names starting `claude-` or `anthropic-` are reserved by Claude Code. |
-| **Repo owner** | `repo` | Your personal account, or an organisation (more neutral if others will maintain it; an org is free). It shows up in every install command: `/plugin marketplace add <owner>/<slug>`. |
-| **Domain** | `url` | Free: `https://<owner>.github.io/<slug>`. Custom (e.g. `<name>.design`, about $15–60 a year): shorter install commands, survives a repo rename. **Pick before launch.** Component install URLs contain it, so changing it later breaks updates for anyone who already installed. |
-| **npm scope** | — | **Not needed at launch.** The registry serves from your site, and the bridge script can be served by jsDelivr straight from GitHub. Reserve the name anyway (`npm login`, then publish an empty placeholder, or create an org scope `@<name>`). |
-| **Tagline / description** | `tagline`, `description` | Show on the landing page, in the plugin listing and in the README. |
-| **What goes public** | — | `research/` (useful context, names competitors frankly) and `docs/SESSION-CONTEXT.md` (internal hand-off notes). I'd keep research and delete SESSION-CONTEXT. Your call. |
-| **Old skill** | `~/.claude/skills/rueca/` | Once you install the plugin, remove the old copy, or both versions trigger on the same requests. |
+| Name / slug | Rueca / `rueca` | Changing it later: edit `site.config.ts`, `npm run sync` (rewrites skill, plugin, registry, package.json, README, docs). The kit itself never contains the name. |
+| Repo | `rueca/rueca` (org `rueca`) | In every install command: `/plugin marketplace add rueca/rueca`. |
+| Domain | `https://rueca.dev` | Component install URLs contain it — don't change it after launch. |
+| Hosting | Vercel | Settings live in `vercel.json` (Vite, `npm run build` → `dist`, Node ≥24). The Vercel connector can't see projects; use the dashboard for project/domain settings. |
+| npm scope | `@rueca` (free, not reserved) | Not needed at launch: the registry serves from the site. Reserve it by creating the npm org. |
+| What goes public | — | `research/` and `docs/SESSION-CONTEXT.md` are internal notes. Rafael's call before step 2. |
+| Old skill | `~/.claude/skills/rueca` is a symlink to the repo | After installing the plugin, remove the symlink or both copies trigger. |
 
-Then run:
-
-```bash
-npm run sync
-```
-
-That rewrites the name, repo and URL across the skill, plugin manifest, registry,
-`package.json`, README and docs. The landing page reads the config directly.
-
-## 2. Publish
-
-**Before you start:** your whole home folder is a git repository with no commits.
-This project is currently inside it, not a repo of its own. Step 1 gives it its own
-repo, so nothing outside the project folder (`.ssh`, `.zshrc`…) can be pushed by
-accident. Later, consider whether you meant `~` to be a repo at all.
-
-You need the GitHub CLI signed in (`gh auth status`; `brew install gh` then
-`gh auth login` if not).
+## 2. Go public
 
 ```bash
-cd ~/Documents/"Prototype UI Harness"
-git init -b main
-git add -A
-git status            # read the list: no secrets, no stray files
-git commit -m "Initial public release"
+gh repo edit rueca/rueca --visibility public --accept-visibility-change-consequences
+gh repo edit rueca/rueca --add-topic claude-code-plugin,agent-skills,shadcn-registry,design-tools,prototyping
 ```
 
-```bash
-gh repo create <owner>/<slug> --public --source . --push --description "<tagline>"
-```
-
-Turn on GitHub Pages, deployed by the workflow that's already in the repo:
-
-```bash
-gh api -X POST repos/<owner>/<slug>/pages -f build_type=workflow
-gh workflow run Site
-gh run watch
-```
-
-The site goes live at the `url` from your config. Add topics so people can find it:
-
-```bash
-gh repo edit <owner>/<slug> --add-topic claude-code-plugin,agent-skills,shadcn-registry,design-tools,prototyping
-```
-
-**Custom domain (if you chose one):** point the DNS at GitHub Pages (a `CNAME` record
-to `<owner>.github.io` for a subdomain, or GitHub's A records for an apex domain), then:
-
-```bash
-echo "<your.domain>" > public/CNAME
-git add public/CNAME && git commit -m "Custom domain" && git push
-gh api -X PUT repos/<owner>/<slug>/pages -f cname=<your.domain> -F https_enforced=true
-```
+Nothing to redeploy: the site is already live. CI (`.github/workflows/ci.yml`) checks every push
+and pull request (generated files up to date, unit tests, production build).
 
 ## 3. Check it works from the outside
 
@@ -81,15 +39,16 @@ Do these on the live site, not on localhost.
       `/plugin marketplace add <owner>/<slug>` → `/plugin install <slug>@<slug>`,
       then ask *"make me a tool to tune a gradient"* and watch it use the skill.
 - [ ] Skill for other agents: `npx skills add <owner>/<slug>`.
-- [ ] Kit, in a fresh folder (this exact sequence passed against a local registry on
-      2026-10-09):
+- [ ] Kit, in a fresh folder (this exact sequence was re-checked against rueca.dev by the
+      2026-10-10 cleanup QA):
       ```bash
       npm create vite@latest kit-check -- --template react-ts --no-interactive
       cd kit-check && npm i && npm i -D tailwindcss @tailwindcss/vite
-      # add tailwindcss() + an '@' alias to vite.config.ts, "@/*" paths to tsconfig.app.json
+      printf '@import "tailwindcss";\n' > src/index.css
+      # add tailwindcss() + an '@' alias to vite.config.ts, "@/*" paths to tsconfig.json AND tsconfig.app.json
       npx shadcn@latest init -y -b base --no-monorepo -p nova
       npx shadcn@latest add https://<url>/r/studio.json -y
-      echo '@import "./components/studio/theme.css";' >> src/index.css
+      printf '@import "./components/studio/theme.css";\nhtml, body, #root { height: 100%%; margin: 0 }\n' >> src/index.css
       ```
 - [ ] `claude plugin validate .` passes in the repo (it does today).
 
@@ -112,4 +71,4 @@ Framer, Rive forums), and skills.sh once people install it.
   update with `npx shadcn@latest add <url>/r/<item>.json --overwrite`.
 - Bump `version` in `site.config.ts` for skill or plugin changes, then `npm run sync`.
   Plugin users get it with `/plugin marketplace update`.
-- CI (`.github/workflows/pages.yml`) fails a pull request if someone forgot to run sync.
+- CI (`.github/workflows/ci.yml`) fails a pull request if someone forgot to run sync, broke a test or broke the build.

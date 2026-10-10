@@ -40,9 +40,9 @@
 ## Files
 - `src/kit/` — the kit (API in `docs/KIT.md`). `src/kit/theme.css` tokens.
 - `src/shells/<id>/` — test shells (meta.ts + index.tsx), auto-registered by `src/gallery/App.tsx` via import.meta.glob.
-  Done: motion, dropin, present. In progress by 8 builder agents: ui-design, component-lab, shader, dither, scene,
-  photo, animate, video, flows, journey, nodes, generate, batch, marks, type, synth.
-- `src/gallery/` — gallery home (`#/`), shells at `#/<id>`.
+  All 19 are done (motion, dropin, present, ui-design, component-lab, shader, dither, scene, photo, animate, video,
+  flows, journey, nodes, generate, batch, marks, type, synth).
+- `src/landing/` — the landing page (`#/`); `src/gallery/` — the shells gallery (`#/shells`), shells at `#/<id>`.
 - `research/01–06` — technology survey, pro-tool patterns, landscape of vibe-coded instruments, six-tool control
   matrix, Toolcraft evaluation, QA findings/gotchas.
 - `scripts/qa.mjs` — headless Chrome (playwright-core, channel 'chrome') QA: console errors, contrast audit both

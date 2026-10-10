@@ -18,10 +18,13 @@ New project:
 ```bash
 npm create vite@latest studio -- --template react-ts
 cd studio && npm i && npm i -D tailwindcss @tailwindcss/vite
-# add tailwindcss() to vite.config.ts plugins, an "@/*": ["./src/*"] path to
-# tsconfig.json + tsconfig.app.json and the matching '@' alias in vite.config.ts
+printf '@import "tailwindcss";\n' > src/index.css          # shadcn init only finds Tailwind v4 through this import
+# add tailwindcss() to vite.config.ts plugins, an "@/*": ["./src/*"] path to BOTH
+# tsconfig.json and tsconfig.app.json (one alone makes shadcn write a literal ./@/ folder), and the
+# matching alias in vite.config.ts: resolve: { alias: { '@': path.resolve(import.meta.dirname, 'src') } }
 npx shadcn@latest init -y -b base --no-monorepo -p nova   # flags matter: init is interactive and hangs otherwise
 npx shadcn@latest add https://rueca.dev/r/studio.json -y
+printf '@import "./components/studio/theme.css";\nhtml, body, #root { height: 100%%; margin: 0 }\n' >> src/index.css
 ```
 
 - `studio` installs everything; individual pieces (`inspector`, `timeline`, `stage`,
@@ -37,6 +40,9 @@ npx shadcn@latest add https://rueca.dev/r/studio.json -y
   (`muted`, `accent`, `input`) — order doesn't matter. The kit styles only `.studio` (the
   `<Studio>` root) and `.pop` popups; it never touches your `<body>`. Using kit controls outside
   `<Studio>`? Put `className="studio"` on their container.
+- **Give the page a height.** `<Studio>` fills its parent, and Vite's template sets no height, so
+  without `html, body, #root { height: 100%; margin: 0 }` the tool renders 0 px tall (a blank page,
+  no errors). The kit warns about this in dev.
 - **Theme class before first paint.** Put this in `index.html` `<head>` so the stored
   theme never flashes (the kit's `useTheme` / `ThemeToggle` read the same key). Without a
   `.dark`/`.light` class the tokens follow the OS:

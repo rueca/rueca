@@ -9,9 +9,13 @@ Check here before debugging.
 | `rafCallsIn600ms: 0`, nothing animates | `document.hidden` — browsers suspend rAF in background tabs. Environment artifact, not a bug. Don't chase it. |
 | rAF crawls (2 frames / 1.5s) in an embedded preview pane even though `document.hidden` is false | Preview panes throttle. Verify motion by `clock.seek()` + sampling, never by waiting. |
 | New component's classes don't apply (padding / size silently 0) | Tailwind v4 + Vite dev: classes used only in files created after the server started may not reach the served CSS. Restart the dev server (or touch the CSS entry) after creating new files. |
-| `npx shadcn init` hangs | It's interactive. Pass `-y`, or write the files directly — they're just source. |
+| `npx shadcn init` hangs or fails | It's interactive: pass `-y -b base --no-monorepo -p nova` (`-y` alone still prompts). "No Tailwind CSS configuration found" means `src/index.css` lacks `@import "tailwindcss";`. Or write the files directly — they're just source. |
+| The tool renders blank, no errors | `<Studio>` fills its parent and nothing gave the page a height: `html, body, #root { height: 100%; margin: 0 }`. |
 | Fonts silently fall back | Chrome blocks `@font-face` over `file://`. Serve over HTTP. |
 | TS error about `baseUrl` | TypeScript 7 removed it. `paths` must be relative (`"./src/*"`). |
+| Canvas won't pan over an iframe artboard | Iframes swallow wheel and pointer events. Use a Hand vs Interact mode with a transparent shield over the frame (see the Drop-in shell). |
+| `<a> cannot contain a nested <a>` | `Brand` links the mark home itself — pass a plain glyph. |
+| Parallel agents' tests interfere | Each agent needs its own dev-server port, its own headless-Chrome debugging port and profile, and its own scratch folder. Shared `cdp.mjs` / port 9333 collisions happened. |
 
 ## Layout
 
@@ -69,17 +73,6 @@ Check here before debugging.
 | Space "clicks" the focused button instead of playing | Intended: Space/Enter on a focused button belong to the button. |
 | `?` sheet never opens | `shift+/` never matched — the produced key is `?`. Bind `'?'`. |
 | ⌘↵ does nothing in a text field | The field swallowed every key. Kit fields don't; global single-key shortcuts already ignore typing targets. |
-
-## Environment and tooling
-
-| Symptom | Cause / fix |
-|---|---|
-| A new component renders with no padding / zero size | Tailwind v4 dev server missed classes from files created after it started. Restart the dev server after adding files. |
-| Animation frozen in the preview pane | rAF throttled in a hidden or background pane. Verify by stepping the clock (`clock.seek`) and sampling, or in headless Chrome. |
-| Canvas won't pan over an iframe artboard | Iframes swallow wheel and pointer events. Use a Hand vs Interact mode with a transparent shield over the frame (see the Drop-in shell). |
-| `<a> cannot contain a nested <a>` | `Brand` links the mark home itself — pass a plain glyph. |
-| Parallel agents' tests interfere | Each agent needs its own dev-server port, its own headless-Chrome debugging port and profile, and its own scratch folder. Shared `cdp.mjs` / port 9333 collisions happened. |
-| `tsc` complains about `baseUrl` | TypeScript 7 removed it; `paths` must be relative (`"./src/*"`). |
 
 ## Learned from the break-it QA round
 

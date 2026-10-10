@@ -35,6 +35,12 @@ export function Studio({
   children: ReactNode; layout?: Layout; className?: string; leftWidth?: number; rightWidth?: number
 }) {
   const [present, setPresent] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  // The #1 install trap: <Studio> fills its parent, and a fresh Vite page has no height → a blank page, no error.
+  useLayoutEffect(() => {
+    if (import.meta.env?.DEV && rootRef.current && rootRef.current.clientHeight === 0)
+      console.warn('[studio] <Studio> is 0px tall. It fills its parent — give the page a height: html, body, #root { height: 100%; margin: 0 }')
+  }, [])
   useHotkeys({
     'mod+\\': { run: () => setPresent((p) => !p), label: 'Hide interface', group: 'View' },
   }, [present], { priority: 0 })
@@ -99,7 +105,7 @@ export function Studio({
   return (
     <StudioCtx.Provider value={{ present, setPresent, layout }}>
       <TipProvider>
-        <div className={cn('studio h-full w-full overflow-hidden bg-field text-fg no-select', className)}>
+        <div ref={rootRef} className={cn('studio h-full w-full overflow-hidden bg-field text-fg no-select', className)}>
           {shell}
           {statusbar}
           {present && (
@@ -181,7 +187,7 @@ export function Empty({ icon: Icon, title, hint, action, compact }: { icon?: Rea
 }
 
 /* ---------------------------------------------------------------------------
-   Safe area — in the overlay layout the stage runs under the panels. This
+   Safe area — in the islands and overlay layouts the stage runs under the panels. This
    measures what the panels cover and exposes it as CSS vars on the root
    (--safe-top/right/bottom/left) and via useSafeArea(), so a HUD, a fixed-
    aspect frame or the camera's "centre" can sit in the uncovered rect.
