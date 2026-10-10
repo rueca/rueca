@@ -3,8 +3,8 @@ export const meta: ShellMeta = {
   id: 'batch',
   name: 'Batch',
   category: 'Generators',
-  description: 'A brand asset generator: one template, a table of products, every social size at once — with per-size overrides, safe areas and a zipped batch export.',
-  archetype: 'Template × data × sizes grid + export queue',
+  description: 'Turn one template and a product list into every social size at once. Adjust any size by hand and export them all as a zip.',
+  archetype: 'Template × products × sizes + export queue',
   references: ['Figma', 'Canva', 'Freshcoat'],
   order: 40,
 }

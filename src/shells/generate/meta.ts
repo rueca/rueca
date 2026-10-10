@@ -3,8 +3,8 @@ export const meta: ShellMeta = {
   id: 'generate',
   name: 'Generate',
   category: 'AI',
-  description: 'An image-generation playground with a mock model: streamed progress, a queue, a masonry history grouped by prompt, compare, variations, remix and upscale.',
-  archetype: 'Prompt + params + history gallery',
+  description: 'Practise an image-generation workflow with a stand-in model: queue prompts, browse results by prompt, compare them and make variations.',
+  archetype: 'Prompt + settings + history gallery',
   references: ['Figma Weave', 'Midjourney web', 'Krea', 'Nano Banana editors'],
   order: 41,
 }

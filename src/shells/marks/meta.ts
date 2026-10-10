@@ -3,7 +3,7 @@ export const meta: ShellMeta = {
   id: 'marks',
   name: 'Marks',
   category: 'Generators',
-  description: 'A parametric logo generator: five mark families from seed + params, a variants grid you reroll with Space, and a focus view with lockups, a size ladder, more-like-this and side-by-side compare.',
+  description: 'Generate logo ideas from a few dials and reroll the ones you don\'t like with Space. Open one to see lockups and sizes.',
   archetype: 'Variants grid → focus + inspector',
   references: ['Oddgrid', 'Mentee Logo Lab', 'Affinity', 'Components AI'],
   order: 41,

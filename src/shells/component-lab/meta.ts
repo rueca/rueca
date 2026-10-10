@@ -4,8 +4,8 @@ export const meta: ShellMeta = {
   id: 'component-lab',
   name: 'Component lab',
   category: 'UI design',
-  description: 'A component playground: schema-generated props, a resizable viewport, a variant × state matrix, OKLCH tokens with contrast checks, and JSX / CSS / token hand-off.',
-  archetype: 'Preview + props + states matrix',
+  description: 'Try a component\'s props, screen widths and states side by side. Check colour contrast and copy the code when it looks right.',
+  archetype: 'Preview + props + states grid',
   references: ['Storybook', 'Framer', 'tweakcn'],
   order: 21,
 }

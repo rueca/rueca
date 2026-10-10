@@ -3,8 +3,8 @@ export const meta: ShellMeta = {
   id: 'dither',
   name: 'Dither lab',
   category: 'Photo',
-  description: 'Drop in a photo, shape it, then dither it — Floyd–Steinberg, Atkinson, Bayer, halftone, ASCII, pixelate — through retro palettes, with a before/after split and pixel-exact zoom.',
-  archetype: 'Image in → effect chain → export',
+  description: 'Drop in a photo and turn it into dithered, halftone or ASCII art with retro palettes. Compare before and after, and zoom to the pixel.',
+  archetype: 'Image in → effects → export',
   references: ['Efecto', 'Tooooools', 'Grainrad', 'Affinity Photo'],
   order: 21,
 }

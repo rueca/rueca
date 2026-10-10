@@ -3,8 +3,8 @@ export const meta: ShellMeta = {
   id: 'animate',
   name: 'Animate',
   category: 'Motion',
-  description: 'A Rive / Figma Motion style keyframe animator: Design and Animate modes, keyframe diamonds on every property, an editable timeline with easing and springs, and a state machine that drives the preview.',
-  archetype: 'Design/Animate modes + keyframe timeline',
+  description: 'Animate a design with keyframes, easing and springs on a timeline, then add states so the preview reacts to hover and click.',
+  archetype: 'Design and animate modes + keyframe timeline',
   references: ['Rive', 'Figma Motion', 'After Effects', 'Theatre.js'],
   order: 20,
 }

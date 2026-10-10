@@ -3,8 +3,8 @@ export const meta: ShellMeta = {
   id: 'flows',
   name: 'Flows',
   category: 'UX & mapping',
-  description: 'A UX flow mapper on React Flow: wireframe screens, decisions, labelled triggers, sections, comment pins, auto layout and a happy-path walkthrough.',
-  archetype: 'Node canvas + inspector',
+  description: 'Map a product flow with screens, decisions and labelled steps. Tidy the layout in one click, leave comments and walk the happy path.',
+  archetype: 'Flow canvas + inspector',
   references: ['FigJam', 'Whimsical', 'Figma prototyping', 'Overflow'],
   order: 40,
 }

@@ -3,8 +3,8 @@ export const meta: ShellMeta = {
   id: 'present',
   name: 'Client demo',
   category: 'Generators',
-  description: 'The same instrument, two audiences. Designers get the full inspector; clients get a touch-friendly sheet with only the controls marked “publish”. Works on a phone.',
-  archetype: 'Full-bleed art + published controls (mobile)',
+  description: 'One tool, two audiences. You get every control; your client gets a phone-friendly panel with only the controls you choose.',
+  archetype: 'Full-screen art + client controls (phone)',
   references: ['Nodes.io', 'Spline', 'Framer'],
   order: 3,
 }

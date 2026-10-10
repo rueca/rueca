@@ -4,8 +4,8 @@ export const meta: ShellMeta = {
   id: 'ui-design',
   name: 'Canvas',
   category: 'UI design',
-  description: 'A Figma-grade screen design tool: node tree, auto layout, smart guides, fills and effects stacks, prototype links with a player, and PNG / CSS hand-off.',
-  archetype: 'Layers + canvas + properties (docked)',
+  description: 'Design screens the way you would in Figma: layers, auto layout, smart guides, fills and effects. Link them into a clickable prototype and export.',
+  archetype: 'Layers + canvas + properties',
   references: ['Figma', 'Framer', 'Paper', 'Affinity'],
   order: 20,
 }

@@ -3,8 +3,8 @@ export const meta: ShellMeta = {
   id: 'shader',
   name: 'Gradient studio',
   category: 'Graphics',
-  description: 'A live WebGL2 mesh gradient built from an effect stack — warp, grain, halftone, chromatic, vignette — with looks, randomise, 4K stills and frame-accurate loops.',
-  archetype: 'Full-bleed canvas + layer stack + inspector (overlay)',
+  description: 'Build a moving gradient from stacked effects like warp, grain and halftone. Save looks, shuffle for ideas and export 4K stills or seamless loops.',
+  archetype: 'Full-screen canvas + effect stack + inspector',
   references: ['Paper Shaders', 'Unicorn Studio', 'Spline'],
   order: 20,
 }

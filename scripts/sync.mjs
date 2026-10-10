@@ -82,12 +82,17 @@ write(`${SKILL}/assets/theme.css`, `/* Copied from src/kit/theme.css by \`npm ru
 write(`${SKILL}/assets/studio-bridge.js`, read('public/studio-bridge.js'))
 
 const metaField = (src, k) => src.match(new RegExp(`${k}:\\s*(['"\`])((?:\\\\.|(?!\\1).)*)\\1`))?.[2]
+// The <Studio layout> a shell actually uses, read from its source (meta copy is for people; this is for agents).
+const studioLayout = (d) => {
+  const src = walk(`src/shells/${d}`).filter((f) => f.endsWith('.tsx')).map(read).join('\n')
+  return src.match(/<Studio\b[^>]*?\blayout="(islands|overlay|docked)"/)?.[1] ?? (/<Studio\b/.test(src) ? 'islands' : 'custom')
+}
 const shells = readdirSync(r('src/shells'))
   .filter((d) => existsSync(r('src/shells', d, 'meta.ts')) && existsSync(r('src/shells', d, 'index.tsx')))
-  .map((d) => { const s = read(`src/shells/${d}/meta.ts`); return { id: metaField(s, 'id') ?? d, name: metaField(s, 'name') ?? d, archetype: metaField(s, 'archetype') ?? '', order: +(s.match(/order:\s*(\d+)/)?.[1] ?? 99) } })
+  .map((d) => { const s = read(`src/shells/${d}/meta.ts`); return { id: metaField(s, 'id') ?? d, name: metaField(s, 'name') ?? d, archetype: metaField(s, 'archetype') ?? '', layout: studioLayout(d), order: +(s.match(/order:\s*(\d+)/)?.[1] ?? 99) } })
   .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name))
-const table = ['| Shell | Archetype | Live | Source |', '|---|---|---|---|',
-  ...shells.map((s) => `| ${s.name} | ${s.archetype} | [open](${site.url}/#/${s.id}) | [src/shells/${s.id}](${repoURL}/tree/main/src/shells/${s.id}) |`)].join('\n')
+const table = ['| Shell | Archetype | Studio layout | Live | Source |', '|---|---|---|---|---|',
+  ...shells.map((s) => `| ${s.name} | ${s.archetype} | ${s.layout} | [open](${site.url}/#/${s.id}) | [src/shells/${s.id}](${repoURL}/tree/main/src/shells/${s.id}) |`)].join('\n')
 const layouts = read(`${SKILL}/references/layouts.md`)
   .replace(/(<!-- shells:start[^>]*-->)[\s\S]*?(<!-- shells:end -->)/, `$1\n${table}\n$2`)
 write(`${SKILL}/references/layouts.md`, layouts)
