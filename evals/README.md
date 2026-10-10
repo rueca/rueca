@@ -28,10 +28,14 @@ claude plugin eval . --scaffold --allow-tools Write Edit --runs 3 -j 3 --max-cos
 By default this also runs a no-plugin baseline, so the report shows what the skill adds.
 
 ## Gotchas
-- `evals/results/` sits inside the eval dir, and its files are hard links; a later run can then refuse to load
-  cases ("a file in the plugin has more than one name"). Clear it before a run:
+- "a file in the plugin has more than one name (a hard link)": the eval refuses to load while any file in the
+  repo is hard-linked. Cloud sync (Google Drive / iCloud "Desktop & Documents") makes short-lived hard links
+  while uploading, so a repo inside a synced folder fails at random. Run evals from a worktree outside it:
 
   ```bash
-  rm -r evals/results
+  git worktree add --detach ~/trompo-eval HEAD
   ```
+
+  then `cd ~/trompo-eval` and run the eval there (`git -C ~/trompo-eval checkout --detach <commit>` to update it).
 - The CLI needs its own login (`claude auth login`); the desktop app's sign-in doesn't carry over.
+- Don't run two evals at once — they share one rate limit and the second one times out.
