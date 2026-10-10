@@ -10,7 +10,7 @@
      · captures console errors and page errors
      · runs the contrast audit (surface + text pairs, WCAG AA for text)
      · greps the rendered chrome for theme leaks (inline colours outside the stage)
-     · saves public/thumbs/<id>-<theme>.png (gallery thumbnails)
+     · saves research/qa-shots/<id>-<theme>.png (git-ignored; the site's thumbnails are thumbs/rail/*.jpg)
    and prints a table + writes research/qa-report.json.
 --------------------------------------------------------------------------- */
 import { chromium } from 'playwright-core'
@@ -24,7 +24,7 @@ const BASE = process.env.BASE ?? await (async () => {
   console.error('No dev server on :5273 (tried localhost, 127.0.0.1, [::1]). Run `npm run dev`, or set BASE.'); process.exit(1)
 })()
 const only = process.argv.slice(2)
-mkdirSync('public/thumbs', { recursive: true })
+mkdirSync('research/qa-shots', { recursive: true })
 
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 })
@@ -83,7 +83,7 @@ for (const id of shells) {
     await page.goto(`${BASE}/?qa=${Date.now()}#/${id}`)
     await page.waitForTimeout(2200)
     const res = await page.evaluate(audit)
-    await page.screenshot({ path: `public/thumbs/${id}-${theme}.png` })
+    await page.screenshot({ path: `research/qa-shots/${id}-${theme}.png` })
     page.off('console', onConsole); page.off('pageerror', onPageErr)
     report.push({ id, theme, errors, ...res })
     const flag = errors.length || res.fails.length || res.lowText.length ? '✗' : '✓'

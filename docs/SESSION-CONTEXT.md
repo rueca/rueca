@@ -46,7 +46,7 @@
 - `research/01–06` — technology survey, pro-tool patterns, landscape of vibe-coded instruments, six-tool control
   matrix, Toolcraft evaluation, QA findings/gotchas.
 - `scripts/qa.mjs` — headless Chrome (playwright-core, channel 'chrome') QA: console errors, contrast audit both
-  themes, writes `public/thumbs/<id>-<theme>.png`.
+  themes, writes `research/qa-shots/<id>-<theme>.png` (git-ignored).
 - `public/studio-bridge.js`, `public/protos/hero.html` — the drop-in bridge demo.
 - Dev server: `npm run dev` → http://localhost:5273 (already running; don't restart it, don't use the shared
   browser pane — use playwright-core screenshots into the scratchpad).
