@@ -149,3 +149,16 @@ Still open: PERF-6 (landing iframe off-screen), DX10 (accent-check prints
 :root not :root:root — branding-owned script), DX16 p.select union typing, interaction agent re-run.
 PERF-5 ✅ FIXED: ui-design icons rasterised via detached createRoot+flushSync (no react-dom/server); verified 390×844 frame with 14 icons renders.
 DX10 ✅ FIXED by branding session (accent-check + visual-rules print :root:root / .light / prefers-color-scheme blocks).
+
+## Shell P2 pass — DONE (cleanup agent, commit 2a4bde1)
+F3 shell HUDs · F4/F5/F6/F10 layout · S8 (src/shells/storage.ts saveLocal shares kit storageWarned) · S9 batch CSV guard
+(type, 5 MB, 2,000 rows, confirm) · S10 (src/shells/intake.ts toasts + downscale notice) · A9 flows edge focus, edges not
+tab stops · A14 flows status shapes + role=img, ports, override dot · A15 24px targets · A16 crop W/H fields · A17
+documented, A18 journey handle unfocusable · A20 synth toggles, nested-interactive fixes, batch Enter → Pick colour ·
+F12 Vec3Input tokens, generate hover, ≥10.5px text · dither window.prompt → promptText.
+Kit requests applied: intake `onReject`, AxisGizmo 24px, KeyButton nav 24px, data-grid key guard + colour target,
+scrub Enter stops propagation, ALL kit popups z-160 (data-grid, stack, layout-fields, KeyTimeline were missed).
+Open (kit): KeyTimeline `[`/`]` per focused lane + lane label min-h-6; stack.tsx / preset-grid.tsx nested buttons inside
+options (axe nested-interactive); ViewportFrame `chrome={false}` + icon-only presets; data-grid row buttons inside
+gridcell; then remove shell overrides (batch/panels.tsx wrapper, animate KeyButton class) and switch photo/dither from
+src/shells/intake.ts to kit `onReject`. Comment-pin initials label mismatch; synth knob value fields; video timeline labels.
