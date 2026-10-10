@@ -73,8 +73,9 @@ Geist Mono code — landing + gallery only; product chrome stays Inter.
 - Eval suite (evals/; run from the ~/skill-eval worktree, since Drive sync breaks runs inside ~/Documents). 3 runs per
   arm, 2026-10-10, $15.81: client-view 1.00 vs 0.00 · docs-state 1.00 vs 0.33 · tuning-tool 0.92 vs 0.00 ·
   wrap-existing-html 1.00 vs 0.83 · vanilla-three 1.00 vs 1.00 · no-trigger 1.00 vs 1.00 (stays out). Mean Δ +0.46.
-  With the skill, runs cost 2–5× more (it reads several references); one hit the 25-turn cap. Next: trim what the
-  skill makes agents read, and give vanilla-three a rubric that plain Claude doesn't already meet.
+  Skill trimmed (0b8db76: starter in SKILL.md, refs "read ONLY when", kit-api split): with-skill cost per suite
+  $3.90 → $2.17 (−44%; tuning −59%, three.js −51%), all cases still 1.00; agents now read 0–3 refs instead of 5–7.
+  Next: give vanilla-three a rubric plain Claude doesn't already meet.
 - Branding session is converting shell demo content to the "wire aesthetic v2" (brand/BRAND.md): it owns
   ui-design, dropin, batch, video, animate, motion, component-lab, photo, dither, generate, flows, journey (+ scene
   optional) until it says it's done. Message it before touching those shells.
