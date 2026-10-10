@@ -65,6 +65,8 @@ if (typeof window !== 'undefined') {
   // Params / doc stores announce storage failures once; tell the person, quietly.
   window.addEventListener('studio:storage-error', () =>
     toast('Settings could not be saved', { type: 'error', description: 'Browser storage is full or blocked. Your work is fine until you reload.', timeout: 6000 }))
+  window.addEventListener('studio:link-ignored', () =>
+    toast('This link is from an older version', { description: 'The tool has changed since it was shared, so it opened with your own settings instead.', timeout: 6000 }))
 }
 
 export function Toaster() {

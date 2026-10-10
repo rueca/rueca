@@ -76,3 +76,36 @@ describe('presets', () => {
     expect(s.activePreset()?.name).toBe('My calm')
   })
 })
+
+describe('share links carry their version', () => {
+  const link = (payload: object) => { location.hash = '#p=' + btoa(unescape(encodeURIComponent(JSON.stringify(payload)))) }
+  it('round-trips through shareURL', () => {
+    const a = createParams(schema, { id: `link${++n}`, persist: false, version: 2 })
+    a.setValue('rings', 30)
+    const url = a.shareURL()
+    location.hash = url.slice(url.indexOf('#'))
+    sessionStorage.clear()
+    const b = createParams(schema, { id: `link${++n}`, persist: false, version: 2 })
+    expect(b.values().rings).toBe(30)
+  })
+  it('ignores a link made with another version, and says so', async () => {
+    const seen: unknown[] = []
+    const on = (e: Event) => seen.push((e as CustomEvent).detail)
+    window.addEventListener('studio:link-ignored', on)
+    link({ $v: 1, rings: 30 })
+    sessionStorage.clear()
+    const s = createParams(schema, { id: `link${++n}`, persist: false, version: 2 })
+    expect(s.values().rings).toBe(14)
+    await Promise.resolve()
+    expect(seen).toHaveLength(1)
+    window.removeEventListener('studio:link-ignored', on)
+  })
+  it('treats links from before versions existed as version 1', () => {
+    link({ rings: 22 })
+    sessionStorage.clear()
+    expect(createParams(schema, { id: `link${++n}`, persist: false }).values().rings).toBe(22)
+    link({ rings: 22 })
+    sessionStorage.clear()
+    expect(createParams(schema, { id: `link${++n}`, persist: false, version: 3 }).values().rings).toBe(14)
+  })
+})

@@ -180,11 +180,21 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     try { seen = !!m && sessionStorage.getItem(seenKey) === '1' } catch { /* noop */ }
     if (m && !seen) try {
       const raw = JSON.parse(b64.dec(m[1])) as Record<string, unknown>
+      // Links carry the schema version they were made with ($v; links from before this existed count as 1).
+      // A link from another version could mean something else entirely (a renamed or re-scaled param), so it
+      // is ignored, not half-applied — the page opens with the saved settings and says why.
+      const linkVersion = typeof raw?.$v === 'number' ? raw.$v : 1
+      if (raw) delete raw.$v
+      if (linkVersion !== (opts.version ?? 1)) {
+        try { sessionStorage.setItem(seenKey, '1') } catch { /* noop */ }
+        if (typeof window !== 'undefined') queueMicrotask(() => window.dispatchEvent(new CustomEvent('studio:link-ignored', { detail: { id: opts.id, linkVersion, version: opts.version ?? 1 } })))
+        throw new Error('version')
+      }
       // keys marked share:false (images, private data) can never arrive by link
       for (const k of Object.keys(raw ?? {})) if (!flag(k, 'share')) { delete raw[k]; warn(`ignored "${k}" from share link (share: false)`) }
       initial = { ...initial, ...sanitize(raw as Partial<V>, 'share link') }
       try { sessionStorage.setItem(seenKey, '1') } catch { /* noop */ }
-    } catch { warn('ignored an unreadable share link') }
+    } catch (e) { if ((e as Error)?.message !== 'version') warn('ignored an unreadable share link') }
   }
 
   const builtin: Preset<V>[] = (opts.presets ?? []).map((pr) => ({ name: pr.name, values: sanitize(pr.values), mode: pr.mode, builtin: true }))
@@ -388,7 +398,7 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
       const changed = api.toJSON({ changedOnly: true, shareable: true })
       const base = location.href.replace(/[#&]p=[^&]*/, '')
       const sep = base.includes('#') ? '&' : '#'
-      return `${base}${sep}p=${b64.enc(JSON.stringify(changed))}`
+      return `${base}${sep}p=${b64.enc(JSON.stringify({ $v: opts.version ?? 1, ...changed }))}`
     },
     isChanged: (key: keyof V) => !equal(store.getState().values[key], defaults[key]),
   }) as unknown as ParamStore<S>

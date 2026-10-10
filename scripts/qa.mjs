@@ -3,7 +3,8 @@
    channel 'chrome', no browser download).
 
      node scripts/qa.mjs                 # every shell, both themes
-     node scripts/qa.mjs motion dropin   # just these
+     node scripts/qa.mjs motion dropin   # just these (the report keeps the other shells' last results)
+     BASE=http://127.0.0.1:5400 node scripts/qa.mjs   # another server (default: finds the local dev server)
 
    For each shell × theme it:
      · captures console errors and page errors
@@ -13,9 +14,15 @@
    and prints a table + writes research/qa-report.json.
 --------------------------------------------------------------------------- */
 import { chromium } from 'playwright-core'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 
-const BASE = process.env.BASE ?? 'http://localhost:5273'
+// Vite may listen on IPv4 or IPv6 only — try each loopback address unless BASE is given.
+const BASE = process.env.BASE ?? await (async () => {
+  for (const host of ['localhost', '127.0.0.1', '[::1]']) {
+    try { const r = await fetch(`http://${host}:5273/`, { signal: AbortSignal.timeout(3000) }); if (r.ok) return `http://${host}:5273` } catch { /* next */ }
+  }
+  console.error('No dev server on :5273 (tried localhost, 127.0.0.1, [::1]). Run `npm run dev`, or set BASE.'); process.exit(1)
+})()
 const only = process.argv.slice(2)
 mkdirSync('public/thumbs', { recursive: true })
 
@@ -86,5 +93,12 @@ for (const id of shells) {
     for (const l of res.lowText.slice(0, 4)) console.log('    ◦ ' + l)
   }
 }
-writeFileSync('research/qa-report.json', JSON.stringify(report, null, 2))
+// A partial run updates only the shells it checked; everyone else's last result stays (merge by id + theme).
+const REPORT = 'research/qa-report.json'
+let previous = []
+try { if (only.length && existsSync(REPORT)) previous = JSON.parse(readFileSync(REPORT, 'utf8')) } catch { /* start fresh */ }
+const ran = new Set(report.map((r) => `${r.id}:${r.theme}`))
+const merged = [...previous.filter((r) => !ran.has(`${r.id}:${r.theme}`) && ids.includes(r.id)), ...report]
+  .sort((a, b) => ids.indexOf(a.id) - ids.indexOf(b.id) || a.theme.localeCompare(b.theme))
+writeFileSync(REPORT, JSON.stringify(merged, null, 2))
 await browser.close()
