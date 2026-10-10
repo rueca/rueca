@@ -60,7 +60,11 @@ skill architecture/gotchas updated, sync check passes.
 **Note:** ~/.claude/skills/trompo is a symlink to this repo's skills/trompo — edits there are live in Rafael's
 personal skill. Old prototype-studio skill archived at ~/.claude/skill-backups/.
 
-## Break-it QA round: dx + a11y reported; P0/P1 from them FIXED (see research/08-qa-round.md "Fix log").
+## Break-it QA round: 5 of 6 reported (interaction stalled); all P0/P1 FIXED except S2/S4 shell-side validation —
+see research/08-qa-round.md "Status after this pass". Next: S2/S4 shell validators, then P2 backlog, re-run interaction
+agent on a quiet machine (close orphaned headless Chrome first — load avg hit ~480), apply Geométrica fonts.
+
+## (earlier) dx + a11y reported; P0/P1 from them FIXED (see research/08-qa-round.md "Fix log").
 Still running at hand-off: interaction (5311), state (5312), layout (5313), perf (5316). Their reports arrive as
 notifications — append to research/08-qa-round.md, fix P0/P1, then P2. Then APPLY the Geométrica site fonts myself (Branding session paused) — exact plan in brand/SESSION-NOTES.md
 "In progress / open" item 1; touches only src/landing/*, src/gallery/Gallery.tsx, package.json.

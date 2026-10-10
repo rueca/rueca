@@ -66,7 +66,7 @@ NOT YET: flows "Connect to" picker not exercised in a browser test (typechecks; 
 ## layout (viewports, themes, present mode)
 | ID | Sev | Where | Problem | Fix |
 |---|---|---|---|---|
-| F1 | P1 | Studio.tsx present Esc (prio 0) vs shell `esc` (prio 10) | Esc doesn't leave present mode in 10/19 shells; "Show interface" button is opacity-0 | Present-mode Esc at high priority with `when: () => present`; make the exit button visible on hover/focus |
+| F1 | P1 ✅ FIXED (Esc at priority 100 with `when: present`; exit button visible at 30%) | Studio.tsx present Esc (prio 0) vs shell `esc` (prio 10) | Esc doesn't leave present mode in 10/19 shells; "Show interface" button is opacity-0 | Present-mode Esc at high priority with `when: () => present`; make the exit button visible on hover/focus |
 | F2 | P2 | present shell client branch | No `<Toaster/>` outside Studio → "Saved"/"Link copied" never show on phone | Mount Toaster + TipProvider in client branch (or make Toaster self-mount like DialogHost) |
 | F3 | P2 | Stage HUD/overlays | ⌘\ leaves zoom pill, tool dock, minimap, gizmo, readouts on screen | Stage hud/overlay read `useStudio().present` and hide |
 | F4 | P2 | flows @1024 | zoom pill overlaps ToolDock | dock respects pill / safe bottom-right |
@@ -84,7 +84,7 @@ Desktop shells at 390px just squeeze (batch, journey, scene, video clip mid-cont
 ## perf (production builds)
 | ID | Sev | Where | Problem | Fix |
 |---|---|---|---|---|
-| PERF-1 | P1 | scene viewport dispose via MountSurface useEffect cleanup | Each scene visit leaks the scene + a WebGL context (OrbitControls removes keydown from detached root); after 16 visits Chrome drops contexts | MountSurface mount/dispose in useLayoutEffect; scene: orbit.disconnect() while attached + renderer.forceContextLoss() |
+| PERF-1 | P1 ✅ FIXED (MountSurface mounts/disposes in useLayoutEffect; scene forceContextLoss; verified 0 leaked keydown listeners over 4 visits) | scene viewport dispose via MountSurface useEffect cleanup | Each scene visit leaks the scene + a WebGL context (OrbitControls removes keydown from detached root); after 16 visits Chrome drops contexts | MountSurface mount/dispose in useLayoutEffect; scene: orbit.disconnect() while attached + renderer.forceContextLoss() |
 | PERF-2 | P2 | kit clock: rAF starts on import, never stops | 7 module clocks keep 421 rAF/s running on every page after visiting them | lazy start on first subscriber/play, stop with none |
 | PERF-3 | P2 | clock idle ticks + useClockTime setT while paused; animate SceneView force() per tick | paused animate: 60 React commits/s (thousands of Tip renders) | no idle emits unless opted in; useClockTime skip unchanged t; SceneView bail on dt=0 |
 | PERF-4 | P2 | landing eager kit chunk 812 KB raw / 259 KB gz (+193 KB index incl. framer-motion) | landing loads whole kit | narrow imports / manualChunks |
@@ -123,3 +123,10 @@ Not tested: MP4/WebM/GLB/.cube capture (machine overloaded).
 ## Also fixed this pass
 - DX7/DX8 history: flush pending edits before undo, skip steps a store can't undo, ignore commits during replay.
 - DX9 bindItem: orphaned item stops writing through.
+
+## Status after this pass (2026-10-09 ~21:00)
+All P0 and P1 findings from dx, a11y, layout, perf and state are fixed and verified, except:
+- S2 (P0, partly): kit refuses invalid imports; shells still need per-import try/catch + toast and real `validate` hooks.
+- S4 (P1, partly): kit has DataDef `validate`; shader/synth/photo should add one to their shared p.data defs.
+- Interaction agent never reported (stalled twice under machine load) — re-run on a quiet machine.
+P2/P3 backlog: everything else in this file marked without ✅ / FIXED.

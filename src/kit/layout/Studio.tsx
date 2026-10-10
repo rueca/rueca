@@ -36,8 +36,9 @@ export function Studio({
   const [present, setPresent] = useState(false)
   useHotkeys({
     'mod+\\': { run: () => setPresent((p) => !p), label: 'Hide interface', group: 'View' },
-    esc: present ? () => setPresent(false) : undefined,
   }, [present], { priority: 0 })
+  // Leaving present mode must always work, whatever the shell binds to Esc (break-it F1).
+  useHotkeys({ esc: { run: () => setPresent(false), when: () => present } }, [present], { priority: 100 })
   const rw = rightWidth ? `${rightWidth}px` : 'var(--inspector-w)'
   // Each region gets its own boundary: a crash in the artwork leaves the panels usable and vice versa.
   const guard = (node: ReactNode, label: string) => node && <ErrorBoundary label={label} compact>{node}</ErrorBoundary>
@@ -94,8 +95,8 @@ export function Studio({
           {statusbar}
           {present && (
             <button type="button" onClick={() => setPresent(false)}
-              className="cluster fixed right-3 bottom-3 z-50 h-7 px-2.5 text-[11.5px] text-fg-muted opacity-0 transition-opacity hover:opacity-100 focus-visible:opacity-100">
-              Show interface
+              className="cluster fixed right-3 bottom-3 z-50 h-7 px-2.5 text-[11.5px] text-fg-muted opacity-30 transition-opacity hover:opacity-100 focus-visible:opacity-100">
+              Show interface · Esc
             </button>
           )}
         </div>

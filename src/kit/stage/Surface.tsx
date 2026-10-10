@@ -14,7 +14,7 @@
    Draw functions should be pure in (values, t) so scrubbing, slow-mo and
    frame-accurate export work for free.
 --------------------------------------------------------------------------- */
-import { useEffect, useImperativeHandle, useRef, type Ref } from 'react'
+import { useEffect, useImperativeHandle, useLayoutEffect, useRef, type Ref } from 'react'
 import type { Clock } from '../core/clock'
 import type { ParamStore } from '../core/params'
 import type { Schema, SchemaValues } from '../core/schema'
@@ -158,7 +158,9 @@ export function MountSurface<S extends Schema, H extends object = object>({
   const mountRef = useRef(mount)
   // getters: the handle exists only after mount() runs, which is after the ref is attached
   useImperativeHandle(ref, () => ({ get el() { return el.current }, get handle() { return handle.current } }), [])
-  useEffect(() => {
+  // Layout effect: cleanup runs BEFORE React removes the element, so renderers that unbind from
+  // el.getRootNode() (OrbitControls) still find `document` — else they leak (break-it PERF-1).
+  useLayoutEffect(() => {
     const out = mountRef.current(el.current!, { params, clock, values: () => params.values() as SchemaValues<S> })
     if (out && typeof out === 'object') handle.current = out as H
     return () => {

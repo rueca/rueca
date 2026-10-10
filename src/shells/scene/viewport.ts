@@ -625,6 +625,8 @@ export function mountViewport(el: HTMLDivElement): EngineApi & { dispose: () => 
     envTex.dispose()
     pmrem.dispose()
     renderer.dispose()
+    // Release the GL context now — Chrome caps live contexts at ~16 (break-it PERF-1).
+    renderer.forceContextLoss()
     canvas.remove()
     ui.setState({ ready: false })
   }
