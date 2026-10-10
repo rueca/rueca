@@ -162,3 +162,4 @@ Open (kit): KeyTimeline `[`/`]` per focused lane + lane label min-h-6; stack.tsx
 options (axe nested-interactive); ViewportFrame `chrome={false}` + icon-only presets; data-grid row buttons inside
 gridcell; then remove shell overrides (batch/panels.tsx wrapper, animate KeyButton class) and switch photo/dither from
 src/shells/intake.ts to kit `onReject`. Comment-pin initials label mismatch; synth knob value fields; video timeline labels.
+open: stack.tsx listbox→grid row pattern (nested-interactive, axe); KeyTimeline per-lane [ ]; ViewportFrame chrome prop

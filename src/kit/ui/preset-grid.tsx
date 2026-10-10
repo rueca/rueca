@@ -72,7 +72,9 @@ function Thumb({ it, pixelated }: { it: PresetTile; pixelated?: boolean }) {
 
 function RemoveButton({ it, onRemove, className }: { it: PresetTile; onRemove: (id: string) => void; className?: string }) {
   return (
-    <button type="button" tabIndex={-1} aria-label={`Delete ${it.name}`} onClick={(e) => { e.stopPropagation(); onRemove(it.id) }}
+    // Pointer shortcut only: keyboard users press Delete on the tile, so this stays out of the a11y tree
+    // (a button inside a listbox is invalid — break-it A20).
+    <button type="button" tabIndex={-1} aria-hidden title={`Delete ${it.name}`} onClick={(e) => { e.stopPropagation(); onRemove(it.id) }}
       className={cn('absolute hidden size-5 items-center justify-center rounded-full bg-overlay text-fg-muted shadow-[var(--shadow-segment)] outline-none hover:text-fg', className)}>
       <X size={11} strokeWidth={2} />
     </button>
@@ -89,8 +91,8 @@ export function PresetGrid({ items, value, onApply, onPreview, onRemove, columns
         const on = i === cur
         const head = it.group && (i === 0 || items[i - 1].group !== it.group)
         return (
-          <div key={it.id} className="group/tile relative flex min-w-0 flex-col gap-1" style={head && i ? { gridColumnStart: 1 } : undefined}>
-            {head && <span className="px-0.5 text-[11px] text-fg-faint">{it.group}</span>}
+          <div key={it.id} role="presentation" className="group/tile relative flex min-w-0 flex-col gap-1" style={head && i ? { gridColumnStart: 1 } : undefined}>
+            {head && <span aria-hidden className="px-0.5 text-[11px] text-fg-faint">{it.group}</span>}
             <button
               ref={(el) => { refs.current[i] = el }}
               type="button"
@@ -118,7 +120,7 @@ export function PresetGrid({ items, value, onApply, onPreview, onRemove, columns
             >
               <Thumb it={it} pixelated={pixelated} />
             </button>
-            <span className={cn('truncate px-0.5 text-[11.5px]', on ? 'text-fg' : 'text-fg-muted')}>{it.name}</span>
+            <span aria-hidden className={cn('truncate px-0.5 text-[11.5px]', on ? 'text-fg' : 'text-fg-muted')}>{it.name}</span>
             {it.removable && onRemove && <RemoveButton it={it} onRemove={onRemove} className="top-1 right-1 group-focus-within/tile:flex group-hover/tile:flex" />}
           </div>
         )
