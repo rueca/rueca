@@ -22,7 +22,7 @@ import { copyShader, downloadShader, exportLoop, exportStill, renderThumb, sizeF
 const fpsNow = () => (clock.getState().playing && params.values().speed > 0 ? perf.fps : 0)
 const fpsFmt = (v: number) => (v ? `${Math.round(v)} fps` : 'idle')
 
-const QUALITY = [{ value: 'auto', label: 'Auto' }, { value: '0.5', label: '50%' }, { value: '0.75', label: '75%' }, { value: '1', label: '100%' }]
+const QUALITY = [{ value: 'auto', label: 'Auto' }, { value: '0.5', label: '50%' }, { value: '0.75', label: '75%' }, { value: '1', label: '100%' }] as const
 const SPEEDS = [0, 0.25, 0.5, 1, 1.5, 2, 3]
 
 const Mark = (
@@ -95,7 +95,7 @@ export default function GradientStudio() {
     { id: 'down', label: 'Move layer down', group: 'Layers', shortcut: 'mod+[', icon: ArrowDown, run: () => sid && moveBy(sid, 1) },
     { id: 'vis', label: 'Show / hide layer', group: 'Layers', shortcut: 'shift+mod+h', icon: Eye, run: () => sid && updateLayer(sid, (l) => ({ ...l, visible: !l.visible })) },
     { id: 'desel', label: 'Select document', group: 'Layers', shortcut: 'esc', run: () => ui.setState({ selected: null }) },
-    ...[['free', 'Fill window'], ['16:9', '16:9'], ['1:1', 'Square'], ['9:16', '9:16']].map(([a, l]) => ({ id: `aspect-${a}`, label: `Canvas: ${l}`, group: 'Canvas', run: () => params.setValue('aspect', a) })),
+    ...([['free', 'Fill window'], ['16:9', '16:9'], ['1:1', 'Square'], ['9:16', '9:16']] as const).map(([a, l]) => ({ id: `aspect-${a}`, label: `Canvas: ${l}`, group: 'Canvas', run: () => params.setValue('aspect', a) })),
     ...QUALITY.map((q) => ({ id: `q-${q.value}`, label: `Resolution: ${q.label}`, group: 'Canvas', icon: Gauge, run: () => params.setValue('quality', q.value) })),
     { id: 'png1', label: `Export PNG 1× (${sizes.x1.w} × ${sizes.x1.h})`, group: 'Export', shortcut: 'mod+e', icon: ImageIcon, run: still(sizes.x1) },
     { id: 'png2', label: `Export PNG 2× (${sizes.x2.w} × ${sizes.x2.h})`, group: 'Export', icon: ImageIcon, run: still(sizes.x2) },

@@ -93,7 +93,7 @@ export const SOUNDS = {
   Pluck: { wave: 'square', detune: 14, sub: 0.15, glide: 0, gate: 0.3, attack: 1, decay: 120, sustain: 0, release: 140, filterType: 'lowpass', cutoff: 1400, resonance: 5, envAmt: 0.65, drive: 0.1 },
   'Wide saw': { wave: 'sawtooth', detune: 28, sub: 0.35, glide: 35, gate: 0.7, attack: 12, decay: 300, sustain: 0.5, release: 260, filterType: 'lowpass', cutoff: 1100, resonance: 4, envAmt: 0.4, drive: 0.3 },
   Hollow: { wave: 'triangle', detune: 6, sub: 0.1, glide: 50, gate: 0.6, attack: 20, decay: 260, sustain: 0.45, release: 300, filterType: 'bandpass', cutoff: 700, resonance: 6, envAmt: 0.5, drive: 0.4 },
-}
+} as const
 
 export const params = createParams(schema, {
   id: 'synth',

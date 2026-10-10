@@ -9,22 +9,22 @@ import { cn } from '../core/cn'
 import { prettyCombo } from '../core/hotkeys'
 import { Tip } from './tooltip'
 
-export type Opt = { value: string; label?: string; icon?: ComponentType<{ size?: number; strokeWidth?: number }>; hint?: string; swatch?: string }
-export const normOptions = (o: (string | Opt)[]): Opt[] => o.map((x) => (typeof x === 'string' ? { value: x } : x))
+export type Opt<T extends string = string> = { value: T; label?: string; icon?: ComponentType<{ size?: number; strokeWidth?: number }>; hint?: string; swatch?: string }
+export const normOptions = (o: readonly (string | Opt)[]): Opt[] => o.map((x) => (typeof x === 'string' ? { value: x } : x))
 const labelOf = (o: Opt) => o.label ?? o.value.charAt(0).toUpperCase() + o.value.slice(1)
 
 /* Segmented control — a WELL with a RAISED pill. Real Radix/Base toggle group
    (role="radio"-like semantics + arrow keys), never hand-rolled divs. */
-export function Segmented({
+export function Segmented<T extends string = string>({
   value, onChange, options, className, size = 'md', iconOnly, label,
-}: { value: string; onChange: (v: string) => void; options: (string | Opt)[]; className?: string; size?: 'sm' | 'md'; iconOnly?: boolean; label?: string }) {
+}: { value: T; onChange: (v: T) => void; options: readonly (T | Opt<T>)[]; className?: string; size?: 'sm' | 'md'; iconOnly?: boolean; label?: string }) {
   const opts = normOptions(options)
   return (
     <ToggleGroup
       aria-label={label}
       role="radiogroup"
       value={[value]}
-      onValueChange={(v) => v[0] && onChange(v[0])}
+      onValueChange={(v) => v[0] && onChange(v[0] as T)}
       className={cn('flex w-full min-w-0 gap-0.5 rounded-[7px] bg-well p-[2px]', className)}
     >
       {opts.map((o) => {
@@ -138,13 +138,13 @@ export function Checkbox({ checked, onChange, label }: { checked: boolean; onCha
 }
 
 /* Dropdown select — for long lists. Modes with ≤4 options should be Segmented. */
-export function Select({
+export function Select<T extends string = string>({
   value, onChange, options, className, label, placeholder,
-}: { value: string; onChange: (v: string) => void; options: (string | Opt)[]; className?: string; label?: string; placeholder?: string }) {
+}: { value: T; onChange: (v: T) => void; options: readonly (T | Opt<T>)[]; className?: string; label?: string; placeholder?: string }) {
   const opts = normOptions(options)
   const cur = opts.find((o) => o.value === value)
   return (
-    <BaseSelect.Root value={value} onValueChange={(v) => v != null && onChange(v as string)} items={opts.map((o) => ({ value: o.value, label: labelOf(o) }))}>
+    <BaseSelect.Root value={value} onValueChange={(v) => v != null && onChange(v as T)} items={opts.map((o) => ({ value: o.value, label: labelOf(o) }))}>
       <BaseSelect.Trigger
         aria-label={label}
         className={cn(

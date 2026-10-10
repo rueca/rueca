@@ -53,7 +53,7 @@ export const schema = defineSchema({
   shape: folder('Shape', {
     count:  p.number(12, { min: 1, max: 64, step: 1, hint: 'One sentence. This IS the docs.' }),
     radius: p.number(80, { min: 0, max: 400, unit: 'px' }),
-    mode:   p.select('grid', ['grid', 'radial', 'spiral']),        // ≤4 short → segmented, else dropdown
+    mode:   p.select('grid', ['grid', 'radial', 'spiral']),        // ≤4 short → segmented, else dropdown; value typed 'grid' | 'radial' | 'spiral'
     tint:   p.color('#5b8cff'),                                     // alpha default on; { alpha: false }
     seed:   p.seed(7),
     angle:  p.angle(45),

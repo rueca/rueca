@@ -36,7 +36,7 @@ interface Base<V> {
   share?: boolean
 }
 
-export type Option = string | { value: string; label?: string; icon?: React.ComponentType<{ size?: number; strokeWidth?: number }>; hint?: string; swatch?: string }
+export type Option<T extends string = string> = T | { value: T; label?: string; icon?: React.ComponentType<{ size?: number; strokeWidth?: number }>; hint?: string; swatch?: string }
 
 export interface NumberDef extends Base<number> {
   type: 'number'
@@ -64,8 +64,8 @@ export interface SizeDef extends Base<{ w: number; h: number }> { type: 'size'; 
 export interface ColorDef extends Base<string> { type: 'color'; alpha?: boolean }
 export interface PaletteDef extends Base<string[]> { type: 'palette'; max?: number }
 export interface GradientDef extends Base<{ angle: number; stops: { pos: number; color: string }[] }> { type: 'gradient' }
-export interface SelectDef extends Base<string> { type: 'select'; options: Option[]; display?: 'segmented' | 'dropdown' | 'tiles' | 'swatches' }
-export interface MultiDef extends Base<string[]> { type: 'multi'; options: Option[]; min?: number; display?: 'tiles' | 'chips' }
+export interface SelectDef<T extends string = string> extends Base<T> { type: 'select'; options: Option<T>[]; display?: 'segmented' | 'dropdown' | 'tiles' | 'swatches' }
+export interface MultiDef<T extends string = string> extends Base<T[]> { type: 'multi'; options: Option<T>[]; min?: number; display?: 'tiles' | 'chips' }
 export interface BoolDef extends Base<boolean> { type: 'boolean'; display?: 'switch' | 'checkbox' }
 export interface TextDef extends Base<string> { type: 'text'; multiline?: boolean; placeholder?: string; maxLength?: number; mono?: boolean }
 export interface SeedDef extends Base<number> { type: 'seed' }
@@ -110,8 +110,9 @@ export const p = {
   color: (value: string, o: Opt<ColorDef> = {}): ColorDef => ({ type: 'color', value, ...o }),
   palette: (value: string[], o: Opt<PaletteDef> = {}): PaletteDef => ({ type: 'palette', value, ...o }),
   gradient: (value: GradientDef['value'], o: Opt<GradientDef> = {}): GradientDef => ({ type: 'gradient', value, ...o }),
-  select: <T extends string>(value: T, options: Option[], o: Omit<Opt<SelectDef>, 'options'> = {}): SelectDef => ({ type: 'select', value, options, ...o }),
-  multi: (value: string[], options: Option[], o: Omit<Opt<MultiDef>, 'options'> = {}): MultiDef => ({ type: 'multi', value, options, ...o }),
+  /** values are typed from the options: `p.select('circle', ['circle', 'square'])` → 'circle' | 'square' */
+  select: <const T extends string>(value: NoInfer<T>, options: readonly Option<T>[], o: Omit<Opt<SelectDef<T>>, 'options'> = {}): SelectDef<T> => ({ type: 'select', value, options: [...options], ...o }),
+  multi: <const T extends string>(value: NoInfer<T>[], options: readonly Option<T>[], o: Omit<Opt<MultiDef<T>>, 'options'> = {}): MultiDef<T> => ({ type: 'multi', value, options: [...options], ...o }),
   boolean: (value: boolean, o: Opt<BoolDef> = {}): BoolDef => ({ type: 'boolean', value, ...o }),
   text: (value: string, o: Opt<TextDef> = {}): TextDef => ({ type: 'text', value, ...o }),
   seed: (value = 1, o: Opt<SeedDef> = {}): SeedDef => ({ type: 'seed', value, ...o }),

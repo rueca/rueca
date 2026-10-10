@@ -54,7 +54,7 @@ export function DocumentPanel() {
       </Section>
       <Section title="Export">
         <div className="flex flex-wrap gap-1 px-3 pb-1.5">
-          {[{ s: '1', f: 'png' }, { s: '2', f: 'png' }, { s: '3', f: 'png' }, { s: '2', f: 'jpg' }, { s: '2', f: 'webp' }].map((p) => {
+          {([{ s: '1', f: 'png' }, { s: '2', f: 'png' }, { s: '3', f: 'png' }, { s: '2', f: 'jpg' }, { s: '2', f: 'webp' }] as const).map((p) => {
             const on = v.exportScale === p.s && v.exportFormat === p.f
             return (
               <Button key={p.s + p.f} size="sm" variant={on ? 'default' : 'ghost'} active={on} onClick={() => prefs.patch({ exportScale: p.s, exportFormat: p.f, exportSuffix: p.s === '1' ? '' : `@${p.s}x` })}>
