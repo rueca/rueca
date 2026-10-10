@@ -11,7 +11,7 @@ It ships three ways: an **agent skill** that teaches your coding agent to build 
 harness properly, a **Claude Code plugin** that bundles it, and a **component
 registry** for the kit itself.
 
-**[Live site and example tools →](https://rueca.github.io/rueca)**
+**[Live site and example tools →](https://rueca.dev)**
 
 ## Install
 
@@ -35,12 +35,12 @@ npx skills add rueca/rueca
 **Just the kit** (React + Tailwind v4, via the shadcn CLI)
 
 ```bash
-npx shadcn@latest add https://rueca.github.io/rueca/r/studio.json
+npx shadcn@latest add https://rueca.dev/r/studio.json
 ```
 
 Or one piece at a time — `theme`, `core`, `inspector`, `timeline`, `stage`, `layers`,
 `scrub`, `color`, `palette`… Each pulls what it needs. The full list is at
-[`/r/registry.json`](https://rueca.github.io/rueca/r/registry.json). Files land in
+[`/r/registry.json`](https://rueca.dev/r/registry.json). Files land in
 your project (`components/studio/`), so you own them. Then add the theme as the **last**
 line of your main CSS, so it wins over shadcn's default tokens:
 

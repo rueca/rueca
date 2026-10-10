@@ -25,7 +25,7 @@ you read rides along in every later turn.
    an existing page or app — and who uses the tool (the designer, or a client).
 2. **Pick the route.**
    - React project, or a new one → the kit. Not installed yet? Install it:
-     `npx shadcn@latest add https://rueca.github.io/rueca/r/studio.json -y` (lands in
+     `npx shadcn@latest add https://rueca.dev/r/studio.json -y` (lands in
      `src/components/studio/`; import from `@/components/studio`; add
      `@import "./components/studio/theme.css";` to the main CSS). New project or `shadcn init`
      trouble → `references/install.md`. **Can't install right now** (no shell, or told not to run

@@ -8,7 +8,7 @@ Three routes. Pick by what already exists, not by preference.
 | An existing prototype you must not rewrite (plain HTML, Svelte, Vue, Webflow export, p5, a built app) | **B. Drop-in** — a small harness app wraps it through the bridge |
 | One self-contained HTML file, no build step | **C. Hand-built** from `assets/theme.css` + the visual rules |
 
-Registry base URL: `https://rueca.github.io/rueca/r/` (each item is
+Registry base URL: `https://rueca.dev/r/` (each item is
 `<name>.json`). Source and live examples: `https://github.com/rueca/rueca`.
 
 ## A. Kit (shadcn registry)
@@ -21,12 +21,12 @@ cd studio && npm i && npm i -D tailwindcss @tailwindcss/vite
 # add tailwindcss() to vite.config.ts plugins, an "@/*": ["./src/*"] path to
 # tsconfig.json + tsconfig.app.json and the matching '@' alias in vite.config.ts
 npx shadcn@latest init -y -b base --no-monorepo -p nova   # flags matter: init is interactive and hangs otherwise
-npx shadcn@latest add https://rueca.github.io/rueca/r/studio.json -y
+npx shadcn@latest add https://rueca.dev/r/studio.json -y
 ```
 
 - `studio` installs everything; individual pieces (`inspector`, `timeline`, `stage`,
   `layers`, `scrub`, `color`, …) install alone and pull what they need. List:
-  `https://rueca.github.io/rueca/r/registry.json`. The bridge is its own item
+  `https://rueca.dev/r/registry.json`. The bridge is its own item
   (`bridge`, lands in `public/`).
 - Files land in `<components>/studio/` (usually `src/components/studio/`). The barrel
   `index.ts` ships only with the full `studio` item — after installing single pieces, import

@@ -1,6 +1,6 @@
 <!-- Copied from docs/KIT.md by `npm run sync`. Edit the source, not this file. -->
 
-> In a project that installed the kit from the registry, `@kit` means `@/components/studio` (or alias it). Live examples of every shell: https://rueca.github.io/rueca/ · source: https://github.com/rueca/rueca/tree/main/src/shells
+> In a project that installed the kit from the registry, `@kit` means `@/components/studio` (or alias it). Live examples of every shell: https://rueca.dev/ · source: https://github.com/rueca/rueca/tree/main/src/shells
 
 # Rueca kit — guide
 

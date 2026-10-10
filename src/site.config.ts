@@ -21,8 +21,8 @@ export const site = {
   /** GitHub owner/repo */
   repo: 'rueca/rueca',
   /** where the site and the component registry are served from, no trailing slash.
-      GitHub Pages until rueca.dev is bought and live — then switch and re-sync. */
-  url: 'https://rueca.github.io/rueca',
+      Hosted on Vercel (team RC IDP), deployed from main. */
+  url: 'https://rueca.dev',
   author: { name: 'Rafael Cespedes', url: 'https://rafaelcespedes.com' },
   license: 'MIT',
   version: '0.1.0',

@@ -52,7 +52,7 @@
   "description": "The inspector, timeline, layers and export of a real design tool, wrapped around any prototype. Ships as an agent skill, a Claude Code plugin and a component registry.",
   "license": "MIT",
   "author": "Rafael Cespedes",
-  "homepage": "https://rueca.github.io/rueca",
+  "homepage": "https://rueca.dev",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rueca/rueca.git"
