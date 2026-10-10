@@ -9,7 +9,7 @@ written in the middle), and a regex over the trace also matches the skill docs t
 | --- | --- |
 | tuning-tool-canvas | Core use: schema → inspector, clock-driven `draw`, CanvasSurface, presets, PNG export |
 | wrap-existing-html | Drop-in: FrameSurface + studio-bridge.js, no rewrite, breakpoints side by side |
-| vanilla-three | MountSurface around a vanilla three.js scene, no react-three-fiber, dispose |
+| vanilla-three | A sign-off tool around a vanilla three.js scene: mount once, two-way selection, undo/redo, named colourways + compare, persistence + share link, expensive control applied on commit |
 | client-view | `publish: true` params + a client sheet, not a hand-built second form |
 | docs-state | Layer stack as undoable, validated state (p.data / createDocStore + createHistory) |
 | no-trigger-unrelated | The skill stays out of an unrelated typo fix |
