@@ -51,6 +51,9 @@
   },
   "description": "The inspector, timeline, layers and export of a real design tool, wrapped around any prototype. Ships as an agent skill, a Claude Code plugin and a component registry.",
   "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
   "author": "Rafael Cespedes",
   "homepage": "https://rueca.dev",
   "repository": {
