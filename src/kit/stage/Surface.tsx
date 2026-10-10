@@ -179,11 +179,49 @@ export function MountSurface<S extends Schema, H extends object = object>({
  * the frame can post { type: 'studio:set', key, value } back.
  * Drop public/studio-bridge.js into the prototype for a 6-line hookup.
  */
-export function FrameSurface<S extends Schema>({ src, params, className, title = 'Prototype' }: { src: string; params?: ParamStore<S>; className?: string; title?: string }) {
+/** Mirror scalar values to CSS custom properties (`accentColor` → `--accent-color`), like studio-bridge's `cssVars()`. */
+export function writeCssVars(doc: Document, values: Record<string, unknown>, o: { unitless?: string[]; suffix?: string } = {}) {
+  const s = doc.documentElement.style
+  for (const [k, val] of Object.entries(values)) {
+    const name = '--' + k.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
+    if (typeof val === 'number') s.setProperty(name, o.unitless?.includes(k) ? String(val) : val + (o.suffix ?? 'px'))
+    else if (typeof val === 'string' || typeof val === 'boolean') s.setProperty(name, String(val))
+  }
+}
+
+/**
+ * An existing page in an iframe. Two ways to drive it:
+ *  - same-origin page (served by your dev server): `apply={(doc, v) => …}` and/or `cssVars` write straight
+ *    into its DOM — the page needs NO changes, so a client's file stays untouched;
+ *  - any other page: add studio-bridge.js to it and handle values there (postMessage, always sent).
+ */
+export function FrameSurface<S extends Schema>({ src, params, className, title = 'Prototype', apply, cssVars }: {
+  src: string; params?: ParamStore<S>; className?: string; title?: string
+  /** same-origin only: write values into the page's document (runs on load and on every change) */
+  apply?: (doc: Document, values: SchemaValues<S>) => void
+  /** same-origin only: mirror scalar values to CSS custom properties on the page's :root */
+  cssVars?: boolean | { unitless?: string[]; suffix?: string }
+}) {
   const frame = useRef<HTMLIFrameElement>(null)
+  const applyRef = useRef(apply)
+  applyRef.current = apply
+  const varsRef = useRef(cssVars)
+  varsRef.current = cssVars
   useEffect(() => {
     if (!params) return
-    const post = () => frame.current?.contentWindow?.postMessage({ type: 'studio:params', values: params.toJSON({ shareable: false }) }, '*')
+    const direct = () => {
+      const vars = varsRef.current
+      if (!applyRef.current && !vars) return
+      let doc: Document | null = null
+      try { doc = frame.current?.contentDocument ?? null } catch { /* cross-origin: use the bridge */ }
+      if (!doc?.documentElement) return
+      const v = params.values() as SchemaValues<S>
+      try {
+        if (vars) writeCssVars(doc, v as Record<string, unknown>, vars === true ? {} : vars)
+        applyRef.current?.(doc, v)
+      } catch (err) { console.error('[trompo] FrameSurface apply failed:', err) }
+    }
+    const post = () => { frame.current?.contentWindow?.postMessage({ type: 'studio:params', values: params.toJSON({ shareable: false }) }, '*'); direct() }
     const off = params.subscribe(post)
     let commitTimer: ReturnType<typeof setTimeout> | undefined
     const onMsg = (e: MessageEvent) => {

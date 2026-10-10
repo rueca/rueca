@@ -162,7 +162,8 @@ stops ticks while paused too (default true for artifacts with their own life).
 <CanvasSurface ref={h} params={params} clock={clock} draw={(ctx, { t, w, h, v, dt }) => …} deps={[docVersion]} />
 <WebGLSurface params={params} clock={clock} setup={(gl) => program} draw={(gl, f, program) => …} />
 <MountSurface ref={m} params={params} clock={clock} mount={(el, api) => { const engine = start(el, api.values()); api.params.subscribe((s) => engine.update(s.values)); return { engine, dispose: () => engine.stop() } }} />
-<FrameSurface src="/proto.html" params={params} />   // postMessage bridge — see public/studio-bridge.js
+<FrameSurface src="/proto.html" params={params} cssVars apply={(doc, v) => …} />  // same-origin: writes into the page, no edits to it
+<FrameSurface src="https://other.site/x" params={params} />  // anything else: add public/studio-bridge.js to the page
 ```
 `h.current.canvas` gives the canvas for export; `m.current.handle` the object `mount` returned.
 **`api.values` is a function** — call `api.values()` for a snapshot; subscribe for changes.

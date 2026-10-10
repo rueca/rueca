@@ -22,8 +22,9 @@ designed reads truthfully inside the artboard.
    use the tool (the designer tuning it, or a client being shown it).
 2. **Pick the route** → `references/install.md`
    - React project, or a new one → install the kit (shadcn registry).
-   - An existing prototype you must not rewrite → wrap it with `FrameSurface` and the
-     bridge script (`assets/studio-bridge.js`).
+   - An existing prototype you must not rewrite → wrap it with `FrameSurface`. Served by the
+     same dev server (same origin)? Drive it with `cssVars` / `apply={(doc, v) => …}` and leave
+     the page untouched. Otherwise add the bridge script (`assets/studio-bridge.js`) to it.
    - No build step allowed (one HTML file) → hand-build with `assets/theme.css` and
      the visual rules.
 3. **Write the schema first.** Every knob is one line with a `hint`. The schema drives
