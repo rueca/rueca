@@ -75,7 +75,9 @@ Geist Mono code — landing + gallery only; product chrome stays Inter.
   wrap-existing-html 1.00 vs 0.83 · vanilla-three 1.00 vs 1.00 · no-trigger 1.00 vs 1.00 (stays out). Mean Δ +0.46.
   Skill trimmed (0b8db76: starter in SKILL.md, refs "read ONLY when", kit-api split): with-skill cost per suite
   $3.90 → $2.17 (−44%; tuning −59%, three.js −51%), all cases still 1.00; agents now read 0–3 refs instead of 5–7.
-  Next: give vanilla-three a rubric plain Claude doesn't already meet.
+  vanilla-three hardened (sign-off workflow: two-way selection, undo, named colourways + compare, persistence, share
+  link, expensive control on commit): with 0.88 vs without 0.67, and cheaper with ($0.58 vs $0.91 a run). It caught a
+  skill bug: told "don't run anything", agents hand-built everything instead of writing against the kit (fixed b394593).
 - Branding session is converting shell demo content to the "wire aesthetic v2" (brand/BRAND.md): it owns
   ui-design, dropin, batch, video, animate, motion, component-lab, photo, dither, generate, flows, journey (+ scene
   optional) until it says it's done. Message it before touching those shells.
