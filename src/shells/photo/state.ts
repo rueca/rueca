@@ -5,6 +5,7 @@
    view state — crop draft, split, peek, clipping overlay, hover preview.
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
+import { saveLocal } from '../storage'
 import { createHistory, createParams, defineSchema, folder, humanize, matchesShape, p, type ParamStore, type Schema } from '@kit'
 import { IDENTITY_CURVE, type CurvePoint } from '@kit/ui/charts'
 import type { CropRect as Rect } from '@kit/stage/overlays'
@@ -145,7 +146,7 @@ export const ui = createStore<UI>(() => ({
   curveChannel: 'RGB',
   hslMode: 's',
 }))
-ui.subscribe((s, prev) => { if (s.userLooks !== prev.userLooks) try { localStorage.setItem(LSK, JSON.stringify(s.userLooks)) } catch { /* quota */ } })
+ui.subscribe((s, prev) => { if (s.userLooks !== prev.userLooks) saveLocal(LSK, JSON.stringify(s.userLooks)) })
 export const allLooks = () => [...LOOKS, ...ui.getState().userLooks.map((l) => ({ ...l, user: true, group: 'Yours' }))]
 
 /* --- history: named steps (Lightroom's History panel) --------------------

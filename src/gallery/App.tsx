@@ -1,6 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { site } from '@/site.config'
-import { ErrorBoundary } from '@kit'
+import { ErrorBoundary } from '@kit/system/error-boundary'
 import { Landing } from '@/landing/Landing'
 import { Gallery } from './Gallery'
 import { SHELLS } from './registry'

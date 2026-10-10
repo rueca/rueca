@@ -4,7 +4,7 @@
    `group`), off under reduced motion. Kit tokens only, so both themes work. */
 import type { ReactNode } from 'react'
 import { Eye, Link2, Redo2, Undo2 } from 'lucide-react'
-import { cn } from '@kit'
+import { cn } from '@kit/core/cn'
 
 const T = 'transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none'
 const bar = 'rounded-full bg-fg/10'

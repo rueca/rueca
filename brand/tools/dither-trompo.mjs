@@ -9,7 +9,7 @@ const RATIOS = { '4x3': [4, 3], '16x9': [16, 9], '1x1': [1, 1], '3x4': [3, 4], '
 const PALETTES = {
   ink:   { dark: '#1C1A19', light: '#F6F1EA' }, // ink dots on paper
   pink:  { dark: '#D1006F', light: '#F6F1EA' }, // rosa mexicano on paper
-  night: { dark: '#1C1A19', light: '#E9E1D6' }, // for dark UIs: soft paper dots on ink (inverted below)
+  night: { dark: '#1C1A19', light: '#E9E1D6' }, // for dark UIs: the top lit in a dark room, paper dots on ink
 }
 const GRID = 320  // dither cells along the long edge
 const SCALE = 4   // output upscale (nearest) → 1280px long edge
@@ -28,7 +28,9 @@ for (const [rname, [rw, rh]] of Object.entries(RATIOS)) {
       const x = cv.getContext('2d')
       // background: a very gentle light falloff, so the edges get only sparse dots
       const bg = x.createRadialGradient(w * 0.4, h * 0.32, 0, w * 0.5, h * 0.5, Math.hypot(w, h) * 0.62)
-      bg.addColorStop(0, '#fbfbfb'); bg.addColorStop(1, '#d4d4d4'); x.fillStyle = bg; x.fillRect(0, 0, w, h)
+      if (invert) { bg.addColorStop(0, '#2c2c2c'); bg.addColorStop(1, '#0c0c0c') } // night: a dark room
+      else { bg.addColorStop(0, '#fbfbfb'); bg.addColorStop(1, '#d4d4d4') }
+      x.fillStyle = bg; x.fillRect(0, 0, w, h)
       const S = Math.min(w, h) * 0.64 / 32, cx = w * 0.53, cy = h * 0.5
       // floor shadow under the tip, pushed away from the light
       x.save(); x.filter = `blur(${S * 1.5}px)`; x.fillStyle = 'rgba(0,0,0,.5)'
@@ -72,7 +74,7 @@ for (const [rname, [rw, rh]] of Object.entries(RATIOS)) {
       for (let i = 0; i < W * H; i++) {
         let v = (0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2]) / 255
         v = Math.min(1, Math.max(0, (v - 0.5) * 1.12 + 0.52)) // a touch of contrast
-        L[i] = invert ? 1 - v : v
+        L[i] = invert ? v * 1.08 : v // night keeps true tones; the object is lit, the room is dark
       }
       // 3. Atkinson dithering: spreads 6/8 of the error, which keeps highlights clean
       const on = new Uint8Array(W * H)
@@ -87,9 +89,10 @@ for (const [rname, [rw, rh]] of Object.entries(RATIOS)) {
       // 4. paint two colours, upscale with nearest-neighbour
       const out = document.createElement('canvas'); out.width = W * SCALE; out.height = H * SCALE
       const ox = out.getContext('2d')
+      // light scenes: paper ground, ink where dark · night: ink ground, paper where lit
       ox.fillStyle = invert ? pal.dark : pal.light; ox.fillRect(0, 0, out.width, out.height)
       ox.fillStyle = invert ? pal.light : pal.dark
-      for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) if (!on[yy * W + xx]) ox.fillRect(xx * SCALE, yy * SCALE, SCALE, SCALE)
+      for (let yy = 0; yy < H; yy++) for (let xx = 0; xx < W; xx++) if (on[yy * W + xx] === (invert ? 1 : 0)) ox.fillRect(xx * SCALE, yy * SCALE, SCALE, SCALE)
       return out.toDataURL('image/png').split(',')[1]
     }, { W, H, SCALE, pal, invert: pname === 'night' })
     const file = `${OUT}/trompo-${pname}-${rname}.png`

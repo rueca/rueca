@@ -3,7 +3,10 @@
    colour inside Mark. */
 import { useState, type ReactNode } from 'react'
 import { Check, Copy, Moon, Sun } from 'lucide-react'
-import { cn, copyText, useTheme, Tip } from '@kit'
+import { cn } from '@kit/core/cn'
+import { copyText } from '@kit/core/io'
+import { useTheme } from '@kit/core/theme'
+import { Tip } from '@kit/ui/tooltip'
 
 export function Container({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cn('mx-auto w-full max-w-[1120px] px-4 sm:px-8', className)}>{children}</div>

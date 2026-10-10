@@ -435,8 +435,9 @@ export function KeyTimeline(props: KeyTimelineProps) {
                         className="pointer-events-auto absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center outline-none active:cursor-grabbing"
                         style={{ left: X(k.t) }}>
                         <span className={cn('block rotate-45 rounded-[1.5px] transition-colors',
-                          group ? 'size-[7px]' : 'size-[9px]',
-                          sel ? 'bg-signal shadow-[0_0_0_1.5px_var(--panel)]' : group ? 'bg-fg-muted' : 'bg-fg/85 hover:bg-fg')} />
+                          // selection is bigger AND ringed, not just blue (WCAG 1.4.1, break-it A14)
+                          group ? 'size-[7px]' : sel ? 'size-[10px]' : 'size-[9px]',
+                          sel ? 'bg-signal shadow-[0_0_0_1.5px_var(--panel),0_0_0_3px_var(--signal)]' : group ? 'bg-fg-muted' : 'bg-fg/85 hover:bg-fg')} />
                       </button>
                     )
                   })}

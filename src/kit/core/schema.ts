@@ -163,8 +163,14 @@ export function defIndex(schema: Schema): Record<string, ParamDef> {
   return out
 }
 
+/** `fontSize` → "Font size" (sentence case, the kit's rule); acronyms stay ("bgURL" → "Bg URL"). */
 export const humanize = (key: string) =>
-  key.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ').replace(/^./, (c) => c.toUpperCase())
+  key
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/[_-]+/g, ' ')
+    .split(' ')
+    .map((w, i) => (w.length > 1 && w === w.toUpperCase() ? w : i === 0 ? w.charAt(0).toUpperCase() + w.slice(1).toLowerCase() : w.toLowerCase()))
+    .join(' ')
 
 export const equal = (a: unknown, b: unknown) => a === b || JSON.stringify(a) === JSON.stringify(b)
 

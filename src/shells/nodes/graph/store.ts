@@ -7,6 +7,7 @@
    compare and trivially serialisable.
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
+import { saveLocal } from '../../storage'
 import type { HistoryLike } from '@kit'
 import { useStore } from 'zustand'
 import { applyEdgeChanges, applyNodeChanges, type Connection, type Edge, type EdgeChange, type Node, type NodeChange, type XYPosition } from '@xyflow/react'
@@ -77,7 +78,7 @@ let saveT: ReturnType<typeof setTimeout> | undefined
 graph.subscribe((s, prev) => {
   if (s.nodes === prev.nodes && s.edges === prev.edges && s.name === prev.name) return
   clearTimeout(saveT)
-  saveT = setTimeout(() => { try { localStorage.setItem(LS, snap(graph.getState())) } catch { /* quota */ } }, 300)
+  saveT = setTimeout(() => { saveLocal(LS, snap(graph.getState())) }, 300)
 })
 
 /* listeners told when history jumps (undo/redo/load) so per-node param stores can resync */

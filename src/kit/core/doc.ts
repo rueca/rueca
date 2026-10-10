@@ -111,6 +111,18 @@ export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> 
   const flush = () => { if (pending !== null) { save(pending); pending = null } }
   const saveSoon = (d: D) => { pending = d; clearTimeout(saveTimer); saveTimer = setTimeout(flush, 250) }
   if (typeof window !== 'undefined' && opts.persist !== false) {
+    // Another tab saved this doc: adopt it when we're not mid-edit, so tabs don't clobber each other (S7).
+    window.addEventListener('storage', (e) => {
+      if (e.key !== key || !e.newValue) return
+      try {
+        const st = store.getState()
+        if (st.dirty || pending !== null) return
+        const d = JSON.parse(e.newValue)
+        if (!ok(d) || JSON.stringify(d) === JSON.stringify(st.doc)) return
+        store.setState({ doc: d, committed: d })
+        emit(d, { kind: 'replace', label: 'Another tab' })
+      } catch { /* ignore */ }
+    })
     window.addEventListener('pagehide', flush)
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush() })
   }

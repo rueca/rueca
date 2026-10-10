@@ -118,7 +118,21 @@ const b64 = {
   dec: (s: string) => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/')))),
 }
 
+const liveIds = new Set<string>()
+
 export function createParams<S extends Schema>(schema: S, opts: ParamOptions<SchemaValues<S>>): ParamStore<S> {
+  {
+    // Same checks as defineSchema, for schemas built by hand (break-it DX16).
+    const seen = new Set<string>()
+    for (const f of Object.values(schema)) for (const k of Object.keys(f.params)) {
+      if (seen.has(k)) throw new Error(`createParams("${opts.id}"): duplicate key "${k}" — keys are flat across folders`)
+      seen.add(k)
+    }
+    const isDev = (import.meta as any).env?.DEV
+    if (isDev && opts.persist !== false && liveIds.has(opts.id) && !opts.id.startsWith('item:'))
+      console.warn(`[trompo] two param stores share the id "${opts.id}" — they will overwrite each other's saved values. Give each a unique id.`)
+    liveIds.add(opts.id)
+  }
   type V = SchemaValues<S> & Values
   const defaults = defaultsOf(schema) as V
   const defs = defIndex(schema)

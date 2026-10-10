@@ -11,7 +11,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { ArrowUp, Check, FileCode2, Paperclip, Upload } from 'lucide-react'
-import { cn } from '@kit'
+import { cn } from '@kit/core/cn'
 import { site } from '@/site.config'
 
 export interface DeckStep { n: number; short: string; title: string; body: string }

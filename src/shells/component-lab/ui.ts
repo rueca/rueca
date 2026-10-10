@@ -1,6 +1,7 @@
 /* View state (not undoable, persisted per browser): which component, which
    view, the viewport width and the preview theme. */
 import { createStore } from 'zustand/vanilla'
+import { saveLocal } from '../storage'
 import { useStore } from 'zustand'
 import type { CompId } from './props'
 
@@ -19,6 +20,6 @@ const initial: UIState = { comp: 'button', view: 'preview', width: 768, previewT
 const load = (): UIState => { try { return { ...initial, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') } } catch { return initial } }
 
 export const ui = createStore<UIState>(load)
-ui.subscribe((s) => { try { localStorage.setItem(KEY, JSON.stringify(s)) } catch { /* noop */ } })
+ui.subscribe((s) => { saveLocal(KEY, JSON.stringify(s)) })
 export const useUI = <T,>(pick: (s: UIState) => T) => useStore(ui, pick)
 export const setUI = (patch: Partial<UIState>) => ui.setState(patch)

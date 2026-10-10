@@ -80,18 +80,22 @@ function useDrag(onMove: (x: number, y: number, final: boolean) => void) {
   }
 }
 
-function Rail({ value, onChange, background, label }: { value: number; onChange: (v: number, final: boolean) => void; background: string; label: string }) {
+function Rail({ value, onChange, background, label, valueText }: { value: number; onChange: (v: number, final: boolean) => void; background: string; label: string; valueText?: (v: number) => string }) {
   const d = useDrag((x, _y, f) => onChange(x, f))
   return (
     <div
       {...d}
       role="slider"
       aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
       aria-valuenow={Math.round(value * 100)}
+      aria-valuetext={valueText?.(value)}
       tabIndex={0}
       onKeyDown={(e) => {
-        if (e.key === 'ArrowRight') onChange(clamp(value + 0.01, 0, 1), true)
-        if (e.key === 'ArrowLeft') onChange(clamp(value - 0.01, 0, 1), true)
+        const step = e.shiftKey ? 0.1 : 0.01
+        const to = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? value + step : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? value - step : e.key === 'Home' ? 0 : e.key === 'End' ? 1 : null
+        if (to !== null) { e.preventDefault(); onChange(clamp(to, 0, 1), true) }
       }}
       className="relative h-3 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-signal"
       style={{ background }}
@@ -152,7 +156,20 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
       ) : (
       <div
         {...area}
-        className="relative h-[150px] cursor-crosshair rounded-[8px]"
+        // The 2-D area is keyboard-operable too (WCAG 2.1.1, break-it A10): ←→ saturation, ↑↓ brightness.
+        role="slider"
+        aria-label="Saturation and brightness"
+        aria-valuenow={Math.round(hsva.s * 100)}
+        aria-valuetext={`Saturation ${Math.round(hsva.s * 100)}%, brightness ${Math.round(hsva.v * 100)}%`}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          const st = e.shiftKey ? 0.1 : 0.01
+          const k = e.key
+          if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(k)) return
+          e.preventDefault()
+          emit({ ...hsva, s: clamp(hsva.s + (k === 'ArrowRight' ? st : k === 'ArrowLeft' ? -st : 0), 0, 1), v: clamp(hsva.v + (k === 'ArrowUp' ? st : k === 'ArrowDown' ? -st : 0), 0, 1) }, true)
+        }}
+        className="relative h-[150px] cursor-crosshair rounded-[8px] outline-none focus-visible:ring-2 focus-visible:ring-signal"
         style={{ background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${hueHex})` }}
       >
         <div
@@ -169,12 +186,12 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
         )}
         <div className="flex flex-1 flex-col gap-2">
           {mode !== 'oklch' && (
-            <Rail label="Hue" value={hsva.h / 360} onChange={(x, f) => emit({ ...hsva, h: x * 360 }, f)}
+            <Rail label="Hue" valueText={(x) => `${Math.round(x * 360)}°`} value={hsva.h / 360} onChange={(x, f) => emit({ ...hsva, h: x * 360 }, f)}
               background="linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)" />
           )}
           {alpha && (
             <div className="checker rounded-full">
-              <Rail label="Opacity" value={hsva.a} onChange={(x, f) => emit({ ...hsva, a: Math.round(x * 100) / 100 }, f)}
+              <Rail label="Opacity" valueText={(x) => `${Math.round(x * 100)}%`} value={hsva.a} onChange={(x, f) => emit({ ...hsva, a: Math.round(x * 100) / 100 }, f)}
                 background={`linear-gradient(to right, transparent, ${solid})`} />
             </div>
           )}
@@ -185,6 +202,7 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
           <Segmented size="sm" value={mode} onChange={(m) => setMode(m as typeof mode)} options={[{ value: 'hex', label: 'Hex' }, { value: 'rgb', label: 'RGB' }, { value: 'oklch', label: 'Lch', hint: 'OKLCH' }]} />
         </div>
         <input
+          aria-label={`Colour value (${mode === 'hex' ? 'hex' : mode.toUpperCase()})`}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onBlur={applyText}

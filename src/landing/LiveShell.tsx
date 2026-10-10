@@ -8,7 +8,8 @@
      (landing.css: data-reveal "head"), and the switcher fades in after it. */
 import { useEffect, useRef, useState } from 'react'
 import { MousePointerClick, X } from 'lucide-react'
-import { cn, useTheme } from '@kit'
+import { cn } from '@kit/core/cn'
+import { useTheme } from '@kit/core/theme'
 import type { Shell } from '@/gallery/registry'
 import { thumb } from '@/gallery/registry'
 import { NEUTRAL_ACCENT_CSS } from './neutral'

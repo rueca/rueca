@@ -44,9 +44,12 @@ export function KeyDiamond({ state, size = 9, className }: { state: KeyState; si
           state === 'none' && 'fill-transparent stroke-[var(--fg-faint)]',
           state === 'animated' && 'fill-transparent stroke-[var(--signal)]',
           state === 'key' && 'fill-[var(--signal)] stroke-[var(--signal)]',
-          state === 'edited' && 'fill-[var(--key)] stroke-[var(--key)]',
+          state === 'edited' && 'fill-transparent stroke-[var(--key)]',
         )}
       />
+      {/* "edited, not keyed" differs by SHAPE as well as colour (WCAG 1.4.1, break-it A14):
+          an amber outline with a centre dot, vs the solid blue "key here" */}
+      {state === 'edited' && <circle cx={6} cy={6} r={1.6} className="fill-[var(--key)]" />}
     </svg>
   )
 }

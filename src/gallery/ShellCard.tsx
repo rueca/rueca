@@ -1,5 +1,5 @@
 import { ArrowUpRight } from 'lucide-react'
-import { cn } from '@kit'
+import { cn } from '@kit/core/cn'
 import type { ShellMeta } from '@/shells/types'
 import { thumb } from './registry'
 

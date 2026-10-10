@@ -48,6 +48,8 @@ export function Inspector({ params, folders, keys, published, className, id }: {
   const values = useParamState(params, (s) => s.values) as Record<string, unknown>
   const defaults = params.getState().defaults as Record<string, unknown>
   const schema = params.schema as Schema
+  if ((import.meta as any).env?.DEV && folders) for (const f of folders) if (!schema[f])
+    console.warn(`[trompo] <Inspector folders>: "${f}" isn't a folder id in ${params.id} (ids: ${Object.keys(schema).join(', ')}). Folder ids are the schema keys, not their labels.`)
   const entries = (folders ? folders.filter((k) => schema[k]).map((k) => [k, schema[k]]) : Object.entries(schema)) as [string, Folder][]
   const lsKey = `studio:${params.id}:sections:${id ?? (folders?.join(',') ?? 'all')}${published ? ':pub' : ''}`
 
@@ -142,6 +144,8 @@ export function Row({
         style={stacked ? undefined : { width: labelWidth }}
       >
         <span className="truncate">{label}</span>
+        {/* changed-from-default: a dot as well as brighter text (WCAG 1.4.1, break-it A14) */}
+        {changed && <><span aria-hidden className="size-1 shrink-0 rounded-full bg-signal" /><span className="sr-only">, changed from default</span></>}
       </span>
     </Tip>
   )

@@ -20,6 +20,7 @@ import { Minus, Plus } from 'lucide-react'
 import { clamp, cn } from '../core/cn'
 import { useHotkeys } from '../core/hotkeys'
 import { Menu, type MenuItem } from '../ui/controls'
+import { useStudio } from '../layout/Studio'
 
 export interface Camera { x: number; y: number; zoom: number }
 export type CameraStore = StoreApi<Camera> & {
@@ -62,6 +63,8 @@ export function Stage({
   overlay?: ReactNode
 }) {
   const [cam] = useState(() => external ?? createCamera())
+  // Present mode (⌘\\) hides chrome — including the stage's own HUD and overlays (break-it F3).
+  const { present } = useStudio()
   const { x, y, zoom } = useStore(cam)
   const el = useRef<HTMLDivElement>(null)
   const world = useRef<HTMLDivElement>(null)
@@ -180,8 +183,8 @@ export function Stage({
             {children}
           </div>
         )}
-        {overlay}
-        {hud && !fill && <ZoomPill />}
+        {!present && overlay}
+        {hud && !fill && !present && <ZoomPill />}
       </div>
     </CamCtx.Provider>
   )

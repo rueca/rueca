@@ -3,6 +3,7 @@
    persisted — pixels are re-rendered from params (see engine/paint.ts).
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
+import { saveLocal } from '../../storage'
 import { useStore } from 'zustand'
 import { createDocStore, createHistory, useDoc } from '@kit'
 import { params } from './params'
@@ -75,7 +76,7 @@ gallery.subscribe((s, prev) => {
   clearTimeout(saveT)
   saveT = setTimeout(() => {
     const { view, activeSession, groupBy, density } = gallery.getState()
-    try { localStorage.setItem(VIEW, JSON.stringify({ view, activeSession, groupBy, density })) } catch { /* quota */ }
+    saveLocal(VIEW, JSON.stringify({ view, activeSession, groupBy, density }))
   }, 250)
 })
 

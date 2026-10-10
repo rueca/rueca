@@ -2,7 +2,12 @@
    everything visual from the kit's tokens, so both themes work unchanged. */
 import { Fragment, useRef, useState } from 'react'
 import { ArrowRight, ArrowUpRight } from 'lucide-react'
-import { Button, Segmented, TipProvider, useTheme, cn } from '@kit'
+// Narrow kit imports keep the landing chunk small (the barrel pulls every shell's kit code).
+import { Button } from '@kit/ui/button'
+import { Segmented } from '@kit/ui/controls'
+import { TipProvider } from '@kit/ui/tooltip'
+import { useTheme } from '@kit/core/theme'
+import { cn } from '@kit/core/cn'
 import { site } from '@/site.config'
 import './landing.css'
 import type { Shell } from '@/gallery/registry'

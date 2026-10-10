@@ -10,6 +10,7 @@
    tunable studio preferences (snapping, nudge, export) use createParams.
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
+import { saveLocal } from '../../storage'
 import { useStore } from 'zustand'
 import type { HistoryLike } from '@kit'
 import type { SnapGuide } from '@kit/stage/snap'
@@ -62,7 +63,7 @@ export const design = createStore<DesignState>(() => ({
 export const useDesign = <T,>(pick: (s: DesignState) => T) => useStore(design, pick)
 
 let saveTimer = 0
-const persist = (doc: Doc) => { clearTimeout(saveTimer); saveTimer = window.setTimeout(() => { try { localStorage.setItem(LS, JSON.stringify(doc)) } catch { /* quota */ } }, 300) }
+const persist = (doc: Doc) => { clearTimeout(saveTimer); saveTimer = window.setTimeout(() => { saveLocal(LS, JSON.stringify(doc)) }, 300) }
 
 /* --- reading ---------------------------------------------------------------- */
 export const get = () => design.getState()
