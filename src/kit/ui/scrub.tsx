@@ -45,14 +45,15 @@ export interface ScrubProps {
 }
 
 /** "+8" / "-8" typed into a Mixed field → a delta for every selected item (break-it V9) */
-function relativeDelta(text: string): number | null {
+export function relativeDelta(text: string): number | null {
   const m = text.trim().replace(/,/g, '.').match(/^([+-])\s*([\d.]+(?:e[+-]?\d+)?)$/i)
   if (!m) return null
   const n = Number(m[2]) * (m[1] === '-' ? -1 : 1)
   return Number.isFinite(n) ? n : null
 }
 
-function evaluate(text: string, current: number): number | null {
+/** Typed field text → number: "120/2", "+8" (relative to `current`), "1e3". null = reject. */
+export function evaluate(text: string, current: number): number | null {
   const s = text.trim().replace(/,/g, '.').replace(/[a-z%°×]+$/i, '')
   if (!s) return null
   const rel = s.match(/^([+\-*/])\s*(-?[\d.]+(?:e[+-]?\d+)?)$/i)

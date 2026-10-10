@@ -16,5 +16,5 @@
     "types": ["vite/client"],
     "paths": { "@kit": ["./src/kit/index.ts"], "@kit/*": ["./src/kit/*"], "@/*": ["./src/*"] }
   },
-  "include": ["src"]
+  "include": ["src", "tests"]
 }

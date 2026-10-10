@@ -21,10 +21,13 @@ Node 24 or newer (the sync script imports TypeScript directly).
 
 ```bash
 npm run sync    # regenerate derived files (registry, plugin manifest, skill copies)
-npm run check   # fails if generated files are stale; typechecks
+npm run check   # fails if generated files are stale; typechecks; runs the unit tests
 npm run qa      # console errors + contrast audit in both themes + thumbnails
 npm run build
 ```
+
+Kit logic (`src/kit/core`, maths in controls) has fast unit tests in `tests/` (`npm test`, under a
+second). A bug fix in the kit should come with a test that fails without it.
 
 Check your change in **both themes** (`T` toggles inside a shell) and, if it touches
 the client view or the landing page, at **375px wide**.

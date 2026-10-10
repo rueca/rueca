@@ -1,10 +1,10 @@
 @import "@fontsource-variable/gabarito";
-@import "@fontsource-variable/lexend";
+@import "@fontsource-variable/hanken-grotesk";
 @import "@fontsource-variable/geist-mono";
 
 /* ---------------------------------------------------------------------------
    Brand type for the marketing pages ("Geométrica", brand/BRAND.md):
-     Lexend   — body, the page's base font
+     Hanken Grotesk — body, the page's base font (warm, plain grotesque; replaced Lexend 10 Oct)
      Gabarito — headlines and the wordmark (.font-display)
      Geist Mono — commands and code (.font-code, code, kbd, pre)
    Anything that SHOWS the product goes back to the kit's chrome fonts: .preview,
@@ -12,7 +12,7 @@
 --------------------------------------------------------------------------- */
 .site {
   --font-display: "Gabarito Variable", Gabarito, ui-sans-serif, system-ui, sans-serif;
-  --font-body: "Lexend Variable", Lexend, ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Hanken Grotesk Variable", "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-code: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
   font-family: var(--font-body);
 }

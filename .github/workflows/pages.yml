@@ -30,6 +30,8 @@ jobs:
       - run: npm ci
       - name: Generated files are up to date
         run: node scripts/sync.mjs --check
+      - name: Unit tests
+        run: npm test
       - name: Pages base path
         id: pages
         if: github.event_name != 'pull_request'
