@@ -28,7 +28,6 @@ const E = {
   out: { kind: 'bezier', p: [0, 0, 0.58, 1] } as Ease,
   io: { kind: 'bezier', p: [0.42, 0, 0.58, 1] } as Ease,
   expo: { kind: 'bezier', p: [0.16, 1, 0.3, 1] } as Ease,
-  spinUp: { kind: 'bezier', p: [0.5, 0, 0.18, 1] } as Ease, // gathers, then coasts
   hold: { kind: 'hold' } as Ease,
   spring: (duration: number, bounce: number): Ease => ({ kind: 'spring', duration, bounce }),
 }
@@ -51,8 +50,8 @@ export function demoDoc(): Doc {
     obj('band', 'Drive band', 'image', null, { x: 558, y: 416.5, w: 1116, h: 833 }, { href: ART.band, locked: true }),
     obj('thread', 'Thread', 'group', null, { x: ORIFICE.x, y: ORIFICE.y, rotation: 25 }),
     obj('yarn', 'Yarn', 'rect', 'thread', { x: 0, w: 0, h: 2.5, radius: 1.25, fill: ACHIOTE }),
-    obj('count', 'Count', 'text', null, { x: 1272, y: 400, fill: ACHIOTE, opacity: 0 }, { text: '{turns} turns', fontSize: 38, fontWeight: 400, align: 'middle', font: 'hand' }),
-    obj('cta', 'Call to action', 'group', null, { x: 1272, y: 444, opacity: 0.7 }),
+    obj('count', 'Count', 'text', null, { x: 1272, y: 400, fill: ACHIOTE }, { text: '{turns} turns', fontSize: 38, fontWeight: 400, align: 'middle', font: 'hand' }),
+    obj('cta', 'Call to action', 'group', null, { x: 1272, y: 444 }),
     obj('caption', 'Caption', 'text', 'cta', { fill: ACHIOTE }, { text: 'click to spin', fontSize: 24, fontWeight: 400, align: 'middle', font: 'hand' }),
     obj('underline', 'Underline', 'rect', 'cta', { x: -2, y: 17, rotation: -2.5, w: 112, h: 1.8, radius: 0.9, fill: ACHIOTE }),
   ]
@@ -66,23 +65,18 @@ export function demoDoc(): Doc {
   const idle: Anim = {
     id: 'idle', name: 'Idle', duration: 9000, loop: 'loop', tracks: {
       'wheel.rotation': [k(0, 0, E.lin), k(9000, 360)],
-      'cta.opacity': [k(0, 0.7), k(2250, 1), k(4500, 0.7), k(6750, 1), k(9000, 0.7)],
     },
   }
   const hover: Anim = {
     id: 'hover', name: 'Hover', duration: 2800, loop: 'loop', tracks: {
       'wheel.rotation': [k(0, 0, E.lin), k(2800, 360)],
-      'cta.opacity': [k(0, 0.7, E.out), k(300, 1)],
     },
   }
   const press: Anim = {
     id: 'press', name: 'Spin up', duration: 2400, loop: 'loop', tracks: {
-      'wheel.rotation': [k(0, 0, E.spinUp), k(1800, 1080)],
+      'wheel.rotation': [k(0, 0, E.lin), k(2400, 1080)], // constant speed: 1080° in 2.4s loops seamlessly
       ...yarn(240, 1300, E.expo),
-      'count.opacity': [k(0, 0, E.hold), k(900, 0, E.out), k(1200, 1, E.hold), k(2050, 1, E.in), k(2400, 0)],
       'yarn.opacity': [k(0, 1, E.hold), k(2050, 1, E.in), k(2400, 0)],
-      'count.y': [k(0, 400, E.hold), k(900, 412, E.spring(520, 0.45)), k(1400, 400)],
-      'cta.opacity': [k(0, 1, E.out), k(400, 0.45, E.hold), k(2050, 0.45, E.io), k(2400, 1)],
     },
   }
   return {
