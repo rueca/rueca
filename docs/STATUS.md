@@ -70,11 +70,11 @@ Geist Mono code — landing + gallery only; product chrome stays Inter.
   Esc mid-scrub, wheel), focused fields own their keys, bare-Space shortcuts fire on release (Space+drag pans
   without playing), typed `p.select`/`p.multi` values, grid semantics for EffectStack + DataGrid, KeyTimeline per-lane
   `[ ]`, ViewportFrame `chrome={false}`, preset name clashes + active-preset tracking, OKLCH text entry.
-- Eval suite (evals/, run from the ~/rueca-eval worktree — Drive sync breaks runs inside ~/Documents):
-  with skill vs without — client-view 1.00/0.00, docs-state 1.00/0.00, tuning-tool 1.00/0.50,
-  wrap-existing-html 0.75/0.25 (grader since widened), vanilla-three 1.00/1.00 (doesn't discriminate),
-  no-trigger 1.00/1.00 (skill correctly stays out). ~$7 spent in total, 2026-10-10. Next: --runs 3 for noise,
-  and a harder three.js rubric (outliner/gizmo/undo) so that case measures something.
+- Eval suite (evals/; run from the ~/skill-eval worktree, since Drive sync breaks runs inside ~/Documents). 3 runs per
+  arm, 2026-10-10, $15.81: client-view 1.00 vs 0.00 · docs-state 1.00 vs 0.33 · tuning-tool 0.92 vs 0.00 ·
+  wrap-existing-html 1.00 vs 0.83 · vanilla-three 1.00 vs 1.00 · no-trigger 1.00 vs 1.00 (stays out). Mean Δ +0.46.
+  With the skill, runs cost 2–5× more (it reads several references); one hit the 25-turn cap. Next: trim what the
+  skill makes agents read, and give vanilla-three a rubric that plain Claude doesn't already meet.
 - Branding session is converting shell demo content to the "wire aesthetic v2" (brand/BRAND.md): it owns
   ui-design, dropin, batch, video, animate, motion, component-lab, photo, dither, generate, flows, journey (+ scene
   optional) until it says it's done. Message it before touching those shells.
