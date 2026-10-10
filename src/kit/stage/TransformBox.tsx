@@ -142,8 +142,10 @@ export function resizeRect(
     ;({ l, t, r, b } = o.snap({ l, t, r, b }, mv))
   }
   const min = o.min ?? 1
-  if (r - l < min) { if (hx === 'l') l = r - min; else r = l + min }
-  if (b - t < min) { if (hy === 't') t = b - min; else b = t + min }
+  // From-centre collapses onto the centre, not onto the far edge (break-it V4: the box jumped 400px)
+  const cx = start.x + start.w / 2, cy = start.y + start.h / 2
+  if (r - l < min) { if (o.fromCenter && hx) { l = cx - min / 2; r = cx + min / 2 } else if (hx === 'l') l = r - min; else r = l + min }
+  if (b - t < min) { if (o.fromCenter && hy) { t = cy - min / 2; b = cy + min / 2 } else if (hy === 't') t = b - min; else b = t + min }
   return { l, t, r, b }
 }
 

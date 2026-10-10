@@ -38,6 +38,19 @@ export function numField(key: string, nodes: Node[], L: LayoutMap, get: (n: Node
       }, { commit: final })
       if (final) bases.delete(key)
     },
+    // Mixed: every node moves by the same delta, each clamped on its own by `apply` — so the first node's
+    // limit doesn't stop the others short, and ↑/↓ or a typed "+8" keep their differences (break-it V2/V8/V9).
+    onDelta: mixed ? (d: number, final: boolean) => {
+      let base = bases.get(key)
+      if (!base) { base = new Map(nodes.map((n, i) => [n.id, vals[i]])); bases.set(key, base) }
+      const b0 = base
+      S.setNodes((ns) => {
+        let out = ns
+        for (const n of nodes) out = update(out, n.id, (cur) => ({ ...cur, ...apply(cur, (b0.get(n.id) ?? 0) + d, L.get(n.id) ?? { x: 0, y: 0, w: 0, h: 0 }) }))
+        return out
+      }, { commit: final })
+      if (final) bases.delete(key)
+    } : undefined,
   }
 }
 

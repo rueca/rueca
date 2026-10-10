@@ -44,15 +44,25 @@ export interface ScrubProps {
   soft?: [number, number]
 }
 
+/** "+8" / "-8" typed into a Mixed field → a delta for every selected item (break-it V9) */
+function relativeDelta(text: string): number | null {
+  const m = text.trim().replace(/,/g, '.').match(/^([+-])\s*([\d.]+(?:e[+-]?\d+)?)$/i)
+  if (!m) return null
+  const n = Number(m[2]) * (m[1] === '-' ? -1 : 1)
+  return Number.isFinite(n) ? n : null
+}
+
 function evaluate(text: string, current: number): number | null {
   const s = text.trim().replace(/,/g, '.').replace(/[a-z%°×]+$/i, '')
   if (!s) return null
-  const rel = s.match(/^([+\-*/])\s*(-?[\d.]+)$/)
-  if (rel && !/^-[\d.]+$/.test(s)) {
+  const rel = s.match(/^([+\-*/])\s*(-?[\d.]+(?:e[+-]?\d+)?)$/i)
+  if (rel && !/^-[\d.]+(?:e[+-]?\d+)?$/i.test(s)) {
     const n = Number(rel[2])
-    return rel[1] === '+' ? current + n : rel[1] === '-' ? current - n : rel[1] === '*' ? current * n : current / n
+    const r = rel[1] === '+' ? current + n : rel[1] === '-' ? current - n : rel[1] === '*' ? current * n : current / n
+    // "/0" must never write Infinity / NaN into a doc (break-it V6)
+    return Number.isFinite(r) ? r : null
   }
-  if (!/^[\d+\-*/().\s]+$/.test(s)) return null
+  if (!/^[\d+\-*/().eE\s]+$/.test(s)) return null
   try {
     const r = Function(`"use strict";return (${s})`)() as number
     return Number.isFinite(r) ? r : null
@@ -69,7 +79,11 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
   const el = useRef<HTMLDivElement>(null)
   useImperativeHandle(fwd, () => el.current!)
   const input = useRef<HTMLInputElement>(null)
-  const drag = useRef<{ x: number; acc: number; acc2?: number; start: number; moved: boolean; id: number }>({ x: 0, acc: 0, start: 0, moved: false, id: -1 })
+  const drag = useRef<{ x: number; acc: number; acc2?: number; start: number; orig: number; moved: boolean; id: number }>({ x: 0, acc: 0, start: 0, orig: 0, moved: false, id: -1 })
+  // set by double-click so the editor that the first click opened doesn't commit its stale draft on blur (break-it V1)
+  const discard = useRef(false)
+  // typing a digit into a focused field starts the edit with that digit — keep the caret after it, don't select it
+  const caretEnd = useRef(false)
   const live = useRef(value)
   live.current = value
 
@@ -78,19 +92,56 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
   // Scale scrubbing to the range so a 0–1 param and a 0–2000 param both feel right.
   const perPx = range ? Math.max(step, range / 300) / sensitivity : step / sensitivity * 2
 
-  const commitNum = (v: number, final: boolean) => onChange(clamp(roundTo(v, step), min, max), final)
+  const commitNum = (v: number, final: boolean) => { if (Number.isFinite(v)) onChange(clamp(roundTo(v, step), min, max), final) }
 
   const display = mixed ? 'Mixed' : fmt ? fmt(value) : `${value.toFixed(decimalsOf(step))}${unit ?? ''}`
 
   // With a custom parse, edit in display units ("30%" → parse) rather than the raw number.
   const editText = () => (parse && fmt ? fmt(value) : String(roundTo(value, step)))
 
-  useEffect(() => { if (editing) { input.current?.focus(); input.current?.select() } }, [editing])
+  useEffect(() => {
+    if (!editing) return
+    const i = input.current
+    i?.focus()
+    if (caretEnd.current) { caretEnd.current = false; i?.setSelectionRange(i.value.length, i.value.length) } else i?.select()
+  }, [editing])
+
+  // Esc mid-scrub puts the value back (break-it V7). Focus isn't on the field while dragging, so listen on window.
+  useEffect(() => {
+    if (!scrubbing) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return
+      e.preventDefault(); e.stopPropagation()
+      const d = drag.current
+      if (d.id !== -1) try { el.current?.releasePointerCapture(d.id) } catch { /* already released */ }
+      d.id = -1
+      if (document.pointerLockElement) document.exitPointerLock()
+      setScrubbing(false)
+      if (mixed && onDelta) onDelta(0, true); else commitNum(d.orig, true)
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  })
+
+  // Wheel while focused → step. Non-passive so the panel doesn't scroll instead (break-it V10).
+  useEffect(() => {
+    const node = el.current
+    if (!node || disabled) return
+    const onWheel = (e: WheelEvent) => {
+      if (document.activeElement !== node || editing || !e.deltaY) return
+      e.preventDefault()
+      const mult = e.shiftKey ? 10 : e.altKey ? 0.1 : 1
+      const d = (e.deltaY < 0 ? 1 : -1) * step * mult
+      if (mixed && onDelta) onDelta(d, true); else commitNum(live.current + d, true)
+    }
+    node.addEventListener('wheel', onWheel, { passive: false })
+    return () => node.removeEventListener('wheel', onWheel)
+  })
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (disabled || editing || e.button !== 0) return
     e.preventDefault()
-    drag.current = { x: e.clientX, acc: 0, acc2: 0, start: live.current, moved: false, id: e.pointerId }
+    drag.current = { x: e.clientX, acc: 0, acc2: 0, start: live.current, orig: live.current, moved: false, id: e.pointerId }
     el.current?.setPointerCapture(e.pointerId)
   }
   const onPointerMove = (e: React.PointerEvent) => {
@@ -125,9 +176,14 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
   const finishEdit = (apply: boolean) => {
     // keep keyboard users where they were (break-it A5)
     requestAnimationFrame(() => el.current?.focus())
+    if (discard.current) { discard.current = false; apply = false }
+    if (apply && mixed && onDelta) {
+      const d = relativeDelta(draft)
+      if (d !== null) { onDelta(d, true); setEditing(false); return }
+    }
     if (apply) {
       const v = parse ? parse(draft) : evaluate(draft, value)
-      if (v !== null) commitNum(v, true)
+      if (v !== null && Number.isFinite(v)) commitNum(v, true)
     }
     setEditing(false)
   }
@@ -135,8 +191,21 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (editing) return
     const mult = e.shiftKey ? 10 : e.altKey ? 0.1 : 1
-    if (e.key === 'ArrowUp' || e.key === 'ArrowRight') { e.preventDefault(); commitNum(value + step * mult, true) }
-    if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') { e.preventDefault(); commitNum(value - step * mult, true) }
+    const nudge = (dir: 1 | -1) => {
+      e.preventDefault()
+      // Mixed: nudge each selected item by a step instead of collapsing them to one value (break-it V2)
+      if (mixed && onDelta) onDelta(dir * step * mult, true); else commitNum(value + dir * step * mult, true)
+    }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowRight') nudge(1)
+    if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') nudge(-1)
+    // Typing into a focused field starts editing with that character (Figma); Backspace starts empty (break-it V3)
+    if (!e.metaKey && !e.ctrlKey && (/^[\d.+\-*/=]$/.test(e.key) || e.key === 'Backspace' || e.key === 'Delete')) {
+      e.preventDefault(); e.stopPropagation()
+      caretEnd.current = true
+      setDraft(e.key.length === 1 && e.key !== '=' ? e.key : '')
+      setEditing(true)
+      return
+    }
     if (e.key === 'Enter') { setDraft(editText()); setEditing(true) }
     if (e.key === 'Home' && Number.isFinite(min)) commitNum(min, true)
     if (e.key === 'End' && Number.isFinite(max)) commitNum(max, true)
@@ -158,7 +227,12 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
-      onDoubleClick={() => defaultValue !== undefined && commitNum(defaultValue, true)}
+      onDoubleClick={() => {
+        if (defaultValue === undefined) return
+        discard.current = true
+        setEditing(false)
+        commitNum(defaultValue, true)
+      }}
       onKeyDown={onKeyDown}
       {...rest}
       className={cn(

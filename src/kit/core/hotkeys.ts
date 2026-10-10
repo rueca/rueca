@@ -27,6 +27,14 @@ const typing = (e: KeyboardEvent) => {
   const tag = el.tagName
   return el.isContentEditable || tag === 'TEXTAREA' || tag === 'SELECT' || (tag === 'INPUT' && !['range', 'checkbox', 'radio', 'button'].includes((el as HTMLInputElement).type))
 }
+/** A focused number field / slider owns bare digits, Backspace, Delete and arrows (break-it V3:
+    typing "2" into a focused field must not fire the canvas "20% opacity" hotkey). */
+const onField = (e: KeyboardEvent) => {
+  if (e.metaKey || e.ctrlKey) return false
+  const el = e.target as HTMLElement | null
+  if (!el?.closest?.('[role="spinbutton"],[role="slider"]')) return false
+  return e.key.length === 1 || /^(Backspace|Delete|Arrow|Home|End|Page)/.test(e.key)
+}
 /** Space / Enter on a focused button belong to the button. */
 const onButton = (e: KeyboardEvent, key: string) => {
   if (key !== 'space' && key !== 'enter') return false
@@ -87,7 +95,7 @@ function install() {
   if (installed || typeof window === 'undefined') return
   installed = true
   window.addEventListener('keydown', (e) => {
-    if (e.defaultPrevented || typing(e)) return
+    if (e.defaultPrevented || typing(e) || onField(e)) return
     const hits = bindings.filter((b) => splitCombos(b.combo).some((c) => matches(c, e)) && (!b.when || b.when()))
     if (!hits.length) return
     if (onButton(e, normKey(e.key))) return
