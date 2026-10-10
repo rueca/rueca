@@ -33,7 +33,7 @@ export class ErrorBoundary extends Component<Props, State> {
   state: State = { error: null }
   static getDerivedStateFromError(error: Error): State { return { error } }
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error(`[trompo] ${this.props.label ?? 'A panel'} crashed:`, error, info.componentStack)
+    console.error(`[studio] ${this.props.label ?? 'A panel'} crashed:`, error, info.componentStack)
   }
   reset = () => { this.props.onReset?.(); this.setState({ error: null }) }
   render() {

@@ -4,6 +4,7 @@ import { snapshotElement } from '@kit'
 import { CHANNELS, LANES, emoji, fmtEmotion, type JourneyDoc, type Persona } from './model'
 import { doc, persona, ui, history } from './store'
 import { LEVEL } from './map/Card'
+import { site } from '../../site.config'
 
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'journey'
 const fileBase = () => `${slug(doc.get().title)}-${slug(persona().name)}`
@@ -93,7 +94,7 @@ export async function copyMarkdown() {
 }
 
 export function exportJourneyJSON() {
-  exportJSON({ app: 'trompo/journey', version: 1, doc: doc.get() }, `${slug(doc.get().title)}.json`)
+  exportJSON({ app: `${site.slug}/journey`, version: 1, doc: doc.get() }, `${slug(doc.get().title)}.json`)
 }
 
 export function importJourneyJSON() {

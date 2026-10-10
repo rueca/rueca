@@ -1,10 +1,10 @@
 ---
-name: trompo
+name: rueca
 description: Build the design-tool harness around an interactive prototype — inspector, timeline, layers, presets, export — so it can be felt and tuned, not just looked at. Use whenever creating or wrapping a prototype, playground, motion study, shader or 3D toy, generator, photo effect, UX flow, journey map, node graph, parameter explorer or client demo, in any runtime (Canvas, WebGL, three.js, SVG, React, plain HTML, an existing app). Triggers on: prototype, playground, motion study, animation harness, tuning tool, design tool, parameter explorer, instrument, "let me test this", "make me a tool to", "add controls to this".
 license: MIT
 ---
 
-# Trompo
+# Rueca
 
 A prototype needs two things: **the artifact** (the screen, animation, shader, flow)
 and **the harness** around it — the tool that lets someone feel it and tune it. This
@@ -50,7 +50,7 @@ designed reads truthfully inside the artboard.
   opacity tier at one size. Tabular numbers on anything live.
 - **One accent, only on state.** Playhead is red/orange, not the accent.
 - **The accent must not clash with the work.** It defaults to system blue (`--signal`),
-  never a brand colour, and that includes Trompo's own pink. Selection outlines,
+  never a brand colour, Rueca's own included. Selection outlines,
   handles and focus rings sit *on top of* the prototype, so before handoff run
   `scripts/accent-check.mjs <url>`. If the artboard or a semantic colour (`--rec`,
   `--key`, `--ok`) is within 35° of hue, switch to the fallback it names

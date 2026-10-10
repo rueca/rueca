@@ -25,7 +25,7 @@ let selfHost: HTMLElement | null = null
 function ensureHost() {
   if (owner || selfHost || typeof document === 'undefined') return
   selfHost = document.createElement('div')
-  selfHost.dataset.trompoToaster = ''
+  selfHost.dataset.studioToaster = ''
   document.body.appendChild(selfHost)
   createRoot(selfHost).render(<Toaster />)
 }

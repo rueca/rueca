@@ -1,7 +1,8 @@
 # Session context (handoff for agents) — 2026-10-09
 
-> **Name: Trompo** (chosen 2026-10-09; was "Prototype Studio"). Skill at `skills/trompo/`, identity in
-> `src/site.config.ts`, brand in `brand/BRAND.md`. Mentions of "Prototype Studio" below are historical.
+> **Name: Rueca** (2026-10-10; before that Trompo, Thumbwheel, "Prototype Studio"). Skill at `skills/rueca/`,
+> identity in `src/site.config.ts` (the only place the name lives; `npm run sync` spreads it), brand in
+> `brand/BRAND.md`. Older names below are historical. The kit itself is brand-neutral (`[studio]` logs, `studio:` keys).
 
 ## Who and what
 - **Rafael Cespedes** — designer (not an engineer). Builds "instruments" for clients: prototypes, asset

@@ -49,7 +49,7 @@ export function Inspector({ params, folders, keys, published, className, id }: {
   const defaults = params.getState().defaults as Record<string, unknown>
   const schema = params.schema as Schema
   if ((import.meta as any).env?.DEV && folders) for (const f of folders) if (!schema[f])
-    console.warn(`[trompo] <Inspector folders>: "${f}" isn't a folder id in ${params.id} (ids: ${Object.keys(schema).join(', ')}). Folder ids are the schema keys, not their labels.`)
+    console.warn(`[studio] <Inspector folders>: "${f}" isn't a folder id in ${params.id} (ids: ${Object.keys(schema).join(', ')}). Folder ids are the schema keys, not their labels.`)
   const entries = (folders ? folders.filter((k) => schema[k]).map((k) => [k, schema[k]]) : Object.entries(schema)) as [string, Folder][]
   const lsKey = `studio:${params.id}:sections:${id ?? (folders?.join(',') ?? 'all')}${published ? ':pub' : ''}`
 

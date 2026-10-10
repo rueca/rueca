@@ -1,4 +1,5 @@
-/* Trompo kit — public surface. Import from '@kit'. */
+/* The studio kit — public surface. Import from '@kit'. (Brand-neutral on purpose: logs say [studio],
+   storage keys start with studio:, so renaming the product never touches the kit.) */
 export * from './core/schema'
 export * from './core/params'
 export * from './core/doc'

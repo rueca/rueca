@@ -143,7 +143,7 @@ export function useHotkeys(map: Record<string, HotkeyHandler>, deps: unknown[] =
     // applies, or it would trap focus for everyone (break-it QA A1). Unguarded ones are dropped.
     const isTab = (c: string) => splitCombos(c).some((x) => x === 'tab' || x === 'shift+tab')
     for (const b of mine) if (isTab(b.combo) && !b.when) {
-      if (import.meta.env?.DEV) console.warn(`[trompo] hotkey "${b.combo}" ignored: bare Tab bindings need a \`when\` guard so keyboard focus still moves.`)
+      if (import.meta.env?.DEV) console.warn(`[studio] hotkey "${b.combo}" ignored: bare Tab bindings need a \`when\` guard so keyboard focus still moves.`)
     }
     const kept = mine.filter((b) => !(isTab(b.combo) && !b.when))
     mine.length = 0; mine.push(...kept)

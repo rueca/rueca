@@ -73,9 +73,9 @@ accent sits near a semantic colour, "selected" reads as "recording" or "keyframe
 - **Default: system blue** (OKLCH hue ≈ 249°). It is far from `rec` (25°), `key`
   (≈ 80°) and `ok` (160°), and blue already reads as "the tool is selecting this".
 - **Never a brand colour.** Not the client's (that lives in the artboard), and not
-  Trompo's own pink either: at hue 353–360° it sits 25–32° from `rec`, so the
-  selection would look like an error or a recording. It also stamps someone else's
-  tool with our brand.
+  Rueca's own either. Brand reds and pinks sit within a few degrees of `rec`, so
+  the selection would look like an error or a recording, and a brand accent stamps
+  someone else's tool with our brand.
 - **The rule:** keep the accent at least **35° of OKLCH hue** from any chromatic
   colour covering ≥ 4% of the rendered artboard, and from `rec`, `key` and `ok`.
   Greys can't clash (OKLCH chroma < 0.06 is ignored), so a monochrome prototype

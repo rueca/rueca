@@ -131,7 +131,7 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     }
     const isDev = (import.meta as any).env?.DEV
     if (isDev && opts.persist !== false && liveIds.has(opts.id) && !opts.id.startsWith('item:'))
-      console.warn(`[trompo] two param stores share the id "${opts.id}" — they will overwrite each other's saved values. Give each a unique id.`)
+      console.warn(`[studio] two param stores share the id "${opts.id}" — they will overwrite each other's saved values. Give each a unique id.`)
     liveIds.add(opts.id)
   }
   type V = SchemaValues<S> & Values
@@ -147,7 +147,7 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
   const labelOf = (k: string) => { const d = defs[k] as any; return d?.label ?? humanize(k) }
 
   const dev = typeof import.meta !== 'undefined' && (import.meta as any).env?.DEV
-  const warn = (msg: string) => { if (dev) console.warn(`[trompo] ${opts.id}: ${msg}`) }
+  const warn = (msg: string) => { if (dev) console.warn(`[studio] ${opts.id}: ${msg}`) }
   // Only keep keys the schema knows, and only values that fit their def — a renamed param,
   // a hand-edited share link or a framed page sending "30" for a number never poisons state.
   const sanitize = (src: Partial<V> | null | undefined, from = 'input'): Partial<V> => {
@@ -167,7 +167,7 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
   if (dev) for (const [k, d] of Object.entries(defs)) {
     if (!isValueDef(d)) continue
     const r = coerce(d, (defaults as Values)[k])
-    if (!r.ok) console.error(`[trompo] ${opts.id}: default for "${k}" does not fit its ${d.type} def — ${r.reason}`)
+    if (!r.ok) console.error(`[studio] ${opts.id}: default for "${k}" does not fit its ${d.type} def — ${r.reason}`)
   }
 
   let initial = { ...defaults }

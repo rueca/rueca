@@ -3,6 +3,7 @@ import { copyText, download, exportCanvasPNG, exportJSON, matchesShape, toast } 
 import { snapshotElement } from '@kit'
 import { activeFlow, importFlow, select, sizeOf, ui, viewport } from './store'
 import type { Flow } from './model'
+import { site } from '../../site.config'
 
 export const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'flow'
 
@@ -38,7 +39,7 @@ export async function exportPNG(scale = 2) {
 
 export function exportFlowJSON() {
   const f = activeFlow()
-  exportJSON({ app: 'trompo/flows', version: 1, flow: { ...f, nodes: f.nodes.map(({ measured: _m, selected: _s, ...n }) => n) } }, `${slug(f.name)}.json`)
+  exportJSON({ app: `${site.slug}/flows`, version: 1, flow: { ...f, nodes: f.nodes.map(({ measured: _m, selected: _s, ...n }) => n) } }, `${slug(f.name)}.json`)
   toast('JSON downloaded', { type: 'success' })
 }
 

@@ -1,4 +1,4 @@
-# Trompo kit — guide
+# Rueca kit — guide
 
 The kit is the **harness**: the design-tool chrome around a prototype. The prototype (the
 *artifact*) can be anything — Canvas 2D, WebGL, vanilla three.js, SVG, DOM/React, an iframe.

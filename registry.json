@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "trompo",
-  "homepage": "https://trompo-dev.github.io/trompo",
+  "name": "rueca",
+  "homepage": "https://rueca.github.io/rueca",
   "items": [
     {
       "name": "studio",
@@ -12,44 +12,44 @@
         "@xyflow/react@^12.12.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/actions.json",
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/charts.json",
-        "https://trompo-dev.github.io/trompo/r/chip-input.json",
-        "https://trompo-dev.github.io/trompo/r/code-block.json",
-        "https://trompo-dev.github.io/trompo/r/color.json",
-        "https://trompo-dev.github.io/trompo/r/controls.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/data-grid.json",
-        "https://trompo-dev.github.io/trompo/r/dialog.json",
-        "https://trompo-dev.github.io/trompo/r/easing.json",
-        "https://trompo-dev.github.io/trompo/r/envelope.json",
-        "https://trompo-dev.github.io/trompo/r/error-boundary.json",
-        "https://trompo-dev.github.io/trompo/r/inline-text.json",
-        "https://trompo-dev.github.io/trompo/r/inspector.json",
-        "https://trompo-dev.github.io/trompo/r/jobs.json",
-        "https://trompo-dev.github.io/trompo/r/key-button.json",
-        "https://trompo-dev.github.io/trompo/r/knob.json",
-        "https://trompo-dev.github.io/trompo/r/layers.json",
-        "https://trompo-dev.github.io/trompo/r/layout-fields.json",
-        "https://trompo-dev.github.io/trompo/r/masonry.json",
-        "https://trompo-dev.github.io/trompo/r/oklch.json",
-        "https://trompo-dev.github.io/trompo/r/palette.json",
-        "https://trompo-dev.github.io/trompo/r/param-slider.json",
-        "https://trompo-dev.github.io/trompo/r/preset-grid.json",
-        "https://trompo-dev.github.io/trompo/r/prompt-box.json",
-        "https://trompo-dev.github.io/trompo/r/quick-add.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json",
-        "https://trompo-dev.github.io/trompo/r/slider.json",
-        "https://trompo-dev.github.io/trompo/r/special.json",
-        "https://trompo-dev.github.io/trompo/r/stack.json",
-        "https://trompo-dev.github.io/trompo/r/stage.json",
-        "https://trompo-dev.github.io/trompo/r/studio-layout.json",
-        "https://trompo-dev.github.io/trompo/r/theme.json",
-        "https://trompo-dev.github.io/trompo/r/timeline.json",
-        "https://trompo-dev.github.io/trompo/r/toast.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json",
-        "https://trompo-dev.github.io/trompo/r/variant-grid.json"
+        "https://rueca.github.io/rueca/r/actions.json",
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/charts.json",
+        "https://rueca.github.io/rueca/r/chip-input.json",
+        "https://rueca.github.io/rueca/r/code-block.json",
+        "https://rueca.github.io/rueca/r/color.json",
+        "https://rueca.github.io/rueca/r/controls.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/data-grid.json",
+        "https://rueca.github.io/rueca/r/dialog.json",
+        "https://rueca.github.io/rueca/r/easing.json",
+        "https://rueca.github.io/rueca/r/envelope.json",
+        "https://rueca.github.io/rueca/r/error-boundary.json",
+        "https://rueca.github.io/rueca/r/inline-text.json",
+        "https://rueca.github.io/rueca/r/inspector.json",
+        "https://rueca.github.io/rueca/r/jobs.json",
+        "https://rueca.github.io/rueca/r/key-button.json",
+        "https://rueca.github.io/rueca/r/knob.json",
+        "https://rueca.github.io/rueca/r/layers.json",
+        "https://rueca.github.io/rueca/r/layout-fields.json",
+        "https://rueca.github.io/rueca/r/masonry.json",
+        "https://rueca.github.io/rueca/r/oklch.json",
+        "https://rueca.github.io/rueca/r/palette.json",
+        "https://rueca.github.io/rueca/r/param-slider.json",
+        "https://rueca.github.io/rueca/r/preset-grid.json",
+        "https://rueca.github.io/rueca/r/prompt-box.json",
+        "https://rueca.github.io/rueca/r/quick-add.json",
+        "https://rueca.github.io/rueca/r/scrub.json",
+        "https://rueca.github.io/rueca/r/slider.json",
+        "https://rueca.github.io/rueca/r/special.json",
+        "https://rueca.github.io/rueca/r/stack.json",
+        "https://rueca.github.io/rueca/r/stage.json",
+        "https://rueca.github.io/rueca/r/studio-layout.json",
+        "https://rueca.github.io/rueca/r/theme.json",
+        "https://rueca.github.io/rueca/r/timeline.json",
+        "https://rueca.github.io/rueca/r/toast.json",
+        "https://rueca.github.io/rueca/r/tooltip.json",
+        "https://rueca.github.io/rueca/r/variant-grid.json"
       ],
       "files": [
         {
@@ -68,17 +68,17 @@
       "name": "actions",
       "type": "registry:component",
       "title": "Actions",
-      "description": "Actions — part of the Trompo kit.",
+      "description": "Actions — part of the Rueca kit.",
       "dependencies": [
         "lucide-react@^1.54.0",
         "zustand@^5.0.15"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/controls.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/dialog.json",
-        "https://trompo-dev.github.io/trompo/r/toast.json"
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/controls.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/dialog.json",
+        "https://rueca.github.io/rueca/r/toast.json"
       ],
       "files": [
         {
@@ -107,13 +107,13 @@
       "name": "button",
       "type": "registry:component",
       "title": "Button",
-      "description": "Button — part of the Trompo kit.",
+      "description": "Button — part of the Rueca kit.",
       "dependencies": [
         "class-variance-authority@^0.7.1"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -127,12 +127,12 @@
       "name": "charts",
       "type": "registry:component",
       "title": "Charts",
-      "description": "Charts — part of the Trompo kit.",
+      "description": "Charts — part of the Rueca kit.",
       "dependencies": [],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/scrub.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -146,12 +146,12 @@
       "name": "chip-input",
       "type": "registry:component",
       "title": "Chip Input",
-      "description": "Chip Input — part of the Trompo kit.",
+      "description": "Chip Input — part of the Rueca kit.",
       "dependencies": [
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -165,14 +165,14 @@
       "name": "code-block",
       "type": "registry:component",
       "title": "Code Block",
-      "description": "Code Block — part of the Trompo kit.",
+      "description": "Code Block — part of the Rueca kit.",
       "dependencies": [
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/toast.json"
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/toast.json"
       ],
       "files": [
         {
@@ -192,9 +192,9 @@
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/controls.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/oklch.json"
+        "https://rueca.github.io/rueca/r/controls.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/oklch.json"
       ],
       "files": [
         {
@@ -208,14 +208,14 @@
       "name": "controls",
       "type": "registry:component",
       "title": "Controls",
-      "description": "Controls — part of the Trompo kit.",
+      "description": "Controls — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -237,7 +237,7 @@
         "zustand@^5.0.15"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/theme.json"
+        "https://rueca.github.io/rueca/r/theme.json"
       ],
       "files": [
         {
@@ -321,15 +321,15 @@
       "name": "data-grid",
       "type": "registry:component",
       "title": "Data Grid",
-      "description": "Data Grid — part of the Trompo kit.",
+      "description": "Data Grid — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/color.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/color.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -343,14 +343,14 @@
       "name": "dialog",
       "type": "registry:component",
       "title": "Dialog",
-      "description": "Dialog — part of the Trompo kit.",
+      "description": "Dialog — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -364,18 +364,18 @@
       "name": "easing",
       "type": "registry:component",
       "title": "Easing",
-      "description": "Easing — part of the Trompo kit.",
+      "description": "Easing — part of the Rueca kit.",
       "dependencies": [
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/controls.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json",
-        "https://trompo-dev.github.io/trompo/r/slider.json",
-        "https://trompo-dev.github.io/trompo/r/special.json",
-        "https://trompo-dev.github.io/trompo/r/toast.json"
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/controls.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/scrub.json",
+        "https://rueca.github.io/rueca/r/slider.json",
+        "https://rueca.github.io/rueca/r/special.json",
+        "https://rueca.github.io/rueca/r/toast.json"
       ],
       "files": [
         {
@@ -389,11 +389,11 @@
       "name": "envelope",
       "type": "registry:component",
       "title": "Envelope",
-      "description": "Envelope — part of the Trompo kit.",
+      "description": "Envelope — part of the Rueca kit.",
       "dependencies": [],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/scrub.json"
       ],
       "files": [
         {
@@ -407,7 +407,7 @@
       "name": "error-boundary",
       "type": "registry:component",
       "title": "Error Boundary",
-      "description": "Error Boundary — part of the Trompo kit.",
+      "description": "Error Boundary — part of the Rueca kit.",
       "dependencies": [
         "lucide-react@^1.54.0"
       ],
@@ -424,10 +424,10 @@
       "name": "inline-text",
       "type": "registry:component",
       "title": "Inline Text",
-      "description": "Inline Text — part of the Trompo kit.",
+      "description": "Inline Text — part of the Rueca kit.",
       "dependencies": [],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -447,15 +447,15 @@
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/color.json",
-        "https://trompo-dev.github.io/trompo/r/controls.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/knob.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json",
-        "https://trompo-dev.github.io/trompo/r/slider.json",
-        "https://trompo-dev.github.io/trompo/r/special.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/color.json",
+        "https://rueca.github.io/rueca/r/controls.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/knob.json",
+        "https://rueca.github.io/rueca/r/scrub.json",
+        "https://rueca.github.io/rueca/r/slider.json",
+        "https://rueca.github.io/rueca/r/special.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -469,14 +469,14 @@
       "name": "jobs",
       "type": "registry:component",
       "title": "Jobs",
-      "description": "Jobs — part of the Trompo kit.",
+      "description": "Jobs — part of the Rueca kit.",
       "dependencies": [
         "lucide-react@^1.54.0",
         "zustand@^5.0.15"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -490,13 +490,13 @@
       "name": "key-button",
       "type": "registry:component",
       "title": "Key Button",
-      "description": "Key Button — part of the Trompo kit.",
+      "description": "Key Button — part of the Rueca kit.",
       "dependencies": [
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -510,12 +510,12 @@
       "name": "knob",
       "type": "registry:component",
       "title": "Knob",
-      "description": "Knob — part of the Trompo kit.",
+      "description": "Knob — part of the Rueca kit.",
       "dependencies": [],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/scrub.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -534,8 +534,8 @@
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/inline-text.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/inline-text.json"
       ],
       "files": [
         {
@@ -549,18 +549,18 @@
       "name": "layout-fields",
       "type": "registry:component",
       "title": "Layout Fields",
-      "description": "Layout Fields — part of the Trompo kit.",
+      "description": "Layout Fields — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/color.json",
-        "https://trompo-dev.github.io/trompo/r/controls.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json",
-        "https://trompo-dev.github.io/trompo/r/special.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/color.json",
+        "https://rueca.github.io/rueca/r/controls.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/scrub.json",
+        "https://rueca.github.io/rueca/r/special.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -574,10 +574,10 @@
       "name": "masonry",
       "type": "registry:component",
       "title": "Masonry",
-      "description": "Masonry — part of the Trompo kit.",
+      "description": "Masonry — part of the Rueca kit.",
       "dependencies": [],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -591,13 +591,13 @@
       "name": "oklch",
       "type": "registry:component",
       "title": "Oklch",
-      "description": "Oklch — part of the Trompo kit.",
+      "description": "Oklch — part of the Rueca kit.",
       "dependencies": [],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/controls.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/controls.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/scrub.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -611,15 +611,15 @@
       "name": "palette",
       "type": "registry:component",
       "title": "Palette",
-      "description": "Palette — part of the Trompo kit.",
+      "description": "Palette — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "cmdk@^1.1.1",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -633,14 +633,14 @@
       "name": "param-slider",
       "type": "registry:component",
       "title": "Param Slider",
-      "description": "Param Slider — part of the Trompo kit.",
+      "description": "Param Slider — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/inspector.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/inspector.json",
+        "https://rueca.github.io/rueca/r/scrub.json"
       ],
       "files": [
         {
@@ -654,12 +654,12 @@
       "name": "preset-grid",
       "type": "registry:component",
       "title": "Preset Grid",
-      "description": "Preset Grid — part of the Trompo kit.",
+      "description": "Preset Grid — part of the Rueca kit.",
       "dependencies": [
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -673,10 +673,10 @@
       "name": "prompt-box",
       "type": "registry:component",
       "title": "Prompt Box",
-      "description": "Prompt Box — part of the Trompo kit.",
+      "description": "Prompt Box — part of the Rueca kit.",
       "dependencies": [],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -690,14 +690,14 @@
       "name": "quick-add",
       "type": "registry:component",
       "title": "Quick Add",
-      "description": "Quick Add — part of the Trompo kit.",
+      "description": "Quick Add — part of the Rueca kit.",
       "dependencies": [
         "cmdk@^1.1.1",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -714,7 +714,7 @@
       "description": "Drag, type or write expressions into a number. Shift ×10, Alt ×0.1.",
       "dependencies": [],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -728,12 +728,12 @@
       "name": "slider",
       "type": "registry:component",
       "title": "Slider",
-      "description": "Slider — part of the Trompo kit.",
+      "description": "Slider — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -747,16 +747,16 @@
       "name": "special",
       "type": "registry:component",
       "title": "Special",
-      "description": "Special — part of the Trompo kit.",
+      "description": "Special — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/color.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/color.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/scrub.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -770,17 +770,17 @@
       "name": "stack",
       "type": "registry:component",
       "title": "Stack",
-      "description": "Stack — part of the Trompo kit.",
+      "description": "Stack — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/controls.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/controls.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/scrub.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -800,12 +800,12 @@
         "zustand@^5.0.15"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/controls.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/scrub.json",
-        "https://trompo-dev.github.io/trompo/r/studio-layout.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/controls.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/scrub.json",
+        "https://rueca.github.io/rueca/r/studio-layout.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -867,10 +867,10 @@
       "description": "Islands, overlay and docked layouts, toolbar, brand, clusters, tool dock, panels.",
       "dependencies": [],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/error-boundary.json",
-        "https://trompo-dev.github.io/trompo/r/toast.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/error-boundary.json",
+        "https://rueca.github.io/rueca/r/toast.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {
@@ -918,11 +918,11 @@
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/button.json",
-        "https://trompo-dev.github.io/trompo/r/controls.json",
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/slider.json",
-        "https://trompo-dev.github.io/trompo/r/studio-layout.json"
+        "https://rueca.github.io/rueca/r/button.json",
+        "https://rueca.github.io/rueca/r/controls.json",
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/slider.json",
+        "https://rueca.github.io/rueca/r/studio-layout.json"
       ],
       "files": [
         {
@@ -951,7 +951,7 @@
       "name": "toast",
       "type": "registry:component",
       "title": "Toast",
-      "description": "Toast — part of the Trompo kit.",
+      "description": "Toast — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0"
@@ -969,12 +969,12 @@
       "name": "tooltip",
       "type": "registry:component",
       "title": "Tooltip",
-      "description": "Tooltip — part of the Trompo kit.",
+      "description": "Tooltip — part of the Rueca kit.",
       "dependencies": [
         "@base-ui/react@^1.9.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json"
+        "https://rueca.github.io/rueca/r/core.json"
       ],
       "files": [
         {
@@ -988,13 +988,13 @@
       "name": "variant-grid",
       "type": "registry:component",
       "title": "Variant Grid",
-      "description": "Variant Grid — part of the Trompo kit.",
+      "description": "Variant Grid — part of the Rueca kit.",
       "dependencies": [
         "lucide-react@^1.54.0"
       ],
       "registryDependencies": [
-        "https://trompo-dev.github.io/trompo/r/core.json",
-        "https://trompo-dev.github.io/trompo/r/tooltip.json"
+        "https://rueca.github.io/rueca/r/core.json",
+        "https://rueca.github.io/rueca/r/tooltip.json"
       ],
       "files": [
         {

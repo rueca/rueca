@@ -14,6 +14,7 @@ import { engine, engineState, renderLoopWAV, stepSeconds } from './engine'
 import { drawStage } from './visual'
 import { Sequencer, SequencerHeader, applyPatternPreset } from './Sequencer'
 import { SynthPanel, MonitorPanel, SoundMenu } from './panels'
+import { site } from '../../site.config'
 
 const CAPTURE = typeof location !== 'undefined' && /[?&]qa\b/.test(location.search)
 
@@ -25,7 +26,7 @@ const Mark = <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><path d
 function patternDoc(v: V) {
   const { pattern, ...rest } = params.toJSON() as Record<string, unknown>
   void pattern
-  return { app: 'trompo/synth', version: 1, bpm: v.bpm, swing: v.swing, pattern: patternOf(v), settings: rest }
+  return { app: `${site.slug}/synth`, version: 1, bpm: v.bpm, swing: v.swing, pattern: patternOf(v), settings: rest }
 }
 
 function importDoc(json: unknown) {

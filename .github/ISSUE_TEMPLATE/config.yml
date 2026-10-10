@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
   - name: Kit guide
-    url: https://github.com/trompo-dev/trompo/blob/main/docs/KIT.md
+    url: https://github.com/rueca/rueca/blob/main/docs/KIT.md
     about: The full kit API — check here before asking how something works.

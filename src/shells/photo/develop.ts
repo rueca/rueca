@@ -16,6 +16,7 @@
 import { sampleCurve, type CurvePoint } from '@kit/ui/charts'
 import type { CropRect as Rect } from '@kit/stage/overlays'
 import { BANDS, type V } from './state'
+import { site } from '../../site.config'
 
 export interface ViewOpts {
   crop: Rect
@@ -409,7 +410,7 @@ export class Develop {
     gl.deleteTexture(inTex)
     gl.deleteTexture(outTex)
     gl.bindTexture(gl.TEXTURE_2D, this.src)
-    const lines = [`TITLE "${title.replace(/"/g, '')}"`, `# Exported from Develop (Trompo)`, `LUT_3D_SIZE ${n}`, 'DOMAIN_MIN 0.0 0.0 0.0', 'DOMAIN_MAX 1.0 1.0 1.0', '']
+    const lines = [`TITLE "${title.replace(/"/g, '')}"`, `# Exported from Develop (${site.name})`, `LUT_3D_SIZE ${n}`, 'DOMAIN_MIN 0.0 0.0 0.0', 'DOMAIN_MAX 1.0 1.0 1.0', '']
     for (let b = 0; b < n; b++)
       for (let g = 0; g < n; g++)
         for (let r = 0; r < n; r++) {

@@ -4,6 +4,7 @@ import { FAMILY, mulberry32, mutateParams, sampleParams, type FamilyId } from '.
 import { doc, history, settings, ui, newMark, uid, colorsOf, markLabel, type Doc, type Mark } from './model'
 import { lockupSVG, markSVG, svgToPNG } from './render'
 import { createZip } from '@kit'
+import { site } from '../../site.config'
 
 const rng = () => mulberry32((Math.random() * 2 ** 31) | 0)
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'mark'
@@ -196,7 +197,7 @@ export function exportParams(id = cursorId()) {
   const m = mark(id)
   if (!m) return
   const s = settings.values()
-  exportJSON({ generator: 'Marks — Trompo', family: m.family, params: { ...(FAMILY[m.family].params.getState().defaults as object), ...m.v }, colors: { ink: s.ink, paper: s.paper, accent: s.accent }, initials: m.family === 'monogram' ? s.initials : undefined }, `${base(m)}.json`)
+  exportJSON({ generator: `Marks — ${site.name}`, family: m.family, params: { ...(FAMILY[m.family].params.getState().defaults as object), ...m.v }, colors: { ink: s.ink, paper: s.paper, accent: s.accent }, initials: m.family === 'monogram' ? s.initials : undefined }, `${base(m)}.json`)
 }
 export function exportLockup(mode: 'light' | 'dark', id = cursorId()) {
   const m = mark(id)

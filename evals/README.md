@@ -1,6 +1,6 @@
 # Evals
 
-Six cases for the Trompo skill. Each is a realistic request plus graders: `tool_used` checks the skill fired (or,
+Six cases for the skill. Each is a realistic request plus graders: `tool_used` checks the skill fired (or,
 for the negative case, didn't), and `regex` + `llm` graders read the FILE the prompt names (`src/RippleTool.tsx`
 etc.). Graders never read the transcript: an `llm` judge only sees its first and last 12 messages (the code is
 written in the middle), and a regex over the trace also matches the skill docs the agent read.
@@ -33,9 +33,9 @@ By default this also runs a no-plugin baseline, so the report shows what the ski
   while uploading, so a repo inside a synced folder fails at random. Run evals from a worktree outside it:
 
   ```bash
-  git worktree add --detach ~/trompo-eval HEAD
+  git worktree add --detach ~/skill-eval HEAD
   ```
 
-  then `cd ~/trompo-eval` and run the eval there (`git -C ~/trompo-eval checkout --detach <commit>` to update it).
+  then `cd ~/skill-eval` and run the eval there (`git -C ~/skill-eval checkout --detach <commit>` to update it).
 - The CLI needs its own login (`claude auth login`); the desktop app's sign-in doesn't carry over.
 - Don't run two evals at once — they share one rate limit and the second one times out.

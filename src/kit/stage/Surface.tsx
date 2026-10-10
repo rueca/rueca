@@ -219,7 +219,7 @@ export function FrameSurface<S extends Schema>({ src, params, className, title =
       try {
         if (vars) writeCssVars(doc, v as Record<string, unknown>, vars === true ? {} : vars)
         applyRef.current?.(doc, v)
-      } catch (err) { console.error('[trompo] FrameSurface apply failed:', err) }
+      } catch (err) { console.error('[studio] FrameSurface apply failed:', err) }
     }
     const post = () => { frame.current?.contentWindow?.postMessage({ type: 'studio:params', values: params.toJSON({ shareable: false }) }, '*'); direct() }
     const off = params.subscribe(post)

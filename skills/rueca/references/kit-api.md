@@ -1,8 +1,8 @@
 <!-- Copied from docs/KIT.md by `npm run sync`. Edit the source, not this file. -->
 
-> In a project that installed the kit from the registry, `@kit` means `@/components/studio` (or alias it). Live examples of every shell: https://trompo-dev.github.io/trompo/ · source: https://github.com/trompo-dev/trompo/tree/main/src/shells
+> In a project that installed the kit from the registry, `@kit` means `@/components/studio` (or alias it). Live examples of every shell: https://rueca.github.io/rueca/ · source: https://github.com/rueca/rueca/tree/main/src/shells
 
-# Trompo kit — guide
+# Rueca kit — guide
 
 The kit is the **harness**: the design-tool chrome around a prototype. The prototype (the
 *artifact*) can be anything — Canvas 2D, WebGL, vanilla three.js, SVG, DOM/React, an iframe.

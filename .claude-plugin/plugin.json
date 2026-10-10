@@ -1,14 +1,14 @@
 {
-  "name": "trompo",
-  "displayName": "Trompo",
+  "name": "rueca",
+  "displayName": "Rueca",
   "version": "0.1.0",
-  "description": "Inspector, timeline, layers, presets and export — dropped in around any prototype, in any runtime, installed component by component and kept up to date. Ships as an agent skill, a Claude Code plugin and a component registry.",
+  "description": "The inspector, timeline, layers and export of a real design tool, wrapped around any prototype. Ships as an agent skill, a Claude Code plugin and a component registry.",
   "author": {
     "name": "Rafael Cespedes",
     "url": "https://rafaelcespedes.com"
   },
-  "homepage": "https://trompo-dev.github.io/trompo",
-  "repository": "https://github.com/trompo-dev/trompo",
+  "homepage": "https://rueca.github.io/rueca",
+  "repository": "https://github.com/rueca/rueca",
   "license": "MIT",
   "keywords": [
     "design-tools",

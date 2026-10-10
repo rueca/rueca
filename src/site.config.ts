@@ -12,17 +12,17 @@
 --------------------------------------------------------------------------- */
 export const site = {
   /** display name — headings, tab titles, toolbar brand */
-  name: 'Trompo',
+  name: 'Rueca',
   /** machine name: skill id, plugin id, registry namespace, package name. lowercase-kebab, ≤64 chars */
-  slug: 'trompo',
+  slug: 'rueca',
   tagline: 'A design-tool harness for the prototype you already have.',
   description:
-    'Inspector, timeline, layers, presets and export — dropped in around any prototype, in any runtime, installed component by component and kept up to date. Ships as an agent skill, a Claude Code plugin and a component registry.',
+    'The inspector, timeline, layers and export of a real design tool, wrapped around any prototype. Ships as an agent skill, a Claude Code plugin and a component registry.',
   /** GitHub owner/repo */
-  repo: 'trompo-dev/trompo',
+  repo: 'rueca/rueca',
   /** where the site and the component registry are served from, no trailing slash.
-      GitHub Pages until trompo.dev is bought and live — then switch and re-sync. */
-  url: 'https://trompo-dev.github.io/trompo',
+      GitHub Pages until rueca.dev is bought and live — then switch and re-sync. */
+  url: 'https://rueca.github.io/rueca',
   author: { name: 'Rafael Cespedes', url: 'https://rafaelcespedes.com' },
   license: 'MIT',
   version: '0.1.0',

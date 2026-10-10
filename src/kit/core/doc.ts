@@ -79,7 +79,7 @@ export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> 
       else {
         // Never silently destroy someone's work: park the rejected doc where it can be recovered.
         try { localStorage.setItem(`${key}:rejected`, JSON.stringify(saved)) } catch { /* noop */ }
-        console.warn(`[trompo] ${opts.id}: saved document failed validation — starting fresh (kept as ${key}:rejected)`)
+        console.warn(`[studio] ${opts.id}: saved document failed validation — starting fresh (kept as ${key}:rejected)`)
       }
     } else {
       // nothing under this version: try older versions, then legacy keys; migrate once, remove what we used

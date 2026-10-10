@@ -217,7 +217,7 @@
 }
 
 @layer base {
-  /* Scoped to Trompo's own surfaces. The kit must not restyle a host app's <body> (break-it DX3):
+  /* Scoped to the kit's own surfaces. The kit must not restyle a host app's <body> (break-it DX3):
      the app's own index CSS sets html/body (see src/app.css). Popups portal to <body>, so `.pop`
      carries the same base. */
   :where(.studio, .pop) {
