@@ -19,8 +19,8 @@ import { demoDoc } from './demo'
 
 export const schema = defineSchema({
   artboard: folder('Artboard', {
-    bgTop: p.color('#F6F1EA', { alpha: false, label: 'Background', hint: 'Top of the artboard gradient.' }),
-    bgBottom: p.color('#F6F1EA', { alpha: false, label: 'Background end', hint: 'Bottom of the artboard gradient.' }),
+    bgTop: p.color('#F3F1EB', { alpha: false, label: 'Background', hint: 'Top of the artboard gradient.' }),
+    bgBottom: p.color('#F3F1EB', { alpha: false, label: 'Background end', hint: 'Bottom of the artboard gradient.' }),
     onion: p.boolean(false, { label: 'Onion skin', hint: 'Ghost the selected object a few frames before and after the playhead.' }),
     onionSpan: p.number(120, { min: 20, max: 500, step: 10, unit: 'ms', label: 'Onion span', hint: 'Time between ghosts.', when: (v) => v.onion }),
   }),
@@ -31,10 +31,10 @@ export const schema = defineSchema({
   }),
 })
 
-export const params = createParams(schema, { id: 'animate', version: 3 })
+export const params = createParams(schema, { id: 'animate', version: 4 }) // v4: Lana artboard
 export type V = ReturnType<typeof params.values>
 
-export const doc = createDocStore<Doc>(demoDoc(), { id: 'animate', version: 2 })
+export const doc = createDocStore<Doc>(demoDoc(), { id: 'animate', version: 3 }) // v3: the engraved rueca (image objects, spin)
 export const history = createHistory([params, doc])
 
 export const getDoc = () => doc.get()
@@ -61,7 +61,7 @@ export interface UI {
 export const ui = createStore<UI>(() => ({
   mode: 'animate',
   animId: 'press',
-  sel: 'heart',
+  sel: 'wheel',
   keySel: [],
   pending: {},
   autoKey: false,
@@ -417,7 +417,7 @@ export function createRuntime() {
       if (mixFrom && mixDur > 0) {
         mixT += dt
         const k = Math.min(1, mixT / mixDur)
-        out = blendResolved(mixFrom, out, k)
+        out = blendResolved(mixFrom, out, k, new Set(doc.objects.filter((o) => o.spin).map((o) => o.id)))
         if (k >= 1) mixFrom = null
       }
       last = out

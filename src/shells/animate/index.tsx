@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowLeftRight, ArrowRight, Boxes, Braces, Circle, CircleDot, Clipboard, ClipboardPaste, Code, Copy, Diamond, Download, Ellipsis, Eye,
+  ArrowLeftRight, ArrowRight, Boxes, Braces, Circle, CircleDot, Clipboard, ClipboardPaste, Code, Copy, Diamond, Download, Ellipsis,
   Film, Image as ImageIcon, Layers, Magnet, MousePointer2, Pause, PenTool, Play, Plus, Repeat, RotateCcw, SkipBack, Square, StepBack, StepForward,
   Trash2, Type, Workflow, Zap,
 } from 'lucide-react'
 import {
-  Artboard, Brand, Button, Cluster, CommandPalette, Divider, Empty, IconButton, LayerTree, Menu, Panel, PanelHeader, PanelTabs, ParamActions,
+  Brand, Button, Cluster, CommandPalette, Divider, Empty, IconButton, LayerTree, Menu, Panel, PanelHeader, PanelTabs, ParamActions,
   Segmented, Stage, Studio, Tip, Toolbar, cn, copyText, download, exportJSON, fmtTime, recordFrames, shareMenuItems, toast, useClock, useClockTime, useHotkeys, useValues,
   type Command, type LayerItem, type MenuItem,
 } from '@kit'
@@ -13,7 +13,7 @@ import { KeyTimeline, type KeyLane } from '@kit/timeline/KeyTimeline'
 import { KeyButton, KeyDiamond } from '@kit/ui/key-button'
 import { EaseGlyph, EasingEditor } from '@kit/ui/easing'
 import { PROPS, PROPS_FOR, childrenOf, keyAt, objHasKeys, resolve, toCSSKeyframes, trackKey, type Anim, type Obj, type PropKey } from './engine'
-import { drawCanvas } from './demo'
+import { drawCanvas, inlineImages, loadImages } from './demo'
 import { LiveScene } from './SceneView'
 import { AnimInspector } from './AnimInspector'
 import { InputsList, StateMachineGraph, TransitionsList } from './local/StateMachinePanel'
@@ -24,7 +24,7 @@ import {
 } from './store'
 import { demoDoc } from './demo'
 
-const KIND_ICON = { group: Boxes, rect: Square, ellipse: Circle, path: PenTool, text: Type }
+const KIND_ICON = { group: Boxes, rect: Square, ellipse: Circle, path: PenTool, text: Type, image: ImageIcon }
 const LOOP_ICON = { loop: Repeat, once: ArrowRight, pingpong: ArrowLeftRight }
 
 const fmtVal = (p: PropKey, v: unknown) => {
@@ -198,7 +198,7 @@ function AnimationsPanel() {
             <div className="flex h-7 items-center px-3 text-[11.5px] font-medium">Listeners</div>
             <div className="flex flex-col gap-1 px-3 pb-1.5 font-mono text-[10.5px] text-fg-muted">
               <span><span className="text-fg-faint">pointer enter / exit →</span> hover</span>
-              <span><span className="text-fg-faint">pointer down →</span> press, likes + 1</span>
+              <span><span className="text-fg-faint">pointer down →</span> press, turns + 3</span>
             </div>
           </div>
           <div className="border-t border-line pt-1.5 pb-2">
@@ -227,7 +227,7 @@ function togglePreview(on = !ui.getState().preview) {
 function fire(name: string) {
   if (!ui.getState().preview) togglePreview(true)
   runtime.fire(name)
-  ui.setState((s) => ({ fired: name, inputs: name === 'press' ? { ...s.inputs, likes: Number(s.inputs.likes ?? 0) + 1 } : s.inputs }))
+  ui.setState((s) => ({ fired: name, inputs: name === 'press' ? { ...s.inputs, turns: Number(s.inputs.turns ?? 0) + 3 } : s.inputs }))
 }
 
 /* ---------- the shell ---------- */
@@ -291,18 +291,21 @@ export default function AnimateShell() {
 
   /* exports */
   const scale = Number(v.exportScale)
-  const exportPNG = () => {
+  const exportPNG = async () => {
+    await loadImages(doc)
     const c = document.createElement('canvas')
     c.width = doc.width * scale; c.height = doc.height * scale
     const r = mode === 'design' ? resolve(doc, undefined, 0) : resolve(doc, anim, animTime(), pending)
     drawCanvas(c.getContext('2d')!, doc, r, [v.bgTop, v.bgBottom], c.width, c.height)
     c.toBlob((b) => { if (b) { download(b, `${anim.name.toLowerCase()}-${Math.round(animTime())}ms.png`); toast('PNG exported', { type: 'success', description: `${c.width} × ${c.height}` }) } })
   }
-  const exportSVGFrame = () => {
+  const exportSVGFrame = async () => {
     const svg = svgRef.current
     if (!svg) return
     const clone = svg.cloneNode(true) as SVGSVGElement
     clone.querySelectorAll('[data-overlay]').forEach((n) => n.remove())
+    clone.querySelector('[data-bg]')?.setAttribute('fill', 'url(#tw-bg)') // the stage is bare; a file keeps its paper
+    await inlineImages(clone)
     download(new Blob([clone.outerHTML], { type: 'image/svg+xml' }), `${anim.name.toLowerCase()}-frame.svg`)
     toast('SVG exported', { type: 'success' })
   }
@@ -314,6 +317,7 @@ export default function AnimateShell() {
     const dur = a.loop === 'pingpong' ? a.duration * 2 : a.duration
     const fold = (ms: number) => (a.loop === 'pingpong' && ms > a.duration ? 2 * a.duration - ms : ms)
     const docNow = getDoc()
+    await loadImages(docNow) // decoded before the first frame, or the opening frames render blank
     const bg: [string, string] = [v.bgTop, v.bgBottom]
     const canvas = document.createElement('canvas')
     canvas.width = W; canvas.height = H
@@ -340,7 +344,7 @@ export default function AnimateShell() {
     download(new Blob([css], { type: 'text/css' }), `${anim.name}-${sel}.css`.toLowerCase())
     toast('CSS @keyframes copied and downloaded', { type: 'success' })
   }
-  const exportDocJSON = () => { exportJSON({ format: 'tween-animation/1', ...getDoc() }, 'like-button.animation.json'); toast('Animation JSON exported', { type: 'success' }) }
+  const exportDocJSON = () => { exportJSON({ format: 'tween-animation/1', ...getDoc() }, 'rueca.animation.json'); toast('Animation JSON exported', { type: 'success' }) }
 
   const exportItems: MenuItem[] = [
     { type: 'label', label: 'Export' },
@@ -403,7 +407,7 @@ export default function AnimateShell() {
     { id: 'svg', label: 'Export SVG (current frame)', group: 'Export', icon: PenTool, run: exportSVGFrame },
     { id: 'css', label: 'Export CSS @keyframes (selected layer)', group: 'Export', icon: Code, run: exportCSS },
     { id: 'json', label: 'Export animation JSON', group: 'Export', icon: Braces, run: exportDocJSON },
-    { id: 'reset-doc', label: 'Reset demo scene', group: 'Document', icon: RotateCcw, run: () => { setDoc(demoDoc()); ui.setState({ keySel: [], pending: {}, animId: 'press', sel: 'heart' }); toast('Demo scene restored', { action: { label: 'Undo', onClick: () => history.undo() } }) } },
+    { id: 'reset-doc', label: 'Reset demo scene', group: 'Document', icon: RotateCcw, run: () => { setDoc(demoDoc()); ui.setState({ keySel: [], pending: {}, animId: 'press', sel: 'wheel' }); toast('Demo scene restored', { action: { label: 'Undo', onClick: () => history.undo() } }) } },
   ]
 
   const K = 'Keyframes', L = 'Layer'
@@ -433,7 +437,7 @@ export default function AnimateShell() {
       rightWidth={300}
       toolbar={
         <Toolbar
-          start={<Brand name="Tween" doc="Like button" mark={brandMark} />}
+          start={<Brand name="Tween" doc="La rueca" mark={brandMark} />}
           center={
             <Cluster className="gap-1.5 pr-1.5">
               <div className="w-[176px]">
@@ -525,9 +529,11 @@ export default function AnimateShell() {
           </div>
         ) : null
       }>
-        <Artboard width={doc.width} height={doc.height} label={<span className="flex items-center gap-1.5"><Eye size={11} />Like button</span>} background="#F6F1EA" selected={!sel && !preview} className="rounded-[14px]">
+        {/* no artboard: the plate sits straight on the canvas, its inks following the theme */}
+        <div className="absolute [--plate-ink:#181411] [--plate-measure:rgba(24,20,17,.42)] [--plate-mute:#6E6A64] dark:[--plate-ink:#F3F1EB] dark:[--plate-measure:rgba(243,241,235,.42)] dark:[--plate-mute:#A39E96]"
+          style={{ left: 0, top: 0, width: doc.width, height: doc.height }} data-studio-artifact="">
           <LiveScene svgRef={svgRef} />
-        </Artboard>
+        </div>
       </Stage>
 
       <CommandPalette commands={commands} extraShortcuts={[

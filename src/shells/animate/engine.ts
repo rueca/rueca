@@ -13,7 +13,7 @@ export type Val = number | string
 export interface Key { id: string; t: number; v: Val; ease: Ease }
 
 export type PropKey = 'x' | 'y' | 'rotation' | 'scale' | 'opacity' | 'w' | 'h' | 'radius' | 'fill' | 'stroke' | 'strokeWidth'
-export type ObjKind = 'group' | 'rect' | 'ellipse' | 'path' | 'text'
+export type ObjKind = 'group' | 'rect' | 'ellipse' | 'path' | 'text' | 'image'
 
 export interface Obj {
   id: string
@@ -25,12 +25,16 @@ export interface Obj {
   base: Partial<Record<PropKey, Val>>
   /** path data, centred on the origin */
   d?: string
-  /** text content; `{likes}` binds to a state-machine number input */
+  /** text content; `{turns}` binds to a state-machine number input */
   text?: string
   fontSize?: number
   fontWeight?: number
   align?: 'start' | 'middle'
   shadow?: boolean
+  /** image source (same-origin), drawn w × h centred on the origin */
+  href?: string
+  /** continuous rotation: when states blend, the angle always travels forward round the circle instead of unwinding */
+  spin?: boolean
 }
 
 export type LoopMode = 'loop' | 'once' | 'pingpong'
@@ -67,6 +71,7 @@ export const PROPS_FOR: Record<ObjKind, PropKey[]> = {
   ellipse: [...T, 'w', 'h', 'fill', 'stroke', 'strokeWidth'],
   path: [...T, 'fill'],
   text: [...T, 'fill'],
+  image: [...T, 'w', 'h'],
 }
 export const DEFAULTS: Record<PropKey, Val> = { x: 0, y: 0, rotation: 0, scale: 1, opacity: 1, w: 40, h: 40, radius: 0, fill: '#ffffff', stroke: '#00000000', strokeWidth: 0 }
 
@@ -119,12 +124,17 @@ export function resolve(doc: Doc, anim: Anim | undefined, t: number, overrides?:
   return out
 }
 
-export function blendResolved(a: Resolved, b: Resolved, k: number): Resolved {
+export function blendResolved(a: Resolved, b: Resolved, k: number, spin?: ReadonlySet<string>): Resolved {
   if (k >= 1) return b
   const out: Resolved = {}
   for (const id of Object.keys(b)) {
     const r = {} as Record<PropKey, Val>
-    for (const p of Object.keys(b[id]) as PropKey[]) r[p] = lerpVal(a[id]?.[p] ?? b[id][p], b[id][p], k)
+    for (const p of Object.keys(b[id]) as PropKey[]) {
+      const from = a[id]?.[p] ?? b[id][p], to = b[id][p]
+      // a spinning object never unwinds: blend the angle forward, the short way round to the next equal position
+      if (p === 'rotation' && spin?.has(id) && typeof from === 'number' && typeof to === 'number') r[p] = from + ((((to - from) % 360) + 360) % 360) * k
+      else r[p] = lerpVal(from, to, k)
+    }
     out[id] = r
   }
   return out

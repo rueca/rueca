@@ -8,6 +8,11 @@ import { animTime, clock, currentAnim, editProps, params, runtime, ui, useDoc, u
 
 const num = (v: Val) => (typeof v === 'number' ? v : parseFloat(v))
 
+/* On the bare stage the plate's two inks follow the theme (Nogal on light, Lana on dark), set as CSS vars on the wrapper.
+   The fallbacks are the light values, so an exported SVG frame prints Nogal on Lana. */
+const INK: Record<string, string> = { '#181411': 'var(--plate-ink, #181411)', '#6e6a64': 'var(--plate-mute, #6E6A64)' }
+const inked = (fill: Val) => INK[String(fill).toLowerCase()] ?? String(fill)
+
 function Shape({ o, p, doc, inputs }: { o: Obj; p: Record<PropKey, Val>; doc: Doc; inputs: Record<string, boolean | number> }) {
   if (o.kind === 'rect') {
     const w = num(p.w), h = num(p.h)
@@ -16,11 +21,15 @@ function Shape({ o, p, doc, inputs }: { o: Obj; p: Record<PropKey, Val>; doc: Do
   if (o.kind === 'ellipse')
     return <ellipse rx={Math.max(0, num(p.w) / 2)} ry={Math.max(0, num(p.h) / 2)} fill={String(p.fill)} stroke={num(p.strokeWidth) > 0 ? String(p.stroke) : undefined} strokeWidth={num(p.strokeWidth)} />
   if (o.kind === 'path') return <path d={o.d} fill={String(p.fill)} />
+  if (o.kind === 'image' && o.href) {
+    const w = num(p.w), h = num(p.h)
+    return <image href={o.href} x={-w / 2} y={-h / 2} width={Math.max(0, w)} height={Math.max(0, h)} preserveAspectRatio="none" filter="url(#tw-ink)" />
+  }
   if (o.kind === 'text') {
     const merged = doc.sm.inputs.map((i) => ({ ...i, value: inputs[i.name] ?? i.value }))
     return (
-      <text x={0} y={0} dominantBaseline="central" textAnchor={o.align === 'middle' ? 'middle' : 'start'} fill={String(p.fill)}
-        style={{ font: `${o.fontWeight ?? 500} ${o.fontSize ?? 16}px "Inter Variable", Inter, system-ui, sans-serif`, fontFeatureSettings: '"tnum"' }}>
+      <text x={0} y={0} dominantBaseline="central" textAnchor={o.align === 'middle' ? 'middle' : 'start'}
+        style={{ fill: inked(p.fill), font: `${o.fontWeight ?? 500} ${o.fontSize ?? 16}px "Inter Variable", Inter, system-ui, sans-serif`, fontFeatureSettings: '"tnum"' }}>
         {bindText(o.text ?? '', merged)}
       </text>
     )
@@ -31,9 +40,11 @@ function Shape({ o, p, doc, inputs }: { o: Obj; p: Record<PropKey, Val>; doc: Do
 const tf = (p: Record<PropKey, Val>) => `translate(${num(p.x)} ${num(p.y)}) rotate(${num(p.rotation)}) scale(${num(p.scale)})`
 
 export function SceneSVG({
-  doc, r, inputs, bg, interactive = false, onObjectDown, svgRef, ghosts = [], ghostOf, children,
+  doc, r, inputs, bg, bare = false, interactive = false, onObjectDown, svgRef, ghosts = [], ghostOf, children,
 }: {
   doc: Doc; r: Resolved; inputs: Record<string, boolean | number>; bg: [string, string]
+  /** no background: the scene sits straight on the canvas */
+  bare?: boolean
   interactive?: boolean
   onObjectDown?: (o: Obj, e: React.PointerEvent) => void
   svgRef?: React.Ref<SVGSVGElement>
@@ -67,9 +78,11 @@ export function SceneSVG({
     <svg ref={svgRef} width={doc.width} height={doc.height} viewBox={`0 0 ${doc.width} ${doc.height}`} className="block" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="tw-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={bg[0]} /><stop offset="1" stopColor={bg[1]} /></linearGradient>
+        {/* engraved layers are ink-alpha images: recolour them to the plate ink */}
+        <filter id="tw-ink" colorInterpolationFilters="sRGB"><feFlood style={{ floodColor: 'var(--plate-ink, #181411)' }} /><feComposite in2="SourceAlpha" operator="in" /></filter>
         <filter id="tw-shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="12" stdDeviation="14" floodColor="#140a3c" floodOpacity="0.35" /></filter>
       </defs>
-      <rect data-bg width={doc.width} height={doc.height} fill="url(#tw-bg)" />
+      <rect data-bg width={doc.width} height={doc.height} fill={bare ? 'transparent' : 'url(#tw-bg)'} />
       {ghosts.map((g, i) => <g key={i} opacity={g.opacity} pointerEvents="none" data-overlay>{ghost(g.r)}</g>)}
       {childrenOf(doc, null).map((o) => node(o, r, true))}
       {children}
@@ -77,27 +90,33 @@ export function SceneSVG({
   )
 }
 
-/* Red-pen marks (wire style): annotation only, drawn on the stage overlay so
-   SVG/PNG export never carries them. They follow the button as it animates. */
-const PEN = '#D1006F'
+/* Plate marks (Lámina): annotation only, drawn on the stage overlay so SVG/PNG
+   export never carries them. A measure-pen diameter under the wheel, and one
+   Achiote note on the flyer. They follow the wheel as it moves. */
+const MEASURE = 'var(--plate-measure, rgba(24,20,17,.42))', PEN = '#E8582C'
 const MONO = "'Geist Mono Variable', 'Geist Mono', ui-monospace, Menlo, monospace"
-function PenMarks({ doc, r, bg }: { doc: Doc; r: Resolved; bg: string }) {
-  const btn = r.button, pill = r.pill, heart = r.heart
-  if (!btn || !pill || !doc.objects.find((o) => o.id === 'pill')?.visible) return null
-  const s = num(btn.scale), bx = num(btn.x), by = num(btn.y)
-  const w = num(pill.w) * s, h = num(pill.h) * s
-  const x0 = bx + num(pill.x) * s - w / 2, x1 = x0 + w, y = by + num(pill.y) * s + h / 2 + 16
-  const hx = heart ? bx + num(heart.x) * s : x0 + 40, hy = by - h / 2 - 34
-  const font = { font: `500 11px ${MONO}` }
+function PenMarks({ doc, r }: { doc: Doc; r: Resolved }) {
+  const wheel = r.wheel
+  if (!wheel || !doc.objects.find((o) => o.id === 'wheel')?.visible) return null
+  const s = num(wheel.scale), cx = num(wheel.x), cy = num(wheel.y), rad = (num(wheel.w) / 2) * s * 0.996
+  const y0 = cy - rad, y1 = cy + rad, x = cx - rad - 34
+  const font = { font: `500 15px ${MONO}` }
+  const fx = 836, fy = 118 // above the flyer
   return (
-    <g data-overlay pointerEvents="none" fill="none" stroke={PEN} strokeWidth={1}>
-      <path d={`M${x0} ${y}H${x1}M${x0} ${y - 4}V${y + 4}M${x1} ${y - 4}V${y + 4}`} />
-      <rect x={bx - 20} y={y - 7} width={40} height={14} fill={bg} stroke="none" />
-      <text x={bx} y={y} dominantBaseline="central" textAnchor="middle" fill={PEN} stroke="none" style={font}>{Math.round(w)}</text>
-      <path d={`M${hx} ${hy + 10}V${by - h / 2 + 8}`} strokeDasharray="2 3" />
-      <circle cx={hx} cy={hy} r={9} />
-      <text x={hx} y={hy + 0.5} dominantBaseline="central" textAnchor="middle" fill={PEN} stroke="none" style={{ font: `600 10px ${MONO}` }}>1</text>
-      <text x={hx + 16} y={hy + 0.5} dominantBaseline="central" fill={PEN} stroke="none" style={font}>faint → ink on press</text>
+    <g data-overlay pointerEvents="none" fill="none">
+      {/* measure pen: the wheel's diameter, up its left side */}
+      <g stroke={MEASURE} strokeWidth={1.2}>
+        <path d={`M${x - 8} ${y0}H${cx - rad * 0.55}M${x - 8} ${y1}H${cx - rad * 0.55}`} strokeDasharray="3 4" />
+        <path d={`M${x} ${y0}V${cy - 24}M${x} ${cy + 24}V${y1}M${x - 5} ${y0 + 5}l10 -10M${x - 5} ${y1 + 5}l10 -10`} />
+      </g>
+      <text x={x} y={cy} dominantBaseline="central" textAnchor="middle" transform={`rotate(-90 ${x} ${cy})`} style={{ ...font, fill: MEASURE }}>Ø 560</text>
+      {/* red pen: one note on the part that pays it back */}
+      <g stroke={PEN} strokeWidth={1.4}>
+        <path d={`M${fx - 4} ${fy + 78}C${fx - 10} ${fy + 50} ${fx - 6} ${fy + 26} ${fx + 2} ${fy + 12}`} />
+        <circle cx={fx + 12} cy={fy} r={13} />
+      </g>
+      <text x={fx + 12} y={fy + 0.5} dominantBaseline="central" textAnchor="middle" style={{ font: `600 14px ${MONO}`, fill: PEN }}>1</text>
+      <text x={fx + 33} y={fy + 0.5} dominantBaseline="central" style={{ ...font, fill: PEN }}>turns 9.7× the wheel</text>
     </g>
   )
 }
@@ -208,15 +227,15 @@ export function LiveScene({ svgRef }: { svgRef: React.RefObject<SVGSVGElement | 
     onPointerDown: (e: React.PointerEvent) => {
       if (!(e.target as Element).closest('[data-id]')) return
       runtime.fire('press')
-      ui.setState((s) => ({ fired: 'press', inputs: { ...s.inputs, likes: Number(s.inputs.likes ?? 0) + 1 } }))
+      ui.setState((s) => ({ fired: 'press', inputs: { ...s.inputs, turns: Number(s.inputs.turns ?? 0) + 3 } }))
     },
   } : {}
 
   return (
     <div className="h-full w-full" style={preview ? { cursor: 'pointer' } : undefined} {...previewProps}
       onPointerDown={preview ? previewProps.onPointerDown : (e) => { if ((e.target as Element).hasAttribute('data-bg')) ui.setState({ sel: null }) }}>
-      <SceneSVG doc={doc} r={r} inputs={inputs} bg={[v.bgTop, v.bgBottom]} interactive={!preview} onObjectDown={onObjectDown} svgRef={svgRef} ghosts={ghosts} ghostOf={sel}>
-        {!preview && <PenMarks doc={doc} r={r} bg={v.bgBottom} />}
+      <SceneSVG doc={doc} r={r} inputs={inputs} bg={[v.bgTop, v.bgBottom]} bare interactive={!preview} onObjectDown={onObjectDown} svgRef={svgRef} ghosts={ghosts} ghostOf={sel}>
+        {!preview && <PenMarks doc={doc} r={r} />}
         <g data-overlay pointerEvents="none">
           <polygon ref={outline} fill="none" stroke="var(--signal)" strokeWidth={1.5} vectorEffect="non-scaling-stroke" visibility="hidden" />
           <g ref={handles} visibility="hidden">

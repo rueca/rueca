@@ -85,7 +85,7 @@ function ObjectSections({ o, first }: { o: Obj; first: boolean }) {
     <>
       <Section title="Layer" first={first} actions={
         <div className="flex items-center">
-          <Badge>{o.kind === 'group' ? 'Group' : o.kind === 'rect' ? 'Rectangle' : o.kind === 'ellipse' ? 'Ellipse' : o.kind === 'path' ? 'Vector' : 'Text'}</Badge>
+          <Badge>{o.kind === 'group' ? 'Group' : o.kind === 'rect' ? 'Rectangle' : o.kind === 'ellipse' ? 'Ellipse' : o.kind === 'path' ? 'Vector' : o.kind === 'image' ? 'Image' : 'Text'}</Badge>
           <IconButton size="icon-sm" icon={o.visible ? Eye : EyeOff} label={o.visible ? 'Hide' : 'Show'} onClick={() => patchObject(o.id, { visible: !o.visible })} />
           <IconButton size="icon-sm" icon={o.locked ? Lock : LockOpen} label={o.locked ? 'Unlock' : 'Lock'} onClick={() => patchObject(o.id, { locked: !o.locked })} />
         </div>
@@ -93,7 +93,7 @@ function ObjectSections({ o, first }: { o: Obj; first: boolean }) {
         <Row label="Name"><TextInput value={o.name} label="Name" onChange={(s) => patchObject(o.id, { name: s }, false)} onCommit={() => commitDoc('Rename')} /></Row>
         {o.kind === 'text' && (
           <>
-            <Row label="Text" hint="Static. Use {likes} to bind a state-machine number input."><TextInput value={o.text ?? ''} label="Text" mono onChange={(s) => patchObject(o.id, { text: s }, false)} onCommit={() => commitDoc('Edit text')} /></Row>
+            <Row label="Text" hint="Static. Use {turns} to bind a state-machine number input."><TextInput value={o.text ?? ''} label="Text" mono onChange={(s) => patchObject(o.id, { text: s }, false)} onCommit={() => commitDoc('Edit text')} /></Row>
             <Row label="Font size"><ScrubValue boxed align="left" value={o.fontSize ?? 16} min={6} max={200} step={1} unit="px" className="flex-1" onChange={(n, f) => patchObject(o.id, { fontSize: n }, f)} /></Row>
           </>
         )}
@@ -188,7 +188,7 @@ function DocumentSections() {
             options={[{ value: 'loop', label: 'Loop', icon: Repeat }, { value: 'once', label: 'Once', icon: ArrowRight }, { value: 'pingpong', label: 'Ping-pong', icon: ArrowLeftRight }]} />
         </Row>
         <div className="flex gap-1.5 px-3 pt-1">
-          <Button size="sm" variant="default" className="flex-1" onClick={() => ui.setState({ sel: 'button' })}>Select button</Button>
+          <Button size="sm" variant="default" className="flex-1" onClick={() => ui.setState({ sel: 'wheel' })}>Select wheel</Button>
           <Button size="sm" variant="default" className="flex-1" onClick={() => ui.setState({ mode: mode === 'design' ? 'animate' : 'design' })}>{mode === 'design' ? 'Animate mode' : 'Design mode'}</Button>
         </div>
       </Section>
