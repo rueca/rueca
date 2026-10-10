@@ -20,7 +20,7 @@ import { Minus, Plus } from 'lucide-react'
 import { clamp, cn } from '../core/cn'
 import { useHotkeys } from '../core/hotkeys'
 import { Menu, type MenuItem } from '../ui/controls'
-import { useStudio } from '../layout/Studio'
+import { useStudio, useSafeArea } from '../layout/Studio'
 
 export interface Camera { x: number; y: number; zoom: number }
 export type CameraStore = StoreApi<Camera> & {
@@ -64,7 +64,16 @@ export function Stage({
 }) {
   const [cam] = useState(() => external ?? createCamera())
   // Present mode (⌘\\) hides chrome — including the stage's own HUD and overlays (break-it F3).
-  const { present } = useStudio()
+  const { present, layout } = useStudio()
+  // In the islands layout the content box stops at the panels; a camera stage bleeds back out to the
+  // edges so the grid and artboard run under the floating panels. Fit and zoom aim at the visible gap.
+  // Only the stage that IS the main content bleeds — not one nested in a split pane or a card.
+  const [isMain, setIsMain] = useState(false)
+  const bleed = layout === 'islands' && !fill && !present && isMain
+  const safe = useSafeArea()
+  const inset = present || (layout === 'islands' && !bleed) ? NO_INSET : safe
+  const insetRef = useRef(inset)
+  insetRef.current = inset
   const { x, y, zoom } = useStore(cam)
   const el = useRef<HTMLDivElement>(null)
   const world = useRef<HTMLDivElement>(null)
@@ -83,13 +92,16 @@ export function Stage({
     const r = el.current?.getBoundingClientRect()
     if (!r || !r.width) return
     const s = size()
-    const z = clamp(Math.min((r.width - padding * 2) / s.w, (r.height - padding * 2) / s.h, fitMaxZoom), minZoom, maxZoom)
-    cam.setState({ zoom: z, x: (r.width - s.w * z) / 2 - s.x * z, y: (r.height - s.h * z) / 2 - s.y * z })
+    const i = insetRef.current
+    const w = Math.max(1, r.width - i.left - i.right), h = Math.max(1, r.height - i.top - i.bottom)
+    const z = clamp(Math.min((w - padding * 2) / s.w, (h - padding * 2) / s.h, fitMaxZoom), minZoom, maxZoom)
+    cam.setState({ zoom: z, x: i.left + (w - s.w * z) / 2 - s.x * z, y: i.top + (h - s.h * z) / 2 - s.y * z })
   }, [cam, size, padding, minZoom, maxZoom, fitMaxZoom])
 
   const zoomTo = useCallback((z: number, at?: { x: number; y: number }) => {
     const r = el.current!.getBoundingClientRect()
-    const p = at ?? { x: r.width / 2, y: r.height / 2 }
+    const i = insetRef.current
+    const p = at ?? { x: i.left + (r.width - i.left - i.right) / 2, y: i.top + (r.height - i.top - i.bottom) / 2 }
     const s = cam.getState()
     const nz = clamp(z, minZoom, maxZoom)
     cam.setState({ zoom: nz, x: p.x - ((p.x - s.x) * nz) / s.zoom, y: p.y - ((p.y - s.y) * nz) / s.zoom })
@@ -98,6 +110,15 @@ export function Stage({
   // Fit on mount and when the stage resizes, until the user takes the camera.
   const touched = useRef(false)
   cam.fit = fit
+  useLayoutEffect(() => {
+    if (layout !== 'islands' || fill || isMain) return
+    const node = el.current, main = node?.closest<HTMLElement>('[data-studio-main]')
+    if (!node || !main) return
+    const a = node.getBoundingClientRect(), b = main.getBoundingClientRect()
+    if (Math.abs(a.width - b.width) < 2 && Math.abs(a.height - b.height) < 2 && Math.abs(a.left - b.left) < 2 && Math.abs(a.top - b.top) < 2) setIsMain(true)
+  }, [layout, fill, isMain])
+  // Panels are measured after the first fit (and change on resize / present mode): refit unless the user took over.
+  useEffect(() => { if (!fill && !touched.current) fit() }, [inset.top, inset.right, inset.bottom, inset.left]) // eslint-disable-line react-hooks/exhaustive-deps
   cam.zoomTo = zoomTo
   cam.bounds = () => el.current?.getBoundingClientRect() ?? null
   cam.touch = () => { touched.current = true }
@@ -170,8 +191,9 @@ export function Stage({
     <CamCtx.Provider value={cam}>
       <div
         ref={el}
-        className={cn('relative h-full w-full overflow-hidden', fill ? '' : 'touch-none', space && (pan.current ? 'cursor-grabbing' : 'cursor-grab'), className)}
+        className={cn(bleed ? 'absolute' : 'relative h-full w-full', 'overflow-hidden', fill ? '' : 'touch-none', space && (pan.current ? 'cursor-grabbing' : 'cursor-grab'), className)}
         style={{
+          ...(bleed ? BLEED : null),
           background,
           backgroundImage: grid ? `radial-gradient(circle, var(--grid) 1px, transparent 1px)` : undefined,
           backgroundSize: grid ? `${20 * zoom}px ${20 * zoom}px` : undefined,
@@ -186,20 +208,33 @@ export function Stage({
             {children}
           </div>
         )}
-        {!present && overlay}
-        {hud && !fill && !present && <ZoomPill />}
+        {/* HUD: when the stage bleeds under the panels, keep it in the visible gap (where it always was) */}
+        {!present && overlay && (bleed ? <div className="pointer-events-none absolute [&>*]:pointer-events-auto" style={HUD_INSET}>{overlay}</div> : overlay)}
+        {hud && !fill && !present && <ZoomPill style={bleed ? { right: HUD_INSET.right, bottom: HUD_INSET.bottom } : layout === 'overlay' ? { right: `calc(${inset.right}px + 12px)`, bottom: `calc(${inset.bottom}px + 12px)` } : undefined} />}
       </div>
     </CamCtx.Provider>
   )
 }
+
+const NO_INSET = { top: 0, right: 0, bottom: 0, left: 0 }
+/** The visible gap inside a bleeding stage (mirrors Studio's SAFE_INSET). */
+const HUD_INSET = {
+  top: 'calc(var(--safe-top, 0px) + var(--gutter, 12px))', right: 'calc(var(--safe-right, 0px) + var(--gutter, 12px))',
+  bottom: 'calc(var(--safe-bottom, 0px) + var(--gutter, 12px))', left: 'calc(var(--safe-left, 0px) + var(--gutter, 12px))',
+} as const
+/** Undo the islands content inset (Studio's SAFE_INSET), so the stage covers the whole workspace. */
+const BLEED = {
+  top: 'calc(-1 * (var(--safe-top, 0px) + var(--gutter, 12px)))', right: 'calc(-1 * (var(--safe-right, 0px) + var(--gutter, 12px)))',
+  bottom: 'calc(-1 * (var(--safe-bottom, 0px) + var(--gutter, 12px)))', left: 'calc(-1 * (var(--safe-left, 0px) + var(--gutter, 12px)))',
+} as const
 
 /**
  * Zoom pill. Inside a <Stage> it drives that camera; anywhere else (React Flow,
  * a custom canvas) pass zoom / onZoom / onFit.
  */
 export function ZoomPill({
-  className, zoom: zoomProp, onZoom, onFit, step = 1.25, steps, presets = [0.5, 1, 2], floating = true, extra, fitShortcut = 'shift+1',
-}: { className?: string; zoom?: number; onZoom?: (z: number) => void; onFit?: () => void; step?: number; /** a zoom ladder (e.g. integer pixel zooms) instead of ×step */ steps?: number[]; presets?: number[]; floating?: boolean; /** more menu items after "Zoom to fit" (e.g. Zoom to selection) */ extra?: MenuItem[]; /** shown next to Zoom to fit; false hides it */ fitShortcut?: string | false }) {
+  className, style, zoom: zoomProp, onZoom, onFit, step = 1.25, steps, presets = [0.5, 1, 2], floating = true, extra, fitShortcut = 'shift+1',
+}: { className?: string; style?: React.CSSProperties; zoom?: number; onZoom?: (z: number) => void; onFit?: () => void; step?: number; /** a zoom ladder (e.g. integer pixel zooms) instead of ×step */ steps?: number[]; presets?: number[]; floating?: boolean; /** more menu items after "Zoom to fit" (e.g. Zoom to selection) */ extra?: MenuItem[]; /** shown next to Zoom to fit; false hides it */ fitShortcut?: string | false }) {
   const cam = useContext(CamCtx) ?? NO_CAMERA
   const camZoom = useStore(cam, (s) => s.zoom)
   const zoom = zoomProp ?? camZoom
@@ -209,7 +244,7 @@ export function ZoomPill({
     ? (dir > 0 ? steps.find((z) => z > zoom * 1.001) : [...steps].reverse().find((z) => z < zoom * 0.999)) ?? zoom
     : dir > 0 ? zoom * step : zoom / step
   return (
-    <div className={cn('cluster flex h-8 items-center gap-0.5 px-1', floating && 'absolute right-3 bottom-3 z-10', className)}>
+    <div style={style} className={cn('cluster flex h-8 items-center gap-0.5 px-1', floating && 'absolute right-3 bottom-3 z-10', className)}>
       <button type="button" aria-label="Zoom out" onClick={() => set(go(-1))} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg"><Minus size={13} /></button>
       <Menu
         side="top"

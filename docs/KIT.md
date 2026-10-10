@@ -181,8 +181,12 @@ stops ticks while paused too (default true for artifacts with their own life).
   <Stage>…</Stage>   or   <Stage fill>…</Stage>
 </Studio>
 ```
-- `islands`: floating cards with gutter (artboard work). `overlay`: stage full-bleed under
-  floating panels (shaders, 3D, photo). `docked`: flush panels, Figma UI3 (dense editors).
+- `islands`: floating cards with a gutter (artboard work). The panels float OVER the workspace: a camera
+  `<Stage>` that fills the main area runs under them (grid and artboard continue), fits and zooms into the
+  visible gap, and keeps its HUD (`overlay`, zoom pill) in that gap. Anything else (`<Stage fill>`, galleries,
+  React Flow, nested stages) sits in the gap so nothing hides under a panel. `overlay`: the same idea for
+  full-bleed art (shaders, 3D, photo), with the bottom strip centred. `docked`: flush panels, Figma UI3 (dense
+  editors). The covered edges are exposed as `useSafeArea()` and `--safe-top/right/bottom/left`.
 - `⌘\` hides all chrome (present mode).
 - The app should also wrap each route/shell in `<ErrorBoundary resetPrefix={\`studio:\${id}\`}>` — stores
   are created at module load, before `<Studio>` exists (see src/gallery/App.tsx).

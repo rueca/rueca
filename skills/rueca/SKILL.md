@@ -40,7 +40,7 @@ you read rides along in every later turn.
    inspector, defaults, reset, the changed cue, presets, undo, share link and agent export.
 4. **Build the artifact as a pure function of `(values, t)`**, drawn by a surface the clock
    ticks — never by React re-renders or a hand-written rAF loop.
-5. **Pick the layout** — `islands` (default: floating panels), `docked` (Figma-like
+5. **Pick the layout** — `islands` (default: panels float over the canvas, which runs underneath), `docked` (Figma-like
    editors with layers + properties), `overlay` (full-bleed art, panels on top).
 6. **QA by measuring, not looking**: typecheck, production build, both themes, the accent
    check → `references/qa.md` before you claim it works.

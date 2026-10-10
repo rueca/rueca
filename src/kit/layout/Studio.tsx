@@ -11,7 +11,8 @@
      </Studio>
 
    Two arrangements:
-     layout="islands"  floating rounded cards with a gutter (default; motion, artboards)
+     layout="islands"  floating rounded cards with a gutter (default; motion, artboards). Panels float
+                       over the workspace: the main camera stage runs underneath and fits in the gap
      layout="overlay"  the stage is full-bleed under the panels (shaders, 3D, photo)
      layout="docked"   panels flush to the window edges, Figma UI3 style
    `present` hides all chrome (⌘\ / F) — the client-facing view.
@@ -76,15 +77,23 @@ export function Studio({
         {bottom && !present && <div className="flex-none border-t border-line bg-panel">{bottom}</div>}
       </div>
     ) : (
-      <div className="flex h-full flex-col gap-[var(--gutter)] p-[var(--gutter)]">
-        {toolbar && !present && <div className="flex-none">{toolbar}</div>}
-        <div className="flex min-h-0 flex-1 gap-[var(--gutter)]">
-          {left && !present && <aside className="flex min-h-0 flex-none flex-col" style={{ width: leftWidth }}>{left}</aside>}
-          <main className="relative min-w-0 flex-1">{children}</main>
-          {right && !present && <aside className="flex min-h-0 flex-none flex-col" style={{ width: rw }}>{right}</aside>}
-        </div>
-        {bottom && !present && <div className="flex-none">{bottom}</div>}
-      </div>
+      // Islands: the panels FLOAT. The field runs uninterrupted underneath them; content sits in the
+      // uncovered rect (the safe area) so nothing hides under a panel — except a camera <Stage>, which
+      // bleeds to the edges (grid and artboard continue under the panels) and fits into the safe area.
+      <SafeAreaRoot className="relative h-full w-full overflow-hidden">
+        <main data-studio-main="" className="absolute" style={present ? { inset: 0 } : SAFE_INSET}>{children}</main>
+        {!present && (
+          <div className="pointer-events-none absolute inset-0 flex flex-col gap-[var(--gutter)] p-[var(--gutter)]">
+            {toolbar && <div data-safe="top" className="pointer-events-auto flex-none">{toolbar}</div>}
+            <div className="flex min-h-0 flex-1 gap-[var(--gutter)]">
+              {left && <aside data-safe="left" className="pointer-events-auto flex min-h-0 flex-none flex-col" style={{ width: leftWidth }}>{left}</aside>}
+              <div className="flex-1" />
+              {right && <aside data-safe="right" className="pointer-events-auto flex min-h-0 flex-none flex-col" style={{ width: rw }}>{right}</aside>}
+            </div>
+            {bottom && <div data-safe="bottom" className="pointer-events-auto flex-none">{bottom}</div>}
+          </div>
+        )}
+      </SafeAreaRoot>
     )
 
   return (
@@ -178,6 +187,11 @@ export function Empty({ icon: Icon, title, hint, action, compact }: { icon?: Rea
    aspect frame or the camera's "centre" can sit in the uncovered rect.
 --------------------------------------------------------------------------- */
 export interface SafeArea { top: number; right: number; bottom: number; left: number }
+/** The uncovered rect, one gutter in from the panels (the safe vars measure to the panels' far edges). */
+const SAFE_INSET = {
+  top: 'calc(var(--safe-top, 0px) + var(--gutter, 12px))', right: 'calc(var(--safe-right, 0px) + var(--gutter, 12px))',
+  bottom: 'calc(var(--safe-bottom, 0px) + var(--gutter, 12px))', left: 'calc(var(--safe-left, 0px) + var(--gutter, 12px))',
+} as const
 const SafeCtx = createContext<SafeArea>({ top: 0, right: 0, bottom: 0, left: 0 })
 export const useSafeArea = () => useContext(SafeCtx)
 
