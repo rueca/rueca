@@ -16,7 +16,7 @@ import type { Anim, Doc, Ease, Key, Obj, PropKey, Resolved, Val } from './engine
 import { bindText, childrenOf } from './engine'
 
 const B = import.meta.env.BASE_URL
-export const ART = { frame: `${B}demo/animate/frame-v2.webp`, wheel: `${B}demo/animate/wheel-v2.webp`, wheelFill: `${B}demo/animate/wheel-v2-fill.webp` }
+export const ART = { frame: `${B}demo/animate/frame-v2.webp`, wheel: `${B}demo/animate/wheel-v2.webp`, wheelFill: `${B}demo/animate/wheel-v2-fill.webp`, band: `${B}demo/animate/band-v2.webp` }
 const ACHIOTE = '#E8582C' // all plate text is the red pen
 export const HAND = '"La Belle Aurore", cursive'
 /** the selection on the plate: set as --signal on the scene wrapper, so only the plate's selection is Cielo */
@@ -47,6 +47,8 @@ export function demoDoc(): Doc {
   const objects: Obj[] = [
     obj('frame', 'Frame', 'image', null, { x: 558, y: 416.5, w: 1116, h: 833 }, { href: ART.frame, locked: true }),
     obj('wheel', 'Drive wheel', 'image', null, { x: WHEEL.x, y: WHEEL.y, w: 536, h: 536 }, { href: ART.wheel, under: ART.wheelFill, spin: true }),
+    // the drive band sits above the turning wheel and wraps its rim, so it never looks cut
+    obj('band', 'Drive band', 'image', null, { x: 558, y: 416.5, w: 1116, h: 833 }, { href: ART.band, locked: true }),
     obj('thread', 'Thread', 'group', null, { x: ORIFICE.x, y: ORIFICE.y, rotation: 25 }),
     obj('yarn', 'Yarn', 'rect', 'thread', { x: 0, w: 0, h: 2.5, radius: 1.25, fill: ACHIOTE }),
     obj('count', 'Count', 'text', null, { x: 1272, y: 400, fill: ACHIOTE, opacity: 0 }, { text: '{turns} turns', fontSize: 38, fontWeight: 400, align: 'middle', font: 'hand' }),
