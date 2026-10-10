@@ -13,7 +13,11 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { AlertTriangle } from 'lucide-react'
 
-interface Props { children: ReactNode; label?: string; compact?: boolean; onReset?: () => void }
+interface Props {
+  children: ReactNode; label?: string; compact?: boolean; onReset?: () => void
+  /** localStorage prefix that "Reset saved settings" clears (default: every `studio:` key) */
+  resetPrefix?: string
+}
 interface State { error: Error | null }
 
 export function clearSavedSettings(prefix = 'studio:') {
@@ -43,7 +47,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <div className="max-w-[280px] text-[11.5px] leading-relaxed text-fg-muted">{this.state.error.message || 'Something went wrong.'}</div>
           <div className="flex flex-wrap justify-center gap-1.5">
             <button type="button" onClick={this.reset} className="h-7 rounded-[6px] bg-active px-2.5 text-[12px] font-medium text-fg hover:brightness-110">Try again</button>
-            <button type="button" onClick={() => { clearSavedSettings(); location.reload() }} className="h-7 rounded-[6px] px-2.5 text-[12px] text-fg-muted hover:bg-hover hover:text-fg">Reset saved settings</button>
+            <button type="button" onClick={() => { clearSavedSettings(this.props.resetPrefix); location.reload() }} className="h-7 rounded-[6px] px-2.5 text-[12px] text-fg-muted hover:bg-hover hover:text-fg">Reset saved settings</button>
             <button type="button" onClick={() => location.reload()} className="h-7 rounded-[6px] px-2.5 text-[12px] text-fg-muted hover:bg-hover hover:text-fg">Reload</button>
           </div>
         </div>

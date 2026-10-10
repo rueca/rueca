@@ -62,7 +62,8 @@ personal skill. Old prototype-studio skill archived at ~/.claude/skill-backups/.
 
 ## Break-it QA round: dx + a11y reported; P0/P1 from them FIXED (see research/08-qa-round.md "Fix log").
 Still running at hand-off: interaction (5311), state (5312), layout (5313), perf (5316). Their reports arrive as
-notifications — append to research/08-qa-round.md, fix P0/P1, then P2. Then send Branding "go fonts".
+notifications — append to research/08-qa-round.md, fix P0/P1, then P2. Then APPLY the Geométrica site fonts myself (Branding session paused) — exact plan in brand/SESSION-NOTES.md
+"In progress / open" item 1; touches only src/landing/*, src/gallery/Gallery.tsx, package.json.
 
 ## Break-it QA round (original plan) (6 read-only agents, brief: scratchpad/breakit-brief.md)
 interaction (5311) · state/persistence (5312) · layout/responsive/themes (5313) · a11y + axe (5314) ·

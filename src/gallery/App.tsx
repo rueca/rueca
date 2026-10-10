@@ -1,5 +1,6 @@
 import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { site } from '@/site.config'
+import { ErrorBoundary } from '@kit'
 import { Landing } from '@/landing/Landing'
 import { Gallery } from './Gallery'
 import { SHELLS } from './registry'
@@ -22,9 +23,13 @@ export function App() {
   }, [shell, route])
   if (route === 'shells') return <Gallery shells={SHELLS} />
   if (!Comp) return <Landing shells={SHELLS} />
+  // Stores are created when a shell's module loads, so a corrupt saved doc can throw before <Studio>
+  // exists. This outer boundary is the guaranteed way back: it clears only this shell's saved data.
   return (
-    <Suspense fallback={<div className="flex h-full items-center justify-center text-[12px] text-fg-faint">Loading {shell!.name}…</div>}>
-      <Comp />
-    </Suspense>
+    <ErrorBoundary key={shell!.id} label={shell!.name} resetPrefix={`studio:${shell!.id}`}>
+      <Suspense fallback={<div className="flex h-full items-center justify-center text-[12px] text-fg-faint">Loading {shell!.name}…</div>}>
+        <Comp />
+      </Suspense>
+    </ErrorBoundary>
   )
 }

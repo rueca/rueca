@@ -128,7 +128,8 @@ interface UI {
   hslMode: 'h' | 's' | 'l'
 }
 const LSK = 'studio:photo:looks'
-const savedLooks = (() => { try { return JSON.parse(localStorage.getItem(LSK) || '[]') as Look[] } catch { return [] } })()
+// Guard the shape: a corrupt key must not crash the shell on every load (break-it S1).
+const savedLooks = (() => { try { const v = JSON.parse(localStorage.getItem(LSK) || '[]'); return Array.isArray(v) ? (v.filter((l) => l && typeof l.name === 'string' && l.values && typeof l.values === 'object') as Look[]) : [] } catch { return [] } })()
 export const ui = createStore<UI>(() => ({
   file: 'Ridgeline at dusk.jpg',
   hasImage: true,

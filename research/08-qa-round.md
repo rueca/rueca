@@ -62,3 +62,64 @@ DONE, verified:
 - install.md rewritten for namespaced tokens (no "import last"), per-file imports (DX13), fork/localhost (DX2), kit-from-source dedupe + @source (DX17); stale cast note removed (DX15).
 INCIDENT: my theme.css edit left a stray `}` → CSS 500 from ~18:09–18:16; running QA agents warned to re-verify that window. Lesson for the skill: after editing theme.css, `curl` it from the dev server (or run qa.mjs on one shell) before moving on — an earlier spot QA passed on cached CSS.
 NOT YET: flows "Connect to" picker not exercised in a browser test (typechecks; my test script clicked the wrong node). Remaining P1s from the 4 agents still running; all P2/P3 above.
+
+## layout (viewports, themes, present mode)
+| ID | Sev | Where | Problem | Fix |
+|---|---|---|---|---|
+| F1 | P1 | Studio.tsx present Esc (prio 0) vs shell `esc` (prio 10) | Esc doesn't leave present mode in 10/19 shells; "Show interface" button is opacity-0 | Present-mode Esc at high priority with `when: () => present`; make the exit button visible on hover/focus |
+| F2 | P2 | present shell client branch | No `<Toaster/>` outside Studio → "Saved"/"Link copied" never show on phone | Mount Toaster + TipProvider in client branch (or make Toaster self-mount like DialogHost) |
+| F3 | P2 | Stage HUD/overlays | ⌘\ leaves zoom pill, tool dock, minimap, gizmo, readouts on screen | Stage hud/overlay read `useStudio().present` and hide |
+| F4 | P2 | flows @1024 | zoom pill overlaps ToolDock | dock respects pill / safe bottom-right |
+| F5 | P2 | scene ≤1280 | stats readout under tool dock | move stats left / hide narrow |
+| F6 | P2 | generate prompt bar 1024/1280 | Generate button overflows, summary truncates | min-w-0 / wrap / drop summary narrow |
+| F7 | P2 | landing hero LiveShell phone | coach pill covers Shuffle/Download | re-check after landing rewrite |
+| F8 | P2 (code-read) | z-index: popups z-[100] < Dialog z-[151] | Select/Menu/Tooltip inside a kit Dialog render behind backdrop | raise popup positioners (z-[160]) |
+| F9 | P3 | Brand | long doc name truncates app name to "M…" | name span flex-none |
+| F10 | P3 | dither HUD, component-lab ViewportFrame @1024 | clipped without ellipsis | truncate / icon-only |
+| F11 | P3 | present ClientSheet | chevron direction inverted | swap |
+| F12 | P3 | audit | hex in scene/local/Vec3Input.tsx; icon sizes/strokes vary widely (kit itself breaks the 14/1.5 rule); 8.5–9px text in ui-design/flows; ColorField unchanged hex in fg-faint; generate tile hover = base; radii 3–14px mix | update KIT §1 rule to reality or align |
+Held up: theme flip mid-session; safe-area vars; no horizontal scroll; long/Arabic/CJK/emoji text; present + gallery on phone.
+Desktop shells at 390px just squeeze (batch, journey, scene, video clip mid-control) — consider a "best on a larger screen" notice. 768 mostly usable.
+
+## perf (production builds)
+| ID | Sev | Where | Problem | Fix |
+|---|---|---|---|---|
+| PERF-1 | P1 | scene viewport dispose via MountSurface useEffect cleanup | Each scene visit leaks the scene + a WebGL context (OrbitControls removes keydown from detached root); after 16 visits Chrome drops contexts | MountSurface mount/dispose in useLayoutEffect; scene: orbit.disconnect() while attached + renderer.forceContextLoss() |
+| PERF-2 | P2 | kit clock: rAF starts on import, never stops | 7 module clocks keep 421 rAF/s running on every page after visiting them | lazy start on first subscriber/play, stop with none |
+| PERF-3 | P2 | clock idle ticks + useClockTime setT while paused; animate SceneView force() per tick | paused animate: 60 React commits/s (thousands of Tip renders) | no idle emits unless opted in; useClockTime skip unchanged t; SceneView bail on dt=0 |
+| PERF-4 | P2 | landing eager kit chunk 812 KB raw / 259 KB gz (+193 KB index incl. framer-motion) | landing loads whole kit | narrow imports / manualChunks |
+| PERF-5 | P2 | ui-design render/paint.ts imports react-dom/server (190 KB) | heavy chunk | createRoot+flushSync or serialise SVG |
+| PERF-6 | P3 | landing hero iframe runs off-screen | | IntersectionObserver pause |
+| PERF-7 | P3 | flows/nodes +2 ResizeObservers per visit | likely GC'd | low |
+| PERF-8 | P3 | scene chunk 726 KB (three) | | accept / trim addons |
+Held up: no other shell leaks DOM/listeners/GL/workers/AudioContexts; idle shells at 0 rAF/s; undo limits exist.
+Not tested: hidden-tab path, scrub cost, scale (1000 layers etc.), undo memory.
+
+## interaction agent
+Stalled twice (watchdog) during heavy machine load (load avg ~480, >100 orphaned headless Chrome/Vite processes) — no report. Re-run later on a quiet machine.
+
+## Machine note (2026-10-09 ~19:50)
+Load average ~480. Many headless Chrome processes (playwright) left by QA agents. Killing them was not permitted by the auto-mode classifier — Rafael should close them (Activity Monitor → search "Google Chrome for Testing"/headless, or reboot) before the next QA round. Future QA briefs: each agent must close its browser in a `finally` and run at most one Chrome at a time.
+
+## state (persistence, links, imports, exports) — reported 2026-10-09 ~20:00
+| ID | Sev | Problem | Status |
+|---|---|---|---|
+| S1 | P0 | corrupt saved doc/ui keys white-screen shells on every load (module-level loaders, above Studio) | FIXED: route-level ErrorBoundary in gallery/App.tsx with "Reset saved settings" scoped to `studio:<shell>`; createDocStore `validate` hook + default `matchesShape(initial)` check; rejected docs parked at `<key>:rejected` (never destroyed); photo looks + scene ui loaders guarded. Repros (flows {}, motion presets {}, animate null, photo looks {}, scene ui null) all load. |
+| S2 | P0 | imports that pass a shallow check get saved and kill the shell after reload | PARTLY: doc.replace() now refuses docs that fail validate/shape and throws (nothing persisted). TODO per shell: catch + toast on import; add real `validate` to each createDocStore (ui-design, video, journey, flows, generate). |
+| S3 | P1 | non-array presets key crashes params shells | FIXED (Array.isArray + name guard) |
+| S4 | P1 | p.data from share links white-screens shader/synth/photo | FIXED in kit: DataDef `validate` hook; share:false keys dropped from links. TODO: shader/synth/photo add `validate` to their p.data defs (they set share:true). |
+| S5 | P1 | share link overrides later edits on every reload | FIXED: a link applies once per tab session (sessionStorage marker) |
+| S6 | P2 | edit + immediate reload lost (debounce) | FIXED: flush on pagehide / visibilitychange (params + doc) |
+| S7 | P2 | two tabs clobber each other | FIXED for params (storage event adopt when not mid-edit). Doc stores: TODO |
+| S8 | P2 | shells' own LS writes swallow quota silently | TODO shells: route through kit (window event 'studio:storage-error') |
+| S9 | P2 | batch CSV import has no type/size guard | TODO |
+| S10 | P2 | photo/dither intake: no toast on reject, silent downscale | TODO |
+| S11 | P3 | legacyKeys never removed; scan stops at first | FIXED |
+| S12 | P3 | double quota toasts / silent forever after | FIXED: shared module flag, re-armed on success |
+| S13 | P3 | present: `&client` appended repeatedly | TODO |
+Held up: 40+ exports valid (zip CRC, WAV, PNG/SVG/JSON/CSV); garbage imports toast; version migrate works.
+Not tested: MP4/WebM/GLB/.cube capture (machine overloaded).
+
+## Also fixed this pass
+- DX7/DX8 history: flush pending edits before undo, skip steps a store can't undo, ignore commits during replay.
+- DX9 bindItem: orphaned item stops writing through.

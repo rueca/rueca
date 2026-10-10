@@ -74,7 +74,12 @@ export interface SpringDef extends Base<{ stiffness: number; damping: number; ma
 export interface ImageDef extends Base<string | null> { type: 'image'; accept?: string }
 /** Opaque document value — never rendered as a row, but undoable, persisted and (optionally) shared.
     Use for collections (a layer stack, clips, pattern steps) that other UI edits. */
-export interface DataDef<T = unknown> extends Base<T> { type: 'data' }
+export interface DataDef<T = unknown> extends Base<T> {
+  type: 'data'
+  /** deep check for values arriving from storage, links or imports — return false to reject.
+      Without one, only the shape family (array / object / primitive) is checked. */
+  validate?: (v: unknown) => boolean
+}
 export interface ActionDef { type: 'action'; label: string; onClick: (v: any) => void; icon?: React.ComponentType<{ size?: number; strokeWidth?: number }>; hint?: string; variant?: 'primary' | 'default'; when?: (v: any) => boolean; value?: undefined }
 export interface MonitorDef { type: 'monitor'; label?: string; get: () => number | string; graph?: boolean; min?: number; max?: number; fmt?: (v: number) => string; hint?: string; when?: (v: any) => boolean; value?: undefined }
 
@@ -224,7 +229,9 @@ export function coerce(def: ParamDef, value: unknown): { ok: true; value: unknow
       // Opaque, but at least the same shape family as the default (array vs object vs primitive).
       const d = def.value as unknown
       const same = Array.isArray(d) ? Array.isArray(value) : d !== null && typeof d === 'object' ? value !== null && typeof value === 'object' && !Array.isArray(value) : typeof value === typeof d
-      return same ? { ok: true, value } : bad('data shape does not match the default')
+      if (!same) return bad('data shape does not match the default')
+      if (def.validate) { try { if (!def.validate(value)) return bad('data failed its validate()') } catch { return bad('data validate() threw') } }
+      return { ok: true, value }
     }
   }
 }

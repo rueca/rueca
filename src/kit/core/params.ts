@@ -98,11 +98,13 @@ export interface ParamOptions<V> {
   historyLimit?: number
 }
 
-const warned = { quota: false }
+/** One storage-failure notice per page (shared with doc stores), re-armed after a successful write. */
+export const storageWarned = { quota: false }
+const warned = storageWarned
 const LS = {
   get<T>(k: string): T | null { try { const s = localStorage.getItem(k); return s ? JSON.parse(s) : null } catch { return null } },
   set(k: string, v: unknown) {
-    try { localStorage.setItem(k, JSON.stringify(v)) } catch (e) {
+    try { localStorage.setItem(k, JSON.stringify(v)); warned.quota = false } catch (e) {
       // Quota or private mode. Say so once — silent failure means "my settings vanished".
       if (!warned.quota && typeof window !== 'undefined') {
         warned.quota = true
@@ -157,11 +159,24 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
   if (opts.persist !== false) initial = { ...initial, ...sanitize(LS.get<Partial<V>>(keyLS), 'localStorage') }
   if (opts.url !== false && typeof location !== 'undefined') {
     const m = location.hash.match(/[#&]p=([^&]+)/)
-    if (m) try { initial = { ...initial, ...sanitize(JSON.parse(b64.dec(m[1])), 'share link') } } catch { warn('ignored an unreadable share link') }
+    // A link applies ONCE per tab: reloading after tweaking must keep the tweaks (break-it S5).
+    const seenKey = `studio:link:${opts.id}:${m?.[1].slice(0, 64)}`
+    let seen = false
+    try { seen = !!m && sessionStorage.getItem(seenKey) === '1' } catch { /* noop */ }
+    if (m && !seen) try {
+      const raw = JSON.parse(b64.dec(m[1])) as Record<string, unknown>
+      // keys marked share:false (images, private data) can never arrive by link
+      for (const k of Object.keys(raw ?? {})) if (!flag(k, 'share')) { delete raw[k]; warn(`ignored "${k}" from share link (share: false)`) }
+      initial = { ...initial, ...sanitize(raw as Partial<V>, 'share link') }
+      try { sessionStorage.setItem(seenKey, '1') } catch { /* noop */ }
+    } catch { warn('ignored an unreadable share link') }
   }
 
   const builtin: Preset<V>[] = (opts.presets ?? []).map((pr) => ({ name: pr.name, values: sanitize(pr.values), mode: pr.mode, builtin: true }))
-  const saved = (LS.get<Preset<V>[]>(keyPresets) ?? []).map((pr) => ({ ...pr, values: sanitize(pr.values) }))
+  const rawSaved = LS.get<unknown>(keyPresets)
+  const saved = (Array.isArray(rawSaved) ? rawSaved : [])
+    .filter((pr): pr is Preset<V> => !!pr && typeof pr === 'object' && typeof (pr as Preset<V>).name === 'string')
+    .map((pr) => ({ name: pr.name, mode: pr.mode === 'replace' ? 'replace' as const : 'merge' as const, values: sanitize(pr.values, 'saved preset') }))
 
   const store = createStore<ParamState<V>>(() => ({
     values: initial,
@@ -177,12 +192,32 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
 
   const commitListeners = new Set<(v: V, meta: CommitMeta) => void>()
   const emit = (v: V, meta: CommitMeta) => commitListeners.forEach((fn) => fn(v, meta))
+  // Another tab saved: adopt its values (when we're not mid-edit) so the two don't clobber each other (S7).
+  if (typeof window !== 'undefined' && opts.persist !== false) window.addEventListener('storage', (e) => {
+    if (e.key !== keyLS || !e.newValue) return
+    try {
+      const s = store.getState()
+      if (!equal(s.values, s.committed)) return
+      const next = { ...s.values, ...sanitize(JSON.parse(e.newValue), 'another tab') } as V
+      if (equal(next, s.values)) return
+      store.setState({ values: next, committed: next })
+      emit(next, { kind: 'replace', label: 'Another tab' })
+    } catch { /* ignore */ }
+  })
   const persistUser = () => LS.set(keyPresets, store.getState().presets.filter((p) => !p.builtin))
   let saveTimer: ReturnType<typeof setTimeout> | undefined
+  let pendingSave: V | null = null
+  const writeNow = () => { if (pendingSave) { LS.set(keyLS, pick(pendingSave, 'persist')); pendingSave = null } }
   const save = (v: V) => {
     if (opts.persist === false) return
+    pendingSave = v
     clearTimeout(saveTimer)
-    saveTimer = setTimeout(() => LS.set(keyLS, pick(v, 'persist')), 120)
+    saveTimer = setTimeout(writeNow, 120)
+  }
+  if (typeof window !== 'undefined' && opts.persist !== false) {
+    // an edit followed by an immediate reload / tab close must not be lost (break-it S6)
+    window.addEventListener('pagehide', writeNow)
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') writeNow() })
   }
 
   const describe = (prev: V, next: V) => {
@@ -374,8 +409,11 @@ export function bindItem(
   b: { read: () => Record<string, unknown> | null; write: (v: Record<string, unknown>) => void; commit: (label?: string) => void; subscribe: (fn: () => void) => () => void },
 ): () => void {
   let syncing = false
+  let orphan = false
   const pull = () => {
     const src = b.read()
+    // The bound item is gone (deleted, deselected): stop writing through to it (break-it DX9).
+    orphan = !src
     if (!src) return
     const next = { ...item.getState().defaults, ...src }
     if (equal(next, item.getState().values)) return
@@ -386,9 +424,9 @@ export function bindItem(
   pull()
   const offOwner = b.subscribe(pull)
   const offItem = item.subscribe((s, prev) => {
-    if (syncing || s.values === prev.values) return
+    if (syncing || orphan || s.values === prev.values) return
     b.write(s.values as Record<string, unknown>)
   })
-  const offCommit = item.onCommit((_v, meta) => { if (meta.kind === 'edit') b.commit(meta.label) })
+  const offCommit = item.onCommit((_v, meta) => { if (meta.kind === 'edit' && !orphan) b.commit(meta.label) })
   return () => { offOwner(); offItem(); offCommit() }
 }

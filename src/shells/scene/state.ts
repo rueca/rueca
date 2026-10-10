@@ -165,7 +165,18 @@ interface UI {
   stats: { tris: number; meshes: number; lights: number }
 }
 const LSK = 'studio:scene:ui'
-const saved = (() => { try { return JSON.parse(localStorage.getItem(LSK) || '{}') as Partial<UI> } catch { return {} } })()
+// Guard the shape: a corrupt key must not crash the shell on every load (break-it S1).
+const saved = (() => {
+  try {
+    const v = JSON.parse(localStorage.getItem(LSK) || '{}')
+    if (!v || typeof v !== 'object' || Array.isArray(v)) return {} as Partial<UI>
+    return {
+      names: v.names && typeof v.names === 'object' && !Array.isArray(v.names) ? v.names : undefined,
+      views: Array.isArray(v.views) ? v.views : undefined,
+      thumbs: v.thumbs && typeof v.thumbs === 'object' && !Array.isArray(v.thumbs) ? v.thumbs : undefined,
+    } as Partial<UI>
+  } catch { return {} as Partial<UI> }
+})()
 export const ui = createStore<UI>(() => ({
   ready: false,
   selected: null,

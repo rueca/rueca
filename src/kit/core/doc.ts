@@ -20,7 +20,7 @@
 --------------------------------------------------------------------------- */
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import type { CommitMeta } from './params'
+import { storageWarned, type CommitMeta } from './params'
 
 export interface DocState<D> {
   doc: D
@@ -56,42 +56,64 @@ export interface DocOptions<D = unknown> {
   migrate?: (raw: unknown, fromVersion: number | null) => D | null
   /** older localStorage keys to try (and remove) when nothing is saved under the current one */
   legacyKeys?: string[]
+  /** deep-check a loaded / imported / other-tab doc; false → fall back to `initial` (load) or
+      refuse (replace). Strongly recommended: a doc that loads wrong-shaped crashes the shell on
+      every reload (break-it S1). */
+  validate?: (d: unknown) => boolean
 }
 
 export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> {
   const key = `studio:${opts.id}:doc:v${opts.version ?? 1}`
   const limit = opts.limit ?? 120
+  const ok = (d: unknown): d is D => {
+    if (d === null || d === undefined) return false
+    try { return opts.validate ? !!opts.validate(d) : matchesShape(d, initial) } catch { return false }
+  }
   let start = initial
   if (opts.persist !== false && typeof localStorage !== 'undefined') {
-    try {
-      const s = localStorage.getItem(key)
-      if (s) start = opts.migrate ? (opts.migrate(JSON.parse(s), opts.version ?? 1) ?? initial) : JSON.parse(s)
+    const parse = (raw: string | null) => { try { return raw === null ? undefined : JSON.parse(raw) } catch { return undefined } }
+    const saved = parse(localStorage.getItem(key))
+    if (saved !== undefined) {
+      const m = opts.migrate ? opts.migrate(saved, opts.version ?? 1) : saved
+      if (ok(m)) start = m
       else {
-        // nothing under this version: try older versions and legacy keys, migrating once
-        const older = [...Array(Math.max(0, (opts.version ?? 1) - 1)).keys()].map((i) => `studio:${opts.id}:doc:v${i + 1}`).reverse()
-        for (const k of [...older, ...(opts.legacyKeys ?? [])]) {
-          const raw = localStorage.getItem(k)
-          if (!raw) continue
-          const v = Number(k.match(/:v(\d+)$/)?.[1] ?? NaN)
-          const m = opts.migrate ? opts.migrate(JSON.parse(raw), Number.isNaN(v) ? null : v) : null
-          if (m) { start = m; localStorage.setItem(key, JSON.stringify(m)) }
+        // Never silently destroy someone's work: park the rejected doc where it can be recovered.
+        try { localStorage.setItem(`${key}:rejected`, JSON.stringify(saved)) } catch { /* noop */ }
+        console.warn(`[trompo] ${opts.id}: saved document failed validation — starting fresh (kept as ${key}:rejected)`)
+      }
+    } else {
+      // nothing under this version: try older versions, then legacy keys; migrate once, remove what we used
+      const older = [...Array(Math.max(0, (opts.version ?? 1) - 1)).keys()].map((i) => `studio:${opts.id}:doc:v${i + 1}`).reverse()
+      for (const k of [...older, ...(opts.legacyKeys ?? [])]) {
+        const raw = parse(localStorage.getItem(k))
+        if (raw === undefined) continue
+        const v = Number(k.match(/:v(\d+)$/)?.[1] ?? NaN)
+        const m = opts.migrate ? opts.migrate(raw, Number.isNaN(v) ? null : v) : null
+        if (m && ok(m)) {
+          start = m
+          try { localStorage.setItem(key, JSON.stringify(m)); localStorage.removeItem(k) } catch { /* noop */ }
           break
         }
       }
-    } catch { /* private mode / bad json */ }
+    }
   }
   const store = createStore<DocState<D>>(() => ({ doc: start, committed: start, past: [], future: [], dirty: false }))
   const listeners = new Set<(d: D, meta: CommitMeta) => void>()
   const emit = (d: D, meta: CommitMeta) => listeners.forEach((fn) => fn(d, meta))
-  let warned = false
   const save = (d: D) => {
     if (opts.persist === false) return
-    try { localStorage.setItem(key, JSON.stringify(d)) } catch (e) {
-      if (!warned) { warned = true; window.dispatchEvent(new CustomEvent('studio:storage-error', { detail: { key, error: String(e) } })) }
+    try { localStorage.setItem(key, JSON.stringify(d)); storageWarned.quota = false } catch (e) {
+      if (!storageWarned.quota) { storageWarned.quota = true; window.dispatchEvent(new CustomEvent('studio:storage-error', { detail: { key, error: String(e) } })) }
     }
   }
   let saveTimer: ReturnType<typeof setTimeout> | undefined
-  const saveSoon = (d: D) => { clearTimeout(saveTimer); saveTimer = setTimeout(() => save(d), 250) }
+  let pending: D | null = null
+  const flush = () => { if (pending !== null) { save(pending); pending = null } }
+  const saveSoon = (d: D) => { pending = d; clearTimeout(saveTimer); saveTimer = setTimeout(flush, 250) }
+  if (typeof window !== 'undefined' && opts.persist !== false) {
+    window.addEventListener('pagehide', flush)
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush() })
+  }
 
   const commit = (label?: string) => {
     const s = store.getState()
@@ -135,6 +157,8 @@ export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> 
     canUndo: () => store.getState().past.length > 0,
     canRedo: () => store.getState().future.length > 0,
     replace: (d: D, o: { history?: boolean; label?: string } = {}) => {
+      // An imported file that doesn't validate must never become the saved doc (break-it S2).
+      if (!ok(d)) throw new Error(`${opts.id}: that document doesn't have the expected shape`)
       if (o.history === false) {
         store.setState({ doc: d, committed: d, past: [], future: [], dirty: false })
         save(d)
@@ -146,6 +170,29 @@ export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> 
     },
     onCommit: (fn: (d: D, meta: CommitMeta) => void) => { listeners.add(fn); return () => { listeners.delete(fn) } },
   }) as DocStore<D>
+}
+
+/**
+ * Default doc check when no `validate` is given: the value has the same SHAPE FAMILY as the initial
+ * doc — objects keep the initial's keys (with matching kinds, three levels deep), arrays stay arrays
+ * whose items are the same kind as the initial's first item. Extra keys are fine. Catches `{}`, `null`
+ * and `{ pages: [1] }`; pass a real `validate` for anything finer.
+ */
+export function matchesShape(value: unknown, template: unknown, depth = 3): boolean {
+  const kind = (x: unknown) => (x === null ? 'null' : Array.isArray(x) ? 'array' : typeof x)
+  if (template === undefined || template === null) return true
+  if (kind(value) !== kind(template)) return false
+  if (depth <= 0) return true
+  if (Array.isArray(template)) {
+    if (!template.length) return true
+    const t0 = template[0]
+    return (value as unknown[]).every((v) => kind(v) === kind(t0) && (kind(t0) !== 'object' || depth <= 1 || true))
+  }
+  if (kind(template) === 'object') {
+    const t = template as Record<string, unknown>, v = value as Record<string, unknown>
+    return Object.keys(t).every((k) => t[k] === undefined || t[k] === null || (k in v && matchesShape(v[k], t[k], depth - 1)))
+  }
+  return true
 }
 
 /** React: subscribe to the doc or a slice of it. */

@@ -20,6 +20,10 @@ export interface Undoable {
   undo(): unknown
   redo(): unknown
   onCommit(fn: (v: any, meta: CommitMeta) => void): () => void
+  /** optional: lets history skip steps a store can no longer undo, and flush mid-drag edits */
+  canUndo?(): boolean
+  canRedo?(): boolean
+  commit?(label?: string): void
 }
 
 export interface Step { source: number; label: string }
@@ -40,30 +44,48 @@ export interface History extends StoreApi<HistoryState> {
 export function createHistory(sources: Undoable[], opts: { limit?: number } = {}): History {
   const limit = opts.limit ?? 200
   const store = createStore<HistoryState>(() => ({ past: [], future: [] }))
+  let replaying = false
   const offs = sources.map((src, i) =>
     src.onCommit((_v, meta) => {
       // Replays (undo/redo) and silent replaces are not new steps.
-      if (meta && meta.kind !== 'edit') return
+      if (replaying || (meta && meta.kind !== 'edit')) return
       const s = store.getState()
       store.setState({ past: [...s.past, { source: i, label: meta?.label ?? 'Edit' }].slice(-limit), future: [] })
     }),
   )
+  // Mid-drag edits in any store become real steps BEFORE we undo (else they'd be committed during the
+  // undo and recorded on top of it — break-it DX8).
+  const flush = () => sources.forEach((src) => src.commit?.())
   const api: History = Object.assign(store, {
     undo: () => {
-      const s = store.getState()
-      const step = s.past.at(-1)
-      if (!step) return undefined
-      sources[step.source].undo()
-      store.setState({ past: s.past.slice(0, -1), future: [step, ...s.future] })
-      return step.label
+      flush()
+      // Skip steps whose store has run out of its own history (its limit may be smaller — DX7).
+      for (let guard = 0; guard < 1000; guard++) {
+        const s = store.getState()
+        const step = s.past.at(-1)
+        if (!step) return undefined
+        const src = sources[step.source]
+        if (src.canUndo && !src.canUndo()) { store.setState({ past: s.past.slice(0, -1) }); continue }
+        replaying = true
+        try { src.undo() } finally { replaying = false }
+        store.setState({ past: store.getState().past.slice(0, -1), future: [step, ...store.getState().future] })
+        return step.label
+      }
+      return undefined
     },
     redo: () => {
-      const s = store.getState()
-      const [step, ...rest] = s.future
-      if (!step) return undefined
-      sources[step.source].redo()
-      store.setState({ future: rest, past: [...s.past, step] })
-      return step.label
+      for (let guard = 0; guard < 1000; guard++) {
+        const s = store.getState()
+        const [step, ...rest] = s.future
+        if (!step) return undefined
+        const src = sources[step.source]
+        if (src.canRedo && !src.canRedo()) { store.setState({ future: rest }); continue }
+        replaying = true
+        try { src.redo() } finally { replaying = false }
+        store.setState({ future: rest, past: [...store.getState().past, step] })
+        return step.label
+      }
+      return undefined
     },
     canUndo: () => store.getState().past.length > 0,
     canRedo: () => store.getState().future.length > 0,
