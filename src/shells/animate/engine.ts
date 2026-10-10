@@ -30,9 +30,13 @@ export interface Obj {
   fontSize?: number
   fontWeight?: number
   align?: 'start' | 'middle'
+  /** 'hand' sets the text in the handwriting face (La Belle Aurore) */
+  font?: 'hand'
   shadow?: boolean
   /** image source (same-origin), drawn w × h centred on the origin */
   href?: string
+  /** an alpha mask drawn under the image in the paper colour: a solid backing, so what's behind doesn't show through hatching */
+  under?: string
   /** continuous rotation: when states blend, the angle always travels forward round the circle instead of unwinding */
   spin?: boolean
 }

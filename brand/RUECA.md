@@ -165,7 +165,12 @@ copperplate engraving with fine parallel hatching, single black ink on white, is
 
 This puts Hairline's line and the engraving on the same 30° grid, so they can share one sheet (shared isometric axes in the measure pen): **line explains how it's built (new), the engraving shows what it is (old)**. In a build guide the steps are line, the final "assembled" panel is the engraving, and shared isometric axes in the measure pen tie them together. Study: `brand/lamina/illustration/` → "Line + engraving, same angle". The Hairline art is exported as SVG and recoloured to Nogal (`hairline/line-*-ink.svg`).
 
-**In the product: the animate shell's demo** [built 2026-10-11, the first shell in the hero]: the "1A" idea (the tool working on an old plate) made real. An engraved Saxony wheel, built from two Midjourney parts made one by one and upscaled: the frame with its wheel cut away, and a face-on drive wheel that turns on the same axle (`public/demo/animate/`, ink on transparent). It sits straight on the canvas with no artboard, and its ink follows the theme (Nogal on light, Lana on dark). The tool's own selection, keys and states do the "new". The Achiote thread draws out of the orifice on *Spin up*.
+**In the product: the animate shell's demo** [live; art v2 2026-10-11, the first shell in the hero]: the "1A" idea (the tool working on an old plate) made real.
+- **The art:** one engraved Saxony plate that Rafael picked from 20 Midjourney options, mirrored so the small wheel sits left like the logo. Gemini then removed the floor and border, and split it into a frame (wheel removed, axle stand drawn in) and the drive wheel on its own. Files: `public/demo/animate/*-v2.webp`, ink on transparent.
+- **The wheel:** it turns with a solid backing in the canvas colour, so the frame never shows through its rim. It only rotates; no scale pulse, which doesn't suit a physical wheel.
+- **Plate text:** all of it is Achiote in La Belle Aurore: the count, "click to spin" (underlined), the Ø dimension and the note. The Achiote thread runs from the spindle into the count.
+- **Ink:** it follows the theme: Nogal on light, a dimmed warm grey (#B8B1A7) on dark. The plate sits straight on the canvas, with no artboard.
+- **Recipe for future plates:** Midjourney for the pick, then Gemini (or Nano Banana) to remove the floor and split it into moving parts.
 
 **Recommendation** (comparison: `brand/lamina/illustration/`):
 - **Engraving = what it is (old).** Use it for the signature image, hero plates, hands and finished objects.

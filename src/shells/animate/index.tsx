@@ -1,3 +1,4 @@
+import '@fontsource/la-belle-aurore/latin-400.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ArrowLeftRight, ArrowRight, Boxes, Braces, Circle, CircleDot, Clipboard, ClipboardPaste, Code, Copy, Diamond, Download, Ellipsis,
@@ -530,7 +531,7 @@ export default function AnimateShell() {
         ) : null
       }>
         {/* no artboard: the plate sits straight on the canvas, its inks following the theme */}
-        <div className="absolute [--plate-ink:#181411] [--plate-measure:rgba(24,20,17,.42)] [--plate-mute:#6E6A64] dark:[--plate-ink:#F3F1EB] dark:[--plate-measure:rgba(243,241,235,.42)] dark:[--plate-mute:#A39E96]"
+        <div className="absolute [--plate-ink:#181411] [--plate-measure:rgba(24,20,17,.42)] [--plate-mute:#6E6A64] dark:[--plate-ink:#B8B1A7] dark:[--plate-measure:rgba(243,241,235,.34)] dark:[--plate-mute:#8C857C]"
           style={{ left: 0, top: 0, width: doc.width, height: doc.height, '--signal': CIELO } as React.CSSProperties} data-studio-artifact="">
           <LiveScene svgRef={svgRef} />
         </div>

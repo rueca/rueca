@@ -34,7 +34,7 @@ export const schema = defineSchema({
 export const params = createParams(schema, { id: 'animate', version: 4 }) // v4: Lana artboard
 export type V = ReturnType<typeof params.values>
 
-export const doc = createDocStore<Doc>(demoDoc(), { id: 'animate', version: 3 }) // v3: the engraved rueca (image objects, spin)
+export const doc = createDocStore<Doc>(demoDoc(), { id: 'animate', version: 4 }) // v4: Rafael's plate, split into frame + wheel by Gemini
 export const history = createHistory([params, doc])
 
 export const getDoc = () => doc.get()

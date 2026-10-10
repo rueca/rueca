@@ -4,9 +4,11 @@
    export. The stage uses the SVG renderer in SceneView.tsx; both read the same
    Resolved values.
 
-   The artwork is two engraved parts made one by one in Midjourney and upscaled
-   (public/demo/animate, ink on transparent at 2× density): the frame, with its
-   own wheel cut away, and a face-on drive wheel that turns on the same axle. Old plate,
+   The artwork is one engraved plate (Midjourney, picked by Rafael, mirrored so the
+   small wheel sits left like the logo) split into parts with Gemini: the frame with
+   its wheel removed and the axle stand drawn in, and the drive wheel on its own.
+   Both are ink on transparent (public/demo/animate). The wheel carries a solid
+   backing (`under`) in the canvas colour, so the frame never shows through its rim. Old plate,
    new tool: the engraving is the "old", the keys, states and the Achiote
    thread are the "new".
 --------------------------------------------------------------------------- */
@@ -14,8 +16,9 @@ import type { Anim, Doc, Ease, Key, Obj, PropKey, Resolved, Val } from './engine
 import { bindText, childrenOf } from './engine'
 
 const B = import.meta.env.BASE_URL
-export const ART = { frame: `${B}demo/animate/frame.webp`, wheel: `${B}demo/animate/wheel.webp` }
-const NOGAL = '#181411', MUTED = '#6E6A64', ACHIOTE = '#E8582C'
+export const ART = { frame: `${B}demo/animate/frame-v2.webp`, wheel: `${B}demo/animate/wheel-v2.webp`, wheelFill: `${B}demo/animate/wheel-v2-fill.webp` }
+const ACHIOTE = '#E8582C' // all plate text is the red pen
+export const HAND = '"La Belle Aurore", cursive'
 /** the selection on the plate: set as --signal on the scene wrapper, so only the plate's selection is Cielo */
 export const CIELO = '#5DB4E8'
 
@@ -37,17 +40,19 @@ const obj = (id: string, name: string, kind: Obj['kind'], parent: string | null,
   ({ id, name, kind, parent, visible: true, locked: false, base, ...extra })
 
 /* the plate is 1056 × 704; the artboard runs on to the right so the thread has somewhere to go */
-const WHEEL = { x: 307.3, y: 255 }, ORIFICE = { x: 955, y: 248 }, YARN = 190
+const WHEEL = { x: 620.2, y: 288.9 }, ORIFICE = { x: 1078, y: 318 }, YARN = 132
 
 export function demoDoc(): Doc {
   n = 0
   const objects: Obj[] = [
-    obj('frame', 'Frame', 'image', null, { x: 528, y: 352, w: 1056, h: 704 }, { href: ART.frame, locked: true }),
-    obj('wheel', 'Drive wheel', 'image', null, { x: WHEEL.x, y: WHEEL.y, w: 460.5, h: 460.5 }, { href: ART.wheel, spin: true }),
-    obj('thread', 'Thread', 'group', null, { x: ORIFICE.x, y: ORIFICE.y, rotation: 14 }),
+    obj('frame', 'Frame', 'image', null, { x: 558, y: 416.5, w: 1116, h: 833 }, { href: ART.frame, locked: true }),
+    obj('wheel', 'Drive wheel', 'image', null, { x: WHEEL.x, y: WHEEL.y, w: 536, h: 536 }, { href: ART.wheel, under: ART.wheelFill, spin: true }),
+    obj('thread', 'Thread', 'group', null, { x: ORIFICE.x, y: ORIFICE.y, rotation: 25 }),
     obj('yarn', 'Yarn', 'rect', 'thread', { x: 0, w: 0, h: 2.5, radius: 1.25, fill: ACHIOTE }),
-    obj('count', 'Count', 'text', null, { x: 1128, y: 318, fill: NOGAL, opacity: 0 }, { text: '{turns} turns', fontSize: 26, fontWeight: 600, align: 'middle' }),
-    obj('caption', 'Caption', 'text', null, { x: 1128, y: 356, fill: MUTED, opacity: 0.55 }, { text: 'click to spin', fontSize: 17, fontWeight: 500, align: 'middle' }),
+    obj('count', 'Count', 'text', null, { x: 1272, y: 400, fill: ACHIOTE, opacity: 0 }, { text: '{turns} turns', fontSize: 38, fontWeight: 400, align: 'middle', font: 'hand' }),
+    obj('cta', 'Call to action', 'group', null, { x: 1272, y: 444, opacity: 0.7 }),
+    obj('caption', 'Caption', 'text', 'cta', { fill: ACHIOTE }, { text: 'click to spin', fontSize: 24, fontWeight: 400, align: 'middle', font: 'hand' }),
+    obj('underline', 'Underline', 'rect', 'cta', { x: -2, y: 17, rotation: -2.5, w: 112, h: 1.8, radius: 0.9, fill: ACHIOTE }),
   ]
 
   // the yarn grows from the orifice: its centre rides at half its length
@@ -59,28 +64,27 @@ export function demoDoc(): Doc {
   const idle: Anim = {
     id: 'idle', name: 'Idle', duration: 9000, loop: 'loop', tracks: {
       'wheel.rotation': [k(0, 0, E.lin), k(9000, 360)],
-      'caption.opacity': [k(0, 0.55), k(2250, 0.9), k(4500, 0.55), k(6750, 0.9), k(9000, 0.55)],
+      'cta.opacity': [k(0, 0.7), k(2250, 1), k(4500, 0.7), k(6750, 1), k(9000, 0.7)],
     },
   }
   const hover: Anim = {
     id: 'hover', name: 'Hover', duration: 2800, loop: 'loop', tracks: {
       'wheel.rotation': [k(0, 0, E.lin), k(2800, 360)],
-      'caption.opacity': [k(0, 0.55, E.out), k(300, 1)],
+      'cta.opacity': [k(0, 0.7, E.out), k(300, 1)],
     },
   }
   const press: Anim = {
     id: 'press', name: 'Spin up', duration: 2400, loop: 'loop', tracks: {
       'wheel.rotation': [k(0, 0, E.spinUp), k(1800, 1080)],
-      'wheel.scale': [k(0, 1, E.in), k(90, 0.985, E.spring(500, 0.35)), k(560, 1)],
       ...yarn(240, 1300, E.expo),
       'count.opacity': [k(0, 0, E.hold), k(900, 0, E.out), k(1200, 1, E.hold), k(2050, 1, E.in), k(2400, 0)],
       'yarn.opacity': [k(0, 1, E.hold), k(2050, 1, E.in), k(2400, 0)],
-      'count.y': [k(0, 318, E.hold), k(900, 330, E.spring(520, 0.45)), k(1400, 318)],
-      'caption.opacity': [k(0, 1, E.out), k(400, 0.4, E.hold), k(2050, 0.4, E.io), k(2400, 1)],
+      'count.y': [k(0, 400, E.hold), k(900, 412, E.spring(520, 0.45)), k(1400, 400)],
+      'cta.opacity': [k(0, 1, E.out), k(400, 0.45, E.hold), k(2050, 0.45, E.io), k(2400, 1)],
     },
   }
   return {
-    width: 1200, height: 704, objects, anims: [idle, hover, press],
+    width: 1380, height: 833, objects, anims: [idle, hover, press],
     sm: {
       entry: 'idle',
       inputs: [
@@ -103,14 +107,30 @@ export function demoDoc(): Doc {
 /** Decoded images for the canvas exporters, keyed by href. The SVG stage loads its own. */
 const imgs = new Map<string, HTMLImageElement>()
 export async function loadImages(doc: Doc) {
-  await Promise.all(doc.objects.filter((o) => o.kind === 'image' && o.href).map(async (o) => {
-    if (imgs.get(o.href!)?.complete) return
+  await document.fonts.load(`400 24px ${HAND}`) // exported frames draw the hand too
+  const hrefs = doc.objects.filter((o) => o.kind === 'image').flatMap((o) => [o.href, o.under]).filter((h): h is string => !!h)
+  await Promise.all(hrefs.map(async (href) => {
+    if (imgs.get(href)?.complete) return
     const im = new Image()
-    im.src = o.href!
+    im.src = href
     await im.decode()
-    imgs.set(o.href!, im)
+    imgs.set(href, im)
   }))
 }
+/** An alpha mask filled with one colour (the wheel's backing, in the paper colour). Cached per colour. */
+const tints = new Map<string, HTMLCanvasElement>()
+function tinted(im: HTMLImageElement, color: string) {
+  const key = im.src + color
+  let c = tints.get(key)
+  if (!c) {
+    c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight
+    const x = c.getContext('2d')!
+    x.drawImage(im, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = color; x.fillRect(0, 0, c.width, c.height)
+    tints.set(key, c)
+  }
+  return c
+}
+let paper = '#F3F1EB'
 /** An SVG frame that opens anywhere: image hrefs become data URLs. */
 export async function inlineImages(svg: SVGSVGElement) {
   await Promise.all(Array.from(svg.querySelectorAll('image')).map(async (el) => {
@@ -123,6 +143,7 @@ export async function inlineImages(svg: SVGSVGElement) {
 
 /* ---------- Canvas 2D renderer (export) ---------- */
 export function drawCanvas(ctx: CanvasRenderingContext2D, doc: Doc, r: Resolved, bg: [string, string], w: number, h: number) {
+  paper = bg[1]
   const g = ctx.createLinearGradient(0, 0, 0, h)
   g.addColorStop(0, bg[0]); g.addColorStop(1, bg[1])
   ctx.fillStyle = g
@@ -164,10 +185,12 @@ function shape(ctx: CanvasRenderingContext2D, doc: Doc, o: Obj, p: Record<PropKe
     ctx.fillStyle = fill; ctx.fill(new Path2D(o.d))
   } else if (o.kind === 'image' && o.href) {
     const im = imgs.get(o.href), w = +p.w, h = +p.h
+    const under = o.under ? imgs.get(o.under) : undefined
+    if (under) ctx.drawImage(tinted(under, paper), -w / 2, -h / 2, w, h)
     if (im) ctx.drawImage(im, -w / 2, -h / 2, w, h)
   } else if (o.kind === 'text') {
     ctx.fillStyle = fill
-    ctx.font = `${o.fontWeight ?? 500} ${o.fontSize ?? 16}px "Inter Variable", Inter, system-ui, sans-serif`
+    ctx.font = `${o.fontWeight ?? 500} ${o.fontSize ?? 16}px ${o.font === 'hand' ? HAND : '"Inter Variable", Inter, system-ui, sans-serif'}`
     ctx.textAlign = o.align === 'middle' ? 'center' : 'left'
     ctx.textBaseline = 'middle'
     ctx.fillText(bindText(o.text ?? '', doc.sm.inputs), 0, 0)

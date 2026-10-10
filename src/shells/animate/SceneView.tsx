@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useStore } from 'zustand'
 import { useCamera, useValues } from '@kit'
 import { bindText, childrenOf, resolve, type Doc, type Obj, type PropKey, type Resolved, type Val } from './engine'
+import { HAND } from './demo'
 import { animTime, clock, currentAnim, editProps, params, runtime, ui, useDoc, useUI } from './store'
 
 const num = (v: Val) => (typeof v === 'number' ? v : parseFloat(v))
@@ -23,13 +24,17 @@ function Shape({ o, p, doc, inputs }: { o: Obj; p: Record<PropKey, Val>; doc: Do
   if (o.kind === 'path') return <path d={o.d} fill={String(p.fill)} />
   if (o.kind === 'image' && o.href) {
     const w = num(p.w), h = num(p.h)
-    return <image href={o.href} x={-w / 2} y={-h / 2} width={Math.max(0, w)} height={Math.max(0, h)} preserveAspectRatio="none" filter="url(#tw-ink)" />
+    const box = { x: -w / 2, y: -h / 2, width: Math.max(0, w), height: Math.max(0, h), preserveAspectRatio: 'none' }
+    return (<>
+      {o.under && <image href={o.under} {...box} filter="url(#tw-paper)" />}
+      <image href={o.href} {...box} filter="url(#tw-ink)" />
+    </>)
   }
   if (o.kind === 'text') {
     const merged = doc.sm.inputs.map((i) => ({ ...i, value: inputs[i.name] ?? i.value }))
     return (
       <text x={0} y={0} dominantBaseline="central" textAnchor={o.align === 'middle' ? 'middle' : 'start'}
-        style={{ fill: inked(p.fill), font: `${o.fontWeight ?? 500} ${o.fontSize ?? 16}px "Inter Variable", Inter, system-ui, sans-serif`, fontFeatureSettings: '"tnum"' }}>
+        style={{ fill: inked(p.fill), font: `${o.fontWeight ?? 500} ${o.fontSize ?? 16}px ${o.font === 'hand' ? HAND : '"Inter Variable", Inter, system-ui, sans-serif'}`, fontFeatureSettings: '"tnum"' }}>
         {bindText(o.text ?? '', merged)}
       </text>
     )
@@ -80,6 +85,8 @@ export function SceneSVG({
         <linearGradient id="tw-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={bg[0]} /><stop offset="1" stopColor={bg[1]} /></linearGradient>
         {/* engraved layers are ink-alpha images: recolour them to the plate ink */}
         <filter id="tw-ink" colorInterpolationFilters="sRGB"><feFlood style={{ floodColor: 'var(--plate-ink, #181411)' }} /><feComposite in2="SourceAlpha" operator="in" /></filter>
+        {/* a backing in the paper colour: the canvas on the stage, Lana in an exported frame */}
+        <filter id="tw-paper" colorInterpolationFilters="sRGB"><feFlood style={{ floodColor: bare ? 'var(--field, #F3F1EB)' : bg[1] }} /><feComposite in2="SourceAlpha" operator="in" /></filter>
         <filter id="tw-shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="12" stdDeviation="14" floodColor="#140a3c" floodOpacity="0.35" /></filter>
       </defs>
       <rect data-bg width={doc.width} height={doc.height} fill={bare ? 'transparent' : 'url(#tw-bg)'} />
@@ -94,14 +101,13 @@ export function SceneSVG({
    export never carries them. A measure-pen diameter under the wheel, and one
    Achiote note on the flyer. They follow the wheel as it moves. */
 const MEASURE = 'var(--plate-measure, rgba(24,20,17,.42))', PEN = '#E8582C'
-const MONO = "'Geist Mono Variable', 'Geist Mono', ui-monospace, Menlo, monospace"
 function PenMarks({ doc, r }: { doc: Doc; r: Resolved }) {
   const wheel = r.wheel
   if (!wheel || !doc.objects.find((o) => o.id === 'wheel')?.visible) return null
   const s = num(wheel.scale), cx = num(wheel.x), cy = num(wheel.y), rad = (num(wheel.w) / 2) * s * 0.996
   const y0 = cy - rad, y1 = cy + rad, x = cx - rad - 34
-  const font = { font: `500 15px ${MONO}` }
-  const fx = 836, fy = 118 // above the flyer
+  const font = { font: `400 23px ${HAND}` }
+  const fx = 905, fy = 104 // above the flyer assembly
   return (
     <g data-overlay pointerEvents="none" fill="none">
       {/* measure pen: the wheel's diameter, up its left side */}
@@ -109,14 +115,14 @@ function PenMarks({ doc, r }: { doc: Doc; r: Resolved }) {
         <path d={`M${x - 8} ${y0}H${cx - rad * 0.55}M${x - 8} ${y1}H${cx - rad * 0.55}`} strokeDasharray="3 4" />
         <path d={`M${x} ${y0}V${cy - 24}M${x} ${cy + 24}V${y1}M${x - 5} ${y0 + 5}l10 -10M${x - 5} ${y1 + 5}l10 -10`} />
       </g>
-      <text x={x} y={cy} dominantBaseline="central" textAnchor="middle" transform={`rotate(-90 ${x} ${cy})`} style={{ ...font, fill: MEASURE }}>Ø 560</text>
+      <text x={x} y={cy} dominantBaseline="central" textAnchor="middle" transform={`rotate(-90 ${x} ${cy})`} style={{ ...font, fill: PEN }}>Ø 560</text>
       {/* red pen: one note on the part that pays it back */}
       <g stroke={PEN} strokeWidth={1.4}>
-        <path d={`M${fx - 4} ${fy + 78}C${fx - 10} ${fy + 50} ${fx - 6} ${fy + 26} ${fx + 2} ${fy + 12}`} />
+        <path d={`M${fx + 88} ${fy + 68}C${fx + 70} ${fy + 44} ${fx + 40} ${fy + 22} ${fx + 18} ${fy + 12}`} />
         <circle cx={fx + 12} cy={fy} r={13} />
       </g>
-      <text x={fx + 12} y={fy + 0.5} dominantBaseline="central" textAnchor="middle" style={{ font: `600 14px ${MONO}`, fill: PEN }}>1</text>
-      <text x={fx + 33} y={fy + 0.5} dominantBaseline="central" style={{ ...font, fill: PEN }}>turns 9.7× the wheel</text>
+      <text x={fx + 12} y={fy + 0.5} dominantBaseline="central" textAnchor="middle" style={{ font: `400 20px ${HAND}`, fill: PEN }}>1</text>
+      <text x={fx + 32} y={fy + 2} dominantBaseline="central" style={{ ...font, fill: PEN }}>turns 9.7× the wheel</text>
     </g>
   )
 }
