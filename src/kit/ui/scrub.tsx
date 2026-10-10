@@ -96,8 +96,16 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
 
   const display = mixed ? 'Mixed' : fmt ? fmt(value) : `${value.toFixed(decimalsOf(step))}${unit ?? ''}`
 
+  // A fmt that renders percent ("-3.5%" for -0.035) edits in percent too, so typing "5%" means 5%,
+  // not 500% pinned to max (break-it V11). Scale is read off fmt(1): "100%" → ×100, "1%" → ×1.
+  const pctScale = !parse && fmt ? (() => { const o = fmt(1); return /%\s*$/.test(o) ? parseFloat(o.replace(/[^\d.\-]/g, '')) || null : null })() : null
   // With a custom parse, edit in display units ("30%" → parse) rather than the raw number.
-  const editText = () => (parse && fmt ? fmt(value) : String(roundTo(value, step)))
+  const editText = () => (parse && fmt ? fmt(value) : pctScale ? fmt!(value) : String(roundTo(value, step)))
+  const readTyped = (text: string) => {
+    if (parse) return parse(text)
+    if (pctScale) { const v = evaluate(text, value * pctScale); return v === null ? null : v / pctScale }
+    return evaluate(text, value)
+  }
 
   useEffect(() => {
     if (!editing) return
@@ -179,10 +187,10 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
     if (discard.current) { discard.current = false; apply = false }
     if (apply && mixed && onDelta) {
       const d = relativeDelta(draft)
-      if (d !== null) { onDelta(d, true); setEditing(false); return }
+      if (d !== null) { onDelta(pctScale ? d / pctScale : d, true); setEditing(false); return }
     }
     if (apply) {
-      const v = parse ? parse(draft) : evaluate(draft, value)
+      const v = readTyped(draft)
       if (v !== null && Number.isFinite(v)) commitNum(v, true)
     }
     setEditing(false)

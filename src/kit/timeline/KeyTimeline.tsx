@@ -10,7 +10,7 @@
        onMoveKeys={(next, final) => …}          // { keyId: newTimeMs }
        onDeleteKeys={(ids) => …}
        segmentEditor={({ keyId }) => <EasingEditor … />}   // popover on segment click
-       onDurationChange={(ms, final) => …}      // drag the end marker
+       onDurationChange={(ms, final) => …}      // drag the end marker (stops at the last key)
        toolbar={<Transport />} autoKey={recording} />
 
    Lanes
@@ -159,9 +159,11 @@ export function KeyTimeline(props: KeyTimelineProps) {
     const r = track.current!.getBoundingClientRect()
     return toFrame(clamp(Tm(e.clientX - r.left), 0, duration), fps)
   }
+  const lastKeyT = useMemo(() => Math.max(0, ...lanes.flatMap((l) => (l.kind === 'prop' ? l.keys.map((k) => k.t) : []))), [lanes])
   const endT = (e: React.PointerEvent) => {
     const r = track.current!.getBoundingClientRect()
-    return Math.max(100, Math.round(toFrame(Tm(e.clientX - r.left), fps)))
+    // never shorter than the last key — keys past the end would be unreachable (break-it V5)
+    return Math.max(100, lastKeyT, Math.round(toFrame(Tm(e.clientX - r.left), fps)))
   }
   const onRulerDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return

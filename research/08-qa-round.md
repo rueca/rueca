@@ -163,3 +163,22 @@ options (axe nested-interactive); ViewportFrame `chrome={false}` + icon-only pre
 gridcell; then remove shell overrides (batch/panels.tsx wrapper, animate KeyButton class) and switch photo/dither from
 src/shells/intake.ts to kit `onReject`. Comment-pin initials label mismatch; synth knob value fields; video timeline labels.
 open: stack.tsx listbox→grid row pattern (nested-interactive, axe); KeyTimeline per-lane [ ]; ViewportFrame chrome prop
+
+## interaction-2 (re-run, 2026-10-10) — findings + fixes
+Agent still running when this was written; findings V1–V11 so far, all fixed and checked headlessly unless noted.
+
+| # | Sev | Finding | Fix |
+|---|---|---|---|
+| V1 | P1 | Double-click reset was undone on blur by the editor the first click opened | `discard` ref; dblclick closes the editor without committing (scrub.tsx) |
+| V2 | P1 | ↑/↓ on a Mixed field collapsed every selection to one value | keyboard on Mixed goes through `onDelta` |
+| V3 | P1 | Focused number field: "2" fired the canvas opacity hotkey, Backspace deleted the layer | dispatcher skips bare digits/Backspace/arrows when a spinbutton/slider has focus; typing into a focused ScrubValue starts editing with that character (Figma) |
+| V4 | P1 | Alt (from-centre) resize past zero teleported the box 400px | resizeRect collapses onto the centre under `fromCenter` |
+| V5 | P2 | Shrinking an animation's duration stranded keys past the end | KeyTimeline end marker stops at the last key |
+| V6 | P0 | Typing "/0" wrote Infinity into the doc → artwork crash; "1e3" rejected | relative maths checked with `isFinite`; commit guards non-finite; exponent notation accepted |
+| V7 | P2 | Esc mid-scrub kept the dragged value | Esc while scrubbing restores the start value (Mixed: zero delta) |
+| V8 | P2 | Mixed scrub stopped every node at the FIRST node's limit | ui-design `numField` gained `onDelta` that clamps each node separately |
+| V9 | P2 | Typed "+8" on a Mixed field set all to first+8 | "+n"/"-n" on Mixed → per-node delta |
+| V10 | P3 | Header promised wheel-to-step, none existed | non-passive wheel handler while focused |
+| V11 | P2 | Percent fields without `parse` edited in raw units ("5%" → pinned 30%) | ScrubValue reads percent scale off `fmt(1)` and edits in percent (fixes synth, nodes, animate, type in one place) |
+
+Kit lesson: number-field behaviour lives in one component, so every shell got these fixes for free — the only shell change was ui-design's multi-select plumbing.
