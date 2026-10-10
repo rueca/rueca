@@ -171,8 +171,13 @@ export function LiveScene({ svgRef }: { svgRef: React.RefObject<SVGSVGElement | 
     const el = sel && !preview ? (svg.querySelector(`[data-content="${sel}"]`) as SVGGraphicsElement | null) : null
     if (!el) { poly.setAttribute('visibility', 'hidden'); handles.current?.setAttribute('visibility', 'hidden'); return }
     const b = el.getBBox()
-    const m = el.getCTM()
+    let m = el.getCTM()
     if (!m) return
+    // a spinning object keeps an upright box: drop its own rotation, keep position, scale and every parent transform
+    const o = doc.objects.find((x) => x.id === sel)
+    const holder = el.parentElement as unknown as SVGGraphicsElement | null
+    const outer = (holder?.parentElement as unknown as SVGGraphicsElement | null)?.getCTM()
+    if (o?.spin && outer && r[o.id]) m = outer.translate(num(r[o.id].x), num(r[o.id].y)).scale(num(r[o.id].scale))
     const pts = [[b.x, b.y], [b.x + b.width, b.y], [b.x + b.width, b.y + b.height], [b.x, b.y + b.height]].map(([x, y]) => new DOMPoint(x, y).matrixTransform(m))
     poly.setAttribute('points', pts.map((q) => `${q.x},${q.y}`).join(' '))
     poly.setAttribute('visibility', 'visible')
@@ -237,9 +242,9 @@ export function LiveScene({ svgRef }: { svgRef: React.RefObject<SVGSVGElement | 
       <SceneSVG doc={doc} r={r} inputs={inputs} bg={[v.bgTop, v.bgBottom]} bare interactive={!preview} onObjectDown={onObjectDown} svgRef={svgRef} ghosts={ghosts} ghostOf={sel}>
         {!preview && <PenMarks doc={doc} r={r} />}
         <g data-overlay pointerEvents="none">
-          <polygon ref={outline} fill="none" stroke="var(--signal)" strokeWidth={1.5} vectorEffect="non-scaling-stroke" visibility="hidden" />
+          <polygon ref={outline} fill="none" stroke="var(--signal)" strokeWidth={2} vectorEffect="non-scaling-stroke" visibility="hidden" />
           <g ref={handles} visibility="hidden">
-            {[0, 1, 2, 3].map((i) => <rect key={i} fill="#fff" stroke="var(--signal)" strokeWidth={1} vectorEffect="non-scaling-stroke" />)}
+            {[0, 1, 2, 3].map((i) => <rect key={i} fill="#fff" stroke="var(--signal)" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />)}
           </g>
         </g>
       </SceneSVG>

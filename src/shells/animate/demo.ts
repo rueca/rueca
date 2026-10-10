@@ -16,6 +16,8 @@ import { bindText, childrenOf } from './engine'
 const B = import.meta.env.BASE_URL
 export const ART = { frame: `${B}demo/animate/frame.webp`, wheel: `${B}demo/animate/wheel.webp` }
 const NOGAL = '#181411', MUTED = '#6E6A64', ACHIOTE = '#E8582C'
+/** the selection on the plate: set as --signal on the scene wrapper, so only the plate's selection is Cielo */
+export const CIELO = '#5DB4E8'
 
 const E = {
   lin: { kind: 'bezier', p: [0, 0, 1, 1] } as Ease,

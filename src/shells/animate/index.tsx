@@ -13,7 +13,7 @@ import { KeyTimeline, type KeyLane } from '@kit/timeline/KeyTimeline'
 import { KeyButton, KeyDiamond } from '@kit/ui/key-button'
 import { EaseGlyph, EasingEditor } from '@kit/ui/easing'
 import { PROPS, PROPS_FOR, childrenOf, keyAt, objHasKeys, resolve, toCSSKeyframes, trackKey, type Anim, type Obj, type PropKey } from './engine'
-import { drawCanvas, inlineImages, loadImages } from './demo'
+import { CIELO, drawCanvas, inlineImages, loadImages } from './demo'
 import { LiveScene } from './SceneView'
 import { AnimInspector } from './AnimInspector'
 import { InputsList, StateMachineGraph, TransitionsList } from './local/StateMachinePanel'
@@ -531,7 +531,7 @@ export default function AnimateShell() {
       }>
         {/* no artboard: the plate sits straight on the canvas, its inks following the theme */}
         <div className="absolute [--plate-ink:#181411] [--plate-measure:rgba(24,20,17,.42)] [--plate-mute:#6E6A64] dark:[--plate-ink:#F3F1EB] dark:[--plate-measure:rgba(243,241,235,.42)] dark:[--plate-mute:#A39E96]"
-          style={{ left: 0, top: 0, width: doc.width, height: doc.height }} data-studio-artifact="">
+          style={{ left: 0, top: 0, width: doc.width, height: doc.height, '--signal': CIELO } as React.CSSProperties} data-studio-artifact="">
           <LiveScene svgRef={svgRef} />
         </div>
       </Stage>
