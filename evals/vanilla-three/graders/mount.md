@@ -1,9 +1,12 @@
 ---
 type: llm
 weight: 2
-focus: trace
+focus: { source: file, path: src/ProductTool.tsx }
 ---
-PASS only if the agent mounts the existing vanilla scene through an imperative adapter (e.g. `MountSurface` calling
-`start(el)` and returning `dispose`), subscribes the scene to param changes (e.g. `params.subscribe` / `onCommit` for
-expensive work) instead of re-creating it, disposes on unmount, and does not convert to react-three-fiber. FAIL if it
-rewrites the scene, re-mounts it on every change, or leaks it (no dispose).
+This file wraps an existing imperative three.js scene (`start(el)` returning setters and `dispose`). PASS only if it:
+- mounts the scene once through an imperative adapter (e.g. `MountSurface`, or a ref + effect that calls `start(el)` and returns `dispose`);
+- pushes param changes into the running scene through its setters (subscribe / onCommit / effect on values), WITHOUT re-creating the scene on every change;
+- disposes the scene on unmount;
+- offers an inspector for colourway, roughness and light, an outliner of scene objects, and a 2× PNG export;
+- does not use react-three-fiber.
+FAIL otherwise.

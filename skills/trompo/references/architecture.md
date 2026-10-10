@@ -119,7 +119,9 @@ design vs prototype).
   defaults.
 - **Presets** with A/B compare (`\`).
 - **Export** — PNG at 1×/2×/4×, SVG when the artifact is vector, WebM/MP4 for motion
-  (mediabunny), JSON for settings. Batch multi-size when the tool makes assets.
+  (mediabunny, `recordFrames`), JSON for settings. Batch multi-size when the tool makes assets.
+  For Canvas 2D, re-render instead of upscaling: `renderCanvasPNG(draw, { width, height, v: params.values(),
+  t: clock.time(), scale: 2 })` reuses the surface's `draw`, so the 2× file is sharp. Don't hand-roll toBlob.
 
 ## Keyboard (defaults)
 

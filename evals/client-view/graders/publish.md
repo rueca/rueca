@@ -1,9 +1,10 @@
 ---
 type: llm
 weight: 2
-focus: trace
+focus: { source: file, path: src/PatternTool.tsx }
 ---
-PASS only if the agent exposes the three client knobs by marking them in the schema (e.g. `publish: true`) and renders
-a separate touch-friendly client view that shows only published params (e.g. `<Inspector published />` in a bottom
-sheet), with a download action and a shareable link, rather than hand-building a second form. FAIL if it duplicates the
-controls by hand or hides the other knobs with CSS only.
+The task: let a client on a phone change only palette, tile size and shuffle seed, then download. PASS only if:
+- exactly those three params are marked for the client in the schema (e.g. `publish: true` on palette, size and seed), rather than listed again by hand in a second form;
+- there is a separate client / present view that renders only the published params (e.g. `<Inspector params={params} published />`, typically in a touch-friendly bottom sheet), chosen by a link or URL flag;
+- the client view has a download / export action and a way to share the link.
+FAIL if the controls are duplicated by hand, or the other knobs are only hidden with CSS.

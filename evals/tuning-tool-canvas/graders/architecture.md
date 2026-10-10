@@ -1,11 +1,11 @@
 ---
 type: llm
 weight: 2
-focus: trace
+focus: { source: file, path: src/RippleTool.tsx }
 ---
-PASS only if the agent's written code:
-- declares the tunable values ONCE in a schema (e.g. `defineSchema` / `p.number` / `p.curve` or an equivalent single param table) that drives the inspector, defaults, presets and export;
-- keeps `draw` a pure function of (values, t) and drives it from a clock / ticker, NOT by putting live values in a requestAnimationFrame effect's dependency array;
-- wires the artwork through a surface/adapter (e.g. `CanvasSurface`) inside a studio shell with an inspector, a timeline or transport, presets, and a PNG export;
-- uses theme tokens for chrome colours (no hardcoded hex in the tool UI; hex is fine inside the artwork).
-FAIL if any of these are missing, or if it hand-builds a generic form instead of a design-tool inspector.
+This file is a tuning tool built around an existing `draw(ctx, t, values)` function. PASS only if:
+- the tunable values are declared ONCE in a schema / param table (e.g. `defineSchema` + `p.number` / `p.select`) that drives the inspector, defaults, presets and export;
+- `draw` is called from a clock- or ticker-driven surface (e.g. `CanvasSurface` with a clock), NOT from a hand-written requestAnimationFrame effect that lists live values in its dependency array;
+- the UI is a design-tool layout (studio shell with an inspector panel, a timeline / transport to scrub time, presets, and a PNG export action), not a generic form;
+- chrome colours come from theme tokens or kit components (a hex colour inside the artwork itself is fine).
+FAIL if any of these is missing.

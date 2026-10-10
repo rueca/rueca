@@ -1,8 +1,9 @@
 # Evals
 
 Six cases for the Trompo skill. Each is a realistic request plus graders: `tool_used` checks the skill fired (or,
-for the negative case, didn't), `regex` checks for the right kit pieces in the transcript, and an `llm` rubric judges
-the code against the skill's non-negotiables.
+for the negative case, didn't), and `regex` + `llm` graders read the FILE the prompt names (`src/RippleTool.tsx`
+etc.). Graders never read the transcript: an `llm` judge only sees its first and last 12 messages (the code is
+written in the middle), and a regex over the trace also matches the skill docs the agent read.
 
 | Case | What it proves |
 | --- | --- |
@@ -25,3 +26,12 @@ claude plugin eval . --scaffold --allow-tools Write Edit --runs 3 -j 3 --max-cos
 ```
 
 By default this also runs a no-plugin baseline, so the report shows what the skill adds.
+
+## Gotchas
+- `evals/results/` sits inside the eval dir, and its files are hard links; a later run can then refuse to load
+  cases ("a file in the plugin has more than one name"). Clear it before a run:
+
+  ```bash
+  rm -r evals/results
+  ```
+- The CLI needs its own login (`claude auth login`); the desktop app's sign-in doesn't carry over.

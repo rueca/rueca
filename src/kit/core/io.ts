@@ -34,6 +34,26 @@ export function exportCanvasPNG(canvas: HTMLCanvasElement, name = `export-${stam
   })
 }
 
+/**
+ * Re-render a Canvas 2D `draw` off-screen at `scale`× and download it — sharp at any size, unlike
+ * upscaling the on-screen canvas. Takes the same draw you give <CanvasSurface>, so export is one line:
+ *   renderCanvasPNG(draw, { width: 1080, height: 1080, v: params.values(), t: clock.time(), scale: 2 })
+ */
+export function renderCanvasPNG<V>(
+  draw: (ctx: CanvasRenderingContext2D, f: { t: number; dt: number; w: number; h: number; dpr: number; v: V; frame: number }) => void,
+  o: { width: number; height: number; v: V; t?: number; scale?: number; name?: string },
+) {
+  const scale = o.scale ?? 1
+  const c = document.createElement('canvas')
+  c.width = Math.round(o.width * scale)
+  c.height = Math.round(o.height * scale)
+  const ctx = c.getContext('2d')
+  if (!ctx) return Promise.reject(new Error('No 2D context'))
+  ctx.setTransform(scale, 0, 0, scale, 0, 0)
+  draw(ctx, { t: o.t ?? 0, dt: 0, w: o.width, h: o.height, dpr: scale, v: o.v, frame: 0 })
+  return new Promise<void>((res, rej) => c.toBlob((b) => { if (b) { download(b, o.name ?? `export-${stamp()}@${scale}x.png`); res() } else rej(new Error('Could not encode PNG')) }, 'image/png'))
+}
+
 /** Download an SVG element or SVG markup. */
 export function exportSVG(svg: SVGSVGElement | string, name = `export-${stamp()}.svg`) {
   let text: string

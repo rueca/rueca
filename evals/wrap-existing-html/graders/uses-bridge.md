@@ -1,6 +1,7 @@
 ---
 type: regex
-target: trace
+target: { source: file, path: src/HeroHarness.tsx }
 pattern: 'FrameSurface|studio-bridge'
 match: contains
+weight: 1
 ---
