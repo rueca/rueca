@@ -38,6 +38,8 @@ export interface KnobProps {
   label: string
   hint?: string
   fmt?: (v: number) => string
+  /** typed text → number for the value field, when `fmt` isn't plain (see ScrubValue) */
+  parse?: (s: string) => number | null
   unit?: string
   taper?: 'linear' | 'log'
   bipolar?: boolean
@@ -56,7 +58,7 @@ const START = -135
 const PX_FULL = 220 // pixels of vertical drag for the full range
 
 export function Knob({
-  value, onChange, min = 0, max = 1, step = 0.01, defaultValue, label, hint, fmt, unit, taper = 'linear', bipolar,
+  value, onChange, min = 0, max = 1, step = 0.01, defaultValue, label, hint, fmt, parse, unit, taper = 'linear', bipolar,
   size = 'md', hideValue, hideLabel, changed, disabled, className,
 }: KnobProps) {
   const log = taper === 'log' && min > 0
@@ -189,7 +191,7 @@ export function Knob({
           className={cn('max-w-full truncate text-[10.5px] leading-tight no-select', changed ? 'text-fg' : 'text-fg-muted')}>{label}</span>
       )}
       {!hideValue && (
-        <ScrubValue value={value} onChange={onChange} min={min} max={max} step={step} defaultValue={defaultValue} fmt={fmt} unit={unit}
+        <ScrubValue value={value} onChange={onChange} min={min} max={max} step={step} defaultValue={defaultValue} fmt={fmt} parse={parse} unit={unit}
           label={`${label} value`} changed={changed} align="left" className={cn('h-[18px] justify-center px-0.5 text-[10.5px] [&>span]:text-center', dragging && 'text-signal')} />
       )}
     </div>

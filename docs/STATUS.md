@@ -80,7 +80,7 @@ Geist Mono code — landing + gallery only; product chrome stays Inter.
 1. Rafael: try a single eval case (see evals/README.md) and decide whether to run the suite.
 2. Remaining small items: shell overrides (batch/panels.tsx wrapper, animate KeyButton class) and photo/dither
    intake → kit `onReject` (wait for Branding to finish those shells); PERF-6 landing iframe off-screen pause
-   (Packaging owns src/landing); comment-pin initials label; synth knob value fields; video timeline labels.
+   (Packaging owns src/landing); comment-pin initials label (ui-design); video timeline labels.
 3. Untested areas worth one more agent later: undo storms in flows/journey/generate, photo HistoryList jump,
    canvas zoom extremes, real pointer lock.
 4. Launch decisions (Rafael): domain trompo.dev, repo trompo-dev/trompo, npm scope, publish — see docs/LAUNCH.md.

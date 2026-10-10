@@ -22,6 +22,7 @@ export function PKnob({ k, size = 'md', hideLabel, label, bipolar }: { k: string
       label={label ?? def.label ?? humanize(k)}
       hint={def.hint}
       fmt={def.fmt}
+      parse={def.parse}
       unit={def.unit}
       taper={LOG.has(k) && (def.min ?? 0) > 0 ? 'log' : 'linear'}
       bipolar={bipolar}
