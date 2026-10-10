@@ -74,10 +74,15 @@ const skillMd = read(`${SKILL}/SKILL.md`).replace(/^name: .*$/m, `name: ${site.s
 write(`${SKILL}/SKILL.md`, skillMd)
 
 const banner = (src) => `<!-- Copied from ${src} by \`npm run sync\`. Edit the source, not this file. -->\n\n`
-write(`${SKILL}/references/kit-api.md`, banner('docs/KIT.md') +
-  `> In a project that installed the kit from the registry, \`@kit\` means \`@/components/studio\` ` +
-  `(or alias it). Live examples of every shell: ${site.url}/ · source: ${repoURL}/tree/main/src/shells\n\n` +
-  read('docs/KIT.md'))
+// KIT.md is split so agents load less: the core API, and the specialist components (§6b onward) on their own.
+const kitDoc = read('docs/KIT.md')
+const cut = kitDoc.search(/^## 6b\./m)
+if (cut < 0) throw new Error('docs/KIT.md: expected a "## 6b." heading to split kit-api / kit-components')
+const kitNote = `> In a project that installed the kit from the registry, \`@kit\` means \`@/components/studio\` ` +
+  `(or alias it). Live examples of every shell: ${site.url}/ · source: ${repoURL}/tree/main/src/shells\n\n`
+write(`${SKILL}/references/kit-api.md`, banner('docs/KIT.md') + kitNote + kitDoc.slice(0, cut).trimEnd() +
+  `\n\nSpecialist components (knob, layers, key/track timelines, data grid, curves, effect stack, …): \`references/kit-components.md\`.\n`)
+write(`${SKILL}/references/kit-components.md`, banner('docs/KIT.md §6b–') + kitNote + kitDoc.slice(cut))
 write(`${SKILL}/assets/theme.css`, `/* Copied from src/kit/theme.css by \`npm run sync\`. */\n` + read('src/kit/theme.css'))
 write(`${SKILL}/assets/studio-bridge.js`, read('public/studio-bridge.js'))
 
