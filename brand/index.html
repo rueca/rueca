@@ -267,14 +267,139 @@
   .wdir .cols { display: grid; gap: 10px 20px; grid-template-columns: 1fr; font-size: 13px; }
   @media (min-width: 900px) { .wdir .cols { grid-template-columns: 1.4fr 1fr 1fr; } }
   .wdir .cols p { margin: 0; } .wdir .cols .k { display: block; font-size: 11px; color: var(--faint); margin-bottom: 3px; }
+  .bodypick { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .heroes3 { display: grid; gap: 14px; }
+  .hero3 { position: relative; overflow: hidden; border-radius: var(--r); container-type: inline-size; box-shadow: var(--shadow); }
+  .hero3 .navx { display: flex; align-items: center; gap: 18px; padding: 22px clamp(20px, 4cqw, 48px) 0; font-size: 14px; }
+  .hero3 .navx .sp { flex: 1; }
+  .hero3 .in { padding: clamp(28px, 6cqw, 72px) clamp(20px, 4cqw, 48px) clamp(32px, 6cqw, 64px); }
+  .hero3 .big { font-family: 'Gabarito', sans-serif; font-weight: 900; line-height: .88; letter-spacing: -0.045em; margin: 0; }
+  .hero3 .bodyx { font-size: clamp(16px, 1.5cqw, 19px); line-height: 1.55; max-width: 34em; margin: clamp(18px, 2.6cqw, 30px) 0 0; }
+  .hero3 .cta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: clamp(20px, 3cqw, 32px); }
+  .hero3 .b { height: 44px; padding: 0 20px; border-radius: 10px; display: grid; place-items: center; font-size: 15px; font-weight: 600; }
+  .hero3 .cmd { height: 44px; padding: 0 14px; border-radius: 10px; display: grid; place-items: center; font: 400 14px 'Geist Mono', monospace; white-space: nowrap; }
+  .hero3 .tag { position: absolute; right: 12px; top: 10px; font: 500 11px 'Geist Mono', monospace; opacity: .55; }
+  .princ { padding: 6px 0; display: grid; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .princ { grid-template-columns: 1fr 1fr; } }
+  .princ div { padding: 12px 18px; font-size: 13px; } .princ b { font-weight: 600; display: block; margin-bottom: 2px; } .princ p { margin: 0; color: var(--muted); }
+  .shots6 { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); margin-top: 14px; }
+  .shots6 a { display: block; border-radius: 8px; overflow: hidden; aspect-ratio: 16 / 10; box-shadow: inset 0 0 0 1px var(--line); position: relative; }
+  .shots6 img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+  .shots6 span { position: absolute; left: 6px; bottom: 6px; font-size: 11px; background: var(--panel); padding: 1px 6px; border-radius: 4px; }
+  .bodies { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); }
+  .bodyc { overflow: hidden; }
+  .bodyc .spec2 { padding: 26px 22px 20px; container-type: inline-size; }
+  .bodyc h4 { font-family: 'Gabarito', sans-serif; font-weight: 900; font-size: clamp(34px, 12cqw, 52px); line-height: .9; letter-spacing: -0.04em; margin: 0 0 14px; }
+  .bodyc .spec2 p { margin: 0; font-size: 16px; line-height: 1.55; }
+  .bodyc .uirow { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 14px; font-size: 14px; opacity: .75; }
+  .bodyc .meta2 { padding: 12px 22px 16px; border-top: 1px solid var(--line); font-size: 12.5px; display: grid; gap: 4px; }
+  .bodyc .meta2 b { font-size: 13px; font-weight: 600; }
+  .phs { padding: 22px; display: grid; gap: 22px; }
+  .phs .row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end; }
+  .phs figure { margin: 0; display: grid; gap: 6px; }
+  .phs figure svg, .phs figure img { display: block; height: auto; box-shadow: 0 0 0 1px var(--line); }
+  .phs figcaption { font: 11px "Geist Mono", monospace; color: var(--faint); }
+  .socials { display: grid; gap: 14px; }
+  .socials .soc { border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow); }
+  .socials .soc svg { display: block; width: 100%; height: auto; }
+  .socials .lbl { font: 11px "Geist Mono", monospace; color: var(--faint); margin: 6px 2px 0; }
+  .socials .two { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 900px) { .socials .two { grid-template-columns: 1fr 1fr; } }
+  .wv2 { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 1000px) { .wv2 { grid-template-columns: 1.58fr 1fr; } }
+  .wv2 > div { border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow); }
+  .wv2 svg { display: block; width: 100%; height: auto; }
+  .trove { display: grid; gap: 22px; }
+  .trove .grp b { display: block; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .trove .row { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+  .trove a { display: block; text-decoration: none; border-radius: 10px; overflow: hidden; background: var(--panel); box-shadow: var(--shadow); }
+  .trove a .im { aspect-ratio: 4 / 3; background: var(--well) center / cover no-repeat; }
+  .trove a p { margin: 0; padding: 9px 11px 11px; font-size: 12px; line-height: 1.45; color: var(--muted); }
+  .rtrove { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 330px), 1fr)); }
+  .rpat { padding: 16px 18px 16px; display: grid; gap: 6px; align-content: start; scroll-margin-top: 90px; }
+  .rpat .k { font: 500 11px "Geist Mono", monospace; color: var(--faint); }
+  .rpat b { font-weight: 600; font-size: 14.5px; }
+  .rpat p { margin: 0; color: var(--muted); font-size: 13px; }
+  .rpat ul { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 12.5px; }
+  .rpat li::before { content: "↗ "; color: var(--faint); }
+  .rpat a { text-decoration: none; border-bottom: 1px solid var(--line-strong); }
+  .rpat a:hover { border-color: var(--fg); }
+  .rwatch { display: grid; gap: 8px; margin: 14px 0 0; max-width: 820px; }
+  .rwatch p { margin: 0; padding: 10px 14px; border-left: 2px solid var(--warn); background: var(--panel); border-radius: 0 8px 8px 0; font-size: 13px; color: var(--muted); }
+  .rwatch a { color: var(--fg); white-space: nowrap; }
+  .rtags { display: flex; flex-wrap: wrap; gap: 6px; margin: -8px 0 18px; }
+  .rdirs { display: grid; gap: 22px; }
+  .rdir { overflow: hidden; scroll-margin-top: 90px; }
+  .rdir .hd { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; padding: 16px 18px 12px; }
+  .rdir .hd .idx { font: 500 12px "Geist Mono", monospace; color: var(--faint); }
+  .rdir .hd b { font-weight: 600; font-size: 17px; }
+  .rdir .hd .gl { color: var(--muted); font-size: 13px; font-style: italic; }
+  .rdir .hd .ln { margin-left: auto; color: var(--muted); font-size: 13px; }
+  .rdir .stage { margin: 0 12px; border-radius: 10px; display: grid; gap: 18px; padding: 24px; grid-template-columns: 1fr; container-type: inline-size; }
+  @media (min-width: 980px) { .rdir .stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); align-items: center; } }
+  .rdir .copy { display: grid; gap: 12px; align-content: center; }
+  .rdir .wm { font-size: 44px; line-height: .9; }
+  .rdir h4 { margin: 6px 0 0; font-size: clamp(30px, 4.2vw, 46px); line-height: 1.02; font-weight: inherit; text-wrap: balance; }
+  .rdir .copy p { margin: 0; font-size: 16px; line-height: 1.55; max-width: 34em; }
+  .rdir .cta { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .rdir .cta .b { height: 38px; padding: 0 16px; border-radius: 6px; display: grid; place-items: center; font-size: 14px; }
+  .rdir .cta .c { height: 38px; padding: 0 12px; border-radius: 6px; display: grid; place-items: center; font-size: 13px; white-space: nowrap; max-width: 100%; overflow: hidden; }
+  .rdir .art svg { display: block; width: 100%; height: auto; border-radius: 6px; }
+  .rdir dl { margin: 0; padding: 16px 18px 4px; display: grid; gap: 12px 24px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); font-size: 13px; }
+  .rdir dt { font-size: 11.5px; color: var(--faint); margin-bottom: 3px; }
+  .rdir dd { margin: 0; }
+  .rdir .from { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 12px 18px 18px; font-size: 11.5px; color: var(--faint); }
+  .rdir .from a { text-decoration: none; padding: 2px 9px; border-radius: 99px; background: var(--hover); color: var(--muted); }
+  .rpal { display: grid; gap: 18px; padding: 16px; margin-top: 14px; }
+  .rpal .pgl { display: block; font-size: 11.5px; color: var(--faint); margin-bottom: 8px; }
+  .rpal .pgs { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr)); gap: 16px; }
+  .rpal .fg { display: flex; align-items: center; gap: 5px; } .rpal .fg i { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+  .ramps { display: grid; gap: 6px; }
+  .rr { display: grid; grid-template-columns: 150px repeat(10, minmax(0, 1fr)); gap: 3px; align-items: stretch; }
+  .rr .rn { display: grid; font-size: 12px; align-content: center; } .rr .rn b { font-weight: 600; } .rr .rn em { font-style: normal; color: var(--faint); font-size: 11px; }
+  .rr .rc { height: 38px; border-radius: 5px; display: flex; align-items: flex-end; padding: 3px 5px; box-shadow: inset 0 0 0 1px rgba(0,0,0,.05); }
+  .rr .rc i { font: 9.5px "Geist Mono", monospace; font-style: normal; opacity: .8; }
+  @media (max-width: 640px) { .rr { grid-template-columns: repeat(10, minmax(0, 1fr)); } .rr .rn { grid-column: 1 / -1; } }
+  .rpaltop { display: grid; gap: 14px; grid-template-columns: 1fr; }
+  @media (min-width: 980px) { .rpaltop { grid-template-columns: 1.5fr 1fr; } }
+  .rpaluse { overflow: hidden; } .rpaluse svg { display: block; width: 100%; height: auto; }
+  .rpalrules { padding: 16px 18px; display: grid; gap: 12px; align-content: start; }
+  .rpalrules b { font-weight: 600; font-size: 13.5px; } .rpalrules p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  .rpal .sw { display: grid; gap: 2px; font-size: 12px; }
+  .rpal .chips { display: grid; grid-template-columns: 1fr 1fr; height: 64px; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px var(--line); margin-bottom: 6px; }
+  .rpal b { font-size: 13.5px; font-weight: 600; }
+  .rpal code { font: 11px "Geist Mono", monospace; color: var(--faint); background: none; padding: 0; }
+  .rpal em { font-style: normal; color: var(--muted); }
+  .rpairs { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 360px), 1fr)); }
+  .rpair { overflow: hidden; display: flex; flex-direction: column; }
+  .rpair .sp { margin: 10px 10px 0; border-radius: 8px; padding: 22px 20px 20px; display: grid; gap: 8px; }
+  .rpair .sp .wm { font-size: 46px; line-height: .9; }
+  .rpair .sp .h { font-size: 26px; line-height: 1.08; text-wrap: balance; }
+  .rpair .sp .bd { font-size: 14px; line-height: 1.5; }
+  .rpair .tx { padding: 12px 16px 16px; display: grid; gap: 6px; font-size: 12.5px; }
+  .rpair .tx p { margin: 0; }
+  .rpair .nm { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+  .rpair .nm b { font-size: 14px; font-weight: 600; } .rpair .nm span { color: var(--muted); } .rpair .nm .rec { color: #fff; }
+  .rpair .mk { color: var(--faint); } .rpair .mk a { color: var(--muted); }
+  .rpair .trial { font: 10.5px "Geist Mono", monospace; color: var(--faint); border: 1px solid var(--line-strong); border-radius: 99px; padding: 1px 7px; }
+  .rtry { display: flex; flex-wrap: wrap; gap: 0 18px; }
+  .rsel select { flex: 1; height: 34px; border-radius: 8px; border: 0; padding: 0 10px; background: var(--panel); color: var(--fg); font: inherit; box-shadow: var(--shadow); }
+  .rdir .cta .hn { line-height: 1; white-space: nowrap; }
+  .rhands { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
+  .rh { text-align: left; border: 0; padding: 10px 10px 14px; display: grid; gap: 6px; cursor: pointer; font: inherit; color: inherit; box-shadow: var(--shadow), inset 0 0 0 2px transparent; }
+  .rh.on { box-shadow: var(--shadow), inset 0 0 0 2px var(--accent); }
+  .rh .s { border-radius: 7px; padding: 14px 12px; line-height: 1.25; }
+  .rh .t { display: flex; gap: 8px; align-items: baseline; padding: 0 4px; } .rh .t b { font-weight: 600; font-size: 13.5px; }
+  .rh .d { padding: 0 4px; color: var(--muted); font-size: 12.5px; }
+  .rhex p b { display: block; color: var(--fg); font-weight: 500; margin-bottom: 4px; } .rpair .echo { color: var(--muted); font-style: italic; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="crumb">Brand board <span>Trompo · chosen 9 Oct 2026</span></div>
+    <div class="crumb">Brand board <span>Rueca · renamed 11 Oct 2026</span></div>
     <nav class="nav" aria-label="Sections">
-      <a href="#wire">Wireframe</a><a href="#type">Type</a><a href="#favourites">Favourites</a><a href="#round5">Round 5</a><a href="#round4">Shorter</a><a href="#round3">Round 3</a><a href="#round2">Round 2</a><a href="#positioning">Positioning</a><a href="#names">Names</a><a href="#shortlist">Round 1</a><a href="#voice">Voice</a><a href="#next">Next</a>
+      <a href="#rueca">Rueca</a><a href="#paper">Paper</a><a href="#scale">Type scale</a><a href="#wire">Wireframe</a><a href="#type">Type</a><a href="#favourites">Favourites</a><a href="#round5">Round 5</a><a href="#round4">Shorter</a><a href="#round3">Round 3</a><a href="#round2">Round 2</a><a href="#positioning">Positioning</a><a href="#names">Names</a><a href="#shortlist">Round 1</a><a href="#voice">Voice</a><a href="#next">Next</a>
     </nav>
     <button class="btn solid" id="theme" type="button" aria-label="Toggle theme (T)">Theme</button>
   </header>
@@ -289,12 +414,75 @@
     <div class="panel call"><span class="k">Your call · 3</span><b>Approve the voice</b><p>Seven rules and the do/don’t pairs. If one doesn’t sound like you, cut it.</p></div>
   </div>
 
+  <section id="rueca" style="margin-top:56px">
+    <div class="sh"><span class="n">R</span><h2>Rueca: the rustic rethink</h2><p>11 Oct 2026 · grounded in your Trove</p></div>
+    <p class="lede" style="margin-bottom:18px">Trompo is retired. Rueca is the spinning wheel that turns raw fibre into thread, and you asked for something more rustic, probably with a serif display. Before drawing anything I read about 90 of your saves across brand identity, type, textiles, palettes and craft. Seven patterns repeat, and everything below is built from them, with links back to the saves. The pictures are stand-ins, because you’re drawing the mark and imagery by hand. The hero line is now “Spin up a real tool.” (chosen 11 Oct).</p>
+    <h3 class="sub" style="margin-top:0">What your Trove keeps saying</h3>
+    <div class="rtrove" id="rtrove"></div>
+    <div class="rwatch" id="rwatch"></div>
+    <h3 class="sub">Three directions, one world</h3>
+    <div class="rtry"><label class="tryline"><span>Headline</span><input id="ruecaHead" type="text" value="Spin up a real tool." maxlength="60" /></label>
+    <label class="tryline rsel"><span>Display</span><select id="rdisplay" aria-label="Display font for the three directions"></select></label>
+    <label class="tryline rsel"><span>Hand</span><select id="rhand" aria-label="Handwriting for labels and notes"></select></label></div>
+    <div class="rtags" id="rtags" role="group" aria-label="Try a tagline"></div>
+    <div class="rdirs" id="rdirs"></div>
+    <h3 class="sub">Palette v2: rustic meets modern, “Figma made in the 90s”</h3>
+    <p class="note" style="margin:-6px 2px 12px;max-width:820px">The ground and ink stay rustic: wool paper, walnut, madder oxblood, plus the platinum grey of a 1997 Mac window. The brights are Figma’s five hues and a yolk yellow, printed flat and a little chalky instead of glowing, each named after the natural dye that makes it. They’re tuned against colours sampled from ayushsoni_io and HEX’s work (Cardinal, the legal-tech system, the Klein biotech set). Left chip is light, right chip is dark.</p>
+    <div class="rpaltop"><div class="panel rpaluse" id="rpaluse"></div><div class="panel princ rpalrules" id="rpalrules"></div></div>
+    <div class="panel rpal" id="rpal"></div>
+    <h3 class="sub">Handwriting instead of mono</h3>
+    <p class="note" style="margin:-6px 2px 12px;max-width:820px">Labels, measurements, captions and red-pen notes are now handwritten. All seven options are free and open-licensed, so the open-source site can ship them. Code stays in Geist Mono, because a command people copy has to be unambiguous. Click one to apply it everywhere above, or use the Hand menu.</p>
+    <div class="rhands" id="rhands"></div>
+    <h3 class="sub">Paid display serifs: trials already on your Mac</h3>
+    <p class="note" style="margin:-6px 2px 12px">You had about 1,650 fonts installed, including foundry trials. These seven fit the brief best. They load from your own font folder, so they only render on this machine and nothing is downloaded or shipped. Trials are for evaluation only, and the site would need a licence. Use the Display menu above to put any of them into the three directions.</p>
+    <div class="rpairs" id="rpaid"></div>
+    <p class="note" id="rpaidalso" style="margin:12px 2px 0;max-width:820px"></p>
+    <h3 class="sub">All seven free serif pairings</h3>
+    <p class="note" style="margin:-6px 2px 12px">Each one is matched to the save it echoes. They use the headline above and follow the board’s theme.</p>
+    <div class="rpairs" id="rpairs"></div>
+    <h3 class="sub">From HEX’s swipe file</h3>
+    <p class="note" style="margin:-6px 2px 12px">swipe.hex.inc, an agency’s daily feed of AI and dev-tool brand work. These are the pieces that bear on Rueca, with what to take from each.</p>
+    <div class="trove"><div class="grp"><div class="row rhex" id="rhex"></div></div></div>
+    <h3 class="sub">The saves themselves</h3>
+    <div class="trove" id="troverefs"></div>
+  </section>
+
+  <section id="paper" style="margin-top:56px">
+    <div class="sh"><span class="n">P</span><h2>Paper: their wireframed look, and socials</h2><p>paper.design · X · YouTube (Instagram is behind a login)</p></div>
+    <h3 class="sub" style="margin-top:0">Trompo, drawn the same way: social mock-ups</h3>
+    <div class="socials" id="socials"></div>
+    <h3 class="sub">What Paper does</h3>
+    <div class="panel princ" id="plessons"></div>
+    <div class="shots6" id="pshots"></div>
+  </section>
+
+  <section id="scale" style="margin-top:56px">
+    <div class="sh"><span class="n">Aa</span><h2>Type at scale: chosen, stacked hero + Hanken Grotesk</h2><p>Measured 10 Oct 2026 · 1440px viewport</p></div>
+    <p class="lede" style="margin-bottom:18px">How brands use big geometric display type (Spotify, Uber, Wise and others), measured, then applied to Trompo. Switch the body font to try the six neutral candidates in every mock-up.</p>
+    <div class="bodypick" role="group" aria-label="Body font" id="bodypick"></div>
+    <div class="heroes3" id="heroes3"></div>
+    <h3 class="sub">What the big-type brands do</h3>
+    <div class="panel princ" id="princ"></div>
+    <div class="panel tbl" style="margin-top:14px"><table><thead><tr><th>Brand</th><th>Font</th><th>Size</th><th>Weight</th><th>Tracking</th><th>Line height</th><th>vs body</th><th>Note</th></tr></thead><tbody id="measures"></tbody></table></div>
+    <div class="shots6" id="scaleshots"></div>
+    <h3 class="sub">Body font: six neutral candidates</h3>
+    <div class="bodies" id="bodies"></div>
+  </section>
+
   <section id="wire" style="margin-top:56px">
-    <div class="sh"><span class="n">⌗</span><h2>Wireframe identity: research</h2><p>9 Oct 2026 · screenshots are local only (git-ignored)</p></div>
+    <div class="sh"><span class="n">⌗</span><h2>Wireframe identity: chosen, “the harness, drawn”</h2><p>9 Oct 2026 · screenshots are local only (git-ignored)</p></div>
     <p class="lede" id="wireIdea" style="margin-bottom:22px"></p>
-    <h3 class="sub" style="margin-top:0">The same artboard, four ways</h3>
+    <h3 class="sub" style="margin-top:0">v2 · polished (10 Oct): one ink, red pen, drafting conventions</h3>
+    <div class="wv2" id="wv2"></div>
+    <div class="panel princ" id="wrules" style="margin-top:14px"></div>
+    <div class="shots6" id="wshots2"></div>
+    <h3 class="sub">v1 · the first pass, kept for comparison</h3>
+    <h3 class="sub" style="margin-top:6px">The same artboard, four ways (v1)</h3>
     <div class="wmocks" id="wmocks"></div>
-    <h3 class="sub">Six directions found</h3>
+    <h3 class="sub">Trompo placeholders</h3>
+    <p class="note" style="margin:-6px 2px 14px">Two kinds that work together. The <b>blank sheet</b> stands in for content that hasn’t arrived. Its punch holes are real cut-outs on the long edge, and its caption names the slot. The <b>dithered top</b> is the signature image wherever a picture should be. Rafael will supply the final image. Files: <code>brand/trompo/placeholders/</code> · generators: <code>brand/tools/blank-card.mjs</code>, <code>dither-trompo.mjs</code>.</p>
+    <div class="panel phs" id="phs"></div>
+    <h3 class="sub">Seven directions found</h3>
     <div class="wdirs" id="wdirs"></div>
     <h3 class="sub">Avoid</h3>
     <div class="wdirs" id="wavoid"></div>
@@ -411,7 +599,10 @@
 
 <script type="module">
   import { marks } from './marks.js'
-  import { names, alsoChecked, shortlist, positioning, voice, checkedOn, round2Lenses, names2, alsoChecked2, shortlist2, stories, round3Lenses, names3, alsoChecked3, shortlist3, stories3, favourites, names4, alsoChecked4, shortlist4, names5, alsoChecked5, shortlist5, pairings, typeLink, wireframeIdea, wireframeDirections, wireframeAvoid, wireframeProposal } from './data.js'
+  import { blankCard } from './placeholders.js'
+  import { renderRueca, wireRueca } from './rueca.js'
+  import { landingSheet, markSheet } from './wire.js'
+  import { names, alsoChecked, shortlist, positioning, voice, checkedOn, round2Lenses, names2, alsoChecked2, shortlist2, stories, round3Lenses, names3, alsoChecked3, shortlist3, stories3, favourites, names4, alsoChecked4, shortlist4, names5, alsoChecked5, shortlist5, pairings, typeLink, wireframeIdea, wireframeDirections, wireframeAvoid, wireframeProposal, scaleMeasures, scalePrinciples, bodyFonts, scaleLink, paperRefs, paperLessons, wireRules, wire2Refs, troveRefs } from './data.js'
 
   const $ = (id) => document.getElementById(id)
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
@@ -513,7 +704,118 @@
       </article>`
     }).join('')
   }
-  const renderAll = () => { renderCands(); renderCands(shortlist2, names2, 'cands2'); renderCands(shortlist3, names3, 'cands3'); renderCands(shortlist4, names4, 'cands4'); renderCands(shortlist5, names5, 'cands5'); renderFavs(); renderDecision(); renderPairs(); renderWire() }
+  const renderAll = () => { renderCands(); renderCands(shortlist2, names2, 'cands2'); renderCands(shortlist3, names3, 'cands3'); renderCands(shortlist4, names4, 'cands4'); renderCands(shortlist5, names5, 'cands5'); renderFavs(); renderDecision(); renderPairs(); renderWire(); renderScale(); renderPlaceholders(); renderSocials(); renderWire2(); renderRueca(isDark()) }
+  function renderWire2() {
+    const th = isDark() ? 'dark' : 'light'
+    $('wv2').innerHTML = `<div>${landingSheet(th)}</div><div>${markSheet(th)}</div>`
+  }
+  $('wrules').innerHTML = wireRules.map(([t, d]) => `<div><b>${esc(t)}</b><p>${esc(d)}</p></div>`).join('')
+  $('wshots2').innerHTML = wire2Refs.map(([r, l]) => `<a href="references/wire2/${r}.png" target="_blank" rel="noopener"><img loading="lazy" src="references/wire2/${r}.png" alt="${esc(l)}"><span>${esc(l)}</span></a>`).join('')
+  /* Paper-inspired socials: ruled paper, rulers, arcs, and the top as a window holding different materials */
+  function renderSocials() {
+    const ink = '#1C1A19', paper = '#F6F1EA', pink = '#D1006F', turq = '#1E9AA0', wood = '#C58B4E'
+    // the top's silhouette in a 32-unit box (stem + body)
+    const TOP = 'M14.4 2.5h3.2v6h-3.2z M5.5 12.5 C5.5 9 10 7.5 16 7.5 C22 7.5 26.5 9 26.5 12.5 C26.5 17.5 20 23.5 16 29.5 C12 23.5 5.5 17.5 5.5 12.5 Z'
+    const BAND = 'M5.7 11.2 H26.3 C26.5 12 26.5 13 26.3 14 H5.7 C5.5 13 5.5 12 5.7 11.2 Z'
+    const scene = (W, H, id) => {
+      // ruled paper: faint grain, dashed column guides, rulers on two edges, one guide arc
+      let ticks = ''; for (let y = 0; y < H; y += 8) ticks += `<line x1="0" x2="${y % 40 === 0 ? 14 : 8}" y1="${y}" y2="${y}" stroke="${ink}" stroke-opacity=".18" stroke-width="1"/>`
+      let tx = ''; for (let x = 0; x < W; x += 8) tx += `<line y1="0" y2="${x % 40 === 0 ? 14 : 8}" x1="${x}" x2="${x}" stroke="${ink}" stroke-opacity=".18" stroke-width="1"/>`
+      let cols = ''; for (let x = W / 8; x < W; x += W / 8) cols += `<line x1="${x}" x2="${x}" y1="0" y2="${H}" stroke="${ink}" stroke-opacity=".07" stroke-dasharray="4 5"/>`
+      return `<defs><filter id="${id}g"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.11  0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 .06 0"/></filter></defs>
+        <rect width="${W}" height="${H}" fill="${paper}"/><rect width="${W}" height="${H}" filter="url(#${id}g)"/>${cols}${ticks}${tx}
+        <circle cx="${W * 0.08}" cy="${H * 1.9}" r="${H * 1.75}" fill="none" stroke="${turq}" stroke-opacity=".45" stroke-width="1.2"/>`
+    }
+    // material fills for the window
+    const mats = (id) => `
+      <pattern id="${id}half" width="1.15" height="1.15" patternUnits="userSpaceOnUse" patternTransform="rotate(30)"><circle cx=".575" cy=".575" r=".4" fill="${ink}"/></pattern>
+      <pattern id="${id}check" width=".9" height=".9" patternUnits="userSpaceOnUse"><rect width=".45" height=".45" fill="${ink}"/><rect x=".45" y=".45" width=".45" height=".45" fill="${ink}"/></pattern>
+      <linearGradient id="${id}fade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff"/><stop offset=".45" stop-color="#fff" stop-opacity=".2"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      <pattern id="${id}grain" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="${wood}"/><path d="M0 1.5h6M0 4.2h6" stroke="#9A6534" stroke-width=".9" stroke-opacity=".7"/></pattern>`
+    const win = (x, y, size, fill, extra = '') => `<g transform="translate(${x} ${y}) scale(${size / 32})">${fill}${extra}</g>`
+    const W = 1500, H = 500, id = 'xb'
+    const s = 150, y0 = 175, xs = [200, 420, 640, 860, 1080, 1300].map((x) => x - s / 2)
+    const clip = (n) => `<clipPath id="${id}c${n}"><path d="${TOP}"/></clipPath>`
+    const banner = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${scene(W, H, id)}<defs>${mats(id)}${[0, 1, 2, 3, 4, 5].map(clip).join('')}</defs>
+      ${win(xs[0], y0, s, `<path d="${TOP}" fill="${ink}"/><path d="${BAND}" fill="${pink}"/>`)}
+      ${win(xs[1], y0, s, `<g clip-path="url(#${id}c1)"><rect width="32" height="32" fill="url(#${id}half)"/></g>`)}
+      ${win(xs[2], y0, s, `<g style="mix-blend-mode:multiply"><path d="${TOP}" fill="${pink}" transform="translate(-1.4 -.8)"/><path d="${TOP}" fill="${turq}" fill-opacity=".85" transform="translate(1.2 .9)"/></g>`)}
+      ${win(xs[3], y0, s, `<g clip-path="url(#${id}c3)"><rect width="32" height="32" fill="url(#${id}check)"/><rect width="32" height="32" fill="url(#${id}fade)"/><path d="${BAND}" fill="${ink}"/></g>`)}
+      ${win(xs[4], y0, s, `<g clip-path="url(#${id}c4)"><rect width="32" height="32" fill="url(#${id}grain)"/><path d="${BAND}" fill="${ink}" opacity=".8"/></g>`)}
+      ${win(xs[5], y0, s, `<path d="${TOP}" fill="#E8E1D6"/><g clip-path="url(#${id}c5)"><line x1="0" y1="0" x2="32" y2="32" stroke="${ink}" stroke-opacity=".18" stroke-width=".3"/></g><circle cx="9" cy="12.6" r=".9" fill="${paper}"/><circle cx="23" cy="12.6" r=".9" fill="${paper}"/>`)}
+      ${['solid', 'halftone', 'overprint', 'dither', 'wood', 'blank sheet'].map((t, i) => `<text x="${xs[i] + s / 2}" y="${y0 + s + 34}" text-anchor="middle" font-family="'Geist Mono',monospace" font-size="13" fill="${ink}" fill-opacity=".5">${t}</text>`).join('')}
+      <rect x="${xs[0] - 22}" y="${y0 - 22}" width="${xs[5] + s + 44 - xs[0]}" height="${s + 44}" fill="none" stroke="${turq}" stroke-width="1"/>
+      ${[[xs[0] - 22, y0 - 22], [xs[5] + s + 22, y0 - 22], [xs[0] - 22, y0 + s + 22], [xs[5] + s + 22, y0 + s + 22]].map(([x, y]) => `<rect x="${x - 4}" y="${y - 4}" width="8" height="8" fill="${paper}" stroke="${turq}"/>`).join('')}
+      <text x="${xs[0] - 22}" y="${y0 - 34}" font-family="'Geist Mono',monospace" font-size="13" fill="${turq}">trompo · 6 materials</text></svg>`
+    // post / thumbnail template, 1200×675
+    const PW = 1200, PH = 675, pid = 'po'
+    const post = (head, label, dark) => `<svg viewBox="0 0 ${PW} ${PH}" xmlns="http://www.w3.org/2000/svg">${scene(PW, PH, pid + (dark ? 'd' : 'l'))}
+      ${dark ? `<rect width="${PW}" height="${PH}" fill="${ink}" opacity=".96"/>` : ''}
+      <g transform="translate(74 70) scale(1.6)">${marks.trompo(dark ? { ink: paper, acc: '#FF3EA5', bg: ink } : { ink, acc: pink, bg: paper }, 32).replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g>
+      <text x="138" y="108" font-family="Gabarito" font-weight="800" font-size="38" letter-spacing="-1.3" fill="${dark ? paper : ink}">trompo</text>
+      <text x="${PW - 74}" y="104" text-anchor="end" font-family="'Geist Mono',monospace" font-size="18" fill="${dark ? paper : ink}" fill-opacity=".55">${label}</text>
+      ${head.map((l, i) => `<text x="70" y="${330 + i * 150}" font-family="Gabarito" font-weight="900" font-size="168" letter-spacing="-7.5" fill="${dark ? paper : ink}">${l}</text>`).join('')}
+      <g transform="translate(${PW - 360} ${PH - 330})"><defs><filter id="${pid}k${dark ? 'd' : 'l'}" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values="${dark
+        ? '0 0 0 0 0.965  0 0 0 0 0.945  0 0 0 0 0.918  0 1.28 0 0 -0.13'
+        : '0 0 0 0 0.82  0 0 0 0 0  0 0 0 0 0.435  0 -1.1 0 0 1.04'}"/></filter></defs>
+      <image href="trompo/placeholders/trompo-${dark ? 'night' : 'pink'}-1x1.png" width="290" height="290" filter="url(#${pid}k${dark ? 'd' : 'l'})"/></g>
+      <line x1="70" x2="${PW - 70}" y1="${PH - 40}" y2="${PH - 40}" stroke="${dark ? paper : ink}" stroke-opacity=".2"/>
+      <text x="70" y="${PH - 52}" font-family="'Geist Mono',monospace" font-size="16" fill="${dark ? paper : ink}" fill-opacity=".5">trompo-dev/trompo</text></svg>`
+    $('socials').innerHTML = `<div class="soc">${banner}</div><p class="lbl">X / YouTube banner · the top as a window holding six materials, on ruled paper with rulers, column guides, a guide arc and selection handles</p>
+      <div class="two"><div><div class="soc">${post(['Give it', 'a spin.'], 'launch', false)}</div><p class="lbl">post / thumbnail · light</p></div>
+      <div><div class="soc">${post(['New in', 'October.'], 'changelog · oct 2026', true)}</div><p class="lbl">post / thumbnail · dark (changelog)</p></div></div>`
+  }
+  $('plessons').innerHTML = paperLessons.map(([t, d]) => `<div><b>${esc(t)}</b><p>${esc(d)}</p></div>`).join('')
+  $('pshots').innerHTML = paperRefs.map((r) => `<a href="references/paper/${r.ref}.png" target="_blank" rel="noopener" title="${esc(r.label)}"><img loading="lazy" src="references/paper/${r.ref}.png" alt="${esc(r.label)}"><span>${esc(r.label.split(':')[0])}</span></a>`).join('')
+  function renderPlaceholders() {
+    const dark = isDark(), theme = dark ? 'dark' : 'light'
+    const page = dark ? '#1C1A19' : '#F6F1EA'
+    const cards = [['16:9', 16, 9, 220], ['4:3', 4, 3, 180], ['1:1', 1, 1, 150], ['3:4', 3, 4, 150], ['9:16', 9, 16, 112]]
+    const tops = dark ? ['night-4x3', 'night-1x1', 'night-3x4'] : ['ink-4x3', 'pink-1x1', 'ink-3x4']
+    $('phs').style.background = page
+    $('phs').innerHTML = `<div class="row">${cards.map(([r, a, b2, wpx]) => {
+        const W = 640, H = Math.round((W * b2) / a)
+        return `<figure style="width:${wpx}px">${blankCard({ w: W, h: H, theme, ratio: r }).replace(/width="\d+" height="\d+"/, `width="${wpx}" height="${Math.round((wpx * b2) / a)}"`)}<figcaption>blank · ${r}</figcaption></figure>`
+      }).join('')}</div>
+      <div class="row">${tops.map((t) => `<figure style="width:${t.endsWith('4x3') ? 220 : t.endsWith('1x1') ? 170 : 150}px"><img src="trompo/placeholders/trompo-${t}.png" alt="dithered trompo ${t}" style="width:100%;image-rendering:pixelated"><figcaption>top · ${t.replace('-', ' · ')}</figcaption></figure>`).join('')}</div>`
+  }
+  /* Type at scale */
+  { const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = scaleLink; document.head.append(l) }
+  let bodyFace = (() => { try { return localStorage.getItem('brand:bodyFace') || 'Hanken Grotesk' } catch { return 'Hanken Grotesk' } })()
+  function renderScale() {
+    const dark = isDark()
+    const ink = '#1C1A19', paper = '#F6F1EA', pink = '#D1006F'
+    const BF = `'${bodyFace}', sans-serif`
+    $('bodypick').innerHTML = bodyFonts.map((f) => `<button class="chip" type="button" data-bf="${f.family}" aria-pressed="${f.family === bodyFace}" style="font-family:'${f.family}'">${f.family}${f.chosen ? ' ✓' : ''}</button>`).join('')
+    const nav = (fg, mk) => `<div class="navx" style="font-family:${BF};color:${fg}">${marks.trompo(mk, 26)}<span style="font:800 22px 'Gabarito',sans-serif;letter-spacing:-0.035em;margin-left:-8px">trompo</span><span class="sp"></span><span>How it works</span><span>Shells</span><span>Kit</span><span>GitHub</span></div>`
+    const L = { ink, acc: pink, bg: paper }, D = { ink: paper, acc: '#FF3EA5', bg: ink }
+    $('heroes3').innerHTML = [
+      // 1 · stacked & heavy (Spotify Premium / Artists)
+      `<div class="hero3" style="background:${dark ? ink : paper};color:${dark ? paper : ink}"><span class="tag">stacked · Spotify</span>${nav(dark ? paper : ink, dark ? D : L)}
+        <div class="in"><h4 class="big" style="font-size:clamp(56px,12.5cqw,168px)">Give it<br>a spin.</h4>
+        <p class="bodyx" style="font-family:${BF};opacity:.72">Put a real design tool around the prototype you already have: inspector, timeline, layers and export, in any runtime.</p>
+        <div class="cta"><span class="b" style="font-family:${BF};background:${pink};color:#fff">Install</span><span class="cmd" style="background:${dark ? 'rgba(246,241,234,.08)' : 'rgba(28,26,25,.06)'}">npx skills add trompo-dev/trompo</span></div></div></div>`,
+      // 2 · colour field (Wise / Cash App)
+      `<div class="hero3" style="background:${pink};color:#fff;text-align:center"><span class="tag">colour field · Wise</span>${nav('#fff', { ink: '#fff', acc: ink, bg: pink })}
+        <div class="in"><h4 class="big" style="font-size:clamp(46px,9.6cqw,132px)">A design tool<br>around anything.</h4>
+        <p class="bodyx" style="font-family:${BF};margin-left:auto;margin-right:auto;opacity:.9">Inspector, timeline, layers and export, dropped in around any prototype. Installed piece by piece, yours to keep.</p>
+        <div class="cta" style="justify-content:center"><span class="b" style="font-family:${BF};background:#fff;color:${ink}">Install</span><span class="cmd" style="background:rgba(255,255,255,.14)">npx skills add trompo-dev/trompo</span></div></div></div>`,
+      // 3 · the name bleeds (Spotify For the Record / Lineto)
+      `<div class="hero3" style="background:${ink};color:${paper};min-height:clamp(380px,48cqw,600px)"><span class="tag">bleed · Lineto</span>${nav(paper, D)}
+        <div class="in" style="max-width:640px"><h4 class="big" style="font-size:clamp(34px,4.6cqw,60px);line-height:.95;letter-spacing:-0.035em">Every prototype<br>wants to spin.</h4>
+        <p class="bodyx" style="font-family:${BF};opacity:.72">The harness drops in around what you already have and stays out of the way.</p></div>
+        <div style="position:absolute;left:clamp(14px,3cqw,40px);right:0;bottom:-0.13em;font:800 clamp(110px,27.5cqw,380px)/0.8 'Gabarito',sans-serif;letter-spacing:-0.055em;color:${paper};white-space:nowrap;display:flex;align-items:flex-end;gap:.04em">trompo<span style="color:#FF3EA5">.</span></div></div>`,
+    ].join('')
+    $('bodies').innerHTML = bodyFonts.map((f) => `<div class="panel bodyc"><div class="spec2" style="background:${dark ? ink : paper};color:${dark ? paper : ink}">
+        <h4>Give it a spin.</h4>
+        <p style="font-family:'${f.family}',sans-serif;opacity:.78">Put a real design tool around the prototype you already have: inspector, timeline, layers and export, in any runtime. Installed component by component, so the code stays yours.</p>
+        <div class="uirow" style="font-family:'${f.family}',sans-serif"><span>How it works</span><span>Shells</span><span>Install</span><span style="font-weight:600">Read the docs →</span></div></div>
+      <div class="meta2"><b>${esc(f.family)}${f.chosen ? ' · chosen' : ''} <span class="faint" style="font-weight:400">· ${f.kb} KB</span></b><span class="faint">${esc(f.makers)}</span><span class="muted">${esc(f.note)}</span></div></div>`).join('')
+  }
+  $('bodypick').addEventListener('click', (e) => { const b = e.target.closest('[data-bf]'); if (!b) return; bodyFace = b.dataset.bf; try { localStorage.setItem('brand:bodyFace', bodyFace) } catch {} ; renderScale() })
+  $('princ').innerHTML = scalePrinciples.map(([t, d]) => `<div><b>${esc(t)}</b><p>${esc(d)}</p></div>`).join('')
+  $('measures').innerHTML = scaleMeasures.map((m) => `<tr${m.ref ? '' : ' class="short"'}><td class="nm"><b>${esc(m.who)}</b></td><td>${esc(m.font)}</td><td class="mono">${m.px}px</td><td class="mono">${m.weight}</td><td class="mono">${m.tracking}</td><td class="mono">${m.leading}</td><td class="mono">${m.ratio}</td><td class="web">${esc(m.note)}</td></tr>`).join('')
+  $('scaleshots').innerHTML = scaleMeasures.filter((m) => m.ref).map((m) => `<a href="references/type-scale/${m.ref}.png" target="_blank" rel="noopener"><img loading="lazy" src="references/type-scale/${m.ref}.png" alt="${esc(m.who)}"><span>${esc(m.who)}</span></a>`).join('')
   /* Wireframe identity: four mock artboards + the reference directions */
   function renderWire() {
     const dark = isDark()
@@ -536,7 +838,7 @@
     const lines = (n, w = [92, 78, 64]) => Array.from({ length: n }, (_, i) => `<div style="height:5px;border-radius:3px;background:${P.block};width:${w[i % w.length]}%;margin-top:5px"></div>`).join('')
     const mocks = [
       ['Cargo', 'One signature image, repeated, tiny numbered captions', `<div style="position:absolute;inset:0;background:${P.paper};padding:14px 16px;display:grid;grid-template-rows:auto 1fr;gap:10px">
-        <div style="display:flex;justify-content:space-between;font-size:8.5px;color:${P.ink}"><span>Trompo® Shell</span><span style="opacity:.6">Index · Info</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:8.5px;color:${P.ink}"><span>Trompo Shell</span><span style="opacity:.6">Index · Info</span></div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-content:start">${[1, 2, 3, 4, 5, 6].map((n) => `<div><div style="aspect-ratio:4/3;overflow:hidden">${sig()}</div><div style="font-size:7.5px;color:${P.ink};margin-top:3px">0${n}&nbsp; Project name <span style="opacity:.5">Jan 01</span></div></div>`).join('')}</div></div>`],
       ['Apple HIG', 'One hue, flat tints, guides and dimension marks', `<div style="position:absolute;inset:0;background:${dark ? '#2a1420' : '#FBE3EE'};padding:22px">
         <div style="position:absolute;inset:22px;border:1px dashed ${P.pink}66"></div>
@@ -615,6 +917,11 @@
   renderAll()
 
   $('tryHead').addEventListener('input', renderPairs)
+
+  /* Rueca rethink: patterns, directions, palette and pairings live in rueca.js; the saves grid is static */
+  wireRueca(() => renderRueca(isDark()))
+  { const groups = [...new Set(troveRefs.map((r) => r.theme))]
+    $('troverefs').innerHTML = groups.map((g) => `<div class="grp"><b>${esc(g)}</b><div class="row">${troveRefs.filter((r) => r.theme === g).map((r) => `<a href="${esc(r.url)}" target="_blank" rel="noopener noreferrer"><div class="im" style="background-image:url('${r.img.replace(/'/g, '%27')}')"></div><p>${esc(r.s)}</p></a>`).join('')}</div></div>`).join('') }
 
   /* round 5 */
   $('rows5').innerHTML = names5.map((n) => rowHTML(n, true)).join('')

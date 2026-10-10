@@ -627,6 +627,13 @@ export const wireframeDirections = [
     risk: 'It needs a genuinely good image that we own. A stock photo would cheapen it, and Cargo’s photo is theirs.',
   },
   {
+    id: 'cargo-blank', name: 'The blank sheet', who: 'Cargo (Blank templates) · found by Rafael',
+    refs: ['cargo-blank-placeholder'],
+    how: 'An empty slot drawn as a physical sheet. It’s a flat card with one corner-to-corner hairline (a refined version of the classic image “X”), two binder punch holes and a tiny vertical caption that names its own format: “Cargo® Rectangular Placeholder / Image — vertical”. It reads as stationery waiting to be filled, not as broken content.',
+    borrow: 'Trompo’s own version for empty slots: real cut-out punch holes on the long edge, a hairline diagonal, and a Geist Mono caption with kind, ratio and orientation. See “Trompo placeholders” above.',
+    risk: 'Too literal a copy would just be Cargo’s look. Ours differs in colour, caption type and hole logic, and it pairs with the dithered top.',
+  },
+  {
     id: 'hig', name: 'Single-hue construction diagram', who: 'Apple Human Interface Guidelines',
     refs: ['apple-hig-layout', 'apple-hig-sidebars'],
     how: 'Apple draws UI as a diagram in one hue, all yellow or all red. Shapes are flat tints of that hue, with guide lines, margins and measurement brackets drawn on top. It looks like an explanation of the UI, not the UI itself, and it’s beautiful because it’s monochrome and exact.',
@@ -676,4 +683,343 @@ export const wireframeProposal = {
     ['Signature image', 'One placeholder picture we own, used everywhere a photo goes. A dithered spinning top, made with our own dither shell, would make the placeholder itself a piece of Trompo. (Cargo)'],
     ['Annotation', 'Callouts and dimension marks in Trompo pink, inside the artboard only. The chrome accent stays blue, per the accent rule. (Apple HIG, Fragments)'],
   ],
+}
+
+/* ---------------------------------------------------------------------------
+   Type at scale — how brands use big geometric display type (measured 10 Oct 2026,
+   1440px viewport; largest text on screen vs. body paragraph). Screenshots in
+   brand/references/type-scale/ (git-ignored).
+--------------------------------------------------------------------------- */
+
+export const scaleMeasures = [
+  { who: 'Spotify Premium', ref: 'spotify-premium', font: 'Spotify Mix Title', px: 128, weight: 900, tracking: '0', leading: 'tight', ratio: '10.7×', note: 'Three stacked lines over a photo, one word italic for emphasis' },
+  { who: 'Spotify, For the Record', ref: 'spotify-fortherecord', font: 'Spotify Mix', px: 140, weight: 700, tracking: '−0.04em', leading: '1.07', ratio: '8.8×', note: '“About Spotify” runs off the bottom of its frame' },
+  { who: 'Spotify for Artists', ref: 'spotify-artists', font: 'Spotify Mix Title', px: 96, weight: 800, tracking: '0', leading: 'tight', ratio: '—', note: 'Left-aligned, one short phrase per line' },
+  { who: 'Uber brand', ref: 'uber-brand', font: 'Uber Move', px: 120, weight: 'light', tracking: '0', leading: '0.90', ratio: '7.5×', note: 'Huge and thin over photography' },
+  { who: 'Wise', ref: 'wise-home', font: 'Wise Sans', px: 89, weight: 900, tracking: '0', leading: '0.85', ratio: '5.6×', note: 'Heavy, centred, on a full brand-green field' },
+  { who: 'Robinhood', ref: 'robinhood', font: 'Martina Plantijn', px: 110, weight: 400, tracking: '−0.005em', leading: '1.00', ratio: '6.9×', note: 'Big but light, centred' },
+  { who: 'Gumroad', ref: 'gumroad', font: 'ABC Favorit', px: 96, weight: 400, tracking: '0', leading: '1.00', ratio: '6.0×', note: 'Playful props around a calm headline' },
+  { who: 'Cash App', ref: 'cashapp', font: 'Cash Sans', px: 56, weight: 400, tracking: '−0.03em', leading: '0.95', ratio: '3.1×', note: 'Modest size, but the whole page is brand green' },
+  { who: 'Lineto (Circular specimen)', ref: 'lineto-circular', font: 'Circular Black', px: 294, weight: 900, tracking: '0', leading: '1.00', ratio: '—', note: 'The name as the image' },
+  { who: 'Trompo today', ref: null, font: 'Gabarito', px: 52, weight: 700, tracking: '−0.035em', leading: '1.06', ratio: '3.1×', note: 'Our current hero, for comparison' },
+]
+
+export const scalePrinciples = [
+  ['Go 7–10× the body', 'Spotify Premium’s headline is 10.7× its body text, Uber’s 7.5×, Robinhood’s 6.9×. Ours is 3.1×. For Trompo: about 120–150px on desktop (clamp to 9–10vw), 48–56px on phones.'],
+  ['Heavy, then heavier', 'Display weights sit at 800–900. Gabarito runs to 900 (Black), so use it for the hero and 700–800 for section heads.'],
+  ['Tighten everything', 'Line height 0.85–0.95 (Wise 0.85, Uber 0.9). Tracking −0.03 to −0.045em at these sizes, since big type looks loose at default spacing.'],
+  ['Few words, stacked', 'Two to five words per line, with deliberate breaks (“Where your / music / is everything”). The headline is a shape as much as a sentence.'],
+  ['Let it fill, or bleed', 'Type becomes the image: it runs to the edges or past them (Spotify’s “About Spotify”, Lineto’s 294px name). The wordmark can do this too.'],
+  ['Plain, small body', 'The contrast does the work. Big geometric display wants a quiet, neutral body at 16–18px. That’s why Lexend, which has its own personality, fights it.'],
+  ['Colour fields', 'Wise and Cash App set big type on a full brand-colour field. Trompo’s version is white Gabarito on rosa mexicano (#D1006F passes 5.3:1 with white).'],
+  ['Emphasis without italics', 'Spotify italicises one word. Gabarito has no italic, so we emphasise with weight or the pink instead.'],
+]
+
+export const bodyFonts = [
+  { family: 'Geist', kb: 29, makers: 'Basement Studio (Argentina) with Vercel', note: 'Neutral, slightly technical, and the same family as our Geist Mono, so body and code feel related.' },
+  { family: 'Inter', kb: 47, makers: 'Rasmus Andersson', note: 'The most neutral, and it’s the product’s own chrome font, so site and tool would match. Also the most generic.' },
+  { family: 'Instrument Sans', kb: 29, makers: 'Rodrigo Fuenzalida (Chile), Jordan Egstad', note: 'Crisp and a little condensed. Precise without being cold.' },
+  { family: 'Figtree', kb: 20, makers: 'Erik Kennedy', note: 'Friendly geometric, closest to Gabarito’s shapes, lightest download. The least contrast with the display face.' },
+  { family: 'Hanken Grotesk', chosen: true, kb: 34, makers: 'Alfredo Marco Pradil, Hanken Design Co.', note: 'A warm, plain grotesque. Reads like good editorial body text.' },
+  { family: 'Public Sans', kb: 26, makers: 'USWDS, with Pablo Impallari and Rodrigo Fuenzalida', note: 'Deliberately neutral, built for US government sites. As plain as it gets.' },
+]
+
+export const scaleLink = 'https://fonts.googleapis.com/css2?family=Gabarito:wght@400..900&family=Geist:wght@400..600&family=Inter:wght@400..600&family=Instrument+Sans:wght@400..600&family=Figtree:wght@400..600&family=Hanken+Grotesk:wght@400..600&family=Public+Sans:wght@400..600&family=Geist+Mono:wght@400..500&display=swap'
+
+/* ---------------------------------------------------------------------------
+   Paper (paper.design) — their own take on the wireframed look, site + socials.
+   Studied 10 Oct 2026; screenshots in brand/references/paper/ (git-ignored).
+--------------------------------------------------------------------------- */
+
+export const paperRefs = [
+  { ref: 'home-08', label: 'Roadmap block: ruler ticks, dashed columns, corner handles, stepped pixel diagonal, mark in 3 materials' },
+  { ref: 'home-02', label: 'Giant guide arc framing a centred, lowercase, light headline' },
+  { ref: 'home-05', label: 'Hairline section grid like a cutting mat, with dither texture in the corner' },
+  { ref: 'home-10', label: 'Footer: the wordmark huge and faded into the paper' },
+  { ref: 'social-youtube-0', label: 'YouTube: the mark as halftone, noise and checker dither on ruled paper, with rulers and blue arcs' },
+  { ref: 'social-x-0', label: 'X banner: the mark as a window holding solid, riso overprint, torn paper, sky, painting' },
+]
+
+export const paperLessons = [
+  ['The mark is a window', 'Paper fills its two-squares mark with different materials and images. The mark holds content, which is exactly Trompo’s promise. Our top’s silhouette can hold dither, halftone, overprint, a blank sheet or a blueprint.'],
+  ['Brand art made with the product', 'Their textures (paper grain, halftone, dithering) are the same effects Paper Shaders sells. Trompo has its own dither shell, so our art should come out of our own tools and say so.'],
+  ['Measurement as ornament', 'Ruler ticks down the edge, dashed column guides, selection-handle squares at frame corners and guide arcs. It’s the harness, drawn, and they already do it well.'],
+  ['Paper, not white', 'A warm off-white with faint grain everywhere, never pure white. Trompo’s paper (#F6F1EA) already fits; add a subtle grain.'],
+  ['Where we differ', 'Paper is quiet and lowercase-light (Matter). Trompo is loud: stacked Gabarito Black and rosa mexicano. Borrow the scaffolding and the material idea, not the voice.'],
+]
+
+/* ---------------------------------------------------------------------------
+   Wire aesthetic v2 — polish rules from are.na + Cosmos (10 Oct 2026).
+   Screenshots: brand/references/wire2/ (git-ignored). Kit: brand/wire.js.
+--------------------------------------------------------------------------- */
+export const wireRules = [
+  ['One ink, line weight is the hierarchy', 'The polished references draw in one colour: Klein-blue sheets, ink-on-paper patents, a red “line weight” plan. Structure is hairline, objects are thin, emphasis is medium. Our v1 mixed grey fills, teal arcs, pink and black, which is why it looked unfinished.'],
+  ['Pink is the red pen', 'Annotation is the only colour: dimensions, numbered callouts and revision notes, like a reviewer’s markup over a print. Content never uses it.'],
+  ['Real drafting conventions', 'Extension lines, 45° ticks and the value set in a gap in the dimension line (from the adidas and Mitsubishi logo drawings and the patent sheets). It’s instantly “engineered”, not “sketched”.'],
+  ['Every sheet is a document', 'Border, ruler ticks, registration marks and a title block (project, drawing, sheet n / N, scale, date, drawn by). That one block turns a mock-up into an artefact.'],
+  ['Placeholders follow type', 'Headlines are heavy bars stacked at the real leading (0.88–0.95), not pills. Body is thin bars on a baseline grid with a short last line. Images are a box with both diagonals.'],
+  ['Numbered callouts, not floating labels', 'A dot on the target, a straight leader and a circled number, then the note. Leaders never cross content.'],
+  ['Stationery, physically', 'Cosmos’s “paper archives” mock-ups (punch holes, clips, stamps, sheet numbers, typewriter mono) are the physical twin of the blank card. Use sheet numbers and punch holes, never fake staples.'],
+]
+export const wire2Refs = [
+  ['cosmos-technical-drawing-0', 'Cosmos · technical drawing'],
+  ['cosmos-wireframe-0', 'Cosmos · wireframe'],
+  ['cosmos-placeholder-0', 'Cosmos · placeholder'],
+  ['cosmos-annotation-0', 'Cosmos · annotation'],
+  ['cosmos-blueprint-0', 'Cosmos · blueprint'],
+  ['cosmos-grid-layout-0', 'Cosmos · grid layout'],
+  ['ch-placeholder-as-form-0', 'are.na · placeholder as form'],
+  ['ch-markup-0', 'are.na · markup & annotation'],
+  ['ch-wireframe-prototype-1', 'are.na · wireframe → prototype'],
+]
+
+/* ---------------------------------------------------------------------------
+   Rueca — the rename (11 Oct 2026) and a rustic rethink. Rafael: "go with rueca …
+   requires a rethink as far as brand elements go … more rustic, probably a serif
+   display font." Reference: spinning-wheel photography (wood, undyed wool, thread).
+--------------------------------------------------------------------------- */
+
+export const ruecaLink = 'https://fonts.googleapis.com/css2?family=Alegreya:wght@500..900&family=Alegreya+Sans:wght@400;500&family=IM+Fell+Double+Pica&family=IM+Fell+English:ital@0;1&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Young+Serif&family=Gloock&family=Vollkorn:wght@500..900&family=Piazzolla:opsz,wght@8..30,500..900&family=Hanken+Grotesk:wght@400..600&family=Libre+Franklin:wght@400..600&family=Geist+Mono&family=Architects+Daughter&family=Caveat:wght@400..700&family=Nanum+Pen+Script&family=Kalam:wght@400;700&family=Covered+By+Your+Grace&family=Walter+Turncoat&family=Reenie+Beanie&display=swap'
+
+export const ruecaPairs = [
+  { id: 'alegreya', name: 'Huerta', display: { family: 'Alegreya', weight: 800, tracking: '-0.02em' }, body: 'Alegreya Sans',
+    makers: 'Juan Pablo del Peral · Huerta Tipográfica, Argentina', pick: true,
+    why: 'A calligraphic, hand-made serif with a matching sans, both from an Argentine foundry. It has the warmth of the wheel without looking like a costume, and it reads well at body size. Best all-rounder.' },
+  { id: 'fell', name: 'Imprenta', display: { family: 'IM Fell Double Pica', weight: 400, tracking: '-0.01em' }, body: 'Hanken Grotesk',
+    makers: 'Igino Marini · revival of the 17th-century Fell types',
+    why: 'The most rustic: real letterpress unevenness, ink spread and wobble from 1670s type. Unmistakable, but it reads as historical and only comes in one weight.' },
+  { id: 'fraunces', name: 'Telar', display: { family: 'Fraunces', weight: 700, tracking: '-0.02em', settings: "'opsz' 144, 'SOFT' 50, 'WONK' 1" }, body: 'Hanken Grotesk',
+    makers: 'Undercase Type · Phaedra Charles, Flavia Zimbardi (Brazil)',
+    why: 'An old-style serif with deliberately wonky letters and softened corners. It’s rustic and modern at once, and the most flexible (variable weight, softness, optical size).' },
+  { id: 'young', name: 'Taller', display: { family: 'Young Serif', weight: 400, tracking: '-0.015em' }, body: 'Hanken Grotesk',
+    makers: 'Bastien Sozeau',
+    why: 'Heavy, warm and chunky, like a hand-painted shop sign or a seed packet. Friendly and bold at big sizes. Single weight.' },
+  { id: 'vollkorn', name: 'Pan', display: { family: 'Vollkorn', weight: 800, tracking: '-0.02em' }, body: 'Hanken Grotesk',
+    makers: 'Friedrich Althausen',
+    why: '“Vollkorn” means wholemeal. A dark, sturdy book serif that feels like an old manual. Earthy rather than decorative.' },
+  { id: 'gloock', name: 'Molino', display: { family: 'Gloock', weight: 400, tracking: '-0.01em' }, body: 'Hanken Grotesk',
+    makers: 'Duarte Pinto (Portugal)',
+    why: 'High-contrast and sculptural with soft, ball-ended strokes. The most elegant: rustic like a good wood workshop, not a farmhouse.' },
+  { id: 'piazzolla', name: 'Piazzolla', display: { family: 'Piazzolla', weight: 800, tracking: '-0.02em', settings: "'opsz' 30" }, body: 'Hanken Grotesk',
+    makers: 'Juan Pablo del Peral · Huerta Tipográfica, Argentina',
+    why: 'Alegreya’s sharper sibling: angular, carved strokes like woodcut lettering. Rustic with an edge.' },
+]
+
+/* v2 (11 Oct): "rustic meets modern, like Figma made in the 90s". The ground and ink stay rustic (paper, walnut,
+   madder oxblood, platinum 90s chrome). The brights are Figma's five hues plus a yolk yellow, printed flat and chalky
+   instead of glowing, and each named for the natural dye that gives that colour. Tuned against colours sampled from
+   ayushsoni_io / HEX work (Cardinal, the legal-tech system, the Klein biotech set). */
+export const ruecaPalette = [
+  { name: 'Lana', hex: '#F3F1EB', dark: '#F3F1EB', group: 'base', role: 'paper: undyed wool, tint halved 11 Oct so the shells’ neutral UI sits well on it' },
+  { name: 'Platino', hex: '#DCDAD5', dark: '#383430', group: 'base', role: 'chrome: the platinum grey of a 1997 Mac window' },
+  { name: 'Nogal', hex: '#181411', dark: '#151210', group: 'base', role: 'ink: walnut, nearly black (dark value is the night ground, next to the kit’s #131313)' },
+  { name: 'Rubia', hex: '#5E2219', dark: '#5E2219', group: 'base', role: 'deep block: madder oxblood, the rustic dark (as in Cardinal)' },
+  { name: 'Achiote', hex: '#E8582C', dark: '#F06A3E', group: 'bright', figma: '#F24E1E', role: 'annatto orange-red: the lead accent and the CTA' },
+  { name: 'Cochinilla', hex: '#EE7A68', dark: '#F38B79', group: 'bright', figma: '#FF7262', role: 'cochineal coral' },
+  { name: 'Malva', hex: '#A88BF6', dark: '#B39AF8', group: 'bright', figma: '#A259FF', role: 'mallow violet' },
+  { name: 'Cielo', hex: '#5DB4E8', dark: '#6FC0EE', group: 'bright', figma: '#1ABCFE', role: 'light indigo dip: sky' },
+  { name: 'Hoja', hex: '#2FA57C', dark: '#3DB68B', group: 'bright', figma: '#0ACF83', role: 'weld over indigo: leaf green' },
+  { name: 'Gualda', hex: '#F2C744', dark: '#F5D05A', group: 'bright', role: 'weld yolk yellow (from the legal-tech and Cardinal sets)' },
+  { name: 'Añil', hex: '#3440C8', dark: '#8C95F0', group: 'line', role: 'deep indigo, cobalt-bright: diagram lines and links only' },
+]
+export const ruecaPaletteRules = [
+  ['Paper carries it', 'Lana, Platino and Nogal cover most of every layout. Rustic lives in the ground and the ink, never in muddy accents.'],
+  ['Brights are flat blocks', 'The brights are printed flat with a little grain: no gradients, no glow. Use one or two per layout, set as blocks or threads, with Nogal text on top (never white).'],
+  ['All six only together', 'The full set appears together only in the mark and system moments, the way Figma’s logo uses all five of its colours. That’s the nod.'],
+  ['Rubia is the dark, not black', 'For a dark block, reach for madder oxblood before Nogal. That’s where the warmth comes from.'],
+  ['Ramps for depth', 'Every family has lights (50–300) for washes and tints, and darks (600–900) for text on colour and deep blocks. The darks lean slightly warmer, like dyed cloth.'],
+]
+
+export const ruecaTaglines = ['Spin up a real tool.', 'Turn it into a tool.', 'Your prototype, with handles.', 'Spun from what you have.', 'Tune it by hand.', 'Raw prototype in. Real tool out.', 'Put a wheel on it.', 'Give it a spin.']
+
+/** From Rafael's Trove (read 11 Oct 2026 via trove.quest, signed in). Old-meets-new references he saved. */
+export const troveRefs = [
+  { theme: 'Craft material × precise mark', s: 'Interlaced line monogram for Claude Type, a maison-style mark paired with a high-contrast serif wordmark on brown wool.', url: 'https://the-brandidentity.com/interview/how-margot-l%C3%A9v%C3%AAque-built-claude-type-around-slowness-and-craft', img: 'https://d2w9rnfcy7mm78.cloudfront.net/43261939/original_a4334ed1248ca7e6060a3b8c5e184032.webp?1770115343?bc=0' },
+  { theme: 'Craft material × precise mark', s: 'Blind deboss of a crane mark into blue linen cloth, all the identity carried by texture and shadow with zero ink.', url: 'https://www.are.na/block/9803031', img: 'https://images.are.na/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiI5ODAzMDMxL29yaWdpbmFsX2Y3NjBjZGQ5NDEzNjMzNzJkODQ5ODM0MTNlMTk0OGQ1IiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjoxMjAwLCJoZWlnaHQiOjYzMCwiZml0IjoiY292ZXIiLCJ3aXRob3V0RW5sYXJnZW1lbnQiOnRydWV9LCJ3ZWJwIjp7InF1YWxpdHkiOjgwfSwianBlZyI6eyJxdWFsaXR5Ijo4MH0sInJvdGF0ZSI6bnVsbH19' },
+  { theme: 'Craft material × precise mark', s: 'Whole Earth Catalog cover translated into woven textile, high-contrast type and halftone earth surviving the yarn grid.', url: 'https://images.squarespace-cdn.com/content/v1/6435e515f2053a1aa71379e5/50da67e8-a429-42a8-8470-7562f421ad27/94_whole-earth-catalog-blanket.jpg', img: 'https://images.squarespace-cdn.com/content/v1/6435e515f2053a1aa71379e5/50da67e8-a429-42a8-8470-7562f421ad27/94_whole-earth-catalog-blanket.jpg' },
+  { theme: 'Craft material × precise mark', s: 'Hand embroidery on sheer white fabric where dense running stitches map organic shapes and loose thread ends stay visible.', url: 'https://uk.pinterest.com/pin/39195459253260123/', img: 'https://d2w9rnfcy7mm78.cloudfront.net/45942758/original_e9b1c43ec31bcbb210ad7aa24f76ddc8.jpeg?1778235034?bc=0' },
+  { theme: 'Old picture × flat diagram', s: 'Legal-tech brand system pairing Victorian engraving illustrations with flat geometric diagrams and bold primaries — serious but warm.', url: 'https://x.com/ayushsoni_io/status/2076549249399914510', img: 'https://pbs.twimg.com/media/HNFifOCWwAEyqsa?format=jpg&name=large' },
+  { theme: 'Old picture × flat diagram', s: 'Neoclassical oil painting imagery paired with clean sans-serif and italic serif accents, an AI brand identity that avoids the usual tech look.', url: 'https://x.com/Oriku175', img: 'https://framerusercontent.com/images/9VseybFkI3E7tot1jiu5oXIGIxI.png' },
+  { theme: 'Old picture × flat diagram', s: 'Sepia halftone collage system with technical registration marks, rulers and barcodes — archival-technical art direction.', url: 'https://x.com/olegcoada/status/2075143489768071506', img: 'https://pbs.twimg.com/media/HMuQfR5WEAASKbG?format=jpg&name=large' },
+  { theme: 'Old picture × flat diagram', s: 'Korean furniture catalog printed on kraft paper, hand-lettered header with sepia line drawings in a dense grid.', url: 'https://www.are.na/block/38051138', img: 'https://images.are.na/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiIzODA1MTEzOC9vcmlnaW5hbF9mNDlkYmMzNTAwZmM5ZmVjOTM2MGJiM2M5ZWM1MWU0ZS5wbmciLCJlZGl0cyI6eyJyZXNpemUiOnsid2lkdGgiOjEyMDAsImhlaWdodCI6NjMwLCJmaXQiOiJjb3ZlciIsIndpdGhvdXRFbmxhcmdlbWVudCI6dHJ1ZX0sIndlYnAiOnsicXVhbGl0eSI6ODB9LCJqcGVnIjp7InF1YWxpdHkiOjgwfSwicm90YXRlIjpudWxsfX0=' },
+  { theme: 'Old mark kept beside new', s: 'ARRI pairs a heavy angular sans with a surviving vintage oval monogram — old mark kept beside new.', url: 'https://www.are.na/block/13829527', img: 'https://d2w9rnfcy7mm78.cloudfront.net/13829527/original_6c12b7432de208f99949066404453900.png?1635962780?bc=0' },
+  { theme: 'Old mark kept beside new', s: 'Nike Run: a 1980s Swoosh lockup with “RUN” swapped in, Volt Orange sourced from the 1972 shoe box.', url: 'https://www.portorocha.com/nikerun', img: 'https://images.prismic.io/portorocha/aMFtF2GNHVfTO_Qo_image382.jpg' },
+  { theme: 'Old mark kept beside new', s: 'Arcane: Art Deco and Art Nouveau encoded into one identity, unified by a custom typeface.', url: 'https://wearecollins.com/case-studies/arcane', img: 'https://cdn.sanity.io/images/fmzd4n68/production/7d3e523dc655a6798a183298ef720305d0e4ec03-1000x1500.webp' },
+  { theme: 'Hand-made type', s: 'Hand-carved maker’s mark and date gouged into walnut — rough incised lettering on wood.', url: 'https://images.squarespace-cdn.com/content/v1/6435e515f2053a1aa71379e5/8dd2473a-920b-463a-b855-d2bf84fb6db2/4_noll-n189-2-jpg.jpg', img: 'https://images.squarespace-cdn.com/content/v1/6435e515f2053a1aa71379e5/8dd2473a-920b-463a-b855-d2bf84fb6db2/4_noll-n189-2-jpg.jpg' },
+  { theme: 'Hand-made type', s: 'Letters built from repeated impressions of themselves, hand-pressed wood type on A2 paper.', url: 'https://www.are.na/block/5025511', img: 'https://images.are.na/eyJidWNrZXQiOiJhcmVuYV9pbWFnZXMiLCJrZXkiOiI1MDI1NTExL29yaWdpbmFsX2Y5ZWViZTczZGI1MTk3MjMwMWUwNjQ5NjI0OTQ4OWJkLmpwZyIsImVkaXRzIjp7InJlc2l6ZSI6eyJ3aWR0aCI6MjA0OCwiZml0IjoiaW5zaWRlIiwid2l0aG91dEVubGFyZ2VtZW50Ijp0cnVlfSwid2VicCI6eyJxdWFsaXR5Ijo3NX0sImpwZWciOnsicXVhbGl0eSI6NzV9LCJyb3RhdGUiOm51bGx9fQ==' },
+  { theme: 'Hand-made type', s: 'Heavy slab-serif capital A printed with visible ink grain on cream stock — letterpress texture and weight.', url: 'https://www.are.na/block/15474632', img: 'https://d2w9rnfcy7mm78.cloudfront.net/15474632/original_3f905217de2edb17a886b1c26504464c.png?1646683908?bc=0' },
+  { theme: 'Hand-made type', s: 'Interlocked serif S monogram tiled into an allover pattern, photocopy-degraded — a mark turned into brand texture.', url: 'https://www.are.na/block/10142772', img: 'https://d2w9rnfcy7mm78.cloudfront.net/10142772/original_0f25e7c8dd139b16771313db13ac25b5.jpg?1610026515?bc=0' },
+]
+
+/* Rueca rethink, grounded in Rafael's Trove (read through the x-book MCP, 11 Oct 2026).
+   ~90 saves across brand-identity, typography, textiles, color-palettes, material-studies and print-aesthetics.
+   Each pattern below repeats across several saves, so it's a habit of his eye, not a one-off. */
+export const ruecaTrove = [
+  { id: 'material', title: 'The mark lives in the material',
+    says: 'The most repeated move in the brand saves: a mark blind-debossed into linen, board, stone or steel, with no ink at all. The identity is carried by texture and raking light.',
+    refs: [
+      { t: 'Crane Paper: crane debossed into blue linen (Collins)', u: 'https://www.are.na/block/9803031' },
+      { t: 'Monogram blind-embossed into coarse fibrous board', u: 'https://www.are.na/block/35539940' },
+      { t: 'Jacquemus wordmark debossed into a steel tray', u: 'https://www.are.na/block/16892083' },
+      { t: 'Claude Type: serif wordmark on brown wool, “slowness and craft”', u: 'https://the-brandidentity.com/interview/how-margot-l%C3%A9v%C3%AAque-built-claude-type-around-slowness-and-craft' },
+    ] },
+  { id: 'engraving', title: 'Old picture, new drawing',
+    says: 'Classical or engraved imagery set against flat geometric diagrams and monospace labels. Your own note on one save: “soften AI with classical imagery, natural textures, and more analog feelings.”',
+    refs: [
+      { t: 'Legal-tech system: Victorian engravings + flat geometric diagrams', u: 'https://x.com/ayushsoni_io/status/2076549249399914510' },
+      { t: 'Sepia halftone collage with registration marks and rulers', u: 'https://x.com/olegcoada/status/2075143489768071506' },
+      { t: 'Nexus: neoclassical paintings for an AI brand (your note)', u: 'https://x.com/Oriku175' },
+      { t: 'Biotech lab: serif display over monospace annotation', u: 'https://x.com/ayushsoni_io/status/2093246561677705238' },
+    ] },
+  { id: 'tool', title: 'The oldest tool next to the newest',
+    says: 'Objects that put prehistoric and digital making in one silhouette. A spinning wheel next to a prototype harness is the same joke, played straight.',
+    refs: [
+      { t: 'Flint hand axe seated in a Dremel housing', u: 'https://arena-images-temp.s3.amazonaws.com/D0788F0E-F17C-4B8A-A316-8209256C657D.jpg' },
+      { t: 'Knapped flint blade on a titanium handle, stamped MAN MADE', u: 'https://kr.pinterest.com/pin/326651779244745766/' },
+      { t: 'Maker’s mark and date gouged into walnut', u: 'https://images.squarespace-cdn.com/content/v1/6435e515f2053a1aa71379e5/8dd2473a-920b-463a-b855-d2bf84fb6db2/4_noll-n189-2-jpg.jpg' },
+    ] },
+  { id: 'accent', title: 'Near-invisible image, one loud accent',
+    says: 'A whisper of an image (embossed, tonal, raw) and then one hard colour doing all the shouting. Rueca’s brights work the same way: flat, small, and loud against a quiet paper ground.',
+    refs: [
+      { t: 'Embossed St George engraving + three flat red stars', u: 'https://www.are.na/block/29659225' },
+      { t: 'Red thread embroidered in tangled lines on raw linen', u: 'https://www.are.na/block/29038294' },
+      { t: 'Matchbox: hand-cut red lettering on cream does everything', u: 'https://thegraphicsideof.tumblr.com/' },
+    ] },
+  { id: 'serif', title: 'Warm serif, never a costume',
+    says: 'The serifs you keep are calligraphic or old-style but drawn with a modern hand. “Warm and hand-drawn without being twee” is your caption on Tagada, and it’s the brief for Rueca’s type.',
+    refs: [
+      { t: 'Tagada (Laurent Muller): calligraphic serif, warm not twee', u: 'https://www.futurefonts.xyz/laurent-muller/tagada' },
+      { t: 'Old-style serif with ct ligatures, single-weight specimen', u: 'https://www.aboutcontact.com/typography' },
+      { t: 'Atelier Dyakova: bespoke high-contrast serif, old-master names', u: 'https://www.instagram.com/p/C1ftr5MtsTk/' },
+      { t: 'Pine deck: heavy grotesk against a delicate serif, ochre and olive', u: 'https://images.squarespace-cdn.com/content/v1/6435e515f2053a1aa71379e5/fc5bbd2b-486d-4ee5-8e61-47d36a8359ec/104_pine-albinholmqvist-4-jpg.jpg' },
+    ] },
+  { id: 'dye', title: 'Dyed, not printed',
+    says: 'The palettes you save come from cloth and process: rust and ochre quilts, crimson ikat on cream, indigo cyanotype. Rueca’s palette names every bright after the natural dye that makes it, and then prints it like 90s software.',
+    refs: [
+      { t: 'Slow Roads quilt: rust, ochre, grey, yellow thread ties', u: 'https://images.squarespace-cdn.com/content/v1/6435e515f2053a1aa71379e5/aa639b1e-a902-420e-9113-907e7afa71f9/110_slow-roads-sunday-quilt.jpg' },
+      { t: 'Ikat poppies: crimson and violet bleeding on cream linen', u: 'https://uk.pinterest.com/pin/371335931747051999/' },
+      { t: 'RM “Indigo”: cyanotype botanicals in Prussian blue', u: 'https://uk.pinterest.com/pin/616289530297057019/' },
+      { t: 'The Clove Club: a whole identity in Klein-blue cyanotypes', u: 'https://e-i-b.com/work/the-clove-club/' },
+    ] },
+]
+
+ruecaTrove.push({ id: 'keep', title: 'Keep the old mark beside the new',
+  says: 'Instead of blending old and new into one compromise, these brands set a surviving vintage element right next to a modern one. For Rueca: an engraved wheel as the seal, a plain modern wordmark beside it.',
+  refs: [
+    { t: 'ARRI: vintage oval monogram kept beside a heavy angular sans', u: 'https://www.are.na/block/13829527' },
+    { t: 'Nike Run: the 1980s lockup, Volt Orange from the 1972 shoe box', u: 'https://www.portorocha.com/nikerun' },
+    { t: 'Arcane: Art Deco and Art Nouveau held in one identity', u: 'https://wearecollins.com/case-studies/arcane' },
+  ] })
+
+export const ruecaWatch = [
+  { t: 'You saved a shelved identity for a design tool called Weaver, shelved because Figma bought Weave. Textile metaphors for design tools are getting crowded, so Rueca should lean on the wheel and the hand, not on “weaving”.', u: 'https://x.com/thenickpattison/status/2090078556269289742' },
+  { t: 'You also saved an essay arguing brand work should build one world instead of pitching safe, middle and bold routes. So the three directions below aren’t a risk ladder. They’re three materials of one world (thread, paper, wood), and they combine.', u: 'https://x.com/samstooff/status/2076632115878232394' },
+]
+
+/* Three directions, one world. Each names its type pairing (from ruecaPairs) and the Trove patterns it rests on. */
+export const ruecaDirections = [
+  { id: 'grabado', name: 'Grabado', gloss: 'engraving', rec: true, chosen: true, pair: 'alegreya', from: ['engraving', 'keep', 'serif', 'accent'],
+    line: 'Old picture, new drawing.',
+    idea: 'A hand-drawn engraving of the wheel sits next to flat technical diagrams in indigo hairline and handwritten callouts. Achiote “red pen” marks the one thing that matters, and the picture can be a flat bright block (as in Vorflux). This is the wire identity you already chose (“the harness, drawn”) with a 17th-century picture inside the frame, so the 12-shell rollout carries over and only the imagery changes.',
+    type: 'Alegreya 800 display (the free, open cousin of Tagada) · Libre Franklin body · handwritten labels (Geist Mono stays for code only)',
+    image: 'Your hand-drawn engraving or woodcut of a rueca, plus diagrams of how it works: wheel, drive band, flyer.',
+    watch: 'Needs the engraving to be good. A clip-art engraving would sink it, and that part is in your hands.' },
+  { id: 'hilo', name: 'Hilo', gloss: 'thread', pair: 'gloock', from: ['material', 'accent', 'dye'],
+    line: 'Spin something real.',
+    idea: 'No printed mark at all. The wordmark is pressed into felt, linen or paper, and dyed threads in the brights run through every layout as the accent and the motion: they spin, pull and tie things off. The quietest and most premium of the three.',
+    type: 'Gloock display (high contrast, like Claude Type’s wordmark on wool) · Libre Franklin body · handwritten notes',
+    image: 'Photographs of real material (wool roving, felt, linen) with the mark debossed. The thread is a vector line that can animate.',
+    watch: 'Debossing reads beautifully large and dies at 16px. The favicon needs its own solid form.' },
+  { id: 'taller', name: 'Taller', gloss: 'workshop', pair: 'young', from: ['tool', 'dye', 'serif'],
+    line: 'Raw material in. Real tools out.',
+    idea: 'A maker’s mark cut into walnut, chunky shop-sign serif, and the old-tool/new-tool pairing as the image system: a spindle next to a cursor, a flyer next to a slider. Gualda thread ties stitch the wood panels to flat, bright software panels: rustic and modern side by side.',
+    type: 'Young Serif display (single weight, chunky) · Libre Franklin body · handwritten labels',
+    image: 'Paired still lifes of an old tool and its software twin, carved or incised lettering.',
+    watch: 'The warmest and the most likely to drift into farmhouse kitsch. Keep the grids strict.' },
+]
+
+export const ruecaEcho = {
+  alegreya: 'Closest free match to Tagada, which you saved as “warm and hand-drawn without being twee”.',
+  fell: 'Echoes the old-style specimen with ct ligatures you saved (aboutcontact).',
+  fraunces: 'Wonky and soft. No direct match in your saves, so kept as the flexible fallback.',
+  young: 'Echoes the letterpress slab A and the hand-cut matchbox lettering.',
+  vollkorn: 'Echoes the condensed letterpress slab set on an arc.',
+  gloock: 'Echoes Claude Type’s high-contrast wordmark on brown wool and Atelier Dyakova’s serif.',
+  piazzolla: 'Echoes the walnut maker’s mark: carved, angular strokes.',
+}
+
+/* Paid display serifs, 11 Oct 2026. All are foundry TRIALS already installed on Rafael's Mac (~/Library/Fonts),
+   loaded on the board with CSS local(), so they render on this machine only and are never shipped or published.
+   Trials are for evaluation; the site needs a web + desktop licence from the foundry. */
+export const ruecaPaid = [
+  { id: 'dominicale', name: 'Dominicale', ps: 'DominicaleTrial-Alpha', weight: 600, tracking: '-0.01em',
+    foundry: 'Altiplano Typefaces · Raphael Verona', url: 'https://www.altiplano.xyz', fit: ['grabado', 'taller'], star: true,
+    why: 'Chunky, soft-wedged and a little uneven, like letters cut by hand. The most rustic of the paid set without being a costume, and the closest in spirit to Tagada. It comes from Altiplano, named for the Andean highlands, which is a nice origin for a Spanish name.',
+    watch: 'The trial is an “Alpha” with one weight, so check the foundry for the finished family and its release date.' },
+  { id: 'signifier', name: 'Signifier', ps: 'TestSignifier-Black', alt: 'TestSignifier-Regular', weight: 900, tracking: '-0.02em',
+    foundry: 'Klim Type Foundry · Kris Sowersby', url: 'https://klim.co.nz/retail-fonts/signifier/', fit: ['grabado'], star: true,
+    why: 'Klim’s re-reading of the 17th-century Fell types, drawn with digital precision, which is old meets new in the letters themselves. It’s the grown-up version of the free IM Fell draft. Black is sturdy and rustic, and Regular is sharp and literary.',
+    watch: 'It’s cool rather than warm at light weights. Use Bold or Black for the wordmark.' },
+  { id: 'sectra', name: 'GT Sectra', ps: 'GTSectraDisplayTrial-Bold', weight: 700, tracking: '-0.02em',
+    foundry: 'Grilli Type', url: 'https://www.grillitype.com/typeface/gt-sectra', fit: ['grabado', 'hilo'],
+    why: 'A broad-nib pen crossed with a scalpel: calligraphic strokes with cut, angular joins. It reads as carved and engraved, which suits the Grabado direction.',
+    watch: 'Widely used in editorial since 2014, so it’s less of a discovery than the others.' },
+  { id: 'ivar', name: 'Ivar Display', ps: 'IvarDisplayTRIAL-SemiBold', weight: 600, tracking: '-0.015em',
+    foundry: 'Letters from Sweden · Göran Söderström', url: 'https://lettersfromsweden.se/font/ivar/', fit: ['hilo'],
+    why: 'Warm, open old-style forms with crisp details, plus Display, Headline, Text and Fine cuts for every size. It’s the most refined and quiet of the set, wool rather than wood.',
+    watch: 'It can look like a premium lifestyle brand. You’d rely on the imagery for the rustic part.' },
+  { id: 'plantijn', name: 'Martina Plantijn', ps: 'TestMartinaPlantijnVF-Roman', weight: 700, tracking: '-0.02em', variable: true, chosen: true,
+    foundry: 'Klim Type Foundry', url: 'https://klim.co.nz/retail-fonts/martina-plantijn/', fit: ['grabado', 'taller'],
+    why: 'A sturdy 16th-century book face from the Plantin printing tradition, rethought by Klim. Dark, solid and practical, like an old manual. It’s variable from 300 to 900.',
+    watch: 'It’s bookish, so at hero size it needs tight tracking to avoid feeling like a newspaper.' },
+  { id: 'incise', name: 'F37 Incise', ps: 'F37InciseTrial-Bold', weight: 700, tracking: '-0.02em',
+    foundry: 'F37 Foundry · Rodrigo Fuenzalida, Rick Banks', url: 'https://www.f37foundry.com', fit: ['taller'],
+    why: 'Glyphic, flared letters that look chiselled into stone or wood, the walnut maker’s mark as a typeface. Co-designed by Rodrigo Fuenzalida from Chile.',
+    watch: 'It isn’t a true serif. It reads as carved, not printed, so it pairs best with Taller.' },
+  { id: 'arizona', name: 'ABC Arizona Flare', ps: 'ABCArizonaFlareTrial-Regular', weight: 400, tracking: '-0.02em',
+    foundry: 'Dinamo · Elias Hanzer', url: 'https://abcdinamo.com/typefaces/arizona', fit: ['hilo', 'grabado'],
+    why: 'One family that slides from sans to serif (Sans, Serif, Flare, Mix). Old and new live in the same type system, so a mono-like sans and a flared serif can share one voice.',
+    watch: 'It’s gentle, and less rustic than Dominicale or Signifier.' },
+]
+export const ruecaPaidAlsoTried = 'Also tried from your installed fonts and set aside: GT Alpina (lovely but bouncy), Reckless Neue and PP Hatton (fashion, not craft), Tiempos Headline (newspaper), PP Cirka, GTF Byrd, Civilitate (a gorgeous Civilité script, but only as a one-word accent), Jabin, Louche and Grenat (too decorative). Tagada, the one you saved, isn’t installed. It’s on Future Fonts, so trying it means buying early access.'
+
+/* HEX swipe file (swipe.hex.inc), shared by Rafael 11 Oct 2026. Images hotlinked, never copied. */
+export const hexRefs = [
+  { t: 'Vorflux: Roman helmet as a flat screen-print, over golden-ratio construction lines, dotted measures and code', img: 'https://swipe.hex.inc/media/uploads/mumuxxk8-b551fc-image.webp', take: 'Grabado doesn’t have to be hatched. The old picture can be a flat Rubia silhouette with Añil construction geometry drawn over it.' },
+  { t: 'Vorflux: classical bust on a coin, “Multi-agent harness · Orchestration system”', img: 'https://swipe.hex.inc/media/uploads/muvtb8yd-c65d18-image.webp', take: 'Proof the move works for agent tooling: an old object plus technical labels, framed like a seal. Rueca’s version is the wheel on the coin, with the harness parts as the legend around the rim.' },
+  { t: 'Ryvn: a line of copy set as a tight spiral', img: 'https://swipe.hex.inc/media/uploads/mumza3rc-1435c2-image.webp', take: 'Type wound like thread on a bobbin. A motion idea: Rueca’s tagline spins onto the wheel.' },
+  { t: 'Dessn, “the design tool built for curious minds”: serif display with procedural flowers', img: 'https://swipe.hex.inc/media/uploads/musfu8fr-e29097-image.webp', take: 'A design tool with a warm serif and organic, procedural imagery: confirmation that serif + hand-made reads as “creative tool”, not old-fashioned. The flowers could be generated by the harness itself.' },
+  { t: 'AgentMail: rubber stamp and an iridescent seal over code', img: 'https://swipe.hex.inc/media/uploads/mumz638n-329194-image.webp', take: 'A stamp or seal as the mark, old office ritual over new tech. Good for Taller’s maker’s mark.' },
+  { t: 'Anthrogen: mark embossed into paper, no ink', img: 'https://swipe.hex.inc/media/uploads/mun2qhqg-9f40d8-a-1.webp', take: 'The same move as the crane in linen, done for a tech brand. It backs up Hilo.' },
+  { t: 'Anthrogen: one tangled procedural line', img: 'https://swipe.hex.inc/media/uploads/muvtdv8f-2cc79e-image.webp', take: 'The madder thread, generative. It could be drawn live by the harness itself.' },
+  { t: 'First Star: pen plotter drawing an engraving-like hatch', img: 'https://swipe.hex.inc/media/uploads/mun2wac4-4bc571-img-2317.webp', take: 'A production idea: draw the rueca by hand, then plot it, so a machine draws the hand.' },
+]
+
+/* Handwriting replaces the mono for labels, measurements, captions and red-pen notes (11 Oct, Rafael's call).
+   All free and open-licensed (OFL or Apache) so an open-source site can ship them. Code stays in Geist Mono:
+   a command people copy should be unambiguous. Local handwriting fonts were tried and skipped (unclear licences). */
+export const ruecaHands = [
+  { id: 'architects', family: 'Architects Daughter', size: 1.15, note: 'Draftsman’s lettering: hand-made but still technical, so it takes over the mono’s job (labels, sizes) without losing precision. Fits the diagrams and the 90s software side best.' },
+  { id: 'caveat', family: 'Caveat', size: 1.25, star: true, note: 'Chosen 11 Oct. The most natural pen note: red-pen asides, labels on the engraving, the note beside the install command. Weight 500, Latin only, about 20 KB on the site.' },
+  { id: 'nanum', family: 'Nanum Pen Script', size: 1.35, note: 'A quick, narrow ballpoint hand. The most rustic and personal, like notes in the margin of a workshop manual.' },
+  { id: 'kalam', family: 'Kalam', size: 1.05, note: 'A neat, slightly slanted hand from Indian Type Foundry. The most legible at small sizes.' },
+  { id: 'walter', family: 'Walter Turncoat', size: 0.95, note: 'Blocky drafting caps. It reads like labels on a blueprint and makes the most of the 90s-software mood.' },
+  { id: 'covered', family: 'Covered By Your Grace', size: 1.3, note: 'Felt-tip marker. Bold and loud, good for one-word callouts, too heavy for running labels.' },
+  { id: 'reenie', family: 'Reenie Beanie', size: 1.4, note: 'A rough, scratchy ballpoint. The most authentic, and the hardest to read below 14px.' },
+]
+
+/* Tonal ramps, 11 Oct (Rafael: "add some more darks and lights in the same hue families"). OKLCH, same hue,
+   stepped lightness, chroma eased toward the ends; each family's original colour (base: true) sits at its natural
+   step. Lights are the modern half (pastel washes, tints); darks lean a few degrees warmer, like dyed cloth, for
+   text on colour and deep blocks. Generated by brand/tools/ramps.mjs. */
+export const ruecaRamps = {
+  'Tierra': { note: 'neutral: undyed wool (50) to walnut (900)', steps: [{ s: 50, hex: '#F3F1EB', base: true }, { s: 100, hex: '#E8E2DD' }, { s: 200, hex: '#D7CFCA' }, { s: 300, hex: '#C1B9B3' }, { s: 400, hex: '#A8A099' }, { s: 500, hex: '#908781' }, { s: 600, hex: '#766E69' }, { s: 700, hex: '#5C5551' }, { s: 800, hex: '#423D3A' }, { s: 900, hex: '#181411', base: true }] },
+  'Achiote': { note: 'annatto', steps: [{ s: 50, hex: '#FFF4F1' }, { s: 100, hex: '#FFE7E0' }, { s: 200, hex: '#FED0C3' }, { s: 300, hex: '#FEAF99' }, { s: 400, hex: '#FE8562' }, { s: 500, hex: '#E8582C', base: true }, { s: 600, hex: '#CB4522' }, { s: 700, hex: '#A53016' }, { s: 800, hex: '#7F1E0C' }, { s: 900, hex: '#5B0C04' }] },
+  'Cochinilla': { note: 'cochineal', steps: [{ s: 50, hex: '#FEF4F2' }, { s: 100, hex: '#FEE7E3' }, { s: 200, hex: '#FED0C7' }, { s: 300, hex: '#FEAEA0' }, { s: 400, hex: '#EE7A68', base: true }, { s: 500, hex: '#DF6C5D' }, { s: 600, hex: '#BC5448' }, { s: 700, hex: '#983E36' }, { s: 800, hex: '#752B25' }, { s: 900, hex: '#531816' }] },
+  'Gualda': { note: 'weld', steps: [{ s: 50, hex: '#FDF7E5' }, { s: 100, hex: '#F8ECCB' }, { s: 200, hex: '#F0DBA1' }, { s: 300, hex: '#F2C744', base: true }, { s: 400, hex: '#D2A628' }, { s: 500, hex: '#B98C09' }, { s: 600, hex: '#9A7103' }, { s: 700, hex: '#7C5800' }, { s: 800, hex: '#5E4000' }, { s: 900, hex: '#412A00' }] },
+  'Hoja': { note: 'leaf', steps: [{ s: 50, hex: '#ECFBF4' }, { s: 100, hex: '#D7F5E7' }, { s: 200, hex: '#B6EAD2' }, { s: 300, hex: '#89D9B7' }, { s: 400, hex: '#5DC39B' }, { s: 500, hex: '#2FA57C', base: true }, { s: 600, hex: '#138E6B' }, { s: 700, hex: '#067056' }, { s: 800, hex: '#015341' }, { s: 900, hex: '#00382C' }] },
+  'Cielo': { note: 'light indigo', steps: [{ s: 50, hex: '#F0F8FE' }, { s: 100, hex: '#DBF0FF' }, { s: 200, hex: '#B9E3FF' }, { s: 300, hex: '#8ECFF8' }, { s: 400, hex: '#5DB4E8', base: true }, { s: 500, hex: '#459DD0' }, { s: 600, hex: '#2E81AF' }, { s: 700, hex: '#1B668E' }, { s: 800, hex: '#0B4C6C' }, { s: 900, hex: '#01334C' }] },
+  'Malva': { note: 'mallow', steps: [{ s: 50, hex: '#F7F5FF' }, { s: 100, hex: '#EEEAFE' }, { s: 200, hex: '#DED6FF' }, { s: 300, hex: '#C9BAFE' }, { s: 400, hex: '#A88BF6', base: true }, { s: 500, hex: '#9D7DE7' }, { s: 600, hex: '#8363C3' }, { s: 700, hex: '#694B9D' }, { s: 800, hex: '#503578' }, { s: 900, hex: '#372156' }] },
+  'Añil': { note: 'deep indigo, for lines', steps: [{ s: 50, hex: '#F4F7FF' }, { s: 100, hex: '#E7ECFE' }, { s: 200, hex: '#D0DBFE' }, { s: 300, hex: '#B1C3FE' }, { s: 400, hex: '#8FA7FE' }, { s: 500, hex: '#6E89FE' }, { s: 600, hex: '#5269EA' }, { s: 700, hex: '#3440C8', base: true }, { s: 800, hex: '#2C3A95' }, { s: 900, hex: '#1B246C' }] },
+  'Rubia': { note: 'madder: the warm darks', steps: [{ s: 50, hex: '#FEF4F2' }, { s: 100, hex: '#FDE7E3' }, { s: 200, hex: '#F7D3CC' }, { s: 300, hex: '#ECB7AD' }, { s: 400, hex: '#D89B8F' }, { s: 500, hex: '#C08175' }, { s: 600, hex: '#A1685D' }, { s: 700, hex: '#815047' }, { s: 800, hex: '#623A33' }, { s: 900, hex: '#5E2219', base: true }] },
 }

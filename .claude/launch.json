@@ -1,6 +1,25 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "shells", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 5273 }
+    {
+      "name": "shells",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 5273
+    },
+    {
+      "name": "brand-board",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--port",
+        "5281",
+        "--strictPort"
+      ],
+      "port": 5281
+    }
   ]
 }

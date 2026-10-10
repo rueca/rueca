@@ -28,7 +28,7 @@ for (const [rname, [rw, rh]] of Object.entries(RATIOS)) {
       const x = cv.getContext('2d')
       // background: a very gentle light falloff, so the edges get only sparse dots
       const bg = x.createRadialGradient(w * 0.4, h * 0.32, 0, w * 0.5, h * 0.5, Math.hypot(w, h) * 0.62)
-      if (invert) { bg.addColorStop(0, '#2c2c2c'); bg.addColorStop(1, '#0c0c0c') } // night: a dark room
+      if (invert) { bg.addColorStop(0, '#141414'); bg.addColorStop(1, '#0a0a0a') } // night: a dark room; kept below the dither threshold so it stays clean ink
       else { bg.addColorStop(0, '#fbfbfb'); bg.addColorStop(1, '#d4d4d4') }
       x.fillStyle = bg; x.fillRect(0, 0, w, h)
       const S = Math.min(w, h) * 0.64 / 32, cx = w * 0.53, cy = h * 0.5
