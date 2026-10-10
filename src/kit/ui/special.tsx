@@ -364,7 +364,7 @@ export function ImageDrop({ value, onChange, accept = 'image/*', compact }: { va
       tabIndex={0}
       role="button"
       aria-label="Choose image"
-      onKeyDown={(e) => e.key === 'Enter' && input.current?.click()}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.current?.click() } }}
       className={cn(
         'group/drop relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-[7px] bg-control outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
         compact ? 'h-12' : 'h-[88px]',

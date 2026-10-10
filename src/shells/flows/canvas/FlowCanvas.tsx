@@ -263,9 +263,11 @@ export function FlowCanvas() {
 
   const empty = flow.nodes.length === 0
   const interactive = walk === null
+  // ⌘\ present mode hides the canvas HUD too (dock, zoom, minimap, pins); the walkthrough keeps its own HUD (break-it F3)
+  const hud = interactive && !present
 
   return (
-    <div ref={wrap} className="relative h-full w-full" onDragOver={onDragOver} onDrop={onDrop}>
+    <div ref={wrap} className="@container relative h-full w-full" onDragOver={onDragOver} onDrop={onDrop}>
       <ReactFlow<FlowNode, FlowEdge>
         className={cn('studio-flow handles-on-hover flows-rf', connecting && 'is-connecting', animating && 'is-animating', tool === 'comment' && '[&_.react-flow__pane]:!cursor-crosshair [&_.react-flow__node]:!cursor-crosshair')}
         nodes={nodes}
@@ -309,11 +311,11 @@ export function FlowCanvas() {
           <Background variant={v.background === 'lines' ? BackgroundVariant.Lines : BackgroundVariant.Dots} gap={v.background === 'lines' ? v.grid * 2 : 20} size={1.2}
             color={v.background === 'lines' ? 'var(--line)' : 'var(--line-strong)'} />
         )}
-        {v.minimap && interactive && (
+        {v.minimap && hud && (
           <MiniMap pannable zoomable position="bottom-right" style={{ width: 176, height: 112, bottom: 52, right: 12 }} ariaLabel="Minimap"
             nodeBorderRadius={4} nodeClassName={(n) => `mm-${n.type}`} />
         )}
-        <ViewportPortal><CommentLayer zoom={zoom} /></ViewportPortal>
+        {!present && <ViewportPortal><CommentLayer zoom={zoom} /></ViewportPortal>}
       </ReactFlow>
 
       {empty && (
@@ -325,9 +327,10 @@ export function FlowCanvas() {
         </div>
       )}
 
-      {interactive ? (
+      {hud ? (
         <>
-          <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2">
+          {/* narrow canvas: the dock centres in the space left of the zoom pill instead of under it (break-it F4) */}
+          <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 @max-[760px]:right-[120px] @max-[760px]:left-auto @max-[760px]:translate-x-0">
             <ToolDock value={tool} onChange={(t) => ui.setState({ tool: t, draft: null })} tools={TOOLS}>
               <Divider vertical className="mx-1 h-5" />
               <IconButton icon={Square} label="Screen" shortcut="s" tipSide="top" className="size-8 rounded-[8px]" onClick={() => addScreen('home')} />
@@ -343,7 +346,7 @@ export function FlowCanvas() {
             </div>
           )}
         </>
-      ) : (
+      ) : walk !== null && (
         <WalkHUD index={walk!} onStep={stepTo} onExit={exitWalk} playing={playing} onPlay={() => setPlaying((p) => !p)} canPlay={v.autoplay > 0} />
       )}
       <QuickAdd open={!!adding} at={adding?.screen ?? null} onClose={() => setAdding(null)} items={adding?.from ? ADD_ITEMS.filter((i) => i.id !== 'shape:note' && i.id !== 'shape:section') : ADD_ITEMS} onPick={pickAdd}

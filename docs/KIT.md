@@ -16,7 +16,8 @@ Import everything from `@kit`. Read `src/shells/motion/` for a complete worked e
   playhead is `bg-rec` (red/orange) — never the accent.
 - **Radius + shadow, not borders.** Islands use the `panel` utility; toolbar groups `cluster`;
   popovers `pop`. A boundary inside a panel is `border-line` (6–8%), never a solid grey rule.
-- **Icons**: lucide-react, 14px, strokeWidth 1.5 in chrome (16 in the tool dock).
+- **Icons**: lucide-react. 14px at stroke 1.5 for toolbar and row icons; 12–13px (stroke 1.5–1.75)
+  inside dense 24px controls (chevrons, steppers, close ×); 16px in the tool dock. Never larger in chrome.
 - **Hover reveals** secondary affordances (reset, eye/lock, thumbs). But everything hover-only
   must also appear on `:focus-visible` / `focus-within`.
 - **Every drag has a non-drag alternative** (typed field, stepper, menu item) — WCAG 2.5.7.

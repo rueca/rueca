@@ -10,6 +10,7 @@
      active tool, safe-area insets, saved camera views, thumbnails.
 --------------------------------------------------------------------------- */
 import { createStore } from 'zustand/vanilla'
+import { saveLocal } from '../storage'
 import { createParams, defineSchema, folder, p, type Folder, type ParamDef, type ParamStore, type Schema } from '@kit'
 
 export type Kind = 'group' | 'mesh' | 'floor' | 'light' | 'camera'
@@ -191,7 +192,7 @@ export const ui = createStore<UI>(() => ({
 }))
 ui.subscribe((s, prev) => {
   if (s.names === prev.names && s.views === prev.views) return
-  try { localStorage.setItem(LSK, JSON.stringify({ names: s.names, views: s.views })) } catch { /* private mode */ }
+  saveLocal(LSK, JSON.stringify({ names: s.names, views: s.views }))
 })
 
 export const nameOf = (id: string) => ui.getState().names[id] ?? OBJ[id]?.name ?? id

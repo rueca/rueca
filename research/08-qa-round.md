@@ -130,3 +130,20 @@ All P0 and P1 findings from dx, a11y, layout, perf and state are fixed and verif
 - S4 (P1, partly): kit has DataDef `validate`; shader/synth/photo should add one to their shared p.data defs.
 - Interaction agent never reported (stalled twice under machine load) — re-run on a quiet machine.
 P2/P3 backlog: everything else in this file marked without ✅ / FIXED.
+
+## Kit P2 pass (2026-10-10 early hours) — FIXED
+A4 palette focus return · A5 scrub refocus + input name · A6 tree aria-level/setsize/posinset + refocus after rename ·
+A7 faint → AA (dark #8a8a8a, light #737373), untouched values muted, qa.mjs faint 4.5 · A8 switch edge, slider groove
+edge, thumb always visible (small at rest) · A10 colour area keyboard slider + valuetext, hue in degrees, hex input named ·
+A11 SizeFields link named · A12 Segmented radio semantics, PanelTabs APG (roving, arrows, aria-controls) · A13 slider
+aria-valuetext from fmt · A14 KeyButton edited = outline + dot, selected key larger + ringed, changed rows get a dot +
+sr-only text · A19 reduced-motion chrome · A20 ImageDrop Space · DX5 inferred steps · DX7/DX8/DX9 history/bindItem ·
+DX11 folder warning · DX14 animate default !!clock · DX16 sentence-case labels, duplicate keys in createParams,
+same-id warning · F3 Stage HUD/overlay hidden in present · F8 popups z-160 above dialogs · F9 Brand name never
+collapses · F12 icon rule updated to reality (KIT §1) · PERF-2 clock lazy start/stop · PERF-3 idle readouts don't
+re-render · PERF-4 landing eager JS+CSS ~340→222 KB gz (narrow imports) · S7 multi-tab for doc stores too ·
+F2 toast() self-mounts one Toaster.
+Shell-level P2s (F3 shell HUDs, F4–F6, F10, S8–S10, A9, A14 flows dots, A15–A18, A20 shell parts, F12 shell bits):
+delegated to one cleanup agent — see its report.
+Still open: PERF-5 (ui-design react-dom/server 190 KB), PERF-6 (landing iframe off-screen), DX10 (accent-check prints
+:root not :root:root — branding-owned script), DX16 p.select union typing, interaction agent re-run.

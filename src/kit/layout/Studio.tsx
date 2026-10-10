@@ -129,11 +129,27 @@ export function PanelHeader({ title, children, className }: { title?: ReactNode;
 }
 
 /* Text tabs in a panel header (Design / Prototype, Layers / Assets). */
-export function PanelTabs<T extends string>({ value, onChange, tabs }: { value: T; onChange: (t: T) => void; tabs: { value: T; label: string }[] }) {
+/* Text tabs in a panel header (Design / Prototype, Layers / Assets). APG tabs: one tab stop,
+   ←/→ (and Home/End) move between tabs and select (break-it A12). Pass `controls` to name the panel. */
+export function PanelTabs<T extends string>({ value, onChange, tabs, controls }: { value: T; onChange: (t: T) => void; tabs: { value: T; label: string }[]; controls?: string }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const go = (i: number) => {
+    const t = tabs[(i + tabs.length) % tabs.length]
+    onChange(t.value)
+    requestAnimationFrame(() => ref.current?.querySelector<HTMLElement>(`[data-tab="${t.value}"]`)?.focus())
+  }
   return (
-    <div role="tablist" className="flex flex-1 items-center gap-0.5">
+    <div ref={ref} role="tablist" className="flex flex-1 items-center gap-0.5"
+      onKeyDown={(e) => {
+        const i = tabs.findIndex((t) => t.value === value)
+        if (e.key === 'ArrowRight') { e.preventDefault(); go(i + 1) }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); go(i - 1) }
+        else if (e.key === 'Home') { e.preventDefault(); go(0) }
+        else if (e.key === 'End') { e.preventDefault(); go(tabs.length - 1) }
+      }}>
       {tabs.map((t) => (
-        <button key={t.value} role="tab" type="button" aria-selected={value === t.value} onClick={() => onChange(t.value)}
+        <button key={t.value} role="tab" type="button" data-tab={t.value} aria-selected={value === t.value} aria-controls={controls}
+          tabIndex={value === t.value ? 0 : -1} onClick={() => onChange(t.value)}
           className={cn('h-7 rounded-[6px] px-2 text-[12px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
             value === t.value ? 'bg-active text-fg' : 'text-fg-muted hover:text-fg')}>
           {t.label}
