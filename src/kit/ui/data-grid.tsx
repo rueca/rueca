@@ -36,6 +36,7 @@ import { cn } from '../core/cn'
 import { copyText } from '../core/io'
 import { ColorPanel, Swatch } from './color'
 import { Tip } from './tooltip'
+import { revealInScroller } from '../core/scroll'
 
 export interface GridColumn {
   key: string
@@ -91,7 +92,7 @@ export function DataGrid<R extends object>({
     const rr = Math.max(0, Math.min(rows.length - 1, r)), cc = Math.max(0, Math.min(columns.length - 1, c))
     setSel({ r: rr, c: cc })
     if (rr !== activeRow) onActiveRow?.(rr)
-    requestAnimationFrame(() => document.getElementById(cellId(rr, cc))?.scrollIntoView({ block: 'nearest', inline: 'nearest' }))
+    requestAnimationFrame(() => revealInScroller(document.getElementById(cellId(rr, cc))))
   }
   const startEdit = (initial?: string) => {
     if (!sel || columns[sel.c]?.readOnly) return

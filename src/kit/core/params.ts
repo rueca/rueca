@@ -114,6 +114,9 @@ const LS = {
     }
   },
 }
+/** short stable hash (FNV-1a) — identifies a share link without storing it */
+const hash = (s: string) => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619); return (h >>> 0).toString(36) }
+
 const b64 = {
   enc: (s: string) => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''),
   dec: (s: string) => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/_/g, '/')))),
@@ -139,7 +142,8 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
   const defs = defIndex(schema)
   const suffix = opts.version ? `:v${opts.version}` : ''
   const keyLS = `studio:${opts.id}:values${suffix}`
-  const keyPresets = `studio:${opts.id}:presets${suffix}`
+  // Presets are sanitized key by key on load, so they survive schema bumps: one unversioned key (ST4).
+  const keyPresets = `studio:${opts.id}:presets`
   const limit = opts.historyLimit ?? 100
 
   const flag = (k: string, f: 'persist' | 'share') => { const d = defs[k] as any; return !d || d[f] !== false }
@@ -172,10 +176,11 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
 
   let initial = { ...defaults }
   if (opts.persist !== false) initial = { ...initial, ...sanitize(LS.get<Partial<V>>(keyLS), 'localStorage') }
+  let linkApplied = false
   if (opts.url !== false && typeof location !== 'undefined') {
     const m = location.hash.match(/[#&]p=([^&]+)/)
     // A link applies ONCE per tab: reloading after tweaking must keep the tweaks (break-it S5).
-    const seenKey = `studio:link:${opts.id}:${m?.[1].slice(0, 64)}`
+    const seenKey = `studio:link:${opts.id}:${m ? hash(m[1]) : ''}`
     let seen = false
     try { seen = !!m && sessionStorage.getItem(seenKey) === '1' } catch { /* noop */ }
     if (m && !seen) try {
@@ -193,12 +198,20 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
       // keys marked share:false (images, private data) can never arrive by link
       for (const k of Object.keys(raw ?? {})) if (!flag(k, 'share')) { delete raw[k]; warn(`ignored "${k}" from share link (share: false)`) }
       initial = { ...initial, ...sanitize(raw as Partial<V>, 'share link') }
+      linkApplied = true
       try { sessionStorage.setItem(seenKey, '1') } catch { /* noop */ }
     } catch (e) { if ((e as Error)?.message !== 'version') warn('ignored an unreadable share link') }
   }
 
   const builtin: Preset<V>[] = (opts.presets ?? []).map((pr) => ({ name: pr.name, values: sanitize(pr.values), mode: pr.mode, builtin: true }))
-  const rawSaved = LS.get<unknown>(keyPresets)
+  // A link's values become the saved values right away, or a plain reload (which skips the already-seen link)
+  // would fall back to the old ones (break-it ST2).
+  if (linkApplied && opts.persist !== false) LS.set(keyLS, pick(initial as Values, 'persist'))
+  let rawSaved = LS.get<unknown>(keyPresets)
+  if (rawSaved === null) for (let v = opts.version ?? 0; v >= 1; v--) {
+    const old = `studio:${opts.id}:presets:v${v}`, found = LS.get<unknown>(old)
+    if (found !== null) { rawSaved = found; LS.set(keyPresets, found); try { localStorage.removeItem(old) } catch { /* noop */ } break }
+  }
   const saved = (Array.isArray(rawSaved) ? rawSaved : [])
     .filter((pr): pr is Preset<V> => !!pr && typeof pr === 'object' && typeof (pr as Preset<V>).name === 'string')
     .map((pr) => ({ name: pr.name, mode: pr.mode === 'replace' ? 'replace' as const : 'merge' as const, values: sanitize(pr.values, 'saved preset') }))
@@ -402,6 +415,23 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     },
     isChanged: (key: keyof V) => !equal(store.getState().values[key], defaults[key]),
   }) as unknown as ParamStore<S>
+
+  // A new link pasted into an open tab (hash-only navigation) applies at once, as one undoable step (ST3).
+  if (opts.url !== false && typeof window !== 'undefined') window.addEventListener('hashchange', () => {
+    const m = location.hash.match(/[#&]p=([^&]+)/)
+    if (!m) return
+    const seenKey = `studio:link:${opts.id}:${hash(m[1])}`
+    try { if (sessionStorage.getItem(seenKey) === '1') return; sessionStorage.setItem(seenKey, '1') } catch { /* noop */ }
+    try {
+      const raw = JSON.parse(b64.dec(m[1])) as Record<string, unknown>
+      const linkVersion = typeof raw?.$v === 'number' ? raw.$v : 1
+      if (raw) delete raw.$v
+      if (linkVersion !== (opts.version ?? 1)) { window.dispatchEvent(new CustomEvent('studio:link-ignored', { detail: { id: opts.id, linkVersion, version: opts.version ?? 1 } })); return }
+      for (const k of Object.keys(raw ?? {})) if (!flag(k, 'share')) delete raw[k]
+      const vals = sanitize(raw as Partial<V>, 'share link')
+      if (Object.keys(vals).length) api.patch(vals, { label: 'Open link' })
+    } catch { warn('ignored an unreadable share link') }
+  })
 
   return api
 }

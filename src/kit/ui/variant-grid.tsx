@@ -31,6 +31,7 @@ import { useEffect, useRef, type ComponentType, type ReactNode } from 'react'
 import { Lock, LockOpen, Star, Maximize2 } from 'lucide-react'
 import { cn } from '../core/cn'
 import { Tip } from './tooltip'
+import { revealInScroller } from '../core/scroll'
 
 export interface Variant { id: string; label: string; sub?: string; locked?: boolean; fav?: boolean; background?: string }
 
@@ -84,7 +85,7 @@ export function VariantGrid({
     ro.observe(el.current)
     return () => ro.disconnect()
   }, [onColumns, minSize, gap])
-  useEffect(() => { el.current?.querySelector(`[data-variant-index="${cursor}"]`)?.scrollIntoView({ block: 'nearest' }) }, [cursor])
+  useEffect(() => { revealInScroller(el.current?.querySelector(`[data-variant-index="${cursor}"]`)) }, [cursor])
 
   const move = (i: number, e: React.KeyboardEvent) => {
     const n = items.length

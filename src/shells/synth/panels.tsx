@@ -22,7 +22,9 @@ const SECTION_KEYS = {
 
 const OPEN_KEY = 'studio:synth:sections'
 /** Section open state, shared by both panels and persisted. Alt-click a header to solo it. */
-const openStore = createStore<Record<string, boolean>>(() => { try { return JSON.parse(localStorage.getItem(OPEN_KEY) ?? '{}') } catch { return {} } })
+const openStore = createStore<Record<string, boolean>>(() => {
+  try { const v = JSON.parse(localStorage.getItem(OPEN_KEY) ?? '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {} } catch { return {} }
+})
 function toggleSection(id: string, solo: boolean) {
   const open = openStore.getState()
   const next = solo ? Object.fromEntries(Object.keys(SECTION_KEYS).map((k) => [k, k === id])) : { ...open, [id]: !(open[id] ?? true) }

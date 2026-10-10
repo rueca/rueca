@@ -53,3 +53,31 @@ Held up: every documented API exists (393 exports, ~2,100 doc tokens) and a file
 | PERF-11 | P3 | 12.9 MB QA PNGs deployed | **fixed** (D1) |
 | PERF-12 | P3 | `/nope` plain-text 404; `#/nope` silently shows the landing | gallery owner |
 Held up: brotli everywhere, HTTPS/www redirects 308 + HSTS, `/r/*.json` CORS + 404s, font-display swap + latin subsets, CLS ≈ 0, no failed requests.
+
+## 4. Consistency and accessibility (agent "consistency") — axe on landing, gallery and 6 shells, keyboard walks, contrast
+| ID | Sev | Finding | Action |
+|---|---|---|---|
+| C1 | P1 | kit `Button` / `IconButton` showed no keyboard focus anywhere (base `outline-none` beat the scoped base rule) — every toolbar, the landing CTA | **fixed**: focus ring on buttonVariants, Inspector popover trigger, Timeline keys, folder headers |
+| C2 | P1 | Synth `autoFocus` pulls page focus into the landing rail iframe; 94+ tab stops | landing owner: `inert={!active}` on LiveFrame iframes |
+| C3 | P2 | islands refactor (7a296bc) put the canvas HUD before the toolbar in tab order | **fixed**: panels first in DOM, canvas layer z-0 |
+| C4 | P2 | accent text on soft / control surfaces 3.35–4.43:1 | `--signal-text` token (next batch) |
+| C5 | P2 | `fg-faint` on active / well / soft surfaces 3.5–4.2:1 | use `fg-muted` there (next batch) |
+| C6 | P2 | no `<main>` on landing/gallery; unnamed asides; overlay artwork not a landmark | **fixed in kit** (named panels, overlay `<main>`); landing/gallery `<main>`: landing owner |
+| C7 | P2 | video ClipInspector two unnamed spinbuttons + min mismatch | next batch |
+| C8 | P2 | dimmed real text on rail names / gallery chip counts 2.2–3.8:1 | landing owner |
+| C9–C16 | P3 | reduced-motion smooth scroll, hero autoplay, StepDeck regions, small targets, em dashes in chrome copy, label drift, no type scale, `#fff` handles | backlog |
+Held up: no hex in kit chrome, borders all `border-line`, no Title Case labels, zero console warnings on 21 routes, landing palette contrast passes, landing nav keyboard + focus, no tab traps.
+
+## 5. State, persistence and exports (agent "state") — 19 shells × 7 corrupt-storage variants, links, presets, undo, ~45 exports
+| ID | Sev | Finding | Action |
+|---|---|---|---|
+| ST1 | P0 | marks doc rejected on every reload (record keyed by random ids vs a fresh demo template) — all edits lost | **fixed**: `validate` in createDocStore; test |
+| ST2 | P1 | share-link values lost on a plain reload (never persisted; seen-flag skips the link) | **fixed**: persist after applying; test |
+| ST3 | P2 | seen-link key was a 64-char prefix; a pasted link in an open tab did nothing | **fixed**: hash of the whole payload; `hashchange` applies as one undo step; tests |
+| ST4 | P1 | version bumps orphaned returning users' docs (no migrate) and presets (versioned key) | **fixed**: shape-compatible older docs carried forward; presets on one unversioned key with fallback; tests |
+| ST5 | P1 | ui-design loaded its saved doc unvalidated: null / bad pages crashed every panel | **fixed**: validate + park + carry v1 forward |
+| ST6 | P3 | synth `sections` = null crashed two panels | **fixed** |
+| ST7 | P3 | generate legacy gallery key unvalidated | **fixed**: validate items, retire the key |
+| ST8 | P3 | nodes saved node without x/y → NaN positions | **fixed**: drop unknown kinds, default 0 |
+| ST9 | P2 | nodes "PNG · 2048 px" produced no download in 45 s (once, headless WebGL) | manual re-check |
+Held up: corrupt storage elsewhere parked or dropped cleanly; presets (clash → "Name 2", persist, delete); A/B; unified undo across stores; one drag = one step; ~45 exports produced valid files; ui-design and CSV imports reject bad files with clear toasts.

@@ -12,7 +12,7 @@ import type { HistoryLike } from '@kit'
 import { useStore } from 'zustand'
 import { applyEdgeChanges, applyNodeChanges, type Connection, type Edge, type EdgeChange, type Node, type NodeChange, type XYPosition } from '@xyflow/react'
 import { portOf, specOf, type EngineGraph, type PortType } from '../engine/spec'
-import { defOf, defaultParams } from './defs'
+import { DEFS, defOf, defaultParams } from './defs'
 import { SAMPLES } from './samples'
 
 export interface NodeData extends Record<string, unknown> { kind: string; title: string; params: Record<string, unknown>; bypass?: boolean }
@@ -56,8 +56,10 @@ const mkEdge = (nodes: GNode[], e: { source: string; sourceHandle: string; targe
 })
 
 export function fromSaved(g: SavedGraph): { name: string; nodes: GNode[]; edges: GEdge[] } {
-  const nodes: GNode[] = g.nodes.map((n) => ({
-    id: n.id, type: 'proc', position: { x: n.x, y: n.y },
+  // unknown kinds are dropped and missing positions default to 0 (break-it ST8: NaN positions)
+  const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : 0)
+  const nodes: GNode[] = g.nodes.filter((n) => !!DEFS[n.kind]).map((n) => ({
+    id: n.id, type: 'proc', position: { x: num(n.x), y: num(n.y) },
     data: { kind: n.kind, title: n.title ?? defOf(n.kind).label, params: { ...defaultParams(n.kind), ...n.params }, bypass: n.bypass },
   }))
   return { name: g.name, nodes, edges: g.edges.map((e) => mkEdge(nodes, e)) }

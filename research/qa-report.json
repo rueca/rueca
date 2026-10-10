@@ -16,12 +16,44 @@
     "textSampled": 78
   },
   {
+    "id": "dropin",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 44
+  },
+  {
+    "id": "dropin",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 44
+  },
+  {
+    "id": "present",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 33
+  },
+  {
+    "id": "present",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 33
+  },
+  {
     "id": "animate",
     "theme": "dark",
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 91
+    "textSampled": 87
   },
   {
     "id": "animate",
@@ -29,6 +61,246 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 91
+    "textSampled": 87
+  },
+  {
+    "id": "ui-design",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 115
+  },
+  {
+    "id": "ui-design",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 115
+  },
+  {
+    "id": "shader",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 49
+  },
+  {
+    "id": "shader",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 49
+  },
+  {
+    "id": "component-lab",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 106
+  },
+  {
+    "id": "component-lab",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 106
+  },
+  {
+    "id": "video",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 3
+  },
+  {
+    "id": "video",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 142
+  },
+  {
+    "id": "dither",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 84
+  },
+  {
+    "id": "dither",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 84
+  },
+  {
+    "id": "scene",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 69
+  },
+  {
+    "id": "scene",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 69
+  },
+  {
+    "id": "batch",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 159
+  },
+  {
+    "id": "batch",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 159
+  },
+  {
+    "id": "photo",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 86
+  },
+  {
+    "id": "photo",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 86
+  },
+  {
+    "id": "flows",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 127
+  },
+  {
+    "id": "flows",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 127
+  },
+  {
+    "id": "nodes",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 103
+  },
+  {
+    "id": "nodes",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 105
+  },
+  {
+    "id": "type",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 99
+  },
+  {
+    "id": "type",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 99
+  },
+  {
+    "id": "generate",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 77
+  },
+  {
+    "id": "generate",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 77
+  },
+  {
+    "id": "journey",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 93
+  },
+  {
+    "id": "journey",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 93
+  },
+  {
+    "id": "marks",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 66
+  },
+  {
+    "id": "marks",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 66
+  },
+  {
+    "id": "synth",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 152
+  },
+  {
+    "id": "synth",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 152
   }
 ]

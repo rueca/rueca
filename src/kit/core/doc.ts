@@ -88,12 +88,15 @@ export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> 
         const raw = parse(localStorage.getItem(k))
         if (raw === undefined) continue
         const v = Number(k.match(/:v(\d+)$/)?.[1] ?? NaN)
-        const m = opts.migrate ? opts.migrate(raw, Number.isNaN(v) ? null : v) : null
+        // No migrate: a version bump is often only a demo refresh, so an older doc that still has the right
+        // shape is carried forward as-is (break-it ST4: bumps used to orphan every returning user's work).
+        const m = opts.migrate ? opts.migrate(raw, Number.isNaN(v) ? null : v) : raw
         if (m && ok(m)) {
           start = m
           try { localStorage.setItem(key, JSON.stringify(m)); localStorage.removeItem(k) } catch { /* noop */ }
           break
         }
+        console.warn(`[studio] ${opts.id}: found a saved document under ${k} that no longer fits — left it there, starting fresh`)
       }
     }
   }

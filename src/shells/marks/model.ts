@@ -64,7 +64,9 @@ const valid = (raw: unknown): raw is Doc => {
   return !!d && !!d.marks && Array.isArray(d.grid) && Array.isArray(d.favs) && d.grid.every((id) => d.marks[id] && FAMILY[d.marks[id].family])
 }
 
-export const doc = createDocStore<Doc>(demoDoc(), { id: 'marks', version: 1 })
+// `marks` is a record keyed by random ids, so the default shape check (against a fresh demo) always failed and
+// every reload threw the user's work away (break-it ST1). Validate the structure instead.
+export const doc = createDocStore<Doc>(demoDoc(), { id: 'marks', version: 1, validate: valid })
 // A stored doc from an older build (or a different family set) falls back to the demo;
 // the pre-kit store kept its doc under `studio:marks:doc` — carry it over once.
 {

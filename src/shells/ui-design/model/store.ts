@@ -15,6 +15,7 @@ import { useStore } from 'zustand'
 import type { HistoryLike } from '@kit'
 import type { SnapGuide } from '@kit/stage/snap'
 import { seedDoc } from './seed'
+import { matchesShape } from '@kit/core/doc'
 import { find, update, updateMany, remove, insert, locate, ancestors, cloneFresh, topMost, childrenOf } from './tree'
 import { layoutPage, union, sizeOf } from './layout'
 import { base, frame, solid } from './factory'
@@ -50,8 +51,24 @@ export interface DesignState {
 }
 
 function load(): Doc {
-  try { const s = localStorage.getItem(LS); if (s) return JSON.parse(s) } catch { /* noop */ }
-  return seedDoc()
+  // Validate before use — a null or wrong-shaped saved doc used to crash every panel (break-it ST5). Bad docs are
+  // parked, not deleted; a v1 doc that still fits is carried forward (the v2 bump only refreshed the demo).
+  const seed = seedDoc()
+  for (const key of [LS, 'studio:ui-design:doc:v1']) {
+    let text: string | null = null
+    try { text = localStorage.getItem(key) } catch { /* private mode */ }
+    if (!text) continue
+    let raw: unknown
+    try { raw = JSON.parse(text) } catch { raw = undefined }
+    const d = raw as Doc | undefined
+    if (d && Array.isArray(d.pages) && d.pages.length > 0 && matchesShape(d, seed)) {
+      if (key !== LS) try { localStorage.setItem(LS, text); localStorage.removeItem(key) } catch { /* noop */ }
+      return d
+    }
+    try { localStorage.setItem(`${key}:rejected`, text) } catch { /* noop */ }
+    console.warn(`[studio] ui-design: saved document under ${key} doesn't fit — starting fresh (kept as ${key}:rejected)`)
+  }
+  return seed
 }
 const doc0 = load()
 

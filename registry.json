@@ -295,6 +295,11 @@
           "target": "@components/studio/core/schema.ts"
         },
         {
+          "path": "src/kit/core/scroll.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/scroll.ts"
+        },
+        {
           "path": "src/kit/core/snapshot.ts",
           "type": "registry:lib",
           "target": "@components/studio/core/snapshot.ts"

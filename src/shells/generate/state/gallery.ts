@@ -50,7 +50,11 @@ const read = (key: string) => { try { return JSON.parse(localStorage.getItem(key
 
 function initialLibrary(): Library {
   const g = read(LEGACY)
-  if (g && Array.isArray(g.sessions) && Array.isArray(g.images)) return { sessions: g.sessions, boards: g.boards ?? [], images: g.images }
+  // validate items, and retire the legacy key once read (break-it ST7: bad entries crashed two panels)
+  try { if (g !== null) localStorage.removeItem(LEGACY) } catch { /* noop */ }
+  const obj = (x: unknown) => !!x && typeof x === 'object'
+  if (g && Array.isArray(g.sessions) && Array.isArray(g.images) && g.sessions.every(obj) && g.images.every((i: unknown) => obj(i) && typeof (i as { sessionId?: unknown }).sessionId === 'string'))
+    return { sessions: g.sessions, boards: Array.isArray(g.boards) ? g.boards : [], images: g.images }
   return seedGallery()
 }
 

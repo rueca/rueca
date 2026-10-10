@@ -10,7 +10,7 @@
        <Stage>…</Stage>
      </Studio>
 
-   Two arrangements:
+   Three arrangements:
      layout="islands"  floating rounded cards with a gutter (default; motion, artboards). Panels float
                        over the workspace: the main camera stage runs underneath and fits in the gap
      layout="overlay"  the stage is full-bleed under the panels (shaders, 3D, photo)
@@ -58,47 +58,47 @@ export function Studio({
   const shell =
     layout === 'overlay' ? (
       <SafeAreaRoot className="relative h-full w-full overflow-hidden">
-        <div className="absolute inset-0">{children}</div>
         {!present && (
-          <div className="pointer-events-none absolute inset-0 flex flex-col gap-[var(--gutter)] p-[var(--gutter)]">
-            {toolbar && <div data-safe="top" className="pointer-events-auto flex-none">{toolbar}</div>}
+          <div className="pointer-events-none absolute inset-0 z-10 flex flex-col gap-[var(--gutter)] p-[var(--gutter)]">
+            {toolbar && <div data-safe="top" className="flex-none [&_header>div>*]:pointer-events-auto [&>*:not(header)]:pointer-events-auto">{toolbar}</div>}
             <div className="flex min-h-0 flex-1 gap-[var(--gutter)]">
-              {left && <aside data-safe="left" className="pointer-events-auto flex min-h-0 flex-none flex-col" style={{ width: leftWidth }}>{left}</aside>}
+              {left && <aside aria-label="Left panel" data-safe="left" className="flex min-h-0 flex-none flex-col [&>*]:pointer-events-auto" style={{ width: leftWidth }}>{left}</aside>}
               <div className="flex-1" />
-              {right && <aside data-safe="right" className="pointer-events-auto flex min-h-0 flex-none flex-col" style={{ width: rw }}>{right}</aside>}
+              {right && <aside aria-label="Right panel" data-safe="right" className="flex min-h-0 flex-none flex-col [&>*]:pointer-events-auto" style={{ width: rw }}>{right}</aside>}
             </div>
             {/* the strip itself lets clicks through; only its content takes them */}
-            {bottom && <div data-safe="bottom" className="flex flex-none justify-center [&>*]:pointer-events-auto">{bottom}</div>}
+            {bottom && <section aria-label="Bottom panel" data-safe="bottom" className="flex flex-none justify-center [&>*]:pointer-events-auto">{bottom}</section>}
           </div>
         )}
+        <main className="absolute inset-0 z-0">{children}</main>
       </SafeAreaRoot>
     ) : layout === 'docked' ? (
       <div className="flex h-full flex-col">
         {toolbar && !present && <div className="flex-none border-b border-line bg-panel px-2 py-1.5">{toolbar}</div>}
         <div className="flex min-h-0 flex-1">
-          {left && !present && <aside className="flex min-h-0 flex-none flex-col border-r border-line bg-panel" style={{ width: leftWidth }}>{left}</aside>}
+          {left && !present && <aside aria-label="Left panel" className="flex min-h-0 flex-none flex-col border-r border-line bg-panel" style={{ width: leftWidth }}>{left}</aside>}
           <main className="relative min-w-0 flex-1">{children}</main>
-          {right && !present && <aside className="flex min-h-0 flex-none flex-col border-l border-line bg-panel" style={{ width: rw }}>{right}</aside>}
+          {right && !present && <aside aria-label="Right panel" className="flex min-h-0 flex-none flex-col border-l border-line bg-panel" style={{ width: rw }}>{right}</aside>}
         </div>
-        {bottom && !present && <div className="flex-none border-t border-line bg-panel">{bottom}</div>}
+        {bottom && !present && <section aria-label="Bottom panel" className="flex-none border-t border-line bg-panel">{bottom}</section>}
       </div>
     ) : (
       // Islands: the panels FLOAT. The field runs uninterrupted underneath them; content sits in the
       // uncovered rect (the safe area) so nothing hides under a panel — except a camera <Stage>, which
       // bleeds to the edges (grid and artboard continue under the panels) and fits into the safe area.
       <SafeAreaRoot className="relative h-full w-full overflow-hidden">
-        <main data-studio-main="" className="absolute" style={present ? { inset: 0 } : SAFE_INSET}>{children}</main>
         {!present && (
-          <div className="pointer-events-none absolute inset-0 flex flex-col gap-[var(--gutter)] p-[var(--gutter)]">
-            {toolbar && <div data-safe="top" className="pointer-events-auto flex-none">{toolbar}</div>}
+          <div className="pointer-events-none absolute inset-0 z-10 flex flex-col gap-[var(--gutter)] p-[var(--gutter)]">
+            {toolbar && <div data-safe="top" className="flex-none [&_header>div>*]:pointer-events-auto [&>*:not(header)]:pointer-events-auto">{toolbar}</div>}
             <div className="flex min-h-0 flex-1 gap-[var(--gutter)]">
-              {left && <aside data-safe="left" className="pointer-events-auto flex min-h-0 flex-none flex-col" style={{ width: leftWidth }}>{left}</aside>}
+              {left && <aside aria-label="Left panel" data-safe="left" className="flex min-h-0 flex-none flex-col [&>*]:pointer-events-auto" style={{ width: leftWidth }}>{left}</aside>}
               <div className="flex-1" />
-              {right && <aside data-safe="right" className="pointer-events-auto flex min-h-0 flex-none flex-col" style={{ width: rw }}>{right}</aside>}
+              {right && <aside aria-label="Right panel" data-safe="right" className="flex min-h-0 flex-none flex-col [&>*]:pointer-events-auto" style={{ width: rw }}>{right}</aside>}
             </div>
-            {bottom && <div data-safe="bottom" className="pointer-events-auto flex-none">{bottom}</div>}
+            {bottom && <section aria-label="Bottom panel" data-safe="bottom" className="pointer-events-auto flex-none">{bottom}</section>}
           </div>
         )}
+        <main data-studio-main="" className="absolute z-0" style={present ? { inset: 0 } : SAFE_INSET}>{children}</main>
       </SafeAreaRoot>
     )
 

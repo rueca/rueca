@@ -13,6 +13,7 @@ import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 
 import { ChevronRight, Eye, EyeOff, Lock, Unlock } from 'lucide-react'
 import { cn } from '../core/cn'
 import { InlineText } from '../ui/inline-text'
+import { revealInScroller } from '../core/scroll'
 
 export interface LayerItem {
   id: string
@@ -72,11 +73,13 @@ export function LayerTree({
     } else setClosedOwn(next)
   }
   const rootRef = useRef<HTMLDivElement>(null)
-  // Bring the selection into view when it changes from outside (canvas click).
+  // Bring the selection into view when it changes from outside (canvas click). Only the
+  // tree's own scroller moves: scrollIntoView also scrolls every ancestor, including the
+  // host page when the tool runs in an iframe (it pulled the landing hero under the nav).
   const selKey = selected.join(',')
   useEffect(() => {
     const el = rootRef.current?.querySelector<HTMLElement>('[aria-selected="true"]')
-    el?.scrollIntoView({ block: 'nearest' })
+    revealInScroller(el)
   }, [selKey])
   const [drag, setDrag] = useState<string | null>(null)
   const [drop, setDrop] = useState<Drop>(null)

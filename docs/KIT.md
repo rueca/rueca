@@ -229,6 +229,7 @@ stops ticks while paused too (default true for artifacts with their own life).
 - `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound.
 - `toast(title, opts)` works anywhere (it mounts a single toaster if none is rendered) and returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
   `toast.promise(p, { loading, success, error })` · `toast.progress(title, { onCancel })` → `{ set(p), done(msg), fail(msg) }`.
+- `revealInScroller(el)` — keep a selection visible by scrolling only its nearest scroll box (never `scrollIntoView`: it scrolls the host page too when the tool is embedded).
 - IO: `renderCanvasPNG(draw, { width, height, v, t, scale })` (re-renders your CanvasSurface `draw` off-screen at scale — use this for 2× / 4× exports) · `exportCanvasPNG(canvas, name, scale, { smoothing })` (upscales what's on screen — pixel art, WebGL) · `exportSVG(svg | string)` · `exportJSON(data)` ·
   `recordFrames({ canvas, draw(t, i), frames, fps, name, onProgress, signal })` (frame-accurate MP4/WebM, WebCodecs) ·
   `recordCanvas(canvas, ms)` (quick real-time fallback) · `createZip()` (STORE zip: `add(name, bytes)`, `await addBlob(name, blob)`, `toBlob()`) ·

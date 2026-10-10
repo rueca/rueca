@@ -111,7 +111,7 @@ export function Section({
           type="button"
           aria-expanded={collapsible ? open : undefined}
           onClick={(e) => toggle(e.altKey)}
-          className={cn('flex h-full min-w-0 flex-1 items-center gap-1 text-left text-[11.5px] font-medium text-fg outline-none no-select focus-visible:text-signal', !collapsible && 'cursor-default')}
+          className={cn('flex h-full min-w-0 flex-1 items-center gap-1 text-left text-[11.5px] font-medium text-fg outline-none no-select rounded-[4px] focus-visible:text-signal focus-visible:ring-2 focus-visible:ring-signal', !collapsible && 'cursor-default')}
         >
           <Tip label={hint} side="left"><span className="truncate">{title}</span></Tip>
           {changed && <span className="size-1 shrink-0 rounded-full bg-signal" aria-label="changed" />}
@@ -203,7 +203,7 @@ export function ParamRow({ k, def, params, values: valuesProp, defaults: default
     return (
       <Row {...common}>
         <Popover.Root>
-          <Popover.Trigger className="flex h-6 w-full min-w-0 items-center gap-2 rounded-[5px] bg-control px-1.5 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
+          <Popover.Trigger className="flex h-6 w-full min-w-0 items-center gap-2 rounded-[5px] bg-control px-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-signal hover:shadow-[inset_0_0_0_1px_var(--line-strong)] data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
             <CurveGlyph value={v as [number, number, number, number]} className="text-signal" />
             <span className={cn('truncate tabular text-[11px]', changed ? 'text-fg' : 'text-fg-faint')}>{(v as number[]).map((n) => n.toFixed(2)).join(', ')}</span>
           </Popover.Trigger>

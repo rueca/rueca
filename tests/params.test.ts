@@ -109,3 +109,38 @@ describe('share links carry their version', () => {
     expect(createParams(schema, { id: `link${++n}`, persist: false, version: 3 }).values().rings).toBe(14)
   })
 })
+
+describe('share links and presets across reloads and versions', () => {
+  it('a link’s values survive a plain reload (ST2)', () => {
+    const id = `keep${++n}`
+    location.hash = '#p=' + btoa(JSON.stringify({ $v: 1, rings: 31 }))
+    sessionStorage.clear()
+    expect(createParams(schema, { id }).values().rings).toBe(31)
+    // reload: same URL, link already seen this tab → saved values must hold the link's value
+    expect(createParams(schema, { id }).values().rings).toBe(31)
+  })
+  it('two links that differ only late in the payload are both honoured (ST3)', () => {
+    const id = `two${++n}`
+    sessionStorage.clear()
+    location.hash = '#p=' + btoa(JSON.stringify({ $v: 1, shape: 'square', rings: 10 }))
+    createParams(schema, { id })
+    location.hash = '#p=' + btoa(JSON.stringify({ $v: 1, shape: 'square', rings: 20 }))
+    expect(createParams(schema, { id }).values().rings).toBe(20)
+  })
+  it('a link pasted into an open tab applies at once, undoably (ST3)', () => {
+    location.hash = ''
+    const s = createParams(schema, { id: `paste${++n}`, persist: false })
+    location.hash = '#p=' + btoa(JSON.stringify({ $v: 1, rings: 27 }))
+    window.dispatchEvent(new HashChangeEvent('hashchange'))
+    expect(s.values().rings).toBe(27)
+    s.undo()
+    expect(s.values().rings).toBe(14)
+  })
+  it('saved presets survive a schema version bump (ST4)', () => {
+    location.hash = ''
+    localStorage.setItem('studio:pv:presets:v1', JSON.stringify([{ name: 'Mine', values: { rings: 9 } }]))
+    const s = createParams(schema, { id: 'pv', version: 2 })
+    expect(s.getState().presets.some((p) => p.name === 'Mine')).toBe(true)
+    expect(localStorage.getItem('studio:pv:presets')).not.toBeNull()
+  })
+})

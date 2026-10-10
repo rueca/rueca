@@ -67,3 +67,27 @@ describe('createHistory', () => {
     expect(doc.get().x).toBe(1)
   })
 })
+
+describe('version bumps keep returning users’ work (break-it ST4)', () => {
+  it('carries a shape-compatible older doc forward without a migrate', () => {
+    localStorage.setItem('studio:bump:doc:v1', JSON.stringify({ title: 'mine', items: [1, 2] }))
+    const d = createDocStore({ title: 'demo', items: [] as number[] }, { id: 'bump', version: 2 })
+    expect(d.get()).toEqual({ title: 'mine', items: [1, 2] })
+    expect(localStorage.getItem('studio:bump:doc:v1')).toBeNull()
+  })
+  it('leaves an older doc that no longer fits where it was', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    localStorage.setItem('studio:bump2:doc:v1', JSON.stringify({ title: 3 }))
+    const d = createDocStore({ title: 'demo' }, { id: 'bump2', version: 2 })
+    expect(d.get()).toEqual({ title: 'demo' })
+    expect(localStorage.getItem('studio:bump2:doc:v1')).not.toBeNull()
+    warn.mockRestore()
+  })
+  it('records keyed by random ids need validate (marks regression, ST1)', () => {
+    const demo = () => ({ marks: { [Math.random().toString(36)]: { family: 'a' } } })
+    const saved = demo()
+    localStorage.setItem('studio:rec:doc:v1', JSON.stringify(saved))
+    const valid = (x: unknown) => !!x && typeof (x as { marks?: unknown }).marks === 'object'
+    expect(createDocStore(demo(), { id: 'rec', validate: valid }).get()).toEqual(saved)
+  })
+})
