@@ -11,7 +11,7 @@
 import { useEffect, type ReactNode, type RefObject } from 'react'
 import { Check, Eye, Film, Link2, Play, Redo2, Square, Type, Undo2 } from 'lucide-react'
 import { cn } from '@kit/core/cn'
-import { Scaffold, Swatches, Threads } from './brandArt'
+import { DYES, Scaffold, Swatches, Threads } from './brandArt'
 
 /** How far each thumbnail's motion has played: scroll progress (--kp, set on the card by
     useKitScroll) or hover (--kh), whichever is further along. 0 = start, 1 = end. */
@@ -46,11 +46,26 @@ export function DotGrid({ size = 12 }: { size?: number }) {
 }
 
 /** a pointer, drawn in the page's ink so it reads in both themes */
-export function Cursor({ className, style }: { className?: string; style?: React.CSSProperties }) {
+/** A cursor drawn like pen.dev's: Lucide's rounded pointer (ISC) in a dye, with a
+    thick white edge over a soft dark shadow, and an optional square-cornered tag off
+    the tip (Nogal text on the bright, per the brand). The tip sits at the element's
+    top-left, so position it like a pointer. `big` for How it works. */
+const POINTER = 'M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z'
+export function Cursor({ color = DYES.achiote, name, big, className, style }: { color?: string; name?: string; big?: boolean; className?: string; style?: React.CSSProperties }) {
+  const size = big ? 24 : 17
   return (
-    <svg viewBox="0 0 12 16" width="11" height="15" className={cn('pointer-events-none absolute z-10 drop-shadow-[0_1px_1px_rgb(0_0_0/0.25)]', T, className)} style={style}>
-      <path d="M1 1 L1 12.5 L4 9.8 L6.3 14.6 L8.4 13.7 L6.1 8.9 L10.2 8.9 Z" fill="var(--fg)" stroke="var(--panel)" strokeWidth="1.1" strokeLinejoin="round" />
-    </svg>
+    <span aria-hidden className={cn('pointer-events-none absolute z-10 block', T, className)} style={style}>
+      <span className="relative block" style={{ width: size, height: size, margin: `${(-size * 4.3) / 24}px 0 0 ${(-size * 4.3) / 24}px` }}>
+        <svg viewBox="0 0 24 24" width={size} height={size} className="block overflow-visible">
+          <path d={POINTER} className="drop-shadow-[0_1px_1.75px_rgb(0_0_0/0.6)]" />
+          <path d={POINTER} fill={color} stroke="#fff" strokeWidth="2.5" strokeLinejoin="round" paintOrder="stroke" />
+        </svg>
+        {name && (
+          <span className="absolute rounded-[2px] px-[5px] py-[2px] text-[11px] leading-[13px] font-medium whitespace-nowrap text-[#181411]"
+            style={{ background: color, left: size * 0.75, top: size * 0.75 }}>{name}</span>
+        )}
+      </span>
+    </span>
   )
 }
 
@@ -68,7 +83,7 @@ function Controls() {
             <span className={cn('absolute inset-y-0 left-0 flex items-center justify-end rounded-[4px] bg-signal pr-1', T)} style={{ width: at }}>
               <span className="tabular text-[8px] leading-none font-medium text-signal-fg">18</span>
             </span>
-            <Cursor style={{ left: at, top: '55%' }} />
+            <Cursor color={DYES.malva} style={{ left: at, top: '55%' }} />
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -181,7 +196,7 @@ function Structure() {
         <div className={cn(focal, 'absolute right-1.5 bottom-1.5 left-1.5 flex h-[18px] items-center gap-1.5 pr-1.5 pl-[15px] text-fg', T)} style={{ transform: lift }}>
           <span className="size-2 rounded-full border border-current text-fg-faint" />
           <span className="text-[9px] leading-none">Thread</span>
-          <Cursor className="top-[9px] left-[42%]" />
+          <Cursor color={DYES.hoja} className="top-[9px] left-[42%]" />
         </div>
       </div>
     </Tile>
@@ -210,7 +225,7 @@ function Working() {
             <span className={cn('absolute inset-y-0 w-px bg-panel', T)} style={{ left: split }}>
               <span className="absolute top-1/2 left-1/2 flex size-4 -translate-1/2 items-center justify-center rounded-full bg-panel text-[7px] leading-none text-fg shadow-[0_1px_3px_rgb(0_0_0/0.3)]">‹›</span>
             </span>
-            <Cursor style={{ left: `calc(${split} + 2px)`, top: '56%' }} />
+            <Cursor color={DYES.gualda} style={{ left: `calc(${split} + 2px)`, top: '56%' }} />
           </div>
         </div>
         <div className="flex flex-col items-center gap-1">

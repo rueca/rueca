@@ -14,7 +14,9 @@ import { useEffect, useRef } from 'react'
 const VB = { w: 1440, h: 820 } // shared layout space, placed like a viewBox with xMaxYMid slice
 const K = 2.7 // logo units → layout units
 const BIG = { x: 1190, y: 330, r: 60.5 * K }
-const SMALL = { x: BIG.x + (67 - 200.5) * K, y: BIG.y + (148 - 108.5) * K, r: 21 * K }
+/* the small wheel sits level with the TOP of the big one here (the logo has their bottoms level;
+   Rafael's call for the hero, 11 Oct): same horizontal spacing, mirrored vertical offset */
+const SMALL = { x: BIG.x + (67 - 200.5) * K, y: BIG.y - (60.5 - 21) * K, r: 21 * K }
 const PITCH = 24 // the big wheel's dash grid
 
 /* ---- the string: perimeter of the band (hull of the two circles), walked clockwise ---- */

@@ -259,7 +259,7 @@ function ChatVisual({ active }: { active: boolean }) {
         <div className="relative flex h-9 items-center gap-2 rounded-[10px] bg-control pr-1 pl-3 text-fg-faint shadow-[inset_0_0_0_1px_var(--line)]">
           <span className="flex-1 truncate">Reply…</span>
           <span className="flex size-7 items-center justify-center rounded-[8px] bg-fg text-field"><ArrowUp size={13} strokeWidth={2} /></span>
-          <Beat on={active} delay={1.9} from={6} className="absolute right-1 bottom-0"><Cursor className="static" /></Beat>
+          <Beat on={active} delay={1.9} from={6} className="absolute right-1 bottom-0"><Cursor big color="#EE7A68" name="You" className="static" /></Beat>
         </div>
       </div>
     </div>
@@ -301,7 +301,7 @@ function DropVisual({ active }: { active: boolean }) {
               <div className="truncate text-[12px] font-medium text-fg">hero-threads.html</div>
               <div className="text-[11px] text-fg-faint">Your existing page · 14 KB</div>
             </div>
-            <Cursor className="right-6 bottom-1" />
+            <Cursor big color={DYES.cielo} name="You" className="right-6 bottom-1" />
           </motion.div>
         </div>
         <Beat on={active} delay={0.95} className={cn(focal, 'flex flex-col gap-2 p-2.5 shadow-[0_0_0_1px_var(--line)]')}>
@@ -317,7 +317,7 @@ function DropVisual({ active }: { active: boolean }) {
 
 function ShellVisual({ active }: { active: boolean }) {
   const reduce = useReducedMotion()
-  const grain = active || reduce ? 58 : 24
+  const grain = active || reduce ? 32 : 10 // ends short so the "You" tag lands in the empty middle of the Drift row, clear of its value
   return (
     <div className="relative flex h-full items-center justify-center p-4 text-[11px] sm:p-6">
       <DotGrid size={14} />
@@ -350,7 +350,7 @@ function ShellVisual({ active }: { active: boolean }) {
                   <span className="tabular text-[9px] leading-none font-medium text-signal-fg">18</span>
                 </motion.span>
                 <motion.span className="absolute top-[55%]" initial={false} animate={{ left: `${grain}%` }}
-                  transition={active && !reduce ? { duration: 1, ease: EASE, delay: 0.6 } : { duration: 0 }}><Cursor className="static" /></motion.span>
+                  transition={active && !reduce ? { duration: 1, ease: EASE, delay: 0.6 } : { duration: 0 }}><Cursor big color={DYES.achiote} name="You" className="static" /></motion.span>
               </div>
             </div>
             <div className="flex items-center gap-2"><span className="w-11 flex-none text-fg-muted">Drift</span><span className="flex h-4 flex-1 items-center justify-between rounded-[4px] bg-control px-1.5"><span className="text-fg-faint">↔</span><span className="tabular text-fg">0.72</span></span></div>

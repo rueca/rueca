@@ -49,11 +49,10 @@ export function Landing({ shells }: { shells: Shell[] }) {
               })}</span>)}
             </h1>
             <p data-reveal style={{ '--reveal-delay': '0.56s' } as React.CSSProperties} className="mt-7 max-w-[600px] text-[17px] leading-[1.6] text-pretty text-fg-muted sm:mt-9 sm:text-[19px]">{hero.lede}</p>
-            {/* the actions: Install, the install command beside it, and the hand note */}
+            {/* the actions: Install, and the install command beside it */}
             <div data-reveal="fade" style={{ '--reveal-delay': '0.7s' } as React.CSSProperties} className="mt-8 flex flex-wrap items-center gap-2.5">
               <Button variant="primary" size="lg" className="h-10 flex-none px-4 text-[13.5px]" onClick={() => scrollToSection('install')}>Install<ArrowRight size={14} strokeWidth={1.75} /></Button>
               <CommandLine text={installs[0].lines[0]} className="w-full max-w-[420px] min-w-[260px] flex-1" />
-              <span aria-hidden className="font-hand hidden flex-none pl-1 text-[22px] leading-none text-[var(--ink-achiote)] lg:block">← one line, then ask</span>
             </div>
           </div>
         </Container>
