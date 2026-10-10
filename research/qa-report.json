@@ -16,19 +16,51 @@
     "textSampled": 78
   },
   {
-    "id": "nodes",
+    "id": "ui-design",
     "theme": "dark",
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 103
+    "textSampled": 96
   },
   {
-    "id": "nodes",
+    "id": "ui-design",
     "theme": "light",
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 103
+    "textSampled": 96
+  },
+  {
+    "id": "scene",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 69
+  },
+  {
+    "id": "scene",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 69
+  },
+  {
+    "id": "journey",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 97
+  },
+  {
+    "id": "journey",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 97
   }
 ]

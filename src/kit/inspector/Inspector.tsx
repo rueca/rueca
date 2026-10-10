@@ -204,7 +204,7 @@ export function ParamRow({ k, def, params, values: valuesProp, defaults: default
             <span className={cn('truncate tabular text-[11px]', changed ? 'text-fg' : 'text-fg-faint')}>{(v as number[]).map((n) => n.toFixed(2)).join(', ')}</span>
           </Popover.Trigger>
           <Popover.Portal>
-            <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[100]">
+            <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[160]">
               <Popover.Popup className="pop w-[260px] p-3 outline-none">{control}</Popover.Popup>
             </Popover.Positioner>
           </Popover.Portal>
@@ -228,6 +228,15 @@ export function fitsSegmented(options: ReturnType<typeof normOptions>) {
   return chars + options.length * 2 <= 22
 }
 
+/** Step when a def doesn't say: integers for wide ranges, ~1/100 of a narrow one (0..1 → 0.01). */
+export function inferStep(min?: number, max?: number) {
+  if (min === undefined || max === undefined) return 1
+  const r = Math.abs(max - min)
+  if (r >= 100) return 1
+  const raw = r / 100, p = Math.pow(10, Math.floor(Math.log10(raw)))
+  return [1, 2, 5, 10].map((m) => m * p).find((x) => x >= raw * 0.999) ?? p
+}
+
 /** Log taper helpers for sliders on frequencies, sizes, time constants. */
 const toLog = (v: number, min: number, max: number) => Math.log(v / min) / Math.log(max / min)
 const fromLog = (t: number, min: number, max: number) => min * Math.pow(max / min, t)
@@ -236,10 +245,12 @@ const fromLog = (t: number, min: number, max: number) => min * Math.pow(max / mi
 export function ParamControl({ def: d, value: v, onChange: set, changed, defaultValue: dflt, label }: { def: ValueDef; value: any; onChange: (v: unknown, final?: boolean) => void; changed?: boolean; defaultValue?: any; label?: string }): ReactNode {
   switch (d.type) {
     case 'number': {
+      const step = d.step ?? inferStep(d.min, d.max)
+      const show = (n: number) => (d.fmt ? d.fmt(n) : `${n}${d.unit ?? ''}`)
       const hasRange = d.min !== undefined && d.max !== undefined
       const display = d.display ?? (hasRange ? 'slider' : 'field')
       const scrub = (
-        <ScrubValue value={v} onChange={(n, f) => set(n, f)} min={d.min} max={d.max} step={d.step ?? 1} unit={d.unit} fmt={d.fmt} parse={d.parse} soft={d.soft}
+        <ScrubValue value={v} onChange={(n, f) => set(n, f)} min={d.min} max={d.max} step={step} unit={d.unit} fmt={d.fmt} parse={d.parse} soft={d.soft}
           defaultValue={dflt} changed={changed} label={label} boxed={display !== 'slider'} className={display === 'slider' ? 'w-[56px] shrink-0' : 'flex-1'} />
       )
       if (display === 'knob')
@@ -254,7 +265,7 @@ export function ParamControl({ def: d, value: v, onChange: set, changed, default
               <Slider value={toLog(Math.max(lo, v), lo, hi)} min={0} max={1} step={0.001} label={label}
                 onChange={(t, f) => set(Number(fromLog(t, lo, hi).toPrecision(4)), f)} />
             ) : (
-              <Slider value={Math.min(hi, Math.max(lo, v))} onChange={(n, f) => set(n, f)} min={lo} max={hi} step={d.step ?? 1} label={label} origin={origin} track={d.track} />
+              <Slider value={Math.min(hi, Math.max(lo, v))} onChange={(n, f) => set(n, f)} min={lo} max={hi} step={step} label={label} origin={origin} track={d.track} format={show} />
             )}
             {scrub}
           </>
@@ -263,9 +274,9 @@ export function ParamControl({ def: d, value: v, onChange: set, changed, default
       if (display === 'stepper')
         return (
           <div className="flex w-full items-center gap-1">
-            <Button size="icon-sm" variant="default" aria-label="Decrease" onClick={() => set(Math.max(d.min ?? -Infinity, v - (d.step ?? 1)))}>−</Button>
+            <Button size="icon-sm" variant="default" aria-label="Decrease" onClick={() => set(Math.max(d.min ?? -Infinity, v - step))}>−</Button>
             {scrub}
-            <Button size="icon-sm" variant="default" aria-label="Increase" onClick={() => set(Math.min(d.max ?? Infinity, v + (d.step ?? 1)))}>+</Button>
+            <Button size="icon-sm" variant="default" aria-label="Increase" onClick={() => set(Math.min(d.max ?? Infinity, v + step))}>+</Button>
           </div>
         )
       return scrub

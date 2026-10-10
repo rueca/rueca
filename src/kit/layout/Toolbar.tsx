@@ -38,7 +38,7 @@ export function Brand({ name, doc, mark, href = '#/' }: { name: string; doc?: Re
       ) : (
         <div className="flex size-5 shrink-0 items-center justify-center rounded-[5px] bg-fg text-field">{markEl}</div>
       )}
-      <span className="truncate text-[12.5px] font-semibold tracking-[-0.005em]">{name}</span>
+      <span className="shrink-0 text-[12.5px] font-semibold tracking-[-0.005em]">{name}</span>
       {doc && <><span className="text-fg-faint">/</span><span className="truncate text-[12.5px] text-fg-muted">{doc}</span></>}
     </div>
   )

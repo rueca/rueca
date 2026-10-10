@@ -1,3 +1,26 @@
+@import "@fontsource-variable/gabarito";
+@import "@fontsource-variable/lexend";
+@import "@fontsource-variable/geist-mono";
+
+/* ---------------------------------------------------------------------------
+   Brand type for the marketing pages ("Geométrica", brand/BRAND.md):
+     Lexend   — body, the page's base font
+     Gabarito — headlines and the wordmark (.font-display)
+     Geist Mono — commands and code (.font-code, code, kbd, pre)
+   Anything that SHOWS the product goes back to the kit's chrome fonts: .preview,
+   [data-studio-embed], and kit surfaces (.studio / .pop set their own font).
+--------------------------------------------------------------------------- */
+.site {
+  --font-display: "Gabarito Variable", Gabarito, ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Lexend Variable", Lexend, ui-sans-serif, system-ui, sans-serif;
+  --font-code: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
+  font-family: var(--font-body);
+}
+.site .font-display { font-family: var(--font-display); }
+.site :is(.font-code, code, kbd, pre) { font-family: var(--font-code); }
+.site :is(.preview, [data-studio-embed]) { font-family: var(--font-ui); }
+.site :is(.preview, [data-studio-embed]) :is(code, kbd, pre) { font-family: var(--font-mono); }
+
 /* ---------------------------------------------------------------------------
    Accent rule for the marketing pages (landing, shells gallery):
      .site     — the page's own accents use the brand pink (brand/BRAND.md).

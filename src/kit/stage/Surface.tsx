@@ -53,7 +53,8 @@ function useCanvasLoop<S extends Schema, C>(
   paintRef.current = paint
   const frame = useRef(0)
   const redraw = useRef<(dt?: number) => void>(() => {})
-  const { params, clock, width, height, pixelRatio, animate = true } = p
+  // Without a clock a surface is a static picture unless you ask for `animate` (break-it DX14).
+  const { params, clock, width, height, pixelRatio, animate = !!clock } = p
 
   useImperativeHandle(p.ref, () => ({ get canvas() { return canvas.current }, get el() { return canvas.current }, redraw: () => redraw.current(), invalidate: () => redraw.current() }), [])
   const sizeRef = useRef(p.size)

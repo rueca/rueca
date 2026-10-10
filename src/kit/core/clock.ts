@@ -81,6 +81,8 @@ export function createClock(init: Partial<ClockState> = {}): Clock {
   }
 
   const frame = (now: number) => {
+    // Nobody listening → stop the loop; onTick restarts it (break-it PERF-2: module clocks ran forever).
+    if (!ticks.size) { raf = 0; last = 0; return }
     raf = requestAnimationFrame(frame)
     // Hidden tab: browsers throttle rAF anyway; don't advance or render at all.
     if (typeof document !== 'undefined' && document.hidden) { last = 0; return }
@@ -104,7 +106,6 @@ export function createClock(init: Partial<ClockState> = {}): Clock {
   }
 
   const start = () => { if (!raf && typeof window !== 'undefined') { last = 0; raf = requestAnimationFrame(frame) } }
-  start()
 
   const api: Clock = Object.assign(store, {
     time: () => t,
@@ -114,6 +115,7 @@ export function createClock(init: Partial<ClockState> = {}): Clock {
       emit(0)
     },
     play: () => {
+      start()
       const [a, b] = bounds()
       if (t >= b) t = a
       store.setState({ playing: true })
@@ -127,7 +129,7 @@ export function createClock(init: Partial<ClockState> = {}): Clock {
       api.seek(t + (frames * 1000) / s.fps)
     },
     setRate: (r: number) => store.setState({ rate: r }),
-    onTick: (fn: (t: number, dt: number) => void) => { ticks.add(fn); return () => ticks.delete(fn) },
+    onTick: (fn: (t: number, dt: number) => void) => { ticks.add(fn); start(); return () => { ticks.delete(fn) } },
     hold: () => { held = true; return () => { held = false; last = 0 } },
   })
   return api
@@ -138,9 +140,11 @@ export function useClockTime(clock: Clock, fps = 15) {
   const [t, setT] = useState(clock.time())
   useEffect(() => {
     let lastSet = 0
+    let lastT = NaN
     return clock.onTick((now) => {
+      if (now === lastT) return // paused idle ticks: nothing changed, no re-render (PERF-3)
       const wall = performance.now()
-      if (wall - lastSet > 1000 / fps || !clock.getState().playing) { lastSet = wall; setT(now) }
+      if (wall - lastSet > 1000 / fps || !clock.getState().playing) { lastSet = wall; lastT = now; setT(now) }
     })
   }, [clock, fps])
   return t

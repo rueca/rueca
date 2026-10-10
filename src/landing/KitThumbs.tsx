@@ -11,7 +11,7 @@ const bar = 'rounded-full bg-fg/10'
 
 function Tile({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div aria-hidden className={cn('relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-[10px] bg-fg/[0.035] shadow-[inset_0_0_0_1px_var(--line)]', className)}>
+    <div aria-hidden data-studio-embed className={cn('relative flex aspect-[16/9] items-center justify-center overflow-hidden rounded-[10px] bg-fg/[0.035] shadow-[inset_0_0_0_1px_var(--line)]', className)}>
       {children}
     </div>
   )

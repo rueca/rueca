@@ -5,7 +5,7 @@ import { cn } from '../core/cn'
    luminance room below it). The thumb hides until hover so a column of
    twenty reads as data, not noise. Accent only on the filled portion. */
 export function Slider({
-  value, onChange, min = 0, max = 1, step = 0.01, className, label, disabled, origin, track,
+  value, onChange, min = 0, max = 1, step = 0.01, className, label, disabled, origin, track, format,
 }: {
   value: number | [number, number]
   onChange: (v: any, final: boolean) => void
@@ -15,6 +15,8 @@ export function Slider({
   origin?: number
   /** a painted track (CSS gradient) instead of the groove + fill — the thumb stays visible */
   track?: string
+  /** announce the value the way the UI shows it ("1.45s", "100%") */
+  format?: (v: number) => string
 }) {
   const range = Array.isArray(value)
   const fillFrom = !range && origin !== undefined ? ((origin - min) / (max - min)) * 100 : null
@@ -31,7 +33,7 @@ export function Slider({
       className={cn('group/slider relative flex h-6 w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}
     >
       <Base.Control className="flex h-6 w-full cursor-default items-center">
-        <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[3px] bg-track')} style={track ? { background: track } : undefined}>
+        <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[3px] bg-track shadow-[0_0_0_0.5px_var(--line-strong)]')} style={track ? { background: track } : undefined}>
           {track ? null : fillFrom === null ? (
             <Base.Indicator className="rounded-full bg-signal" />
           ) : (
@@ -45,10 +47,12 @@ export function Slider({
               key={i}
               index={range ? i : undefined}
               aria-label={label}
+              getAriaValueText={format ? (_f: string, v: number) => format(v) : undefined}
               className={cn(
                 'size-3 rounded-full bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,.25),0_1px_3px_rgba(0,0,0,.4)] outline-none',
-                track ? '' : 'opacity-0 transition-opacity duration-100 group-hover/slider:opacity-100',
-                'focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal data-[dragging]:opacity-100',
+                // thumb rests small and quiet (always findable, WCAG 1.4.11), grows on hover/focus/drag
+                track ? '' : 'scale-[0.6] transition-transform duration-100 group-hover/slider:scale-100',
+                'focus-visible:scale-100 focus-visible:ring-2 focus-visible:ring-signal data-[dragging]:scale-100',
               )}
             />
           ))}

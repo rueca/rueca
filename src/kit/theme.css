@@ -35,7 +35,7 @@
 
   --fg: #ffffff;
   --fg-muted: #a8a8a8;
-  --fg-faint: #858585; /* #707070 was 2.9:1 on --control, #7a7a7a 2.94 on --active (selected rows) */
+  --fg-faint: #8a8a8a; /* #707070 was 2.9:1 on --control, #7a7a7a 2.94 on --active (selected rows) */
 
   --line: rgba(255, 255, 255, 0.07);
   --line-strong: rgba(255, 255, 255, 0.13);
@@ -93,7 +93,7 @@
 
   --fg: #1a1a1a;
   --fg-muted: #5e5e5e;
-  --fg-faint: #7e7e7e; /* #9a9a9a was only 2.8:1 on white */
+  --fg-faint: #737373; /* AA 4.5:1 on white (4.74), 4.35 on --control; #7e7e7e failed (break-it A7) */
 
   --line: rgba(0, 0, 0, 0.08);
   --line-strong: rgba(0, 0, 0, 0.16);
@@ -140,7 +140,7 @@
 
     --fg: #1a1a1a;
     --fg-muted: #5e5e5e;
-    --fg-faint: #7e7e7e; /* #9a9a9a was only 2.8:1 on white */
+    --fg-faint: #737373; /* AA 4.5:1 on white (4.74), 4.35 on --control; #7e7e7e failed (break-it A7) */
 
     --line: rgba(0, 0, 0, 0.08);
     --line-strong: rgba(0, 0, 0, 0.16);
@@ -245,6 +245,15 @@
 
   :where(.studio, .pop) :focus-visible { outline: 2px solid var(--signal); outline-offset: 1px; }
   :where(.studio, .pop) ::selection { background: var(--signal-soft); }
+}
+
+/* Chrome motion respects reduced-motion; the ARTWORK's own animation is the product and is left alone. */
+@media (prefers-reduced-motion: reduce) {
+  :where(.studio, .pop), :where(.studio, .pop) *:not([data-studio-artifact] *) {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @utility tabular { font-variant-numeric: tabular-nums; }

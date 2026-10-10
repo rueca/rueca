@@ -33,14 +33,14 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
         <div className="mx-auto max-w-[1180px] px-4 pt-6 pb-24 sm:px-8 sm:pt-8">
           <header className="flex items-center justify-between gap-4">
             <a href="#/" className="flex items-center gap-2 rounded-[6px] text-[13px] font-medium text-fg outline-none focus-visible:ring-2 focus-visible:ring-signal">
-              <Mark />{site.name}
+              <Mark /><span className="font-display text-[17px] font-extrabold lowercase tracking-[-0.035em]">{site.name}</span>
             </a>
             <ThemeButton />
           </header>
           <a href="#/" className="mt-10 inline-flex items-center gap-1.5 text-[12.5px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
             <ArrowLeft size={13} strokeWidth={1.5} />Overview
           </a>
-          <h1 className="mt-3 text-[28px] font-semibold tracking-[-0.02em]">Shells</h1>
+          <h1 className="mt-3 font-display text-[30px] font-bold tracking-[-0.025em]">Shells</h1>
           <p className="mt-2 max-w-[600px] text-[13.5px] leading-relaxed text-fg-muted">
             One kit, many instruments. Each shell is a different kind of tool built from the same components, to prove
             the harness holds up across environments. Press <span className="text-fg">⌘K</span> inside any shell for

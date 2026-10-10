@@ -80,3 +80,17 @@ Check here before debugging.
 | `<a> cannot contain a nested <a>` | `Brand` links the mark home itself — pass a plain glyph. |
 | Parallel agents' tests interfere | Each agent needs its own dev-server port, its own headless-Chrome debugging port and profile, and its own scratch folder. Shared `cdp.mjs` / port 9333 collisions happened. |
 | `tsc` complains about `baseUrl` | TypeScript 7 removed it; `paths` must be relative (`"./src/*"`). |
+
+## Learned from the break-it QA round
+
+| Symptom | Cause / fix |
+|---|---|
+| Shell white-screens on every load after a bad import / old version | A wrong-shaped saved doc. Give `createDocStore` a `validate` (the kit falls back to a shape check), guard hand-rolled `localStorage` loaders (`Array.isArray`, key checks), and wrap each route in an `ErrorBoundary` with `resetPrefix`. |
+| A framed prototype sending `"30"` blanked the harness | Values weren't validated. The kit now coerces/rejects every write — don't bypass it with `store.setState({ values })`. |
+| Esc doesn't leave present mode | A shell bound Esc at a higher priority. Kit present-Esc now runs at priority 100 with `when: present`. |
+| Tab key dead in a shell | A bare `tab` hotkey. The kit drops Tab bindings without a `when` guard. |
+| Leaving a three.js shell leaks a WebGL context | Disposing after React removed the DOM: OrbitControls unbinds from a detached root. `MountSurface` now disposes in a layout effect; also call `renderer.forceContextLoss()`. |
+| Gallery burns CPU after visiting animated shells | Module-level clocks ran rAF forever. Clocks now start on the first `onTick` and stop with none. |
+| Untouched values / captions fail contrast | Faint is for non-essential text only; values use muted. QA asks 4.5:1 of faint text. |
+| Editing `theme.css` broke every page silently | One stray `}`. After editing CSS, `curl` it from the dev server or run `qa.mjs` on one shell before moving on — a spot check can pass on cached CSS. |
+| Parallel test agents bring the machine to a crawl | Close the browser in `finally`, one Chrome per agent, and keep heavy repos out of synced folders (Google Drive / iCloud Documents re-sync every `node_modules` change). |

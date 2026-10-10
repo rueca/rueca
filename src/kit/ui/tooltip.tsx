@@ -15,7 +15,7 @@ export function Tip({
     <Tooltip.Root>
       <Tooltip.Trigger render={cloneElement(children)} />
       <Tooltip.Portal>
-        <Tooltip.Positioner side={side} sideOffset={6} className="z-[100]">
+        <Tooltip.Positioner side={side} sideOffset={6} className="z-[160]">
           <Tooltip.Popup className="pop flex max-w-[260px] origin-[var(--transform-origin)] items-center gap-2 px-2 py-1.5 text-[11.5px] leading-snug text-fg transition-[opacity,transform] duration-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
             <span>{label}</span>
             {shortcut && <span className="text-fg-faint">{prettyCombo(shortcut)}</span>}

@@ -22,8 +22,8 @@ export function Heading({ kicker, title, lede, className }: { kicker?: string; t
   return (
     <div className={cn('max-w-[640px]', className)}>
       {kicker && <div data-reveal="fade" className="mb-3 text-[13px] font-medium text-signal">{kicker}</div>}
-      <h2 data-reveal="head" className="text-[26px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance text-fg sm:text-[32px]">{title}</h2>
-      {lede && <p data-reveal style={{ '--reveal-delay': '80ms' } as React.CSSProperties} className="mt-4 text-[15px] leading-[1.6] text-pretty text-fg-muted">{lede}</p>}
+      <h2 data-reveal="head" className="font-display text-[26px] leading-[1.15] font-bold tracking-[-0.02em] text-balance text-fg sm:text-[32px]">{title}</h2>
+      {lede && <p data-reveal style={{ '--reveal-delay': '80ms' } as React.CSSProperties} className="mt-4 text-[16px] leading-[1.6] text-pretty text-fg-muted">{lede}</p>}
     </div>
   )
 }
@@ -34,8 +34,8 @@ export function CommandLine({ text, className }: { text: string; className?: str
   const slash = text.startsWith('/')
   return (
     <div className={cn('group flex h-10 min-w-0 items-center gap-2 rounded-[9px] bg-control pr-1 pl-3.5 shadow-[inset_0_0_0_1px_var(--line)] dark:bg-fg/[0.035]', className)}>
-      <span className="flex-none font-mono text-[12px] text-fg-faint select-none">{slash ? '›' : '$'}</span>
-      <code className="min-w-0 flex-1 truncate font-mono text-[12.5px] text-fg" title={text}>{text}</code>
+      <span className="flex-none font-code text-[12px] text-fg-faint select-none">{slash ? '›' : '$'}</span>
+      <code className="min-w-0 flex-1 truncate font-code text-[12.5px] text-fg" title={text}>{text}</code>
       <Tip label={done ? 'Copied' : 'Copy'}>
         <button
           type="button"

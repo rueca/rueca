@@ -22,6 +22,7 @@ export function Segmented({
   return (
     <ToggleGroup
       aria-label={label}
+      role="radiogroup"
       value={[value]}
       onValueChange={(v) => v[0] && onChange(v[0])}
       className={cn('flex w-full min-w-0 gap-0.5 rounded-[7px] bg-well p-[2px]', className)}
@@ -33,6 +34,10 @@ export function Segmented({
             key={o.value}
             value={o.value}
             aria-label={labelOf(o)}
+            // single choice: announce as a radio, not a pressed toggle (APG radiogroup, break-it A12)
+            role="radio"
+            aria-checked={value === o.value}
+            aria-pressed={undefined}
             className={cn(
               'flex min-w-0 flex-1 items-center justify-center gap-1 rounded-[5px] px-1 font-medium text-fg-muted outline-none no-select transition-colors duration-100',
               size === 'sm' ? 'h-5 text-[11px]' : 'h-6 text-[11.5px]',
@@ -98,7 +103,7 @@ export function Switch({ checked, onChange, label, size = 'md' }: { checked: boo
       onCheckedChange={onChange}
       aria-label={label}
       className={cn(
-        'relative inline-flex shrink-0 items-center rounded-full bg-track p-[2px] outline-none transition-colors duration-150',
+        'relative inline-flex shrink-0 items-center rounded-full bg-track p-[2px] outline-none transition-colors duration-150 shadow-[inset_0_0_0_1px_var(--line-strong)] data-[checked]:shadow-none',
         'data-[checked]:bg-signal focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-1 focus-visible:ring-offset-panel',
         size === 'sm' ? 'h-4 w-[26px]' : 'h-[18px] w-[30px]',
       )}
@@ -155,7 +160,7 @@ export function Select({
         <BaseSelect.Icon className="text-fg-faint"><ChevronDown size={12} strokeWidth={1.75} /></BaseSelect.Icon>
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
-        <BaseSelect.Positioner sideOffset={4} alignItemWithTrigger={false} className="z-[100] outline-none">
+        <BaseSelect.Positioner sideOffset={4} alignItemWithTrigger={false} className="z-[160] outline-none">
           <BaseSelect.Popup className="pop max-h-[min(360px,var(--available-height))] min-w-[var(--anchor-width)] overflow-y-auto p-1 outline-none transition-[opacity,transform] duration-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
             <BaseSelect.List>
             {opts.map((o) => (
@@ -222,7 +227,7 @@ function MenuItems({ items }: { items: MenuItem[] }) {
                 <ChevronRight size={12} className="text-fg-faint" />
               </BaseMenu.SubmenuTrigger>
               <BaseMenu.Portal>
-                <BaseMenu.Positioner sideOffset={2} className="z-[101] outline-none">
+                <BaseMenu.Positioner sideOffset={2} className="z-[161] outline-none">
                   <BaseMenu.Popup className={popupCls}><MenuItems items={it.items} /></BaseMenu.Popup>
                 </BaseMenu.Positioner>
               </BaseMenu.Portal>
@@ -257,7 +262,7 @@ export function Menu({ trigger, items, side = 'bottom', align = 'start' }: { tri
     <BaseMenu.Root>
       <BaseMenu.Trigger render={trigger} />
       <BaseMenu.Portal>
-        <BaseMenu.Positioner side={side} align={align} sideOffset={6} className="z-[100] outline-none">
+        <BaseMenu.Positioner side={side} align={align} sideOffset={6} className="z-[160] outline-none">
           <BaseMenu.Popup className={popupCls}><MenuItems items={items} /></BaseMenu.Popup>
         </BaseMenu.Positioner>
       </BaseMenu.Portal>

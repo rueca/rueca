@@ -108,7 +108,7 @@ export function SizeFields({
       <ScrubValue boxed align="left" prefix="W" value={value.w} min={min} max={max} unit={unit} changed={changed} label="Width"
         onChange={(w, f) => onChange(lock ? { w, h: Math.round(w / ratio) } : { ...value, w }, f)} className="flex-1" />
       <Tip label={lock ? 'Unlink proportions' : 'Link proportions'}>
-        <button type="button" aria-pressed={lock} onClick={() => setLock(!lock)}
+        <button type="button" aria-label={lock ? 'Unlink proportions' : 'Link proportions'} aria-pressed={lock} onClick={() => setLock(!lock)}
           className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
           {lock ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
         </button>
@@ -290,7 +290,7 @@ export function GradientEditor({ value, onChange, angle = true }: { value: { ang
             <span className="ml-auto tabular text-[11px] text-fg-faint">{Math.round(hexToRgba(cur.color)[3] * 100)}%</span>
           </Popover.Trigger>
           <Popover.Portal>
-            <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[100]">
+            <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[160]">
               <Popover.Popup className="pop outline-none"><ColorPanel value={cur.color} onChange={(c, f) => setStop(sel, { color: c }, f)} /></Popover.Popup>
             </Popover.Positioner>
           </Popover.Portal>
@@ -326,7 +326,7 @@ export function PaletteField({ value, onChange, max = 8, min = 1 }: { value: str
             )}
           </div>
           <Popover.Portal>
-            <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[100]">
+            <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[160]">
               <Popover.Popup className="pop outline-none">
                 <ColorPanel value={c} onChange={(nc, f) => onChange(value.map((x, j) => (j === i ? nc : x)), f)} />
                 {value.length > min && (

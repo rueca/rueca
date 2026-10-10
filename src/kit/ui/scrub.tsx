@@ -123,6 +123,8 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
   }
 
   const finishEdit = (apply: boolean) => {
+    // keep keyboard users where they were (break-it A5)
+    requestAnimationFrame(() => el.current?.focus())
     if (apply) {
       const v = parse ? parse(draft) : evaluate(draft, value)
       if (v !== null) commitNum(v, true)
@@ -164,7 +166,8 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
         'cursor-ew-resize focus-visible:ring-2 focus-visible:ring-signal',
         boxed ? 'bg-control px-1.5 hover:shadow-[inset_0_0_0_1px_var(--line-strong)]' : 'px-1 hover:bg-hover',
         'data-[scrubbing]:bg-active',
-        changed === false ? 'text-fg-faint' : 'text-fg',
+        // untouched values read muted, not faint — they are real text (WCAG 1.4.3, break-it A7)
+        changed === false ? 'text-fg-muted' : 'text-fg',
         mixed && 'text-fg-faint italic',
         disabled && 'pointer-events-none opacity-40',
         className,
@@ -174,6 +177,7 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
       {editing ? (
         <input
           ref={input}
+          aria-label={label ? `${label} value` : 'Value'}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onBlur={() => finishEdit(true)}

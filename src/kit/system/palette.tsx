@@ -9,7 +9,7 @@
 --------------------------------------------------------------------------- */
 import { Command as Cmdk } from 'cmdk'
 import { Dialog } from '@base-ui/react/dialog'
-import { useState, type ComponentType } from 'react'
+import { useRef, useState, type ComponentType } from 'react'
 import { Search } from 'lucide-react'
 import { useHotkeys, useHotkeyRegistry, prettyCombo } from '../core/hotkeys'
 import { Kbd } from '../ui/button'
@@ -17,7 +17,14 @@ import { Kbd } from '../ui/button'
 export interface Command { id: string; label: string; group?: string; shortcut?: string; icon?: ComponentType<{ size?: number; strokeWidth?: number }>; run: () => void; keywords?: string[] }
 
 export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Command[]; extraShortcuts?: { keys: string; label: string; group?: string }[] }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpenRaw] = useState(false)
+  // Remember where focus was so closing returns it there (break-it A4).
+  const returnTo = useRef<HTMLElement | null>(null)
+  const setOpen = (v: boolean | ((o: boolean) => boolean)) => setOpenRaw((o) => {
+    const next = typeof v === 'function' ? v(o) : v
+    if (next && !o) returnTo.current = document.activeElement as HTMLElement | null
+    return next
+  })
   const [sheet, setSheet] = useState(false)
   // Commands carry their shortcuts: bound here at shell priority, labelled for the ? sheet.
   const bound = Object.fromEntries(commands.filter((c) => c.shortcut).map((c) => [c.shortcut!, { run: () => c.run(), label: c.label, group: c.group }]))
@@ -35,7 +42,7 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-[150] bg-black/30 transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-          <Dialog.Popup className="pop fixed top-[14vh] left-1/2 z-[151] w-[560px] max-w-[calc(100vw-32px)] -translate-x-1/2 overflow-hidden outline-none transition-[opacity,transform] duration-150 data-[ending-style]:opacity-0 data-[starting-style]:scale-[.98] data-[starting-style]:opacity-0">
+          <Dialog.Popup finalFocus={returnTo} className="pop fixed top-[14vh] left-1/2 z-[151] w-[560px] max-w-[calc(100vw-32px)] -translate-x-1/2 overflow-hidden outline-none transition-[opacity,transform] duration-150 data-[ending-style]:opacity-0 data-[starting-style]:scale-[.98] data-[starting-style]:opacity-0">
             <Dialog.Title className="sr-only">Command palette</Dialog.Title>
             <Cmdk loop label="Commands" className="flex flex-col"
               // exact / prefix matches on the label outrank fuzzy keyword hits ("css" → Export CSS, not "Back 10 frames")

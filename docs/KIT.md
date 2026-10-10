@@ -76,7 +76,9 @@ Every def accepts `label`, `hint`, `when: (v) => boolean` (conditional row), `di
 `persist: false` (keep out of localStorage), `share: false` (keep out of links/JSON).
 Keys are **flat across folders** (`v.count`).
 
-More defs: `p.data<Layer[]>([])` — a hidden, typed document value (a layer stack, clips, pattern
+Number `step` defaults from the range when omitted (0–1 → 0.01, 0–10 → 0.1, ≥100 wide → 1).
+
+More defs: `p.data<Layer[]>([], { validate })` — a hidden, typed document value (a layer stack, clips, pattern
 steps): undoable and persisted, never rendered as a row. `p.image()` defaults to persist/share
 off (a photo would blow the storage quota). Numbers take `scale: 'log'`, `soft: [lo, hi]` (drag
 range; typing can exceed it), `parse` (typed text → number, e.g. percent), `display: 'knob'`.
@@ -118,6 +120,16 @@ export const history = createHistory([params, doc])    // ⌘Z undoes whichever 
 ```
 Keep selection and view state OUT of the doc so undo never fights focus.
 
+**Validate documents.** A doc that loads wrong-shaped would crash the shell on every reload. Pass
+`validate: (d) => boolean` to `createDocStore`; without one, the kit checks `matchesShape(d, initial)`
+(same keys and kinds as the initial doc, list items checked against keys every initial item shares).
+A rejected saved doc is kept at `<key>:rejected`, never deleted. `doc.replace()` throws on an invalid
+doc, so wrap imports in try/catch and toast the error; call `matchesShape(imported, current)` yourself
+when importing into a store you manage. Options also take `migrate(raw, fromVersion)` and `legacyKeys`.
+
+Saves flush on `pagehide`, a share link applies once per tab (reloading keeps later edits), and two tabs
+on the same params store adopt each other's saved values.
+
 ### One item of a collection in the Inspector
 
 ```ts
@@ -139,7 +151,8 @@ clock.onTick((t, dt) => …)  clock.time()  clock.seek(ms)  clock.play()/pause()
 useClockTime(clock, 15)     // throttled React readout
 ```
 Render as a pure function of `(values, t)` so scrubbing and export work. Keep live values in
-refs, never in a rAF effect's dependency array. The clock stops in hidden tabs; `idle: false`
+refs, never in a rAF effect's dependency array. The clock only runs while something listens (`onTick`, a playing transport) and stops in hidden
+tabs; `idle: false`
 stops ticks while paused too (default true for artifacts with their own life).
 
 ## 4. Surfaces — plugging the artifact in
@@ -169,6 +182,8 @@ stops ticks while paused too (default true for artifacts with their own life).
 - `islands`: floating cards with gutter (artboard work). `overlay`: stage full-bleed under
   floating panels (shaders, 3D, photo). `docked`: flush panels, Figma UI3 (dense editors).
 - `⌘\` hides all chrome (present mode).
+- The app should also wrap each route/shell in `<ErrorBoundary resetPrefix={\`studio:\${id}\`}>` — stores
+  are created at module load, before `<Studio>` exists (see src/gallery/App.tsx).
 - Each region (toolbar, panels, timeline, stage) sits in an `ErrorBoundary`: a crash shows "Try
   again / Reset saved settings / Reload" in that region instead of blanking the app.
 - Kit base styles (font, size, scrollbars, focus ring, colour-scheme) apply inside `.studio` (the
@@ -206,7 +221,7 @@ stops ticks while paused too (default true for artifacts with their own life).
 - `ParamActions params history? presets compare theme share` (each part switchable; `compare={{ hotkey: false }}`) · `HistoryButtons` · `PresetMenu` ·
   `CompareButton` · `ThemeToggle` · `shareMenuItems(params)` (link, JSON, **copy as agent prompt**).
 - `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound.
-- `toast(title, opts)` returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
+- `toast(title, opts)` works anywhere (it mounts a single toaster if none is rendered) and returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
   `toast.promise(p, { loading, success, error })` · `toast.progress(title, { onCancel })` → `{ set(p), done(msg), fail(msg) }`.
 - IO: `exportCanvasPNG(canvas, name, scale, { smoothing })` · `exportSVG(svg | string)` · `exportJSON(data)` ·
   `recordFrames({ canvas, draw(t, i), frames, fps, name, onProgress, signal })` (frame-accurate MP4/WebM, WebCodecs) ·

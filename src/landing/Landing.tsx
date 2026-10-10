@@ -38,10 +38,10 @@ export function Landing({ shells }: { shells: Shell[] }) {
         <Container className="pt-14 sm:pt-20">
           <div className="max-w-[760px]">
             {/* word by word, then the paragraph rises and the actions fade (trove.quest's timings) */}
-            <h1 data-reveal="words" className="text-[34px] leading-[1.06] font-semibold tracking-[-0.035em] text-balance sm:text-[52px]">
+            <h1 data-reveal="words" className="font-display text-[34px] leading-[1.06] font-bold tracking-[-0.035em] text-balance sm:text-[52px]">
               {site.tagline.split(' ').map((w, i) => <Fragment key={i}>{i > 0 && ' '}<span className="reveal-word"><span style={{ '--word': i } as React.CSSProperties}>{w}</span></span></Fragment>)}
             </h1>
-            <p data-reveal style={{ '--reveal-delay': '0.56s' } as React.CSSProperties} className="mt-5 max-w-[620px] text-[15.5px] leading-[1.6] text-pretty text-fg-muted sm:text-[17px]">{site.description}</p>
+            <p data-reveal style={{ '--reveal-delay': '0.56s' } as React.CSSProperties} className="mt-5 max-w-[620px] text-[16px] leading-[1.6] text-pretty text-fg-muted sm:text-[17px]">{site.description}</p>
             <div data-reveal="fade" style={{ '--reveal-delay': '0.7s' } as React.CSSProperties} className="mt-8 flex flex-wrap items-center gap-2.5">
               <Button variant="primary" size="lg" className="h-10 px-4 text-[13.5px]" onClick={() => scrollToSection('install')}>Install<ArrowRight size={14} strokeWidth={1.75} /></Button>
               <a href="#/shells" className="inline-flex h-10 items-center gap-1.5 rounded-[8px] px-4 text-[13.5px] font-medium text-fg shadow-[inset_0_0_0_1px_var(--line-strong)] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
@@ -74,7 +74,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
             {kitGroups.map((g, i) => (
               <div key={g.title} style={{ '--card-in-delay': `${i * 70}ms` } as React.CSSProperties} className="card-in panel group flex flex-col gap-3 p-2.5 pb-4 sm:pb-5">
                 {KIT_THUMBS[g.title]?.()}
-                <h3 className="mt-1.5 px-1.5 text-[14px] font-semibold sm:px-2.5">{g.title}</h3>
+                <h3 className="mt-1.5 px-1.5 font-display text-[15px] font-semibold sm:px-2.5">{g.title}</h3>
                 <p className="px-1.5 text-[12.5px] leading-[1.6] text-fg-muted sm:px-2.5">{g.body}</p>
                 <div className="mt-auto flex flex-wrap gap-1 px-1.5 pt-1 sm:px-2.5">{g.items.map((i) => <Chip key={i}>{i}</Chip>)}</div>
               </div>
@@ -149,7 +149,7 @@ function Nav() {
       <Container className="flex h-14 items-center justify-between gap-4">
         <a href="#/" onClick={(e) => { e.preventDefault(); (e.currentTarget.closest('.overflow-y-auto') as HTMLElement)?.scrollTo({ top: 0, behavior: 'smooth' }) }}
           className="flex items-center gap-2 rounded-[6px] text-[13.5px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-signal">
-          <Mark />{site.name}
+          <Mark /><span className="font-display text-[17px] font-extrabold lowercase tracking-[-0.035em]">{site.name}</span>
         </a>
         <nav className="flex items-center gap-0.5">
           {NAV.map((n) => (
@@ -179,7 +179,7 @@ function InstallSection() {
         <div data-reveal className="panel flex min-w-0 flex-col gap-4 p-4 sm:p-5">
           <Segmented value={tab} onChange={setTab} label="Install method" options={installs.map((i) => ({ value: i.id, label: i.label }))} />
           <div>
-            <h3 className="text-[14px] font-semibold">{cur.title}</h3>
+            <h3 className="font-display text-[15px] font-semibold">{cur.title}</h3>
             <div className="mt-3 flex flex-col gap-1.5">{cur.lines.map((l) => <CommandLine key={l} text={l} />)}</div>
             <p className="mt-3 text-[12.5px] leading-[1.6] text-fg-muted">{cur.note}</p>
           </div>

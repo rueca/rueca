@@ -82,10 +82,10 @@ export function LayerTree({
   const [drop, setDrop] = useState<Drop>(null)
   const [editing, setEditing] = useState<string | null>(null)
 
-  const flat: { item: LayerItem; depth: number; hiddenParent: boolean }[] = []
+  const flat: { item: LayerItem; depth: number; hiddenParent: boolean; pos: number; size: number }[] = []
   const walk = (list: LayerItem[], depth: number, hiddenParent: boolean) => {
-    for (const it of list) {
-      flat.push({ item: it, depth, hiddenParent })
+    for (const [i, it] of list.entries()) {
+      flat.push({ item: it, depth, hiddenParent, pos: i + 1, size: list.length })
       if (it.children?.length && !closed[it.id]) walk(it.children, depth + 1, hiddenParent || it.visible === false)
     }
   }
@@ -93,7 +93,7 @@ export function LayerTree({
 
   return (
     <div ref={rootRef} role="tree" aria-multiselectable className={cn('flex flex-col py-1', className)} onDragEnd={() => { setDrag(null); setDrop(null) }} onPointerLeave={() => onHover?.(null)}>
-      {flat.map(({ item, depth, hiddenParent }) => {
+      {flat.map(({ item, depth, hiddenParent, pos, size }) => {
         const sel = selected.includes(item.id)
         const Icon = item.icon
         const hasKids = !!item.children?.length
@@ -106,6 +106,10 @@ export function LayerTree({
           <div
             key={item.id}
             role="treeitem"
+            aria-level={depth + 1}
+            aria-setsize={size}
+            aria-posinset={pos}
+            data-row-id={item.id}
             aria-selected={sel}
             aria-expanded={hasKids ? !closed[item.id] : undefined}
             tabIndex={tabbable ? 0 : -1}
@@ -166,7 +170,7 @@ export function LayerTree({
               <Icon size={14} strokeWidth={1.5} className={cn('shrink-0', sel ? 'text-signal' : 'text-fg-faint')} />
             ) : null}
             <span className="ml-1 flex min-w-0 flex-1" onClick={(e) => editing === item.id && e.stopPropagation()}>
-              <InlineText bare focusable={false} editing={editing === item.id} onEditingChange={(b) => setEditing(b ? item.id : null)}
+              <InlineText bare focusable={false} editing={editing === item.id} onEditingChange={(b) => { setEditing(b ? item.id : null); if (!b) requestAnimationFrame(() => rootRef.current?.querySelector<HTMLElement>(`[data-row-id="${item.id}"]`)?.focus()) }}
                 value={item.name} onCommit={(v) => onRename?.(item.id, v)} label="Rename layer" className="min-w-0 flex-1 truncate" />
             </span>
             {item.meta && <span className="shrink-0 text-[11px] text-fg-faint group-hover/row:hidden">{item.meta}</span>}
