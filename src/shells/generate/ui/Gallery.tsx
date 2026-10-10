@@ -175,11 +175,11 @@ export function Gallery() {
 }
 
 const IDEAS = [
-  'Alpine lake at dawn, layered peaks fading into mist, soft film grain',
-  'Neon city skyline in the rain, wet street reflections, cinematic',
-  'Iridescent glass planet with rings, deep space, studio lighting',
-  'Botanical bloom in coral and cream, macro, soft pastel light',
-  'Abstract liquid marble, emerald and gold silk',
+  'A spinning top, studio light, seamless paper sweep',
+  'Spinning top at night, one spotlight from above',
+  'Spinning top close-up, hard key light, long shadow',
+  'A spinning top, centred, upright, soft light',
+  'Spinning top, wide, minimal, negative space',
 ]
 
 function EmptyState({ favourites, board }: { favourites: boolean; board: boolean }) {

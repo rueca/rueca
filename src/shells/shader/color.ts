@@ -1,5 +1,5 @@
-/* Colour maths for the artifact: OKLab for perceptual mixing, OKLCH for
-   generating harmonious random palettes. Pure functions, no DOM. */
+/* Colour maths for the artifact: OKLab for perceptual mixing, and the brand
+   palette Randomise draws from. Pure functions, no DOM. */
 
 export type Vec3 = [number, number, number]
 
@@ -57,21 +57,31 @@ export function rng(seed: number) {
   }
 }
 
-/** A harmonious 4–5 colour palette: one dark anchor, a few mid chroma notes, one light lift. */
+/* Rueca dye families (brand/data.js ruecaRamps): a light wash (200), the dye itself
+   and a deep dark (800). Randomise only ever mixes these, so every shuffle stays
+   on brand. */
+const DYES: { light: string; base: string; dark: string }[] = [
+  { light: '#FED0C3', base: '#E8582C', dark: '#7F1E0C' }, // Achiote
+  { light: '#FED0C7', base: '#EE7A68', dark: '#752B25' }, // Cochinilla
+  { light: '#F0DBA1', base: '#F2C744', dark: '#5E4000' }, // Gualda
+  { light: '#B6EAD2', base: '#2FA57C', dark: '#015341' }, // Hoja
+  { light: '#B9E3FF', base: '#5DB4E8', dark: '#0B4C6C' }, // Cielo
+  { light: '#DED6FF', base: '#A88BF6', dark: '#503578' }, // Malva
+  { light: '#D0DBFE', base: '#3440C8', dark: '#2C3A95' }, // Añil
+]
+/** the grounds: walnut, madder and the deepest dyes */
+const GROUNDS = ['#181411', '#181411', '#5E2219', '#5B0C04', '#1B246C', '#372156', '#00382C']
+const LANA = '#F3F1EB'
+
+/** A 4–5 colour palette from the brand: one dark ground, two or three dyes, one light lift. */
 export function randomPalette(seed: number): string[] {
   const r = rng(seed)
-  const base = r() * 360
-  const scheme = Math.floor(r() * 4) // 0 analogous · 1 split · 2 triad-ish · 3 complementary
-  const offsets = [[0, 28, 56, -30], [0, 150, 210, 30], [0, 120, 240, 60], [0, 180, 20, 200]][scheme]
-  const n = 4 + (r() < 0.5 ? 1 : 0)
-  const out: string[] = []
-  for (let i = 0; i < n; i++) {
-    const h = base + offsets[i % offsets.length] + (r() - 0.5) * 18
-    const L = i === 0 ? 0.22 + r() * 0.12 : i === n - 1 ? 0.86 + r() * 0.08 : 0.5 + r() * 0.26
-    const C = i === n - 1 ? 0.04 + r() * 0.05 : 0.1 + r() * 0.1
-    out.push(oklchToHex(L, C, h))
-  }
-  // shuffle all but keep the dark one first so the field has depth
-  for (let i = out.length - 1; i > 1; i--) { const j = 1 + Math.floor(r() * i); [out[i], out[j]] = [out[j], out[i]] }
-  return out
+  const pick = <T,>(xs: T[]) => xs[Math.floor(r() * xs.length)]
+  const deck = [...DYES]
+  for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]] }
+  const families = deck.slice(0, r() < 0.5 ? 2 : 3)
+  // each dye at its own strength, or a step lighter or deeper, for variety
+  const mids = families.map((f) => { const x = r(); return x < 0.6 ? f.base : x < 0.8 ? f.light : f.dark })
+  const lift = r() < 0.5 ? LANA : families[0].light
+  return [pick(GROUNDS), ...mids, lift]
 }

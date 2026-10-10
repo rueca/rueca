@@ -5,6 +5,9 @@
    sizes are in units of the frame's SHORT side, so changing aspect re-lays
    everything out without touching a clip.
 --------------------------------------------------------------------------- */
+/* Demo content is drawn in the wire style (src/demo/wire.ts): paper, one ink, hairlines. */
+import { WIRE } from '@/demo/wire'
+
 export type Bezier = [number, number, number, number]
 export type Aspect = '9:16' | '1:1' | '16:9' | '4:5'
 export const ASPECTS: Record<Aspect, { w: number; h: number; label: string }> = {
@@ -98,11 +101,11 @@ export function newClip(kind: ClipKind, track: string, start: number): Clip {
   const id = uid()
   const common = { id, track, kind, start, dur: 2500 }
   switch (kind) {
-    case 'text': return base({ ...common, name: 'Text', text: 'New headline', font: 'display', weight: 800, size: 120, color: '#FFFFFF', align: 'center', tracking: -0.03, lineHeight: 1.02, highlight: null, maxWidth: 0.84, y: 0.45, enter: M('slide-up', 600) })
-    case 'shape': return base({ ...common, name: 'Shape', shape: 'circle', w: 0.4, h: 0.4, radius: 0.04, fill: '#8B7CFF', stroke: 0.02, enter: M('pop', 500, EASE['Out back']) })
+    case 'text': return base({ ...common, name: 'Text', text: 'New headline', font: 'display', weight: 800, size: 120, color: WIRE.ink, align: 'center', tracking: -0.03, lineHeight: 1.02, highlight: null, maxWidth: 0.84, y: 0.45, enter: M('slide-up', 600) })
+    case 'shape': return base({ ...common, name: 'Shape', shape: 'circle', w: 0.4, h: 0.4, radius: 0.04, fill: WIRE.ink, stroke: 0.004, enter: M('pop', 500, EASE['Out back']) })
     case 'image': return base({ ...common, name: 'Image', image: 'mesh', seed: Math.floor(Math.random() * 9999), w: 0.8, h: 0.8, radius: 0.04, kenBurns: 0.08, frame: false, enter: M('slide-up', 600) })
-    case 'bg': return base({ ...common, name: 'Background', from: '#0E0B1F', to: '#2A1B5E', angle: 160, enter: M('none', 0), exit: M('none', 0), dur: 4000 })
-    case 'progress': return base({ ...common, name: 'Progress', fill: '#FFFFFF', trackColor: '#FFFFFF40', thickness: 10, edge: 'top', enter: M('fade', 300), exit: M('none', 0), dur: 4000 })
+    case 'bg': return base({ ...common, name: 'Background', from: WIRE.paper, to: WIRE.paper, angle: 160, enter: M('none', 0), exit: M('none', 0), dur: 4000 })
+    case 'progress': return base({ ...common, name: 'Progress', fill: WIRE.ink, trackColor: WIRE.line, thickness: 6, edge: 'top', enter: M('fade', 300), exit: M('none', 0), dur: 4000 })
   }
 }
 
@@ -116,16 +119,16 @@ export function demoComp(): Comp {
     { id: 'tBg', name: 'Background', muted: false, locked: true },
   ]
   const clips: Clip[] = [
-    base({ id: 'title', track: 'tText', kind: 'text', name: 'Meet Orbit', start: 500, dur: 3100, text: 'Meet Orbit', font: 'display', weight: 800, size: 168, color: '#FFFFFF', align: 'center', tracking: -0.04, lineHeight: 1, highlight: null, maxWidth: 0.9, y: 0.4, enter: M('slide-up', 700), exit: M('fade', 300) }),
-    base({ id: 'cta', track: 'tText', kind: 'text', name: 'Available today', start: 5400, dur: 2600, text: 'Available today', font: 'display', weight: 800, size: 74, color: '#0E0B1F', align: 'center', tracking: -0.02, lineHeight: 1, highlight: null, maxWidth: 0.9, y: 0.83, enter: M('pop', 500, EASE['Out back']), exit: M('none', 0) }),
-    base({ id: 'sub', track: 'tText2', kind: 'text', name: 'Subtitle', start: 1100, dur: 2500, text: 'Your week, in one glance.', font: 'sans', weight: 500, size: 58, color: '#D9D3FF', align: 'center', tracking: -0.01, lineHeight: 1.15, highlight: null, maxWidth: 0.8, y: 0.485, enter: M('blur', 600), exit: M('fade', 300) }),
-    base({ id: 'url', track: 'tText2', kind: 'text', name: 'URL', start: 6000, dur: 2000, text: 'orbit.app', font: 'mono', weight: 500, size: 40, color: '#FFFFFFB3', align: 'center', tracking: 0.02, lineHeight: 1, highlight: null, maxWidth: 0.8, y: 0.905, enter: M('typewriter', 700, EASE.Linear), exit: M('none', 0) }),
-    base({ id: 'bar', track: 'tOverlay', kind: 'progress', name: 'Progress', start: 0, dur: 8000, fill: '#FFFFFF', trackColor: '#FFFFFF33', thickness: 10, edge: 'top', enter: M('fade', 300), exit: M('none', 0) }),
-    base({ id: 'ring', track: 'tShapes', kind: 'shape', name: 'Halo', start: 250, dur: 3500, shape: 'ring', w: 0.86, h: 0.86, fill: '#8B7CFF', stroke: 0.012, y: 0.43, opacity: 0.9, enter: M('pop', 900, EASE['Out expo']), exit: M('fade', 400) }),
-    base({ id: 'pill', track: 'tShapes', kind: 'shape', name: 'CTA pill', start: 5300, dur: 2700, shape: 'rect', w: 0.7, h: 0.105, radius: 1, fill: '#FFFFFF', y: 0.83, enter: M('wipe', 450, EASE['In out quint']), exit: M('none', 0) }),
-    base({ id: 'aurora', track: 'tMedia', kind: 'image', name: 'Aurora', start: 0, dur: 4300, image: 'aurora', seed: 7, frame: true, kenBurns: 0.14, radius: 0, enter: M('fade', 500), exit: M('fade', 700, EASE['Ease in out']) }),
-    base({ id: 'app', track: 'tMedia', kind: 'image', name: 'App screen', start: 3900, dur: 4100, image: 'app', seed: 3, w: 0.74, h: 1.3, radius: 0.06, y: 0.43, kenBurns: 0.04, frame: false, enter: M('slide-up', 800, EASE['Out expo']), exit: M('none', 0) }),
-    base({ id: 'bg', track: 'tBg', kind: 'bg', name: 'Night gradient', start: 0, dur: 8000, from: '#0E0B1F', to: '#2A1B5E', angle: 160, enter: M('none', 0), exit: M('none', 0) }),
+    base({ id: 'title', track: 'tText', kind: 'text', name: 'Meet Orbit', start: 500, dur: 3100, text: 'Meet Orbit', font: 'display', weight: 800, size: 168, color: WIRE.ink, align: 'center', tracking: -0.04, lineHeight: 1, highlight: null, maxWidth: 0.9, y: 0.19, enter: M('slide-up', 700), exit: M('fade', 300) }),
+    base({ id: 'cta', track: 'tText', kind: 'text', name: 'Available today', start: 5400, dur: 2600, text: 'Available today', font: 'display', weight: 700, size: 70, color: WIRE.paper, align: 'center', tracking: -0.02, lineHeight: 1, highlight: null, maxWidth: 0.9, y: 0.83, enter: M('pop', 500, EASE['Out back']), exit: M('none', 0) }),
+    base({ id: 'sub', track: 'tText2', kind: 'text', name: 'Subtitle', start: 1100, dur: 2500, text: 'Your week, in one glance.', font: 'sans', weight: 500, size: 58, color: WIRE.muted, align: 'center', tracking: -0.01, lineHeight: 1.15, highlight: null, maxWidth: 0.8, y: 0.265, enter: M('blur', 600), exit: M('fade', 300) }),
+    base({ id: 'url', track: 'tText2', kind: 'text', name: 'URL', start: 6000, dur: 2000, text: 'orbit.app', font: 'mono', weight: 500, size: 40, color: WIRE.muted, align: 'center', tracking: 0.02, lineHeight: 1, highlight: null, maxWidth: 0.8, y: 0.905, enter: M('typewriter', 700, EASE.Linear), exit: M('none', 0) }),
+    base({ id: 'bar', track: 'tOverlay', kind: 'progress', name: 'Progress', start: 0, dur: 8000, fill: WIRE.ink, trackColor: WIRE.line, thickness: 6, edge: 'top', enter: M('fade', 300), exit: M('none', 0) }),
+    base({ id: 'ring', track: 'tShapes', kind: 'shape', name: 'Halo', start: 250, dur: 3500, shape: 'ring', w: 0.74, h: 0.74, fill: WIRE.ink, stroke: 0.0028, y: 0.515, opacity: 0.45, enter: M('pop', 900, EASE['Out expo']), exit: M('fade', 400) }),
+    base({ id: 'pill', track: 'tShapes', kind: 'shape', name: 'CTA pill', start: 5300, dur: 2700, shape: 'rect', w: 0.7, h: 0.105, radius: 1, fill: WIRE.ink, y: 0.83, enter: M('wipe', 450, EASE['In out quint']), exit: M('none', 0) }),
+    base({ id: 'aurora', track: 'tMedia', kind: 'image', name: 'Top', start: 0, dur: 4300, image: 'aurora', seed: 7, frame: true, kenBurns: 0.06, radius: 0, enter: M('fade', 500), exit: M('fade', 700, EASE['Ease in out']) }),
+    base({ id: 'app', track: 'tMedia', kind: 'image', name: 'App screen', start: 3900, dur: 4100, image: 'app', seed: 3, w: 0.74, h: 1.22, radius: 0.06, y: 0.42, kenBurns: 0.03, frame: false, enter: M('slide-up', 800, EASE['Out expo']), exit: M('none', 0) }),
+    base({ id: 'bg', track: 'tBg', kind: 'bg', name: 'Paper', start: 0, dur: 8000, from: WIRE.paper, to: WIRE.paper, angle: 160, enter: M('none', 0), exit: M('none', 0) }),
   ]
   return { tracks, clips, design: '9:16' }
 }

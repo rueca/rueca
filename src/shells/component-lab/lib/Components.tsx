@@ -1,6 +1,8 @@
 /* The component set being designed. Real, interactive components that read
    only --cl-* variables; `force` pins a state for the States matrix. */
 import { ArrowRight, Plus, Download, Sparkles, Check, Search, Mail, Lock, Bookmark } from 'lucide-react'
+import type { CSSProperties } from 'react'
+import { ditherTop } from '@/demo/wire'
 import type { ButtonV, InputV, CardV } from '../props'
 
 const GLYPH = { 'arrow-right': ArrowRight, plus: Plus, download: Download, sparkles: Sparkles, check: Check } as const
@@ -48,7 +50,7 @@ export function Card({ v, force, buttonV }: { v: CardV; force?: string; buttonV:
   return (
     <div className="cl-card-wrap">
       <article className="cl-card" data-variant={v.cardVariant} data-layout={v.layout} data-state={state === 'default' ? undefined : state} tabIndex={force ? -1 : 0}>
-        {v.media && <div className="cl-media" aria-hidden><b /></div>}
+        {v.media && <div className="cl-media" aria-hidden style={mediaStyle()} />}
         <div className="cl-body">
           {(v.eyebrow || v.badge) && <div className="cl-eyebrow">{v.eyebrow}{v.badge && <span className="cl-badge">New</span>}</div>}
           <h3 className="cl-title">{v.title}</h3>
@@ -64,4 +66,13 @@ export function Card({ v, force, buttonV }: { v: CardV; force?: string; buttonV:
       </article>
     </div>
   )
+}
+
+/* The cover image is a placeholder: the dithered spinning top (paper ground; lit top on ink for dark).
+   Painted lazily on first render and cached by ditherTop. */
+function mediaStyle(): CSSProperties {
+  return {
+    '--cl-media-day': `url(${ditherTop(640, 400, { at: 0.5, size: 0.66 })})`,
+    '--cl-media-night': `url(${ditherTop(640, 400, { at: 0.5, size: 0.66, night: true })})`,
+  } as CSSProperties
 }

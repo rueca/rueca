@@ -10,7 +10,8 @@ import {
   Switch, TextInput, cn, toast, type ScrubProps,
 } from '@kit'
 import { ASPECTS, EASE, PRESETS, type Aspect, type Clip, type FontKey, type ImageGen, type Motion } from './comp'
-import { FONTS, proceduralImage } from './render'
+import { WIRE, ditherTop, wireImage } from '@/demo/wire'
+import { FONTS, IMAGE_LABEL, proceduralImage } from './render'
 import { addClip, commitComp, deleteClips, duplicateClips, getComp, history, params, rebaseDesign, splitAt, ui, updateClip, useComp, useUI } from './store'
 
 const sec = (v: number) => `${(v / 1000).toFixed(2)}s`
@@ -153,7 +154,7 @@ function ClipSections({ c }: { c: Clip }) {
           </Row>
           <Row label="Highlight" hint="A rounded marker behind each line (caption style).">
             <div className="flex w-full items-center gap-1.5">
-              <Switch checked={!!c.highlight} label="Highlight" onChange={(b) => set({ highlight: b ? '#FFD84D' : null })} />
+              <Switch checked={!!c.highlight} label="Highlight" onChange={(b) => set({ highlight: b ? WIRE.sheet : null })} />
               {c.highlight && <ColorField value={c.highlight} onChange={(v, f) => set({ highlight: v }, f)} />}
             </div>
           </Row>
@@ -185,7 +186,7 @@ function ClipSections({ c }: { c: Clip }) {
               <button key={g} type="button" aria-pressed={c.image === g} onClick={() => set({ image: g })}
                 className={cn('flex flex-col items-center gap-1 rounded-[7px] p-1 text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal', c.image === g ? 'bg-signal-soft text-signal' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
                 <Thumb gen={g} seed={c.seed ?? 1} />
-                {g === 'app' ? 'App UI' : g[0].toUpperCase() + g.slice(1)}
+                {IMAGE_LABEL[g]}
               </button>
             ))}
           </div>
@@ -269,6 +270,12 @@ const thumbCache = new Map<string, string>()
 export function thumbURL(gen: ImageGen, seed: number) {
   const k = `${gen}:${seed}`
   let u = thumbCache.get(k)
+  if (!u && gen !== 'app') {
+    // the wire painters hand back data URLs already — one dither cell per pixel, scaled down by the browser
+    const at = 0.44 + (((seed * 37) % 13) / 100)
+    u = gen === 'mesh' ? wireImage(192, 192, 'image') : ditherTop(260, 260, { at, size: 0.72, night: gen === 'sunset' })
+    thumbCache.set(k, u)
+  }
   if (!u) {
     const src = proceduralImage(gen, seed, gen === 'app' ? 384 : 512, gen === 'app' ? 640 : 512)
     const c = document.createElement('canvas')

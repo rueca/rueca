@@ -2,22 +2,22 @@
    Design tokens — the component set's OWN theme, independent of the studio
    chrome. A small schema of decisions (accent in OKLCH, radius, type scale,
    density, shadow style) derives every CSS variable the components read,
-   for light and dark. Presets are whole looks ("Linear-ish", "Soft", "Brutal").
+   for light and dark. Presets are whole looks ("Compact", "Soft", "Brutal").
 --------------------------------------------------------------------------- */
 import { defineSchema, folder, p, createParams } from '@kit'
 import { formatHex, clampChroma, displayable, inGamut, wcagContrast, type Oklch } from 'culori'
 
 export const tokenSchema = defineSchema({
   accent: folder('Accent', {
-    accentL: p.number(0.56, { min: 0.3, max: 0.95, step: 0.01, label: 'Lightness' }),
-    accentC: p.number(0.2, { min: 0, max: 0.37, step: 0.005, label: 'Chroma' }),
-    accentH: p.number(264, { min: 0, max: 360, step: 1, label: 'Hue' }),
-    neutralTint: p.number(0.008, { min: 0, max: 0.04, step: 0.001, label: 'Neutral tint', hint: 'How much of the accent hue bleeds into greys, borders and text.' }),
+    accentL: p.number(0.22, { min: 0.15, max: 0.95, step: 0.01, label: 'Lightness' }),
+    accentC: p.number(0.004, { min: 0, max: 0.37, step: 0.001, label: 'Chroma' }),
+    accentH: p.number(78, { min: 0, max: 360, step: 1, label: 'Hue' }),
+    neutralTint: p.number(0.012, { min: 0, max: 0.04, step: 0.001, label: 'Neutral tint', hint: 'How much of the accent hue bleeds into greys, borders and text.' }),
   }),
   shape: folder('Shape', {
     radius: p.number(8, { min: 0, max: 24, step: 1, unit: 'px', hint: 'Control radius. Cards use 1.5×, pills ignore it.' }),
     borderWidth: p.number(1, { min: 0, max: 3, step: 0.5, unit: 'px', label: 'Border' }),
-    shadow: p.select('soft', [{ value: 'none', label: 'None' }, { value: 'soft', label: 'Soft' }, { value: 'hard', label: 'Hard' }], { hint: 'Hard = offset solid shadow, the neo-brutalist look.' }),
+    shadow: p.select('none', [{ value: 'none', label: 'None' }, { value: 'soft', label: 'Soft' }, { value: 'hard', label: 'Hard' }], { hint: 'Hard = offset solid shadow, the neo-brutalist look.' }),
   }),
   type: folder('Type', {
     font: p.select('inter', [
@@ -36,14 +36,17 @@ export const tokenSchema = defineSchema({
   }),
 })
 
+/* Every preset stays in the wire palette (one ink on warm paper, hairlines): the looks differ by
+   shape, type and density, not by colour. The accent is still free to dial in. */
 export const tokens = createParams(tokenSchema, {
   id: 'component-lab-tokens',
+  version: 2, // v2: wire-palette defaults + presets (v1 saved a blue accent and soft shadows)
   presets: [
-    { name: 'Default', values: {} },
-    { name: 'Linear-ish', values: { accentL: 0.6, accentC: 0.17, accentH: 277, neutralTint: 0.006, radius: 6, borderWidth: 1, shadow: 'soft', font: 'inter', baseSize: 13, scale: '1.125', weight: 500, density: 'compact' } },
-    { name: 'Soft', values: { accentL: 0.68, accentC: 0.14, accentH: 300, neutralTint: 0.016, radius: 16, borderWidth: 1, shadow: 'soft', font: 'rounded', baseSize: 15, scale: '1.2', weight: 600, density: 'comfortable' } },
-    { name: 'Brutal', values: { accentL: 0.9, accentC: 0.19, accentH: 106, neutralTint: 0, radius: 0, borderWidth: 2, shadow: 'hard', font: 'mono', baseSize: 14, scale: '1.25', weight: 700, density: 'default' } },
-    { name: 'Forest', values: { accentL: 0.5, accentC: 0.1, accentH: 155, neutralTint: 0.012, radius: 10, borderWidth: 1, shadow: 'soft', font: 'serif', baseSize: 15, scale: '1.25', weight: 600, density: 'default' } },
+    { name: 'Wire', values: {} },
+    { name: 'Compact', values: { radius: 6, baseSize: 13, scale: '1.125', weight: 500, density: 'compact' } },
+    { name: 'Soft', values: { accentL: 0.34, neutralTint: 0.018, radius: 16, font: 'rounded', baseSize: 15, weight: 600, density: 'comfortable' } },
+    { name: 'Brutal', values: { neutralTint: 0, radius: 0, borderWidth: 2, shadow: 'hard', font: 'mono', weight: 700 } },
+    { name: 'Editorial', values: { radius: 2, font: 'serif', baseSize: 15, scale: '1.25', weight: 600 } },
   ],
 })
 export type Tokens = ReturnType<typeof tokens.values>
@@ -79,38 +82,42 @@ export type Theme = 'light' | 'dark'
 export function deriveVars(t: Tokens, theme: Theme): Record<string, string> {
   const H = t.accentH, C = t.accentC
   const dark = theme === 'dark'
-  const L = dark ? Math.min(0.95, t.accentL + 0.05) : t.accentL
+  // an ink-dark accent turns to paper on the dark theme, so it never disappears into the ground
+  const L = dark ? (t.accentL < 0.45 ? Math.max(0.86, 1.12 - t.accentL) : Math.min(0.95, t.accentL + 0.05)) : t.accentL
   const accentHex = hexOf(L, C, H)
-  // pick the label colour by real contrast, not by lightness guesswork
-  const onAccent = wcagContrast(accentHex, '#ffffff') >= wcagContrast(accentHex, '#111111') ? '#ffffff' : hexOf(0.18, Math.min(C, 0.04), H)
   const nt = t.neutralTint
+  // pick the label colour by real contrast, not by lightness guesswork (light label = warm paper)
+  const paper = hexOf(0.965, Math.min(nt, 0.011), H)
+  const onAccent = wcagContrast(accentHex, paper) >= wcagContrast(accentHex, '#111111') ? paper : hexOf(0.2, Math.min(C, 0.04), H)
   const n = (l: number, k = 1) => cssOf(l, nt * k, H)
   const d = DENSITY[t.density as keyof typeof DENSITY] ?? DENSITY.default
   const r = Number(t.scale)
   const fs = (k: number) => `${(t.baseSize * r ** k).toFixed(2)}px`
   const hard = t.shadow === 'hard'
-  const ink = dark ? n(0.97, 0.5) : n(0.21, 1.5)
+  const ink = dark ? n(0.96, 0.9) : n(0.22, 0.3)
   const shadowSm = t.shadow === 'none' ? 'none' : hard ? `2px 2px 0 0 ${ink}` : dark ? '0 1px 2px rgb(0 0 0 / .4)' : '0 1px 2px rgb(15 20 30 / .06), 0 1px 1px rgb(15 20 30 / .04)'
   const shadowMd = t.shadow === 'none' ? 'none' : hard ? `4px 4px 0 0 ${ink}` : dark ? '0 2px 6px rgb(0 0 0 / .35), 0 12px 32px -8px rgb(0 0 0 / .5)' : '0 1px 3px rgb(15 20 30 / .06), 0 10px 30px -10px rgb(15 20 30 / .18)'
   const shadowLg = t.shadow === 'none' ? 'none' : hard ? `6px 6px 0 0 ${ink}` : dark ? '0 24px 48px -12px rgb(0 0 0 / .6)' : '0 2px 6px rgb(15 20 30 / .06), 0 22px 44px -14px rgb(15 20 30 / .26)'
   return {
     '--cl-accent': cssOf(L, C, H),
     '--cl-accent-hex': accentHex,
-    '--cl-accent-hover': cssOf(L + (L > 0.75 ? -0.05 : dark ? 0.05 : -0.05), C, H),
-    '--cl-accent-active': cssOf(L + (L > 0.75 ? -0.09 : dark ? 0.09 : -0.09), C, H),
+    '--cl-accent-hover': cssOf(L + (L > 0.75 ? -0.05 : dark || L < 0.3 ? 0.07 : -0.05), C, H),
+    '--cl-accent-active': cssOf(L + (L > 0.75 ? -0.09 : dark || L < 0.3 ? 0.12 : -0.09), C, H),
     '--cl-accent-soft': cssOf(L, C, H, dark ? 0.2 : 0.12),
     '--cl-accent-text': dark ? cssOf(Math.max(0.72, L), C, H) : cssOf(Math.min(0.5, L), C, H),
     '--cl-on-accent': onAccent,
     '--cl-ring': cssOf(L, C, H, 0.4),
-    '--cl-bg': dark ? n(0.165) : n(0.985, 0.5),
-    '--cl-surface': dark ? n(0.205) : '#ffffff',
-    '--cl-surface-2': dark ? n(0.25) : n(0.965),
-    '--cl-border': dark ? n(0.31) : n(0.915),
-    '--cl-border-strong': dark ? n(0.4) : n(0.84),
+    // light = the wire palette at the default tint: paper, card, sheet, hairline, ink / muted / faint
+    '--cl-bg': dark ? n(0.2, 0.3) : n(0.96, 0.9),
+    '--cl-surface': dark ? n(0.235, 0.4) : n(0.98, 0.7),
+    '--cl-surface-2': dark ? n(0.28, 0.5) : n(0.912, 1.4),
+    '--cl-border': dark ? n(0.33, 0.6) : n(0.876, 1.4),
+    '--cl-border-strong': dark ? n(0.42, 0.6) : n(0.8, 1.2),
     '--cl-text': ink,
-    '--cl-text-muted': dark ? n(0.74) : n(0.48),
-    '--cl-text-faint': dark ? n(0.58) : n(0.64),
-    '--cl-danger': dark ? cssOf(0.68, 0.19, 25) : cssOf(0.58, 0.21, 27),
+    '--cl-text-muted': dark ? n(0.74, 0.8) : n(0.526, 0.9),
+    '--cl-text-faint': dark ? n(0.6, 0.8) : n(0.66, 1.1),
+    // destructive stays a (muted) semantic red: a state, not a brand colour
+    '--cl-danger': dark ? cssOf(0.68, 0.13, 27) : cssOf(0.52, 0.15, 28),
     '--cl-danger-soft': cssOf(0.6, 0.2, 27, dark ? 0.2 : 0.1),
     '--cl-on-danger': '#ffffff',
     '--cl-radius': `${t.radius}px`,

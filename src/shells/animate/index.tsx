@@ -525,7 +525,7 @@ export default function AnimateShell() {
           </div>
         ) : null
       }>
-        <Artboard width={doc.width} height={doc.height} label={<span className="flex items-center gap-1.5"><Eye size={11} />Like button</span>} background="#100C26" selected={!sel && !preview} className="rounded-[14px]">
+        <Artboard width={doc.width} height={doc.height} label={<span className="flex items-center gap-1.5"><Eye size={11} />Like button</span>} background="#F6F1EA" selected={!sel && !preview} className="rounded-[14px]">
           <LiveScene svgRef={svgRef} />
         </Artboard>
       </Stage>

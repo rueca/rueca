@@ -9,59 +9,61 @@ import { createClock, createParams, defineSchema, folder, p } from '@kit'
 import { LAYER_TYPES, makeLayer, newId, type Layer, type LayerType } from './layers'
 import { randomPalette, rng } from './color'
 
-/* ---------- looks (built-in presets) ---------- */
+/* ---------- looks (built-in presets) ----------
+   Colours from the Rueca palette and its tonal ramps (brand/data.js ruecaPalette,
+   ruecaRamps). The first look, the default, is the logo's three dyes on walnut. */
 const L = makeLayer
 const look = (name: string, bg: string, seed: number, layers: Layer[]) => ({ name, values: { bg, seed, layers } })
 
 export const LOOKS = [
-  look('Aurora', '#04050d', 4127, [
+  look('Achiote', '#181411', 4127, [
     L('grain', { params: { size: 1.2 } }),
     L('vignette', { opacity: 0.6 }),
     L('warp', { params: { amount: 0.3, scale: 0.85, detail: 3, evolve: 0.45 } }),
-    L('mesh', { params: { colors: ['#050816', '#2b1b6e', '#0fb3a3', '#7cf0b5', '#5a2fd1'], softness: 0.62, drift: 0.65 } }),
+    L('mesh', { params: { colors: ['#181411', '#5B0C04', '#E8582C', '#F2C744', '#5DB4E8'], softness: 0.62, drift: 0.65 } }),
   ]),
-  look('Peach', '#2a0f14', 812, [
+  look('Cochinilla', '#531816', 812, [
     L('grain', { opacity: 0.26, params: { size: 1.6 } }),
     L('warp', { params: { amount: 0.32, scale: 0.9, detail: 3, evolve: 0.4 } }),
-    L('mesh', { params: { colors: ['#c06c84', '#ff9a76', '#ffd6a5', '#f76b8a', '#ffe9d6'], softness: 0.7, drift: 0.5 } }),
+    L('mesh', { params: { colors: ['#BC5448', '#EE7A68', '#F0DBA1', '#FEAEA0', '#F3F1EB'], softness: 0.7, drift: 0.5 } }),
   ]),
-  look('Riso', '#f4efe6', 2290, [
+  look('Riso', '#F3F1EB', 2290, [
     L('grain', { blend: 'multiply', opacity: 0.18, params: { size: 2, animated: false } }),
-    L('halftone', { params: { shape: 'dot', cell: 11, angle: 22, contrast: 1.2, inkMode: 'source', paper: '#f4efe6' } }),
+    L('halftone', { params: { shape: 'dot', cell: 11, angle: 22, contrast: 1.2, inkMode: 'source', paper: '#F3F1EB' } }),
     L('warp', { params: { style: 'swirl', amount: 0.8, scale: 1.6, cycles: 1 } }),
-    L('mesh', { params: { colors: ['#ff4d6d', '#3a86ff', '#ffbe0b', '#f7f3e8', '#2541b2'], softness: 0.5, drift: 0.7 } }),
+    L('mesh', { params: { colors: ['#E8582C', '#3440C8', '#F2C744', '#F3F1EB', '#2FA57C'], softness: 0.5, drift: 0.7 } }),
   ]),
-  look('Nocturne', '#020208', 5531, [
+  look('Nocturne', '#0E0B09', 5531, [
     L('scanlines', { opacity: 0.22, params: { pitch: 3.5, sharpness: 0.3, roll: 2 } }),
     L('vignette', { opacity: 0.85, params: { size: 0.45, softness: 1.1 } }),
     L('chromatic', { params: { amount: 9, radial: true } }),
     L('warp', { params: { amount: 0.5, scale: 1.1, detail: 4, evolve: 0.7 } }),
-    L('mesh', { params: { colors: ['#03030a', '#1d1b4f', '#ff2e88', '#3df2ff', '#120a2a'], softness: 0.42, drift: 0.8 } }),
+    L('mesh', { params: { colors: ['#0E0B09', '#1B246C', '#EE7A68', '#6FC0EE', '#372156'], softness: 0.42, drift: 0.8 } }),
   ]),
-  look('Lava', '#0d0000', 913, [
+  look('Lava', '#181411', 913, [
     L('grain', { opacity: 0.3 }),
     L('posterize', { opacity: 0.55, params: { levels: 6, gamma: 1.1 } }),
     L('warp', { params: { style: 'swirl', amount: 1.1, scale: 1.4, cycles: 1 } }),
     L('warp', { name: 'Warp flow', params: { amount: 0.3, scale: 1.6, detail: 3, evolve: 0.5 } }),
-    L('mesh', { params: { colors: ['#1a0000', '#ff3b00', '#ffb300', '#5c0a0a', '#ff6a00'], softness: 0.48, drift: 0.9 } }),
+    L('mesh', { params: { colors: ['#5B0C04', '#E8582C', '#F2C744', '#7F1E0C', '#FE8562'], softness: 0.48, drift: 0.9 } }),
   ]),
-  look('Mint print', '#e9f5ee', 3301, [
+  look('Leaf print', '#F3F1EB', 3301, [
     L('grain', { blend: 'multiply', opacity: 0.14, params: { size: 1.8, animated: false } }),
-    L('halftone', { params: { shape: 'line', cell: 10, angle: -30, contrast: 0.8, inkMode: 'source', paper: '#eef6f0' } }),
+    L('halftone', { params: { shape: 'line', cell: 10, angle: -30, contrast: 0.8, inkMode: 'source', paper: '#F3F1EB' } }),
     L('warp', { params: { style: 'waves', amount: 1.1, scale: 1.1, cycles: 1 } }),
-    L('gradient', { params: { ramp: { angle: 135, stops: [{ pos: 0, color: '#0e5e5a' }, { pos: 0.45, color: '#5fc7a0' }, { pos: 1, color: '#f6efd2' }] }, shape: 'linear', spin: 0 } }),
+    L('gradient', { params: { ramp: { angle: 135, stops: [{ pos: 0, color: '#015341' }, { pos: 0.45, color: '#5DC39B' }, { pos: 1, color: '#F3F1EB' }] }, shape: 'linear', spin: 0 } }),
   ]),
-  look('Duotone', '#0d0b1e', 6612, [
+  look('Duotone', '#181411', 6612, [
     L('grain', { opacity: 0.34, params: { size: 1.2 } }),
-    L('gradmap', { params: { colors: ['#0d0b1e', '#ff5f3a', '#ffe7c2'], offset: 0.02 } }),
+    L('gradmap', { params: { colors: ['#181411', '#E8582C', '#F3F1EB'], offset: 0.02 } }),
     L('warp', { params: { amount: 0.45, scale: 0.9, detail: 3, evolve: 0.6 } }),
     L('mesh', { params: { colors: ['#111111', '#777777', '#eeeeee', '#333333', '#bbbbbb'], softness: 0.5, drift: 0.7 } }),
   ]),
-  look('Ultraviolet', '#07021a', 7240, [
+  look('Malva', '#181411', 7240, [
     L('grain', { opacity: 0.28 }),
-    L('vignette', { opacity: 0.8, params: { tint: '#0a0020' } }),
+    L('vignette', { opacity: 0.8, params: { tint: '#181411' } }),
     L('warp', { params: { style: 'ripple', amount: 0.8, scale: 1.1, cycles: 2 } }),
-    L('mesh', { params: { colors: ['#0b0420', '#6a00ff', '#ff00c8', '#00d4ff', '#14002e'], softness: 0.5, drift: 0.6 } }),
+    L('mesh', { params: { colors: ['#181411', '#503578', '#A88BF6', '#5DB4E8', '#372156'], softness: 0.5, drift: 0.6 } }),
   ]),
 ]
 
@@ -77,7 +79,7 @@ const validLayers = (v: unknown) => Array.isArray(v) && v.every((l) =>
 export const schema = defineSchema({
   canvas: folder('Canvas', {
     aspect: p.select('free', [{ value: 'free', label: 'Fill' }, { value: '16:9', label: '16:9' }, { value: '1:1', label: '1:1' }, { value: '9:16', label: '9:16' }], { hint: 'Fill uses the whole window. Fixed ratios frame the artwork for export.' }),
-    bg: p.color('#04050d', { alpha: false, label: 'Background', hint: 'What shows beneath the bottom layer.' }),
+    bg: p.color('#181411', { alpha: false, label: 'Background', hint: 'What shows beneath the bottom layer.' }),
   }),
   time: folder('Time', {
     speed: p.number(1, { min: 0, max: 3, step: 0.05, unit: '×', hint: 'Playback rate. Video exports keep the loop seamless at any speed.' }),

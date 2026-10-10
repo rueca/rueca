@@ -2,6 +2,7 @@
 import { memo } from 'react'
 import { Heart, Sparkles, Maximize2, Download, Check, MoreHorizontal, Wand2, Copy, Trash2, FolderHeart, Expand } from 'lucide-react'
 import { Menu, Tip, toast, cn } from '@kit'
+import { wireImage } from '@/demo/wire'
 import { clickSelect, toggleFavourite, toggleBoard, library, type ImageRec } from '../state/gallery'
 import { usePix, exportPNG } from '../state/images'
 import { ui } from '../state/ui'
@@ -26,7 +27,7 @@ export const Tile = memo(function Tile({ rec, selected, multi }: { rec: ImageRec
       >
         {pix
           ? <img src={pix.url} alt="" draggable={false} className="h-full w-full object-cover transition-transform duration-300 group-hover/tile:scale-[1.015]" />
-          : <span className="block h-full w-full animate-pulse bg-gradient-to-br from-well via-hover to-well" />}
+          : <img src={wireImage(Math.round(rec.params.w / 4), Math.round(rec.params.h / 4), `image · ${rec.params.aspect}`)} alt="" draggable={false} className="h-full w-full animate-pulse object-cover" />}
       </button>
 
       {/* select tick: visible on hover, focus, or while multi-selecting */}

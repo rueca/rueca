@@ -1,56 +1,60 @@
 /* ---------------------------------------------------------------------------
-   Mini wireframes — procedural phone screens drawn with SVG primitives.
-   Tones are CSS classes (flows.css) built from kit tokens, so the thumbnails
-   re-theme with the chrome and survive the DOM snapshot export.
+   Mini wireframes — procedural phone screens drawn with SVG primitives, in
+   the wire style (src/demo/wire.ts): one ink on card, hairline fields,
+   image slots as X-boxes, the dithered top for hero pictures. Tones are CSS
+   classes (flows.css) fixed to the wire palette in both themes; pictures are
+   data-URL <image>s painted lazily at render, so they survive the DOM export.
 --------------------------------------------------------------------------- */
-import { memo, type ReactNode } from 'react'
+import { memo, useId, type ReactNode } from 'react'
+import { ditherTop, wireImage } from '@/demo/wire'
 import type { Template } from './model'
 
 export const WF_W = 120
 export const WF_H = 210
 
-type Tone = 'wf-1' | 'wf-2' | 'wf-3' | 'wf-acc' | 'wf-ok' | 'wf-rec' | 'wf-ink' | 'wf-card' | 'wf-knob'
+type Tone = 'wf-1' | 'wf-2' | 'wf-3' | 'wf-acc' | 'wf-ok' | 'wf-rec' | 'wf-ink' | 'wf-title' | 'wf-card' | 'wf-knob'
 const R = (x: number, y: number, w: number, h: number, t: Tone = 'wf-1', r = 2) => <rect x={x} y={y} width={w} height={h} rx={r} className={t} />
 const C = (cx: number, cy: number, r: number, t: Tone = 'wf-2') => <circle cx={cx} cy={cy} r={r} className={t} />
 const Text = (x: number, y: number, w: number, t: Tone = 'wf-3') => R(x, y, w, 3, t, 1.5)
-const Title = (x: number, y: number, w: number) => R(x, y, w, 6, 'wf-ink', 2)
+const Title = (x: number, y: number, w: number, t: Tone = 'wf-title') => R(x, y, w, 6, t, 2)
 const Field = (x: number, y: number, w: number) => <rect x={x + 0.5} y={y + 0.5} width={w - 1} height={13} rx={3} className="wf-field" />
 const Btn = (x: number, y: number, w: number, t: Tone = 'wf-acc') => R(x, y, w, 14, t, 4)
-const Img = (x: number, y: number, w: number, h: number, r = 4) => (
-  <g>
-    {R(x, y, w, h, 'wf-1', r)}
-    <path d={`M${x + w * 0.12} ${y + h * 0.82} L${x + w * 0.38} ${y + h * 0.48} L${x + w * 0.56} ${y + h * 0.68} L${x + w * 0.7} ${y + h * 0.55} L${x + w * 0.9} ${y + h * 0.82} Z`} className="wf-2" />
-    {C(x + w * 0.74, y + h * 0.3, Math.min(w, h) * 0.08, 'wf-2')}
-  </g>
-)
+/** pictures: painted at 2–3× the viewBox so they stay crisp on the zoomed canvas */
+const Pic = (x: number, y: number, w: number, h: number, href: string) => <image x={x} y={y} width={w} height={h} href={href} preserveAspectRatio="none" />
+/** secondary image / thumbnail → an X-box slot */
+const Img = (x: number, y: number, w: number, h: number, label = '') => Pic(x, y, w, h, wireImage(w * 2, h * 2, label))
+/** hero image → the dithered top (grid keeps the dots big enough to read at node size) */
+const Hero = (x: number, y: number, w: number, h: number, o: { at?: number; size?: number; night?: boolean } = {}) =>
+  Pic(x, y, w, h, ditherTop(w * 3, h * 3, { grid: Math.round(Math.max(w, h) * 0.95), ...o }))
 const TabBar = (active = 0) => (
   <g>
     <rect x="0" y={WF_H - 20} width={WF_W} height="20" className="wf-bar" />
+    <path d={`M0 ${WF_H - 19.5} H${WF_W}`} className="wf-hair" />
     {[0, 1, 2, 3].map((i) => <g key={i}>{C(18 + i * 28, WF_H - 10, 3, i === active ? 'wf-acc' : 'wf-2')}</g>)}
   </g>
 )
 const Row = (y: number, thumb = true, trailing?: ReactNode) => (
   <g>
-    {thumb && R(10, y, 16, 16, 'wf-1', 3)}
+    {thumb && Img(10, y, 16, 16)}
     {Text(thumb ? 32 : 10, y + 3, 44, 'wf-ink')}
     {Text(thumb ? 32 : 10, y + 10, 30)}
     {trailing}
   </g>
 )
 
-const screens: Record<Template, () => ReactNode> = {
+const screens: Record<Template, (uid: string) => ReactNode> = {
   splash: () => (
     <g>
-      <rect x="0" y="0" width={WF_W} height={WF_H} className="wf-acc" opacity="0.14" />
-      {C(60, 92, 16, 'wf-acc')}
-      <path d="M53 92 l5 5 l9 -10" className="wf-check" />
-      {Title(38, 120, 44)}
-      {Text(46, 132, 28)}
+      {/* the brand moment: lit top on an ink ground */}
+      {Hero(0, 0, WF_W, WF_H, { night: true, size: 0.55, at: 0.5 })}
+      {Title(38, 168, 44, 'wf-card')}
+      {Text(46, 180, 28, 'wf-2')}
     </g>
   ),
   welcome: () => (
     <g>
-      {Img(10, 18, 100, 92, 6)}
+      {Hero(10, 18, 100, 92, { size: 0.7 })}
+      <rect x="10.5" y="18.5" width="99" height="91" className="wf-hair" />
       {Title(10, 122, 74)}
       {Text(10, 134, 96)}
       {Text(10, 141, 80)}
@@ -67,12 +71,12 @@ const screens: Record<Template, () => ReactNode> = {
       {Text(10, 112, 64)}
       {Btn(10, 128, 100)}
       {Text(40, 152, 40)}
-      {C(44, 170, 7, 'wf-1')}{C(60, 170, 7, 'wf-1')}{C(76, 170, 7, 'wf-1')}
+      {[44, 60, 76].map((cx) => <circle key={cx} cx={cx} cy={170} r={6.5} className="wf-field" />)}
     </g>
   ),
   login: () => (
     <g>
-      {C(60, 38, 12, 'wf-acc')}
+      {C(60, 38, 12, 'wf-1')}{C(60, 38, 4, 'wf-acc')}
       {Title(32, 60, 56)}
       {Field(10, 82, 100)}{Field(10, 102, 100)}
       {Text(70, 121, 40, 'wf-acc')}
@@ -87,7 +91,8 @@ const screens: Record<Template, () => ReactNode> = {
       {[0, 1, 2, 3, 4, 5].map((i) => <rect key={i} x={10 + i * 17} y={50} width={14} height={18} rx={3} className={i < 3 ? 'wf-field wf-field-on' : 'wf-field'} />)}
       {Text(36, 78, 48, 'wf-acc')}
       <rect x="0" y="98" width={WF_W} height={WF_H - 98} className="wf-bar" />
-      {Array.from({ length: 12 }, (_, i) => <g key={i}>{R(8 + (i % 3) * 36, 104 + Math.floor(i / 3) * 25, 32, 20, 'wf-1', 4)}</g>)}
+      <path d={`M0 98.5 H${WF_W}`} className="wf-hair" />
+      {Array.from({ length: 12 }, (_, i) => <rect key={i} x={8.5 + (i % 3) * 36} y={104.5 + Math.floor(i / 3) * 25} width={31} height={19} rx={4} className="wf-field" />)}
     </g>
   ),
   permissions: () => (
@@ -102,8 +107,7 @@ const screens: Record<Template, () => ReactNode> = {
   ),
   paywall: () => (
     <g>
-      <rect x="0" y="0" width={WF_W} height="70" className="wf-acc" opacity="0.18" />
-      {C(60, 34, 14, 'wf-acc')}
+      {Img(0, 0, WF_W, 70, 'image · 16:9')}
       {Title(30, 80, 60)}
       {Text(18, 92, 84)}
       <rect x="10.5" y="106.5" width="47" height="44" rx="5" className="wf-field wf-field-on" />
@@ -117,12 +121,12 @@ const screens: Record<Template, () => ReactNode> = {
   home: () => (
     <g>
       {Title(10, 18, 50)}
-      {C(102, 21, 6, 'wf-1')}
+      {Img(96, 15, 12, 12)}
       <rect x="10.5" y="32.5" width="99" height="13" rx="6.5" className="wf-field" />
       {[0, 1, 2].map((i) => <g key={i}>{R(10 + i * 34, 52, 30, 9, i === 0 ? 'wf-acc' : 'wf-1', 4.5)}</g>)}
       {[0, 1, 2, 3].map((i) => (
         <g key={i}>
-          {Img(10 + (i % 2) * 52, 70 + Math.floor(i / 2) * 60, 48, 36)}
+          {Img(10 + (i % 2) * 52, 70 + Math.floor(i / 2) * 60, 48, 36, '4:3')}
           {Text(10 + (i % 2) * 52, 110 + Math.floor(i / 2) * 60, 36, 'wf-ink')}
           {Text(10 + (i % 2) * 52, 117 + Math.floor(i / 2) * 60, 22)}
         </g>
@@ -139,7 +143,8 @@ const screens: Record<Template, () => ReactNode> = {
   ),
   product: () => (
     <g>
-      {Img(0, 0, WF_W, 96, 0)}
+      {Hero(0, 0, WF_W, 96, { size: 0.72, at: 0.5 })}
+      <path d={`M0 95.5 H${WF_W}`} className="wf-hair" />
       {Title(10, 106, 70)}
       {R(10, 118, 26, 6, 'wf-acc')}
       {[0, 1, 2, 3, 4].map((i) => <g key={i}>{C(76 + i * 7, 121, 2.2, i < 4 ? 'wf-acc' : 'wf-2')}</g>)}
@@ -155,7 +160,7 @@ const screens: Record<Template, () => ReactNode> = {
       {R(10, 118, 100, 4, 'wf-1', 2)}{R(10, 118, 66, 4, 'wf-ok', 2)}
       {Text(10, 132, 40)}{Text(84, 132, 26)}
       {Text(10, 140, 34)}{Text(84, 140, 26)}
-      {R(10, 150, 100, 1, 'wf-2', 0)}
+      <path d="M10 150.5 H110" className="wf-hair" />
       {Text(10, 157, 30, 'wf-ink')}{Text(80, 157, 30, 'wf-ink')}
       {Btn(10, 176, 100)}
     </g>
@@ -178,7 +183,7 @@ const screens: Record<Template, () => ReactNode> = {
       {R(18, 68, 60, 4, 'wf-card', 2)}{R(18, 77, 30, 4, 'wf-card', 2)}
       {Field(10, 100, 100)}{Field(10, 119, 48)}{Field(62, 119, 48)}
       {Btn(10, 150, 100)}
-      {R(10, 170, 100, 14, 'wf-ink', 4)}
+      <rect x="10.5" y="170.5" width="99" height="13" rx="4" className="wf-field" />
     </g>
   ),
   review: () => (
@@ -218,16 +223,18 @@ const screens: Record<Template, () => ReactNode> = {
   empty: () => (
     <g>
       {C(60, 72, 28, 'wf-1')}
-      {R(46, 62, 28, 20, 'wf-2', 3)}
+      <rect x="46.5" y="62.5" width="27" height="19" rx="3" className="wf-field" />
       {Title(34, 116, 52)}
       {Text(22, 130, 76)}
       {Btn(30, 152, 60)}
       {TabBar(2)}
     </g>
   ),
-  profile: () => (
+  profile: (uid) => (
     <g>
-      {C(60, 40, 18, 'wf-2')}
+      <clipPath id={`${uid}-av`}><circle cx="60" cy="40" r="18" /></clipPath>
+      <g clipPath={`url(#${uid}-av)`}>{Img(42, 22, 36, 36, 'avatar')}</g>
+      <circle cx="60" cy="40" r="17.5" className="wf-hair" />
       {Title(36, 66, 48)}
       {Text(44, 77, 32)}
       {[0, 1, 2, 3].map((i) => <g key={i}>{Row(94 + i * 22, false, R(100, 99 + i * 22, 6, 6, 'wf-2', 1))}</g>)}
@@ -252,13 +259,14 @@ const screens: Record<Template, () => ReactNode> = {
 
 export const Wireframe = memo(function Wireframe({ template, className }: { template: Template; className?: string }) {
   const draw = screens[template] ?? screens.empty
+  const uid = `wf${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   return (
     <svg viewBox={`0 0 ${WF_W} ${WF_H}`} className={className} aria-hidden>
       <rect x="0" y="0" width={WF_W} height={WF_H} className="wf-bg" />
-      {draw()}
+      {draw(uid)}
       {/* status bar */}
-      {R(8, 5, 14, 3, 'wf-3', 1.5)}
-      {R(96, 5, 16, 3, 'wf-3', 1.5)}
+      {R(8, 5, 14, 3, template === 'splash' ? 'wf-2' : 'wf-3', 1.5)}
+      {R(96, 5, 16, 3, template === 'splash' ? 'wf-2' : 'wf-3', 1.5)}
     </svg>
   )
 })

@@ -5,10 +5,10 @@ export type ModelId = 'lumen-xl' | 'lumen-turbo' | 'photon' | 'riso'
 export interface ModelInfo { id: ModelId; name: string; blurb: string; steps: number; guidance: number; msPerStep: number; sampler: string; maxSteps: number }
 
 export const MODELS: ModelInfo[] = [
-  { id: 'lumen-xl', name: 'Lumen XL 1.2', blurb: 'Balanced, painterly detail', steps: 30, guidance: 7, msPerStep: 55, sampler: 'DPM++ 2M Karras', maxSteps: 80 },
-  { id: 'lumen-turbo', name: 'Lumen Turbo', blurb: 'Draft speed in 4–8 steps', steps: 6, guidance: 2, msPerStep: 95, sampler: 'Euler a', maxSteps: 12 },
-  { id: 'photon', name: 'Photon 2', blurb: 'Photographic light and film grain', steps: 40, guidance: 6, msPerStep: 70, sampler: 'DPM++ SDE Karras', maxSteps: 80 },
-  { id: 'riso', name: 'Riso Press', blurb: 'Two- and three-ink print look', steps: 24, guidance: 8, msPerStep: 50, sampler: 'DDIM', maxSteps: 60 },
+  { id: 'lumen-xl', name: 'Lumen XL 1.2', blurb: 'Balanced Atkinson dither', steps: 30, guidance: 7, msPerStep: 55, sampler: 'DPM++ 2M Karras', maxSteps: 80 },
+  { id: 'lumen-turbo', name: 'Lumen Turbo', blurb: 'Coarse draft dither in 4–8 steps', steps: 6, guidance: 2, msPerStep: 95, sampler: 'Euler a', maxSteps: 12 },
+  { id: 'photon', name: 'Photon 2', blurb: 'Fine diffusion, photographic tone', steps: 40, guidance: 6, msPerStep: 70, sampler: 'DPM++ SDE Karras', maxSteps: 80 },
+  { id: 'riso', name: 'Riso Press', blurb: 'One-ink halftone print look', steps: 24, guidance: 8, msPerStep: 50, sampler: 'DDIM', maxSteps: 60 },
 ]
 export const modelOf = (id: string) => MODELS.find((m) => m.id === id) ?? MODELS[0]
 

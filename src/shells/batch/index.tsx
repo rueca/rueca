@@ -9,7 +9,7 @@ import {
   createCamera, shareMenuItems, useHotkeys, useValues, useDoc, exportCanvasPNG, exportJSON, toast, Badge, Tip, HistoryButtons, type Command,
 } from '@kit'
 import { doc, params, ui, history, effective, SIZE_PRESETS, type V } from './model'
-import { drawPost, ensureFonts, loadImage, peekImage } from './artifact'
+import { drawPost, ensureFonts, ensureShots, loadImage, peekImage } from './artifact'
 import { BatchStage } from './stage'
 import { SizesPanel, DesignTab, BrandTab, ExportTab, DataPanel, PasteDialog, CustomSizeDialog, addSizeItems } from './panels'
 import {
@@ -59,6 +59,7 @@ export default function BatchShell() {
     const size = sizes.find((s) => s.id === id)
     if (!size || !current) return
     await ensureFonts()
+    await ensureShots([current])
     const v = params.values()
     const logo = v.logo ? await loadImage(v.logo).catch(() => null) : null
     const c = document.createElement('canvas')

@@ -2,6 +2,7 @@
 import { AlignCenter, AlignLeft } from 'lucide-react'
 import { createStore } from 'zustand/vanilla'
 import { defineSchema, folder, p, createParams, createDocStore, createHistory } from '@kit'
+import { WIRE } from '@/demo/wire'
 
 /* --- template + brand: schema-driven, so the kit Inspector renders them --- */
 const locked = (v: any) => !!v.brandLocked
@@ -17,7 +18,7 @@ export const schema = defineSchema({
     align: p.select('left', [{ value: 'left', label: 'Left', icon: AlignLeft }, { value: 'center', label: 'Centre', icon: AlignCenter }], { label: 'Align' }),
     headlineScale: p.number(100, { min: 50, max: 160, step: 1, unit: '%', label: 'Headline size', hint: 'Relative to the short side of each size. Long headlines still shrink to fit.' }),
     subheadScale: p.number(100, { min: 60, max: 150, step: 1, unit: '%', label: 'Subhead size' }),
-    imageScale: p.number(100, { min: 50, max: 150, step: 1, unit: '%', label: 'Product size', hint: 'Height of the can within the space the layout gives it.' }),
+    imageScale: p.number(100, { min: 50, max: 150, step: 1, unit: '%', label: 'Product size', hint: 'Height of the product shot within the space the layout gives it.' }),
     padding: p.number(7, { min: 3, max: 14, step: 0.5, unit: '%', label: 'Margin', hint: 'Outer margin as % of the short side, inside the platform safe area.' }),
     showSubhead: p.boolean(true, { label: 'Subhead' }),
     showBadge: p.boolean(true, { label: 'Badge', hint: 'Sticker from the Badge column. Hidden when the cell is empty.' }),
@@ -25,26 +26,26 @@ export const schema = defineSchema({
   }),
   look: folder('Look', {
     bgStyle: p.select('paper', [
-      { value: 'paper', label: 'Paper', hint: 'Brand paper with a flavour sun behind the product.' },
-      { value: 'flavour', label: 'Colour', hint: 'The row colour fills the background.' },
-      { value: 'split', label: 'Split', hint: 'Paper and row colour, split behind the product.' },
+      { value: 'paper', label: 'Paper', hint: 'Brand paper, a hairline ring behind the product.' },
+      { value: 'flavour', label: 'Colour', hint: 'The row tone fills the background.' },
+      { value: 'split', label: 'Split', hint: 'Paper and row tone, split behind the product.' },
     ], { label: 'Background' }),
     ctaStyle: p.select('pill', ['pill', 'outline', 'link'], { label: 'Button' }),
-    decor: p.boolean(true, { label: 'Fruit slices', hint: 'Scattered slices in the row colour around the product.' }),
-    grain: p.number(0.3, { min: 0, max: 1, step: 0.05, label: 'Grain', hint: 'Print-like noise over the whole asset.' }),
-    seed: p.seed(11, { hint: 'Scatter of the decorative slices and condensation drops.' }),
+    decor: p.boolean(true, { label: 'Fruit slices', hint: 'Slices drawn in hairline, scattered around the product.' }),
+    grain: p.number(0, { min: 0, max: 1, step: 0.05, label: 'Grain', hint: 'Print-like noise over the whole asset.' }),
+    seed: p.seed(11, { hint: 'Scatter of the decorative slices.' }),
   }),
   brand: folder('Brand', {
-    brandName: p.text('oro', { label: 'Name', hint: 'Wordmark text, used on the can and the logo.', disabled: locked }),
+    brandName: p.text('oro', { label: 'Name', hint: 'Wordmark text, used in the logo.', disabled: locked }),
     logoStyle: p.select('lockup', [{ value: 'mark', label: 'Mark' }, { value: 'lockup', label: 'Lockup' }, { value: 'word', label: 'Word' }], { label: 'Logo', disabled: locked }),
     logo: p.image(null, { label: 'Logo file', hint: 'Drop an SVG or PNG to replace the generated logo.', disabled: locked }),
-    paper: p.color('#F3EDE2', { alpha: false, disabled: locked }),
-    ink: p.color('#1D1A16', { alpha: false, disabled: locked }),
+    paper: p.color(WIRE.paper, { alpha: false, disabled: locked }),
+    ink: p.color(WIRE.ink, { alpha: false, disabled: locked }),
     displayFont: p.select('inter', [
       { value: 'inter', label: 'Inter' }, { value: 'serif', label: 'Serif (system)' },
       { value: 'rounded', label: 'Rounded (system)' }, { value: 'mono', label: 'Mono (system)' },
     ], { label: 'Display font', disabled: locked }),
-    headlineWeight: p.number(750, { min: 300, max: 900, step: 50, label: 'Weight', disabled: locked }),
+    headlineWeight: p.number(700, { min: 300, max: 900, step: 50, label: 'Weight', disabled: locked }),
     tracking: p.number(-3, { min: -8, max: 8, step: 0.5, unit: '%', label: 'Tracking', disabled: locked }),
     bodyFont: p.select('inter', [{ value: 'inter', label: 'Inter' }, { value: 'serif', label: 'Serif (system)' }, { value: 'mono', label: 'Mono (system)' }], { label: 'Body font', disabled: locked }),
   }),
@@ -53,11 +54,12 @@ export const schema = defineSchema({
 
 export const params = createParams(schema, {
   id: 'batch',
+  version: 2, // v2: wire-style defaults (paper/ink, no grain)
   presets: [
     // Looks only touch Layout + Look — never the Brand folder, so they respect a locked brand.
-    { name: 'Editorial', values: { bgStyle: 'paper', ctaStyle: 'link', decor: false, grain: 0.15, headlineScale: 92, padding: 9 } },
+    { name: 'Editorial', values: { bgStyle: 'paper', ctaStyle: 'link', decor: false, grain: 0, headlineScale: 92, padding: 9 } },
     { name: 'Loud', values: { bgStyle: 'flavour', headlineScale: 124, ctaStyle: 'pill', decor: true, imageScale: 110 } },
-    { name: 'Split', values: { bgStyle: 'split', decor: true, grain: 0.2 } },
+    { name: 'Split', values: { bgStyle: 'split', decor: true, grain: 0 } },
     { name: 'Minimal', values: { bgStyle: 'paper', decor: false, grain: 0, showSubhead: false, headlineScale: 90, ctaStyle: 'outline' } },
   ],
 })
@@ -71,7 +73,7 @@ export type Overrides = Partial<Pick<V, OverrideKey>>
 /* --- data rows --- */
 export interface DataRow { name: string; headline: string; subhead: string; cta: string; price: string; color: string; badge: string }
 export const COLUMNS: { key: keyof DataRow; label: string; width: number; kind?: 'color'; mono?: boolean; align?: 'right'; placeholder?: string; hint?: string }[] = [
-  { key: 'name', label: 'Product', width: 132, hint: 'Printed on the can and used in file names.' },
+  { key: 'name', label: 'Product', width: 132, hint: 'Captions the product shot and names the files.' },
   { key: 'headline', label: 'Headline', width: 220 },
   { key: 'subhead', label: 'Subhead', width: 280 },
   { key: 'cta', label: 'Button', width: 104 },
@@ -81,15 +83,15 @@ export const COLUMNS: { key: keyof DataRow; label: string; width: number; kind?:
 ]
 
 export const DEMO_ROWS: DataRow[] = [
-  { name: 'Yuzu & ginger', headline: 'Bright, sharp, a little bit wild.', subhead: 'Japanese yuzu meets fresh-pressed ginger. Zero sugar, all bite.', cta: 'Shop the drop', price: '£2.20', color: '#F2B705', badge: 'New' },
-  { name: 'Blood orange', headline: 'Sunset in a can.', subhead: 'Sicilian blood orange with a whisper of rosemary.', cta: 'Order now', price: '£2.20', color: '#D9412B', badge: 'Bestseller' },
-  { name: 'Cucumber & mint', headline: 'Cool it.', subhead: 'Garden cucumber, spearmint and a squeeze of lime.', cta: 'Try it cold', price: '£2.20', color: '#4FA36C', badge: '' },
-  { name: 'Hibiscus & rose', headline: 'Pink, floral, never sweet.', subhead: 'Hibiscus flower steeped with Damask rose petals.', cta: 'Get 20% off', price: '£2.40', color: '#C2306A', badge: 'Limited' },
-  { name: 'Pear & cardamom', headline: 'Autumn, bottled. Well — canned.', subhead: 'Comice pear and green cardamom for slow evenings in.', cta: 'Pre-order', price: '£2.40', color: '#A8963C', badge: 'Seasonal' },
-  { name: 'Pink grapefruit', headline: 'The 3pm fix.', subhead: 'Ruby grapefruit, a pinch of sea salt, nothing else.', cta: 'Shop now', price: '£2.20', color: '#EE7462', badge: '' },
-  { name: 'Blackcurrant & sage', headline: 'Dark fruit, green finish.', subhead: 'Kentish blackcurrant with garden sage. Best over ice.', cta: 'Discover', price: '£2.40', color: '#5B2A63', badge: 'New' },
+  { name: 'Yuzu & ginger', headline: 'Bright, sharp, a little bit wild.', subhead: 'Japanese yuzu meets fresh-pressed ginger. Zero sugar, all bite.', cta: 'Shop the drop', price: '£2.20', color: '#E8E1D6', badge: 'New' },
+  { name: 'Blood orange', headline: 'Sunset in a can.', subhead: 'Sicilian blood orange with a whisper of rosemary.', cta: 'Order now', price: '£2.20', color: '#DCD5CA', badge: 'Bestseller' },
+  { name: 'Cucumber & mint', headline: 'Cool it.', subhead: 'Garden cucumber, spearmint and a squeeze of lime.', cta: 'Try it cold', price: '£2.20', color: '#EFE9DF', badge: '' },
+  { name: 'Hibiscus & rose', headline: 'Pink, floral, never sweet.', subhead: 'Hibiscus flower steeped with Damask rose petals.', cta: 'Get 20% off', price: '£2.40', color: '#1C1A19', badge: 'Limited' },
+  { name: 'Pear & cardamom', headline: 'Autumn, bottled. Well — canned.', subhead: 'Comice pear and green cardamom for slow evenings in.', cta: 'Pre-order', price: '£2.40', color: '#D3CABC', badge: 'Seasonal' },
+  { name: 'Pink grapefruit', headline: 'The 3pm fix.', subhead: 'Ruby grapefruit, a pinch of sea salt, nothing else.', cta: 'Shop now', price: '£2.20', color: '#E8E1D6', badge: '' },
+  { name: 'Blackcurrant & sage', headline: 'Dark fruit, green finish.', subhead: 'Kentish blackcurrant with garden sage. Best over ice.', cta: 'Discover', price: '£2.40', color: '#1C1A19', badge: 'New' },
 ]
-export const blankRow = (): DataRow => ({ name: 'New flavour', headline: 'Your headline here.', subhead: 'One line about what makes it good.', cta: 'Shop now', price: '£2.20', color: '#3E7CB1', badge: '' })
+export const blankRow = (): DataRow => ({ name: 'New flavour', headline: 'Your headline here.', subhead: 'One line about what makes it good.', cta: 'Shop now', price: '£2.20', color: '#E8E1D6', badge: '' })
 
 /* --- output sizes --- */
 export interface Zone { x: number; y: number; w: number; h: number; label: string }
@@ -133,15 +135,8 @@ export const SIZE_PRESETS: Omit<SizeSpec, 'id'>[] = [
 export interface Doc { rows: DataRow[]; sizes: SizeSpec[]; overrides: Record<string, Overrides> }
 export const DEMO_DOC: Doc = { rows: DEMO_ROWS, sizes: DEFAULT_SIZES, overrides: { 'ig-story': { headlineScale: 112 }, linkedin: { showSubhead: false } } }
 
-/** Sessions saved before the kit doc store (key `studio:batch:doc`) carry over once. */
-function legacyDoc(): Doc {
-  try {
-    const d = JSON.parse(localStorage.getItem('studio:batch:doc') ?? 'null') as Doc | null
-    if (d && Array.isArray(d.rows) && Array.isArray(d.sizes) && d.overrides) return d
-  } catch { /* corrupt or private mode */ }
-  return DEMO_DOC
-}
-export const doc = createDocStore<Doc>(legacyDoc(), { id: 'batch', version: 1 })
+/* v2: the template is drawn in the wire style; v1 docs (colourful flavour rows) are not carried over. */
+export const doc = createDocStore<Doc>(DEMO_DOC, { id: 'batch', version: 2 })
 
 /** ⌘Z undoes whichever changed last — template/brand values or the document. */
 export const history = createHistory([params, doc])

@@ -63,7 +63,7 @@ export const PROPS: Record<PropKey, PropDef> = {
 const T: PropKey[] = ['x', 'y', 'rotation', 'scale', 'opacity']
 export const PROPS_FOR: Record<ObjKind, PropKey[]> = {
   group: T,
-  rect: [...T, 'w', 'h', 'radius', 'fill'],
+  rect: [...T, 'w', 'h', 'radius', 'fill', 'stroke', 'strokeWidth'],
   ellipse: [...T, 'w', 'h', 'fill', 'stroke', 'strokeWidth'],
   path: [...T, 'fill'],
   text: [...T, 'fill'],

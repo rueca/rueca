@@ -14,7 +14,7 @@ import { TRIGGER_ICON } from '../canvas/edges'
 import { Avatar, ago } from '../canvas/comments'
 import { startWalkthrough } from '../canvas/FlowCanvas'
 import { happyPath } from '../layout'
-import { makeEdge, PEOPLE, SECTION_HUES, STICKY, TEMPLATES, TRIGGERS, templateLabel, uid, type FlowEdge, type FlowNode, type Status, type StickyColor, type Template, type Trigger, type EdgeStyle } from '../model'
+import { makeEdge, PEOPLE, SECTION_HUES, STICKY, stickyOf, TEMPLATES, TRIGGERS, templateLabel, uid, type FlowEdge, type FlowNode, type Status, type StickyColor, type Template, type Trigger, type EdgeStyle } from '../model'
 import {
   params, doc, ui, useUI, useFlow, select, updateNodeData, updateEdgeData, setNodes, setEdges, editFlow, deleteSelection, duplicate, addScreen, sizeOf, commentPos, viewport,
 } from '../store'
@@ -89,13 +89,13 @@ function NodeInspector({ node }: { node: FlowNode }) {
         )}
         {node.type === 'note' && (
           <Row label="Colour">
-            <Tiles value={[d.color ?? 'yellow']} onChange={(s) => s[0] && set({ color: s[0] as StickyColor })} columns={5}
-              options={(Object.keys(STICKY) as StickyColor[]).map((c) => ({ value: c, swatch: STICKY[c], hint: c[0].toUpperCase() + c.slice(1) }))} />
+            <Tiles value={[stickyOf(d.color)]} onChange={(s) => s[0] && set({ color: s[0] as StickyColor })} columns={3}
+              options={(Object.keys(STICKY) as StickyColor[]).map((c) => ({ value: c, swatch: STICKY[c], hint: c === 'pen' ? 'Red pen · annotation' : c[0].toUpperCase() + c.slice(1) }))} />
           </Row>
         )}
         {node.type === 'section' && (
           <Row label="Colour">
-            <Tiles value={[d.hue ?? SECTION_HUES[0]]} onChange={(s) => s[0] && set({ hue: s[0] })} columns={6} options={SECTION_HUES.map((h) => ({ value: h, swatch: h, hint: h }))} />
+            <Tiles value={[d.hue ?? SECTION_HUES[0]]} onChange={(s) => s[0] && set({ hue: s[0] })} columns={3} options={SECTION_HUES.map((h, i) => ({ value: h, swatch: h, hint: ['Paper', 'Card', 'Sheet'][i] ?? h }))} />
           </Row>
         )}
         {node.type !== 'section' && (

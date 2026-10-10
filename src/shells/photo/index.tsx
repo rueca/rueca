@@ -25,7 +25,7 @@ import {
   params, ui, history, stepLabel, BANDS, ASPECTS, FULL, LOOK_KEYS, DEFAULTS, lookDefaults, lookValues, activeLook, allLooks, type V, type Look, type CropDraft,
 } from './state'
 import { Develop, type ViewOpts } from './develop'
-import { generateLandscape } from './landscape'
+import { paintTop } from '@/demo/top'
 
 /* ===== engine glue (module level: outside React, like the artifact) ===== */
 const cam = createCamera()
@@ -118,7 +118,7 @@ function loadSource(src: HTMLImageElement | HTMLCanvasElement, name: string, fre
   requestAnimationFrame(() => cam.fit())
   return { w, h, from }
 }
-const openSample = (fresh: boolean) => { sample ??= generateLandscape(); loadSource(sample, 'Ridgeline at dusk.jpg', fresh) }
+const openSample = (fresh: boolean) => { sample ??= paintTop(2000, 1333, { at: 0.5, size: 0.64, tilt: -0.18 }); loadSource(sample, 'Spinning top.jpg', fresh) }
 async function openURL(url: string, name: string) {
   try {
     const img = new Image()

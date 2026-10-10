@@ -55,7 +55,8 @@ function thumbs() {
   proc.clearThumbs()
   const scale = Math.min(1, THUMB_SIDE / Math.max(img.w, img.h))
   for (const p of params.getState().presets) {
-    proc.thumb(settingsOf(p.values as any), scale).then(
+    // looks are partial patches: lay them over the current settings, or unset keys (levels, gamma…) go NaN
+    proc.thumb(settingsOf({ ...params.values(), ...p.values } as any), scale).then(
       (r) => out.setState((s) => ({ thumbs: { ...s.thumbs, [p.name]: renderOutput(r, 1).toDataURL('image/png') } })),
       () => { /* cancelled */ },
     )
@@ -79,7 +80,7 @@ export async function loadImage(input: Blob | string, name: string) {
 
 export function loadSample() {
   const data = paintSample()
-  image.setState({ data, w: data.width, h: data.height, name: 'Sample — dusk.png', sample: true, url: previewURL(data) })
+  image.setState({ data, w: data.width, h: data.height, name: 'Sample — spinning top.png', sample: true, url: previewURL(data) })
 }
 
 /** Start the pipeline; returns a cleanup. Safe to call twice (StrictMode). */

@@ -1,10 +1,11 @@
 /* Batch export — renders every row × size to PNG/JPEG through the same drawPost the stage uses. */
 import { createStore } from 'zustand/vanilla'
 import { download, toast } from '@kit'
-import { drawPost, ensureFonts, loadImage } from './artifact'
+import { drawPost, ensureFonts, ensureShots, loadImage } from './artifact'
 import { doc, params, ui, effective, type DataRow, type SizeSpec } from './model'
 import { canvasBlob, createZip, fmtBytes } from '@kit'
 import { createJobRunner, type JobTask } from '@kit/system/jobs'
+import { site } from '@/site.config'
 
 export interface ExportSettings {
   rows: 'all' | 'current'
@@ -90,6 +91,7 @@ export async function runExport(overrides: Partial<ExportSettings> = {}) {
   exporter.setState({ settings })
 
   await ensureFonts()
+  await ensureShots(planned.map((p) => p.row))
   const logo = v.logo ? await loadImage(v.logo).catch(() => null) : null
   const zip = settings.pack === 'zip' ? createZip() : null
 
@@ -122,7 +124,7 @@ export async function runExport(overrides: Partial<ExportSettings> = {}) {
   const done = jobs.getState().done
   if (zip && done) {
     zip.add('manifest.json', JSON.stringify({
-      generator: 'Batch — Trompo', created: new Date().toISOString(),
+      generator: `Batch — ${site.name}`, created: new Date().toISOString(),
       template: params.toJSON(), rows: d.rows, sizes: d.sizes.map(({ id, name, w, h }) => ({ id, name, w, h, overrides: d.overrides[id] ?? {} })),
       files: [...blobs.values()].map((b) => b.name),
     }, null, 2))

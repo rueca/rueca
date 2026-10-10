@@ -1,8 +1,11 @@
 /* Comment pins (FigJam style): live in flow space, render at constant screen
-   size, open into a thread card. Pins on a node travel with it. */
+   size, open into a thread card. Pins on a node travel with it. On the board a
+   pin is the red pen (wire style: pink is annotation only); the thread card is
+   chrome and keeps the kit's tokens. */
 import { useState } from 'react'
 import { Check, MoreHorizontal, Send, Trash2, RotateCcw } from 'lucide-react'
 import { cn, IconButton, Menu, Button } from '@kit'
+import { WIRE } from '@/demo/wire'
 import { PEOPLE, deepen, type Comment } from '../model'
 import { useFlow, useUI, ui, addComment, updateComment, commentPos } from '../store'
 
@@ -57,7 +60,7 @@ function Pin({ c, open }: { c: Comment; open: boolean }) {
     <button type="button" aria-label={`Comment by ${p.name}${c.resolved ? ', resolved' : c.replies.length ? `, ${c.replies.length + 1} messages` : ''}`}
       onClick={(e) => { e.stopPropagation(); ui.setState({ openComment: open ? null : c.id, draft: null }) }}
       className={cn('absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-[10.5px] font-semibold text-white outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-signal', c.resolved && 'opacity-50')}
-      style={{ pointerEvents: 'all', background: deepen(p.hue), boxShadow: `0 0 0 2px ${open ? 'var(--signal)' : 'var(--panel)'}, var(--shadow-cluster)` }}>
+      style={{ pointerEvents: 'all', background: WIRE.pen, boxShadow: `0 0 0 2px ${open ? 'var(--signal)' : WIRE.card}` }}>
       {c.resolved ? <Check size={12} strokeWidth={2.5} /> : <span aria-hidden>{p.initials}</span>}
       {c.replies.length > 0 && !c.resolved && <span aria-hidden className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-panel px-0.5 text-[10.5px] leading-none text-fg tabular shadow-[0_0_0_1px_var(--line-strong)]">{c.replies.length + 1}</span>}
     </button>

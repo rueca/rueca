@@ -9,7 +9,12 @@
      split  wide — copy column left, product right
    Copy is fitted, not cropped: a long headline shrinks to its line budget,
    and anything that had to give is reported back as an issue.
+
+   Drawn in the wire style (src/demo/wire.ts): the product is a framed
+   placeholder shot — the dithered top on the row's tone — with hairlines in
+   place of shadows, and one ink for everything else.
 --------------------------------------------------------------------------- */
+import { WIRE, ditherTop } from '@/demo/wire'
 import type { DataRow, SizeSpec, V } from './model'
 
 export const FONTS: Record<string, string> = {
@@ -109,117 +114,89 @@ function drawLines(ctx: CanvasRenderingContext2D, f: Fitted, x: number, y: numbe
 }
 
 /* --- procedural pieces --- */
-const metal = (ctx: CanvasRenderingContext2D, x0: number, x1: number) => {
-  const g = ctx.createLinearGradient(x0, 0, x1, 0)
-  ;[[0, '#7d8288'], [0.18, '#e6e9ec'], [0.34, '#b9bec4'], [0.55, '#f7f8f9'], [0.8, '#9ba1a7'], [1, '#666b71']].forEach(([s, c]) => g.addColorStop(s as number, c as string))
-  return g
-}
+const MONO = "'Geist Mono Variable', 'Geist Mono', ui-monospace, Menlo, monospace"
+/** width ÷ height of the product shot */
+export const PRODUCT_RATIO = 0.6
+const SHOT = { w: 312, h: 520 } // 156 × 260 dither cells, 2× — exactly PRODUCT_RATIO
+const hex6 = (c: string) => (/^#[0-9a-f]{6}/i.test(c) ? c.slice(0, 7).toUpperCase() : WIRE.sheet)
+const isNight = (tone: string) => lum(tone) < 0.18
 
-export function drawSlice(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, color: string, rot: number) {
+/* The product shot is a data-URL image (ditherTop), decoded once per tone. drawPost is
+   synchronous, so it paints a plain slot until the image is ready and tells listeners. */
+const shots = new Map<string, HTMLImageElement>()
+const shotListeners = new Set<() => void>()
+export function onShotReady(fn: () => void) { shotListeners.add(fn); return () => { shotListeners.delete(fn) } }
+function shotImage(tone: string) {
+  const night = isNight(tone), key = night ? 'night' : tone
+  let img = shots.get(key)
+  if (!img) {
+    img = new Image()
+    img.onload = () => shotListeners.forEach((f) => f())
+    img.src = night ? ditherTop(SHOT.w, SHOT.h, { night: true, at: 0.5 }) : ditherTop(SHOT.w, SHOT.h, { light: tone, at: 0.5 })
+    shots.set(key, img)
+  }
+  return img
+}
+/** decode the product shots for these rows (call before exporting) */
+export const ensureShots = (rows: DataRow[]) =>
+  Promise.all(rows.map((r) => shotImage(hex6(r.color)).decode().catch(() => {}))).then(() => {})
+
+/** A fruit slice in hairline: rind, flesh line, segment spokes. Filled with the ground so it sits in front. */
+export function drawSlice(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, ground: string, ink: string, rot: number) {
   ctx.save()
-  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = mix(color, '#000000', 0.12); ctx.fill()
-  ctx.beginPath(); ctx.arc(x, y, r * 0.9, 0, Math.PI * 2); ctx.fillStyle = mix(color, '#ffffff', 0.78); ctx.fill()
-  const n = 9, gap = 0.07
+  ctx.lineWidth = Math.max(1, r * 0.035)
+  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = ground; ctx.fill()
+  ctx.strokeStyle = ink; ctx.globalAlpha = 0.55; ctx.stroke()
+  ctx.globalAlpha = 0.3
+  ctx.beginPath(); ctx.arc(x, y, r * 0.86, 0, Math.PI * 2); ctx.stroke()
+  const n = 9
+  ctx.beginPath()
   for (let i = 0; i < n; i++) {
-    const a0 = rot + (i * Math.PI * 2) / n + gap, a1 = rot + ((i + 1) * Math.PI * 2) / n - gap
-    const am = (a0 + a1) / 2
-    ctx.beginPath()
-    ctx.moveTo(x + Math.cos(am) * r * 0.1, y + Math.sin(am) * r * 0.1)
-    ctx.arc(x, y, r * 0.8, a0, a1)
-    ctx.closePath()
-    const g = ctx.createRadialGradient(x, y, r * 0.1, x, y, r * 0.8)
-    g.addColorStop(0, mix(color, '#ffffff', 0.35)); g.addColorStop(1, mix(color, '#ffffff', 0.08))
-    ctx.fillStyle = g
-    ctx.fill()
+    const a = rot + (i * Math.PI * 2) / n
+    ctx.moveTo(x + Math.cos(a) * r * 0.12, y + Math.sin(a) * r * 0.12)
+    ctx.lineTo(x + Math.cos(a) * r * 0.86, y + Math.sin(a) * r * 0.86)
   }
+  ctx.stroke()
   ctx.restore()
 }
 
-function drawCan(ctx: CanvasRenderingContext2D, cx: number, bottom: number, H: number, row: DataRow, v: V, rnd: () => number) {
-  const W = H * 0.5, rx = W / 2, ry = W * 0.11
-  const x0 = cx - rx, top = bottom - H
-  const color = row.color
-  const shoulder = top + H * 0.085
-
-  // contact shadow
+/** The product: a portrait shot slot — dithered top on the row tone, hairline frame, mono caption. */
+function drawProduct(ctx: CanvasRenderingContext2D, cx: number, bottom: number, H: number, row: DataRow, v: V) {
+  const W = H * PRODUCT_RATIO, x0 = cx - W / 2, top = bottom - H
+  const tone = hex6(row.color), night = isNight(tone)
+  const ink = night ? v.paper : v.ink
   ctx.save()
-  ctx.translate(cx, bottom - ry * 0.4)
-  ctx.scale(1, 0.2)
-  const sg = ctx.createRadialGradient(0, 0, 0, 0, 0, W * 1.05)
-  sg.addColorStop(0, 'rgba(0,0,0,0.32)'); sg.addColorStop(0.6, 'rgba(0,0,0,0.1)'); sg.addColorStop(1, 'rgba(0,0,0,0)')
-  ctx.fillStyle = sg
-  ctx.fillRect(-W * 1.1, -W * 1.1, W * 2.2, W * 2.2)
-  ctx.restore()
-
-  const body = new Path2D()
-  body.moveTo(x0, shoulder)
-  body.lineTo(x0, bottom - ry)
-  body.ellipse(cx, bottom - ry, rx, ry, 0, Math.PI, 0, true)
-  body.lineTo(x0 + W, shoulder)
-  body.quadraticCurveTo(x0 + W, top + H * 0.045, cx + rx * 0.84, top + H * 0.03)
-  body.lineTo(cx - rx * 0.84, top + H * 0.03)
-  body.quadraticCurveTo(x0, top + H * 0.045, x0, shoulder)
-  body.closePath()
-
-  ctx.save()
-  ctx.fillStyle = color
-  ctx.fill(body)
-  ctx.clip(body)
-
-  // printed label
-  const ink = textOn(color, v.ink, v.paper)
-  const disp = FONTS[v.displayFont] ?? FONTS.inter, bodyF = FONTS[v.bodyFont] ?? FONTS.inter
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'alphabetic'
-  ctx.fillStyle = ink
-  ctx.font = `800 ${W * 0.34}px ${disp}`
-  ;(ctx as any).letterSpacing = `${-W * 0.012}px`
-  ctx.fillText(v.brandName || 'oro', cx, top + H * 0.36)
-  ;(ctx as any).letterSpacing = '0px'
-  ctx.globalAlpha = 0.5
-  ctx.fillRect(cx - W * 0.16, top + H * 0.395, W * 0.32, Math.max(1, W * 0.008))
-  ctx.globalAlpha = 1
-  ctx.font = `600 ${W * 0.075}px ${bodyF}`
-  let name = row.name || ''
-  while (name.length > 2 && ctx.measureText(name).width > W * 0.82) name = name.slice(0, -1)
-  ctx.fillText(name !== row.name ? `${name.trimEnd()}…` : name, cx, top + H * 0.46)
-  drawSlice(ctx, cx, top + H * 0.63, W * 0.17, mix(color, ink, 0.25), 0.3)
-  ctx.globalAlpha = 0.7
-  ctx.font = `500 ${W * 0.048}px ${bodyF}`
-  ctx.fillText('sparkling botanical water · 330ml', cx, top + H * 0.84)
-  ctx.globalAlpha = 1
-
-  // aluminium shoulder + base
-  ctx.fillStyle = metal(ctx, x0, x0 + W)
-  ctx.fillRect(x0, top, W, shoulder - top + H * 0.006)
-  ctx.fillRect(x0, bottom - H * 0.035, W, H * 0.04)
-
-  // cylindrical shading
-  const sh = ctx.createLinearGradient(x0, 0, x0 + W, 0)
-  ;[[0, 'rgba(0,0,0,0.42)'], [0.12, 'rgba(0,0,0,0.08)'], [0.24, 'rgba(255,255,255,0.32)'], [0.31, 'rgba(255,255,255,0.06)'], [0.62, 'rgba(0,0,0,0)'], [0.86, 'rgba(0,0,0,0.2)'], [1, 'rgba(0,0,0,0.5)']].forEach(([s, c]) => sh.addColorStop(s as number, c as string))
-  ctx.fillStyle = sh
+  ctx.fillStyle = night ? WIRE.ink : tone
   ctx.fillRect(x0, top, W, H)
-
-  // condensation
-  for (let i = 0; i < 26; i++) {
-    const dx = x0 + W * (0.08 + rnd() * 0.84), dy = shoulder + (bottom - shoulder) * (0.05 + rnd() * 0.9)
-    const r = W * (0.006 + rnd() * 0.014)
-    ctx.beginPath(); ctx.ellipse(dx, dy, r, r * 1.25, 0, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(255,255,255,0.32)'; ctx.fill()
-    ctx.beginPath(); ctx.arc(dx - r * 0.3, dy - r * 0.4, r * 0.35, 0, Math.PI * 2)
-    ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fill()
+  const img = shotImage(tone)
+  if (img.complete && img.naturalWidth) {
+    // crisp dither cells when enlarging; let the browser average them when shrinking (no moiré)
+    const t = ctx.getTransform()
+    ctx.imageSmoothingEnabled = (H * Math.abs(t.d || 1)) / SHOT.h < 1.4
+    ctx.drawImage(img, x0, top, W, H)
+    ctx.imageSmoothingEnabled = true
   }
+  // hairline frame
+  ctx.strokeStyle = night ? v.paper : v.ink
+  ctx.globalAlpha = night ? 0.3 : 0.42
+  const lw = Math.max(1, W * 0.004)
+  ctx.lineWidth = lw
+  ctx.strokeRect(x0 + lw / 2, top + lw / 2, W - lw, H - lw)
+  // caption, top-left (the badge takes the top-right, front slices the bottom)
+  const fs = W * 0.042
+  ctx.font = `${fs}px ${MONO}`
+  let name = (row.name || 'product').toLowerCase()
+  const max = W * 0.62 // clear of the badge
+  while (name.length > 2 && ctx.measureText(`${name}… · shot`).width > max) name = name.slice(0, -1)
+  const label = `${name !== (row.name || 'product').toLowerCase() ? `${name.trimEnd()}…` : name} · shot`
+  const tw = ctx.measureText(label).width, px = W * 0.05
+  ctx.globalAlpha = 1
+  ctx.fillStyle = night ? WIRE.ink : tone
+  ctx.fillRect(x0 + px - fs * 0.5, top + px - fs * 0.3, tw + fs, fs * 1.8)
+  ctx.fillStyle = ink; ctx.globalAlpha = 0.66
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'
+  ctx.fillText(label, x0 + px, top + px + fs * 0.6)
   ctx.restore()
-
-  // lid
-  const ly = top + H * 0.03
-  ctx.beginPath(); ctx.ellipse(cx, ly, rx * 0.84, ry * 0.84, 0, 0, Math.PI * 2)
-  ctx.fillStyle = metal(ctx, cx - rx, cx + rx); ctx.fill()
-  ctx.beginPath(); ctx.ellipse(cx, ly + ry * 0.05, rx * 0.72, ry * 0.68, 0, 0, Math.PI * 2)
-  ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fill()
-  ctx.beginPath(); ctx.ellipse(cx + rx * 0.05, ly - ry * 0.05, rx * 0.26, ry * 0.3, 0, 0, Math.PI * 2)
-  ctx.fillStyle = '#c9cdd1'; ctx.fill()
-  ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = Math.max(0.5, W * 0.006); ctx.stroke()
   return { left: x0, right: x0 + W, top, bottom, w: W }
 }
 
@@ -294,6 +271,7 @@ function drawBadge(ctx: CanvasRenderingContext2D, v: V, text: string, x: number,
   }
   ctx.closePath()
   ctx.fillStyle = bg; ctx.fill()
+  ctx.lineWidth = Math.max(1, r * 0.03); ctx.strokeStyle = fg; ctx.stroke()
   let size = r * 0.42
   ctx.font = `800 ${size}px ${FONTS[v.displayFont] ?? FONTS.inter}`
   while (ctx.measureText(text).width > r * 1.45 && size > r * 0.18) { size *= 0.92; ctx.font = `800 ${size}px ${FONTS[v.displayFont] ?? FONTS.inter}` }
@@ -333,7 +311,7 @@ export function drawPost(ctx: CanvasRenderingContext2D, w: number, h: number, ro
   let mode: DrawResult['mode'] = v.layout === 'auto' ? (aspect < 0.82 ? 'stack' : aspect > 1.3 ? 'split' : 'hero') : (v.layout as DrawResult['mode'])
   if (mode === 'hero' && v.align === 'center') mode = 'stack'
   const align = v.align as 'left' | 'center'
-  const color = /^#[0-9a-f]{6}/i.test(row.color) ? row.color.slice(0, 7) : '#888888'
+  const color = /^#[0-9a-f]{6}/i.test(row.color) ? row.color.slice(0, 7) : WIRE.sheet
   const disp = FONTS[v.displayFont] ?? FONTS.inter, bodyF = FONTS[v.bodyFont] ?? FONTS.inter
   const headFont = (s: number) => `${v.headlineWeight} ${s}px ${disp}`
   const subFont = (s: number) => `450 ${s}px ${bodyF}`
@@ -385,7 +363,7 @@ export function drawPost(ctx: CanvasRenderingContext2D, w: number, h: number, ro
       const top = y + cw * 0.05, bottom = ctaY - cw * 0.05
       const avail = bottom - top
       if (avail < cw * 0.42) issues.push('Product squeezed by copy')
-      const H = Math.max(cw * 0.2, Math.min(avail, cw * 1.3)) * (v.imageScale / 100)
+      const H = Math.max(cw * 0.2, Math.min(avail, cw * 1.2)) * (v.imageScale / 100)
       can = { cx: L + cw / 2, bottom: bottom - Math.max(0, (avail - H) * 0.15), H }
       const cwid = ctaWidth(ctx, v, ctaText, ctaH)
       ctx.font = `650 ${ctaH * 0.4}px ${bodyF}`
@@ -434,12 +412,12 @@ export function drawPost(ctx: CanvasRenderingContext2D, w: number, h: number, ro
       if (!isSplit && y > ctaY - ctaH * 0.3) issues.push('Copy runs into the button')
       if (isSplit) {
         const areaL = splitRect ? splitRect.x : L + cw * 0.56
-        const H = Math.min(ch * 1.02, (R - areaL) * 1.5) * (v.imageScale / 100)
+        const H = Math.min(ch * 0.92, ((R - areaL) * 0.8) / PRODUCT_RATIO) * (v.imageScale / 100)
         can = { cx: (areaL + (splitRect ? w : R)) / 2, bottom: T + ch / 2 + H / 2, H }
       } else {
-        const H = ch * 0.8 * (v.imageScale / 100)
-        can = { cx: R - H * 0.25 - cw * 0.03, bottom: B, H }
-        if (L + Math.max(head.width, subF?.width ?? 0) > can.cx - H * 0.25 && y > B - H) issues.push('Product overlaps the copy')
+        const H = ch * 0.76 * (v.imageScale / 100)
+        can = { cx: R - (H * PRODUCT_RATIO) / 2 - cw * 0.03, bottom: B, H }
+        if (L + Math.max(head.width, subF?.width ?? 0) > can.cx - (H * PRODUCT_RATIO) / 2 && y > B - H) issues.push('Product overlaps the copy')
       }
     }
     return { issues, texts, can }
@@ -452,19 +430,23 @@ export function drawPost(ctx: CanvasRenderingContext2D, w: number, h: number, ro
   const { can, texts } = plan
   const rnd = mulberry32(v.seed * 7919 + row.name.length * 31)
 
-  // scenery first: background, split block, sun, slices, product
+  // scenery first: background, split block, hairline ring, slices, product
+  const tone = hex6(color)
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, w, h)
-  if (splitRect) { ctx.fillStyle = color; ctx.fillRect(splitRect.x, splitRect.y, splitRect.w, splitRect.h) }
-  const canW = can.H * 0.5, canTop = can.bottom - can.H
+  if (splitRect) { ctx.fillStyle = tone; ctx.fillRect(splitRect.x, splitRect.y, splitRect.w, splitRect.h) }
+  const canW = can.H * PRODUCT_RATIO, canTop = can.bottom - can.H
   if (v.bgStyle !== 'split') {
-    ctx.beginPath(); ctx.arc(can.cx, canTop + can.H * 0.48, can.H * 0.5, 0, Math.PI * 2)
-    ctx.fillStyle = v.bgStyle === 'paper' ? mix(color, v.paper, 0.45) : mix(color, '#ffffff', 0.18)
-    ctx.fill()
+    ctx.save()
+    ctx.beginPath(); ctx.arc(can.cx, canTop + can.H * 0.5, can.H * 0.56, 0, Math.PI * 2)
+    ctx.strokeStyle = fg; ctx.globalAlpha = 0.18; ctx.lineWidth = Math.max(1, S * 0.0018); ctx.stroke()
+    ctx.restore()
   }
   const slices: { x: number; y: number; r: number; rot: number; front: boolean }[] = []
+  const sliceGround = v.bgStyle === 'split' ? tone : bg
+  const sliceInk = textOn(sliceGround, v.ink, v.paper)
   if (v.decor) {
-    const anchors: [number, number, number, boolean][] = [[-1.05, 0.86, 0.42, false], [0.98, 0.3, 0.3, false], [0.9, 0.97, 0.46, true], [-0.95, 0.24, 0.22, false], [-0.55, 1.02, 0.26, true], [1.15, 0.62, 0.2, false]]
+    const anchors: [number, number, number, boolean][] = [[-0.92, 0.86, 0.34, false], [0.86, 0.3, 0.24, false], [0.78, 0.97, 0.36, true], [-0.84, 0.24, 0.18, false], [-0.5, 1.02, 0.2, true], [1.0, 0.62, 0.16, false]]
     for (const [ax, ay, ar, front] of anchors) {
       const r = canW * ar * (0.85 + rnd() * 0.3)
       const s = { x: can.cx + ax * canW * (0.95 + rnd() * 0.15), y: canTop + ay * can.H + (rnd() - 0.5) * canW * 0.2, r, rot: rnd() * Math.PI * 2, front }
@@ -472,22 +454,22 @@ export function drawPost(ctx: CanvasRenderingContext2D, w: number, h: number, ro
       if (texts.some((t) => hit(t, box))) continue
       slices.push(s)
     }
-    for (const s of slices) if (!s.front) drawSlice(ctx, s.x, s.y, s.r, color, s.rot)
+    for (const s of slices) if (!s.front) drawSlice(ctx, s.x, s.y, s.r, sliceGround, sliceInk, s.rot)
   }
-  const c = drawCan(ctx, can.cx, can.bottom, can.H, { ...row, color }, v, rnd)
-  for (const s of slices) if (s.front) drawSlice(ctx, s.x, s.y, s.r, color, s.rot)
+  const c = drawProduct(ctx, can.cx, can.bottom, can.H, { ...row, color: tone }, v)
+  for (const s of slices) if (s.front) drawSlice(ctx, s.x, s.y, s.r, sliceGround, sliceInk, s.rot)
 
   // copy on top
   copy()
 
   const issues = plan.issues
   if (v.showBadge && row.badge.trim()) {
-    const r = Math.max(S * 0.065, c.w * 0.32)
-    const right = { x: c.right - r * 0.95, y: c.top + c.w * 0.3 - r, w: r * 2, h: r * 2 }
+    const r = Math.max(S * 0.06, c.w * 0.24)
+    const right = { x: c.right - r * 1.1, y: c.top + c.w * 0.18 - r, w: r * 2, h: r * 2 }
     const left = { x: c.left - r * 1.15, y: right.y, w: r * 2, h: r * 2 }
     const fits = (b: Rect) => b.x >= 0 && b.x + b.w <= w && !texts.some((t) => hit(t, b))
     const at = fits(right) ? right : fits(left) ? left : right
-    drawBadge(ctx, v, row.badge.trim(), at.x + r, at.y + r, r, v.ink, v.paper)
+    drawBadge(ctx, v, row.badge.trim(), at.x + r, at.y + r, r, WIRE.card, v.ink)
   }
   if (c.right > w + 1 || c.left < -1 || c.top < -1) issues.push('Product bleeds off the edge')
 

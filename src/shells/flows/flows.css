@@ -8,12 +8,19 @@
 .flows-rf.is-animating .react-flow__node-section > div { transition: width 420ms cubic-bezier(0.16, 1, 0.3, 1), height 420ms cubic-bezier(0.16, 1, 0.3, 1); }
 .flows-rf .react-flow__node-note .react-flow__handle { display: none; }
 
+/* edges are demo content: one ink with a paper casing (wire palette, src/demo/wire.ts) */
+.studio-flow.flows-rf { --xy-edge-stroke: #1C1A19; --xy-edge-stroke-width: 1.25; }
+.flows-rf .flows-edge-case { stroke: #F6F1EA; stroke-width: 4; stroke-linecap: round; pointer-events: none; transition: opacity 200ms; }
+.flows-rf .flows-edge-case.is-dim { opacity: 0.18; }
+.flows-rf .react-flow__edge:hover .react-flow__edge-path:not(.on-path) { stroke: #6E6A64; }
+.flows-rf .flows-edge-label-wire { background: #FBF8F2; color: #6E6A64; box-shadow: 0 0 0 1px #DCD5CA; }
+
 /* edges: arrowheads, the walkthrough path, dimming */
 /* keyboard focus on an edge (WCAG 2.4.7) — edges are reached via the inspector's Connections list, but keep it visible if focused */
 .flows-rf .react-flow__edge:focus-visible { outline: none; }
 .flows-rf .react-flow__edge:focus-visible path.flows-edge-path, .flows-rf .react-flow__edge:focus-visible .react-flow__edge-path { stroke: var(--signal); stroke-width: 3; }
-.flows-rf .flows-arrow { fill: var(--fg-faint); }
-.flows-rf .react-flow__edge:hover .flows-arrow { fill: var(--fg-muted); }
+.flows-rf .flows-arrow { fill: #1C1A19; stroke: #F6F1EA; stroke-width: 1; paint-order: stroke; }
+.flows-rf .react-flow__edge:hover .flows-arrow { fill: #6E6A64; }
 .flows-rf .react-flow__edge.selected .flows-arrow { fill: var(--signal); }
 .flows-rf .flows-edge-path.on-path { stroke: var(--signal); stroke-width: 2; }
 .flows-rf .flows-edge-path.is-live { stroke-dasharray: 6 5; animation: flows-dash 0.6s linear infinite; }
@@ -27,20 +34,23 @@
 .flows-rf .react-flow__minimap-node.mm-note { fill: var(--key); opacity: 0.6; }
 .flows-rf .react-flow__minimap-node.mm-terminal { fill: var(--fg-muted); }
 
-/* wireframe tones (see wireframes.tsx) */
-.wf-bg { fill: var(--panel); }
-.wf-bar { fill: color-mix(in srgb, var(--fg) 4%, var(--panel)); }
-.wf-1 { fill: color-mix(in srgb, var(--fg) 9%, var(--panel)); }
-.wf-2 { fill: color-mix(in srgb, var(--fg) 20%, var(--panel)); }
-.wf-3 { fill: color-mix(in srgb, var(--fg) 22%, var(--panel)); }
-.wf-ink { fill: color-mix(in srgb, var(--fg) 62%, var(--panel)); }
-.wf-acc { fill: var(--signal); }
-.wf-ok { fill: var(--ok); }
-.wf-rec { fill: var(--rec); }
-.wf-card { fill: rgba(255, 255, 255, 0.75); }
-.wf-knob { fill: #fff; }
-.wf-check { fill: none; stroke: #fff; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.wf-field { fill: var(--panel); stroke: color-mix(in srgb, var(--fg) 18%, var(--panel)); stroke-width: 1; }
-.wf-field-on { stroke: var(--signal); }
-.wf-road { fill: none; stroke: color-mix(in srgb, var(--fg) 4%, var(--panel)); stroke-width: 5; }
+/* wireframe tones (see wireframes.tsx) — the wire palette, fixed in both themes:
+   ink #1C1A19 · paper #F6F1EA · card #FBF8F2 · sheet #E8E1D6 · line #DCD5CA · muted #6E6A64 · faint #A39E96 */
+.wf-bg { fill: #FBF8F2; }
+.wf-bar { fill: #F6F1EA; }
+.wf-1 { fill: #E8E1D6; }
+.wf-2 { fill: #DCD5CA; }
+.wf-3 { fill: #A39E96; fill-opacity: 0.55; }
+.wf-ink { fill: #6E6A64; }
+.wf-title { fill: #1C1A19; }
+.wf-acc { fill: #1C1A19; }
+.wf-ok { fill: #1C1A19; }
+.wf-rec { fill: #1C1A19; }
+.wf-card { fill: #F6F1EA; }
+.wf-knob { fill: #FBF8F2; }
+.wf-check { fill: none; stroke: #F6F1EA; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.wf-field { fill: #FBF8F2; stroke: #DCD5CA; stroke-width: 1; }
+.wf-field-on { stroke: #1C1A19; }
+.wf-hair { fill: none; stroke: #DCD5CA; stroke-width: 1; }
+.wf-road { fill: none; stroke: #FBF8F2; stroke-width: 5; }
 .flows-rf .react-flow__minimap { margin: 0; }

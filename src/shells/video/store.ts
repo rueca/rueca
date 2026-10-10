@@ -8,6 +8,7 @@ import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
 import { RectangleHorizontal, RectangleVertical, Square, Smartphone } from 'lucide-react'
 import { createClock, createDocStore, createHistory, createParams, defineSchema, folder, matchesShape, p, useDoc } from '@kit'
+import { WIRE } from '@/demo/wire'
 import { ASPECTS, demoComp, newClip, uid, type Aspect, type Clip, type ClipKind, type Comp, type Track } from './comp'
 
 export const schema = defineSchema({
@@ -20,7 +21,7 @@ export const schema = defineSchema({
     ], { label: 'Aspect', hint: 'Every clip is laid out relative to the frame, so switching aspect re-lays the whole video.' }),
     fps: p.select('30', [{ value: '24', label: '24' }, { value: '30', label: '30' }, { value: '60', label: '60' }], { label: 'Frame rate', hint: 'Frames per second for stepping, snapping and MP4 export.' }),
     duration: p.number(8000, { min: 1000, max: 60000, step: 100, fmt: (v) => `${(v / 1000).toFixed(1)}s`, label: 'Duration', hint: 'Length of the composition.' }),
-    matte: p.color('#07060F', { alpha: false, label: 'Matte', hint: 'Shown wherever no clip covers the frame.' }),
+    matte: p.color(WIRE.paper, { alpha: false, label: 'Matte', hint: 'Shown wherever no clip covers the frame.' }),
   }),
   view: folder('View', {
     safeArea: p.boolean(true, { label: 'Safe areas', hint: 'Shade the zones that platform UI (captions, buttons, profile) covers.' }),
@@ -29,10 +30,10 @@ export const schema = defineSchema({
   }),
 })
 
-export const params = createParams(schema, { id: 'video', version: 2 })
+export const params = createParams(schema, { id: 'video', version: 3 }) // v3: paper matte (wire style)
 export type V = ReturnType<typeof params.values>
 
-export const doc = createDocStore<Comp>(demoComp(), { id: 'video', version: 1 })
+export const doc = createDocStore<Comp>(demoComp(), { id: 'video', version: 2 }) // v2: wire-style demo; v1 (purple) is not carried over
 export const history = createHistory([params, doc])
 export const getComp = () => doc.get()
 export const setComp = (c: Comp, final = true, label?: string) => doc.set(c, { commit: final, label })

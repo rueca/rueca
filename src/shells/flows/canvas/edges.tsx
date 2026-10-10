@@ -40,16 +40,18 @@ export const FlowEdgeView = memo(function FlowEdgeView(props: EdgeProps<FlowEdge
           <path d="M1 1 L9 5 L1 9 Z" className={arrowCls} strokeLinejoin="round" />
         </marker>
       </defs>
+      {/* paper casing: invisible on a section, keeps the ink line legible where it crosses the bare canvas */}
+      <path d={path} className={cn('flows-edge-case', dim && 'is-dim')} fill="none" />
       <BaseEdge id={id} path={path} markerEnd={`url(#fa-${id})`} className={pathCls} interactionWidth={18} />
       {showLabel && (
         <EdgeLabelRenderer>
           <div
             className={cn(
               'flows-edge-label nodrag nopan absolute flex h-[22px] max-w-[180px] items-center gap-1 rounded-full px-2 text-[11px] font-medium transition-[opacity,box-shadow] duration-200',
-              selected || onPath ? 'bg-signal-strong text-signal-fg' : 'bg-panel text-fg-muted',
+              selected || onPath ? 'bg-signal-strong text-signal-fg' : 'flows-edge-label-wire',
               dim && 'is-dim',
             )}
-            style={{ transform: `translate(-50%, -50%) translate(${lx}px, ${ly}px)`, pointerEvents: 'all', boxShadow: selected || onPath ? 'none' : 'var(--shadow-cluster), 0 0 0 1px var(--line)' }}
+            style={{ transform: `translate(-50%, -50%) translate(${lx}px, ${ly}px)`, pointerEvents: 'all' }}
             onClick={(e) => { e.stopPropagation(); select([], [id]) }}
           >
             <Icon size={11} strokeWidth={1.75} className="shrink-0 opacity-80" />

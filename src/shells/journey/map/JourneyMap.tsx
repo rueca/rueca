@@ -7,13 +7,25 @@ import { Plus, Route, LayoutTemplate } from 'lucide-react'
 import { cn, useValues, useDoc, Tip, Button, Empty } from '@kit'
 import { JourneyCard } from './Card'
 import { EmotionLane } from './EmotionLane'
-import { LANES, deepen, emoji, initials, type Card, type LaneId, type Persona } from '../model'
+import { WIRE } from '@/demo/wire'
+import { Avatar } from '../panels/Personas'
+import { LANES, emoji, type Card, type LaneId, type Persona } from '../model'
 import {
   params, ui, useUI, usePersona, camera, doc, moveCard, addCard, addStage, reorderStage, toggleLink, cellCards, updateStage, startFromTemplate,
 } from '../store'
 import { InlineText } from '@kit/ui/inline-text'
 
 export const LANE_W = 176
+
+/* The board is the demo document, drawn in the wire style (src/demo/wire.ts)
+   in both themes: the kit tokens are re-pointed at the paper palette here, so
+   everything inside (cells, headers, the empty state) reads as ink on paper.
+   Selection, drop bars and links in progress keep --signal: that is the tool. */
+const PAPER = {
+  '--panel': WIRE.paper, '--overlay': WIRE.card, '--control': WIRE.card, '--well': WIRE.sheet, '--active': WIRE.sheet,
+  '--hover': 'rgb(28 26 25 / 0.05)', '--fg': WIRE.ink, '--fg-muted': WIRE.muted, '--fg-faint': WIRE.muted,
+  '--line': WIRE.line, '--line-strong': WIRE.faint,
+} as React.CSSProperties
 const ADD_W = 56
 const THRESHOLD = 4
 
@@ -143,10 +155,10 @@ export function JourneyMap({ mapRef }: { mapRef: React.RefObject<HTMLDivElement 
 
   return (
     <div ref={(el) => { mapRef.current = el; board.current = el }} data-journey-map className="relative rounded-[18px] bg-panel font-artboard text-fg"
-      style={{ width, boxShadow: 'var(--shadow-artboard), 0 0 0 1px var(--artboard-ring)' }}>
+      style={{ ...PAPER, width, background: WIRE.paper, color: WIRE.ink, boxShadow: `0 0 0 1px ${WIRE.line}` }}>
       {/* title band */}
       <div className="flex items-center gap-3 border-b border-line px-5 py-4">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold text-white" style={{ background: deepen(p.hue) }}>{initials(p.name)}</span>
+        <Avatar p={p} size={36} />
         <div className="min-w-0 flex-1">
           <InlineText bare focusable={false} value={title} onCommit={(t) => doc.set((d) => ({ ...d, title: t }), { label: 'Rename map' })} className="block truncate text-[17px] font-semibold tracking-[-0.01em]" label="Map title" />
           <div className="truncate text-[12px] text-fg-muted">{p.name} · {p.role}{p.quote && <span className="text-fg-faint"> — “{p.quote}”</span>}</div>
@@ -170,7 +182,7 @@ export function JourneyMap({ mapRef }: { mapRef: React.RefObject<HTMLDivElement 
               <div className="flex items-center gap-1.5">
                 <span className={cn('flex h-[18px] min-w-[18px] items-center justify-center rounded-[5px] px-1 text-[10.5px] font-semibold tabular', selStage === s.id ? 'bg-signal-strong text-signal-fg' : 'bg-active text-fg-muted')}>{i + 1}</span>
                 <InlineText bare focusable={false} value={s.name} onCommit={(name) => updateStage(s.id, { name }, { label: 'Rename stage' })} className="min-w-0 flex-1 truncate text-[13.5px] font-semibold tracking-[-0.01em]" label="Stage name" />
-                <span className="text-[14px]" aria-hidden>{emoji(s.emotion)}</span>
+                <span className="text-[14px] grayscale" aria-hidden>{emoji(s.emotion)}</span>
               </div>
               <div className="mt-0.5 truncate text-[11px] text-fg-faint tabular">{s.duration || '—'}</div>
               {s.goal && <div className="mt-1 line-clamp-2 text-[11.5px] leading-snug text-fg-muted">{s.goal}</div>}
@@ -265,11 +277,12 @@ function EmotionScale({ h }: { h: number }) {
 }
 
 function Legend() {
+  // line style, not colour: solid box = pain point, dashed box = opportunity, dotted line = answers
   return (
     <div className="flex items-center gap-3 text-[11px] text-fg-muted" aria-label="Legend">
-      <span className="flex items-center gap-1.5"><span className="h-3 w-[3px] rounded-full bg-rec" />Pain point</span>
-      <span className="flex items-center gap-1.5"><span className="h-3 w-[3px] rounded-full bg-ok" />Opportunity</span>
-      <span className="flex items-center gap-1.5"><svg width="18" height="6"><line x1="0" y1="3" x2="18" y2="3" style={{ stroke: 'var(--ok)', strokeWidth: 1.5, strokeDasharray: '3 3' }} /></svg>Answers</span>
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-3.5 rounded-[2px]" style={{ border: `1px solid ${WIRE.ink}` }} />Pain point</span>
+      <span className="flex items-center gap-1.5"><span className="h-2.5 w-3.5 rounded-[2px]" style={{ border: `1px dashed ${WIRE.ink}` }} />Opportunity</span>
+      <span className="flex items-center gap-1.5"><svg width="18" height="6"><line x1="0" y1="3" x2="18" y2="3" style={{ stroke: WIRE.ink, strokeWidth: 1.25, strokeDasharray: '1.5 3', strokeLinecap: 'round' }} /></svg>Answers</span>
     </div>
   )
 }
@@ -323,9 +336,10 @@ function LinkLayer({ persona: p, mapRef, linkEnd }: { persona: Persona; mapRef: 
         const d = y2 > y1 ? `M${x1},${y1} C${x1},${y1 + dy} ${x2},${y2 - dy} ${x2},${y2}` : `M${x1},${y1} C${x1},${y1 + 60} ${x2},${y2 - 60} ${x2},${y2}`
         return (
           <g key={`${pain}-${opp}`} style={{ opacity: dim ? 0.15 : 1 }}>
-            <path d={d} style={{ fill: 'none', stroke: active ? 'var(--signal)' : 'var(--ok)', strokeWidth: active ? 2 : 1.5, strokeDasharray: active ? undefined : '4 4', opacity: active ? 1 : 0.7 }} />
-            <circle cx={x1} cy={y1} r={3} style={{ fill: active ? 'var(--signal)' : 'var(--rec)' }} />
-            <circle cx={x2} cy={y2} r={3} style={{ fill: active ? 'var(--signal)' : 'var(--ok)' }} />
+            <path d={d} style={{ fill: 'none', stroke: active ? 'var(--signal)' : WIRE.ink, strokeWidth: active ? 2 : 1.25, strokeDasharray: active ? undefined : '1.5 3.5', strokeLinecap: 'round', opacity: active ? 1 : 0.75 }} />
+            {/* pain end filled, opportunity end hollow */}
+            <circle cx={x1} cy={y1} r={3} style={{ fill: active ? 'var(--signal)' : WIRE.ink }} />
+            <circle cx={x2} cy={y2} r={3} style={{ fill: WIRE.card, stroke: active ? 'var(--signal)' : WIRE.ink, strokeWidth: 1.25 }} />
           </g>
         )
       })}

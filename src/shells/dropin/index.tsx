@@ -8,6 +8,7 @@ import {
   ParamActions, Segmented, Button, IconButton, Menu, CommandPalette, defineSchema, folder, p, createParams,
   copyText, toast, shareMenuItems, type Command,
 } from '@kit'
+import { WIRE } from '@/demo/wire'
 
 const schema = defineSchema({
   copy: folder('Copy', {
@@ -20,21 +21,22 @@ const schema = defineSchema({
     radius: p.number(18, { min: 0, max: 40, step: 1, unit: 'px', label: 'Corner radius' }),
   }),
   color: folder('Colour', {
-    bg: p.color('#f4f1ea', { label: 'Background', alpha: false }),
-    ink: p.color('#1d1b16', { label: 'Ink', alpha: false }),
-    accent: p.color('#ff5a1f', { label: 'Accent', alpha: false }),
+    bg: p.color(WIRE.paper, { label: 'Background', alpha: false }),
+    ink: p.color(WIRE.ink, { label: 'Ink', alpha: false }),
+    accent: p.color(WIRE.ink, { label: 'Accent', alpha: false, hint: 'The italic word and the primary button. Wire style keeps it the ink.' }),
   }),
   art: folder('Art', {
-    blobSpeed: p.number(14, { min: 3, max: 40, step: 1, unit: 's', label: 'Drift', hint: 'Seconds per blob drift cycle.' }),
+    blobSpeed: p.number(14, { min: 3, max: 40, step: 1, unit: 's', label: 'Float', hint: 'Seconds per float cycle of the hero image.' }),
     tilt: p.number(0, { min: -8, max: 8, step: 0.5, unit: '°', hint: 'Rotate the art card.' }),
   }, { collapsed: true }),
 })
 
 const params = createParams(schema, {
   id: 'dropin',
+  version: 2, // v2: wire-style defaults (ink on paper); v1 saved the old orange accent
   presets: [
-    { name: 'Night', values: { bg: '#0f0f12', ink: '#f2efe8', accent: '#7c6cff' } },
-    { name: 'Editorial', values: { headlineSize: 104, radius: 0, accent: '#1d1b16', gap: 56 } },
+    { name: 'Night', values: { bg: WIRE.ink, ink: WIRE.paper, accent: WIRE.paper } },
+    { name: 'Editorial', values: { headlineSize: 104, radius: 0, gap: 56 } },
   ],
 })
 
@@ -43,6 +45,22 @@ const SIZES = [
   { id: 'tablet', label: 'Tablet', w: 768, h: 1024, icon: Tablet },
   { id: 'mobile', label: 'Mobile', w: 390, h: 844, icon: Smartphone },
 ] as const
+
+/* Red-pen notes under the first artboard: annotation only, never content. */
+const NOTES = ['hero image · dithered trompo, painted in the page’s ink + paper', 'one filled action · the rest are hairlines']
+const NOTES_H = 36 + NOTES.length * 46
+function PenNotes({ x, y }: { x: number; y: number }) {
+  return (
+    <div aria-hidden className="pointer-events-none absolute flex flex-col gap-3" style={{ left: x, top: y, color: WIRE.pen, font: `28px/34px ${PEN_FONT}` }}>
+      {NOTES.map((n, i) => (
+        <div key={n} className="flex items-center gap-3 whitespace-nowrap">
+          <span className="grid place-items-center rounded-full" style={{ width: 34, height: 34, border: `2px solid ${WIRE.pen}`, fontSize: 18, fontWeight: 600 }}>{i + 1}</span>{n}
+        </div>
+      ))}
+    </div>
+  )
+}
+const PEN_FONT = "'Geist Mono Variable', 'Geist Mono', ui-monospace, Menlo, monospace"
 
 const SRC = `${import.meta.env.BASE_URL}protos/hero.html`
 
@@ -55,7 +73,7 @@ export default function DropIn() {
   const shown = SIZES.filter((s) => view === 'all' || s.id === view)
   let x = 0
   const placed = shown.map((s) => { const at = x; x += s.w + 120; return { ...s, x: at } })
-  const content = { w: x - 120, h: Math.max(...shown.map((s) => s.h)) }
+  const content = { w: x - 120, h: Math.max(...shown.map((s) => s.h)) + NOTES_H }
 
   const snippet = `<script src="studio-bridge.js"></script>\n<script>\n  studio.cssVars()            // values → CSS custom properties\n  studio.on((v) => { /* anything else */ })\n</script>`
   const commands: Command[] = [
@@ -100,11 +118,12 @@ export default function DropIn() {
     >
       <Stage key={view} contentSize={content} grid>
         {placed.map((s) => (
-          <Artboard key={s.id} x={s.x} width={s.w} height={s.h} background="#fff" label={<><s.icon size={11} strokeWidth={1.75} />{s.label}</>}>
+          <Artboard key={s.id} x={s.x} width={s.w} height={s.h} background={WIRE.paper} label={<><s.icon size={11} strokeWidth={1.75} />{s.label}</>}>
             <FrameSurface key={nonce} src={SRC} params={params} title={`Prototype at ${s.label}`} />
             {!interact && <div className="absolute inset-0" aria-hidden />}
           </Artboard>
         ))}
+        <PenNotes x={placed[0].x} y={placed[0].h + 36} />
       </Stage>
       <CommandPalette commands={commands} />
     </Studio>

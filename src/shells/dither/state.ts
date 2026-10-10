@@ -8,7 +8,7 @@ import { DIFFUSION, RASTER, type EffectId, type Settings } from './engine'
 export const PALETTES: { name: string; colors: string[] }[] = [
   { name: 'Game Boy', colors: ['#0f380f', '#306230', '#8bac0f', '#9bbc0f'] },
   { name: '1-bit', colors: ['#000000', '#ffffff'] },
-  { name: 'Paper & ink', colors: ['#1d1b19', '#f2ede3'] },
+  { name: 'Paper & ink', colors: ['#1c1a19', '#f6f1ea'] },
   { name: 'CGA', colors: ['#000000', '#55ffff', '#ff55ff', '#ffffff'] },
   { name: 'Riso blue + pink', colors: ['#f5efe0', '#0078bf', '#ff48b0'] },
   { name: 'Riso teal + orange', colors: ['#f5efe0', '#00838a', '#ff6c2f'] },
@@ -31,6 +31,9 @@ export const EFFECTS: { value: EffectId; label: string; hint: string }[] = [
   { value: 'pixelate', label: 'Pixelate', hint: 'Big pixels, optionally snapped to the palette.' },
 ]
 
+/** The default: one ink on paper, so the sample comes out in the wire style's two colours. */
+const INK = PALETTES.find((x) => x.name === 'Paper & ink')!
+
 const is = (...ids: EffectId[]) => (v: { effect: EffectId }) => ids.includes(v.effect)
 
 export const schema = defineSchema({
@@ -44,7 +47,7 @@ export const schema = defineSchema({
     invert: p.boolean(false),
   }),
   effect: folder('Effect', {
-    effect: p.select('floyd', EFFECTS.map((e) => ({ value: e.value, label: e.label, hint: e.hint })), { hint: 'How tone becomes pattern.' }),
+    effect: p.select('atkinson', EFFECTS.map((e) => ({ value: e.value, label: e.label, hint: e.hint })), { hint: 'How tone becomes pattern.' }),
     pixel: p.number(3, { min: 1, max: 24, step: 1, unit: 'px', label: 'Pixel size', hint: 'Size of one output pixel in image pixels.', when: is(...RASTER) }),
     strength: p.number(1, { min: 0, max: 1, step: 0.01, label: 'Diffusion', hint: 'How much quantisation error spreads to neighbours. 0 = flat posterise.', when: is(...DIFFUSION) }),
     serpentine: p.boolean(true, { hint: 'Alternate scan direction each row — fewer diagonal worms.', when: is(...DIFFUSION) }),
@@ -61,8 +64,8 @@ export const schema = defineSchema({
     swap: p.boolean(false, { label: 'Swap ink & paper', hint: 'Light marks on a dark ground.', when: is('halftone', 'ascii') }),
   }),
   colour: folder('Palette', {
-    palette: p.palette(PALETTES[0].colors, { max: 16 }),
-    paletteName: p.text(PALETTES[0].name),
+    palette: p.palette(INK.colors, { max: 16 }),
+    paletteName: p.text(INK.name),
   }),
 })
 
@@ -80,13 +83,13 @@ export const LOOKS = [
   look('Big pixels', { effect: 'pixelate', pixel: 12, quantise: false, contrast: 0.05, ...pal('Vapor') }),
 ]
 
-export const params = createParams(schema, { id: 'dither', presets: LOOKS as any })
+export const params = createParams(schema, { id: 'dither', version: 2, presets: LOOKS as any }) // v2: Atkinson + Paper & ink defaults
 export type V = ReturnType<typeof params.values>
 export const settingsOf = (v: V): Settings => v as unknown as Settings
 
 /* ---------- the image (not undoable, not persisted) ---------- */
 export interface ImageState { name: string; w: number; h: number; data: ImageData | null; sample: boolean; url: string | null }
-export const image = createStore<ImageState>(() => ({ name: 'Sample — dusk.png', w: 1600, h: 1000, data: null, sample: true, url: null }))
+export const image = createStore<ImageState>(() => ({ name: 'Sample — spinning top.png', w: 1600, h: 1000, data: null, sample: true, url: null }))
 
 /* ---------- view state ---------- */
 export const view = createStore<{ split: boolean; pos: number; peek: boolean; grid: boolean; hover: { x: number; y: number; hex: string | null } | null; preview: string | null }>(() => ({

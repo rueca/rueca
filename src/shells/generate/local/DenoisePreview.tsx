@@ -20,7 +20,7 @@ export function DenoisePreview({ src, progress, label, className, running = true
     const img = ctx.createImageData(c.width, c.height)
     const paintNoise = () => {
       const d = img.data
-      for (let i = 0; i < d.length; i += 4) { const g = Math.random() * 255; d[i] = g * (0.7 + Math.random() * 0.6); d[i + 1] = g; d[i + 2] = g * (0.7 + Math.random() * 0.6); d[i + 3] = 255 }
+      for (let i = 0; i < d.length; i += 4) { const g = Math.random() * 255; d[i] = g; d[i + 1] = g; d[i + 2] = g; d[i + 3] = 255 }
       ctx.putImageData(img, 0, 0)
     }
     paintNoise()
@@ -41,7 +41,7 @@ export function DenoisePreview({ src, progress, label, className, running = true
           style={{ filter: `blur(${(1 - ease) * 22}px) saturate(${0.25 + ease * 0.75}) contrast(${0.8 + ease * 0.2})`, opacity: Math.min(1, 0.15 + p * 1.4), transform: `scale(${1 + (1 - ease) * 0.08})` }}
         />
       )}
-      <canvas ref={noise} width={96} height={96} className="absolute inset-0 h-full w-full" style={{ opacity: src ? Math.pow(1 - p, 2.2) * 0.9 : 0.55, filter: 'blur(1.5px) saturate(1.4)', mixBlendMode: src ? 'normal' : 'luminosity' }} />
+      <canvas ref={noise} width={96} height={96} className="absolute inset-0 h-full w-full" style={{ opacity: src ? Math.pow(1 - p, 2.2) * 0.9 : 0.55, filter: 'blur(1.5px)', mixBlendMode: src ? 'normal' : 'luminosity' }} />
       {!src && <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-transparent via-white/5 to-transparent" />}
       {label && (
         <div className="absolute inset-x-2 bottom-2 flex items-center gap-2 rounded-[7px] bg-scrim px-2 py-1.5 text-[11px] text-white backdrop-blur-sm">

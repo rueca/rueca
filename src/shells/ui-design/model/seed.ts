@@ -1,11 +1,14 @@
 /* The demo file: "Trailhead", a hiking app. Two phone screens wired as a
-   prototype, a components page and an empty archive page. */
-import { frame, rect, ellipse, text, icon, solid, linear, imageFill, shadow } from './factory'
+   prototype, a components page and an empty archive page — drawn in the
+   wire style (src/demo/wire.ts): one ink, hairlines instead of shadows, the
+   dithered top as the hero image, and pink only for the red-pen notes. */
+import { frame, rect, ellipse, text, icon, solid, linear, imageFill } from './factory'
+import { WIRE } from '@/demo/wire'
 import { uid, type Doc, type Node, type Interaction } from './types'
 
 const C = {
-  bg: '#f6f4ee', ink: '#1b1f1c', muted: '#6b706c', faint: '#9a9d98', line: '#e7e4dc', soft: '#efece4',
-  green: '#2f6b4f', amber: '#e8a33d', white: '#ffffff',
+  bg: WIRE.paper, ink: WIRE.ink, muted: WIRE.muted, faint: WIRE.faint, line: WIRE.line, soft: WIRE.line,
+  green: WIRE.ink, amber: WIRE.ink, white: WIRE.card, pen: WIRE.pen,
 }
 
 const ease: [number, number, number, number] = [0.16, 1, 0.3, 1]
@@ -30,7 +33,7 @@ function chip(label: string, active = false): Node {
   return frame({
     name: `Chip / ${label}`, radius: 99, auto: { pad: [8, 15, 8, 15], alignY: 'center' },
     fills: [solid(active ? C.ink : C.white)], strokes: active ? [] : [solid(C.line)],
-    children: [text(label, { color: active ? C.white : C.ink, t: { size: 14, weight: 500 } })],
+    children: [text(label, { color: active ? WIRE.paper : C.ink, t: { size: 14, weight: 500 } })],
   })
 }
 
@@ -71,10 +74,24 @@ function stat(value: string, label: string): Node {
 
 function roundButton(name: string, ic: string, x: number, y: number, size = 40, inter?: Interaction[]): Node {
   return frame({
-    name, x, y, w: size, h: size, sizingW: 'fixed', sizingH: 'fixed', radius: 99, fills: [solid(C.white, 0.92)],
-    effects: [shadow(2, 8, 0.12)], auto: { alignX: 'center', alignY: 'center' }, interactions: inter,
+    name, x, y, w: size, h: size, sizingW: 'fixed', sizingH: 'fixed', radius: 99, fills: [solid(C.white)], strokes: [solid(C.line)], auto: { alignX: 'center', alignY: 'center' }, interactions: inter,
     children: [icon(ic, { w: 19, h: 19 })],
   })
+}
+
+/** Red-pen notes on the canvas: numbered, mono, pink — annotation, never content. */
+function penNotes(): Node[] {
+  const note = (n: number, x: number, y: number, label: string): Node => frame({
+    name: `Note ${n}`, x, y, fills: [], clip: false, auto: { gap: 8, alignY: 'center' },
+    children: [
+      frame({
+        name: 'Number', w: 20, h: 20, sizingW: 'fixed', sizingH: 'fixed', radius: 99, fills: [], strokes: [solid(C.pen)], auto: { alignX: 'center', alignY: 'center' },
+        children: [text(String(n), { color: C.pen, t: { family: 'Menlo', size: 11, weight: 600 } })],
+      }),
+      text(label, { color: C.pen, t: { family: 'Menlo', size: 12 } }),
+    ],
+  })
+  return [note(1, 884, 196, 'hero · dithered trompo'), note(2, 884, 466, 'stats · three equal cells'), note(3, 884, 652, 'one primary action')]
 }
 
 export function seedDoc(): Doc {
@@ -91,10 +108,9 @@ export function seedDoc(): Doc {
           text('Where to today?', { t: { size: 28, weight: 700, letterSpacing: -2.5 } }),
         ],
       }),
-      ellipse({ name: 'Avatar', x: 322, y: 70, w: 44, h: 44, fills: [imageFill('avatar')], strokes: [solid(C.white)], strokeWidth: 2, strokeAlign: 'outside', effects: [shadow(2, 6, 0.12)] }),
+      ellipse({ name: 'Avatar', x: 322, y: 70, w: 44, h: 44, fills: [imageFill('avatar')], strokes: [solid(C.white)], strokeWidth: 2, strokeAlign: 'outside' }),
       frame({
-        name: 'Search', x: 24, y: 146, w: 342, h: 50, sizingW: 'fixed', sizingH: 'fixed', radius: 14, fills: [solid(C.white)], strokes: [solid(C.line)],
-        effects: [shadow(1, 2, 0.04)], auto: { gap: 10, pad: [0, 14, 0, 16], alignY: 'center' },
+        name: 'Search', x: 24, y: 146, w: 342, h: 50, sizingW: 'fixed', sizingH: 'fixed', radius: 14, fills: [solid(C.white)], strokes: [solid(C.line)], auto: { gap: 10, pad: [0, 14, 0, 16], alignY: 'center' },
         children: [
           icon('Search', { w: 18, h: 18, color: C.muted }),
           text('Search trails, parks, peaks', { color: C.faint, sizingW: 'fill', t: { size: 15, resize: 'auto-height' } }),
@@ -107,19 +123,19 @@ export function seedDoc(): Doc {
         children: [text('Featured', { t: { size: 18, weight: 650, letterSpacing: -1 } }), text('See all', { color: C.green, t: { size: 14, weight: 500 } })],
       }),
       frame({
-        name: 'Featured card', x: 24, y: 306, w: 342, h: 232, radius: 22, fills: [imageFill('ridge')], effects: [shadow(14, 30, 0.2)],
+        name: 'Featured card', x: 24, y: 306, w: 342, h: 232, radius: 22, fills: [imageFill('ridge')], strokes: [solid(C.line)],
         interactions: [go(detailId)],
         children: [
-          rect({ name: 'Scrim', x: 0, y: 96, w: 342, h: 136, fills: [linear([{ pos: 0, color: '#14181500' }, { pos: 1, color: '#141815d9' }], 180)] }),
+          rect({ name: 'Scrim', x: 0, y: 112, w: 342, h: 120, fills: [linear([{ pos: 0, color: '#F6F1EA00' }, { pos: 1, color: '#F6F1EAf2' }], 180)] }),
           frame({
-            name: 'Rating', x: 16, y: 16, radius: 99, fills: [solid(C.white, 0.92)], auto: { gap: 4, pad: [6, 10, 6, 8], alignY: 'center' },
+            name: 'Rating', x: 16, y: 16, radius: 99, fills: [solid(C.white)], strokes: [solid(C.line)], auto: { gap: 4, pad: [6, 10, 6, 8], alignY: 'center' },
             children: [icon('Star', { w: 14, h: 14, color: C.amber, stroke: 2.25 }), text('4.8', { t: { size: 13, weight: 600 } })],
           }),
           roundButton('Save', 'Bookmark', 288, 14, 38),
-          text('Eagle Ridge Loop', { x: 18, y: 160, color: C.white, t: { size: 22, weight: 700, letterSpacing: -2 } }),
+          text('Eagle Ridge Loop', { x: 18, y: 160, color: C.ink, t: { size: 22, weight: 700, letterSpacing: -2 } }),
           frame({
             name: 'Meta', x: 18, y: 194, fills: [], clip: false, auto: { gap: 4, alignY: 'center' },
-            children: [icon('MapPin', { w: 14, h: 14, color: '#e8ebe7' }), text('Mt. Tamalpais  ·  6.4 mi  ·  3h 10m', { color: '#e8ebe7', t: { size: 13, weight: 500 } })],
+            children: [icon('MapPin', { w: 14, h: 14, color: C.muted }), text('Mt. Tamalpais  ·  6.4 mi  ·  3h 10m', { color: C.muted, t: { size: 13, weight: 500 } })],
           }),
         ],
       }),
@@ -132,8 +148,7 @@ export function seedDoc(): Doc {
         ],
       }),
       frame({
-        name: 'Tab bar', x: 0, y: 760, w: 390, h: 84, sizingW: 'fixed', sizingH: 'fixed', fills: [solid(C.white)],
-        effects: [shadow(-1, 0, 0.07)], auto: { between: true, pad: [10, 34, 26, 34], alignY: 'start' },
+        name: 'Tab bar', x: 0, y: 760, w: 390, h: 84, sizingW: 'fixed', sizingH: 'fixed', fills: [solid(C.white)], auto: { between: true, pad: [10, 34, 26, 34], alignY: 'start' },
         children: [tab('Explore', 'Compass', true), tab('Saved', 'Bookmark'), tab('Activity', 'Activity'), tab('Profile', 'User')],
       }),
     ],
@@ -142,14 +157,12 @@ export function seedDoc(): Doc {
   const detail = frame({
     id: detailId, name: 'Trail detail', x: 470, y: 0, w: 390, h: 844, fills: [solid(C.bg)],
     children: [
-      rect({ name: 'Hero', x: 0, y: 0, w: 390, h: 380, fills: [imageFill('ridge')] }),
-      rect({ name: 'Top scrim', x: 0, y: 0, w: 390, h: 130, fills: [linear([{ pos: 0, color: '#00000059' }, { pos: 1, color: '#00000000' }], 180)] }),
-      statusBar(C.white),
+      rect({ name: 'Hero', x: 0, y: 0, w: 390, h: 380, fills: [imageFill('top')] }),
+      statusBar(C.ink),
       roundButton('Back', 'ArrowLeft', 20, 56, 40, [{ id: uid('i'), trigger: 'tap', action: 'back', transition: 'smart', duration: 380, easing: ease }]),
       roundButton('Share', 'Share', 330, 56, 40),
       frame({
-        name: 'Sheet', x: 0, y: 340, w: 390, h: 504, sizingW: 'fixed', sizingH: 'fixed', radius: [28, 28, 0, 0], fills: [solid(C.bg)],
-        effects: [shadow(-8, 24, 0.12)], auto: { dir: 'column', gap: 20, pad: [26, 24, 28, 24] },
+        name: 'Sheet', x: 0, y: 340, w: 390, h: 504, sizingW: 'fixed', sizingH: 'fixed', radius: [28, 28, 0, 0], fills: [solid(C.bg)], strokes: [solid(C.line)], auto: { dir: 'column', gap: 20, pad: [26, 24, 28, 24] },
         children: [
           frame({
             name: 'Title', sizingW: 'fill', fills: [], clip: false, auto: { dir: 'column', gap: 6 },
@@ -163,16 +176,16 @@ export function seedDoc(): Doc {
           }),
           frame({ name: 'Stats', sizingW: 'fill', fills: [], clip: false, auto: { gap: 10 }, children: [stat('6.4 mi', 'Distance'), stat('1,240 ft', 'Elevation'), stat('3h 10m', 'Est. time')] }),
           text('A classic loop that climbs through redwood groves to open ridgeline views of the Pacific and the Bay. Best in the late afternoon, when the fog rolls back.', {
-            name: 'Description', color: '#434843', sizingW: 'fill', t: { size: 15, lineHeight: 23, resize: 'auto-height' },
+            name: 'Description', color: C.muted, sizingW: 'fill', t: { size: 15, lineHeight: 23, resize: 'auto-height' },
           }),
           frame({
             name: 'Actions', sizingW: 'fill', fills: [], clip: false, auto: { gap: 12, alignY: 'center' },
             children: [
-              frame({ name: 'Save button', w: 54, h: 54, sizingW: 'fixed', sizingH: 'fixed', radius: 16, fills: [solid(C.white)], strokes: [solid('#e2ded4')], auto: { alignX: 'center', alignY: 'center' }, children: [icon('Bookmark', { w: 20, h: 20 })] }),
+              frame({ name: 'Save button', w: 54, h: 54, sizingW: 'fixed', sizingH: 'fixed', radius: 16, fills: [solid(C.white)], strokes: [solid(C.line)], auto: { alignX: 'center', alignY: 'center' }, children: [icon('Bookmark', { w: 20, h: 20 })] }),
               frame({
-                name: 'Start route', h: 54, sizingW: 'fill', sizingH: 'fixed', radius: 16, fills: [solid(C.green)], effects: [shadow(8, 20, 0.28, '#2f6b4f')],
+                name: 'Start route', h: 54, sizingW: 'fill', sizingH: 'fixed', radius: 16, fills: [solid(C.green)],
                 auto: { gap: 8, alignX: 'center', alignY: 'center' },
-                children: [icon('Navigation', { w: 18, h: 18, color: C.white, stroke: 2 }), text('Start route', { color: C.white, t: { size: 16, weight: 600 } })],
+                children: [icon('Navigation', { w: 18, h: 18, color: WIRE.paper, stroke: 2 }), text('Start route', { color: WIRE.paper, t: { size: 16, weight: 600 } })],
               }),
             ],
           }),
@@ -182,12 +195,12 @@ export function seedDoc(): Doc {
   })
 
   const button = frame({
-    name: 'Button / Primary', component: true, x: 0, y: 0, radius: 16, fills: [solid(C.green)], effects: [shadow(8, 20, 0.28, '#2f6b4f')],
+    name: 'Button / Primary', component: true, x: 0, y: 0, radius: 16, fills: [solid(C.green)],
     auto: { gap: 8, pad: [16, 24, 16, 24], alignX: 'center', alignY: 'center' },
-    children: [icon('Navigation', { w: 18, h: 18, color: C.white, stroke: 2 }), text('Start route', { color: C.white, t: { size: 16, weight: 600 } })],
+    children: [icon('Navigation', { w: 18, h: 18, color: WIRE.paper, stroke: 2 }), text('Start route', { color: WIRE.paper, t: { size: 16, weight: 600 } })],
   })
   const secondary = frame({
-    name: 'Button / Secondary', component: true, x: 220, y: 0, radius: 16, fills: [solid(C.white)], strokes: [solid('#e2ded4')],
+    name: 'Button / Secondary', component: true, x: 220, y: 0, radius: 16, fills: [solid(C.white)], strokes: [solid(C.line)],
     auto: { gap: 8, pad: [16, 24, 16, 24], alignX: 'center', alignY: 'center' },
     children: [icon('Bookmark', { w: 18, h: 18 }), text('Save trail', { t: { size: 16, weight: 600 } })],
   })
@@ -200,7 +213,7 @@ export function seedDoc(): Doc {
     name: 'Trailhead app',
     pages: [
       {
-        id: uid('pg'), name: 'App screens', bg: '', nodes: [home, detail], start: homeId,
+        id: uid('pg'), name: 'App screens', bg: '', nodes: [home, detail, ...penNotes()], start: homeId,
         comments: [{ id: uid('c'), x: 470 + 316, y: 452, text: 'Can we show elevation as a mini chart here? Feels like the number alone undersells the climb.', author: 'Jun Park', at: Date.now() - 1000 * 60 * 60 * 3 }],
       },
       { id: uid('pg'), name: 'Components', bg: '', nodes: [button, secondary, chipC, chipA, row, statC], comments: [] },

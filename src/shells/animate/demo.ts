@@ -5,6 +5,7 @@
 --------------------------------------------------------------------------- */
 import type { Anim, Doc, Ease, Key, Obj, PropKey, Resolved, Val } from './engine'
 import { bindText, childrenOf } from './engine'
+import { WIRE } from '@/demo/wire'
 
 export const HEART = 'M0,15 C-7,9 -18,2 -18,-6 C-18,-12.5 -13.5,-16 -8.75,-16 C-4.75,-16 -1.6,-13.6 0,-10.4 C1.6,-13.6 4.75,-16 8.75,-16 C13.5,-16 18,-12.5 18,-6 C18,2 7,9 0,15 Z'
 
@@ -25,22 +26,25 @@ const k = (t: number, v: Val, ease: Ease = E.io): Key => ({ id: `d${n++}`, t, v,
 const obj = (id: string, name: string, kind: Obj['kind'], parent: string | null, base: Obj['base'], extra: Partial<Obj> = {}): Obj =>
   ({ id, name, kind, parent, visible: true, locked: false, base, ...extra })
 
-const SPARK = ['#FF3B5C', '#FFB020', '#7C5CFF', '#22C3A6', '#FF6B8A', '#FFD25C']
+/* Drawn in the wire style (src/demo/wire.ts): a paper card with a hairline
+   on a paper artboard, one ink. The like is shown by the heart going from faint
+   to ink, not by colour. */
+const SPARK = [WIRE.ink, WIRE.muted, WIRE.ink, WIRE.muted, WIRE.ink, WIRE.muted]
 
 export function demoDoc(): Doc {
   n = 0
   const objects: Obj[] = [
-    obj('caption', 'Caption', 'text', null, { x: 240, y: 296, fill: '#FFFFFF', opacity: 0.55 }, { text: 'Tap to like', fontSize: 15, fontWeight: 500, align: 'middle' }),
+    obj('caption', 'Caption', 'text', null, { x: 240, y: 296, fill: WIRE.muted, opacity: 0.55 }, { text: 'Tap to like', fontSize: 15, fontWeight: 500, align: 'middle' }),
     obj('button', 'Button', 'group', null, { x: 240, y: 184 }),
-    obj('pill', 'Pill', 'rect', 'button', { w: 212, h: 80, radius: 40, fill: '#FFFFFF' }, { shadow: true }),
-    obj('burst', 'Burst', 'ellipse', 'button', { x: -58, w: 44, h: 44, fill: '#FF3B5C00', stroke: '#FF3B5C', strokeWidth: 8, scale: 0.2, opacity: 0 }),
+    obj('pill', 'Pill', 'rect', 'button', { w: 212, h: 80, radius: 40, fill: WIRE.card, stroke: WIRE.line, strokeWidth: 1 }),
+    obj('burst', 'Burst', 'ellipse', 'button', { x: -58, w: 44, h: 44, fill: '#1C1A1900', stroke: WIRE.ink, strokeWidth: 2, scale: 0.2, opacity: 0 }),
     obj('sparkles', 'Sparkles', 'group', 'button', { x: -58, scale: 0.5, opacity: 0 }),
     ...SPARK.map((c, i) => {
       const a = (i / SPARK.length) * Math.PI * 2 - Math.PI / 2
-      return obj(`s${i + 1}`, `Spark ${i + 1}`, 'ellipse', 'sparkles', { x: Math.round(Math.cos(a) * 40), y: Math.round(Math.sin(a) * 40), w: 8, h: 8, fill: c })
+      return obj(`s${i + 1}`, `Spark ${i + 1}`, 'ellipse', 'sparkles', { x: Math.round(Math.cos(a) * 40), y: Math.round(Math.sin(a) * 40), w: 6, h: 6, fill: c })
     }),
-    obj('heart', 'Heart', 'path', 'button', { x: -58, y: 1, fill: '#C4C7D0' }, { d: HEART }),
-    obj('label', 'Count', 'text', 'button', { x: -24, y: 2, fill: '#1B1D24' }, { text: '{likes}', fontSize: 30, fontWeight: 650, align: 'start' }),
+    obj('heart', 'Heart', 'path', 'button', { x: -58, y: 1, fill: WIRE.faint }, { d: HEART }),
+    obj('label', 'Count', 'text', 'button', { x: -24, y: 2, fill: WIRE.ink }, { text: '{likes}', fontSize: 30, fontWeight: 650, align: 'start' }),
   ]
 
   const idle: Anim = {
@@ -49,14 +53,14 @@ export function demoDoc(): Doc {
       'button.y': [k(0, 184), k(1200, 178), k(2400, 184)],
       'caption.opacity': [k(0, 0.55), k(1200, 0.85), k(2400, 0.55)],
       'button.scale': [k(0, 1)],
-      'pill.fill': [k(0, '#FFFFFF')],
+      'pill.fill': [k(0, WIRE.card)],
       'heart.rotation': [k(0, 0)],
     },
   }
   const hover: Anim = {
     id: 'hover', name: 'Hover', duration: 420, loop: 'once', tracks: {
       'button.scale': [k(0, 1, E.spring(380, 0.35)), k(420, 1.06)],
-      'pill.fill': [k(0, '#FFFFFF', E.out), k(300, '#FFF0F3')],
+      'pill.fill': [k(0, WIRE.card, E.out), k(300, WIRE.sheet)],
       'heart.rotation': [k(0, 0, E.back), k(300, -10)],
     },
   }
@@ -64,11 +68,11 @@ export function demoDoc(): Doc {
     id: 'press', name: 'Press', duration: 1000, loop: 'once', tracks: {
       'button.scale': [k(0, 1, E.in), k(110, 0.93, E.spring(450, 0.4)), k(600, 1)],
       'heart.scale': [k(0, 1, E.in), k(110, 0.7, E.spring(520, 0.5)), k(720, 1)],
-      'heart.fill': [k(0, '#C4C7D0', E.hold), k(110, '#FF3B5C')],
+      'heart.fill': [k(0, WIRE.faint, E.hold), k(110, WIRE.ink)],
       'heart.rotation': [k(0, -10, E.out), k(300, 0)],
       'burst.scale': [k(0, 0.2, E.hold), k(110, 0.2, E.expo), k(560, 2.3)],
       'burst.opacity': [k(0, 0, E.hold), k(110, 1, E.in), k(560, 0)],
-      'burst.strokeWidth': [k(110, 10, E.out), k(560, 0)],
+      'burst.strokeWidth': [k(110, 2.5, E.out), k(560, 0.5)],
       'sparkles.scale': [k(0, 0.5, E.hold), k(150, 0.5, E.expo), k(700, 1.9)],
       'sparkles.opacity': [k(0, 0, E.hold), k(150, 1, E.in), k(760, 0)],
       'sparkles.rotation': [k(150, 0, E.out), k(760, 28)],
@@ -129,6 +133,7 @@ function shape(ctx: CanvasRenderingContext2D, doc: Doc, o: Obj, p: Record<PropKe
     ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, rad)
     ctx.fillStyle = fill; ctx.fill()
     ctx.shadowColor = 'transparent'
+    if (+p.strokeWidth > 0) { ctx.lineWidth = +p.strokeWidth; ctx.strokeStyle = String(p.stroke); ctx.stroke() }
   } else if (o.kind === 'ellipse') {
     ctx.beginPath(); ctx.ellipse(0, 0, Math.max(0, +p.w / 2), Math.max(0, +p.h / 2), 0, 0, Math.PI * 2)
     ctx.fillStyle = fill; ctx.fill()

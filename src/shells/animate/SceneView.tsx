@@ -11,7 +11,7 @@ const num = (v: Val) => (typeof v === 'number' ? v : parseFloat(v))
 function Shape({ o, p, doc, inputs }: { o: Obj; p: Record<PropKey, Val>; doc: Doc; inputs: Record<string, boolean | number> }) {
   if (o.kind === 'rect') {
     const w = num(p.w), h = num(p.h)
-    return <rect x={-w / 2} y={-h / 2} width={Math.max(0, w)} height={Math.max(0, h)} rx={Math.min(num(p.radius), w / 2, h / 2)} fill={String(p.fill)} filter={o.shadow ? 'url(#tw-shadow)' : undefined} />
+    return <rect x={-w / 2} y={-h / 2} width={Math.max(0, w)} height={Math.max(0, h)} rx={Math.min(num(p.radius), w / 2, h / 2)} fill={String(p.fill)} stroke={num(p.strokeWidth) > 0 ? String(p.stroke) : undefined} strokeWidth={num(p.strokeWidth)} filter={o.shadow ? 'url(#tw-shadow)' : undefined} />
   }
   if (o.kind === 'ellipse')
     return <ellipse rx={Math.max(0, num(p.w) / 2)} ry={Math.max(0, num(p.h) / 2)} fill={String(p.fill)} stroke={num(p.strokeWidth) > 0 ? String(p.stroke) : undefined} strokeWidth={num(p.strokeWidth)} />
@@ -74,6 +74,31 @@ export function SceneSVG({
       {childrenOf(doc, null).map((o) => node(o, r, true))}
       {children}
     </svg>
+  )
+}
+
+/* Red-pen marks (wire style): annotation only, drawn on the stage overlay so
+   SVG/PNG export never carries them. They follow the button as it animates. */
+const PEN = '#D1006F'
+const MONO = "'Geist Mono Variable', 'Geist Mono', ui-monospace, Menlo, monospace"
+function PenMarks({ doc, r, bg }: { doc: Doc; r: Resolved; bg: string }) {
+  const btn = r.button, pill = r.pill, heart = r.heart
+  if (!btn || !pill || !doc.objects.find((o) => o.id === 'pill')?.visible) return null
+  const s = num(btn.scale), bx = num(btn.x), by = num(btn.y)
+  const w = num(pill.w) * s, h = num(pill.h) * s
+  const x0 = bx + num(pill.x) * s - w / 2, x1 = x0 + w, y = by + num(pill.y) * s + h / 2 + 16
+  const hx = heart ? bx + num(heart.x) * s : x0 + 40, hy = by - h / 2 - 34
+  const font = { font: `500 11px ${MONO}` }
+  return (
+    <g data-overlay pointerEvents="none" fill="none" stroke={PEN} strokeWidth={1}>
+      <path d={`M${x0} ${y}H${x1}M${x0} ${y - 4}V${y + 4}M${x1} ${y - 4}V${y + 4}`} />
+      <rect x={bx - 20} y={y - 7} width={40} height={14} fill={bg} stroke="none" />
+      <text x={bx} y={y} dominantBaseline="central" textAnchor="middle" fill={PEN} stroke="none" style={font}>{Math.round(w)}</text>
+      <path d={`M${hx} ${hy + 10}V${by - h / 2 + 8}`} strokeDasharray="2 3" />
+      <circle cx={hx} cy={hy} r={9} />
+      <text x={hx} y={hy + 0.5} dominantBaseline="central" textAnchor="middle" fill={PEN} stroke="none" style={{ font: `600 10px ${MONO}` }}>1</text>
+      <text x={hx + 16} y={hy + 0.5} dominantBaseline="central" fill={PEN} stroke="none" style={font}>faint → ink on press</text>
+    </g>
   )
 }
 
@@ -191,6 +216,7 @@ export function LiveScene({ svgRef }: { svgRef: React.RefObject<SVGSVGElement | 
     <div className="h-full w-full" style={preview ? { cursor: 'pointer' } : undefined} {...previewProps}
       onPointerDown={preview ? previewProps.onPointerDown : (e) => { if ((e.target as Element).hasAttribute('data-bg')) ui.setState({ sel: null }) }}>
       <SceneSVG doc={doc} r={r} inputs={inputs} bg={[v.bgTop, v.bgBottom]} interactive={!preview} onObjectDown={onObjectDown} svgRef={svgRef} ghosts={ghosts} ghostOf={sel}>
+        {!preview && <PenMarks doc={doc} r={r} bg={v.bgBottom} />}
         <g data-overlay pointerEvents="none">
           <polygon ref={outline} fill="none" stroke="var(--signal)" strokeWidth={1.5} vectorEffect="non-scaling-stroke" visibility="hidden" />
           <g ref={handles} visibility="hidden">

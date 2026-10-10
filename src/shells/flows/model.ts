@@ -1,11 +1,13 @@
 /* Flows — document model, screen templates and the demo content. Pure data. */
 import type { Edge, Node } from '@xyflow/react'
+import { WIRE } from '@/demo/wire'
 
 export type Kind = 'screen' | 'decision' | 'terminal' | 'note' | 'section'
 export type Status = 'draft' | 'ready' | 'shipped'
 export type Trigger = 'tap' | 'swipe' | 'longpress' | 'auto' | 'condition' | 'back' | 'submit'
 export type EdgeStyle = 'smooth' | 'bezier' | 'straight'
-export type StickyColor = 'yellow' | 'pink' | 'green' | 'blue' | 'violet'
+/** Notes in the wire style: `pen` is the red-pen annotation; `card` / `sheet` are plain paper stickies. */
+export type StickyColor = 'pen' | 'card' | 'sheet'
 export type Template =
   | 'splash' | 'welcome' | 'signup' | 'login' | 'otp' | 'permissions' | 'home' | 'search' | 'product'
   | 'cart' | 'address' | 'payment' | 'review' | 'success' | 'error' | 'profile' | 'settings' | 'paywall' | 'empty'
@@ -92,10 +94,13 @@ export const TRIGGERS: { value: Trigger; label: string }[] = [
   { value: 'back', label: 'Back' },
 ]
 
-export const STICKY: Record<StickyColor, string> = {
-  yellow: '#ffe8a3', pink: '#ffc9de', green: '#c5f0d2', blue: '#c7e3ff', violet: '#e0d4ff',
-}
-export const SECTION_HUES = ['#0d99ff', '#8b5cf6', '#14b8a6', '#f97316', '#ec4899', '#84cc16']
+/* Demo content is drawn in the wire palette (src/demo/wire.ts): one ink on
+   paper, hairlines, pink only as the red pen. Swatches are the paper tones. */
+export const STICKY: Record<StickyColor, string> = { pen: WIRE.pen, card: WIRE.card, sheet: WIRE.sheet }
+/** Section fills: paper tones, so every section reads as a sheet on the board. */
+export const SECTION_HUES: string[] = [WIRE.paper, WIRE.card, WIRE.sheet]
+/** Older docs / imports may carry a colour we no longer draw. */
+export const stickyOf = (c?: string): StickyColor => (c === 'pen' || c === 'sheet' ? c : 'card')
 
 /** Fixed footprint per kind; the layout uses measured sizes when it has them. */
 export const SIZE: Record<Kind, { w: number; h: number }> = {
@@ -115,7 +120,7 @@ export function makeNode(kind: Kind, at: { x: number; y: number }, data: Partial
   if (kind === 'screen') base.data = { name: templateLabel(data.template ?? 'home'), template: 'home', status: 'draft', ...data }
   if (kind === 'decision') base.data = { name: 'Condition?', status: 'draft', ...data }
   if (kind === 'terminal') base.data = { name: data.role === 'end' ? 'End' : 'Start', role: 'start', ...data }
-  if (kind === 'note') base.data = { name: 'Add a note', color: 'yellow', ...data }
+  if (kind === 'note') base.data = { name: 'Add a note', color: 'card', ...data }
   if (kind === 'section') {
     base.data = { name: 'Section', hue: SECTION_HUES[0], ...data }
     base.width = SIZE.section.w
@@ -134,8 +139,8 @@ function demoMain(): Flow {
   const S = (id: string, template: Template, name: string, section: string, status: Status = 'ready', notes?: string) =>
     makeNode('screen', { x: 0, y: 0 }, { template, name, section, status, notes }, id)
   const nodes: FlowNode[] = [
-    makeNode('section', { x: 0, y: 0 }, { name: 'Onboarding', hue: '#8b5cf6' }, 'sec-onb'),
-    makeNode('section', { x: 0, y: 0 }, { name: 'Checkout', hue: '#14b8a6' }, 'sec-chk'),
+    makeNode('section', { x: 0, y: 0 }, { name: 'Onboarding', hue: WIRE.paper }, 'sec-onb'),
+    makeNode('section', { x: 0, y: 0 }, { name: 'Checkout', hue: WIRE.paper }, 'sec-chk'),
     makeNode('terminal', { x: 0, y: 0 }, { name: 'App opened', role: 'start', section: 'sec-onb' }, 'start'),
     S('splash', 'splash', 'Splash', 'sec-onb', 'shipped', 'Holds for at most 1.2s while the session token refreshes.'),
     makeNode('decision', { x: 0, y: 0 }, { name: 'Has account?', section: 'sec-onb', status: 'shipped' }, 'd-account'),
@@ -155,8 +160,8 @@ function demoMain(): Flow {
     S('success', 'success', 'Order confirmed', 'sec-chk', 'draft', 'Show the delivery window and a calendar add.'),
     S('failed', 'error', 'Payment failed', 'sec-chk', 'draft'),
     makeNode('terminal', { x: 0, y: 0 }, { name: 'Order placed', role: 'end', section: 'sec-chk' }, 'end'),
-    makeNode('note', { x: 0, y: 0 }, { name: 'Skip the permission screen on Android 13+ until the first order ships.', color: 'yellow', section: 'sec-onb', attach: 'perm' }, 'note-1'),
-    makeNode('note', { x: 0, y: 0 }, { name: 'Retry keeps the cart and the chosen slot for 10 minutes.', color: 'pink', section: 'sec-chk', attach: 'failed' }, 'note-2'),
+    makeNode('note', { x: 0, y: 0 }, { name: 'Skip the permission screen on Android 13+ until the first order ships.', color: 'pen', section: 'sec-onb', attach: 'perm' }, 'note-1'),
+    makeNode('note', { x: 0, y: 0 }, { name: 'Retry keeps the cart and the chosen slot for 10 minutes.', color: 'pen', section: 'sec-chk', attach: 'failed' }, 'note-2'),
   ]
   const E = (s: string, t: string, trigger: Trigger, label = '', happy = false) => makeEdge(s, t, { trigger, label, happy })
   const edges: FlowEdge[] = [
@@ -196,14 +201,15 @@ function demoMain(): Flow {
 
 function demoReset(): Flow {
   const nodes: FlowNode[] = [
-    makeNode('terminal', { x: 0, y: 0 }, { name: 'Forgot password', role: 'start' }, 'r-start'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'login', name: 'Enter email', status: 'shipped' }, 'r-email'),
-    makeNode('decision', { x: 0, y: 0 }, { name: 'Account found?', status: 'shipped' }, 'r-found'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'otp', name: 'Check your inbox', status: 'ready' }, 'r-code'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'signup', name: 'New password', status: 'ready' }, 'r-new'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'error', name: 'No account', status: 'draft', notes: 'Never confirm whether an email exists — show the same message.' }, 'r-none'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'success', name: 'Password updated', status: 'ready' }, 'r-done'),
-    makeNode('terminal', { x: 0, y: 0 }, { name: 'Signed in', role: 'end' }, 'r-end'),
+    makeNode('section', { x: 0, y: 0 }, { name: 'Recover access', hue: WIRE.paper }, 'sec-reset'),
+    makeNode('terminal', { x: 0, y: 0 }, { name: 'Forgot password', role: 'start', section: 'sec-reset' }, 'r-start'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'login', name: 'Enter email', status: 'shipped', section: 'sec-reset' }, 'r-email'),
+    makeNode('decision', { x: 0, y: 0 }, { name: 'Account found?', status: 'shipped', section: 'sec-reset' }, 'r-found'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'otp', name: 'Check your inbox', status: 'ready', section: 'sec-reset' }, 'r-code'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'signup', name: 'New password', status: 'ready', section: 'sec-reset' }, 'r-new'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'error', name: 'No account', status: 'draft', notes: 'Never confirm whether an email exists — show the same message.', section: 'sec-reset' }, 'r-none'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'success', name: 'Password updated', status: 'ready', section: 'sec-reset' }, 'r-done'),
+    makeNode('terminal', { x: 0, y: 0 }, { name: 'Signed in', role: 'end', section: 'sec-reset' }, 'r-end'),
   ]
   const edges: FlowEdge[] = [
     makeEdge('r-start', 'r-email', { trigger: 'tap', label: 'Forgot?', happy: true }),
@@ -219,11 +225,12 @@ function demoReset(): Flow {
 
 function demoUpgrade(): Flow {
   const nodes: FlowNode[] = [
-    makeNode('terminal', { x: 0, y: 0 }, { name: 'Tap “Go Plus”', role: 'start' }, 'u-start'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'paywall', name: 'Plans', status: 'ready' }, 'u-plans'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'payment', name: 'Confirm plan', status: 'draft' }, 'u-pay'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'success', name: 'Welcome to Plus', status: 'draft' }, 'u-ok'),
-    makeNode('note', { x: 0, y: 0 }, { name: 'Annual plan pre-selected? Needs a pricing review first.', color: 'violet', attach: 'u-plans' }, 'u-note'),
+    makeNode('section', { x: 0, y: 0 }, { name: 'Upsell', hue: WIRE.paper }, 'sec-up'),
+    makeNode('terminal', { x: 0, y: 0 }, { name: 'Tap “Go Plus”', role: 'start', section: 'sec-up' }, 'u-start'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'paywall', name: 'Plans', status: 'ready', section: 'sec-up' }, 'u-plans'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'payment', name: 'Confirm plan', status: 'draft', section: 'sec-up' }, 'u-pay'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'success', name: 'Welcome to Plus', status: 'draft', section: 'sec-up' }, 'u-ok'),
+    makeNode('note', { x: 0, y: 0 }, { name: 'Annual plan pre-selected? Needs a pricing review first.', color: 'pen', section: 'sec-up', attach: 'u-plans' }, 'u-note'),
   ]
   const edges: FlowEdge[] = [
     makeEdge('u-start', 'u-plans', { trigger: 'tap', label: '', happy: true }),

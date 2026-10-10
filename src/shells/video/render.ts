@@ -2,9 +2,11 @@
    The renderer: draw(ctx, comp, t, W, H) — pure in (composition, time), so
    scrubbing, preview and frame-stepped MP4 export are the same code path.
    Images are procedural (no network): generated once per (kind, seed, size)
-   and cached.
+   and cached. They are drawn in the wire style (src/demo/wire.ts): the
+   dithered top, labelled slots and a wireframe app screen, one ink on paper.
 --------------------------------------------------------------------------- */
 import { cubicBezier } from '@kit/core/ease'
+import { WIRE, ditherTop, wireImage } from '@/demo/wire'
 import { ASPECTS, type Clip, type Comp, type FontKey, type ImageGen, type Motion } from './comp'
 
 /* ---------- maths ---------- */
@@ -98,109 +100,117 @@ function motionAt(c: Clip, local: number, U: number): Fx {
 }
 
 /* ---------- procedural images ---------- */
+/** What each generator paints now (the keys are historical: they used to be colour gradients). */
+export const IMAGE_LABEL: Record<ImageGen, string> = { aurora: 'Top', sunset: 'Night', mesh: 'Slot', app: 'App UI' }
+
+/* ditherTop / wireImage hand back data URLs, but drawComp is synchronous. Each image is a
+   cached canvas that shows a blank sheet until the PNG has decoded, then it is painted in
+   and listeners (the preview) are told to redraw. `imagesReady` lets exports wait. */
+const pending = new Set<Promise<void>>()
+const readyListeners = new Set<() => void>()
+export function onImageReady(fn: () => void) { readyListeners.add(fn); return () => { readyListeners.delete(fn) } }
+export async function imagesReady(comp: Comp, W: number, H: number) {
+  const U = frameUnit(comp, W, H)
+  for (const c of comp.clips) if (c.kind === 'image') { const b = clipBox(c, W, H, U); imageFor(c, b.w, b.h) }
+  while (pending.size) await Promise.all([...pending])
+}
+function paintURL(c: HTMLCanvasElement, url: string, ground: string = WIRE.sheet, at: [number, number, number, number] = [0, 0, c.width, c.height]) {
+  const g = c.getContext('2d')!
+  g.fillStyle = ground; g.fillRect(0, 0, c.width, c.height)
+  const im = new Image()
+  const p: Promise<void> = new Promise<void>((res) => {
+    im.onload = () => { g.imageSmoothingEnabled = false; g.drawImage(im, ...at); res(); readyListeners.forEach((f) => f()) }
+    im.onerror = () => res()
+  }).finally(() => pending.delete(p))
+  pending.add(p)
+  im.src = url
+}
+const ratioLabel = (w: number, h: number) => {
+  const r = w / h
+  const known: [number, string][] = [[1, '1:1'], [9 / 16, '9:16'], [16 / 9, '16:9'], [4 / 5, '4:5'], [3 / 4, '3:4'], [4 / 3, '4:3'], [2 / 3, '2:3'], [3 / 2, '3:2']]
+  const best = known.reduce((a, k) => (Math.abs(k[0] - r) < Math.abs(a[0] - r) ? k : a))
+  return Math.abs(best[0] - r) < 0.04 ? best[1] : `${Math.round(w)}×${Math.round(h)}`
+}
+
 const imgCache = new Map<string, HTMLCanvasElement>()
 export function proceduralImage(kind: ImageGen, seed: number, w: number, h: number): HTMLCanvasElement {
-  const W = Math.max(64, Math.round(w / 64) * 64), H = Math.max(64, Math.round(h / 64) * 64)
+  // cap the long side at 1600 without changing the aspect
+  const cap = Math.min(1, 1600 / Math.max(w, h))
+  const W = Math.max(64, Math.round((w * cap) / 32) * 32), H = Math.max(64, Math.round((h * cap) / 32) * 32)
   const key = `${kind}:${seed}:${W}x${H}`
   const hit = imgCache.get(key)
   if (hit) return hit
   if (imgCache.size > 40) imgCache.clear()
   const c = document.createElement('canvas')
   c.width = W; c.height = H
-  const g = c.getContext('2d')!
-  const r = rng(seed * 9301 + 49297)
-  const S = Math.min(W, H)
-  if (kind === 'aurora' || kind === 'mesh') {
-    const pal = kind === 'aurora'
-      ? ['#0B0820', '#3B2BBF', '#18C3B1', '#B84DFF', '#FF5FA2', '#2A6BFF']
-      : ['#FFE7D6', '#FF8A65', '#FF5C8A', '#8E7CFF', '#58C4FF', '#FFD166']
-    g.fillStyle = pal[0]; g.fillRect(0, 0, W, H)
-    for (let i = 0; i < (kind === 'aurora' ? 7 : 6); i++) {
-      const x = r() * W, y = (kind === 'aurora' ? 0.15 + r() * 0.6 : r()) * H, rad = (0.35 + r() * 0.5) * S
-      const col = pal[1 + Math.floor(r() * (pal.length - 1))]
-      const grd = g.createRadialGradient(x, y, 0, x, y, rad)
-      grd.addColorStop(0, col + (kind === 'aurora' ? 'cc' : 'ff'))
-      grd.addColorStop(1, col + '00')
-      g.globalCompositeOperation = kind === 'aurora' ? 'screen' : 'source-over'
-      g.fillStyle = grd
-      g.fillRect(0, 0, W, H)
-    }
-    g.globalCompositeOperation = 'source-over'
-    if (kind === 'aurora') { // vertical curtains
-      for (let i = 0; i < 26; i++) {
-        const x = r() * W, wd = (0.01 + r() * 0.04) * W
-        const grd = g.createLinearGradient(0, H * 0.1, 0, H * 0.75)
-        grd.addColorStop(0, 'rgba(120,255,220,0)'); grd.addColorStop(0.5, `rgba(140,255,230,${0.05 + r() * 0.08})`); grd.addColorStop(1, 'rgba(120,255,220,0)')
-        g.fillStyle = grd; g.fillRect(x, 0, wd, H)
-      }
-      for (let i = 0; i < 160; i++) { g.fillStyle = `rgba(255,255,255,${r() * 0.7})`; const s = r() * 1.6 + 0.4; g.fillRect(r() * W, r() * H * 0.5, s, s) }
-    }
-  } else if (kind === 'sunset') {
-    const grd = g.createLinearGradient(0, 0, 0, H)
-    grd.addColorStop(0, '#2B1055'); grd.addColorStop(0.45, '#D53369'); grd.addColorStop(0.7, '#FF9A5A'); grd.addColorStop(1, '#2B1055')
-    g.fillStyle = grd; g.fillRect(0, 0, W, H)
-    const sx = W * (0.35 + r() * 0.3), sy = H * 0.58, sr = S * 0.22
-    const sun = g.createLinearGradient(0, sy - sr, 0, sy + sr)
-    sun.addColorStop(0, '#FFE29A'); sun.addColorStop(1, '#FF6A88')
-    g.fillStyle = sun; g.beginPath(); g.arc(sx, sy, sr, 0, Math.PI * 2); g.fill()
-    g.fillStyle = '#2B1055'
-    for (let i = 0; i < 9; i++) { const y = sy + i * i * S * 0.0035 + S * 0.01; g.fillRect(0, y, W, 2 + i * 1.2) }
-    g.fillStyle = '#1A0B33'; g.beginPath(); g.moveTo(0, H)
-    for (let x = 0; x <= W; x += W / 12) g.lineTo(x, H * 0.72 + Math.sin(x * 0.01 + seed) * S * 0.03 + r() * S * 0.04)
-    g.lineTo(W, H); g.fill()
-  } else if (kind === 'app') {
-    drawAppScreen(g, W, H, r)
+  const at = 0.44 + (((seed * 37) % 13) / 100) // the seed nudges the top sideways
+  if (kind === 'aurora' || kind === 'sunset') {
+    // the top is dithered on a square tile (finer cells than spreading 260 across the long side),
+    // centred on a ground of the same colour, so it sits seamlessly in any aspect
+    const night = kind === 'sunset', S = Math.min(W, H)
+    paintURL(c, ditherTop(S, S, { at, size: 0.6, night }), night ? WIRE.ink : WIRE.paper, [(W - S) / 2, (H - S) / 2, S, S])
   }
-  // film grain, very light
-  const img = g.getImageData(0, 0, W, H)
-  for (let i = 0; i < img.data.length; i += 4) { const nz = (r() - 0.5) * 10; img.data[i] += nz; img.data[i + 1] += nz; img.data[i + 2] += nz }
-  g.putImageData(img, 0, 0)
+  else if (kind === 'mesh') paintURL(c, wireImage(W, H, `image · ${ratioLabel(W, H)}`))
+  else drawAppScreen(c.getContext('2d')!, W, H, rng(seed * 9301 + 49297))
   imgCache.set(key, c)
   return c
 }
+const imageFor = (c: Clip, w: number, h: number) => proceduralImage(c.image ?? 'mesh', c.seed ?? 1, w, h)
 
+/** A calendar app as a wireframe: ink on card, hairline structure, slots for events. */
 function drawAppScreen(g: CanvasRenderingContext2D, W: number, H: number, r: () => number) {
   const u = W / 100
-  g.fillStyle = '#F6F4FF'; g.fillRect(0, 0, W, H)
+  const hair = Math.max(1, u * 0.18)
+  g.fillStyle = WIRE.card; g.fillRect(0, 0, W, H)
   const font = '"Inter Variable", Inter, system-ui, sans-serif'
-  g.fillStyle = '#16122B'; g.font = `700 ${u * 6.4}px ${font}`; g.textBaseline = 'alphabetic'
+  const mono = "'Geist Mono Variable', 'Geist Mono', ui-monospace, Menlo, monospace"
+  g.fillStyle = WIRE.ink; g.font = `700 ${u * 6.4}px ${font}`; g.textBaseline = 'alphabetic'
   g.fillText('This week', u * 7, u * 16)
-  g.fillStyle = '#8A85A8'; g.font = `500 ${u * 3.4}px ${font}`
+  g.fillStyle = WIRE.muted; g.font = `500 ${u * 3.4}px ${font}`
   g.fillText('12 events · 3 focus blocks', u * 7, u * 22)
-  g.fillStyle = '#6E5BFF'; g.beginPath(); g.arc(W - u * 11, u * 13, u * 4.4, 0, Math.PI * 2); g.fill()
-  g.fillStyle = '#FFFFFF'; g.font = `700 ${u * 3.4}px ${font}`; g.textAlign = 'center'; g.fillText('MK', W - u * 11, u * 14.2); g.textAlign = 'left'
+  // avatar slot
+  const ax = W - u * 11, ay = u * 13, ar = u * 4.4
+  g.save(); g.beginPath(); g.arc(ax, ay, ar, 0, Math.PI * 2); g.fillStyle = WIRE.sheet; g.fill(); g.clip()
+  g.strokeStyle = WIRE.ink; g.globalAlpha = 0.28; g.lineWidth = hair
+  g.beginPath(); g.moveTo(ax - ar, ay - ar); g.lineTo(ax + ar, ay + ar); g.moveTo(ax + ar, ay - ar); g.lineTo(ax - ar, ay + ar); g.stroke(); g.restore()
+  g.strokeStyle = WIRE.line; g.lineWidth = hair; g.beginPath(); g.arc(ax, ay, ar, 0, Math.PI * 2); g.stroke()
   const days = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
   const top = u * 30, colW = (W - u * 14) / 7
   days.forEach((d, i) => {
     const x = u * 7 + i * colW
-    g.fillStyle = i === 2 ? '#6E5BFF' : '#8A85A8'; g.font = `600 ${u * 3}px ${font}`; g.textAlign = 'center'
+    g.textAlign = 'center'
+    g.fillStyle = i === 2 ? WIRE.ink : WIRE.faint; g.font = `600 ${u * 3}px ${font}`
     g.fillText(d, x + colW / 2, top)
-    g.fillStyle = i === 2 ? '#16122B' : '#4A4566'; g.font = `600 ${u * 3.6}px ${font}`
+    g.fillStyle = i === 2 ? WIRE.ink : WIRE.muted; g.font = `${i === 2 ? 700 : 500} ${u * 3.6}px ${font}`
     g.fillText(String(12 + i), x + colW / 2, top + u * 5.4)
+    if (i === 2) { g.fillRect(x + colW / 2 - u * 2.2, top + u * 7.2, u * 4.4, hair * 1.6) }
   })
   g.textAlign = 'left'
   const gridTop = top + u * 10, gridH = H - gridTop - u * 26
-  g.strokeStyle = '#E6E2F6'; g.lineWidth = Math.max(1, u * 0.15)
+  g.strokeStyle = WIRE.line; g.lineWidth = hair
   for (let i = 0; i <= 8; i++) { const y = gridTop + (i / 8) * gridH; g.beginPath(); g.moveTo(u * 7, y); g.lineTo(W - u * 7, y); g.stroke() }
-  const cols = ['#6E5BFF', '#FF6B9A', '#18B8A6', '#FFB020', '#4C8DFF']
+  // events: sheet slots with a hairline; the odd one in solid ink for hierarchy
   for (let d = 0; d < 7; d++) {
     let y = gridTop + r() * gridH * 0.15
     while (y < gridTop + gridH * 0.85) {
       const h = (0.08 + r() * 0.16) * gridH
       if (r() > 0.35) {
-        const col = cols[Math.floor(r() * cols.length)]
-        const x = u * 7 + d * colW + u * 0.6
-        g.fillStyle = col + '2a'; g.beginPath(); g.roundRect(x, y, colW - u * 1.2, Math.min(h, gridTop + gridH - y), u * 1.4); g.fill()
-        g.fillStyle = col; g.beginPath(); g.roundRect(x, y, u * 0.8, Math.min(h, gridTop + gridH - y), u * 0.4); g.fill()
+        const x = u * 7 + d * colW + u * 0.6, eh = Math.min(h, gridTop + gridH - y), ew = colW - u * 1.2
+        const solid = r() > 0.84
+        g.beginPath(); g.roundRect(x, y, ew, eh, u * 1.2)
+        g.fillStyle = solid ? WIRE.ink : WIRE.sheet; g.fill()
+        if (!solid) { g.strokeStyle = WIRE.line; g.lineWidth = hair; g.stroke() }
+        g.fillStyle = solid ? WIRE.paper : WIRE.muted
+        g.fillRect(x + u * 1.2, y + u * 1.6, ew * 0.55, hair * 2.2)
       }
       y += h + r() * gridH * 0.08
     }
   }
   // focus card
   const cy = H - u * 22
-  g.fillStyle = '#16122B'; g.beginPath(); g.roundRect(u * 7, cy, W - u * 14, u * 16, u * 4); g.fill()
-  g.fillStyle = '#B9AEFF'; g.font = `600 ${u * 3}px ${font}`; g.fillText('Next up · 10:30', u * 12, cy + u * 6.4)
-  g.fillStyle = '#FFFFFF'; g.font = `700 ${u * 4.4}px ${font}`; g.fillText('Design review', u * 12, cy + u * 12)
+  g.fillStyle = WIRE.ink; g.beginPath(); g.roundRect(u * 7, cy, W - u * 14, u * 16, u * 4); g.fill()
+  g.fillStyle = WIRE.faint; g.font = `500 ${u * 2.8}px ${mono}`; g.fillText('next up · 10:30', u * 12, cy + u * 6.4)
+  g.fillStyle = WIRE.paper; g.font = `700 ${u * 4.4}px ${font}`; g.fillText('Design review', u * 12, cy + u * 12)
 }
 
 /* ---------- draw ---------- */
@@ -279,7 +289,7 @@ function drawClip(ctx: CanvasRenderingContext2D, c: Clip, local: number, W: numb
       break
     }
     case 'image': {
-      const img = proceduralImage(c.image ?? 'mesh', c.seed ?? 1, Math.min(b.w, 1600), Math.min(b.h, 1600) * (b.h > 1600 ? 1 : 1))
+      const img = imageFor(c, b.w, b.h)
       const kb = 1 + (c.kenBurns ?? 0) * (local / c.dur)
       ctx.save()
       ctx.beginPath(); ctx.roundRect(-b.w / 2, -b.h / 2, b.w, b.h, Math.min((c.radius ?? 0) * S, b.w / 2, b.h / 2)); ctx.clip()
@@ -287,7 +297,7 @@ function drawClip(ctx: CanvasRenderingContext2D, c: Clip, local: number, W: numb
       ctx.drawImage(img, (-img.width * k) / 2, (-img.height * k) / 2, img.width * k, img.height * k)
       ctx.restore()
       if (!c.frame && (c.radius ?? 0) > 0) { // device-ish edge
-        ctx.lineWidth = S * 0.004; ctx.strokeStyle = 'rgba(255,255,255,0.18)'
+        ctx.lineWidth = Math.max(1, S * 0.002); ctx.strokeStyle = WIRE.line
         ctx.beginPath(); ctx.roundRect(-b.w / 2, -b.h / 2, b.w, b.h, Math.min((c.radius ?? 0) * S, b.w / 2, b.h / 2)); ctx.stroke()
       }
       break

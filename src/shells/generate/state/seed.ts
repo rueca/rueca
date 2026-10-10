@@ -9,28 +9,28 @@ type Run = { prompt: string; negative?: string; model: ModelId; aspect: string; 
 
 const SESSIONS: { name: string; ago: number; runs: Run[] }[] = [
   {
-    name: 'Alpine travel posters', ago: 3,
+    name: 'Spinning top studies', ago: 3,
     runs: [
-      { prompt: 'Alpine lake at dawn, layered peaks fading into mist, soft film grain, travel poster', negative: 'people, text, watermark', model: 'lumen-xl', aspect: '4:5', seed: 120417, n: 4, ago: 3.2, fav: [1], board: [1, 2] },
-      { prompt: 'The same valley at night, starry sky, crescent moon over the ridge, quiet and cold', model: 'lumen-xl', aspect: '4:5', seed: 88123, n: 2, ago: 3.0, fav: [0] },
-      { prompt: 'Alpine lake at dawn, layered peaks, risograph print, two inks', model: 'riso', aspect: '2:3', seed: 120417, n: 2, ago: 2.9, board: [0] },
-      { prompt: 'Snow fjord at sunrise, glacier, clean minimal composition', model: 'lumen-turbo', aspect: '3:2', seed: 5521, n: 4, ago: 2.8, steps: 6, guidance: 2 },
+      { prompt: 'A spinning top, studio light, seamless paper sweep', negative: 'text, watermark', model: 'lumen-xl', aspect: '4:5', seed: 120417, n: 4, ago: 3.2, fav: [1], board: [1, 2] },
+      { prompt: 'The same top at night, a single spotlight from above', model: 'lumen-xl', aspect: '4:5', seed: 88123, n: 2, ago: 3.0, fav: [0] },
+      { prompt: 'A spinning top, studio light, halftone print, one ink', model: 'riso', aspect: '2:3', seed: 120417, n: 2, ago: 2.9, board: [0] },
+      { prompt: 'Spinning top on paper, wide, minimal composition', model: 'lumen-turbo', aspect: '3:2', seed: 5521, n: 4, ago: 2.8, steps: 6, guidance: 2 },
     ],
   },
   {
-    name: 'Glass & bloom moodboard', ago: 26,
+    name: 'Product shots', ago: 26,
     runs: [
-      { prompt: 'Iridescent glass planet with rings floating in deep space, studio lighting', model: 'photon', aspect: '1:1', seed: 7, n: 4, ago: 26, fav: [2] },
-      { prompt: 'Botanical bloom in coral and cream, soft pastel petals, macro, shallow depth of field', model: 'lumen-xl', aspect: '1:1', seed: 31337, n: 2, ago: 25.6, board: [0] },
-      { prompt: 'Abstract liquid marble, emerald and gold silk, luxury packaging texture', model: 'lumen-xl', aspect: '16:9', seed: 2024, n: 2, ago: 25.2, fav: [0] },
+      { prompt: 'Spinning top close-up, hard key light, long shadow', model: 'photon', aspect: '1:1', seed: 7, n: 4, ago: 26, fav: [2] },
+      { prompt: 'A spinning top, centred, upright, soft light', model: 'lumen-xl', aspect: '1:1', seed: 31337, n: 2, ago: 25.6, board: [0] },
+      { prompt: 'Spinning top mid-spin, low angle, studio light', model: 'lumen-xl', aspect: '16:9', seed: 2024, n: 2, ago: 25.2, fav: [0] },
     ],
   },
   {
-    name: 'Night city', ago: 50,
+    name: 'Dark set', ago: 50,
     runs: [
-      { prompt: 'Neon city skyline in the rain, wet street reflections, cinematic, 35mm film', model: 'photon', aspect: '16:9', seed: 4471, n: 3, ago: 50, fav: [0], board: [0] },
-      { prompt: 'Desert dunes at golden hour, long shadows, minimal', model: 'lumen-turbo', aspect: '21:9', seed: 902, n: 2, ago: 49.5, steps: 6, guidance: 2 },
-      { prompt: 'Ocean waves at sunset, glittering water, misty horizon', model: 'lumen-xl', aspect: '3:2', seed: 64, n: 2, ago: 49.2 },
+      { prompt: 'Spinning top in the dark, moody, one spotlight, 35mm', model: 'photon', aspect: '16:9', seed: 4471, n: 3, ago: 50, fav: [0], board: [0] },
+      { prompt: 'A spinning top, wide, negative space, minimal', model: 'lumen-turbo', aspect: '21:9', seed: 902, n: 2, ago: 49.5, steps: 6, guidance: 2 },
+      { prompt: 'Spinning top at night, low key, long shadow', model: 'lumen-xl', aspect: '3:2', seed: 64, n: 2, ago: 49.2 },
     ],
   },
 ]

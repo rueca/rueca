@@ -11,7 +11,8 @@ import {
   useStudio,
 } from '@kit'
 import { ASPECTS, demoComp, type Aspect, type Clip, type ClipKind } from './comp'
-import { clipBox, drawComp, frameUnit, hitTest } from './render'
+import { WIRE } from '@/demo/wire'
+import { IMAGE_LABEL, clipBox, drawComp, frameUnit, hitTest, imagesReady, onImageReady } from './render'
 import { ClipInspector, thumbURL } from './ClipInspector'
 import { TrackTimeline, type TimelineClip } from '@kit/timeline/TrackTimeline'
 import {
@@ -34,21 +35,21 @@ const LIB: { group: string; items: { label: string; kind: ClipKind; patch: Parti
   {
     group: 'Text', items: [
       { label: 'Headline', kind: 'text', patch: { name: 'Headline', text: 'Big idea', font: 'display', weight: 800, size: 150, tracking: -0.04 }, preview: <span className="text-[15px] font-extrabold tracking-tight">Aa</span> },
-      { label: 'Subtitle', kind: 'text', patch: { name: 'Subtitle', text: 'A line that explains it', font: 'sans', weight: 500, size: 56, color: '#D9D3FF', tracking: -0.01, y: 0.55, enter: { preset: 'blur', dur: 600, ease: [0.16, 1, 0.3, 1] } }, preview: <span className="text-[12px] font-medium">Aa</span> },
-      { label: 'Caption', kind: 'text', patch: { name: 'Caption', text: 'say it in captions', font: 'sans', weight: 700, size: 64, color: '#141414', highlight: '#FFD84D', y: 0.7, tracking: -0.01, enter: { preset: 'pop', dur: 400, ease: [0.34, 1.56, 0.64, 1] } }, preview: <span className="rounded-[3px] bg-[#FFD84D] px-1 text-[11px] font-bold text-[#141414]">Aa</span> },
-      { label: 'Mono label', kind: 'text', patch: { name: 'Label', text: 'new · v2.0', font: 'mono', weight: 500, size: 38, tracking: 0.06, color: '#FFFFFFB3', y: 0.3, enter: { preset: 'typewriter', dur: 600, ease: [0, 0, 1, 1] } }, preview: <span className="font-mono text-[11px]">a_</span> },
+      { label: 'Subtitle', kind: 'text', patch: { name: 'Subtitle', text: 'A line that explains it', font: 'sans', weight: 500, size: 56, color: WIRE.muted, tracking: -0.01, y: 0.55, enter: { preset: 'blur', dur: 600, ease: [0.16, 1, 0.3, 1] } }, preview: <span className="text-[12px] font-medium">Aa</span> },
+      { label: 'Caption', kind: 'text', patch: { name: 'Caption', text: 'say it in captions', font: 'sans', weight: 700, size: 64, color: WIRE.ink, highlight: WIRE.sheet, y: 0.7, tracking: -0.01, enter: { preset: 'pop', dur: 400, ease: [0.34, 1.56, 0.64, 1] } }, preview: <span className="rounded-[3px] bg-[#E8E1D6] px-1 text-[11px] font-bold text-[#1C1A19]">Aa</span> },
+      { label: 'Mono label', kind: 'text', patch: { name: 'Label', text: 'new · v2.0', font: 'mono', weight: 500, size: 38, tracking: 0.06, color: WIRE.muted, y: 0.3, enter: { preset: 'typewriter', dur: 600, ease: [0, 0, 1, 1] } }, preview: <span className="font-mono text-[11px]">a_</span> },
     ],
   },
   {
     group: 'Shapes', items: [
-      { label: 'Circle', kind: 'shape', patch: { name: 'Circle', shape: 'circle', fill: '#8B7CFF' }, preview: <Circle size={16} strokeWidth={1.5} /> },
-      { label: 'Pill', kind: 'shape', patch: { name: 'Pill', shape: 'rect', w: 0.6, h: 0.11, radius: 1, fill: '#FFFFFF' }, preview: <span className="h-2.5 w-6 rounded-full bg-current" /> },
-      { label: 'Ring', kind: 'shape', patch: { name: 'Ring', shape: 'ring', w: 0.7, h: 0.7, fill: '#FF6B9A', stroke: 0.015 }, preview: <CircleDashed size={16} strokeWidth={1.5} /> },
-      { label: 'Blob', kind: 'shape', patch: { name: 'Blob', shape: 'blob', w: 0.6, h: 0.55, fill: '#18C3B1' }, preview: <Shapes size={16} strokeWidth={1.5} /> },
+      { label: 'Circle', kind: 'shape', patch: { name: 'Circle', shape: 'circle', fill: WIRE.ink }, preview: <Circle size={16} strokeWidth={1.5} /> },
+      { label: 'Pill', kind: 'shape', patch: { name: 'Pill', shape: 'rect', w: 0.6, h: 0.11, radius: 1, fill: WIRE.ink }, preview: <span className="h-2.5 w-6 rounded-full bg-current" /> },
+      { label: 'Ring', kind: 'shape', patch: { name: 'Ring', shape: 'ring', w: 0.7, h: 0.7, fill: WIRE.ink, stroke: 0.004 }, preview: <CircleDashed size={16} strokeWidth={1.5} /> },
+      { label: 'Blob', kind: 'shape', patch: { name: 'Blob', shape: 'blob', w: 0.6, h: 0.55, fill: WIRE.sheet }, preview: <Shapes size={16} strokeWidth={1.5} /> },
     ],
   },
 ]
-const IMAGES = [['aurora', 'Aurora'], ['sunset', 'Sunset'], ['mesh', 'Mesh'], ['app', 'App UI']] as const
+const IMAGES = (['aurora', 'sunset', 'mesh', 'app'] as const).map((g) => [g, IMAGE_LABEL[g]] as const)
 
 function LibraryPanel() {
   return (
@@ -241,6 +242,8 @@ export default function VideoShell() {
     rampOut: c.exit.preset !== 'none' ? c.exit.dur : 0,
   })), [comp, sel])
 
+  // procedural images decode asynchronously — repaint the preview when one lands
+  useEffect(() => onImageReady(() => surface.current?.invalidate()), [])
   // keep the selection valid after undo
   useEffect(() => { const ids = new Set(comp.clips.map((c) => c.id)); if (sel.some((s) => !ids.has(s))) ui.setState({ sel: sel.filter((s) => ids.has(s)) }) }, [comp, sel])
   // play the teaser once on open
@@ -257,6 +260,7 @@ export default function VideoShell() {
     const canvas = document.createElement('canvas')
     canvas.width = EW; canvas.height = EH
     const ctx = canvas.getContext('2d', { alpha: false })!
+    await imagesReady(snapshot, W, H)
     const total = Math.max(1, Math.round((dur / 1000) * fps))
     const ac = new AbortController()
     const pt = toast.progress('Exporting MP4', { onCancel: () => ac.abort() })
@@ -272,7 +276,8 @@ export default function VideoShell() {
       else pt.fail('This browser cannot encode video', { description: 'Try Chrome, Edge or Safari 17+.' })
     } catch (e) { pt.fail('Export failed', { description: (e as Error).message }) }
   }
-  const exportPNG = () => {
+  const exportPNG = async () => {
+    await imagesReady(getComp(), W, H)
     const c = document.createElement('canvas')
     c.width = W; c.height = H
     drawComp(c.getContext('2d')!, getComp(), clock.time(), W, H, { matte: v.matte })
