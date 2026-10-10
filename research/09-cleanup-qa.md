@@ -36,3 +36,20 @@ Held up: no unused files; all 68 kit files in barrel + registry; no TODO/FIXME o
 | D9 | P2 | README vs install.md disagree on theme import order (order doesn't matter: no shared vars) | align |
 | D10–16 | P2/P3 | stale STATUS / SESSION-CONTEXT lines, duplicate gotcha rows, undocumented savePreset return + `--artboard-font`, `w/3` promised but rejected, starter has no `.catch` | fix |
 Held up: every documented API exists (393 exports, ~2,100 doc tokens) and a file calling every documented API/prop typechecks; the starter typechecks and builds in the fresh install; registry 40 items all resolve; plugin validate passes.
+
+## 3. Live site and performance (agent "perf") — medians of 3 runs, fast and Slow-4G + 4× CPU
+| ID | Sev | Finding | Action |
+|---|---|---|---|
+| PERF-01 | P1 | hashed assets served `max-age=0, must-revalidate`: every visit revalidates (19 of 38 requests on the landing) | **fixed**: vercel.json headers (assets immutable 1 y; thumbs/demo 1 d + swr) |
+| PERF-02 | P1 | gallery loads 1440px JPEGs into 341px cards: 2.6 MB, Slow-4G LCP 13.8 s | 720w WebP/AVIF + srcset (gallery owner) |
+| PERF-03 | P1 | `thumbs/rail/present-*.jpg` are 2160px, 1.05 MB each | re-capture at 1440 |
+| PERF-04 | P1 | `@kit` barrel imported by LiveFrame / LiveShell / ShellRail makes all 266 KB gz of kit eager; narrow imports −117 KB gz (verified) | landing owner |
+| PERF-05 | P2 | landing + `motion` in the entry chunk → every shell route pays ~60 KB br | lazy Landing in App.tsx; LazyMotion |
+| PERF-06 | P2 | mediabunny (57 KB br) loads when 5 shells open | **fixed**: dynamic import on first export |
+| PERF-07 | P2 | hero thumbnail is LCP, found late, no priority | `fetchpriority="high"`, WebP/AVIF |
+| PERF-08 | P2 | no description / OG / Twitter / canonical / theme-color; bots see "Rueca" | **fixed**: meta from site.config in vite.config (og.png + touch icon still to design) |
+| PERF-09 | P2 | no font preload; 192 KB fonts; owner sees local trial display font, visitors see the fallback | preload 2 faces, subset hand font; QA with the trial font disabled |
+| PERF-10 | P2 | animate art 711 KB (now ~346 KB after the v2 swap); AVIF −62% | check engraving at 1:1 first |
+| PERF-11 | P3 | 12.9 MB QA PNGs deployed | **fixed** (D1) |
+| PERF-12 | P3 | `/nope` plain-text 404; `#/nope` silently shows the landing | gallery owner |
+Held up: brotli everywhere, HTTPS/www redirects 308 + HSTS, `/r/*.json` CORS + 404s, font-display swap + latin subsets, CLS ≈ 0, no failed requests.

@@ -16,7 +16,8 @@
    recordCanvas). Picks H.264 in MP4, then VP9 / AV1, then WebM.
    (Promoted from shells/shader/local/recordFrames.ts.)
 --------------------------------------------------------------------------- */
-import { BufferTarget, CanvasSource, Mp4OutputFormat, Output, WebMOutputFormat, getFirstEncodableVideoCodec } from 'mediabunny'
+// mediabunny (~57 KB br) loads on first use, not when a shell opens (cleanup PERF-06).
+const mb = () => import('mediabunny')
 import { download } from './io'
 
 export interface RecordOptions {
@@ -35,13 +36,14 @@ export interface RecordOptions {
 
 export async function canRecordFrames(w: number, h: number) {
   if (typeof VideoEncoder === 'undefined') return false
-  try { return !!(await getFirstEncodableVideoCodec(['avc', 'vp9', 'av1'], { width: w, height: h })) } catch { return false }
+  try { const { getFirstEncodableVideoCodec } = await mb(); return !!(await getFirstEncodableVideoCodec(['avc', 'vp9', 'av1'], { width: w, height: h })) } catch { return false }
 }
 
 /** Returns the Blob written (and downloads it), or null if this browser can't encode. */
 export async function recordFrames(o: RecordOptions): Promise<Blob | null> {
   if (typeof VideoEncoder === 'undefined') return null
   const { width: w, height: h } = o.canvas
+  const { BufferTarget, CanvasSource, Mp4OutputFormat, Output, WebMOutputFormat, getFirstEncodableVideoCodec } = await mb()
   const codec = await getFirstEncodableVideoCodec(['avc', 'vp9', 'av1'], { width: w, height: h })
   if (!codec) return null
   const mp4 = codec === 'avc' || codec === 'av1'
@@ -67,7 +69,7 @@ export async function recordFrames(o: RecordOptions): Promise<Blob | null> {
     try { await output.cancel() } catch { /* already gone */ }
     throw e
   }
-  const buf = (output.target as BufferTarget).buffer
+  const buf = (output.target as InstanceType<typeof BufferTarget>).buffer
   if (!buf) return null
   const blob = new Blob([buf], { type: mp4 ? 'video/mp4' : 'video/webm' })
   download(blob, o.name.replace(/\.\w+$/, mp4 ? '.mp4' : '.webm'))

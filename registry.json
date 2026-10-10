@@ -232,7 +232,6 @@
       "description": "Schema, param store (undo, presets, A/B, share), clock, hotkeys, IO and theme hook. Framework-agnostic.",
       "dependencies": [
         "clsx@^2.1.1",
-        "mediabunny@^1.61.3",
         "tailwind-merge@^3.7.0",
         "zustand@^5.0.15"
       ],
