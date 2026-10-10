@@ -20,6 +20,8 @@
    Keyboard: each handle is role="slider" — ← → ±1 px (shift ±10), PgUp / PgDn
    ±100, Home / End min / max. Reports final=false mid-drag, true on release.
    Use it inside <Stage fill> or any full-height box; it scrolls vertically.
+   `chrome={false}` drops the header row when the shell's own toolbar carries
+   the width controls; presets go icon-only when the stage is narrow.
    (Promoted from shells/component-lab/local/ViewportFrame.tsx.)
 --------------------------------------------------------------------------- */
 import { useLayoutEffect, useRef, useState, type ComponentType, type CSSProperties, type ReactNode } from 'react'
@@ -31,7 +33,7 @@ import { Tip } from '../ui/tooltip'
 export interface ViewportPreset { label: string; width: number; icon?: ComponentType<{ size?: number; strokeWidth?: number }> }
 
 export function ViewportFrame({
-  width, onWidth, presets = [], min = 280, max = 1600, minHeight = 420, background, label = 'Viewport', toolbar, frameClassName, frameStyle, className, children,
+  width, onWidth, presets = [], min = 280, max = 1600, minHeight = 420, background, label = 'Viewport', toolbar, chrome = true, frameClassName, frameStyle, className, children,
 }: {
   width: number
   onWidth: (w: number, final: boolean) => void
@@ -45,6 +47,8 @@ export function ViewportFrame({
   label?: string
   /** extra controls at the end of the header row */
   toolbar?: ReactNode
+  /** false = no header row (presets, width field, toolbar) — drive `width` from your own toolbar */
+  chrome?: boolean
   frameClassName?: string
   frameStyle?: CSSProperties
   className?: string
@@ -71,6 +75,8 @@ export function ViewportFrame({
   }, [])
   const scale = Math.min(1, Math.max(0.1, avail / width))
   const active = presets.find((p) => p.width === width)?.label ?? ''
+  // narrow stage: icon-only presets so the header never clips (QA F10)
+  const iconOnly = avail < 720 && presets.length > 0 && presets.every((p) => p.icon)
   const widthAt = (clientX: number, d: NonNullable<typeof drag>) => Math.round(clamp(d.w0 + ((clientX - d.x0) * 2 * d.side) / scale, min, max))
 
   const handle = (side: -1 | 1) => (
@@ -95,10 +101,10 @@ export function ViewportFrame({
 
   return (
     <div className={cn('flex h-full min-h-0 flex-col', className)}>
-      <div className="flex flex-none items-center justify-center gap-2 px-4 pt-3 pb-2">
+      {chrome && <div className="flex flex-none items-center justify-center gap-2 px-4 pt-3 pb-2">
         {presets.length > 0 && (
-          <div style={{ width: Math.min(360, presets.length * 88) }}>
-            <Segmented size="sm" value={active} label={`${label} preset`}
+          <div style={{ width: iconOnly ? presets.length * 30 : Math.min(360, presets.length * 88) }}>
+            <Segmented size="sm" value={active} label={`${label} preset`} iconOnly={iconOnly}
               onChange={(l) => { const p = presets.find((x) => x.label === l); if (p) onWidth(p.width, true) }}
               options={presets.map((p) => ({ value: p.label, label: p.label, icon: p.icon, hint: `${p.label} · ${p.width}px` }))} />
           </div>
@@ -106,7 +112,7 @@ export function ViewportFrame({
         <ScrubValue boxed value={width} min={min} max={max} step={1} unit="px" label={`${label} width`} onChange={(v, f) => onWidth(v, f)} className="w-[76px]" />
         {scale < 1 && <Tip label="The frame is wider than the stage and is shown scaled down"><span className="tabular text-[11px] text-fg-faint">{Math.round(scale * 100)}%</span></Tip>}
         {toolbar}
-      </div>
+      </div>}
       <div ref={stage} className="relative min-h-0 flex-1 overflow-auto">
         <div className="flex min-h-full items-start justify-center px-6 pt-6 pb-16">
           <div className="relative" style={{ width: width * scale }}>

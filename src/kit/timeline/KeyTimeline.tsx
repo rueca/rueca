@@ -33,7 +33,7 @@
      ruler (slider)   ← → one frame (Shift ×10) · Home / End
      key area         ← → nudge selected keys a frame (Shift ×10; with nothing
                       selected, steps the playhead) · [ ] select previous /
-                      next key in time · ⌘A select all · Delete removes ·
+                      next key in time (in the selected key's lane, if one) · ⌘A select all · Delete removes ·
                       Esc clears the selection
    The playhead (bg-rec, never the accent) is painted from the clock, so
    React never re-renders per frame. `autoKey` rings the panel in rec and
@@ -256,7 +256,11 @@ export function KeyTimeline(props: KeyTimelineProps) {
   }
   const selectAdjacent = (dir: 1 | -1) => {
     const now = mapTime(clock.time())
-    const all = [...keyIndex.entries()].sort((a, b) => a[1] - b[1])
+    // With keys selected in ONE lane, step along that lane (After Effects J/K); otherwise across all lanes.
+    const laneOf = new Map(lanes.flatMap((l) => (l.kind === 'prop' ? l.keys.map((k) => [k.id, l.id] as const) : [])))
+    const selLanes = new Set([...selectedIds].map((id) => laneOf.get(id)))
+    const only = selLanes.size === 1 ? [...selLanes][0] : undefined
+    const all = [...keyIndex.entries()].filter(([id]) => !only || laneOf.get(id) === only).sort((a, b) => a[1] - b[1])
     const hit = dir > 0 ? all.find(([, t]) => t > now + 0.5) : [...all].reverse().find(([, t]) => t < now - 0.5)
     if (!hit) return
     const at = all.filter(([, t]) => Math.abs(t - hit[1]) < 0.5).map(([id]) => id)
@@ -384,19 +388,19 @@ export function KeyTimeline(props: KeyTimelineProps) {
                   style={{ height: ROW, paddingLeft: 6 + (l.depth ?? 0) * 12 }}>
                   {l.kind === 'group' ? (
                     <button type="button" aria-label={`${l.open ? 'Collapse' : 'Expand'} ${l.label}`} aria-expanded={!!l.open} onClick={() => props.onToggleLane?.(l.id)}
-                      className="flex size-4 shrink-0 items-center justify-center rounded-[3px] text-fg-faint outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+                      className="flex h-6 w-4 shrink-0 items-center justify-center rounded-[3px] text-fg-faint outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
                       <ChevronRight size={11} strokeWidth={2} className={cn('transition-transform', l.open && 'rotate-90')} />
                     </button>
                   ) : <span className="w-4 shrink-0" />}
                   {l.icon && <l.icon size={13} strokeWidth={1.5} className={cn('shrink-0', l.highlight ? 'text-signal' : 'text-fg-faint')} />}
-                  <button type="button" onClick={() => props.onLaneClick?.(l.id)} className={cn('min-w-0 flex-1 truncate text-left outline-none focus-visible:underline', l.kind === 'group' && 'font-medium')}>{l.label}</button>
+                  <button type="button" onClick={() => props.onLaneClick?.(l.id)} className={cn('h-6 min-w-0 flex-1 truncate text-left outline-none focus-visible:underline', l.kind === 'group' && 'font-medium')}>{l.label}</button>
                   {l.value !== undefined && <span className="shrink-0 tabular text-[11px] text-fg-faint">{l.value}</span>}
                   {l.trailing}
                 </div>
               ))}
             </div>
             <div ref={area} role="group" tabIndex={0}
-              aria-label={`Keyframes — ${selectedIds.size} selected. Arrow keys nudge, brackets select the previous or next key, Delete removes.`}
+              aria-label={`Keyframes — ${selectedIds.size} selected. Arrow keys nudge, brackets select the previous or next key (within the selected key's lane), Delete removes.`}
               className="relative min-w-0 flex-1 outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--signal)]" style={{ minHeight: bodyH }}
               onPointerDown={onAreaDown} onPointerMove={onAreaMove} onPointerUp={onAreaUp} onKeyDown={onAreaKey}>
               {/* past-the-end shade */}
