@@ -300,6 +300,8 @@ export function FlowCanvas() {
         nodesConnectable={tool === 'select' && interactive}
         elementsSelectable={tool !== 'hand' && interactive}
         edgesReconnectable={tool === 'select' && interactive}
+        // 22 edge tab stops before the nodes made Tab useless; edges are reached from the inspector's Connections list (break-it A9)
+        edgesFocusable={false}
         elevateNodesOnSelect={false}
         snapToGrid={v.snap}
         snapGrid={[v.grid, v.grid]}

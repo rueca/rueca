@@ -4,7 +4,8 @@
    export works for any node at any scale. Mirrors NodeView's semantics.
 --------------------------------------------------------------------------- */
 import { createElement } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
+import { createRoot } from 'react-dom/client'
+import { flushSync } from 'react-dom'
 import type { Box, Node, Paint } from '../model/types'
 import { lineHeightOf, setFont, textLines, layoutNodes, type LayoutMap } from '../model/layout'
 import { loadImage, imageSync } from '../model/images'
@@ -21,7 +22,14 @@ function iconSvg(n: Node, size: number) {
   const f = n.fills.find((p) => p.visible)
   const Icon = ICONS[n.icon!.name]
   if (!Icon) return ''
-  return renderToStaticMarkup(createElement(Icon, { size, color: f ? rgba(f.color, f.opacity) : '#000', strokeWidth: n.icon!.stroke }))
+  // Render into a detached element with the client renderer already in the app — react-dom/server
+  // added ~190 KB to this chunk for one call (break-it PERF-5).
+  const host = document.createElement('div')
+  const root = createRoot(host)
+  flushSync(() => root.render(createElement(Icon, { size, color: f ? rgba(f.color, f.opacity) : '#000', strokeWidth: n.icon!.stroke })))
+  const html = host.innerHTML
+  root.unmount()
+  return html
 }
 
 /** Decode every image and rasterise every icon the subtree needs. */

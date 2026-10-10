@@ -93,10 +93,14 @@ accent sits near a semantic colour, "selected" reads as "recording" or "keyframe
   | cyan | 222° | `#00a5cb` / `#007590` | `#008eaf` / `#006e89` |
 
   Override in the project's own CSS, after the theme import. Never edit the kit's
-  theme file:
+  theme file. `:root:root` outranks the theme's own `:root` rules, and the media block
+  covers pages that follow the OS theme:
   ```css
-  :root       { --signal: #d561c8; --signal-strong: #9e3a93; --signal-soft: rgb(213 97 200 / .16); }
-  :root.light { --signal: #be4bb1; --signal-strong: #97338d; --signal-soft: rgb(190 75 177 / .12); }
+  :root:root       { --signal: #d561c8; --signal-strong: #9e3a93; --signal-soft: rgb(213 97 200 / .16); }
+  :root:root.light { --signal: #be4bb1; --signal-strong: #97338d; --signal-soft: rgb(190 75 177 / .12); }
+  @media (prefers-color-scheme: light) {
+    :root:root:not(.dark) { --signal: #be4bb1; --signal-strong: #97338d; --signal-soft: rgb(190 75 177 / .12); }
+  }
   ```
 - **One accent per project, not per theme.** If dark and light disagree, pick one
   fallback for both.

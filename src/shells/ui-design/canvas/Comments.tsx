@@ -55,7 +55,7 @@ function Thread({ c }: { c: Comment }) {
     <div className="pop pointer-events-auto absolute top-[-28px] left-9 w-[264px] p-3" onPointerDown={(e) => e.stopPropagation()} data-chrome>
       {!isNew && (
         <div className="mb-2 flex items-start gap-2">
-          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-active text-[10px] font-semibold text-fg">{initials(c.author)}</div>
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-active text-[10.5px] font-semibold text-fg">{initials(c.author)}</div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 text-[11.5px]"><span className="font-medium text-fg">{c.author}</span><span className="text-fg-faint">{ago(c.at)}</span></div>
             <p className="mt-0.5 text-[12px] leading-relaxed text-fg select-text">{c.text}</p>

@@ -59,7 +59,7 @@ function Pin({ c, open }: { c: Comment; open: boolean }) {
       className={cn('absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-[10.5px] font-semibold text-white outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-signal', c.resolved && 'opacity-50')}
       style={{ pointerEvents: 'all', background: deepen(p.hue), boxShadow: `0 0 0 2px ${open ? 'var(--signal)' : 'var(--panel)'}, var(--shadow-cluster)` }}>
       {c.resolved ? <Check size={12} strokeWidth={2.5} /> : p.initials}
-      {c.replies.length > 0 && !c.resolved && <span className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-panel text-[8.5px] text-fg tabular shadow-[0_0_0_1px_var(--line-strong)]">{c.replies.length + 1}</span>}
+      {c.replies.length > 0 && !c.resolved && <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-panel px-0.5 text-[10.5px] leading-none text-fg tabular shadow-[0_0_0_1px_var(--line-strong)]">{c.replies.length + 1}</span>}
     </button>
   )
 }

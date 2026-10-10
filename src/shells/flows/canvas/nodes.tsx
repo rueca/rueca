@@ -14,8 +14,12 @@ export const STATUS: Record<Status, { label: string; dot: string; text: string }
   shipped: { label: 'Shipped', dot: 'bg-ok', text: 'text-ok' },
 }
 
-export function StatusDot({ status = 'draft', className }: { status?: Status; className?: string }) {
-  return <span aria-label={STATUS[status].label} className={cn('inline-block size-[7px] shrink-0 rounded-full', STATUS[status].dot, status === 'draft' && 'bg-transparent shadow-[inset_0_0_0_1.5px_var(--fg-faint)]', className)} />
+/** Status by shape as well as colour (WCAG 1.4.1): draft hollow · ready half-filled · shipped full. */
+export function StatusDot({ status = 'draft', className, decorative }: { status?: Status; className?: string; /** next to a visible label: hide from AT */ decorative?: boolean }) {
+  const a11y = decorative ? { 'aria-hidden': true } : { role: 'img', 'aria-label': `Status: ${STATUS[status].label}`, title: STATUS[status].label }
+  return <span {...a11y} className={cn('inline-block size-[7px] shrink-0 rounded-full', STATUS[status].dot,
+    status === 'draft' && 'bg-transparent shadow-[inset_0_0_0_1.5px_var(--fg-faint)]',
+    status === 'ready' && 'bg-[conic-gradient(var(--signal)_0_50%,transparent_0)] shadow-[inset_0_0_0_1.5px_var(--signal)]', className)} />
 }
 
 function Handles() {

@@ -4,7 +4,7 @@ import {
   ReactFlow, Background, BackgroundVariant, MiniMap, useReactFlow, useViewport, useStore as useFlowStore,
   type FinalConnectionState, type XYPosition,
 } from '@xyflow/react'
-import { Kbd, ZoomPill, toast, useHotkeys, useTheme, useValues } from '@kit'
+import { Kbd, ZoomPill, toast, useHotkeys, useStudio, useTheme, useValues } from '@kit'
 import { QuickAdd, type QuickAddItem } from '@kit/system/quick-add'
 import { specOf, portOf, type PortType } from '../engine/spec'
 import { DEF_LIST, catVar, defOf } from './defs'
@@ -43,6 +43,7 @@ export function GraphCanvas() {
   const nodes = useGraph((s) => s.nodes)
   const edges = useGraph((s) => s.edges)
   const v = useValues(doc)
+  const { present } = useStudio()   // ⌘\ hides the canvas HUD too (break-it F3)
   const { theme } = useTheme()
   const rf = useReactFlow()
   const wrap = useRef<HTMLDivElement>(null)
@@ -173,8 +174,8 @@ export function GraphCanvas() {
         style={{ '--xy-edge-stroke-width': 1.75 } as CSSProperties}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color="var(--line-strong)" />
-        {v.minimap && <MiniMap pannable zoomable position="bottom-left" nodeBorderRadius={8} nodeColor={(n) => catVar(defOf((n.data as any).kind).category)} maskColor="color-mix(in srgb, var(--field) 65%, transparent)" />}
-        <FlowZoom />
+        {v.minimap && !present && <MiniMap pannable zoomable position="bottom-left" nodeBorderRadius={8} nodeColor={(n) => catVar(defOf((n.data as any).kind).category)} maskColor="color-mix(in srgb, var(--field) 65%, transparent)" />}
+        {!present && <FlowZoom />}
       </ReactFlow>
 
       {nodes.length <= 1 && (

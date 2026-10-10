@@ -8,6 +8,7 @@ import {
   Artboard, Brand, Button, CanvasSurface, Cluster, CommandPalette, Empty, IconButton, Menu, Panel, PanelHeader, ParamActions, Section, Segmented, Stage,
   Studio, Toolbar, cn, download, exportJSON, fmtTime, recordFrames, shareMenuItems, toast, useCamera, useClock, useClockTime, useHotkeys, useValues,
   type Command, type MenuItem, type SurfaceHandle,
+  useStudio,
 } from '@kit'
 import { ASPECTS, demoComp, type Aspect, type Clip, type ClipKind } from './comp'
 import { clipBox, drawComp, frameUnit, hitTest } from './render'
@@ -134,6 +135,7 @@ function CanvasOverlay({ W, H }: { W: number; H: number }) {
   const t = useClockTime(clock, 10)
   const el = useRef<HTMLDivElement>(null)
   const [guides, setGuides] = useState<{ x: boolean; y: boolean }>({ x: false, y: false })
+  const { present } = useStudio()   // ⌘\ shows the frame only: no safe areas, guides or selection (break-it F3)
 
   const toFrame = (e: { clientX: number; clientY: number }) => {
     const r = el.current!.getBoundingClientRect()
@@ -186,10 +188,10 @@ function CanvasOverlay({ W, H }: { W: number; H: number }) {
   const aspect = v.aspect as Aspect
   return (
     <div ref={el} className="absolute inset-0" onPointerDown={onDown} onDoubleClick={() => { if (c?.kind === 'text') document.querySelector<HTMLTextAreaElement>('textarea[aria-label="Text content"]')?.focus() }}>
-      {v.safeArea && <SafeAreas aspect={aspect} W={W} H={H} zoom={zoom} />}
-      {guides.x && <div className="pointer-events-none absolute top-0 bottom-0" style={{ left: W / 2 - lw / 2, width: lw, background: 'var(--rec)' }} />}
-      {guides.y && <div className="pointer-events-none absolute right-0 left-0" style={{ top: H / 2 - lw / 2, height: lw, background: 'var(--rec)' }} />}
-      {c && b && (
+      {v.safeArea && !present && <SafeAreas aspect={aspect} W={W} H={H} zoom={zoom} />}
+      {guides.x && !present && <div className="pointer-events-none absolute top-0 bottom-0" style={{ left: W / 2 - lw / 2, width: lw, background: 'var(--rec)' }} />}
+      {guides.y && !present && <div className="pointer-events-none absolute right-0 left-0" style={{ top: H / 2 - lw / 2, height: lw, background: 'var(--rec)' }} />}
+      {c && b && !present && (
         <div className="pointer-events-none absolute" style={{ left: b.cx - b.w / 2, top: b.cy - b.h / 2, width: b.w, height: b.h, transform: `rotate(${b.rotation}deg)`, outline: `${lw}px ${live ? 'solid' : 'dashed'} var(--signal)` }}>
           <div className="absolute bottom-full left-0 flex origin-bottom-left items-center gap-1 rounded-[4px] bg-signal-strong px-1.5 py-0.5 text-[11px] whitespace-nowrap text-signal-fg" style={{ transform: `scale(${1 / zoom}) translateY(-4px)` }}>
             {c.name}{!live && <span className="opacity-70">· not at playhead</span>}

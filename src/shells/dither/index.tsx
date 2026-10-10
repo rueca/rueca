@@ -325,13 +325,14 @@ function StatusPill() {
     : r.kind === 'halftone' ? `${r.count.toLocaleString()} dots`
     : `${r.cols} × ${r.rows} chars`
   return (
-    <div className="cluster absolute bottom-3 left-3 z-10 flex h-8 max-w-[calc(50%-120px)] items-center gap-2 overflow-hidden px-2.5 text-[11.5px] no-select" aria-live="polite">
+    // narrow stages: the effect name gives way first, then the size — each with an ellipsis, never a hard clip (break-it F10)
+    <div className="cluster absolute bottom-3 left-3 z-10 flex h-8 max-w-[calc(50%-96px)] min-w-0 items-center gap-2 overflow-hidden px-2.5 text-[11.5px] no-select" aria-live="polite">
       {error ? <span className="size-1.5 shrink-0 rounded-full bg-rec" />
         : busy ? <span className="size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" />
         : <span className="size-1.5 shrink-0 rounded-full bg-ok" />}
-      <span className="truncate text-fg">{error ? error : preview ? `Preview: ${preview}` : effectLabel(effect)}</span>
-      <span className="shrink-0 tabular text-fg-muted">{detail}</span>
-      {r && <span className="shrink-0 tabular text-fg-faint" title={threaded ? 'Processed in a worker' : 'Processed on the main thread'}>{Math.round(r.ms)} ms</span>}
+      <span className="min-w-0 shrink-[100] truncate text-fg">{error ? error : preview ? `Preview: ${preview}` : effectLabel(effect)}</span>
+      <span className="min-w-0 truncate tabular text-fg-muted">{detail}</span>
+      {r && <span className="min-w-0 shrink-[20] truncate tabular text-fg-faint" title={threaded ? 'Processed in a worker' : 'Processed on the main thread'}>{Math.round(r.ms)} ms</span>}
       {r?.draft && <Badge tone="key">Draft</Badge>}
       {hover && (
         <span className="flex shrink-0 items-center gap-1.5 border-l border-line pl-2 tabular text-fg-muted">

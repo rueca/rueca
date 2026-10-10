@@ -145,5 +145,6 @@ re-render · PERF-4 landing eager JS+CSS ~340→222 KB gz (narrow imports) · S7
 F2 toast() self-mounts one Toaster.
 Shell-level P2s (F3 shell HUDs, F4–F6, F10, S8–S10, A9, A14 flows dots, A15–A18, A20 shell parts, F12 shell bits):
 delegated to one cleanup agent — see its report.
-Still open: PERF-5 (ui-design react-dom/server 190 KB), PERF-6 (landing iframe off-screen), DX10 (accent-check prints
+Still open: PERF-6 (landing iframe off-screen), DX10 (accent-check prints
 :root not :root:root — branding-owned script), DX16 p.select union typing, interaction agent re-run.
+PERF-5 ✅ FIXED: ui-design icons rasterised via detached createRoot+flushSync (no react-dom/server); verified 390×844 frame with 14 icons renders.

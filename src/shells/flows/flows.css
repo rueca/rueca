@@ -9,6 +9,9 @@
 .flows-rf .react-flow__node-note .react-flow__handle { display: none; }
 
 /* edges: arrowheads, the walkthrough path, dimming */
+/* keyboard focus on an edge (WCAG 2.4.7) — edges are reached via the inspector's Connections list, but keep it visible if focused */
+.flows-rf .react-flow__edge:focus-visible { outline: none; }
+.flows-rf .react-flow__edge:focus-visible path.flows-edge-path, .flows-rf .react-flow__edge:focus-visible .react-flow__edge-path { stroke: var(--signal); stroke-width: 3; }
 .flows-rf .flows-arrow { fill: var(--fg-faint); }
 .flows-rf .react-flow__edge:hover .flows-arrow { fill: var(--fg-muted); }
 .flows-rf .react-flow__edge.selected .flows-arrow { fill: var(--signal); }

@@ -267,6 +267,8 @@ function Hud({ children }: { children: ReactNode }) {
     report()
     return () => ro.disconnect()
   }, [present, safe.left, safe.right, safe.top, safe.bottom])
+  // the kit Stage unmounts its overlay in present mode (⌘\) — give the viewport its full width back
+  useEffect(() => () => ui.setState({ insets: { l: 0, r: 0, t: 0, b: 0 } }), [])
   const g = 'var(--gutter)'
   return (
     <div ref={el} className="pointer-events-none absolute [&>*]:pointer-events-auto"
@@ -313,7 +315,8 @@ function ViewChip({ v }: { v: V }) {
 function Stats() {
   const s = useStore(ui, (x) => x.stats)
   return (
-    <div className="absolute bottom-1 left-1 text-[11px] tabular text-fg-faint no-select">
+    // top-right: bottom-left collided with the tool dock on stages ≤1280px wide (break-it F5)
+    <div className="pointer-events-none absolute top-0 right-0 h-8 max-w-[calc(100%-220px)] truncate leading-8 text-[11px] tabular text-fg-faint no-select">
       {(s.tris / 1000).toFixed(1)}k triangles · {s.meshes} meshes · {s.lights} lights
     </div>
   )
@@ -382,7 +385,7 @@ function ViewsPanel() {
             {!x.builtin && (
               <button type="button" aria-label={`Delete ${x.name}`}
                 onClick={() => ui.setState((s) => ({ views: s.views.filter((y) => y.id !== x.id) }))}
-                className="absolute top-2 right-2 hidden size-5 items-center justify-center rounded-full bg-black/60 text-white group-focus-within/view:flex group-hover/view:flex">
+                className="absolute top-2 right-2 hidden size-6 items-center justify-center rounded-full bg-black/60 text-white group-focus-within/view:flex group-hover/view:flex">
                 <X size={11} />
               </button>
             )}

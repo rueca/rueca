@@ -162,7 +162,11 @@ if (picks.size) {
   console.log('\nOverride — paste after the theme import:')
   for (const [name, a] of Object.entries(ACCENTS)) if (picks.has(name)) {
     const soft = (hex, al) => `rgb(${parseInt(hex.slice(1, 3), 16)} ${parseInt(hex.slice(3, 5), 16)} ${parseInt(hex.slice(5, 7), 16)} / ${al})`
-    console.log(`/* ${name} */\n:root { --signal: ${a.dark[0]}; --signal-strong: ${a.dark[1]}; --signal-soft: ${soft(a.dark[0], 0.16)}; }\n:root.light { --signal: ${a.light[0]}; --signal-strong: ${a.light[1]}; --signal-soft: ${soft(a.light[0], 0.12)}; }`)
+    // :root:root beats the kit theme's own :root rules, in the repo and in a registry install alike.
+    // The media block covers the OS-follows case (no .dark / .light class on <html>).
+    const dark = `--signal: ${a.dark[0]}; --signal-strong: ${a.dark[1]}; --signal-soft: ${soft(a.dark[0], 0.16)};`
+    const light = `--signal: ${a.light[0]}; --signal-strong: ${a.light[1]}; --signal-soft: ${soft(a.light[0], 0.12)};`
+    console.log(`/* ${name} */\n:root:root { ${dark} }\n:root:root.light { ${light} }\n@media (prefers-color-scheme: light) { :root:root:not(.dark) { ${light} } }`)
   }
 }
 process.exit(failed ? 2 : clashed ? 1 : 0)

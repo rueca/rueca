@@ -148,7 +148,7 @@ function NodeInspector({ node }: { node: FlowNode }) {
                 <span className="min-w-0 flex-1 truncate text-fg">{name(dir === 'in' ? e.source : e.target)}</span>
                 <T size={11} strokeWidth={1.5} className="shrink-0 text-fg-faint" />
                 <span className="max-w-[72px] truncate text-fg-faint">{e.data?.label || e.data?.trigger}</span>
-                {e.data?.happy && <span className="size-1.5 shrink-0 rounded-full bg-signal" aria-label="Happy path" />}
+                {e.data?.happy && <span role="img" className="size-1.5 shrink-0 rounded-full bg-signal" aria-label="Happy path" title="Happy path" />}
               </button>
             )
           })}
@@ -328,7 +328,7 @@ function DocInspector() {
             {(['shipped', 'ready', 'draft'] as Status[]).map((s) => <div key={s} className={cn(STATUS[s].dot, s === 'draft' && 'bg-line-strong')} style={{ width: `${(counts[s] / total) * 100}%` }} />)}
           </div>
           <div className="mt-1.5 flex gap-3 text-[11px] text-fg-muted">
-            {(['shipped', 'ready', 'draft'] as Status[]).map((s) => <span key={s} className="flex items-center gap-1.5 tabular"><StatusDot status={s} />{STATUS[s].label} {counts[s]}</span>)}
+            {(['shipped', 'ready', 'draft'] as Status[]).map((s) => <span key={s} className="flex items-center gap-1.5 tabular"><StatusDot status={s} decorative />{STATUS[s].label} {counts[s]}</span>)}
           </div>
         </div>
         <div className="flex items-center gap-2 px-3 pt-3">

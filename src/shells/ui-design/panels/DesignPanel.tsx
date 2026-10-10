@@ -230,7 +230,7 @@ function AutoLayoutRows({ n }: { n: Node }) {
       </div>
       <Row label="Padding">
         <QuadField mode="pairs" value={L.pad} onChange={(v, f) => set({ pad: v }, f)} max={400}
-          prefix={[<span key="h" className="text-[9px]">↔</span>, <span key="v" className="text-[9px]">↕</span>]} labels={['T', 'R', 'B', 'L']} />
+          prefix={[<span key="h" className="text-[10.5px]">↔</span>, <span key="v" className="text-[10.5px]">↕</span>]} labels={['T', 'R', 'B', 'L']} />
       </Row>
     </>
   )
@@ -243,7 +243,7 @@ function RadiusRow({ nodes }: { nodes: Node[] }) {
     <Row label="Radius">
       <QuadField mode="single" value={value as Quad} mixed={r === MIXED} max={999}
         onChange={(v, f) => setAll(nodes, () => ({ radius: v }), f)}
-        prefix={<span className="text-[10px]">◜</span>} labels={['↖', '↗', '↘', '↙']} names={CORNER_NAMES} />
+        prefix={<span className="text-[10.5px]">◜</span>} labels={['↖', '↗', '↘', '↙']} names={CORNER_NAMES} />
     </Row>
   )
 }

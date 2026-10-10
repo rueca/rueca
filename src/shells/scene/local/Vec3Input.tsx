@@ -16,7 +16,7 @@ import { ScrubValue, Tip, cn } from '@kit'
 
 export type Vec3 = { x: number; y: number; z: number }
 
-const AXES = [['x', 'X', 'text-[#ff6b6b]'], ['y', 'Y', 'text-[#5fd37a]'], ['z', 'Z', 'text-[#5aa8ff]']] as const
+const AXES = [['x', 'X', 'text-cat-5'], ['y', 'Y', 'text-cat-3'], ['z', 'Z', 'text-cat-1']] as const
 
 export function Vec3Input({
   value, onChange, step = 0.01, min, max, unit, changed, defaultValue, lockable, defaultLocked = true, label,
