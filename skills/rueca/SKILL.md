@@ -28,7 +28,10 @@ you read rides along in every later turn.
      `npx shadcn@latest add https://rueca.github.io/rueca/r/studio.json -y` (lands in
      `src/components/studio/`; import from `@/components/studio`; add
      `@import "./components/studio/theme.css";` to the main CSS). New project or `shadcn init`
-     trouble → `references/install.md`.
+     trouble → `references/install.md`. **Can't install right now** (no shell, or told not to run
+     anything)? Still write against the kit and put the install command in your handoff — never
+     hand-build what the kit already gives you (undo, presets, A/B, share links, persistence, the
+     inspector, scrubbers). A hand-rolled harness is the failure this skill exists to prevent.
    - An existing page you must not rewrite → `FrameSurface`. Same dev server (same origin)?
      Drive it with `cssVars` / `apply={(doc, v) => …}` and leave the page untouched.
      Otherwise add `assets/studio-bridge.js` to it.
@@ -89,6 +92,12 @@ export function Tool() {
   )
 }
 ```
+
+What the starter already gives you, so don't rebuild it: `createParams` = undo/redo (⌘Z / ⇧⌘Z),
+persistence across reloads and `#p=` share links; `ParamActions` = undo buttons, named presets
+(save / apply / delete), A/B compare (`\`), copy link, theme toggle; `Inspector` = every control,
+scrubbable, with reset and the changed cue. Expensive params: `p.number(…, { live: false })` and apply them
+in `params.onCommit((v, meta) => …)` — that fires on pointer-up, not every drag frame.
 
 Other surfaces, same contract: `WebGLSurface` (`setup(gl)` → `draw(gl, frame, state)`),
 `MountSurface` (`mount={(el, api) => { const s = start(el); return () => s.dispose() }}` for
