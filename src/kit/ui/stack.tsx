@@ -123,7 +123,7 @@ const INTERACTIVE = 'button,input,textarea,select,a[href],[role="spinbutton"],[r
 
 export function EffectStack<T extends StackItem>({
   items, order = 'top-first', selected = null, onSelect, onChange, onToggle, onOpacity, onBlend, onMove, onRemove, onDuplicate, onRename,
-  blendOptions = [], renderRow, renderDetails, expanded: expandedProp, defaultExpanded = [], onExpandedChange, mixed, mixedHint = 'Mixed — add one to replace them all',
+  blendOptions = [], renderRow, renderDetails, expanded: expandedProp, defaultExpanded = [], onExpandedChange, mixed, mixedHint = 'Mixed. Add one to replace them all',
   empty, label = 'Layers', removeIcon = 'trash', grip, contextMenu = true, rowHeight = 30, className,
 }: EffectStackProps<T>) {
   const [drag, setDrag] = useState<{ id: string; to: number } | null>(null)

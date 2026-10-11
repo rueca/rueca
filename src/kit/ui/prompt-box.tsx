@@ -96,7 +96,7 @@ export const PromptBox = forwardRef<HTMLTextAreaElement, PromptBoxProps>(functio
           <span id={meterId} aria-live={over ? 'polite' : 'off'}
             className={cn('pointer-events-none absolute right-0 bottom-0 tabular text-[10.5px]', over ? 'text-rec' : 'text-fg-faint', !tokens && 'sr-only')}>
             <span aria-hidden>{tokens}/{tokenLimit}</span>
-            <span className="sr-only">{over ? `${tokens} of ${tokenLimit} tokens — the end will be ignored` : `${tokens} of ${tokenLimit} tokens`}</span>
+            <span className="sr-only">{over ? `${tokens} of ${tokenLimit} tokens. The end will be ignored` : `${tokens} of ${tokenLimit} tokens`}</span>
           </span>
         )}
       </div>

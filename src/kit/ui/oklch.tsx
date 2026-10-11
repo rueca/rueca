@@ -138,8 +138,8 @@ function Rail({ value, min, max, onChange, background, label, marks = [], fmt }:
 
 const GAMUT_HINT = {
   sRGB: 'Displays the same on every screen',
-  P3: 'Wide-gamut screens only — sRGB screens see the hex',
-  'Out of gamut': 'Beyond Display P3 — shown and exported chroma-clamped',
+  P3: 'Wide-gamut screens only. sRGB screens see the hex',
+  'Out of gamut': 'Beyond Display P3: shown and exported chroma-clamped',
 } as const
 
 export function OklchField({ value, onChange, maxC = 0.37, preview = true, className }: {

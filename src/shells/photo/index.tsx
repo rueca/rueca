@@ -393,7 +393,7 @@ export default function DevelopShell() {
               <Cluster>
                 <HistoryButtons history={history} />
                 <Divider vertical />
-                <Menu align="end" trigger={<IconButton icon={Braces} label="Share & copy settings" />}
+                <Menu align="end" trigger={<IconButton icon={Braces} label="Share & copy" />}
                   items={[...shareMenuItems(params), { type: 'separator' }, { label: 'Export look as .cube LUT', icon: Palette, shortcut: 'shift+mod+l', onClick: () => exportCube(33) }]} />
                 <ThemeToggle />
               </Cluster>

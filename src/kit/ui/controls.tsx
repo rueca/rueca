@@ -104,6 +104,7 @@ export function Switch({ checked, onChange, label, size = 'md' }: { checked: boo
       aria-label={label}
       className={cn(
         'relative inline-flex shrink-0 items-center rounded-full bg-track p-[2px] outline-none transition-colors duration-150 shadow-[inset_0_0_0_1px_var(--line-strong)] data-[checked]:shadow-none',
+        "after:absolute after:-inset-y-[4px] after:-inset-x-[2px] after:content-['']", // ≥24px hit area, same look
         'data-[checked]:bg-signal focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-1 focus-visible:ring-offset-panel',
         size === 'sm' ? 'h-4 w-[26px]' : 'h-[18px] w-[30px]',
       )}

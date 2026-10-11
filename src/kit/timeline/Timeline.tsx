@@ -110,7 +110,7 @@ export function Timeline({
         </button>
         <div className="flex-1" />
         {extra}
-        <IconButton icon={ModeIcon} label={`${modeLabel} — click for ${nextMode === 'pingpong' ? 'ping-pong' : nextMode}`} tipSide="top" active={mode !== 'once'} onClick={() => clock.setState({ mode: nextMode })} />
+        <IconButton icon={ModeIcon} label={`${modeLabel}. Click for ${nextMode === 'pingpong' ? 'ping-pong' : nextMode}`} tipSide="top" active={mode !== 'once'} onClick={() => clock.setState({ mode: nextMode })} />
         <Menu
           side="top" align="end"
           trigger={<button type="button" className={cn('flex h-7 items-center gap-1 rounded-[6px] px-1.5 tabular text-[11.5px] hover:bg-hover', rate !== 1 ? 'text-signal-text' : 'text-fg-muted')}><Gauge size={13} strokeWidth={1.5} />{rate}×</button>}
@@ -241,7 +241,7 @@ function TrackArea({
                     })}
                     {l.keys.map((k, j) => (
                       <button key={j} type="button" aria-label={`Key at ${fmtTime(k.t)}`} onClick={() => { clock.pause(); clock.seek(k.t); onKeyClick?.(l, k) }}
-                        className={cn('absolute top-[7px] size-[9px] -translate-x-1/2 rotate-45 rounded-[1.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-1 focus-visible:ring-offset-panel',
+                        className={cn('absolute top-[7px] size-[9px] -translate-x-1/2 rotate-45 rounded-[1.5px] after:absolute after:-inset-[7px] after:content-[""] outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-1 focus-visible:ring-offset-panel',
                           k.selected ? 'bg-signal' : 'bg-fg/80 hover:bg-fg', Math.abs(k.t - t) < 1 && 'ring-2 ring-signal/60')}
                         style={{ left: X(k.t) }} />
                     ))}

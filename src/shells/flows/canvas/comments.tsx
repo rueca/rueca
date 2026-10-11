@@ -57,7 +57,7 @@ export function CommentLayer({ zoom }: { zoom: number }) {
 function Pin({ c, open }: { c: Comment; open: boolean }) {
   const p = PEOPLE[c.author] ?? PEOPLE.you
   return (
-    <button type="button" aria-label={`Comment by ${p.name}${c.resolved ? ', resolved' : c.replies.length ? `, ${c.replies.length + 1} messages` : ''}`}
+    <button type="button" aria-label={`${p.initials}: comment by ${p.name}${c.resolved ? ', resolved' : c.replies.length ? `, ${c.replies.length + 1} messages` : ''}`}
       onClick={(e) => { e.stopPropagation(); ui.setState({ openComment: open ? null : c.id, draft: null }) }}
       className={cn('absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-[10.5px] font-semibold text-white outline-none transition-transform hover:scale-110 focus-visible:ring-2 focus-visible:ring-signal', c.resolved && 'opacity-50')}
       style={{ pointerEvents: 'all', background: WIRE.pen, boxShadow: `0 0 0 2px ${open ? 'var(--signal)' : WIRE.card}` }}>

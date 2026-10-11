@@ -400,7 +400,7 @@ export function KeyTimeline(props: KeyTimelineProps) {
               ))}
             </div>
             <div ref={area} role="group" tabIndex={0}
-              aria-label={`Keyframes — ${selectedIds.size} selected. Arrow keys nudge, brackets select the previous or next key (within the selected key's lane), Delete removes.`}
+              aria-label={`Keyframes, ${selectedIds.size} selected. Arrow keys nudge, brackets select the previous or next key (within the selected key's lane), Delete removes.`}
               className="relative min-w-0 flex-1 outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--signal)]" style={{ minHeight: bodyH }}
               onPointerDown={onAreaDown} onPointerMove={onAreaMove} onPointerUp={onAreaUp} onKeyDown={onAreaKey}>
               {/* past-the-end shade */}

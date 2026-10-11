@@ -120,7 +120,7 @@ export function Section({
         {actions}
         {onReset && (
           <Tip label="Reset section">
-            <button type="button" aria-label={`Reset ${typeof title === 'string' ? title : 'section'}`} onClick={onReset}
+            <button type="button" aria-label={`Reset ${typeof title === 'string' ? title.toLowerCase() : 'section'}`} onClick={onReset}
               className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/section:opacity-100 focus-visible:opacity-100">
               <RotateCcw size={12} strokeWidth={1.75} />
             </button>

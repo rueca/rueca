@@ -120,7 +120,7 @@ export function Histogram({
     const t = clipTint(bins, which === 'shadows' ? 0 : 255)
     const on = !!clip?.[which]
     return (
-      <Tip label={`${which === 'shadows' ? 'Shadow' : 'Highlight'} clipping${t.on ? ` · ${t.pct.toFixed(1)}% of pixels` : ''}${onClip ? ' — click to show on the image' : ''}`}>
+      <Tip label={`${which === 'shadows' ? 'Shadow' : 'Highlight'} clipping${t.on ? ` · ${t.pct.toFixed(1)}% of pixels` : ''}${onClip ? '. Click to show on the image' : ''}`}>
         <button
           type="button"
           aria-pressed={onClip ? on : undefined}

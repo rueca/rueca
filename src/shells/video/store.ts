@@ -14,10 +14,10 @@ import { ASPECTS, demoComp, newClip, uid, type Aspect, type Clip, type ClipKind,
 export const schema = defineSchema({
   composition: folder('Composition', {
     aspect: p.select('9:16', [
-      { value: '9:16', label: '9:16', icon: Smartphone, hint: 'Story / Reel — 1080 × 1920' },
-      { value: '4:5', label: '4:5', icon: RectangleVertical, hint: 'Portrait feed — 1080 × 1350' },
-      { value: '1:1', label: '1:1', icon: Square, hint: 'Square — 1080 × 1080' },
-      { value: '16:9', label: '16:9', icon: RectangleHorizontal, hint: 'Landscape — 1920 × 1080' },
+      { value: '9:16', label: '9:16', icon: Smartphone, hint: 'Story / Reel · 1080 × 1920' },
+      { value: '4:5', label: '4:5', icon: RectangleVertical, hint: 'Portrait feed · 1080 × 1350' },
+      { value: '1:1', label: '1:1', icon: Square, hint: 'Square · 1080 × 1080' },
+      { value: '16:9', label: '16:9', icon: RectangleHorizontal, hint: 'Landscape · 1920 × 1080' },
     ], { label: 'Aspect', hint: 'Every clip is laid out relative to the frame, so switching aspect re-lays the whole video.' }),
     fps: p.select('30', [{ value: '24', label: '24' }, { value: '30', label: '30' }, { value: '60', label: '60' }], { label: 'Frame rate', hint: 'Frames per second for stepping, snapping and MP4 export.' }),
     duration: p.number(8000, { min: 1000, max: 60000, step: 100, fmt: (v) => `${(v / 1000).toFixed(1)}s`, label: 'Duration', hint: 'Length of the composition.' }),

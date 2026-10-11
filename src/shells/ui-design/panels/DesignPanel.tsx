@@ -268,7 +268,7 @@ function PaintSection({ title, nodes, prop, open }: { title: string; nodes: Node
     <Section title={title} {...open} actions={<IconButton icon={Plus} size="icon-sm" label={`Add ${title.toLowerCase()}`} onClick={add} />}>
       {/* kit stack in paint order (top layer first on screen); its opacity field is the paint's opacity */}
       <EffectStack order="bottom-first" label={`${title}s`} removeIcon="minus" contextMenu={false}
-        items={list.map((p) => ({ ...p, name: PAINT_NAME[p.kind] }))} mixed={mixed} mixedHint={`Mixed ${title.toLowerCase()}s — click + to replace`}
+        items={list.map((p) => ({ ...p, name: PAINT_NAME[p.kind] }))} mixed={mixed} mixedHint={`Mixed ${title.toLowerCase()}s. Click + to replace`}
         onChange={(next, f) => set(next.map(({ name: _n, ...p }) => p), f)}
         renderRow={(p, { set: upd }) => <PaintField value={p} opacity={false} onChange={(np, f) => upd(np, f)} images={IMAGE_LABELS} imageURL={imageURL} label={title} />} />
       {prop === 'strokes' && list.length > 0 && (
@@ -298,7 +298,7 @@ function EffectsSection({ nodes, open }: { nodes: Node[]; open: { open: boolean;
       actions={<Menu align="end" trigger={<IconButton icon={Plus} size="icon-sm" label="Add effect" />} items={(Object.keys(FX_LABEL) as Effect['kind'][]).map((k) => ({ label: FX_LABEL[k], onClick: () => add(k) }))} />}>
       {/* an effect's `opacity` is its shadow colour's (edited in the popover) — carried as `alpha` so the stack shows no opacity field */}
       <EffectStack order="bottom-first" label="Effects" removeIcon="minus" contextMenu={false}
-        items={list.map(({ opacity, ...e }) => ({ ...e, alpha: opacity, name: FX_LABEL[e.kind] }))} mixed={mixed} mixedHint="Mixed effects — click + to replace"
+        items={list.map(({ opacity, ...e }) => ({ ...e, alpha: opacity, name: FX_LABEL[e.kind] }))} mixed={mixed} mixedHint="Mixed effects. Click + to replace"
         onChange={(next, f) => set(next.map(({ name: _n, alpha, ...e }) => ({ ...e, opacity: alpha })), f)}
         renderRow={(e, { set: upd }) => (
           <>

@@ -39,7 +39,7 @@ function exportPNG(scale: number) {
   if (!r) return
   const { w, h } = outSize(r)
   let s = scale
-  if (w * h * s * s > MAX_CANVAS) { s = Math.floor(Math.sqrt(MAX_CANVAS / (w * h)) * 100) / 100; toast(`Reduced to ${s}× — browser canvas limit`) }
+  if (w * h * s * s > MAX_CANVAS) { s = Math.floor(Math.sqrt(MAX_CANVAS / (w * h)) * 100) / 100; toast(`Reduced to ${s}× (browser canvas limit)`) }
   const c = renderOutput(r, s)
   c.toBlob((b) => { if (b) { download(b, `${base()}-${params.values().effect}-${s}x-${stamp()}.png`); toast(`PNG exported · ${c.width} × ${c.height}`, { type: 'success' }) } }, 'image/png')
 }
@@ -130,7 +130,7 @@ export default function DitherLab() {
           start={<Brand name="Dither lab" doc={img.name} mark={Mark} />}
           center={
             <Cluster>
-              <Button size="md" variant="ghost" onClick={intake.open} title="Open image (⌘O) — or drop / paste anywhere"><ImageUp size={14} strokeWidth={1.5} />Open image</Button>
+              <Button size="md" variant="ghost" onClick={intake.open} title="Open image (⌘O), or drop or paste anywhere"><ImageUp size={14} strokeWidth={1.5} />Open image</Button>
               <IconButton icon={Sparkles} label="Use the sample image" onClick={loadSample} active={img.sample} />
             </Cluster>
           }
@@ -147,7 +147,7 @@ export default function DitherLab() {
                   { label: `PNG 2× · ${size.w * 2} × ${size.h * 2}`, icon: ImageIcon, onClick: () => exportPNG(2) },
                   { label: `PNG 4× · ${size.w * 4} × ${size.h * 4}`, icon: ImageIcon, onClick: () => exportPNG(4) },
                   { type: 'separator' },
-                  { label: 'SVG — halftone circles', icon: Shapes, shortcut: 'shift+mod+e', disabled: v.effect !== 'halftone', onClick: exportSVG },
+                  { label: 'SVG (halftone circles)', icon: Shapes, shortcut: 'shift+mod+e', disabled: v.effect !== 'halftone', onClick: exportSVG },
                   { label: 'Copy ASCII text', icon: Copy, shortcut: 'shift+mod+c', disabled: v.effect !== 'ascii', onClick: copyASCII },
                   { label: 'Download ASCII .txt', icon: FileText, disabled: v.effect !== 'ascii', onClick: downloadTXT },
                   { type: 'separator' },

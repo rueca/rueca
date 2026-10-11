@@ -106,7 +106,7 @@ export function PresetMenu({ params, trigger, title = 'Presets' }: { params: Any
 
 export function CompareButton({ params, hotkey = '\\' }: { params: AnyParams; hotkey?: string | false }) {
   const has = useStore(params, (s) => !!s.compare)
-  const run = () => { const r = params.toggleCompare(); toast(r === 'stored' ? 'Stored A — tweak, then swap to compare' : 'Swapped A ↔ B') }
+  const run = () => { const r = params.toggleCompare(); toast(r === 'stored' ? 'Stored A. Tweak, then swap to compare' : 'Swapped A ↔ B') }
   useHotkeys(hotkey ? { [hotkey]: { run, label: 'A / B compare', group: 'View' } } : {}, [params, hotkey], { priority: 0 })
   return <IconButton icon={SplitSquareHorizontal} label={has ? 'Swap A / B' : 'Store A for comparison'} shortcut={hotkey || undefined} active={has} onClick={run} />
 }

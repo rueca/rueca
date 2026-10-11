@@ -307,7 +307,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
           {tracks.length === 0 && empty ? <div className="sticky left-0 flex h-[160px] items-center justify-center" style={{ width: HEAD_W + vw }}>{empty}</div> : null}
 
           <div role="group" tabIndex={tracks.length ? 0 : -1} onKeyDown={onAreaKey}
-            aria-label={`Clips — ${selCount} selected. Tab cycles clips, arrow keys move them a frame, Delete removes.`}
+            aria-label={`Clips, ${selCount} selected. Tab cycles clips, arrow keys move them a frame, Delete removes.`}
             className="relative outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--signal)]">
             {tracks.map((tr) => (
               <div key={tr.id} className="flex border-b border-line" style={{ height: ROW }}>

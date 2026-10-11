@@ -71,12 +71,12 @@ export interface KeyButtonProps {
 
 export function KeyButton({ state, onToggle, onPrev, onNext, shortcut, labels, property, disabled, className }: KeyButtonProps) {
   const label = labels?.[state] ?? KEY_LABELS[state]
-  const aria = property ? `${label} — ${property}` : label
+  const aria = property ? `${label}: ${property}` : label
   const nav = 'flex h-6 w-6 items-center justify-center rounded-[4px] text-fg-faint outline-none hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal'
   const reveal = 'opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100'
   return (
     <div className={cn('flex shrink-0 items-center', disabled && 'pointer-events-none opacity-30', className)}>
-      <button type="button" tabIndex={onPrev ? 0 : -1} aria-label={property ? `Previous keyframe — ${property}` : 'Previous keyframe'} onClick={onPrev} disabled={!onPrev}
+      <button type="button" tabIndex={onPrev ? 0 : -1} aria-label={property ? `Previous keyframe: ${property}` : 'Previous keyframe'} onClick={onPrev} disabled={!onPrev}
         className={cn(nav, reveal, !onPrev && 'invisible')}>
         <ChevronLeft size={11} strokeWidth={2} />
       </button>
@@ -88,7 +88,7 @@ export function KeyButton({ state, onToggle, onPrev, onNext, shortcut, labels, p
           <KeyDiamond state={state} />
         </button>
       </Tip>
-      <button type="button" tabIndex={onNext ? 0 : -1} aria-label={property ? `Next keyframe — ${property}` : 'Next keyframe'} onClick={onNext} disabled={!onNext}
+      <button type="button" tabIndex={onNext ? 0 : -1} aria-label={property ? `Next keyframe: ${property}` : 'Next keyframe'} onClick={onNext} disabled={!onNext}
         className={cn(nav, reveal, !onNext && 'invisible')}>
         <ChevronRight size={11} strokeWidth={2} />
       </button>

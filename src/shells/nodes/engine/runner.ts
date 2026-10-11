@@ -56,7 +56,7 @@ export class Runner {
     const visit = (id: string): string => {
       const st = state.get(id)
       if (st === 2) return this.sigs.get(id)!
-      if (st === 1) { this.status.set(id, { error: 'Part of a loop — break a wire' }); return 'cycle' }
+      if (st === 1) { this.status.set(id, { error: 'Part of a loop. Break a wire' }); return 'cycle' }
       state.set(id, 1)
       const n = this.byId.get(id)!
       const spec = specOf(n.type)

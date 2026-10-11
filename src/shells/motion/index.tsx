@@ -54,7 +54,7 @@ export default function MotionShell() {
       toast.update(pt.id, 'Recording one loop…', { type: 'loading', timeout: 0 })
       clock.replay()
       await recordCanvas(c, clock.getState().duration, fps, 'motion.webm')
-      pt.done('Video exported', { description: 'Real-time WebM — this browser has no frame encoder.' })
+      pt.done('Video exported', { description: 'Real-time WebM: this browser has no frame encoder.' })
     } catch (e) { pt.fail('Video export failed', { description: (e as Error).message }) }
   }
 

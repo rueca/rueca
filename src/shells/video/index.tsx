@@ -358,7 +358,7 @@ export default function VideoShell() {
     { id: 'del', label: 'Delete selection', group: 'Clips', shortcut: 'backspace,delete', icon: Trash2, run: () => { const n = deleteClips(ui.getState().sel); if (n) toast(`Deleted ${n} ${n === 1 ? 'clip' : 'clips'}`, { action: { label: 'Undo', onClick: () => history.undo() } }) } },
     { id: 'all', label: 'Select all clips', group: 'Clips', shortcut: 'mod+a', run: () => ui.setState({ sel: getComp().clips.map((c) => c.id) }) },
     { id: 'track', label: 'New track', group: 'Clips', icon: Plus, run: addTrack },
-    ...(Object.keys(ASPECTS) as Aspect[]).map((a, i) => ({ id: `aspect-${a}`, label: `Aspect ${a} — ${ASPECTS[a].label}`, group: 'Composition', shortcut: String(i + 1), icon: ASPECT_ICON[a], run: () => setAspect(a) })),
+    ...(Object.keys(ASPECTS) as Aspect[]).map((a, i) => ({ id: `aspect-${a}`, label: `Aspect ${a}: ${ASPECTS[a].label}`, group: 'Composition', shortcut: String(i + 1), icon: ASPECT_ICON[a], run: () => setAspect(a) })),
     { id: 'safe', label: v.safeArea ? 'Hide safe areas' : 'Show safe areas', group: 'View', shortcut: 'g', run: () => params.setValue('safeArea', !v.safeArea) },
     { id: 'quality', label: v.quality === '1' ? 'Preview at half resolution' : 'Preview at full resolution', group: 'View', run: () => params.setValue('quality', v.quality === '1' ? '0.5' : '1') },
     { id: 'mp4', label: 'Export MP4', group: 'Export', shortcut: 'shift+mod+e', icon: Film, run: exportMP4 },

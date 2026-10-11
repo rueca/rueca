@@ -39,7 +39,7 @@ function Grid({ comp, theme }: { comp: CompId; theme: Theme }) {
             {m.states.map((s) => {
               const on = picked === `${v.value}:${s.value}`
               return (
-                <Tip key={s.value} label={`${v.label} · ${s.label} — click to load, double-click to preview`} side="top">
+                <Tip key={s.value} label={`${v.label} · ${s.label}. Click to load, double-click to preview`} side="top">
                   <div role="button" tabIndex={0} onClick={() => apply(comp, v.value, s.value)} onDoubleClick={() => apply(comp, v.value, s.value, true)}
                     onKeyDown={(e) => { if (e.key === 'Enter') apply(comp, v.value, s.value, true) }}
                     className={cn('relative flex min-h-[84px] cursor-pointer items-center justify-center p-4 outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-inset', comp === 'card' && 'items-start')}

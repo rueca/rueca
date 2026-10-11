@@ -92,8 +92,8 @@ export function FocusView() {
           </Artboard>
         ) : (
           <>
-            <Artboard x={MARK + GAP} width={LW} height={LH} background={s.paper} label="Lockup — light"><Lockup m={m} s={s} mode="light" /></Artboard>
-            <Artboard x={MARK + GAP} y={MARK - LH} width={LW} height={LH} background={s.ink} label="Lockup — dark"><Lockup m={m} s={s} mode="dark" /></Artboard>
+            <Artboard x={MARK + GAP} width={LW} height={LH} background={s.paper} label="Light lockup"><Lockup m={m} s={s} mode="light" /></Artboard>
+            <Artboard x={MARK + GAP} y={MARK - LH} width={LW} height={LH} background={s.ink} label="Dark lockup"><Lockup m={m} s={s} mode="dark" /></Artboard>
           </>
         )}
       </div>
@@ -221,7 +221,7 @@ export function FavouritesPanel() {
 export function SettingsPanel() {
   return (
     <>
-      <div className="px-3 pt-3 pb-1 text-[11.5px] leading-relaxed text-fg-muted">Brand settings — shared by every variant. Open a variant to tune its shape.</div>
+      <div className="px-3 pt-3 pb-1 text-[11.5px] leading-relaxed text-fg-muted">Brand settings, shared by every variant. Open a variant to tune its shape.</div>
       <Inspector params={settings} />
     </>
   )
@@ -256,7 +256,7 @@ export function MarkPanel() {
       </div>
       <div className="flex items-center gap-0.5 border-b border-line px-1.5 py-1.5">
         <IconButton icon={Star} label={fav ? 'Unfavourite' : 'Favourite'} shortcut="f" size="icon-sm" active={fav} onClick={() => toggleFav(m.id)} />
-        <IconButton icon={m.locked ? Lock : LockOpen} label={m.locked ? 'Kept in grid — unlock' : 'Keep in grid (lock)'} shortcut="l" size="icon-sm" active={!!m.locked} onClick={() => toggleLock(m.id)} />
+        <IconButton icon={m.locked ? Lock : LockOpen} label={m.locked ? 'Kept in grid. Unlock' : 'Keep in grid (lock)'} shortcut="l" size="icon-sm" active={!!m.locked} onClick={() => toggleLock(m.id)} />
         <IconButton icon={Sparkles} label="More like this" shortcut="m" size="icon-sm" onClick={() => moreLikeThis(m.id)} />
         <Menu trigger={<IconButton icon={Columns2} label="Compare with…" size="icon-sm" active={!!b} />} items={[
           { label: b ? 'Stop comparing' : 'Compare with last viewed', shortcut: 'c', icon: Columns2, onClick: toggleCompare },

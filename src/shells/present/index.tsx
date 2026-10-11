@@ -39,7 +39,7 @@ export default function Present() {
 
   const shuffle = () => params.patch({ seed: Math.floor(Math.random() * 99999), palette: Object.keys(PALETTES)[Math.floor(Math.random() * Object.keys(PALETTES).length)] })
   const save = () => renderDownload(params.values() as V).then(() => toast('Saved to downloads', { type: 'success' }))
-  const send = async () => { const u = params.shareURL(); await copyText(/[#&]client\b/.test(u) ? u : `${u}&client`); toast('Link copied — send it to your designer', { type: 'success' }) }
+  const send = async () => { const u = params.shareURL(); await copyText(/[#&]client\b/.test(u) ? u : `${u}&client`); toast('Link copied. Send it to your designer', { type: 'success' }) }
 
   const commands: Command[] = [
     { id: 'client', label: client ? 'Designer view' : 'Client view', shortcut: 'mod+shift+p', icon: Eye, run: () => setClient((c) => !c) },
