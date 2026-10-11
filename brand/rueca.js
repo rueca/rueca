@@ -5,7 +5,7 @@ import { ruecaLink, ruecaPairs, ruecaPalette, ruecaTaglines, ruecaPaletteRules, 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
 const $ = (id) => document.getElementById(id)
 const font = (r) => `font-family:'${r.family}';font-weight:${r.weight};${r.tracking ? `letter-spacing:${r.tracking};` : ''}${r.settings ? `font-variation-settings:${r.settings};` : ''}`
-const BODY = { family: 'Libre Franklin', weight: 400 }
+const BODY = { family: 'IBM Plex Sans', weight: 400 }
 const MONO = "'Geist Mono', ui-monospace, monospace"
 /* the hand replaces the mono for labels and notes; S scales sizes since handwriting fonts run small */
 let hand = ruecaHands.find((h) => h.star) || ruecaHands[0]

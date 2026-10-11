@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Handwriting trial</title>
+<style>
+  @font-face { font-family: "La Belle Aurore"; src: url("/node_modules/@fontsource/la-belle-aurore/files/la-belle-aurore-latin-400-normal.woff2") format("woff2"); font-display: block; }
+  @font-face { font-family: "Geist Mono"; src: url("/node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2") format("woff2"); }
+  :root { --sheet: #1a1714; --fg: #f3f1eb; --muted: #8a8580; --rule: #302d2a; --achiote: #e0663f; }
+  :root[data-theme="light"] { --sheet: #fbfaf7; --fg: #181411; --muted: #6b6762; --rule: #e0dedb; --achiote: #b8381b; }
+  body { margin: 0; background: var(--sheet); color: var(--fg); font: 13px/1.5 "Geist Mono", ui-monospace, monospace; }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 24px 80px; }
+  header { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-bottom: 28px; }
+  header h1 { font-size: 13px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; margin: 0 auto 0 0; }
+  button, label { font: inherit; color: var(--fg); }
+  button { background: none; border: 1px solid var(--rule); padding: 6px 12px; cursor: pointer; border-radius: 2px; }
+  button:hover { border-color: var(--muted); }
+  input[type=range] { width: 120px; vertical-align: middle; }
+  .row { display: grid; grid-template-columns: 180px 1fr 1fr; gap: 0; border-top: 1px solid var(--rule); }
+  .row > * { padding: 18px 16px; min-height: 40px; display: flex; align-items: center; }
+  .row > :not(:first-child) { border-left: 1px solid var(--rule); }
+  .cap { color: var(--muted); font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase; }
+  .head > * { padding: 8px 16px; min-height: 0; }
+  .pen { color: var(--achiote); }
+  .ink { color: color-mix(in srgb, var(--fg) 90%, transparent); }
+  /* today's wipe, for comparison (plate.css) */
+  .wipe { font-family: "La Belle Aurore"; display: inline-block; line-height: 1; white-space: nowrap; }
+  .wipe > span { display: inline-block; clip-path: inset(-30% 100% -30% -10%); }
+  .wipe[data-on] > span { animation: wipe var(--write) cubic-bezier(0.65, 0, 0.35, 1) both; }
+  @keyframes wipe { from { clip-path: inset(-30% 100% -30% -10%); } to { clip-path: inset(-30% -10% -30% -10%); } }
+  .debug .hw text { opacity: .18; }
+  .debug .hw-pen path { stroke-dashoffset: 0 !important; animation: none !important; }
+  .hw-debug { display: none; }
+  #film { display: grid; gap: 2px; margin-bottom: 28px; }
+  #film .frame { display: flex; align-items: center; gap: 14px; }
+  #film .frame .cap { width: 48px; flex: none; }
+  .debug .hw-debug { display: inline; }
+  footer { margin-top: 28px; color: var(--muted); }
+</style>
+<style id="hw-css"></style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Handwriting · written, not wiped</h1>
+    <label>pen <input id="speed" type="range" min="90" max="420" value="200"> <span id="speedv">200</span> px/s</label>
+    <label><input id="debug" type="checkbox"> strokes</label>
+    <button id="theme">theme</button>
+    <button id="frames">frames</button>
+    <button id="again">write again</button>
+  </header>
+  <div id="film" hidden></div>
+  <div class="row head"><span class="cap">where</span><span class="cap">pen (new)</span><span class="cap">wipe (today)</span></div>
+  <div id="rows"></div>
+  <footer>Each string is thinned to its centreline, traced into pen strokes in writing order, and those strokes mask the real text as they're drawn.</footer>
+</main>
+<script type="module">
+  // the landing's own pen (src/landing/handwrite.ts), so the trial is what ships
+  import { strokesOf, writtenSvg } from '/src/landing/handwrite.ts';
+  document.getElementById('hw-css').textContent = `
+    .hw{overflow:visible} .hw text{fill:currentColor;font-family:"La Belle Aurore"}
+    .hw-pen path{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:var(--len) var(--len);stroke-dashoffset:var(--len)}
+    .hw[data-on] .hw-pen path{animation:hw-write var(--for) linear var(--at) forwards}
+    @keyframes hw-write{to{stroke-dashoffset:0}}
+    @media (prefers-reduced-motion:reduce){.hw .hw-pen path{stroke-dashoffset:0;animation:none}}
+    .hw-debug path{fill:none;stroke-width:.6;stroke-linecap:round}`;
+  const SAMPLES = [
+    ['title strip · no.', '2', 23, 'ink'],
+    ['title strip · title', 'The kit', 24, 'ink'],
+    ['title strip · title', 'How it works', 24, 'ink'],
+    ['title strip · sheet', '2 of 6', 23, 'ink'],
+    ['footer · licence', 'MIT', 23, 'ink'],
+    ['gallery · count', '24 in all', 23, 'ink'],
+    ['card · fig.', 'fig. 3', 17, 'ink'],
+    ['drawing note', 'tune it live', 30, 'pen'],
+    ['drawing note', 'drag, type, or do maths', 30, 'pen'],
+    ['drawing note', 'your logo, as it is', 30, 'pen'],
+  ];
+  const rows = document.getElementById('rows'), speed = document.getElementById('speed');
+  const cache = new Map();
+  async function render() {
+    rows.innerHTML = '';
+    for (const [where, text, size, tone] of SAMPLES) {
+      const key = text + size;
+      if (!cache.has(key)) cache.set(key, await strokesOf(text, '"La Belle Aurore"', size));
+      const s = cache.get(key), { svg } = writtenSvg(text, s, { speed: +speed.value * size / 24, debug: true });
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `<span class="cap">${where}</span><span class="${tone}">${svg}</span>`
+        + `<span class="${tone}"><span class="wipe" style="font-size:${size}px;--write:${Math.min(1.3, 0.3 + text.length * 0.05)}s"><span>${text}</span></span></span>`;
+      rows.appendChild(row);
+      row.querySelectorAll('.hw-debug path').forEach((p, i, all) => (p.style.stroke = `hsl(${(i / Math.max(1, all.length - 1)) * 300} 85% 60%)`));
+    }
+    write();
+    if (!document.getElementById('film').hidden) film();
+  }
+  function write() {
+    const all = rows.querySelectorAll('.hw, .wipe');
+    all.forEach((el) => el.removeAttribute('data-on'));
+    void rows.offsetWidth;
+    all.forEach((el) => (el.dataset.on = ''));
+  }
+  // frames: three strings stopped at fixed moments, to read the order the pen takes
+  const FILM = [1, 7, 9], AT = [0.3, 0.6, 0.9, 1.2, 1.5, 1.8, 2.6];
+  function film() {
+    const box = document.getElementById('film'), all = rows.querySelectorAll('.hw');
+    box.innerHTML = '';
+    for (const i of FILM) for (const t of AT) {
+      const s = all[i], c = s.cloneNode(true), k = Math.min(2.2, 420 / +s.getAttribute('width'));
+      c.setAttribute('width', +s.getAttribute('width') * k); c.setAttribute('height', +s.getAttribute('height') * k * 0.8);
+      const m = c.querySelector('mask'); m.id += `-f${t}`; c.querySelector('text').setAttribute('mask', `url(#${m.id})`);
+      c.querySelector('.hw-debug')?.remove();
+      const row = document.createElement('div');
+      row.className = `frame ${s.parentElement.className}`;
+      row.innerHTML = `<span class="cap">${t}s</span>`;
+      row.appendChild(c); box.appendChild(row); c.dataset.on = '';
+    }
+    requestAnimationFrame(() => box.querySelectorAll('.frame').forEach((row) => {
+      const t = parseFloat(row.textContent) * 1000;
+      row.querySelector('svg').getAnimations({ subtree: true }).forEach((a) => { a.pause(); a.currentTime = t; });
+    }));
+  }
+  document.getElementById('frames').onclick = () => { const box = document.getElementById('film'); box.hidden = !box.hidden; if (!box.hidden) film(); };
+  if (location.hash === '#frames') { document.getElementById('film').hidden = false; }
+  speed.oninput = () => { document.getElementById('speedv').textContent = speed.value; render(); };
+  document.getElementById('again').onclick = write;
+  document.getElementById('debug').onchange = (e) => document.body.classList.toggle('debug', e.target.checked);
+  document.getElementById('theme').onclick = () => { const r = document.documentElement; r.dataset.theme = r.dataset.theme === 'light' ? 'dark' : 'light'; };
+  await document.fonts.ready;
+  render();
+</script>
+</body>
+</html>

@@ -779,7 +779,7 @@ export const wire2Refs = [
    display font." Reference: spinning-wheel photography (wood, undyed wool, thread).
 --------------------------------------------------------------------------- */
 
-export const ruecaLink = 'https://fonts.googleapis.com/css2?family=Alegreya:wght@500..900&family=Alegreya+Sans:wght@400;500&family=IM+Fell+Double+Pica&family=IM+Fell+English:ital@0;1&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Young+Serif&family=Gloock&family=Vollkorn:wght@500..900&family=Piazzolla:opsz,wght@8..30,500..900&family=Hanken+Grotesk:wght@400..600&family=Libre+Franklin:wght@400..600&family=Geist+Mono&family=Architects+Daughter&family=Caveat:wght@400..700&family=Nanum+Pen+Script&family=Kalam:wght@400;700&family=Covered+By+Your+Grace&family=Walter+Turncoat&family=Reenie+Beanie&display=swap'
+export const ruecaLink = 'https://fonts.googleapis.com/css2?family=Alegreya:wght@500..900&family=Alegreya+Sans:wght@400;500&family=IM+Fell+Double+Pica&family=IM+Fell+English:ital@0;1&family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Young+Serif&family=Gloock&family=Vollkorn:wght@500..900&family=Piazzolla:opsz,wght@8..30,500..900&family=Hanken+Grotesk:wght@400..600&family=Libre+Franklin:wght@400..600&family=IBM+Plex+Sans:wght@400..600&family=Geist+Mono&family=Architects+Daughter&family=Caveat:wght@400..700&family=La+Belle+Aurore&family=Nanum+Pen+Script&family=Kalam:wght@400;700&family=Covered+By+Your+Grace&family=Walter+Turncoat&family=Reenie+Beanie&display=swap'
 
 export const ruecaPairs = [
   { id: 'alegreya', name: 'Huerta', display: { family: 'Alegreya', weight: 800, tracking: '-0.02em' }, body: 'Alegreya Sans',
@@ -956,7 +956,7 @@ export const ruecaPaid = [
     foundry: 'Altiplano Typefaces · Raphael Verona', url: 'https://www.altiplano.xyz', fit: ['grabado', 'taller'], star: true,
     why: 'Chunky, soft-wedged and a little uneven, like letters cut by hand. The most rustic of the paid set without being a costume, and the closest in spirit to Tagada. It comes from Altiplano, named for the Andean highlands, which is a nice origin for a Spanish name.',
     watch: 'The trial is an “Alpha” with one weight, so check the foundry for the finished family and its release date.' },
-  { id: 'signifier', name: 'Signifier', ps: 'TestSignifier-Black', alt: 'TestSignifier-Regular', weight: 900, tracking: '-0.02em',
+  { id: 'signifier', name: 'Signifier', ps: 'TestSignifier-Black', chosen: true, alt: 'TestSignifier-Regular', weight: 900, tracking: '-0.02em',
     foundry: 'Klim Type Foundry · Kris Sowersby', url: 'https://klim.co.nz/retail-fonts/signifier/', fit: ['grabado'], star: true,
     why: 'Klim’s re-reading of the 17th-century Fell types, drawn with digital precision, which is old meets new in the letters themselves. It’s the grown-up version of the free IM Fell draft. Black is sturdy and rustic, and Regular is sharp and literary.',
     watch: 'It’s cool rather than warm at light weights. Use Bold or Black for the wordmark.' },
@@ -968,7 +968,7 @@ export const ruecaPaid = [
     foundry: 'Letters from Sweden · Göran Söderström', url: 'https://lettersfromsweden.se/font/ivar/', fit: ['hilo'],
     why: 'Warm, open old-style forms with crisp details, plus Display, Headline, Text and Fine cuts for every size. It’s the most refined and quiet of the set, wool rather than wood.',
     watch: 'It can look like a premium lifestyle brand. You’d rely on the imagery for the rustic part.' },
-  { id: 'plantijn', name: 'Martina Plantijn', ps: 'TestMartinaPlantijnVF-Roman', weight: 700, tracking: '-0.02em', variable: true, chosen: true,
+  { id: 'plantijn', name: 'Martina Plantijn', ps: 'TestMartinaPlantijnVF-Roman', weight: 700, tracking: '-0.02em', variable: true,
     foundry: 'Klim Type Foundry', url: 'https://klim.co.nz/retail-fonts/martina-plantijn/', fit: ['grabado', 'taller'],
     why: 'A sturdy 16th-century book face from the Plantin printing tradition, rethought by Klim. Dark, solid and practical, like an old manual. It’s variable from 300 to 900.',
     watch: 'It’s bookish, so at hero size it needs tight tracking to avoid feeling like a newspaper.' },
@@ -999,8 +999,9 @@ export const hexRefs = [
    All free and open-licensed (OFL or Apache) so an open-source site can ship them. Code stays in Geist Mono:
    a command people copy should be unambiguous. Local handwriting fonts were tried and skipped (unclear licences). */
 export const ruecaHands = [
+  { id: 'aurore', family: 'La Belle Aurore', size: 1.2, star: true, note: 'Chosen 11 Oct for Lámina técnica: a fine-nib, 18th–19th-century hand, the plate annotator’s pen. It replaced Caveat, which read as a felt-tip marker next to the engravings. Weight 400, Latin only.' },
   { id: 'architects', family: 'Architects Daughter', size: 1.15, note: 'Draftsman’s lettering: hand-made but still technical, so it takes over the mono’s job (labels, sizes) without losing precision. Fits the diagrams and the 90s software side best.' },
-  { id: 'caveat', family: 'Caveat', size: 1.25, star: true, note: 'Chosen 11 Oct. The most natural pen note: red-pen asides, labels on the engraving, the note beside the install command. Weight 500, Latin only, about 20 KB on the site.' },
+  { id: 'caveat', family: 'Caveat', size: 1.25, note: 'Used until 11 Oct. The most natural pen note: red-pen asides, labels on the engraving, the note beside the install command. Weight 500, Latin only, about 20 KB on the site.' },
   { id: 'nanum', family: 'Nanum Pen Script', size: 1.35, note: 'A quick, narrow ballpoint hand. The most rustic and personal, like notes in the margin of a workshop manual.' },
   { id: 'kalam', family: 'Kalam', size: 1.05, note: 'A neat, slightly slanted hand from Indian Type Foundry. The most legible at small sizes.' },
   { id: 'walter', family: 'Walter Turncoat', size: 0.95, note: 'Blocky drafting caps. It reads like labels on a blueprint and makes the most of the 90s-software mood.' },

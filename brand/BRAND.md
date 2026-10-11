@@ -7,10 +7,10 @@ Renamed from Trompo (it read like "Trump"). *Rueca* is Spanish for spinning whee
 | What | Decision |
 |---|---|
 | Direction | **Grabado**: an engraved picture (Rafael draws it by hand), indigo construction lines, handwritten notes and one flat dyed block. It keeps the wire identity ("the harness, drawn"). |
-| Display | **Martina Plantijn** (Klim Type Foundry), weight 700, on trial since 11 Oct (it replaced Dominicale by Altiplano the same day). Paid, licence still needed; the site falls back to Alegreya 700 until then. |
+| Display | **Signifier** (Klim Type Foundry, Kris Sowersby), weight **400**, on trial since 11 Oct. Lámina sits in the light–medium range, never bold (Rafael). It went Dominicale → Martina Plantijn → Signifier on the same day; Signifier is the Fell types redrawn with digital precision, which suits Lámina técnica. Paid, licence still needed; the site falls back to Alegreya at the same weight. Free fallbacks if needed: Newsreader Display, Old Standard TT. |
 | Tagline | **Spin up a real tool.** (chosen 11 Oct; it replaced “Give it a spin.”). “Spin up” is what developers say for starting something, and it's spinning on the wheel. Runners-up: *Turn it into a tool.* · *Your prototype, with handles.* |
-| Body | **Libre Franklin** (free, OFL), a Franklin Gothic revival from the same era as Plantin. Chosen 11 Oct over Source Sans 3 (runner-up) and Hanken Grotesk (previous). |
-| Handwriting | **Caveat** 500, for labels, measurements and red-pen notes. Replaces the mono everywhere except code. |
+| Body | **IBM Plex Sans** (free, OFL), chosen 11 Oct for Lámina. It was born in IBM's engineering documentation, so it's the technical-manual voice under Signifier's engraved one. It replaced Libre Franklin, which read heavy under Signifier 400. Runner-up: Instrument Sans. Free fonts only for body. |
+| Handwriting | **La Belle Aurore** 400 (free, OFL), chosen 11 Oct for Lámina: a fine-nib period hand, the plate annotator’s pen. Used for labels, measurements, red-pen notes and the label above each heading; never body copy or buttons. It replaced Caveat (a felt-tip marker). |
 | Code | Geist Mono, for commands only |
 | Palette | "Figma made in the 90s": Lana paper (#F3F1EB), Platino chrome, Nogal walnut ink (#181411), Rubia oxblood, plus flat dyed brights Achiote · Cochinilla · Malva · Cielo · Hoja · Gualda, and Añil for lines. Ramps 50–900 per family in `brand/data.js` (`ruecaRamps`). |
 | Accent | Achiote with walnut text on it (never white on a bright). Product previews stay neutral; the tools stay blue. |
