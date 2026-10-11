@@ -4,7 +4,9 @@
      const { client, setClient } = useClientMode()          // #…&client, or a phone (either way up)
      if (client) return (
        <ClientView params={params} onDownload={save} onExit={() => setClient(false)}>
-         <Stage fill><CanvasSurface … /></Stage>              // the art, full-bleed
+         <Stage contentSize={v.size} padding={16} hud={false}>   // the art, fitted at its export size
+           <Artboard width={v.size.w} height={v.size.h}><CanvasSurface … /></Artboard>
+         </Stage>
        </ClientView>
      )
 
@@ -57,14 +59,15 @@ export function ClientView({
   params, children, title = 'Make it yours', subtitle = 'Change it, then send it back', actions, onDownload, onExit, defaultOpen = true, className,
 }: {
   params: AnyParams
-  /** the artwork — usually `<Stage fill>` with a surface */
+  /** the artwork, framed as it will export: `<Stage contentSize={size} padding={16} hud={false}>` + an `<Artboard>`
+      (no label) — not `<Stage fill>`, which shows a 1080px canvas at 1080 css px on a 390px phone */
   children: ReactNode
   title?: string
   subtitle?: string
   /** extra buttons for the action row (Shuffle…), before Download */
   actions?: ReactNode
-  /** show Download; resolve when the file is saved */
-  onDownload?: () => void | Promise<void>
+  /** show Download; resolve when the file is saved (any return value is ignored — ClientView shows its own toast) */
+  onDownload?: () => unknown
   /** show "Back to designer view" (leave it out on a phone) */
   onExit?: () => void
   defaultOpen?: boolean

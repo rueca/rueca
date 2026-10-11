@@ -106,7 +106,7 @@ export function Section({
   }
   return (
     <section className={cn('group/section', !first && 'border-t border-line')}>
-      <div className="flex h-8 items-center gap-1 pr-2 pl-3">
+      <div data-section-header className="flex h-8 items-center gap-1 pr-2 pl-3">
         <button
           type="button"
           aria-expanded={collapsible ? open : undefined}

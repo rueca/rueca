@@ -468,7 +468,7 @@ export function Monitor({ get, graph, min, max, fmt }: { get: () => number | str
       const dpr = devicePixelRatio
       c.width = c.clientWidth * dpr; c.height = c.clientHeight * dpr
       const lo = min ?? Math.min(...h), hi = max ?? Math.max(...h)
-      const accent = getComputedStyle(document.documentElement).getPropertyValue('--signal') // re-read: follows theme changes
+      const accent = getComputedStyle(c).getPropertyValue('--signal') // from the canvas: tokens live on the kit's roots; re-read follows theme changes
       ctx.strokeStyle = accent; ctx.lineWidth = 1.25 * dpr; ctx.beginPath()
       h.forEach((y, i) => {
         const X = (i / 79) * c.width, Y = c.height - ((y - lo) / Math.max(1e-6, hi - lo)) * (c.height - 4 * dpr) - 2 * dpr

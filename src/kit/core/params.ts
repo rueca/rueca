@@ -455,8 +455,10 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     },
     shareURL: () => {
       const changed = api.toJSON({ changedOnly: true, shareable: true })
-      const base = location.href.replace(/[#&]p=[^&]*/, '')
-      const sep = base.includes('#') ? '&' : '#'
+      // Drop the old p= but keep the hash and its other flags: `#p=X&client` → `#client` (not `/&client`, which
+      // a static host serves as a 404 path — install test i1).
+      const base = location.href.replace(/([#&])p=[^&]*/, (_m, c) => (c === '#' ? '#' : '')).replace('#&', '#')
+      const sep = base.endsWith('#') ? '' : base.includes('#') ? '&' : '#'
       return `${base}${sep}p=${b64.enc(JSON.stringify({ $v: opts.version ?? 1, ...changed }))}`
     },
     isChanged: (key: keyof V) => !equal(store.getState().values[key], defaults[key]),

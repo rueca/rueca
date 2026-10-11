@@ -153,6 +153,8 @@ const registryTheme = (css) => '/* Installed from the ' + site.name + ' registry
   '   Its tokens apply only inside the tool (.studio and its popups); your app keeps its own.\n   */\n' +
   css.replace(/^@import "tailwindcss";\n/m, '')
     .replace(/^@custom-variant dark[^\n]*\n/m, '')
+    // --font-mono in @theme would replace the host's whole mono stack (code, pre, font-mono) — keep theirs (i2)
+    .replace(/^\s*--font-mono:[^\n]*\n/m, '')
     .replace(/:is\(\.light, (\[data-studio-theme="light"\])\)/g, '$1')
     .replace(/:not\(\.dark, (\[data-studio-theme="dark"\])\)/g, ':not($1)')
     // a rule whose whole selector is :root (+ attributes/pseudo-classes) declares tokens: move them onto the kit's roots

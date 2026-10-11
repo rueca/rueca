@@ -46,8 +46,10 @@ printf '\n@import "./components/studio/theme.css";\nhtml, body, #root { height: 
   popups and `[data-studio]` — so the app's own variables, `dark:` variant and `<body>` are untouched,
   and the utility names (`fg-muted`, `signal`, `control`, `font-ui`, …) don't overlap shadcn's. Using
   kit controls outside `<Studio>`? Put `className="studio"` on their container. Known overlap: the kit's
-  utility classes `panel`, `pop`, `cluster`, `tabular`, `checker`, `no-select` share names with any
-  app class of the same name — rename the app's if one clashes.
+  utility classes `panel`, `pop`, `cluster`, `tabular`, `checker`, `no-select` share names with app
+  classes. An app CSS rule for `.panel` or `.tabular` (etc.) repaints every kit panel or number, and the
+  kit's give an app element with that class the kit's look — check the app's CSS for those names and
+  rename the app's (e.g. `app-panel`) before installing.
 - **Light / dark:** the tool has its own theme on `<html data-studio-theme="light|dark">`, separate from
   the app's (its `.dark` class is never read or set). With no attribute it follows the OS; the kit's
   toggle remembers the choice (`studio:theme`).

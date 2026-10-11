@@ -119,8 +119,10 @@ never re-mount), `FrameSurface` (an existing page).
 return `<ClientView params={params} onDownload={…} onExit={forced ? undefined : () => setClient(false)}>`
 with the art inside — never hand-build the sheet. It gives touch-size controls, undo, Download,
 "Send to designer" (share sheet on phones) and locks a client link (`&client`) out of the designer view;
-the share menu gains "Copy client link". Show the art framed as it will export (same aspect), and draw
-in output units so the download looks like what the client tuned. Lists the user edits (layers,
+the share menu gains "Copy client link". Frame the art as it will export —
+`<Stage contentSize={size} padding={16} hud={false}><Artboard …>` (not `<Stage fill>`, which crops a 1080px
+artboard on a phone) — and draw in output units so the download looks like what the client tuned.
+`onDownload` takes a bare render (ClientView shows its own toast). Lists the user edits (layers,
 nodes, clips) live in `p.data<T>(…, { validate })` or `createDocStore` + `createHistory([params, doc])`
 so they undo, persist and share — never in `useState`.
 

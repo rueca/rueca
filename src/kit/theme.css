@@ -298,6 +298,11 @@
   .studio-touch [data-studio-thumb] { pointer-events: auto; }
   .studio-touch [data-studio-thumb]::after { content: ""; position: absolute; inset: -10px; }
 }
+.studio-touch [data-section-header] { height: 44px; }
+/* popups (colour picker, selects) are portaled out of the client view: while one is shown, size them for touch too */
+:root[data-studio-client] .pop :where(input:not([type="range"]), textarea, select) { font-size: 16px; }
+:root[data-studio-client] .pop :is(.h-6) { height: 36px; }
+:root[data-studio-client] .pop :is(.text-\[11px\], .text-\[11\.5px\]) { font-size: 14px; }
 /* labels get room at 14px instead of the desktop 84px column */
 .studio-touch [data-row-label] { width: auto !important; min-width: 96px; max-width: 46%; flex-shrink: 0; }
 .studio-touch :where(button, [role="slider"], [role="spinbutton"]) { -webkit-touch-callout: none; }

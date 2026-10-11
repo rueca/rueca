@@ -207,3 +207,14 @@ describe('a link is the whole shared design (client view C4/C5)', () => {
     expect(s.values()).toEqual({ rings: 30, shape: 'square' })
   })
 })
+
+describe('shareURL keeps the hash flags', () => {
+  it('a link made on a #p=…&client page stays a hash link with the flag', () => {
+    sessionStorage.clear()
+    location.hash = '#p=' + btoa(JSON.stringify({ $v: 1, rings: 20 })) + '&client'
+    const s = createParams(schema, { id: `url${++n}`, persist: false })
+    const u = new URL(s.shareURL())
+    expect(u.pathname).toBe('/')
+    expect(u.hash).toMatch(/^#client&p=/)
+  })
+})

@@ -52,7 +52,8 @@ for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attem
   try {
   const page = await ctx.newPage()
   await page.goto(url, { waitUntil: 'load', timeout: 30000 }) // not networkidle: live artifacts may never go idle
-  await page.evaluate((t) => { const h = document.documentElement; h.classList.toggle('dark', t === 'dark'); h.classList.toggle('light', t === 'light') }, theme)
+  // the kit's own theme attribute (installs) and the classes (sites that opt into configureTheme({ htmlClass }))
+  await page.evaluate((t) => { const h = document.documentElement; h.setAttribute('data-studio-theme', t); h.classList.toggle('dark', t === 'dark'); h.classList.toggle('light', t === 'light') }, theme)
   await page.waitForTimeout(800) // let a canvas / WebGL artifact draw a frame
 
   // Find the artboard: --artboard selector → the kit's hook [data-studio-artifact] (on Artboard, and on
@@ -114,7 +115,7 @@ for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attem
     }
     const dist = (x, y) => { const d = Math.abs(x - y) % 360; return Math.min(d, 360 - d) }
     const cssHue = (name) => {
-      const d = document.createElement('div'); d.style.color = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+      const d = document.createElement('div'); d.style.color = getComputedStyle(document.querySelector('.studio') ?? document.documentElement).getPropertyValue(name).trim()   // tokens live on the kit's roots
       document.body.append(d); const v = getComputedStyle(d).color.match(/[\d.]+/g).map(Number); d.remove()
       return oklch(v[0], v[1], v[2]).H
     }
@@ -162,11 +163,12 @@ if (picks.size) {
   console.log('\nOverride — paste after the theme import:')
   for (const [name, a] of Object.entries(ACCENTS)) if (picks.has(name)) {
     const soft = (hex, al) => `rgb(${parseInt(hex.slice(1, 3), 16)} ${parseInt(hex.slice(3, 5), 16)} ${parseInt(hex.slice(5, 7), 16)} / ${al})`
-    // :root:root beats the kit theme's own :root rules, in the repo and in a registry install alike.
-    // The media block covers the OS-follows case (no .dark / .light class on <html>).
+    // Wins in a registry install (tokens on .studio / .pop / [data-studio], theme on data-studio-theme) and in a site
+    // that keeps them on :root with .dark / .light classes. The media block covers the OS-follows case.
     const dark = `--signal: ${a.dark[0]}; --signal-strong: ${a.dark[1]}; --signal-soft: ${soft(a.dark[0], 0.16)};`
     const light = `--signal: ${a.light[0]}; --signal-strong: ${a.light[1]}; --signal-soft: ${soft(a.light[0], 0.12)};`
-    console.log(`/* ${name} */\n:root:root { ${dark} }\n:root:root.light { ${light} }\n@media (prefers-color-scheme: light) { :root:root:not(.dark) { ${light} } }`)
+    const K = ':where(.studio, .pop, [data-studio])'
+    console.log(`/* ${name} */\n:root:root, :root ${K} { ${dark} }\n:root:root.light, :root:is(.light, [data-studio-theme="light"]) ${K} { ${light} }\n@media (prefers-color-scheme: light) { :root:root:not(.dark), :root:not(.dark, [data-studio-theme="dark"]) ${K} { ${light} } }`)
   }
 }
 process.exit(failed ? 2 : clashed ? 1 : 0)
