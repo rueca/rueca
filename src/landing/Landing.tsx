@@ -67,7 +67,8 @@ export function Landing({ shells }: { shells: Shell[] }) {
           </div>
           {/* The one moment that breaks the sheet: the live tool runs wider than the rails.
               No rule or dimension line above it: the hero text runs straight into the figure. */}
-          <div className="pb-14 sm:pb-20">
+          {/* phones: no space under it; the preview takes that height instead and sits on the next sheet's rule (Rafael) */}
+          <div className="sm:pb-20">
             <div ref={heroPreview} className="relative z-[3]" style={{ width: BREAKOUT, marginLeft: `calc(50% - ${BREAKOUT} / 2)` }}>
               {heroShells.length > 0 && <LiveShell shells={heroShells} phone={heroPhone} />}
             </div>

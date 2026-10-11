@@ -20,6 +20,7 @@ import { LiveFrame } from './LiveFrame'
 import { site } from '@/site.config'
 
 const NATIVE = { w: 1440, h: 900 }
+const PHONE_EXTRA = 56 // the hero's bottom space on phones, given to the preview instead (Landing.tsx)
 const TURN = 6 // seconds per shell (Rafael)
 
 function scrollParent(el: HTMLElement | null): HTMLElement | null {
@@ -55,7 +56,7 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
   const narrow = w > 0 && w < 640
   const shell = narrow && phone ? phone : shells.find((s) => s.id === id)
   const current = shell?.id ?? ''
-  const box = narrow ? { w, h: Math.round(Math.min(680, w * 1.55)) } : { w, h: Math.round(NATIVE.h * (w / NATIVE.w)) }
+  const box = narrow ? { w, h: Math.round(Math.min(680, w * 1.55)) + PHONE_EXTRA } : { w, h: Math.round(NATIVE.h * (w / NATIVE.w)) }
 
   const switcher = !narrow && shells.length > 1 && (
     <div data-reveal="fade" style={{ '--reveal-delay': '1.15s' } as React.CSSProperties} className="mt-6 flex justify-center">
@@ -84,8 +85,8 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
       {/* the window: a minimal browser bar on top of the live tool; the frame and shadow wrap both */}
       <div data-reveal="head" style={{ '--reveal-delay': '0.9s' } as React.CSSProperties}
         className={narrow
-          // phones: rules top and bottom only; the window's sides run along the sheet's rails (Rafael)
-          ? 'shadow-[0_-1px_0_var(--artboard-ring),0_1px_0_var(--artboard-ring)]'
+          // phones: a rule on top only; the sides run along the sheet's rails and the bottom sits on the next sheet's rule (Rafael)
+          ? 'shadow-[0_-1px_0_var(--artboard-ring)]'
           : 'shadow-[var(--shadow-artboard),0_0_0_1px_var(--artboard-ring)]'}>
         {shell && <BrowserBar id={current} query={narrow ? '?client' : ''} />}
         <div ref={wrap} className="relative overflow-hidden bg-field"
