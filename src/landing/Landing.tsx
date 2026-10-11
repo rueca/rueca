@@ -169,7 +169,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
 }
 
 /** The hero preview's width: wider than the sheet, up to 1360, always inside the screen. */
-const BREAKOUT = 'min(calc(100vw - 16px), 1360px)'
+const BREAKOUT = 'var(--breakout)' // plate.css: 8px from the window's edges, or flush with the rails on phones
 /** How many numbered sheets (sections) the page has, for the title strips. */
 const SHEETS = 6
 

@@ -24,5 +24,7 @@ if (import.meta.env.DEV) for (const s of SHELLS) if ((RESERVED_ROUTES as readonl
 
 /** Marketing thumbnail: the neutral-accent capture from scripts/thumbs-rail.mjs (qa.mjs's PNGs stay QA artefacts). */
 export const thumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/rail/${id}-${theme}.jpg`
+/** a shell's client view as the phone hero shows it (scripts/thumbs-rail.mjs CLIENT): 880×1360 WebP */
+export const clientThumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/client/${id}-${theme}.webp`
 /** the small one, for the shells page grid (~340px cards): 720w WebP */
 export const gridThumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/grid/${id}-${theme}.webp`

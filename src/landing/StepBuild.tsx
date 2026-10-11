@@ -151,10 +151,6 @@ function Stacked({ steps }: { steps: DeckStep[] }) {
             <BuildArt el={art} />
           </div>
         </div>
-        {/* where you are: one short rule per step, the current one in ink */}
-        <div aria-hidden className="flex gap-1.5">
-          {steps.map((s, i) => <span key={s.n} className={cn('h-px flex-1 transition-colors duration-500', i <= active ? 'bg-fg' : 'bg-[var(--rule)]')} />)}
-        </div>
         {/* the text slot: every step in one grid cell (so it's as tall as the longest), only the current one shown */}
         <div className="grid">
           {steps.map((s, i) => (
@@ -166,6 +162,10 @@ function Stacked({ steps }: { steps: DeckStep[] }) {
               <p className="mt-2.5 text-[14px] leading-[1.6] text-pretty text-fg-muted">{s.body}</p>
             </article>
           ))}
+        </div>
+        {/* where you are, under the text (Rafael): one short rule per step, the current one in ink */}
+        <div aria-hidden className="flex gap-1.5">
+          {steps.map((s, i) => <span key={s.n} className={cn('h-px flex-1 transition-colors duration-500', i <= active ? 'bg-fg' : 'bg-[var(--rule)]')} />)}
         </div>
       </div>
     </div>

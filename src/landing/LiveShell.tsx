@@ -15,7 +15,7 @@ import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@kit/core/cn'
 import { useTheme } from '@kit/core/theme'
 import type { Shell } from '@/gallery/registry'
-import { thumb } from '@/gallery/registry'
+import { clientThumb, thumb } from '@/gallery/registry'
 import { LiveFrame } from './LiveFrame'
 import { site } from '@/site.config'
 
@@ -91,7 +91,8 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
         <div ref={wrap} className="relative overflow-hidden bg-field"
           style={{ height: box.h || undefined, aspectRatio: box.h ? undefined : `${NATIVE.w} / ${NATIVE.h}` }}>
           {/* the thumbnail is always underneath: switching and loading never flash empty */}
-          <img src={thumb(current, theme)} alt="" aria-hidden fetchPriority="high"
+          {/* on a phone it's the client view's own still, not the desktop tool's */}
+          <img src={(narrow ? clientThumb : thumb)(current, theme)} alt="" aria-hidden fetchPriority="high"
             onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden' }}
             className="absolute inset-0 size-full object-cover object-top" />
           {w > 0 && onScreen && shell && (

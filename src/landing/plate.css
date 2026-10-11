@@ -68,11 +68,16 @@
 /* the strip has no top rule; its bottom rule shows only once it pins (Rafael) */
 .site .site-nav:not([data-stuck]) .rule::before { display: none; }
 @media (prefers-reduced-motion: reduce) { .site .site-nav-paper { transition: none; } }
+/* the hero's live tool runs wider than the sheet: 8px from the window's edges, at most 1360px. On phones the
+   sheet is all but the window (6px gutters), so it runs exactly between the rails instead (Rafael: no 1px gap) */
+.site { --breakout: min(calc(100vw - 16px), 1360px); }
+@media (max-width: 639px) { .site { --breakout: calc(100vw - 14px); } }
 /* phones: the footer is one column, so its cells drop their left rule (Rafael) and keep only the rule above */
 @media (max-width: 767px) { .site footer .cells > * { box-shadow: inset 0 1px var(--rule); } }
-/* phones: a top rule too (Rafael), across the sheet at rest and the full window once pinned, like the bottom one */
+/* phones: a top rule too (Rafael), at rest and pinned: on the strip's sheet (its paper would sit under the sheet's
+   own background) and, once pinned, on the paper as well, so it runs out to the window's edges like the bottom one */
 @media (max-width: 767px) {
-  .site .site-nav:not([data-stuck]) .sheet { box-shadow: inset 0 1px var(--rule); }
+  .site .site-nav .sheet { box-shadow: inset 0 1px var(--rule); }
   .site .site-nav[data-stuck] .site-nav-paper { box-shadow: inset 0 1px var(--rule), inset 0 -1px var(--rule), var(--nav-shadow); }
 }
 
@@ -80,6 +85,9 @@
    Dark takes the palette's lifted dark values; the paper takes each ramp's 600, so the fine nib keeps
    at least 3.9:1 on the sheet and 3.3:1 on Platino (sheet 6). */
 .site [data-dye] .font-hand { color: var(--dye); }
+/* the kit drawings' pen (KitArt.tsx): notes and arrows in the dye of the drawing's bright part */
+.site .rueca-iso[data-dye] .rueca-note { fill: var(--dye); }
+.site .rueca-iso[data-dye] .rueca-pen { stroke: var(--dye); }
 .site [data-dye='achiote'] { --dye: #f06a3e; }
 .site [data-dye='gualda'] { --dye: #f5d05a; }
 .site [data-dye='hoja'] { --dye: #3db68b; }

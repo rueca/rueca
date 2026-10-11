@@ -14,11 +14,13 @@ import { WORKING_SVG } from './working'
 import { HANDOFF_SVG } from './handoff'
 
 const ART: Record<string, string> = { Controls: CONTROLS_SVG, Layout: LAYOUT_SVG, Time: TIME_SVG, Structure: STRUCTURE_SVG, Workflow: WORKING_SVG, 'Hand-off': HANDOFF_SVG }
+/** each drawing's notes and arrows in the dye of its one bright part (Rafael), via plate.css [data-dye] */
+const DYE: Record<string, string> = { Controls: 'achiote', Layout: 'cielo', Time: 'gualda', Structure: 'malva', Workflow: 'hoja', 'Hand-off': 'cochinilla' }
 
 /** the drawing for a kit group */
 export function KitArt({ group }: { group: string }) {
   const svg = ART[group], ref = useRef<HTMLDivElement>(null)
   usePenMarks(ref)
   // drawn at 90% of the tile (Rafael, 11 Oct): the objects and their notes shrink together about the centre
-  return svg ? <div ref={ref} className="rueca-iso size-full scale-90" dangerouslySetInnerHTML={{ __html: svg }} /> : null
+  return svg ? <div ref={ref} data-dye={DYE[group]} className="rueca-iso size-full scale-90" dangerouslySetInnerHTML={{ __html: svg }} /> : null
 }
