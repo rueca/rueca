@@ -344,8 +344,7 @@ function useInView<T extends HTMLElement>() {
   return [ref, inView] as const
 }
 
-/** A shell in a card: the name and an open link on top, then the picture (or the live tool)
-    inset. Only the centred card shows its picture; the rest show a skeleton. The two swap by a
+/** A shell in a card: the picture inset, then the name and its link under it (Rafael, 11 Oct). Only the centred card shows its picture; the rest show a skeleton. The two swap by a
     wipe, not a crossfade: a crossfade between two drawings of one layout double-exposes. Focus is shown by
     size and the picture alone (no crosshairs, Rafael 11 Oct). */
 // Thumbnails only: the rail never runs a live shell (Rafael, 11 Oct); "Try the tool" opens it full screen.
@@ -358,9 +357,19 @@ function CardedRailCard({ shell: s, theme, delay, focused }: { shell: Shell; the
     <div data-rail-card data-shell-id={s.id}
       // smaller away from the middle, full size at the centre, following the scroll exactly
       className="card-in group relative flex flex-none flex-col bg-[var(--sheet)] shadow-[inset_0_0_0_1px_var(--rule)] [scale:calc(0.86_+_0.14*var(--near,0))] motion-reduce:[scale:1]" style={{ '--card-in-delay': `${delay}ms`, width: CARD_W } as React.CSSProperties}>
+      <div ref={box} className="relative mx-3 mt-3 aspect-[16/10] overflow-hidden shadow-[0_0_0_1px_var(--rule)]">
+        <Skeleton drawn={drawn} {...(blueprint ?? {})} />
+        {/* the picture wipes in over the skeleton, left to right, behind a hairline edge (RUECA.md §7:
+            the new half wipes in like a product); leaving focus runs it back, right to left */}
+        <a href={`#/${s.id}`} aria-label={`Try ${s.name}`} data-on={focused || undefined}
+          className="wipe absolute inset-0 bg-well outline-none focus-visible:[clip-path:none] focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-inset">
+          <img src={rail(s.id, theme)} alt={`${s.name}, a ${s.category.toLowerCase()} tool built with the kit`} loading="eager" decoding="async" className="absolute inset-0 size-full object-cover" />
+        </a>
+        <WipeEdge on={focused} />
+      </div>
       {/* the header: the real name and link when focused; drawn lines standing in for them otherwise,
           on the same timing as the picture and its skeleton */}
-      <div className="relative flex items-baseline justify-between gap-4 px-5 pt-4 pb-3.5">
+      <div className="relative flex items-baseline justify-between gap-4 px-5 pt-3.5 pb-4">
         <div className="wipe flex min-w-0 flex-1 items-baseline justify-between gap-4 focus-within:[clip-path:none]" data-on={focused || undefined}>
           <h3 className="truncate font-display text-[22px] leading-tight text-fg">{s.name}</h3>
           <a href={`#/${s.id}`} className="strip flex flex-none items-center gap-1 text-[10.5px] text-fg-muted outline-none transition-colors hover:text-fg focus-visible:text-fg">
@@ -374,16 +383,6 @@ function CardedRailCard({ shell: s, theme, delay, focused }: { shell: Shell; the
           {/* the link: a short line and its arrow, at the right */}
           <svg x="100%" overflow="visible"><path d="M-112 15H-22M-14 19L-8 13M-13 13H-8V18" pathLength={1} style={{ '--in': '100ms', '--out': '500ms' } as React.CSSProperties} /></svg>
         </svg>
-      </div>
-      <div ref={box} className="relative mx-3 mb-3 aspect-[16/10] overflow-hidden shadow-[0_0_0_1px_var(--rule)]">
-        <Skeleton drawn={drawn} {...(blueprint ?? {})} />
-        {/* the picture wipes in over the skeleton, left to right, behind a hairline edge (RUECA.md §7:
-            the new half wipes in like a product); leaving focus runs it back, right to left */}
-        <a href={`#/${s.id}`} aria-label={`Try ${s.name}`} data-on={focused || undefined}
-          className="wipe absolute inset-0 bg-well outline-none focus-visible:[clip-path:none] focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-inset">
-          <img src={rail(s.id, theme)} alt={`${s.name}, a ${s.category.toLowerCase()} tool built with the kit`} loading="eager" decoding="async" className="absolute inset-0 size-full object-cover" />
-        </a>
-        <WipeEdge on={focused} />
       </div>
     </div>
   )
@@ -417,18 +416,7 @@ function IndexCard({ rest, first, total, focused }: { rest: Shell[]; first: numb
   return (
     <div data-rail-card
       className="card-in group relative flex flex-none flex-col bg-[var(--sheet)] shadow-[inset_0_0_0_1px_var(--rule)] [scale:calc(0.86_+_0.14*var(--near,0))] motion-reduce:[scale:1]" style={{ '--card-in-delay': '360ms', width: CARD_W } as React.CSSProperties}>
-      <div className="relative flex items-baseline justify-between gap-4 px-5 pt-4 pb-3.5">
-        <div className="wipe flex min-w-0 flex-1 items-baseline justify-between gap-4 focus-within:[clip-path:none]" data-on={focused || undefined}>
-          <h3 className="truncate font-display text-[22px] leading-tight text-fg">And {rest.length} more</h3>
-          <span className="strip flex-none text-[10.5px] text-fg-faint">Plates {String(first).padStart(2, '0')}–{String(total).padStart(2, '0')}</span>
-        </div>
-        <svg aria-hidden className={cn('skeleton pointer-events-none absolute inset-x-5 top-4 h-[28px] w-[calc(100%-40px)] overflow-visible', !DRAW_SKELETON && 'skeleton-static wipe-out')} data-drawn={drawn || undefined} data-on={focused || undefined}
-          fill="none" stroke="var(--rule)" strokeWidth="1" strokeLinecap="round">
-          <path d="M0 15H150" pathLength={1} style={{ '--in': '480ms', '--out': '50ms' } as React.CSSProperties} />
-          <svg x="100%" overflow="visible"><path d="M-96 15H0" pathLength={1} style={{ '--in': '100ms', '--out': '500ms' } as React.CSSProperties} /></svg>
-        </svg>
-      </div>
-      <div ref={box} className="relative mx-3 mb-3 aspect-[16/10] overflow-hidden shadow-[0_0_0_1px_var(--rule)]">
+      <div ref={box} className="relative mx-3 mt-3 aspect-[16/10] overflow-hidden shadow-[0_0_0_1px_var(--rule)]">
         <Skeleton drawn={drawn} marks={INDEX_SKELETON} />
         <div data-on={focused || undefined} className="wipe absolute inset-0 flex flex-col bg-[var(--sheet)] px-[3.75%] pt-[1.5%] pb-[5%] focus-within:[clip-path:none]">
           <ol className="grid min-h-0 flex-1 grid-flow-col grid-cols-2 gap-x-[5%]" style={{ gridTemplateRows: `repeat(${INDEX_ROWS}, minmax(0, 1fr))` }}>
@@ -449,6 +437,17 @@ function IndexCard({ rest, first, total, focused }: { rest: Shell[]; first: numb
           </a>
         </div>
         <WipeEdge on={focused} />
+      </div>
+      <div className="relative flex items-baseline justify-between gap-4 px-5 pt-3.5 pb-4">
+        <div className="wipe flex min-w-0 flex-1 items-baseline justify-between gap-4 focus-within:[clip-path:none]" data-on={focused || undefined}>
+          <h3 className="truncate font-display text-[22px] leading-tight text-fg">And {rest.length} more</h3>
+          <span className="strip flex-none text-[10.5px] text-fg-faint">Plates {String(first).padStart(2, '0')}–{String(total).padStart(2, '0')}</span>
+        </div>
+        <svg aria-hidden className={cn('skeleton pointer-events-none absolute inset-x-5 top-4 h-[28px] w-[calc(100%-40px)] overflow-visible', !DRAW_SKELETON && 'skeleton-static wipe-out')} data-drawn={drawn || undefined} data-on={focused || undefined}
+          fill="none" stroke="var(--rule)" strokeWidth="1" strokeLinecap="round">
+          <path d="M0 15H150" pathLength={1} style={{ '--in': '480ms', '--out': '50ms' } as React.CSSProperties} />
+          <svg x="100%" overflow="visible"><path d="M-96 15H0" pathLength={1} style={{ '--in': '100ms', '--out': '500ms' } as React.CSSProperties} /></svg>
+        </svg>
       </div>
     </div>
   )

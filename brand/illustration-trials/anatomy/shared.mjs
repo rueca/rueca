@@ -158,7 +158,7 @@ ${brightCss}
 .rueca-logo-card>.iso-shade[data-shade="0"]{fill:url(#kit-b0-logo)!important}
 .rueca-logo-card>.iso-shade[data-shade="1"]{fill:url(#kit-b1-logo)!important}
 .rueca-logo-card>.iso-shade[data-shade="2"]{fill:url(#kit-b2-logo)!important}
-.rueca-pale .rueca-logo-card>.iso-fill,.rueca-pale .rueca-logo-card>.iso-top,.rueca-pale .rueca-logo-card>.iso-shade{fill:color-mix(in srgb,var(--logo-card) 34%,var(--anatomy-paper))!important}
+.rueca-pale .rueca-logo-card>.iso-fill,.rueca-pale .rueca-logo-card>.iso-top,.rueca-pale .rueca-logo-card>.iso-shade{fill:color-mix(in srgb,var(--logo-card) var(--logo-pale, 34%),var(--anatomy-paper))!important}
 .rueca-mark-outline{fill:none;stroke:var(--logo-ink);stroke-opacity:.6;stroke-width:.55px;vector-effect:non-scaling-stroke}
 .rueca-mark-trace{fill:none;stroke:var(--logo-ink);stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}
 .rueca-mark-fill{fill:var(--logo-ink)}
@@ -181,7 +181,7 @@ const SITE_TOKENS = `
   --anatomy-paper:${mix(2.5)};--anatomy-face:${mix(5)};--anatomy-top:${mix(5)};--anatomy-lit-top:${mix(6)};--anatomy-lit-shade:${mix(5)};
   --anatomy-shade-0:${mix(9)};--anatomy-hi:var(--fg);--anatomy-mid:${mix(62)};--anatomy-lo:${mix(38)};--anatomy-faint:${mix(20)};
   --anatomy-lit:var(--fg);--anatomy-dot:var(--fg);--anatomy-weight:.6px;--rueca-hatch:${mix(46)};
-  --logo-card:#1B668E;--logo-ink:#F3F1EB;
+  --logo-card:#2E81AF;--logo-ink:#F3F1EB;--logo-pale:78%;
 }
 :root.light .site .rueca-iso{
   --anatomy-face:color-mix(in srgb, #fff 65%, var(--sheet));--anatomy-top:color-mix(in srgb, #fff 65%, var(--sheet));--anatomy-lit-top:color-mix(in srgb, #fff 65%, var(--sheet));

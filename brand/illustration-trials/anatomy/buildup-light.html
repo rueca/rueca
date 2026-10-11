@@ -169,7 +169,7 @@ body{margin:0;background:var(--anatomy-page);color:var(--anatomy-text);font:14px
 .rueca-logo-card>.iso-shade[data-shade="0"]{fill:url(#kit-b0-logo)!important}
 .rueca-logo-card>.iso-shade[data-shade="1"]{fill:url(#kit-b1-logo)!important}
 .rueca-logo-card>.iso-shade[data-shade="2"]{fill:url(#kit-b2-logo)!important}
-.rueca-pale .rueca-logo-card>.iso-fill,.rueca-pale .rueca-logo-card>.iso-top,.rueca-pale .rueca-logo-card>.iso-shade{fill:color-mix(in srgb,var(--logo-card) 34%,var(--anatomy-paper))!important}
+.rueca-pale .rueca-logo-card>.iso-fill,.rueca-pale .rueca-logo-card>.iso-top,.rueca-pale .rueca-logo-card>.iso-shade{fill:color-mix(in srgb,var(--logo-card) var(--logo-pale, 34%),var(--anatomy-paper))!important}
 .rueca-mark-outline{fill:none;stroke:var(--logo-ink);stroke-opacity:.6;stroke-width:.55px;vector-effect:non-scaling-stroke}
 .rueca-mark-trace{fill:none;stroke:var(--logo-ink);stroke-width:1.1;stroke-linecap:round;stroke-linejoin:round}
 .rueca-mark-fill{fill:var(--logo-ink)}
@@ -193,7 +193,7 @@ body{margin:0;background:var(--anatomy-page);color:var(--anatomy-text);font:14px
   --anatomy-paper:color-mix(in srgb, var(--fg) 2.5%, var(--sheet));--anatomy-face:color-mix(in srgb, var(--fg) 5%, var(--sheet));--anatomy-top:color-mix(in srgb, var(--fg) 5%, var(--sheet));--anatomy-lit-top:color-mix(in srgb, var(--fg) 6%, var(--sheet));--anatomy-lit-shade:color-mix(in srgb, var(--fg) 5%, var(--sheet));
   --anatomy-shade-0:color-mix(in srgb, var(--fg) 9%, var(--sheet));--anatomy-hi:var(--fg);--anatomy-mid:color-mix(in srgb, var(--fg) 62%, var(--sheet));--anatomy-lo:color-mix(in srgb, var(--fg) 38%, var(--sheet));--anatomy-faint:color-mix(in srgb, var(--fg) 20%, var(--sheet));
   --anatomy-lit:var(--fg);--anatomy-dot:var(--fg);--anatomy-weight:.6px;--rueca-hatch:color-mix(in srgb, var(--fg) 46%, var(--sheet));
-  --logo-card:#1B668E;--logo-ink:#F3F1EB;
+  --logo-card:#2E81AF;--logo-ink:#F3F1EB;--logo-pale:78%;
 }
 .iso[data-theme="light"]{
   --anatomy-face:color-mix(in srgb, #fff 65%, var(--sheet));--anatomy-top:color-mix(in srgb, #fff 65%, var(--sheet));--anatomy-lit-top:color-mix(in srgb, #fff 65%, var(--sheet));
