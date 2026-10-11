@@ -78,7 +78,7 @@ export function Field({ label, children, className }: { label: string; children:
 /** A section's title strip, like a drawing sheet's title block: printed fields, handwritten values. */
 export function TitleStrip({ n, label, of, aside }: { n: number; label: string; of: number; aside?: ReactNode }) {
   return (
-    <Row className="divide-rule flex h-[60px] items-stretch">
+    <Row className="divide-rule no-cross flex h-[60px] items-stretch">
       <Field label="No." className="w-14 flex-none sm:w-16"><Hand className="text-[23px]">{String(n)}</Hand></Field>
       <Field label="Title" className="min-w-0 flex-1"><Hand className="text-[24px]" delay={0.15}>{label}</Hand></Field>
       {aside && <span className="strip hidden items-center px-5 text-fg-faint md:flex">{aside}</span>}

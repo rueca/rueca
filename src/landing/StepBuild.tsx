@@ -122,7 +122,7 @@ function Side({ steps, head }: { steps: DeckStep[]; head?: ReactNode }) {
           </div>
         </div>
       </div>
-      <div ref={track} className="relative bg-field" style={{ height: `${steps.length * 90 + 10}vh` }}>
+      <div ref={track} className="relative bg-fg/[0.025]" style={{ height: `${steps.length * 90 + 10}vh` }}>
         <div ref={pinned} className="sticky mx-auto" style={{ top, width: size, height: size }} role="img" aria-label={steps.map((s) => s.title).join(', then ')}>
           <BuildArt el={art} />
         </div>

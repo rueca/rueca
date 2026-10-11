@@ -160,25 +160,6 @@ html[data-reveals] [data-reveal='words'][data-in] { animation: none; }
 html[data-reveals] [data-reveal='words']:not([data-in]) .reveal-word > span { opacity: 0; }
 html[data-reveals] [data-reveal='words'][data-in] .reveal-word > span { animation: reveal-word 0.9s var(--ease-mind) calc(0.12s + var(--word, 0) * 45ms) both; }
 
-/* the footer's title block: each cell in its own dye (brand/data.js ruecaRamps), Achiote, Gualda,
-   Hoja, Cielo, Malva. Deep 800 shades in dark (chroma cut about 45%, Rafael) and pale 200 tints in light, so the text keeps its
-   theme colour (light on dark, dark on light) at 8:1 or better; the small labels step up from
-   faint to muted to stay above 4.5:1 on the colour. */
-/* dark: the dyes themselves, flat, with Nogal ink on them (brand rule: on a bright, text is Nogal,
-   never white). The dark-mode values, a touch softened toward the Platino block so five side by side
-   don't shout. Light keeps its pale washes. */
-.site { --tb-1: #e26a43; --tb-2: #e6c25a; --tb-3: #42a985; --tb-4: #6cb3dc; --tb-5: #a693e6; }
-:root:not(.light) .site .title-block > * { --fg: #181411; --fg-muted: #2a2420; color: var(--fg); }
-/* light: each dye greyed into the paper, like faded dyed cloth (Rafael, 11 Oct: the pale washes read as candy) */
-:root.light .site { --tb-1: #e3b9ab; --tb-2: #dccca5; --tb-3: #b9d4c4; --tb-4: #b8cfde; --tb-5: #cdc6e0; }
-:root.light .site .title-block > * { --fg-muted: #4d4743; } /* the small labels, a step darker so they clear 4.5:1 on the deeper tints */
-.site .title-block > * { --fg-faint: var(--fg-muted); }
-.site .title-block > :nth-child(1) { background: var(--tb-1); }
-.site .title-block > :nth-child(2) { background: var(--tb-2); }
-.site .title-block > :nth-child(3) { background: var(--tb-3); }
-.site .title-block > :nth-child(4) { background: var(--tb-4); }
-.site .title-block > :nth-child(5) { background: var(--tb-5); }
-
 /* the hero's pen annotation (HeroArrow.tsx): it mounts once the hero has come to rest, then the loop round the word draws, the line, the head */
 .site .hero-arrow path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: arrow-draw 0.75s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards; }
 .site .hero-arrow .hero-arrow-line { animation-duration: 1s; animation-delay: 0.8s; }

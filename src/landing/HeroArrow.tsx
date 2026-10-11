@@ -120,7 +120,7 @@ export function HeroArrow({ column, preview }: { column: React.RefObject<HTMLEle
     <div ref={box} aria-hidden className="pointer-events-none absolute inset-0 z-[2] hidden md:block">
       {g && (
         <svg className="hero-arrow absolute top-0 left-0 overflow-visible text-signal" width={g.w} height={g.h}
-          fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+          fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d={g.loop} pathLength={1} className="hero-arrow-loop" />
           <path d={g.line} pathLength={1} className="hero-arrow-line" />
           <path d={g.head} pathLength={1} className="hero-arrow-head" />

@@ -37,7 +37,8 @@
 }
 .site .sheet::before { right: calc(100% + 10px); background-position: right top, right top; }
 .site .sheet::after { left: calc(100% + 10px); }
-@media (min-width: 1200px) { .site .sheet::before, .site .sheet::after { display: block; } }
+/* Trial (Rafael, 11 Oct): margin rulers hidden to see the sheet without them. Restore: display: block. */
+@media (min-width: 1200px) { .site .sheet::before, .site .sheet::after { display: none; } }
 
 /* a ruled row: the top hairline. Its ends meet the rails without a mark: a crosshair only
    goes where two lines cross inside the sheet, never on its edge (Rafael, 11 Oct) */
@@ -63,13 +64,21 @@
 .site :is(.cells > *, .split > * + *, .divide-rule > :not(.cross) + :not(.cross))::after {
   content: ""; position: absolute; top: -5px; bottom: -5px; left: -5px; width: 11px; pointer-events: none; z-index: 20;
   background:
-    linear-gradient(var(--cross), var(--cross)) 0 5px / 11px 1px no-repeat,
-    linear-gradient(var(--cross), var(--cross)) 5px 0 / 1px 11px no-repeat,
-    linear-gradient(var(--cross), var(--cross)) 0 calc(100% - 4px) / 11px 1px no-repeat,
-    linear-gradient(var(--cross), var(--cross)) 5px calc(100% + 1px) / 1px 11px no-repeat;
+    linear-gradient(var(--x-top, var(--cross)), var(--x-top, var(--cross))) 0 5px / 11px 1px no-repeat,
+    linear-gradient(var(--x-top, var(--cross)), var(--x-top, var(--cross))) 5px 0 / 1px 11px no-repeat,
+    linear-gradient(var(--x-bot, var(--cross)), var(--x-bot, var(--cross))) 0 calc(100% - 4px) / 11px 1px no-repeat,
+    linear-gradient(var(--x-bot, var(--cross)), var(--x-bot, var(--cross))) 5px calc(100% + 1px) / 1px 11px no-repeat;
 }
-/* .no-cross: dividers with plain rules, no crosshairs (the site nav, Rafael) */
+/* .no-cross: dividers with plain rules, no crosshairs (the site nav, every section opener and the shells page title strip, Rafael) */
 .site .divide-rule.no-cross > :not(.cross) + :not(.cross)::after { content: none; }
+.site .cells.no-cross > :not(.cross)::after { content: none; } /* the same for cell grids (the footer, the shells filter) */
+/* nor where a section's rows meet an opener: the row under it drops its top marks, and every
+   section's last row its bottom marks (they sit on the next opener's top rule, or the footer's) */
+.site .rule.no-cross + .rule > :is(.cells, .split, .divide-rule) > *::after { --x-top: transparent; }
+.site section > .rule:last-child > :is(.cells, .split, .divide-rule) > *::after { --x-bot: transparent; }
+/* the same round a crosshair-free cell grid (the shells filter): the rows either side drop the marks on its rules */
+.site .rule:has(> .cells.no-cross) + .rule > :is(.cells, .split, .divide-rule) > *::after { --x-top: transparent; }
+.site .rule:has(+ .rule > .cells.no-cross) > :is(.cells, .split, .divide-rule) > *::after { --x-bot: transparent; }
 /* which cells sit off the left rail: none in a single column, all but every (n+1)th in n
    columns. A mark the cell's content puts on its left rule (.cell-cross) goes with it.
    The hide rules match the show rules' specificity (:nth-child(n)), so a wider

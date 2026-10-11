@@ -37,7 +37,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
 
   return (
     <TipProvider>
-      <div ref={root} className="site relative isolate h-full overflow-x-hidden overflow-y-auto bg-field text-fg [scroll-snap-type:y_proximity] [&_*]:scroll-mt-20">
+      <div ref={root} className="site relative isolate h-full overflow-x-hidden overflow-y-auto bg-[var(--sheet)] text-fg [scroll-snap-type:y_proximity] [&_*]:scroll-mt-20">
         <SiteNav scroller={root} />
 
         {/* The page is one technical sheet (plate.tsx): rails, ruled cells, Añil crosshairs. */}
@@ -48,7 +48,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
               {/* centred on desktop, left-aligned on phones */}
               <div ref={heroText} className="max-w-[760px] md:mx-auto md:text-center">
                 {/* stacked and big (brand/BRAND.md "Type at scale"): word by word, then the paragraph rises and the actions fade */}
-                <h1 data-reveal="words" aria-label={hero.lines.join(' ')} className="font-display text-[clamp(56px,11.5vw,136px)] leading-[0.82] font-normal tracking-[-0.025em]">
+                <h1 data-reveal="words" aria-label={hero.lines.join(' ')} className="font-display text-[clamp(43px,9.8vw,116px)] leading-[0.82] font-normal tracking-[-0.025em]">
                   {hero.lines.map((line, l) => <span key={l} className="block">{line.split(' ').map((w, i) => {
                     const n = hero.lines.slice(0, l).join(' ').split(' ').filter(Boolean).length + i
                     return <Fragment key={i}>{i > 0 && ' '}<span className="reveal-word"><span style={{ '--word': n } as React.CSSProperties}>{w}</span></span></Fragment>

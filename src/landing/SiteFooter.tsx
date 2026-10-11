@@ -1,9 +1,9 @@
 /* The site footer: the drawing's title block, shared by the landing and the shells page.
-   A row of dyed cells (landing.css .title-block): the logo, who drew it, the licence, a count, and
-   where else to go. Each page passes its own count and links. */
+   A row of cells on Platino, the same as sheet 6 (Rafael, 11 Oct: one colour, not five dyes): the
+   logo, who drew it, the licence, a count, and where else to go. Each page passes its own count and links. */
 import type { ReactNode } from 'react'
 import { site } from '@/site.config'
-import { Logo } from './parts'
+import { Mark } from './parts'
 import { Hand, Row } from './plate'
 import { links } from './content'
 
@@ -27,9 +27,9 @@ export function SiteFooter({ count, elsewhere }: {
   return (
     <Row as="footer">
       {/* 15+15 | 14+14+14: on the landing the first two columns end exactly at the 5/12 split above, so that divider runs straight on */}
-      <div data-md="5" className="cells title-block auto-rows-fr text-[12.5px] md:grid-cols-[repeat(2,minmax(0,15fr))_repeat(3,minmax(0,14fr))]">
+      <div data-md="5" className="cells no-cross auto-rows-fr text-[12.5px] md:grid-cols-[repeat(2,minmax(0,15fr))_repeat(3,minmax(0,14fr))]">
         {/* the name is glossed in the hero's Animate plate (its "Rueca" entry), so the footer just signs it */}
-        <div className="flex items-center px-5 py-5 sm:px-6"><Logo height={16} /></div>
+        <div className="flex items-center justify-center px-5 py-5 sm:px-6"><Mark size={22} /><span className="sr-only">{site.name}</span></div>
         <TitleCell label="Drawn by">{site.author.url
           ? <a href={site.author.url} target="_blank" rel="noreferrer" className="underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-signal"><Hand>{site.author.name}</Hand></a>
           : <Hand>{site.author.name}</Hand>}</TitleCell>

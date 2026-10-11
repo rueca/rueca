@@ -1,5 +1,4 @@
 import { useRef, useState } from 'react'
-import { ArrowLeft } from 'lucide-react'
 import { useTheme } from '@kit/core/theme'
 import { cn } from '@kit/core/cn'
 import { TipProvider } from '@kit/ui/tooltip'
@@ -24,7 +23,7 @@ function Filter({ shells, value, onChange }: { shells: ShellMeta[]; value: strin
   return (
     <Row>
       {/* a grid of ruled cells, one per category: 2 across on phones, 4 from sm, 6 from lg */}
-      <div role="group" aria-label="Filter by category" data-base="2" data-sm="4" data-lg="6" className="cells grid-cols-2 sm:grid-cols-4 lg:grid-cols-6">
+      <div role="group" aria-label="Filter by category" data-base="2" data-sm="4" data-lg="6" className="cells no-cross grid-cols-2 sm:grid-cols-4 lg:grid-cols-6">
         {categoriesOf(shells).map((c) => btn(c, cn('h-12 justify-center px-3', value === c ? 'bg-fg/[0.05]' : 'hover:bg-fg/[0.025]')))}
       </div>
     </Row>
@@ -51,15 +50,12 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
   const list = shells.filter((s) => cat === 'All' || s.category === cat)
   return (
     <TipProvider>
-      <div ref={root} className="site h-full overflow-x-hidden overflow-y-auto bg-field text-fg">
+      <div ref={root} className="site h-full overflow-x-hidden overflow-y-auto bg-[var(--sheet)] text-fg">
         <SiteNav scroller={root} />
         <Sheet as="main">
           {/* the title strip, like a drawing sheet's: printed fields, handwritten values */}
           {/* -mt-px: its top rule lands on the header's closing rule, so the two read as one */}
-          <Row className="divide-rule -mt-px flex h-[60px] items-stretch">
-            <a href="#/" className="strip flex flex-none items-center gap-1.5 px-5 text-[11px] text-fg-muted outline-none transition-colors hover:bg-fg/[0.035] hover:text-fg focus-visible:bg-fg/[0.05] sm:px-6">
-              <ArrowLeft size={12} strokeWidth={1.5} />Overview
-            </a>
+          <Row className="divide-rule no-cross -mt-px flex h-[60px] items-stretch">
             <Field label="Title" className="min-w-0 flex-1"><Hand className="text-[24px]" delay={0.1}>All the shells</Hand></Field>
             <Field label="Count" className="flex-none"><Hand className="text-[23px]" delay={0.3}>{`${shells.length} in all`}</Hand></Field>
           </Row>
@@ -78,8 +74,8 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
             </div>
           </Row>
         </Sheet>
-        {/* the same footer as the landing: the drawing's title block, continuing the sheet's rails */}
-        <Sheet className="mb-16 sm:mb-24">
+        {/* the same footer as the landing: the drawing's title block on Platino, continuing the sheet's rails */}
+        <Sheet className="tone-platino mb-16 sm:mb-24">
           <SiteFooter count={{ label: 'Shells', value: `${shells.length} in all` }} elsewhere={FOOTER_LINKS.shells} />
           <Row />
         </Sheet>
