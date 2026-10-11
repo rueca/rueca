@@ -6,7 +6,7 @@
    Per shell: load at 1440×900, measure the docked/floating side columns, then
    shrink the window (16:10, the card's frame) until the chrome fills all but
    CANVAS of its width. The stage's contents are hidden, its space and
-   background kept, and any chrome inside it (the zoom pill, a floating toolbar) stays.
+   background kept and its floating chrome (zoom pills, tool docks) removed, since it overlaps the panels once squeezed.
    The pictures inside the panels (thumbnails, looks, a navigator) become Cargo-style
    blank cards: flat grey, one hairline diagonal, punched holes when there's room.
 
@@ -24,25 +24,37 @@ const CANVAS = 0.3
 /** single-column shells would get too narrow for their toolbar; Present also swaps to its client view under 761px */
 const MIN_W = 800, WIDE_W = 800
 
-/** Empties the stage, in the page: everything in <main> goes transparent except its chrome (zoom pills,
-    floating toolbars, a short floating panel like Generate's prompt bar) and the boxes that hold it, so the
-    canvas's own background and grid stay. Opacity, not visibility: React Flow and others set visibility inline. */
+/** Empties the stage, in the page. The canvas keeps only its surface (the big boxes that paint its background
+    and grid); everything on it goes transparent, its floating chrome too: zoom pills, tool docks and view toggles
+    sit in the middle of the canvas, and once the window is squeezed they land on the panels. They say "canvas
+    tool" in every shell alike, so the side panels, top bar and bottom timeline are left to say which tool it is.
+    Opacity, not visibility: React Flow and others set visibility inline. */
 const emptyStage = () => {
   const main = document.querySelector('main')
   if (!main) return
-  const H = main.getBoundingClientRect().height
-  const CHROME = '.cluster, header, .panel'
-  const isChrome = (e) => e.matches('.cluster, header') || (e.matches('.panel') && e.getBoundingClientRect().height < H * 0.4)
-  const walk = (el) => {
-    for (const c of el.children) {
-      if (isChrome(c)) continue
-      if ([...c.querySelectorAll(CHROME)].some(isChrome)) walk(c)
-      else c.style.setProperty('opacity', '0', 'important')
-    }
+  const box = main.getBoundingClientRect()
+  const alpha = (c) => { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return 0; const p = m[1].split(/[ ,/]+/).filter(Boolean); return p.length > 3 ? parseFloat(p[3]) : 1 }
+  // the studio's own field colour: a kept surface must sit close to it, or it is the artwork's ground
+  // (Gradient studio's black stage, Journey's paper map in the dark theme) and goes with the rest
+  const lum = (c) => { const m = c.match(/rgba?\(([^)]+)\)/); if (!m) return null; const [r, g, b] = m[1].split(/[ ,/]+/).filter(Boolean).map(Number); return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 }
+  const field = lum(getComputedStyle(document.querySelector('.studio') ?? document.body).backgroundColor) ?? 0.5
+  const fieldLike = (cs) => alpha(cs.backgroundColor) <= 0.05 || Math.abs((lum(cs.backgroundColor) ?? field) - field) < 0.12
+  // a surface: paints something (a field-coloured ground or a grid image) over most of the canvas
+  const surface = (e) => {
+    const r = e.getBoundingClientRect(), cs = getComputedStyle(e)
+    const big = r.width * r.height >= box.width * box.height * 0.6
+    return big && fieldLike(cs) && (alpha(cs.backgroundColor) > 0.05 || cs.backgroundImage !== 'none' || [...e.children].some(surface))
   }
+  const hide = (e) => e.style.setProperty('opacity', '0', 'important')
+  const walk = (el) => { for (const c of el.children) { if (surface(c)) walk(c); else hide(c) } }
   walk(main)
-  // what stayed in <main> is chrome; mark it so blankPictures only touches chrome
-  for (const e of main.querySelectorAll(CHROME)) if (isChrome(e)) e.dataset.thumbChrome = ''
+  // floating chrome that isn't part of the side columns, the top bar or the bottom timeline, wherever it is mounted
+  const keep = 'aside, header, [data-safe], section[aria-label="Bottom panel"], main'
+  for (const e of document.querySelectorAll('.cluster, .panel, [role="toolbar"]')) {
+    if (e.closest(keep)) continue
+    if (e.parentElement?.closest('.cluster, .panel, [role="toolbar"]')) continue
+    hide(e)
+  }
 }
 
 /** The pictures the chrome itself shows (library thumbnails, looks, a navigator, a scope) become blank cards,
@@ -52,7 +64,7 @@ const blankPictures = (theme) => {
   const T = theme === 'dark' ? { card: '#2d2d2d', line: 'rgba(255,255,255,0.10)' } : { card: '#dcdcdc', line: 'rgba(0,0,0,0.13)' }
   const W = innerWidth, H = innerHeight
   const shown = (e) => { const s = getComputedStyle(e); return s.visibility !== 'hidden' && s.display !== 'none' && +s.opacity > 0.05 }
-  const inChrome = (e) => (e.closest('main') ? !!e.closest('[data-thumb-chrome]') : !!e.closest('.panel, .cluster, aside, header, section'))
+  const inChrome = (e) => !e.closest('main') && !!e.closest('.panel, .cluster, aside, header, section')
   const card = (w, h) => {
     const s = Math.min(w, h), portrait = h >= w
     // the holes only where they read as holes (Cargo: 8px holes, 36px in, on a 432px card)
@@ -117,7 +129,8 @@ for (const id of shells) {
       try { await page.goto(`${BASE}/?qa=${Date.now()}#/${id}`); break }
       catch (err) { if (tries >= 3) throw err; await page.waitForTimeout(1500) }
     }
-    await page.waitForFunction(() => { const r = document.getElementById('root'); return !!r && r.querySelectorAll('*').length > 40 && !/Loading/.test(r.innerText.slice(0, 80)) }, null, { timeout: 15000 }).catch(() => {})
+    // a lazily loaded shell shows "Loading <name>…" first: wait until no loading text is left anywhere on screen
+    await page.waitForFunction(() => { const r = document.getElementById('root'); return !!r && r.querySelectorAll('*').length > 40 && !/Loading\b/.test(r.innerText) }, null, { timeout: 20000 }).catch(() => {})
     await page.waitForTimeout(1800)
 
     const full = await page.evaluate(measure)
