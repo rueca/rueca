@@ -69,19 +69,19 @@ describe('createHistory', () => {
 })
 
 describe('version bumps keep returning users’ work (break-it ST4)', () => {
-  it('carries a shape-compatible older doc forward without a migrate', () => {
+  it('a bump starts from the new content and leaves the old doc in place (no migrate)', () => {
+    const info = vi.spyOn(console, 'info').mockImplementation(() => {})
     localStorage.setItem('studio:bump:doc:v1', JSON.stringify({ title: 'mine', items: [1, 2] }))
     const d = createDocStore({ title: 'demo', items: [] as number[] }, { id: 'bump', version: 2 })
-    expect(d.get()).toEqual({ title: 'mine', items: [1, 2] })
-    expect(localStorage.getItem('studio:bump:doc:v1')).toBeNull()
+    expect(d.get()).toEqual({ title: 'demo', items: [] })
+    expect(localStorage.getItem('studio:bump:doc:v1')).not.toBeNull()
+    info.mockRestore()
   })
-  it('leaves an older doc that no longer fits where it was', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
-    localStorage.setItem('studio:bump2:doc:v1', JSON.stringify({ title: 3 }))
-    const d = createDocStore({ title: 'demo' }, { id: 'bump2', version: 2 })
-    expect(d.get()).toEqual({ title: 'demo' })
-    expect(localStorage.getItem('studio:bump2:doc:v1')).not.toBeNull()
-    warn.mockRestore()
+  it('migrate opts in to carrying an older doc forward', () => {
+    localStorage.setItem('studio:bump2:doc:v1', JSON.stringify({ title: 'mine', items: [1, 2] }))
+    const d = createDocStore({ title: 'demo', items: [] as number[] }, { id: 'bump2', version: 2, migrate: (raw) => raw as { title: string; items: number[] } })
+    expect(d.get()).toEqual({ title: 'mine', items: [1, 2] })
+    expect(localStorage.getItem('studio:bump2:doc:v1')).toBeNull()
   })
   it('records keyed by random ids need validate (marks regression, ST1)', () => {
     const demo = () => ({ marks: { [Math.random().toString(36)]: { family: 'a' } } })

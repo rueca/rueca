@@ -52,9 +52,9 @@ export interface DesignState {
 
 function load(): Doc {
   // Validate before use — a null or wrong-shaped saved doc used to crash every panel (break-it ST5). Bad docs are
-  // parked, not deleted; a v1 doc that still fits is carried forward (the v2 bump only refreshed the demo).
+  // parked, not deleted. Older versions (doc:v1) are left alone: a bump means "show the new demo".
   const seed = seedDoc()
-  for (const key of [LS, 'studio:ui-design:doc:v1']) {
+  for (const key of [LS]) {
     let text: string | null = null
     try { text = localStorage.getItem(key) } catch { /* private mode */ }
     if (!text) continue

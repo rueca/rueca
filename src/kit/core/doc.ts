@@ -88,15 +88,16 @@ export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> 
         const raw = parse(localStorage.getItem(k))
         if (raw === undefined) continue
         const v = Number(k.match(/:v(\d+)$/)?.[1] ?? NaN)
-        // No migrate: a version bump is often only a demo refresh, so an older doc that still has the right
-        // shape is carried forward as-is (break-it ST4: bumps used to orphan every returning user's work).
-        const m = opts.migrate ? opts.migrate(raw, Number.isNaN(v) ? null : v) : raw
+        // A version bump means "start from the new content" unless `migrate` says how to carry the old doc over.
+        // Without one, the old doc is left untouched under its own key (recoverable), never loaded and never
+        // deleted. (Carrying shape-compatible docs forward by default kept returning visitors on stale demos.)
+        if (!opts.migrate) { console.info(`[studio] ${opts.id}: kept an older saved document under ${k} (no migrate) and started from version ${opts.version ?? 1}`); break }
+        const m = opts.migrate(raw, Number.isNaN(v) ? null : v)
         if (m && ok(m)) {
           start = m
           try { localStorage.setItem(key, JSON.stringify(m)); localStorage.removeItem(k) } catch { /* noop */ }
           break
         }
-        console.warn(`[studio] ${opts.id}: found a saved document under ${k} that no longer fits — left it there, starting fresh`)
       }
     }
   }

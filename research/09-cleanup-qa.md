@@ -74,7 +74,7 @@ Held up: no hex in kit chrome, borders all `border-line`, no Title Case labels, 
 | ST1 | P0 | marks doc rejected on every reload (record keyed by random ids vs a fresh demo template) — all edits lost | **fixed**: `validate` in createDocStore; test |
 | ST2 | P1 | share-link values lost on a plain reload (never persisted; seen-flag skips the link) | **fixed**: persist after applying; test |
 | ST3 | P2 | seen-link key was a 64-char prefix; a pasted link in an open tab did nothing | **fixed**: hash of the whole payload; `hashchange` applies as one undo step; tests |
-| ST4 | P1 | version bumps orphaned returning users' docs (no migrate) and presets (versioned key) | **fixed**: shape-compatible older docs carried forward; presets on one unversioned key with fallback; tests |
+| ST4 | P1 | version bumps orphaned returning users' docs (no migrate) and presets (versioned key) | presets **fixed** (one unversioned key + fallback). Docs: carrying them forward by default was tried and REVERTED — it kept visitors on stale demos (a bump means "new content"). Old docs stay recoverable under their key; `migrate` opts in to carrying work forward |
 | ST5 | P1 | ui-design loaded its saved doc unvalidated: null / bad pages crashed every panel | **fixed**: validate + park + carry v1 forward |
 | ST6 | P3 | synth `sections` = null crashed two panels | **fixed** |
 | ST7 | P3 | generate legacy gallery key unvalidated | **fixed**: validate items, retire the key |

@@ -126,7 +126,8 @@ Keep selection and view state OUT of the doc so undo never fights focus.
 (same keys and kinds as the initial doc, list items checked against keys every initial item shares).
 A rejected saved doc is kept at `<key>:rejected`, never deleted. `doc.replace()` throws on an invalid
 doc, so wrap imports in try/catch and toast the error; call `matchesShape(imported, current)` yourself
-when importing into a store you manage. Options also take `migrate(raw, fromVersion)` and `legacyKeys`.
+when importing into a store you manage. Options also take `migrate(raw, fromVersion)` and `legacyKeys`. Bumping `version` starts every visitor
+from the new `initial` (the old doc stays under its old key, untouched); pass `migrate` to carry saved work into the new version.
 
 Saves flush on `pagehide`, a share link applies once per tab (reloading keeps later edits), and two tabs
 on the same params store adopt each other's saved values.
