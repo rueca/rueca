@@ -4,7 +4,12 @@
    scrolls out of view, so only one live shell runs on the page at a time.
    On a phone it shows the `phone` shell's client view instead.
    On load it rises in after the headline, in the page's reveal language
-   (landing.css: data-reveal "head"), and the switcher fades in after it. */
+   (landing.css: data-reveal "head"), and the switcher fades in after it.
+   On desktop the switcher runs on a timer (Rafael, 11 Oct): every TURN it moves to the next
+   shell, a thin bar filling under the current one. The bar's own CSS animation is the clock
+   (its end advances), so pausing is just pausing the animation: while the pointer or focus is
+   on the preview or switcher, or the hero is off screen. A click picks a shell and restarts the
+   count. No timer with reduced motion. */
 import { useEffect, useRef, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@kit/core/cn'
@@ -15,6 +20,7 @@ import { LiveFrame } from './LiveFrame'
 import { site } from '@/site.config'
 
 const NATIVE = { w: 1440, h: 900 }
+const TURN = 6 // seconds per shell (Rafael)
 
 function scrollParent(el: HTMLElement | null): HTMLElement | null {
   for (let p = el?.parentElement; p; p = p.parentElement) {
@@ -30,6 +36,11 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
   const [w, setW] = useState(0)
   const [id, setId] = useState(shells[0]?.id)
   const [onScreen, setOnScreen] = useState(true)
+  const [held, setHeld] = useState(false) // pointer or focus on the preview
+  const [turn, setTurn] = useState(0) // restarts the bar on every switch, even back to the same shell
+  const [still] = useState(() => typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const pick = (next: string) => { setId(next); setTurn((t) => t + 1) }
+  const advance = () => pick(shells[(shells.findIndex((s) => s.id === id) + 1) % shells.length].id)
 
   useEffect(() => {
     const el = wrap.current!
@@ -51,10 +62,16 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
       {/* a strip of ruled cells in printed small caps, like the sheet's header (plain dividers, no crosshairs: it's a control, not the grid) */}
       <div className="flex max-w-full overflow-x-auto shadow-[inset_0_0_0_1px_var(--rule)] [scrollbar-width:none] [&>*+*]:shadow-[inset_1px_0_var(--rule)]" role="group" aria-label="Choose a live shell">
         {shells.map((s) => (
-          <button key={s.id} type="button" onClick={() => setId(s.id)} aria-pressed={id === s.id}
-            className={cn('strip h-9 flex-none px-4 text-[10.5px] transition-colors outline-none focus-visible:text-fg focus-visible:bg-fg/[0.05]',
+          <button key={s.id} type="button" onClick={() => pick(s.id)} aria-pressed={id === s.id}
+            className={cn('strip relative h-9 flex-none px-4 text-[10.5px] transition-colors outline-none focus-visible:text-fg focus-visible:bg-fg/[0.05]',
               id === s.id ? 'bg-fg/[0.06] text-fg' : 'text-fg-faint hover:bg-fg/[0.025] hover:text-fg')}>
             {s.name}
+            {/* the timer: fills over TURN seconds, then moves on */}
+            {id === s.id && !still && (
+              <span key={turn} aria-hidden onAnimationEnd={advance}
+                className="hero-turn absolute inset-x-0 bottom-0 h-[2px] origin-left bg-signal"
+                style={{ animationDuration: `${TURN}s`, animationPlayState: held || !onScreen ? 'paused' : 'running' }} />
+            )}
           </button>
         ))}
       </div>
@@ -62,7 +79,8 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
   )
 
   return (
-    <div>
+    <div onPointerOver={() => setHeld(true)} onPointerLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setHeld(false) }}>
       {/* the window: a minimal browser bar on top of the live tool; the frame and shadow wrap both */}
       <div data-reveal="head" style={{ '--reveal-delay': '0.9s' } as React.CSSProperties} className="shadow-[var(--shadow-artboard),0_0_0_1px_var(--artboard-ring)]">
         {shell && <BrowserBar id={current} query={narrow ? '?client' : ''} />}

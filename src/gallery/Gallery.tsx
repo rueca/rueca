@@ -54,8 +54,8 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
         <SiteNav scroller={root} />
         <Sheet as="main">
           {/* the title strip, like a drawing sheet's: printed fields, handwritten values */}
-          {/* -mt-px: its top rule lands on the header's closing rule, so the two read as one */}
-          <Row className="divide-rule no-cross -mt-px flex h-[60px] items-stretch">
+          {/* its own top rule: the nav above has none at rest (its closing rule only shows once pinned) */}
+          <Row className="divide-rule no-cross flex h-[60px] items-stretch">
             <Field label="Title" className="min-w-0 flex-1"><Hand className="text-[24px]" delay={0.1}>All the shells</Hand></Field>
             <Field label="Count" className="flex-none"><Hand className="text-[23px]" delay={0.3}>{`${shells.length} in all`}</Hand></Field>
           </Row>
@@ -75,7 +75,7 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
           </Row>
         </Sheet>
         {/* the same footer as the landing: the drawing's title block on Platino, continuing the sheet's rails */}
-        <Sheet className="tone-platino mb-(--below-footer)">
+        <Sheet className="tone-platino mb-16 sm:mb-24">
           <SiteFooter count={{ label: 'Shells', value: `${shells.length} in all` }} elsewhere={FOOTER_LINKS.shells} />
           <Row />
         </Sheet>

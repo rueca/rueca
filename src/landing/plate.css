@@ -59,13 +59,32 @@
 .site { --nav-shadow: 0 1px 1px rgb(0 0 0 / 0.06), 0 2px 4px rgb(0 0 0 / 0.05), 0 6px 12px rgb(0 0 0 / 0.04), 0 14px 28px rgb(0 0 0 / 0.03); }
 :root.light .site { --nav-shadow: 0 1px 1px rgb(24 20 17 / 0.015), 0 2px 4px rgb(24 20 17 / 0.015), 0 6px 12px rgb(24 20 17 / 0.015), 0 14px 28px rgb(24 20 17 / 0.012); }
 .site .site-nav-paper {
-  background: var(--sheet); box-shadow: inset 0 -1px var(--rule), var(--nav-shadow);
+  background: var(--sheet); box-shadow: var(--nav-shadow);
   clip-path: inset(0 12px); transition: clip-path 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 @media (min-width: 640px) { .site .site-nav-paper { clip-path: inset(0 max(24px, (100% - 1128px) / 2)); } }
 /* pinned, the clip also opens below the strip, so its soft layered shadow shows (only then) */
-.site .site-nav[data-stuck] .site-nav-paper { clip-path: inset(0 0 -48px 0); }
+.site .site-nav[data-stuck] .site-nav-paper { clip-path: inset(0 0 -48px 0); box-shadow: inset 0 -1px var(--rule), var(--nav-shadow); }
+/* the strip has no top rule; its bottom rule shows only once it pins (Rafael) */
+.site .site-nav:not([data-stuck]) .rule::before { display: none; }
 @media (prefers-reduced-motion: reduce) { .site .site-nav-paper { transition: none; } }
+
+/* The section openers' handwriting, each in its own dye (Rafael, 11 Oct): the six brights in order, sheet 1 to 6.
+   Dark takes the palette's lifted dark values; the paper takes each ramp's 600, so the fine nib keeps
+   at least 3.9:1 on the sheet and 3.3:1 on Platino (sheet 6). */
+.site [data-dye] .font-hand { color: var(--dye); }
+.site [data-dye='achiote'] { --dye: #f06a3e; }
+.site [data-dye='gualda'] { --dye: #f5d05a; }
+.site [data-dye='hoja'] { --dye: #3db68b; }
+.site [data-dye='cielo'] { --dye: #6fc0ee; }
+.site [data-dye='malva'] { --dye: #b39af8; }
+.site [data-dye='cochinilla'] { --dye: #f38b79; }
+:root.light .site [data-dye='achiote'] { --dye: #cb4522; }
+:root.light .site [data-dye='gualda'] { --dye: #9a7103; }
+:root.light .site [data-dye='hoja'] { --dye: #138e6b; }
+:root.light .site [data-dye='cielo'] { --dye: #2e81af; }
+:root.light .site [data-dye='malva'] { --dye: #8363c3; }
+:root.light .site [data-dye='cochinilla'] { --dye: #bc5448; }
 
 /* .no-cross: dividers with plain rules, no crosshairs (every section opener and the shells page title strip, Rafael) */
 .site .divide-rule.no-cross > :not(.cross) + :not(.cross)::after { content: none; }

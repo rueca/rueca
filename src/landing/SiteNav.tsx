@@ -1,11 +1,11 @@
 /* The site nav, shared by the landing page and the shells page: the sheet's own header
-   strip. It scrolls with the page until it reaches the top, then pins there (sticky; the
-   12px spacer above it scrolls away first) and, once pinned, its paper and bottom rule grow
+   strip, at the very top of the page. It pins there as soon as the page scrolls (sticky)
+   and, once pinned, its paper and bottom rule grow
    out across the gutters to the window's edges, so the parts of the page that break the
    sheet (the hero's live tool, the shell rail's cards) pass under it, never beside it.
    On the landing page the links scroll in place; elsewhere they go to the
    landing page first (Install is remembered and scrolled to on arrival). */
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@kit/core/cn'
 import { Logo, ThemeButton, scrollToSection } from './parts'
@@ -37,30 +37,25 @@ function goToSection(id: string) {
   location.hash = '#/'
 }
 
-const SPACER = 12 // the gap above the strip, px (h-3)
-
 export function SiteNav({ scroller }: { scroller: React.RefObject<HTMLDivElement | null> }) {
-  const header = useRef<HTMLElement>(null)
   const [stuck, setStuck] = useState(false)
   useEffect(() => {
-    const el = scroller.current, h = header.current
-    if (!el || !h) return
-    // pinned once the header sits at its sticky offset (-SPACER) against the scroller's top
-    const update = () => setStuck(h.getBoundingClientRect().top - el.getBoundingClientRect().top <= -SPACER + 0.5)
+    const el = scroller.current
+    if (!el) return
+    // the strip starts at the very top, so it's pinned as soon as the page has scrolled at all
+    const update = () => setStuck(el.scrollTop > 0)
     update()
     el.addEventListener('scroll', update, { passive: true })
     return () => el.removeEventListener('scroll', update)
   }, [scroller])
 
   return (
-    <header ref={header} data-stuck={stuck || undefined} className="site-nav sticky z-30" style={{ top: -SPACER }}>
+    <header data-stuck={stuck || undefined} className="site-nav sticky top-0 z-30">
       {/* the paper behind the strip: clipped to the sheet at rest, the full window once pinned */}
-      <div aria-hidden className="site-nav-paper absolute inset-x-0 bottom-0" style={{ top: SPACER }} />
+      <div aria-hidden className="site-nav-paper absolute inset-0" />
       <Sheet>
-        <div style={{ height: SPACER }} />
-        <Row>
-          <div className="flex h-14 items-center gap-3 pr-3 sm:pr-4"><SheetNavItems scroller={scroller} /></div>
-        </Row>
+        {/* no top rule; the closing rule below draws in only once the strip pins (plate.css) */}
+        <div className="flex h-14 items-center gap-3 pr-3 sm:pr-4"><SheetNavItems scroller={scroller} /></div>
         <Row />
       </Sheet>
     </header>

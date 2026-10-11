@@ -26,10 +26,10 @@ export function Cross({ x, y = '0px', className }: { x: string; y?: string; clas
 
 /** A ruled row: hairline on top. Its ends on the rails go unmarked; dividers and cells inside
     it mark their own corners (plate.css), so every crossing gets exactly one crosshair. */
-export function Row({ children, className, style, as: As = 'div' }: { children?: ReactNode; className?: string; style?: CSSProperties; as?: 'div' | 'footer' }) {
+export function Row({ children, className, style, dye, as: As = 'div' }: { children?: ReactNode; className?: string; style?: CSSProperties; dye?: string; as?: 'div' | 'footer' }) {
   return (
     // an empty row is a closing rule: 1px tall, or its inset hairline wouldn't paint
-    <As className={cn('rule', !children && 'h-px', className)} style={style}>
+    <As className={cn('rule', !children && 'h-px', className)} style={style} data-dye={dye}>
       {children}
     </As>
   )
@@ -75,10 +75,13 @@ export function Field({ label, children, className }: { label: string; children:
   )
 }
 
+/** each opener's handwriting in its own dye, one per sheet (plate.css [data-dye]) */
+const DYES = ['achiote', 'gualda', 'hoja', 'cielo', 'malva', 'cochinilla'] as const
+
 /** A section's title strip, like a drawing sheet's title block: printed fields, handwritten values. */
 export function TitleStrip({ n, label, of, aside }: { n: number; label: string; of: number; aside?: ReactNode }) {
   return (
-    <Row className="divide-rule no-cross flex h-[60px] items-stretch">
+    <Row dye={DYES[(n - 1) % DYES.length]} className="divide-rule no-cross flex h-[60px] items-stretch">
       <Field label="No." className="w-14 flex-none sm:w-16"><Hand className="text-[23px]">{String(n)}</Hand></Field>
       <Field label="Title" className="min-w-0 flex-1"><Hand className="text-[24px]" delay={0.15}>{label}</Hand></Field>
       {aside && <span className="strip hidden items-center px-5 text-fg-faint md:flex">{aside}</span>}

@@ -170,8 +170,15 @@ html[data-reveals] [data-reveal='words'][data-in] { animation: none; }
 html[data-reveals] [data-reveal='words']:not([data-in]) .reveal-word > span { opacity: 0; }
 html[data-reveals] [data-reveal='words'][data-in] .reveal-word > span { animation: reveal-word 0.9s var(--ease-mind) calc(0.12s + var(--word, 0) * 45ms) both; }
 
+/* the hero switcher's timer bar (LiveShell.tsx): grows across the current shell's cell; its end switches shells */
+@keyframes hero-turn { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.site .hero-turn { animation-name: hero-turn; animation-timing-function: linear; animation-fill-mode: forwards; }
+
 /* the hero's pen annotation (HeroArrow.tsx): it mounts once the hero has come to rest, then the loop round the word draws, the line, the head */
 .site .hero-arrow path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: arrow-draw 0.75s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards; }
+/* the loop round the word in Gualda, the line and head stay Achiote (Rafael, 11 Oct): the brand yellow on dark, a step deeper (400) on the paper so it holds */
+.site .hero-arrow .hero-arrow-loop { stroke: #f2c744; }
+:root.light .site .hero-arrow .hero-arrow-loop { stroke: #d2a628; }
 .site .hero-arrow .hero-arrow-line { animation-duration: 1s; animation-delay: 0.8s; }
 .site .hero-arrow .hero-arrow-head { animation-duration: 0.3s; animation-delay: 1.75s; }
 @keyframes arrow-draw { to { stroke-dashoffset: 0; } }
@@ -183,21 +190,3 @@ html[data-reveals] [data-reveal='words'][data-in] .reveal-word > span { animatio
   html[data-reveals] [data-reveal='cards'][data-in] .card-in { animation: reveal-fade 0.2s linear both; }
   html[data-reveals] [data-reveal='cards'][data-in], html[data-reveals] [data-reveal='words'][data-in] { animation: none; }
 }
-
-/* The workshop under the footer: an engraved spinning workshop printed on the page ground,
-   anchored to the very bottom of the scroll (attachment: local), so it sits behind the sheet,
-   shows in the margins beside it and in the space below the footer, and fades out upward.
-   Pre-inked per theme (Nogal on light, Lana on dark) by brand/tools/workshop.py from a Midjourney
-   plate (Diderot sref, brand/RUECA.md §6) cleaned in Nano Banana: the wheel at rest by the door and
-   the bench of bobbins (Rafael's pick, 11 Oct; no people). Source (local, git-ignored): brand/references/workshop/. */
-.site {
-  /* the picture is ~0.37 of the width tall (min 720 wide), so this shows most of it under the sheet */
-  --below-footer: clamp(220px, 30vw, 560px);
-  background-image: image-set(url('/art/workshop-dark.avif') type('image/avif'), url('/art/workshop-dark.webp') type('image/webp'));
-  /* wider than a phone (min 720), so phones crop it; 20% keeps the wheel in view, desktop is unaffected */
-  background-position: 20% bottom;
-  background-size: max(100%, 720px) auto;
-  background-repeat: no-repeat;
-  background-attachment: local;
-}
-:root.light .site { background-image: image-set(url('/art/workshop-light.avif') type('image/avif'), url('/art/workshop-light.webp') type('image/webp')); }

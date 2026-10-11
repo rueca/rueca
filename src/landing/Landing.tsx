@@ -42,7 +42,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
         <SiteNav scroller={root} />
 
         {/* The page is one technical sheet (plate.tsx): rails, ruled cells, Añil crosshairs. */}
-        <Sheet as="main" className="mb-(--below-footer)">
+        <Sheet as="main" className="mb-16 sm:mb-24">
           {/* ── hero ─────────────────────────────────────────────── */}
           <div className="relative overflow-hidden">
             <div className="relative px-5 pt-15 pb-18 sm:px-6 sm:pt-24 sm:pb-29">
