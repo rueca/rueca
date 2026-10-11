@@ -31,7 +31,7 @@ Before this step, two things from the readiness gate (oss-launch, 2026-10-10) mu
 
 Then, in this order:
 
-1. **Take the site gate down.** rueca.dev and every `/r/*.json` answer 401 until
+1. ✅ **Take the site gate down** (done 2026-10-11). rueca.dev and every `/r/*.json` answer 401 until
    `middleware.ts` (the password gate) is gone, so the kit install fails for everyone.
    Delete the file, commit and push; Vercel redeploys. Check
    `curl -s -o /dev/null -w "%{http_code}" https://rueca.dev/r/studio.json` prints `200`.
