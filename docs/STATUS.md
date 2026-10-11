@@ -71,11 +71,14 @@ Geist Mono code — landing + gallery only; product chrome stays Inter.
   imports (−117 KB gz eager, done by Packaging), gallery WebP thumbs (done), lazy Landing + NotFound route
   (done), Synth iframe focus steal (`inert`), landing/gallery `<main>`, dimmed rail text, reduced-motion scroll,
   StepDeck regions, ShellRail unused import (breaks tsc).
-- Backlog (P2/P3, kit/shells): `--signal-text` token for accent text on tinted surfaces (C4), fg-faint on
-  tinted surfaces (C5), video unnamed spinbuttons (C7), React Flow refit on present/Esc (L2), nodes preview HUD
-  overlap at 1024 (L3), batch toolbar/labels at 1024 (L4/L5), TrackTimeline 16px overflow (L6), unused
-  `statusbar` prop (L7), dead exports + shell duplicates of kit pieces (D3, M1–M5), og.png + touch icon,
-  em dashes in chrome copy, type-scale tokens.
+- Backlog DONE (2026-10-10/11, c75324c → 3ee1d05 + Vec3): --signal-text token, faint-on-tint rule, video field
+  names, flows/nodes refit, nodes HUD, batch toolbar + labels, track timeline overflow, statusbar removed, dither on
+  kit ZoomPill (gained focus rings/label/steps/keys), generate on kit CompareSplit, scene on kit Vec3Fields (gained
+  uniform lock), marks legacyKeys, reserved ids enforced, 13 dead exports, em dashes out of UI labels/notices,
+  24px hit areas, comment-pin names. ST9 (nodes 2048 export) didn't reproduce: 1.4 s, 2048×2048.
+- Still open — Rafael's calls: shared contrast maths in the kit (M3, grows the API); one util module for slug/uid/
+  PRNG (M4: kit or shells-only); type-scale tokens (C15); start shells paused under reduced motion (C10); og.png +
+  touch icon (needs design); em dashes in tooltip prose (P3).
 
 ## Current state — 2026-10-10 (afternoon)
 - Break-it QA round COMPLETE: all six agents reported (interaction re-ran as interaction-2). Every P0/P1 and the P2s

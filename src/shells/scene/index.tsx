@@ -6,7 +6,7 @@ import {
   Box, Braces, Camera, Circle, CircleDot, Cylinder, Disc, Download, Focus, Grid3x3, Image as ImageIcon, ImageDown, Lightbulb,
   MousePointer2, Move3d, Orbit, Package, Plus, Rotate3d, Scale3d, SquareDashed, Spotlight, Sun, Video, X, Eye, EyeOff, ChevronDown, FileBox,
 } from 'lucide-react'
-import {
+import { Vec3Fields,
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Stage, MountSurface, ParamActions, Menu,
   Button, IconButton, CommandPalette, ToolDock, LayerTree, Badge, Swatch, Divider, Kbd, Tip, toast, download, copyText, stamp,
   useParamState, useSafeArea, useStudio, equal, shareMenuItems, cn, type Command, type LayerItem, type MenuItem,
@@ -16,7 +16,6 @@ import {
   params, ui, OBJ, COLOURWAYS, BUILTIN_VIEWS, LIGHTS, colourwayOf, nameOf, allViews, type V, type Tool, type View, type Vec3,
 } from './state'
 import { mountViewport, type EngineApi } from './viewport'
-import { Vec3Input } from './local/Vec3Input'
 import { SwatchTiles } from './local/SwatchTiles'
 
 /* The three.js viewport is reached through MountSurface's handle — no module-level engine.
@@ -495,7 +494,7 @@ function TransformSection({ id, v, positionOnly }: { id: string; v: V; positionO
     const ch = !equal(v[k], defaults[k])
     return (
       <Row key={k} label={label} changed={ch} onReset={() => params.reset([k])} hint={o.lockable ? 'Double-click the label to reset. The chain keeps proportions.' : 'Double-click the label to reset.'}>
-        <Vec3Input value={v[k] as Vec3} defaultValue={defaults[k] as Vec3} step={o.step} unit={o.unit} min={o.min} lockable={o.lockable} changed={ch} label={label}
+        <Vec3Fields value={v[k] as Vec3} defaultValue={defaults[k] as Vec3} step={o.step} unit={o.unit} min={o.min} lockable={o.lockable} changed={ch} label={label}
           onChange={(nv, final) => params.setValue(k, nv, { commit: final })} />
       </Row>
     )

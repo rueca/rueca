@@ -85,14 +85,46 @@ export function XYPad({
   )
 }
 
-export function Vec3Fields({ value, onChange, step = 0.1, min, max, changed }: { value: { x: number; y: number; z: number }; onChange: (v: { x: number; y: number; z: number }, final: boolean) => void; step?: number; min?: number; max?: number; changed?: boolean }) {
+/**
+ * X / Y / Z scrub fields. `lockable` adds a uniform lock (Spline's scale): while locked, editing one axis scales
+ * the other two by the same ratio, or sets them equal when the edited axis was zero.
+ */
+export function Vec3Fields({
+  value, onChange, step = 0.1, min, max, changed, unit, defaultValue, lockable, defaultLocked = true, label,
+}: {
+  value: { x: number; y: number; z: number }; onChange: (v: { x: number; y: number; z: number }, final: boolean) => void
+  step?: number; min?: number; max?: number; changed?: boolean; unit?: string
+  /** double-click an axis to reset it to this */
+  defaultValue?: { x: number; y: number; z: number }
+  lockable?: boolean; defaultLocked?: boolean
+  /** prefixes each axis' accessible name ("Scale X") */
+  label?: string
+}) {
+  const [locked, setLocked] = useState(defaultLocked)
   const axes = [['x', 'X', 'text-cat-5'], ['y', 'Y', 'text-cat-3'], ['z', 'Z', 'text-cat-1']] as const
+  const set = (k: 'x' | 'y' | 'z', n: number, final: boolean) => {
+    if (!(lockable && locked)) return onChange({ ...value, [k]: n }, final)
+    const old = value[k]
+    if (Math.abs(old) < 1e-9) return onChange({ x: n, y: n, z: n }, final)
+    const r = (x: number) => Number((x * (n / old)).toFixed(4))
+    onChange({ x: k === 'x' ? n : r(value.x), y: k === 'y' ? n : r(value.y), z: k === 'z' ? n : r(value.z) }, final)
+  }
   return (
-    <div className="grid w-full grid-cols-3 gap-1">
-      {axes.map(([k, l, c]) => (
-        <ScrubValue key={k} boxed align="left" prefix={<span className={c}>{l}</span>} value={value[k]} step={step} min={min} max={max} changed={changed} label={l}
-          onChange={(v, f) => onChange({ ...value, [k]: v }, f)} />
-      ))}
+    <div className="flex w-full min-w-0 items-center gap-1">
+      <div className="grid min-w-0 flex-1 grid-cols-3 gap-1">
+        {axes.map(([k, l, c]) => (
+          <ScrubValue key={k} boxed align="left" prefix={<span className={c}>{l}</span>} value={value[k]} step={step} min={min} max={max} unit={unit}
+            changed={changed} defaultValue={defaultValue?.[k]} label={`${label ? `${label} ` : ''}${l}`} onChange={(v, f) => set(k, v, f)} />
+        ))}
+      </div>
+      {lockable && (
+        <Tip label={locked ? 'Uniform. Click to scale axes independently' : 'Scale axes together'}>
+          <button type="button" aria-pressed={locked} aria-label="Uniform scale" onClick={() => setLocked(!locked)}
+            className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', locked ? 'text-signal' : 'text-fg-faint')}>
+            {locked ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
+          </button>
+        </Tip>
+      )}
     </div>
   )
 }
