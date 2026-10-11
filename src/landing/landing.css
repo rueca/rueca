@@ -164,7 +164,11 @@ html[data-reveals] [data-reveal='words'][data-in] .reveal-word > span { animatio
    Hoja, Cielo, Malva. Deep 800 shades in dark (chroma cut about 45%, Rafael) and pale 200 tints in light, so the text keeps its
    theme colour (light on dark, dark on light) at 8:1 or better; the small labels step up from
    faint to muted to stay above 4.5:1 on the colour. */
-.site { --tb-1: #68362c; --tb-2: #54442a; --tb-3: #2b4a40; --tb-4: #2d4859; --tb-5: #4b3e62; }
+/* dark: the dyes themselves, flat, with Nogal ink on them (brand rule: on a bright, text is Nogal,
+   never white). The dark-mode values, a touch softened toward the Platino block so five side by side
+   don't shout. Light keeps its pale washes. */
+.site { --tb-1: #e26a43; --tb-2: #e6c25a; --tb-3: #42a985; --tb-4: #6cb3dc; --tb-5: #a693e6; }
+:root:not(.light) .site .title-block > * { --fg: #181411; --fg-muted: #2a2420; color: var(--fg); }
 :root.light .site { --tb-1: #fed0c3; --tb-2: #f0dba1; --tb-3: #b6ead2; --tb-4: #b9e3ff; --tb-5: #ded6ff; }
 .site .title-block > * { --fg-faint: var(--fg-muted); }
 .site .title-block > :nth-child(1) { background: var(--tb-1); }

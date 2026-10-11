@@ -41,11 +41,13 @@
 
 /* a ruled row: the top hairline. Its ends meet the rails without a mark: a crosshair only
    goes where two lines cross inside the sheet, never on its edge (Rafael, 11 Oct) */
+/* Rules and crosshairs are the top layer of the sheet (z 19–20): a cell, a drawing, a coloured plate
+   (.tone-platino) or a pinned block never paints over them. Only the nav (z 30) sits higher. */
 /* the row's top hairline is its own layer on top, so a cell or drawing with a background never hides it */
 .site .rule { position: relative; }
-.site .rule::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: var(--rule); pointer-events: none; z-index: 2; }
+.site .rule::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: var(--rule); pointer-events: none; z-index: 19; }
 .site .cross {
-  position: absolute; width: 11px; height: 11px; margin: -5px 0 0 -5px; pointer-events: none; z-index: 2;
+  position: absolute; width: 11px; height: 11px; margin: -5px 0 0 -5px; pointer-events: none; z-index: 20;
   background:
     linear-gradient(var(--cross), var(--cross)) 0 5px / 11px 1px no-repeat,
     linear-gradient(var(--cross), var(--cross)) 5px 0 / 1px 11px no-repeat;
@@ -59,7 +61,7 @@
 .site .cells > *, .site .split > *, .site .divide-rule > :not(.cross) { position: relative; min-width: 0; }
 .site .cells > * { box-shadow: inset 1px 0 var(--rule), inset 0 1px var(--rule); }
 .site :is(.cells > *, .split > * + *, .divide-rule > :not(.cross) + :not(.cross))::after {
-  content: ""; position: absolute; top: -5px; bottom: -5px; left: -5px; width: 11px; pointer-events: none; z-index: 2;
+  content: ""; position: absolute; top: -5px; bottom: -5px; left: -5px; width: 11px; pointer-events: none; z-index: 20;
   background:
     linear-gradient(var(--cross), var(--cross)) 0 5px / 11px 1px no-repeat,
     linear-gradient(var(--cross), var(--cross)) 5px 0 / 1px 11px no-repeat,
