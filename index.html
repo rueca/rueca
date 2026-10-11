@@ -9,9 +9,9 @@
       // Resolve the theme before first paint so the stored choice never flashes.
       try {
         var t = localStorage.getItem('studio:theme');
-        var dark = t === 'dark'; // light unless the visitor picked dark (Rafael, 11 Oct)
+        var dark = t ? t === 'dark' : true; // dark unless the visitor picked light (Rafael, 11 Oct: back to dark)
         document.documentElement.classList.add(dark ? 'dark' : 'light');
-      } catch (e) { document.documentElement.classList.add('light'); }
+      } catch (e) { document.documentElement.classList.add('dark'); }
     </script>
   </head>
   <body>

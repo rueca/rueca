@@ -116,7 +116,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
           <SheetSection id="faq" n={5} of={SHEETS} label="FAQ">
             <Row>
               <div className="split grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-                <div className={cn('relative overflow-hidden', CELL)}><Heading title="Fair questions." /></div>
+                <div className={cn('relative overflow-hidden', CELL)}><Heading title="FAQ" /></div>
                 <div className="flex flex-col px-5 py-9 sm:px-6 sm:py-16">
                   {faq.map((f, i) => (
                     <details key={f.q} data-reveal style={{ '--reveal-delay': `${i * 60}ms` } as React.CSSProperties} className={cn('group py-4', i > 0 && 'border-t border-[var(--rule)]')} open={i === 0}>

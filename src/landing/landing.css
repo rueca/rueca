@@ -169,7 +169,9 @@ html[data-reveals] [data-reveal='words'][data-in] .reveal-word > span { animatio
    don't shout. Light keeps its pale washes. */
 .site { --tb-1: #e26a43; --tb-2: #e6c25a; --tb-3: #42a985; --tb-4: #6cb3dc; --tb-5: #a693e6; }
 :root:not(.light) .site .title-block > * { --fg: #181411; --fg-muted: #2a2420; color: var(--fg); }
-:root.light .site { --tb-1: #fed0c3; --tb-2: #f0dba1; --tb-3: #b6ead2; --tb-4: #b9e3ff; --tb-5: #ded6ff; }
+/* light: each dye greyed into the paper, like faded dyed cloth (Rafael, 11 Oct: the pale washes read as candy) */
+:root.light .site { --tb-1: #e3b9ab; --tb-2: #dccca5; --tb-3: #b9d4c4; --tb-4: #b8cfde; --tb-5: #cdc6e0; }
+:root.light .site .title-block > * { --fg-muted: #4d4743; } /* the small labels, a step darker so they clear 4.5:1 on the deeper tints */
 .site .title-block > * { --fg-faint: var(--fg-muted); }
 .site .title-block > :nth-child(1) { background: var(--tb-1); }
 .site .title-block > :nth-child(2) { background: var(--tb-2); }
