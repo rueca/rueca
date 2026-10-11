@@ -1,7 +1,7 @@
 /* Kit · Time: three tracks with keyframe studs, a ruler along the back and a gantry riding
    two rails over them: the playhead. One key is being set (Gualda, the one bright). Coming
    apart, the gantry slides along the tracks. node time.mjs [--landing] */
-import { k, P, at, S, L, MT, plate, floor, bright, apart, emit, note, loop } from "./shared.mjs";
+import { k, P, at, S, L, MT, plate, floor, bright, apart, emit, note, loop, caption } from "./shared.mjs";
 
 const X0 = -76, X1 = 68;
 const RULER = { x: X0, y: -58, w: X1 - X0, d: 5, r: 1 };
@@ -35,5 +35,5 @@ emit({
   name: "time", exportName: "TIME_SVG", bright: "gualda",
   label: "Three tracks of keyframe studs under a gantry that rides two rails, with a ruler along the back.",
   art: [plate(), bed(), keys(), `<g ${apart([TRAVEL, 0, 0])}>${gantry()}</g>`],
-  pen: [loop([key[0], key[1]], 30, 19, { tilt: 24, seed: 7, from: 1.2, tail: [250, 492] }), note(180, 520, "always in sync", { rotate: -5 })],
+  pen: caption({ text: "always in sync", w: 185, side: "left", to: key, loop: [30, 19, 24, 1.2], seed: 7 }),
 });

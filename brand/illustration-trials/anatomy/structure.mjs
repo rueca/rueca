@@ -2,7 +2,7 @@
    line, an eye stud and a lock stud. One row (Malva, the one bright) is lifted mid-drag above
    the slot it left, drawn as a dashed outline: reorder. One row's eye is pressed in: hidden.
    Coming apart, the dragged row lifts higher. node structure.mjs [--landing] */
-import { k, P, at, S, L, MT, plate, floor, bright, up, emit, note, loop } from "./shared.mjs";
+import { k, P, at, S, L, MT, plate, floor, bright, up, emit, note, loop, caption } from "./shared.mjs";
 
 const TRAY = { x: -66, y: -56, w: 132, d: 104, r: 1 };
 const ROW = { x: -58, w: 116, d: 18 }, ROWS_Y = [-48, -26, -4, 18], DRAGGED = 1, HIDDEN = 3, H = 3, NAME_W = [40, 50, 30, 36];
@@ -37,5 +37,5 @@ emit({
   name: "structure", exportName: "STRUCTURE_SVG", bright: "malva",
   label: "A layers tray: rows with thumbnails, names, eye and lock studs, one row lifted mid-drag above its empty slot.",
   art: [plate(), tray(), `<g ${up(10)}>${dragged()}</g>`],
-  pen: [loop([studs[0], studs[1]], 30, 16, { tilt: 24, seed: 11, from: 1.4, tail: [300, 492] }), note(300, 520, "hide, lock, reorder", { rotate: -4 })],
+  pen: caption({ text: "hide, lock, reorder", w: 215, side: "centre", to: studs, loop: [30, 16, 24, 1.4], seed: 11 }),
 });

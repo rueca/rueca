@@ -1,7 +1,7 @@
 /* Kit · Controls: three real controls on one plate. A fader (its cap the one bright, Achiote)
    in a slot, a knurled knob on a dial, and a window that reads the value. Coming apart, the
    cap and the knob lift off their stems. node controls.mjs [--landing] */
-import { k, P, at, S, L, D, MT, plate, floor, bright, up, emit, note, arrow } from "./shared.mjs";
+import { k, P, at, S, L, D, MT, plate, floor, bright, up, emit, caption } from "./shared.mjs";
 
 const SLOT = { x: -72, y: -40, w: 104, d: 6, r: 3 }, SLOT_Y = SLOT.y + 3;
 const TRAVEL = [SLOT.x + 8, SLOT.x + SLOT.w - 8], GRAIN = 18 / 40;
@@ -34,10 +34,10 @@ const knob = () => {
     + L(k.lineOnTop([kx + s * 1.5, ky + c * 1.5], [kx + s * KNOB_R, ky + c * KNOB_R], z1, P), { tone: "hi", free: "start" });
 };
 
-const capAt = at([CAP_X - CAP.w / 2, SLOT_Y, MT + CAP_H * 0.6]); // the cap's left side: the thing you drag
+const lcdAt = at([LCD.x + LCD.w * 0.35, LCD.y + LCD.d, MT + 1.5]); // the readout's front edge: the field you type in (and drag the fader to)
 emit({
   name: "controls", exportName: "CONTROLS_SVG", bright: "achiote",
   label: "Three controls on a plate: a fader in its slot, a knurled knob on a dial, and a window that reads 18.",
   art: [plate(), face(), stem(), `<g ${up(22)}>${cap()}</g>`, `<g ${up(24, 0.1)}>${knob()}</g>`],
-  pen: [note(190, 78, "drag, type, or do maths", { rotate: -5 }), arrow([196, 96], [capAt[0] - 3, capAt[1] - 2], { bend: 0.3, seed: 3 })],
+  pen: caption({ text: "drag, type, or do maths", w: 294, side: "left", to: [lcdAt[0], lcdAt[1] + 6], bend: -0.25, seed: 3 }),
 });

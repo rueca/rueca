@@ -146,7 +146,7 @@ function PinnedRow({ shells, rest, theme, head, strip }: { shells: Shell[]; rest
       // card's size every frame (--near, no re-render), and focus, with hysteresis so it never flickers
       let best = -1, bestNear = 0
       const near = cards.map((c, i) => {
-        const n = Math.max(0, 1 - Math.abs(c.offsetLeft - p * dist + c.offsetWidth / 2 - mid) / (c.offsetWidth + 12))
+        const n = Math.max(0, 1 - Math.abs(c.offsetLeft - p * dist + c.offsetWidth / 2 - mid) / (c.offsetWidth + 8))
         c.style.setProperty('--near', n.toFixed(3))
         if (n > bestNear) { bestNear = n; best = i }
         return n
@@ -217,7 +217,7 @@ function PinnedRow({ shells, rest, theme, head, strip }: { shells: Shell[]; rest
         <motion.div ref={track} onFocus={onFocus}
           // padded by half the leftover width at each end, so every card passes exactly through the
           // middle: the focused card is always the centred one, with even peeks either side
-          className="relative z-[3] flex w-max gap-3 will-change-transform" style={{ x, paddingInline: `calc((100% - ${CARD_W}) / 2)` }}>
+          className="relative z-[3] flex w-max gap-2 will-change-transform" style={{ x, paddingInline: `calc((100% - ${CARD_W}) / 2)` }}>
           {shells.map((s, i) => <RailCard key={s.id} shell={s} theme={theme} delay={Math.min(i, 4) * 90} live={live === i} focused={focus === i} />)}
           {rest.length > 0 && <IndexCard rest={rest} first={shells.length + 1} total={shells.length + rest.length} focused={focus === shells.length} />}
         </motion.div>
@@ -356,7 +356,7 @@ function CardedRailCard({ shell: s, theme, delay, focused }: { shell: Shell; the
   return (
     <div data-rail-card data-shell-id={s.id}
       // smaller away from the middle, full size at the centre, following the scroll exactly
-      className="card-in group relative flex flex-none flex-col bg-[var(--sheet)] shadow-[inset_0_0_0_1px_var(--rule)] [scale:calc(0.86_+_0.14*var(--near,0))] motion-reduce:[scale:1]" style={{ '--card-in-delay': `${delay}ms`, width: CARD_W } as React.CSSProperties}>
+      className="card-in group relative flex flex-none flex-col bg-[var(--sheet)] shadow-[inset_0_0_0_1px_var(--rule)] [scale:calc(0.93_+_0.07*var(--near,0))] motion-reduce:[scale:1]" style={{ '--card-in-delay': `${delay}ms`, width: CARD_W } as React.CSSProperties}>
       <div ref={box} className="relative mx-3 mt-3 aspect-[16/10] overflow-hidden shadow-[0_0_0_1px_var(--rule)]">
         <Skeleton drawn={drawn} {...(blueprint ?? {})} />
         {/* the picture wipes in over the skeleton, left to right, behind a hairline edge (RUECA.md §7:
@@ -415,7 +415,7 @@ function IndexCard({ rest, first, total, focused }: { rest: Shell[]; first: numb
   const rows = rest.slice(0, INDEX_ROWS * 2)
   return (
     <div data-rail-card
-      className="card-in group relative flex flex-none flex-col bg-[var(--sheet)] shadow-[inset_0_0_0_1px_var(--rule)] [scale:calc(0.86_+_0.14*var(--near,0))] motion-reduce:[scale:1]" style={{ '--card-in-delay': '360ms', width: CARD_W } as React.CSSProperties}>
+      className="card-in group relative flex flex-none flex-col bg-[var(--sheet)] shadow-[inset_0_0_0_1px_var(--rule)] [scale:calc(0.93_+_0.07*var(--near,0))] motion-reduce:[scale:1]" style={{ '--card-in-delay': '360ms', width: CARD_W } as React.CSSProperties}>
       <div ref={box} className="relative mx-3 mt-3 aspect-[16/10] overflow-hidden shadow-[0_0_0_1px_var(--rule)]">
         <Skeleton drawn={drawn} marks={INDEX_SKELETON} />
         <div data-on={focused || undefined} className="wipe absolute inset-0 flex flex-col bg-[var(--sheet)] px-[3.75%] pt-[1.5%] pb-[5%] focus-within:[clip-path:none]">
@@ -440,7 +440,7 @@ function IndexCard({ rest, first, total, focused }: { rest: Shell[]; first: numb
       </div>
       <div className="relative flex items-baseline justify-between gap-4 px-5 pt-3.5 pb-4">
         <div className="wipe flex min-w-0 flex-1 items-baseline justify-between gap-4 focus-within:[clip-path:none]" data-on={focused || undefined}>
-          <h3 className="truncate font-display text-[22px] leading-tight text-fg">And {rest.length} more</h3>
+          <h3 className="truncate font-display text-[22px] leading-tight text-fg">{rest.length} more shells</h3>
           <span className="strip flex-none text-[10.5px] text-fg-faint">Plates {String(first).padStart(2, '0')}–{String(total).padStart(2, '0')}</span>
         </div>
         <svg aria-hidden className={cn('skeleton pointer-events-none absolute inset-x-5 top-4 h-[28px] w-[calc(100%-40px)] overflow-visible', !DRAW_SKELETON && 'skeleton-static wipe-out')} data-drawn={drawn || undefined} data-on={focused || undefined}

@@ -1,7 +1,7 @@
 /* Kit · Layout: a glass stage (Cielo, the one bright) with an artboard on it, a panel docked
    either side and a tool dock in front. Coming apart, the panels lift out of their bays and
    float; the dock follows. node layout.mjs [--landing] */
-import { k, P, at, S, L, D, MT, plate, floor, bright, up, emit, note, arrow } from "./shared.mjs";
+import { k, P, at, S, L, D, MT, plate, floor, bright, up, emit, note, arrow, caption } from "./shared.mjs";
 
 const STAGE = { x: -40, y: -46, w: 80, d: 74, r: 2 }, STAGE_H = 1.6;
 const PANELS = [{ x: -80, y: -46, w: 32, d: 74, r: 3 }, { x: 48, y: -46, w: 32, d: 74, r: 3 }], PANEL_H = 7;
@@ -39,5 +39,5 @@ emit({
   name: "layout", exportName: "LAYOUT_SVG", bright: "cielo",
   label: "A glass stage with an artboard, a panel docked either side and a tool dock in front.",
   art: [plate(), bays(), stage(), `<g ${up(26)}>${panel(PANELS[0], false)}</g>`, `<g ${up(26, 0.06)}>${panel(PANELS[1], true)}</g>`, `<g ${up(14, 0.14)}>${dock()}</g>`],
-  pen: [note(452, 492, "floating, docked", { rotate: -5, size: 28 }), note(470, 524, "or full-bleed", { rotate: -5, size: 28 }), arrow([352, 474], [edge[0], edge[1] + 4], { bend: 0.12, seed: 5 })],
+  pen: caption({ text: "floating, docked or full-bleed", w: 346, side: "right", to: [edge[0], edge[1] + 6], bend: 0.18, seed: 5, lines: ["floating, docked", "or full-bleed"] }),
 });

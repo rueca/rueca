@@ -6,6 +6,7 @@ import { useCamera, useValues } from '@kit'
 import { bindText, childrenOf, resolve, type Doc, type Obj, type PropKey, type Resolved, type Val } from './engine'
 import { HAND } from './demo'
 import { PartsManual } from './local/PartsManual'
+import { PlateEntry } from './local/PlateEntry'
 import { animTime, clock, currentAnim, editProps, params, runtime, ui, useDoc, useUI } from './store'
 
 const num = (v: Val) => (typeof v === 'number' ? v : parseFloat(v))
@@ -248,6 +249,7 @@ export function LiveScene({ svgRef }: { svgRef: React.RefObject<SVGSVGElement | 
       onPointerDown={preview ? previewProps.onPointerDown : (e) => { if ((e.target as Element).hasAttribute('data-bg')) ui.setState({ sel: null }) }}>
       <SceneSVG doc={doc} r={r} inputs={inputs} bg={[v.bgTop, v.bgBottom]} bare interactive={!preview} onObjectDown={onObjectDown} svgRef={svgRef} ghosts={ghosts} ghostOf={sel}>
         <PartsManual />
+        <PlateEntry />
         {!preview && <PenMarks doc={doc} r={r} />}
         <g data-overlay pointerEvents="none">
           <polygon ref={outline} fill="none" stroke="var(--signal)" strokeWidth={2} vectorEffect="non-scaling-stroke" visibility="hidden" />

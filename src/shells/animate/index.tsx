@@ -24,6 +24,7 @@ import {
   useDoc, useUI,
 } from './store'
 import { demoDoc } from './demo'
+import { ENTRY_TOP } from './local/PlateEntry'
 
 const KIND_ICON = { group: Boxes, rect: Square, ellipse: Circle, path: PenTool, text: Type, image: ImageIcon }
 const LOOP_ICON = { loop: Repeat, once: ArrowRight, pingpong: ArrowLeftRight }
@@ -514,7 +515,7 @@ export default function AnimateShell() {
         </div>
       )}
     >
-      <Stage contentSize={{ w: doc.width, h: doc.height }} fitMaxZoom={0.45} grid onBackgroundPointerDown={() => { if (!preview) ui.setState({ sel: null, keySel: [] }) }} overlay={
+      <Stage contentSize={{ w: doc.width, h: doc.height + ENTRY_TOP, y: -ENTRY_TOP }} fitMaxZoom={0.45} grid onBackgroundPointerDown={() => { if (!preview) ui.setState({ sel: null, keySel: [] }) }} overlay={
         preview ? (
           <div className="pointer-events-none absolute top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 cluster h-8 px-3 text-[11.5px]">
             <span className="size-1.5 animate-pulse rounded-full bg-ok" />

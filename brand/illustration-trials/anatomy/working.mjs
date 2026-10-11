@@ -2,7 +2,7 @@
    the one bright). Behind them, the history: four state tiles in a row, the last one only
    an outline (the step that was undone), with a hand arrow back. Coming apart, the Z springs
    up and the undone tile lifts away. node working.mjs [--landing] */
-import { k, P, at, S, L, MT, plate, floor, bright, up, emit, note, arrow } from "./shared.mjs";
+import { k, P, at, S, L, MT, plate, floor, bright, up, emit, note, arrow, caption } from "./shared.mjs";
 
 // history along the back: four tiles, the fourth undone
 const TILE = { w: 30, d: 22 }, TILES_X = [-78, -42, -6, 30], TILES_Y = -52;
@@ -49,5 +49,5 @@ emit({
   name: "working", exportName: "WORKING_SVG", bright: "hoja",
   label: "A command key and a pressed Z key on a plate, in front of a row of saved states, the last one undone.",
   art: [plate(), history(), `<g ${up(14, 0.1)}>${undone()}</g>`, well(CMD), well(Z), keycap(CMD, KEY_H, false, cmdMark), `<g ${up(PRESSED)}>${keycap(Z, KEY_H - PRESSED, true, zText)}</g>`],
-  pen: [note(400, 520, "undo anything", { rotate: -4 }), arrow([370, 496], [zKey[0] + 2, zKey[1] + 4], { bend: 0.28, seed: 13 })],
+  pen: caption({ text: "undo anything", w: 164, side: "right", to: [zKey[0], zKey[1] + 6], bend: 0.2, seed: 13 }),
 });

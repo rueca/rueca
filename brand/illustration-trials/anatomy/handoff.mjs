@@ -2,7 +2,7 @@
    folded corner and its format on its top strip: PNG (a picture), SVG (a curve), MP4 (play) and,
    on top, the settings file (Cochinilla, the one bright), the one you hand to an agent.
    Coming apart, the hand fans wider. node handoff.mjs [--landing] */
-import { k, P, at, S, L, D, bright, apart, emit, note, arrow, frame } from "./shared.mjs";
+import { k, P, at, S, L, D, bright, apart, emit, note, arrow, frame, caption } from "./shared.mjs";
 const MT = 0; // it lies straight on the paper
 
 const DOC = { w: 62, d: 74 }, FOLD = 11, T = 1.6, STEP = [9, 17], SPREAD = 8;
@@ -46,5 +46,5 @@ emit({
   framed: F,
   // the agent file on top stays put and the others fan back behind it, so the arrow stays on it
   art: FILES.map((_, i) => { const back = FILES.length - 1 - i; return back ? `<g ${apart([0, -SPREAD * back, 0], back * 0.05)}>${doc(i)}</g>` : doc(i) }),
-  pen: [note(400, 530, "or hand it to an agent", { rotate: -4 }), arrow([360, 496], [tip[0] + 2, tip[1] + 5], { bend: -0.25, seed: 17 })],
+  pen: caption({ text: "or hand it to an agent", w: 266, side: "right", to: [tip[0] + 2, tip[1] + 6], bend: -0.22, seed: 17 }),
 });

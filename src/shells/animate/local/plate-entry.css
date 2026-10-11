@@ -1,0 +1,10 @@
+/* The plate entry's headword face: the landing's display serif (Signifier where installed,
+   Newsreader shipped), so the demo reads as the same document as the site around it. */
+@font-face {
+  font-family: "Rueca Display";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: local("Signifier VF"), local("TestSignifier-VF"), local("Test Signifier VF"),
+    url("../../../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2") format("woff2-variations");
+}

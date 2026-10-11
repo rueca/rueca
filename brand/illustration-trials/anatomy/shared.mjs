@@ -77,6 +77,31 @@ const pts = (list) => list.map(([x, y], i) => `${i ? "L" : "M"}${x.toFixed(1)} $
 /** a note in the hand, tilted a touch */
 export const note = (x, y, text, { rotate = -3, size = 30, anchor = "middle" } = {}) =>
   `<text class="rueca-note" x="${x}" y="${y}" font-size="${size}" text-anchor="${anchor}" transform="rotate(${rotate} ${x} ${y})">${text}</text>`;
+/* Captions: every drawing's note sits on one caption band under the object, so the notes line up
+   across a row of tiles; the arrow (or loop) leaves from the note's end nearest the part. Drawn twice,
+   tuned per breakpoint and swapped by a media query (the ENGRAVING styles): desktop at 30 units, and
+   phones (and the narrow two-column tiles) at 42, where a tile is read at arm's length.
+   `w` is the note's width at size 30, measured in La Belle Aurore; `lines` splits a long note on phones. */
+export const BAND = { d: { size: 30, y: 532, rise: 30 }, m: { size: 42, y: 546, rise: 40 } }
+const EDGE = [60, 540] // the band's margins, inside the 6% the tiles keep clear
+function captionOne(v, { text, w, side, to, loop: lp, bend = 0.22, seed = 1, lines }) {
+  const { size, y, rise } = BAND[v], k = size / 30
+  const rows = v === 'm' && lines ? lines : [text]
+  const width = Math.max(...rows.map((t) => (t === text ? w : w * (t.length / text.length)))) * k
+  const x0 = side === 'left' ? EDGE[0] : side === 'right' ? EDGE[1] - width : 300 - width / 2
+  const anchor = side === 'right' ? 'end' : side === 'left' ? 'start' : 'middle'
+  const ax = side === 'right' ? EDGE[1] : side === 'left' ? EDGE[0] : 300
+  const top = y - (rows.length - 1) * size * 1.05
+  const out = rows.map((t, i) => note(ax, top + i * size * 1.05, t, { rotate: -3, size, anchor }))
+  // the pen leaves from above the note, at the point of its line nearest the part
+  const sx = Math.min(Math.max(to[0], x0 + size * 0.7), x0 + width - size * 0.7), sy = top - rise
+  if (lp) out.unshift(loop(to, lp[0], lp[1], { tilt: lp[2] ?? 22, seed, from: lp[3] ?? 1.3, tail: [sx, sy] }))
+  else out.unshift(arrow([sx, sy], to, { bend, seed }))
+  return out.join('')
+}
+/** both variants of a caption, for emit's `pen` */
+export const caption = (opts) => [`<g class="rueca-pen-d">${captionOne('d', opts)}</g>`, `<g class="rueca-pen-m">${captionOne('m', opts)}</g>`]
+
 /** a hand arrow: a bowed stroke from `a` to `b`, an open head of two flicks */
 export function arrow([ax, ay], [bx, by], { bend = 0.18, seed = 1 } = {}) {
   const w = wob(seed), dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy), nx = -dy / len, ny = dx / len;
@@ -174,6 +199,8 @@ ${brightCss}
 .iso-svg .rueca-note{fill:var(--ink-achiote,#b8381b);font-family:var(--font-hand,"La Belle Aurore",cursive)}
 .iso-svg .pen-ink{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;vector-effect:none;stroke-dasharray:var(--len) var(--len);stroke-dashoffset:calc(var(--len) * (1 - clamp(0, (var(--pw, 1) - var(--a)) / var(--f), 1)))}
 .iso-svg .rueca-pen{fill:none;stroke:var(--ink-achiote,#b8381b);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.iso-svg .rueca-pen-m{display:none}
+@media (max-width:767px){.iso-svg .rueca-pen-d{display:none}.iso-svg .rueca-pen-m{display:inline}}
 `;
 // Rueca's paper and ink on the landing: the tile is the sheet with 2.5% ink over it
 const SITE_TOKENS = `
