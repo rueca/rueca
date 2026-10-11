@@ -68,6 +68,13 @@
 /* the strip has no top rule; its bottom rule shows only once it pins (Rafael) */
 .site .site-nav:not([data-stuck]) .rule::before { display: none; }
 @media (prefers-reduced-motion: reduce) { .site .site-nav-paper { transition: none; } }
+/* phones: the footer is one column, so its cells drop their left rule (Rafael) and keep only the rule above */
+@media (max-width: 767px) { .site footer .cells > * { box-shadow: inset 0 1px var(--rule); } }
+/* phones: a top rule too (Rafael), across the sheet at rest and the full window once pinned, like the bottom one */
+@media (max-width: 767px) {
+  .site .site-nav:not([data-stuck]) .sheet { box-shadow: inset 0 1px var(--rule); }
+  .site .site-nav[data-stuck] .site-nav-paper { box-shadow: inset 0 1px var(--rule), inset 0 -1px var(--rule), var(--nav-shadow); }
+}
 
 /* The section openers' handwriting, each in its own dye (Rafael, 11 Oct): the six brights in order, sheet 1 to 6.
    Dark takes the palette's lifted dark values; the paper takes each ramp's 600, so the fine nib keeps

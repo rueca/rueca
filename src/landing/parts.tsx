@@ -133,10 +133,14 @@ function pathBox(d: string) {
     comes out the same size as in the full lockup. */
 export function Wordmark({ height = 20, className }: { height?: number; className?: string }) {
   const { markH, word } = cutFor(height)
-  const [x, y, w, h] = pathBox(word)
+  const [x0, y0, w0, h0] = pathBox(word)
+  // a hair of room on every side: a box cut exactly to the ink loses the round letters' last
+  // antialiased row once the size lands on a fractional pixel (the bottoms of "ueca" on phones)
+  const pad = h0 * 0.04
+  const [x, y, w, h] = [x0 - pad, y0 - pad, w0 + pad * 2, h0 + pad * 2]
   const k = height / markH
   return (
-    <svg role="img" aria-label={site.name} viewBox={`${x} ${y} ${w} ${h}`} height={h * k} width={w * k} className={cn('flex-none text-fg', className)}>
+    <svg role="img" aria-label={site.name} viewBox={`${x} ${y} ${w} ${h}`} height={h * k} width={w * k} className={cn('flex-none overflow-visible text-fg', className)}>
       <path d={word} fill="currentColor" />
     </svg>
   )

@@ -57,10 +57,10 @@ export function Landing({ shells }: { shells: Shell[] }) {
                   })}</span>)}
                 </h1>
                 <p data-reveal style={{ '--reveal-delay': '0.56s' } as React.CSSProperties} className="mt-7 max-w-[600px] md:max-w-[680px] text-[17px] leading-[1.6] text-pretty text-fg-muted sm:mt-9 sm:text-[19px] md:mx-auto">{hero.lede}</p>
-                {/* the actions: Install, and the install command beside it */}
+                {/* the actions: Install, and the install command beside it; on phones both run the full width (Rafael) */}
                 <div data-reveal="fade" style={{ '--reveal-delay': '0.7s' } as React.CSSProperties} className="mt-8 flex flex-wrap items-center gap-2.5 md:justify-center">
-                  <Button variant="primary" size="lg" className="h-10 flex-none rounded-[2px]! px-4 text-[13.5px]" onClick={() => scrollToSection('install')}>Install</Button>
-                  <CommandLine text={installs[0].lines[0]} className="w-fit max-w-full min-w-0 gap-3 text-left" />
+                  <Button variant="primary" size="lg" className="h-10 flex-none rounded-[2px]! px-4 text-[13.5px] max-sm:w-full" onClick={() => scrollToSection('install')}>Install</Button>
+                  <CommandLine text={installs[0].lines[0]} className="w-full max-w-full min-w-0 gap-3 text-left sm:w-fit" />
                 </div>
               </div>
             </div>

@@ -82,7 +82,11 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
     <div onPointerOver={() => setHeld(true)} onPointerLeave={() => setHeld(false)}
       onFocus={() => setHeld(true)} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setHeld(false) }}>
       {/* the window: a minimal browser bar on top of the live tool; the frame and shadow wrap both */}
-      <div data-reveal="head" style={{ '--reveal-delay': '0.9s' } as React.CSSProperties} className="shadow-[var(--shadow-artboard),0_0_0_1px_var(--artboard-ring)]">
+      <div data-reveal="head" style={{ '--reveal-delay': '0.9s' } as React.CSSProperties}
+        className={narrow
+          // phones: rules top and bottom only; the window's sides run along the sheet's rails (Rafael)
+          ? 'shadow-[0_-1px_0_var(--artboard-ring),0_1px_0_var(--artboard-ring)]'
+          : 'shadow-[var(--shadow-artboard),0_0_0_1px_var(--artboard-ring)]'}>
         {shell && <BrowserBar id={current} query={narrow ? '?client' : ''} />}
         <div ref={wrap} className="relative overflow-hidden bg-field"
           style={{ height: box.h || undefined, aspectRatio: box.h ? undefined : `${NATIVE.w} / ${NATIVE.h}` }}>

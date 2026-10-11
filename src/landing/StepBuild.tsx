@@ -139,13 +139,17 @@ function Stacked({ steps }: { steps: DeckStep[] }) {
   const track = useRef<HTMLDivElement>(null), pinned = useRef<HTMLDivElement>(null), art = useRef<HTMLDivElement>(null)
   // the build starts while the drawing is still rising into its spot (a third of a screen early),
   // so it never sits there empty
-  const { active } = useBuild(track, pinned, art, steps.length, useCallback(() => NAV_H + 8 + (scrollParent(track.current)?.clientHeight ?? innerHeight) * 0.35, []))
+  const { active } = useBuild(track, pinned, art, steps.length, useCallback(() => NAV_H + (scrollParent(track.current)?.clientHeight ?? innerHeight) * 0.35, []))
   return (
     // the pinned piece is about 80vh tall on a phone; the rest of the track is the scroll that builds it (~60vh a step)
     <div ref={track} className="relative" style={{ height: `${steps.length * 60 + 95}vh` }}>
-      <div ref={pinned} className="sticky flex flex-col gap-6 px-5 pt-6 pb-10 sm:px-6" style={{ top: NAV_H + 8 }}>
-        <div className="mx-auto aspect-square w-full max-w-[min(100%,46vh)]" role="img" aria-label={steps.map((s) => s.title).join(', then ')}>
-          <BuildArt el={art} />
+      {/* pinned flush under the nav, so the tinted drawing band meets its rule */}
+      <div ref={pinned} className="sticky flex flex-col gap-6 px-5 pt-6 pb-10 sm:px-6" style={{ top: NAV_H }}>
+        {/* the drawing on the kit visuals' tint, edge to edge with a closing rule, like a kit cell (Rafael) */}
+        <div className="-mx-5 -mt-6 bg-fg/[0.025] px-5 py-6 shadow-[inset_0_-1px_var(--rule)] sm:-mx-6 sm:px-6">
+          <div className="mx-auto aspect-square w-full max-w-[min(100%,46vh)]" role="img" aria-label={steps.map((s) => s.title).join(', then ')}>
+            <BuildArt el={art} />
+          </div>
         </div>
         {/* where you are: one short rule per step, the current one in ink */}
         <div aria-hidden className="flex gap-1.5">

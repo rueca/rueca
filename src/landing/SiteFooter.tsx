@@ -30,7 +30,7 @@ export function SiteFooter({ count, elsewhere }: {
       <div data-md="5" className="cells no-cross auto-rows-fr text-[12.5px] md:grid-cols-[repeat(2,minmax(0,15fr))_repeat(3,minmax(0,14fr))]">
         {/* the name is glossed in the hero's Animate plate (its "Rueca" entry), so the footer just signs it */}
         <div className="flex items-center px-5 py-5 sm:px-6"><Wordmark height={22} /></div>
-        <TitleCell label="Drawn by">{site.author.url
+        <TitleCell label="Contributors">{site.author.url
           ? <a href={site.author.url} target="_blank" rel="noreferrer" className="underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-signal"><Hand>{site.author.name}</Hand></a>
           : <Hand>{site.author.name}</Hand>}</TitleCell>
         <TitleCell label="Licence"><Hand delay={0.15}>{site.license}</Hand></TitleCell>
