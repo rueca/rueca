@@ -20,6 +20,17 @@
         "--strictPort"
       ],
       "port": 5281
+    },
+    {
+      "name": "shells-alt",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "vite",
+        "--port",
+        "5276",
+        "--strictPort"
+      ],
+      "port": 5276
     }
   ]
 }

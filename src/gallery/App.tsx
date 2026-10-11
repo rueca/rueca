@@ -23,7 +23,7 @@ export function App() {
   const shell = SHELLS.find((s) => s.id === route)
   const Comp = useMemo(() => (shell ? lazy(shell.load) : null), [shell])
   useEffect(() => {
-    document.title = shell ? `${shell.name} — ${site.name}` : route === 'shells' ? `Shells — ${site.name}` : route === '' ? `${site.name} — ${site.tagline}` : `Not found — ${site.name}`
+    document.title = shell ? `${shell.name} · ${site.name}` : route === 'shells' ? `Shells · ${site.name}` : route === '' ? `${site.name} · ${site.tagline.replace(/\.$/, '')}` : `Not found · ${site.name}`
   }, [shell, route])
   if (route === 'shells') return <Suspense fallback={blank}><Gallery shells={SHELLS} /></Suspense>
   if (route === '') return <Suspense fallback={blank}><Landing shells={SHELLS} /></Suspense>

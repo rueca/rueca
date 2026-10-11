@@ -242,7 +242,7 @@ function renderContext() {
     const square = id === 'malacate' || id === 'erre'
     return `<div class="cell">
       <div class="nav">${lockup(id, square ? 22 : 17)}<span class="links"><span>Shells</span><span>Kit</span><span>Docs</span></span></div>
-      <div class="tab">${markSvg(id, square ? 16 : 12)}<span>Rueca · Spin up a real tool</span></div>
+      <div class="tab">${markSvg(id, square ? 16 : 12)}<span>Rueca · Spin your prototype into a tool</span></div>
       <div class="row">
         <div class="appicon" style="background:#181411">${markSvg(id, square ? 40 : 26, opts({ ink: '#F3F1EB', paper: '#181411', dye: state.colour ? DYE.dark : null }))}</div>
         <div class="appicon" style="background:#E8582C">${markSvg(id, square ? 40 : 26, opts({ ink: '#181411', paper: '#E8582C', dye: null }))}</div>

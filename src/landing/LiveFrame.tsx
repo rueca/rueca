@@ -13,7 +13,7 @@ import { NEUTRAL_ACCENT_CSS } from './neutral'
 
 const NATIVE = { w: 1440, h: 900 }
 
-export function LiveFrame({ id, name, query = '', native = NATIVE, hint = 'Click to try the real tool', hintAlways = false, onReady }: {
+export function LiveFrame({ id, name, query = '', native = NATIVE, hint = 'Click to try it', hintAlways = false, onReady }: {
   id: string; name: string
   /** e.g. '?client' for the phone client view */
   query?: string

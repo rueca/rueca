@@ -20,13 +20,39 @@ checks in part 3.
 
 ## 2. Go public
 
-```bash
-gh repo edit rueca/rueca --visibility public --accept-visibility-change-consequences
-gh repo edit rueca/rueca --add-topic claude-code-plugin,agent-skills,shadcn-registry,design-tools,prototyping
-```
+Before this step, two things from the readiness gate (oss-launch, 2026-10-10) must be done:
 
-Nothing to redeploy: the site is already live. CI (`.github/workflows/ci.yml`) checks every push
-and pull request (generated files up to date, unit tests, production build).
+- [ ] **Logo licence.** The wordmark in `src/landing/logo.generated.ts` is outlined from
+      Signifier (Klim), which is on trial. Buy the licence, or set `SHIP` in
+      `brand/tools/outline_rueca.py` to Newsreader (OFL) and regenerate.
+- [ ] **Name.** A knockout trademark search for RUECA in classes 9 and 42 on
+      [USPTO](https://tmsearch.uspto.gov), [EUIPO](https://euipo.europa.eu/eSearch) and
+      [WIPO](https://branddb.wipo.int). Reserve the `@rueca` npm scope and an X handle.
+
+Then, in this order:
+
+1. **Take the site gate down.** rueca.dev and every `/r/*.json` answer 401 until
+   `middleware.ts` (the password gate) is gone, so the kit install fails for everyone.
+   Delete the file, commit and push; Vercel redeploys. Check
+   `curl -s -o /dev/null -w "%{http_code}" https://rueca.dev/r/studio.json` prints `200`.
+2. **Open the repo and turn on private vulnerability reporting** (`SECURITY.md` points at it):
+   ```bash
+   gh repo edit rueca/rueca --visibility public --accept-visibility-change-consequences
+   gh api -X PUT repos/rueca/rueca/private-vulnerability-reporting
+   ```
+3. **Fix the repo's front page.** The description is still the old tagline and the homepage
+   is `rueca.vercel.app`:
+   ```bash
+   gh repo edit rueca/rueca --description "Spin your prototype into a tool." --homepage https://rueca.dev
+   gh repo edit rueca/rueca --add-topic claude-code-plugin,agent-skills,shadcn-registry,design-tools,prototyping
+   ```
+4. **Tag the release.** There's no tag yet; plugin users and the launch posts point at it:
+   ```bash
+   gh release create v0.1.0 --generate-notes --title "Rueca 0.1.0"
+   ```
+
+CI (`.github/workflows/ci.yml`) checks every push and pull request (generated files up to
+date, unit tests, production build).
 
 ## 3. Check it works from the outside
 
@@ -40,7 +66,8 @@ Do these on the live site, not on localhost.
       then ask *"make me a tool to tune a gradient"* and watch it use the skill.
 - [ ] Skill for other agents: `npx skills add <owner>/<slug>`.
 - [ ] Kit, in a fresh folder (this exact sequence was re-checked against rueca.dev by the
-      2026-10-10 cleanup QA):
+      2026-10-10 cleanup QA, before the password gate; re-run it once the gate is down. The
+      README's kit section now says it needs a project already set up for shadcn):
       ```bash
       npm create vite@latest kit-check -- --template react-ts --no-interactive
       cd kit-check && npm i && npm i -D tailwindcss @tailwindcss/vite

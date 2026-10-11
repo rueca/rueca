@@ -830,7 +830,7 @@ export const ruecaPaletteRules = [
   ['Ramps for depth', 'Every family has lights (50–300) for washes and tints, and darks (600–900) for text on colour and deep blocks. The darks lean slightly warmer, like dyed cloth.'],
 ]
 
-export const ruecaTaglines = ['Spin up a real tool.', 'Turn it into a tool.', 'Your prototype, with handles.', 'Spun from what you have.', 'Tune it by hand.', 'Raw prototype in. Real tool out.', 'Put a wheel on it.', 'Give it a spin.']
+export const ruecaTaglines = ['Spin your prototype into a tool.', 'Spin up a real tool.', 'Turn it into a tool.', 'Your prototype, with handles.', 'Spun from what you have.', 'Tune it by hand.', 'Raw prototype in. Real tool out.', 'Put a wheel on it.', 'Give it a spin.']
 
 /** From Rafael's Trove (read 11 Oct 2026 via trove.quest, signed in). Old-meets-new references he saved. */
 export const troveRefs = [

@@ -109,6 +109,23 @@ export function Logo({ height = 20, className }: { height?: number; className?: 
   )
 }
 
+/** The word's box inside the lockup (x, y, w, h), measured from the V2 cut's word path. Re-measure if
+    outline_rueca.py moves the word. */
+const WORD_BOX = [453.23, 31.85, 799.15, 181.02] as const
+
+/** The wordmark alone. `height` is the mark's height it would sit beside in the Logo, so the word
+    comes out the same size as in the full lockup. */
+export function Wordmark({ height = 20, className }: { height?: number; className?: string }) {
+  const { markH, word } = cutFor(height)
+  const [x, y, w, h] = WORD_BOX
+  const k = height / markH
+  return (
+    <svg role="img" aria-label={site.name} viewBox={`${x} ${y} ${w} ${h}`} height={h * k} width={w * k} className={cn('flex-none text-fg', className)}>
+      <path d={word} fill="currentColor" />
+    </svg>
+  )
+}
+
 export function Chip({ children, className }: { children: ReactNode; className?: string }) {
   return <span className={cn('inline-flex h-6 items-center rounded-[2px] bg-hover px-2 text-[11.5px] whitespace-nowrap text-fg-muted shadow-[inset_0_0_0_1px_var(--rule)]', className)}>{children}</span>
 }

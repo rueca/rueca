@@ -8,6 +8,7 @@ import { Segmented } from '@kit/ui/controls'
 import { TipProvider } from '@kit/ui/tooltip'
 import { useTheme } from '@kit/core/theme'
 import { cn } from '@kit/core/cn'
+import { site } from '@/site.config'
 import './landing.css'
 import type { Shell } from '@/gallery/registry'
 import { Chip, CommandLine, Heading, scrollToSection } from './parts'
@@ -41,12 +42,13 @@ export function Landing({ shells }: { shells: Shell[] }) {
         <SiteNav scroller={root} />
 
         {/* The page is one technical sheet (plate.tsx): rails, ruled cells, Añil crosshairs. */}
-        <Sheet as="main" className="mb-16 sm:mb-24">
+        <Sheet as="main" className="mb-(--below-footer)">
           {/* ── hero ─────────────────────────────────────────────── */}
           <div className="relative overflow-hidden">
             <div className="relative px-5 pt-15 pb-18 sm:px-6 sm:pt-24 sm:pb-29">
               {/* centred on desktop, left-aligned on phones */}
-              <div ref={heroText} className="max-w-[760px] md:mx-auto md:text-center">
+              {/* "prototype into" is the longest line: ~683px at the 116px cap (15% under the old 136px, Rafael, 11 Oct), so 820 leaves room */}
+              <div ref={heroText} className="max-w-[820px] md:mx-auto md:text-center">
                 {/* stacked and big (brand/BRAND.md "Type at scale"): word by word, then the paragraph rises and the actions fade */}
                 <h1 data-reveal="words" aria-label={hero.lines.join(' ')} className="font-display text-[clamp(43px,9.8vw,116px)] leading-[0.82] font-normal tracking-[-0.025em]">
                   {hero.lines.map((line, l) => <span key={l} className="block">{line.split(' ').map((w, i) => {
@@ -54,7 +56,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
                     return <Fragment key={i}>{i > 0 && ' '}<span className="reveal-word"><span style={{ '--word': n } as React.CSSProperties}>{w}</span></span></Fragment>
                   })}</span>)}
                 </h1>
-                <p data-reveal style={{ '--reveal-delay': '0.56s' } as React.CSSProperties} className="mt-7 max-w-[600px] text-[17px] leading-[1.6] text-pretty text-fg-muted sm:mt-9 sm:text-[19px] md:mx-auto">{hero.lede}</p>
+                <p data-reveal style={{ '--reveal-delay': '0.56s' } as React.CSSProperties} className="mt-7 max-w-[600px] md:max-w-[680px] text-[17px] leading-[1.6] text-pretty text-fg-muted sm:mt-9 sm:text-[19px] md:mx-auto">{hero.lede}</p>
                 {/* the actions: Install, and the install command beside it */}
                 <div data-reveal="fade" style={{ '--reveal-delay': '0.7s' } as React.CSSProperties} className="mt-8 flex flex-wrap items-center gap-2.5 md:justify-center">
                   <Button variant="primary" size="lg" className="h-10 flex-none rounded-[2px]! px-4 text-[13.5px]" onClick={() => scrollToSection('install')}>Install</Button>
@@ -76,8 +78,8 @@ export function Landing({ shells }: { shells: Shell[] }) {
           {/* ── how it works ─────────────────────────────────────── */}
           <SheetSection id="how" n={1} of={SHEETS} label="How it works">
             <StepDeck steps={steps} head={
-              <Heading title="Ask for a tool, get a real one."
-                lede={<>Install the skill, then ask your agent for “a tool to tune this”. The tool stays neutral: <span className="text-fg">the brand lives inside the artboard, never around it.</span></>} />
+              <Heading title="From debug sliders to a design tool."
+                lede={<>Install the {site.name} skill and ask your agent for “a tool to tune this”. The tool stays neutral: <span className="text-fg">the brand lives inside the artboard, never around it.</span></>} />
             } />
           </SheetSection>
 
@@ -148,7 +150,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
                     ))}
                   </div>
                   <p className="mt-8 max-w-[640px] text-[12.5px] leading-[1.65] text-fg-faint">
-                    We checked conventions against each tool’s documentation. Borrowed ideas and code are credited in the README.
+                    We checked conventions against each tool’s documentation. The README credits borrowed ideas and code.
                   </p>
                 </div>
               </div>
@@ -183,8 +185,8 @@ function InstallSection() {
       <Row>
         <div className="split grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
           <div className={CELL}>
-            <Heading title="Two minutes, then ask for a tool."
-              lede="Install the skill and your agent does the rest. Or take just the components." />
+            <Heading title="Two commands, then ask your agent."
+              lede={`Install the skill and your agent does the rest. Or take just the components. Both are free under ${site.license}.`} />
           </div>
           <div data-reveal className={cn('flex min-w-0 flex-col gap-4', CELL)}>
             <Segmented value={tab} onChange={setTab} label="Install method" options={installs.map((i) => ({ value: i.id, label: i.label }))} />

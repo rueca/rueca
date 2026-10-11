@@ -72,8 +72,8 @@ export function ShellRail({ shells: all, featured, theme, strip }: { shells: She
   const shells = featured.map((id) => all.find((s) => s.id === id)).filter((s): s is Shell => !!s)
   const rest = all.filter((s) => !shells.includes(s))
   const head = (
-    <Heading title={`${all.length} instruments, one kit.`}
-      lede={`Here are ${WORDS[shells.length] ?? shells.length}, each a different kind of tool. Start yours from any of them.`} />
+    <Heading title={`${all.length} shells, one kit.`}
+      lede={`A shell is a ready-made tool you start from. Here are ${WORDS[shells.length] ?? shells.length}, each a different kind.`} />
   )
   return phone
     ? <SwipeRow shells={shells} rest={rest} theme={theme} head={head} strip={strip} />

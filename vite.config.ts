@@ -13,7 +13,7 @@ export default defineConfig({
     // Title + link-preview meta from site.config (bots don't run JS, so it must be in the HTML).
     { name: 'site-meta', transformIndexHtml: (html) => {
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')
-      const title = `${site.name} — ${site.tagline.replace(/\.$/, '')}`
+      const title = `${site.name} · ${site.tagline.replace(/\.$/, '')}`
       const meta = [
         `<meta name="description" content="${esc(site.description)}" />`,
         `<link rel="canonical" href="${site.url}/" />`,

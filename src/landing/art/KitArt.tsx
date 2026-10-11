@@ -13,7 +13,7 @@ import { STRUCTURE_SVG } from './structure'
 import { WORKING_SVG } from './working'
 import { HANDOFF_SVG } from './handoff'
 
-const ART: Record<string, string> = { Controls: CONTROLS_SVG, Layout: LAYOUT_SVG, Time: TIME_SVG, Structure: STRUCTURE_SVG, Working: WORKING_SVG, 'Hand-off': HANDOFF_SVG }
+const ART: Record<string, string> = { Controls: CONTROLS_SVG, Layout: LAYOUT_SVG, Time: TIME_SVG, Structure: STRUCTURE_SVG, Workflow: WORKING_SVG, 'Hand-off': HANDOFF_SVG }
 
 /** the drawing for a kit group */
 export function KitArt({ group }: { group: string }) {

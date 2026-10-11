@@ -174,7 +174,7 @@ function paletteInUse(k, dark) {
 export function renderRueca(dark) {
   if (!$('rueca')) return
   const k = tones(dark)
-  const head = esc($('ruecaHead')?.value || 'Spin up a real tool.')
+  const head = esc($('ruecaHead')?.value || 'Spin your prototype into a tool.')
   const byId = Object.fromEntries(ruecaPairs.map((p) => [p.id, p]))
   const trove = Object.fromEntries(ruecaTrove.map((t) => [t.id, t]))
 

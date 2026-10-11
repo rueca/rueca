@@ -12,7 +12,7 @@ export const fixed = [
   ['Brights are flat blocks', 'Nogal text, never white'],
   ['Añil is for lines', 'never fills'],
   ['The wheel and the hand', 'no weaving'],
-  ['“Spin up a real tool.”', 'tagline'],
+  ['“Spin your prototype into a tool.”', 'tagline'],
 ]
 
 export const boards = [

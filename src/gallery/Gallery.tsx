@@ -75,7 +75,7 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
           </Row>
         </Sheet>
         {/* the same footer as the landing: the drawing's title block on Platino, continuing the sheet's rails */}
-        <Sheet className="tone-platino mb-16 sm:mb-24">
+        <Sheet className="tone-platino mb-(--below-footer)">
           <SiteFooter count={{ label: 'Shells', value: `${shells.length} in all` }} elsewhere={FOOTER_LINKS.shells} />
           <Row />
         </Sheet>

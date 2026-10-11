@@ -1,6 +1,6 @@
 # Rueca
 
-**A design-tool harness for the prototype you already have.**
+**Spin your prototype into a tool.**
 
 A prototype needs two things: the thing you are designing, and a tool around it to
 feel and tune it. Rueca is that tool — the inspector, timeline, layers,
@@ -33,6 +33,10 @@ npx skills add rueca/rueca
 ```
 
 **Just the kit** (React + Tailwind v4, via the shadcn CLI)
+
+Needs a React project with Tailwind v4 that's already set up for shadcn. Starting fresh
+with Vite? Follow [shadcn's Vite guide](https://ui.shadcn.com/docs/installation/vite)
+first: it adds the `@` import alias and runs `npx shadcn@latest init`.
 
 ```bash
 npx shadcn@latest add https://rueca.dev/r/studio.json

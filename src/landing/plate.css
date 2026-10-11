@@ -1,8 +1,8 @@
 /* The sheet (Lámina técnica, brand/RUECA.md): the landing laid out as one technical
    plate. A centred sheet with hairline rails, sections in ruled cells, crosshairs
-   where rules cross inside the sheet (never on its edge), and ruler ticks in the margins.
+   where rules cross inside the sheet (never on its edge); no margin rulers (Rafael, 11 Oct).
    Pens: ink for the rules, and the measure pen (crosshairs, dimension
-   line, ticks) in a darker neutral ink. It was Añil until Rafael chose neutral, 11 Oct.
+   line) in a darker neutral ink. It was Añil until Rafael chose neutral, 11 Oct.
    Dark is the default theme; :root.light overrides. */
 
 .site {
@@ -12,33 +12,17 @@
   --rule: #2f2d2b;
   --cross: #5a5856;
   --measure: rgba(243, 241, 235, 0.4);
-  --tick: rgba(243, 241, 235, 0.3);
-  --tick-minor: rgba(243, 241, 235, 0.12);
 }
 :root.light .site {
   --sheet: #fbfaf8;
   --rule: #dfdedc;
   --cross: #aaa9a7;
   --measure: rgba(24, 20, 17, 0.42);
-  --tick: rgba(24, 20, 17, 0.3);
-  --tick-minor: rgba(24, 20, 17, 0.11);
 }
 
-/* the sheet: rails down both sides, ruler ticks in the margins (desktop only) */
+/* the sheet: rails down both sides */
 .site .sheet { background: var(--sheet); }
 .site .sheet > .rail { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--rule); pointer-events: none; z-index: 1; }
-.site .sheet::before,
-.site .sheet::after {
-  content: ""; position: absolute; top: 0; bottom: 0; width: 18px; pointer-events: none; display: none;
-  /* major tick every 160px; minor ticks every 16px in between, skipping the majors so they never overlap */
-  background:
-    repeating-linear-gradient(to bottom, var(--tick) 0 1px, transparent 1px 160px) 0 0 / 18px 100% no-repeat,
-    repeating-linear-gradient(to bottom, transparent 0 16px, var(--tick-minor) 16px 17px, transparent 17px 32px, var(--tick-minor) 32px 33px, transparent 33px 48px, var(--tick-minor) 48px 49px, transparent 49px 64px, var(--tick-minor) 64px 65px, transparent 65px 80px, var(--tick-minor) 80px 81px, transparent 81px 96px, var(--tick-minor) 96px 97px, transparent 97px 112px, var(--tick-minor) 112px 113px, transparent 113px 128px, var(--tick-minor) 128px 129px, transparent 129px 144px, var(--tick-minor) 144px 145px, transparent 145px 160px) 0 0 / 7px 100% no-repeat;
-}
-.site .sheet::before { right: calc(100% + 10px); background-position: right top, right top; }
-.site .sheet::after { left: calc(100% + 10px); }
-/* Trial (Rafael, 11 Oct): margin rulers hidden to see the sheet without them. Restore: display: block. */
-@media (min-width: 1200px) { .site .sheet::before, .site .sheet::after { display: none; } }
 
 /* a ruled row: the top hairline. Its ends meet the rails without a mark: a crosshair only
    goes where two lines cross inside the sheet, never on its edge (Rafael, 11 Oct) */
@@ -48,10 +32,10 @@
 .site .rule { position: relative; }
 .site .rule::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: var(--rule); pointer-events: none; z-index: 19; }
 .site .cross {
-  position: absolute; width: 11px; height: 11px; margin: -5px 0 0 -5px; pointer-events: none; z-index: 20;
+  position: absolute; width: 9px; height: 9px; margin: -4px 0 0 -4px; pointer-events: none; z-index: 20;
   background:
-    linear-gradient(var(--cross), var(--cross)) 0 5px / 11px 1px no-repeat,
-    linear-gradient(var(--cross), var(--cross)) 5px 0 / 1px 11px no-repeat;
+    linear-gradient(var(--cross), var(--cross)) 0 4px / 9px 1px no-repeat,
+    linear-gradient(var(--cross), var(--cross)) 4px 0 / 1px 9px no-repeat;
 }
 
 /* Cells and dividers draw their own left and top rules and mark their own left corners:
@@ -62,14 +46,28 @@
 .site .cells > *, .site .split > *, .site .divide-rule > :not(.cross) { position: relative; min-width: 0; }
 .site .cells > * { box-shadow: inset 1px 0 var(--rule), inset 0 1px var(--rule); }
 .site :is(.cells > *, .split > * + *, .divide-rule > :not(.cross) + :not(.cross))::after {
-  content: ""; position: absolute; top: -5px; bottom: -5px; left: -5px; width: 11px; pointer-events: none; z-index: 20;
+  content: ""; position: absolute; top: -4px; bottom: -4px; left: -4px; width: 9px; pointer-events: none; z-index: 20;
   background:
-    linear-gradient(var(--x-top, var(--cross)), var(--x-top, var(--cross))) 0 5px / 11px 1px no-repeat,
-    linear-gradient(var(--x-top, var(--cross)), var(--x-top, var(--cross))) 5px 0 / 1px 11px no-repeat,
-    linear-gradient(var(--x-bot, var(--cross)), var(--x-bot, var(--cross))) 0 calc(100% - 4px) / 11px 1px no-repeat,
-    linear-gradient(var(--x-bot, var(--cross)), var(--x-bot, var(--cross))) 5px calc(100% + 1px) / 1px 11px no-repeat;
+    linear-gradient(var(--x-top, var(--cross)), var(--x-top, var(--cross))) 0 4px / 9px 1px no-repeat,
+    linear-gradient(var(--x-top, var(--cross)), var(--x-top, var(--cross))) 4px 0 / 1px 9px no-repeat,
+    linear-gradient(var(--x-bot, var(--cross)), var(--x-bot, var(--cross))) 0 calc(100% - 3px) / 9px 1px no-repeat,
+    linear-gradient(var(--x-bot, var(--cross)), var(--x-bot, var(--cross))) 4px calc(100% + 1px) / 1px 9px no-repeat;
 }
-/* .no-cross: dividers with plain rules, no crosshairs (the site nav, every section opener and the shells page title strip, Rafael) */
+/* The site nav (SiteNav.tsx): sticky. Its paper is clipped to the sheet's width at rest and
+   opens out to the window's edges once pinned (data-stuck), so breakout parts of the page
+   scroll under it. The sheet's width: 100% - 24px (phones), 100% - 48px, at most 1128px. */
+.site { --nav-shadow: 0 1px 1px rgb(0 0 0 / 0.06), 0 2px 4px rgb(0 0 0 / 0.05), 0 6px 12px rgb(0 0 0 / 0.04), 0 14px 28px rgb(0 0 0 / 0.03); }
+:root.light .site { --nav-shadow: 0 1px 1px rgb(24 20 17 / 0.015), 0 2px 4px rgb(24 20 17 / 0.015), 0 6px 12px rgb(24 20 17 / 0.015), 0 14px 28px rgb(24 20 17 / 0.012); }
+.site .site-nav-paper {
+  background: var(--sheet); box-shadow: inset 0 -1px var(--rule), var(--nav-shadow);
+  clip-path: inset(0 12px); transition: clip-path 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@media (min-width: 640px) { .site .site-nav-paper { clip-path: inset(0 max(24px, (100% - 1128px) / 2)); } }
+/* pinned, the clip also opens below the strip, so its soft layered shadow shows (only then) */
+.site .site-nav[data-stuck] .site-nav-paper { clip-path: inset(0 0 -48px 0); }
+@media (prefers-reduced-motion: reduce) { .site .site-nav-paper { transition: none; } }
+
+/* .no-cross: dividers with plain rules, no crosshairs (every section opener and the shells page title strip, Rafael) */
 .site .divide-rule.no-cross > :not(.cross) + :not(.cross)::after { content: none; }
 .site .cells.no-cross > :not(.cross)::after { content: none; } /* the same for cell grids (the footer, the shells filter) */
 /* nor where a section's rows meet an opener: the row under it drops its top marks, and every

@@ -15,9 +15,9 @@ export const site = {
   name: 'Rueca',
   /** machine name: skill id, plugin id, registry namespace, package name. lowercase-kebab, ≤64 chars */
   slug: 'rueca',
-  tagline: 'A design-tool harness for the prototype you already have.',
+  tagline: 'Spin your prototype into a tool.',
   description:
-    'The inspector, timeline, layers and export of a real design tool, wrapped around any prototype. Ships as an agent skill, a Claude Code plugin and a component registry.',
+    'Teaches your agent to wrap what you’ve already built in a design tool: inspector, timeline, layers, export and a client view. Ships as an agent skill, a Claude Code plugin and a component registry.',
   /** GitHub owner/repo */
   repo: 'rueca/rueca',
   /** where the site and the component registry are served from, no trailing slash.

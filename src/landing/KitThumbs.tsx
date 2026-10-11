@@ -30,7 +30,7 @@ export function DotGrid({ size = 12 }: { size?: number }) {
 }
 
 export const KIT_THUMBS: Record<string, () => ReactNode> = Object.fromEntries(
-  ['Controls', 'Layout', 'Time', 'Structure', 'Working', 'Hand-off'].map((g) => [g, () => <Tile><KitArt group={g} /></Tile>]),
+  ['Controls', 'Layout', 'Time', 'Structure', 'Workflow', 'Hand-off'].map((g) => [g, () => <Tile><KitArt group={g} /></Tile>]),
 )
 
 /** Scroll-drive the thumbnails: each card's --kp runs 0 → 1 as its top travels from
