@@ -1,13 +1,12 @@
 /* Lightbox (Space / double-click) and Compare (select two, C). Both cover the gallery, not the whole app. */
 import { useEffect, useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight, X, Heart, Sparkles, Maximize2, Wand2, Download, ArrowLeftRight } from 'lucide-react'
-import { IconButton, Segmented, Badge, toast, cn } from '@kit'
+import { CompareSplit, IconButton, Segmented, Badge, toast, cn } from '@kit'
 import { modelOf, type GenParams } from '../engine/models'
 import { useGallery, visible, step, toggleFavourite, byId, type ImageRec } from '../state/gallery'
 import { ui, useUI } from '../state/ui'
 import { usePix, exportPNG } from '../state/images'
 import { variations, upscale, remix } from '../state/actions'
-import { CompareSlider } from '../local/CompareSlider'
 
 export function Overlays() {
   const overlay = useUI((s) => s.overlay)
@@ -81,8 +80,8 @@ function Compare({ a, b, mode }: { a: string; b: string; mode: 'wipe' | 'side' }
       <div className="flex min-h-0 flex-1 items-center justify-center p-4 pt-0">
         {mode === 'wipe' ? (
           <div className="relative max-h-full max-w-full overflow-hidden rounded-[6px] shadow-[var(--shadow-artboard)]" style={{ aspectRatio: String(ratio), height: '100%' }}>
-            <CompareSlider value={pos} onChange={setPos} labelA={`A · ${label(A)}`} labelB={`B · ${label(B)}`}
-              a={<Fill rec={A} />} b={<Fill rec={B} />} />
+            <CompareSplit value={pos} onChange={(v) => setPos(v)} dragAnywhere label="A / B divider"
+              labels={[`A · ${label(A)}`, `B · ${label(B)}`]} before={<Fill rec={A} />} after={<Fill rec={B} />} />
           </div>
         ) : (
           <div className="grid h-full w-full grid-cols-2 gap-3">
