@@ -33,7 +33,7 @@ export const params = createParams(schema, {
 export type V = ReturnType<typeof params.values>
 
 /* ---------------------------------------------------------------- doc */
-export const doc = createDocStore<JourneyDoc>(demoDoc(), { id: 'journey', version: 1 })
+export const doc = createDocStore<JourneyDoc>(demoDoc(), { id: 'journey', version: 3 }) // v3: Gabinete demo, copy pass (11 Oct 2026)
 export const history = createHistory([doc, params])
 export const camera = createCamera()
 /** Fit, but never magnify past 100% — a small map should not balloon (kit fit has no cap). */
@@ -55,7 +55,7 @@ export interface UI {
   stageDrop: number | null
 }
 export const ui = createStore<UI>(() => ({
-  personaId: (() => { try { return localStorage.getItem('studio:journey:persona') || 'maya' } catch { return 'maya' } })(),
+  personaId: (() => { try { return localStorage.getItem('studio:journey:persona') || 'ines' } catch { return 'ines' } })(),
   sel: null, editing: null, filterTag: null, hoverCard: null, drop: null, stageDrop: null,
 }))
 export const useUI = <T,>(pick: (s: UI) => T) => useStore(ui, pick)
@@ -227,7 +227,7 @@ export function resetDemo() {
   doc.replace(demoDoc(), { history: false })
   params.reset()
   history.clear()
-  switchPersona('maya')
+  switchPersona('ines')
 }
 
 export const allTags = (p: Persona) => {

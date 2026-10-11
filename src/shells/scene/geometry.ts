@@ -1,10 +1,13 @@
 /* Product geometry — all lathe profiles and procedural textures, no assets.
-   Units are decimetres-ish: the speaker is 1.4 tall and sits on a 0.6 plinth. */
+   The product is Campana's hand bell (src/demo/clients.ts): a cast bronze
+   shell with a flared lip, a turned walnut handle, a brass ferrule between
+   them, and the clapper inside. Units are decimetres-ish: the bell and handle
+   stand about 2 tall on a 0.6 plinth. */
 import * as THREE from 'three'
 
 const SEG = 128
 
-/** A rounded-cylinder profile: flat bottom, bottom fillet, gently barrelled side, top shoulder, flat top. */
+/** A rounded-cylinder profile: flat bottom, bottom fillet, straight side, top shoulder, flat top. */
 function roundedProfile(radius: number, height: number, rb: number, rt: number, bulge = 0, y0 = 0) {
   const pts: THREE.Vector2[] = [new THREE.Vector2(0, y0)]
   const arc = (cx: number, cy: number, r: number, a0: number, a1: number, n = 14) => {
@@ -25,58 +28,61 @@ function roundedProfile(radius: number, height: number, rb: number, rt: number, 
   return pts
 }
 
-export const DIM = { bodyR: 0.62, bodyH: 1.36, bodyY: 0.045, capR: 0.44, plinthR: 1.1, plinthH: 0.6 }
+/** A smooth lathe profile through (radius, height) control points. */
+function spline(points: [number, number][], n: number) {
+  const c = new THREE.SplineCurve(points.map(([r, y]) => new THREE.Vector2(r, y)))
+  return c.getPoints(n)
+}
 
+export const DIM = { bellR: 0.66, bellH: 1.04, wall: 0.035, plinthR: 1.1, plinthH: 0.6 }
+
+/** The bell: one closed shell, crown to lip on the outside, lip back up to the crown inside, so it reads hollow from below. */
 export function bodyGeometry() {
-  const g = new THREE.LatheGeometry(roundedProfile(DIM.bodyR, DIM.bodyH, 0.09, 0.17, 0.025, DIM.bodyY), SEG)
+  const outer = spline([[0, 1.04], [0.2, 1.02], [0.33, 0.97], [0.41, 0.86], [0.44, 0.7], [0.47, 0.52], [0.52, 0.32], [0.59, 0.15], [0.66, 0.035]], 80)
+  const lip = [new THREE.Vector2(0.665, 0.0), new THREE.Vector2(0.64, -0.005)]
+  const inner = spline([[0.62, 0.02], [0.555, 0.15], [0.49, 0.32], [0.44, 0.52], [0.405, 0.7], [0.375, 0.84], [0.3, 0.94], [0.18, 0.99], [0, 1.0]], 80)
+  const g = new THREE.LatheGeometry([...outer, ...lip, ...inner], SEG)
   g.computeVertexNormals()
   return g
 }
 
+/** The handle: turned walnut, a bead at the neck, a long swelling grip, a knob at the top. */
 export function capGeometry() {
-  const top = DIM.bodyY + DIM.bodyH
-  const r = DIM.capR
-  const pts = [new THREE.Vector2(0, top + 0.028)]
-  for (let i = 1; i <= 16; i++) {
-    const t = i / 16
-    // a very slightly domed disc with a rolled edge
-    const x = r * t
-    const y = top + 0.028 - 0.008 * t * t - (t > 0.9 ? ((t - 0.9) / 0.1) ** 2 * 0.02 : 0)
-    pts.push(new THREE.Vector2(x, y))
-  }
-  pts.push(new THREE.Vector2(r, top - 0.004), new THREE.Vector2(0, top - 0.004))
+  const pts = spline([[0, 1.03], [0.07, 1.04], [0.075, 1.09], [0.11, 1.13], [0.075, 1.18], [0.062, 1.24], [0.09, 1.36], [0.118, 1.55], [0.108, 1.72], [0.082, 1.82], [0.1, 1.87], [0.118, 1.93], [0.08, 1.99], [0, 2.0]], 90)
   const g = new THREE.LatheGeometry(pts, SEG)
   g.computeVertexNormals()
   return g
 }
 
+/** The ferrule: a brass collar where the handle meets the bell. */
 export function ringGeometry() {
-  const g = new THREE.TorusGeometry(DIM.capR * 0.7, 0.011, 16, SEG)
+  const g = new THREE.TorusGeometry(0.082, 0.026, 18, SEG)
   g.rotateX(Math.PI / 2)
-  g.translate(0, DIM.bodyY + DIM.bodyH + 0.024, 0)
+  g.translate(0, DIM.bellH + 0.012, 0)
   return g
 }
 
+/** The clapper: a ball on a rod, hanging from the crown inside the bell. */
 export function baseGeometry() {
-  return new THREE.LatheGeometry(roundedProfile(0.5, 0.06, 0.012, 0.02, 0, 0), SEG)
+  const pts = spline([[0, 0.1], [0.06, 0.115], [0.095, 0.19], [0.07, 0.27], [0.022, 0.3], [0.022, 0.6], [0.022, 0.97], [0, 0.98]], 60)
+  const g = new THREE.LatheGeometry(pts, 48)
+  g.computeVertexNormals()
+  return g
 }
 
 export function pedestalGeometry() {
   return new THREE.LatheGeometry(roundedProfile(DIM.plinthR, DIM.plinthH, 0.012, 0.035, 0, 0), SEG)
 }
 
-/** Knit fabric as a tiling normal map: rows of interlocking loops. */
+/** Turning marks as a tiling normal map: fine rings round the bell, the trace of the lathe that finished it.
+    (Exported as knitNormalMap for the viewport; the speaker it was made for wore knit.) */
 export function knitNormalMap() {
   const S = 128
   const h = new Float32Array(S * S)
   for (let y = 0; y < S; y++)
     for (let x = 0; x < S; x++) {
-      // two staggered "V" loops per 16×12 cell
-      const cx = (x % 16) / 16, cy = (y % 12) / 12
-      const row = Math.floor(y / 12) % 2
-      const lx = (cx + row * 0.5) % 1
-      const leg = Math.min(Math.abs(lx - 0.27 - cy * 0.12), Math.abs(lx - 0.73 + cy * 0.12))
-      h[y * S + x] = Math.exp(-(leg * leg) * 140) * (0.75 + 0.25 * Math.sin(cy * Math.PI))
+      const v = y / S
+      h[y * S + x] = 0.5 + 0.5 * Math.sin(v * Math.PI * 2 * 9) * (0.6 + 0.4 * Math.sin(v * Math.PI * 2 * 2 + 1)) + 0.04 * Math.sin((x / S) * Math.PI * 2 * 3)
     }
   // A canvas (not a DataTexture) so GLTFExporter can embed it in the .glb.
   const cv = document.createElement('canvas')
@@ -86,8 +92,8 @@ export function knitNormalMap() {
   const at = (x: number, y: number) => h[((y + S) % S) * S + ((x + S) % S)]
   for (let y = 0; y < S; y++)
     for (let x = 0; x < S; x++) {
-      const dx = (at(x + 1, y) - at(x - 1, y)) * 2.2
-      const dy = (at(x, y + 1) - at(x, y - 1)) * 2.2
+      const dx = (at(x + 1, y) - at(x - 1, y)) * 0.28
+      const dy = (at(x, y + 1) - at(x, y - 1)) * 0.28
       const len = Math.hypot(dx, dy, 1)
       const i = (y * S + x) * 4
       data[i] = ((-dx / len) * 0.5 + 0.5) * 255
@@ -98,7 +104,7 @@ export function knitNormalMap() {
   cv.getContext('2d')!.putImageData(img, 0, 0)
   const t = new THREE.CanvasTexture(cv)
   t.wrapS = t.wrapT = THREE.RepeatWrapping
-  t.repeat.set(44, 13)
+  t.repeat.set(1, 6)
   t.magFilter = THREE.LinearFilter
   t.minFilter = THREE.LinearMipmapLinearFilter
   t.generateMipmaps = true

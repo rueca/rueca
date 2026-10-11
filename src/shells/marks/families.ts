@@ -79,7 +79,7 @@ const scribble: Family = {
   id: 'scribble', name: 'Scribble', icon: Spline, blurb: 'One continuous line looping around a centre — order to chaos on one slider.',
   params: createParams(scribbleSchema, { id: 'marks-scribble', persist: false, url: false, presets: [
     { name: 'Mentor circle', values: { loops: 4, chaos: 0.06, wobble: 0.7, drift: 0.2, squash: 0, weight: 2.4 } },
-    { name: 'Mentee tangle', values: { loops: 7, chaos: 0.85, wobble: 0.45, drift: 0.8, squash: 0.2, weight: 2.2 } },
+    { name: 'Tangle', values: { loops: 7, chaos: 0.85, wobble: 0.45, drift: 0.8, squash: 0.2, weight: 2.2 } },
     { name: 'Bold loop', values: { loops: 2, chaos: 0.35, wobble: 0.2, drift: 0.4, squash: 0.1, weight: 7 } },
   ] }),
   explore: { loops: [2, 8], chaos: [0.05, 0.95], wobble: [0.15, 0.8], drift: [0.2, 0.9], squash: [0, 0.3], weight: [1.8, 6] },

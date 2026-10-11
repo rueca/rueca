@@ -10,7 +10,8 @@ import {
   Switch, TextInput, cn, toast, type ScrubProps,
 } from '@kit'
 import { ASPECTS, EASE, PRESETS, type Aspect, type Clip, type FontKey, type ImageGen, type Motion } from './comp'
-import { WIRE, ditherTop, wireImage } from '@/demo/wire'
+import { WIRE, wireImage } from '@/demo/wire'
+import { CAMPANA } from '@/demo/clients'
 import { FONTS, IMAGE_LABEL, proceduralImage } from './render'
 import { addClip, commitComp, deleteClips, duplicateClips, getComp, history, params, rebaseDesign, splitAt, ui, updateClip, useComp, useUI } from './store'
 
@@ -271,9 +272,8 @@ export function thumbURL(gen: ImageGen, seed: number) {
   const k = `${gen}:${seed}`
   let u = thumbCache.get(k)
   if (!u && gen !== 'app') {
-    // the wire painters hand back data URLs already — one dither cell per pixel, scaled down by the browser
-    const at = 0.44 + (((seed * 37) % 13) / 100)
-    u = gen === 'mesh' ? wireImage(192, 192, 'image') : ditherTop(260, 260, { at, size: 0.72, night: gen === 'sunset' })
+    // the slot is a data URL; the Campana pictures are files the browser scales down itself
+    u = gen === 'mesh' ? wireImage(192, 192, 'image') : gen === 'sunset' ? CAMPANA.photo : CAMPANA.bell
     thumbCache.set(k, u)
   }
   if (!u) {

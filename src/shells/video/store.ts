@@ -33,7 +33,7 @@ export const schema = defineSchema({
 export const params = createParams(schema, { id: 'video', version: 3 }) // v3: paper matte (wire style)
 export type V = ReturnType<typeof params.values>
 
-export const doc = createDocStore<Comp>(demoComp(), { id: 'video', version: 2 }) // v2: wire-style demo; v1 (purple) is not carried over
+export const doc = createDocStore<Comp>(demoComp(), { id: 'video', version: 3 }) // v3: Campana's launch film; v2 (wire style) and v1 are not carried over
 export const history = createHistory([params, doc])
 export const getComp = () => doc.get()
 export const setComp = (c: Comp, final = true, label?: string) => doc.set(c, { commit: final, label })

@@ -3,10 +3,11 @@
    scrubbing, preview and frame-stepped MP4 export are the same code path.
    Images are procedural (no network): generated once per (kind, seed, size)
    and cached. They are drawn in the wire style (src/demo/wire.ts): the
-   dithered top, labelled slots and a wireframe app screen, one ink on paper.
+   Campana's engraved bell, its photograph, labelled slots and a wireframe app screen.
 --------------------------------------------------------------------------- */
 import { cubicBezier } from '@kit/core/ease'
-import { WIRE, ditherTop, wireImage } from '@/demo/wire'
+import { WIRE, wireImage } from '@/demo/wire'
+import { CAMPANA } from '@/demo/clients'
 import { ASPECTS, type Clip, type Comp, type FontKey, type ImageGen, type Motion } from './comp'
 
 /* ---------- maths ---------- */
@@ -19,7 +20,7 @@ function rng(seed: number) {
 export const FONTS: Record<FontKey, { label: string; css: string }> = {
   sans: { label: 'Inter', css: '"Inter Variable", Inter, system-ui, sans-serif' },
   display: { label: 'Inter Display', css: '"Inter Variable", Inter, system-ui, sans-serif' },
-  serif: { label: 'Serif', css: '"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif' },
+  serif: { label: 'Newsreader', css: '"Newsreader Variable", Newsreader, Georgia, serif' },
   mono: { label: 'Mono', css: 'ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace' },
 }
 
@@ -101,9 +102,9 @@ function motionAt(c: Clip, local: number, U: number): Fx {
 
 /* ---------- procedural images ---------- */
 /** What each generator paints now (the keys are historical: they used to be colour gradients). */
-export const IMAGE_LABEL: Record<ImageGen, string> = { aurora: 'Top', sunset: 'Night', mesh: 'Slot', app: 'App UI' }
+export const IMAGE_LABEL: Record<ImageGen, string> = { aurora: 'Bell plate', sunset: 'Bell photo', mesh: 'Slot', app: 'App UI' }
 
-/* ditherTop / wireImage hand back data URLs, but drawComp is synchronous. Each image is a
+/* Pictures load asynchronously (the Campana plate and photo are files, wireImage a data URL), but drawComp is synchronous. Each image is a
    cached canvas that shows a blank sheet until the PNG has decoded, then it is painted in
    and listeners (the preview) are told to redraw. `imagesReady` lets exports wait. */
 const pending = new Set<Promise<void>>()
@@ -114,12 +115,49 @@ export async function imagesReady(comp: Comp, W: number, H: number) {
   for (const c of comp.clips) if (c.kind === 'image') { const b = clipBox(c, W, H, U); imageFor(c, b.w, b.h) }
   while (pending.size) await Promise.all([...pending])
 }
-function paintURL(c: HTMLCanvasElement, url: string, ground: string = WIRE.sheet, at: [number, number, number, number] = [0, 0, c.width, c.height]) {
+function paintURL(c: HTMLCanvasElement, url: string, ground: string = WIRE.sheet, at: [number, number, number, number] | 'cover' | 'contain' | 'bottom' = [0, 0, c.width, c.height], smooth = false) {
   const g = c.getContext('2d')!
   g.fillStyle = ground; g.fillRect(0, 0, c.width, c.height)
   const im = new Image()
   const p: Promise<void> = new Promise<void>((res) => {
-    im.onload = () => { g.imageSmoothingEnabled = false; g.drawImage(im, ...at); res(); readyListeners.forEach((f) => f()) }
+    im.onload = () => {
+      g.imageSmoothingEnabled = smooth
+      if (smooth) g.imageSmoothingQuality = 'high'
+      if (at === 'bottom') {
+        // a photo framed squarer than the video: full width, its foot just above the bottom band (where the
+        // call to action sits), its own backdrop sampled from its top and bottom strips and carried out to
+        // the frame's edges with soft fades, so nothing crops the subject
+        const W = c.width, H = c.height, iw = im.naturalWidth, ih = im.naturalHeight
+        const k = Math.max(W / iw, (H * 0.6) / ih), dw = iw * k, dh = ih * k, y = Math.min(H - dh, H * 0.8 - dh)
+        const strip = (sy: number) => {
+          const t = document.createElement('canvas'); t.width = 8; t.height = 2
+          const tx = t.getContext('2d', { willReadFrequently: true })!
+          tx.drawImage(im, 0, ih * sy, iw, ih * 0.04, 0, 0, 8, 2)
+          const d = tx.getImageData(0, 0, 8, 2).data
+          let r = 0, gg = 0, bb = 0
+          for (let i = 0; i < 16; i++) { r += d[i * 4]; gg += d[i * 4 + 1]; bb += d[i * 4 + 2] }
+          return [(r / 16) | 0, (gg / 16) | 0, (bb / 16) | 0]
+        }
+        const [t0, b0] = [strip(0), strip(0.96)]
+        const css = (c3: number[], a = 1) => `rgba(${c3[0]},${c3[1]},${c3[2]},${a})`
+        g.fillStyle = css(t0); g.fillRect(0, 0, W, y + 2)
+        g.fillStyle = css(b0); g.fillRect(0, y + dh - 2, W, H - y - dh + 2)
+        g.drawImage(im, (W - dw) / 2, y, dw, dh)
+        const top = g.createLinearGradient(0, y, 0, y + dh * 0.3)
+        top.addColorStop(0, css(t0)); top.addColorStop(1, css(t0, 0))
+        g.fillStyle = top; g.fillRect(0, y - 1, W, dh * 0.3 + 1)
+        const bot = g.createLinearGradient(0, y + dh, 0, y + dh * 0.86)
+        bot.addColorStop(0, css(b0)); bot.addColorStop(1, css(b0, 0))
+        g.fillStyle = bot; g.fillRect(0, y + dh * 0.86, W, dh * 0.14 + 1)
+      } else if (at === 'cover' || at === 'contain') {
+        // contain: the engraving sits in the lower part of the frame, clear of the title
+        const W = c.width, H = c.height, iw = im.naturalWidth, ih = im.naturalHeight
+        const k = at === 'cover' ? Math.max(W / iw, H / ih) : Math.min((W * 0.86) / iw, (H * 0.62) / ih)
+        const dw = iw * k, dh = ih * k
+        g.drawImage(im, (W - dw) / 2, at === 'cover' ? (H - dh) / 2 : H * 0.3 + (H * 0.62 - dh) / 2, dw, dh)
+      } else g.drawImage(im, ...at)
+      res(); readyListeners.forEach((f) => f())
+    }
     im.onerror = () => res()
   }).finally(() => pending.delete(p))
   pending.add(p)
@@ -143,13 +181,8 @@ export function proceduralImage(kind: ImageGen, seed: number, w: number, h: numb
   if (imgCache.size > 40) imgCache.clear()
   const c = document.createElement('canvas')
   c.width = W; c.height = H
-  const at = 0.44 + (((seed * 37) % 13) / 100) // the seed nudges the top sideways
-  if (kind === 'aurora' || kind === 'sunset') {
-    // the top is dithered on a square tile (finer cells than spreading 260 across the long side),
-    // centred on a ground of the same colour, so it sits seamlessly in any aspect
-    const night = kind === 'sunset', S = Math.min(W, H)
-    paintURL(c, ditherTop(S, S, { at, size: 0.6, night }), night ? WIRE.ink : WIRE.paper, [(W - S) / 2, (H - S) / 2, S, S])
-  }
+  if (kind === 'aurora') paintURL(c, CAMPANA.plate, WIRE.paper, 'contain', true) // the engraved bell, ink on paper
+  else if (kind === 'sunset') paintURL(c, CAMPANA.photo, '#E5B53A', 'bottom', true) // the bell, photographed on Gualda
   else if (kind === 'mesh') paintURL(c, wireImage(W, H, `image · ${ratioLabel(W, H)}`))
   else drawAppScreen(c.getContext('2d')!, W, H, rng(seed * 9301 + 49297))
   imgCache.set(key, c)

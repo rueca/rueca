@@ -6,11 +6,12 @@ import { wireImage, WIRE } from '@/demo/wire'
 import { type Persona } from '../model'
 import { doc, useUI, usePersona, switchPersona, addPersona, duplicatePersona, deletePersona, editPersona } from '../store'
 
-/** Persona portrait: a wire placeholder slot (demo content, src/demo/wire.ts), painted lazily and cached. */
-export function Avatar({ p, size = 28 }: { p: Pick<Persona, 'name'>; size?: number }) {
+/** Persona portrait: the demo's engraved medallion (ink on paper) when there is one, else a wire
+    placeholder slot (demo content, src/demo/wire.ts), painted lazily and cached. */
+export function Avatar({ p, size = 28 }: { p: Pick<Persona, 'name' | 'photo'>; size?: number }) {
   return (
-    <img src={wireImage(size * 2, size * 2, size >= 48 ? 'avatar' : '')} alt="" aria-hidden draggable={false}
-      className="shrink-0 rounded-full" style={{ width: size, height: size, boxShadow: `0 0 0 1px ${WIRE.line}` }} title={p.name} />
+    <img src={p.photo ?? wireImage(size * 2, size * 2, size >= 48 ? 'avatar' : '')} alt="" aria-hidden draggable={false}
+      className="shrink-0 rounded-full object-cover" style={{ width: size, height: size, background: WIRE.card, boxShadow: `0 0 0 1px ${WIRE.line}` }} title={p.name} />
   )
 }
 

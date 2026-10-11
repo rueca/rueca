@@ -22,12 +22,13 @@ export type V = Record<string, any>
 export interface ObjDef { id: string; name: string; kind: Kind; parent?: string }
 
 export const OBJECTS: ObjDef[] = [
-  { id: 'speaker', name: 'Aura speaker', kind: 'group' },
-  { id: 'body', name: 'Knit body', kind: 'mesh', parent: 'speaker' },
-  { id: 'cap', name: 'Glass top', kind: 'mesh', parent: 'speaker' },
-  { id: 'ring', name: 'Light ring', kind: 'mesh', parent: 'speaker' },
-  { id: 'base', name: 'Base', kind: 'mesh', parent: 'speaker' },
-  { id: 'pedestal', name: 'Pedestal', kind: 'mesh' },
+  // ids are historical (the demo used to be a speaker); the names are the bell's
+  { id: 'speaker', name: 'Hand bell', kind: 'group' },
+  { id: 'body', name: 'Bell', kind: 'mesh', parent: 'speaker' },
+  { id: 'cap', name: 'Handle', kind: 'mesh', parent: 'speaker' },
+  { id: 'ring', name: 'Ferrule', kind: 'mesh', parent: 'speaker' },
+  { id: 'base', name: 'Clapper', kind: 'mesh', parent: 'speaker' },
+  { id: 'pedestal', name: 'Plinth', kind: 'mesh' },
   { id: 'floor', name: 'Shadow catcher', kind: 'floor' },
   { id: 'key', name: 'Key light', kind: 'light' },
   { id: 'rim', name: 'Rim light', kind: 'light' },
@@ -83,11 +84,11 @@ function light(id: string, l: Lite): Folder {
 
 const schema = defineSchema({
   speaker_xf: xf('speaker', v3(0, 0.6, 0)),
-  body_xf: xf('body'), body_mat: mat('body', { type: 'physical', color: '#e9e4da', rough: 0.9, metal: 0, sheen: 0.6 }),
-  cap_xf: xf('cap'), cap_mat: mat('cap', { type: 'physical', color: '#f2efe8', rough: 0.22, metal: 0, clearcoat: 1 }),
-  ring_xf: xf('ring'), ring_mat: mat('ring', { type: 'standard', color: '#fff4dc', rough: 0.4, metal: 0, emission: 2.4 }),
-  base_xf: xf('base'), base_mat: mat('base', { type: 'standard', color: '#c4beb3', rough: 0.32, metal: 1 }),
-  pedestal_xf: xf('pedestal'), pedestal_mat: mat('pedestal', { type: 'standard', color: '#ddd6ca', rough: 0.78, metal: 0 }),
+  body_xf: xf('body'), body_mat: mat('body', { type: 'standard', color: '#c9a14a', rough: 0.26, metal: 1 }),
+  cap_xf: xf('cap'), cap_mat: mat('cap', { type: 'physical', color: '#5a3a26', rough: 0.42, metal: 0, clearcoat: 0.5 }),
+  ring_xf: xf('ring'), ring_mat: mat('ring', { type: 'standard', color: '#d6b260', rough: 0.22, metal: 1 }),
+  base_xf: xf('base'), base_mat: mat('base', { type: 'standard', color: '#8a6a35', rough: 0.35, metal: 1 }),
+  pedestal_xf: xf('pedestal'), pedestal_mat: mat('pedestal', { type: 'standard', color: '#f5d05a', rough: 0.9, metal: 0 }),
   floor: folder('Shadow catcher', {
     floor_visible: p.boolean(true, { label: 'Visible' }),
     floor_locked: p.boolean(true, { label: 'Locked' }),
@@ -99,10 +100,10 @@ const schema = defineSchema({
 
   /* scene settings — the inspector with nothing selected (Spline) */
   look: folder('Background', {
-    bg: p.color('#dcd6cb', { alpha: false, label: 'Colour', hint: 'Also the colour behind a transparent export.' }),
+    bg: p.color('#f2c744', { alpha: false, label: 'Colour', hint: 'Also the colour behind a transparent export.' }),
   }),
   env: folder('Environment', {
-    envIntensity: p.number(0.45, { min: 0, max: 3, step: 0.01, label: 'Intensity', hint: 'Strength of the studio reflection map (RoomEnvironment).' }),
+    envIntensity: p.number(0.8, { min: 0, max: 3, step: 0.01, label: 'Intensity', hint: 'Strength of the studio reflection map (RoomEnvironment).' }),
     envRotation: p.angle(0, { label: 'Rotation' }),
   }),
   render: folder('Rendering', {
@@ -110,7 +111,7 @@ const schema = defineSchema({
     exposure: p.number(1, { min: 0.1, max: 3, step: 0.01, label: 'Exposure' }),
     shadows: p.boolean(true, { label: 'Shadows' }),
     shadowSoft: p.number(5, { min: 0, max: 16, step: 0.5, label: 'Softness', when: (v: V) => v.shadows }),
-    glow: p.number(0.3, { min: 0, max: 2, step: 0.01, label: 'Glow', hint: 'Bloom on emissive and very bright pixels.' }),
+    glow: p.number(0, { min: 0, max: 2, step: 0.01, label: 'Glow', hint: 'Bloom on emissive and very bright pixels.' }),
   }),
   viewport: folder('Viewport', {
     grid: p.boolean(false, { label: 'Grid floor' }),
@@ -123,16 +124,17 @@ const schema = defineSchema({
   }),
 })
 
-export const params = createParams(schema as Schema, { id: 'scene', historyLimit: 200 }) as unknown as ParamStore<Schema, V>
+// v2: Campana's bell; v1 was a speaker
+export const params = createParams(schema as Schema, { id: 'scene', version: 2, historyLimit: 200 }) as unknown as ParamStore<Schema, V>
 
 /* --- colourways: partial patches, so they never touch transforms ---------- */
 export interface Colourway { id: string; name: string; values: V }
 export const COLOURWAYS: Colourway[] = [
-  { id: 'chalk', name: 'Chalk', values: { body_color: '#e9e4da', cap_color: '#f2efe8', ring_color: '#fff4dc', base_color: '#c4beb3', pedestal_color: '#ddd6ca', bg: '#dcd6cb' } },
-  { id: 'onyx', name: 'Onyx', values: { body_color: '#3a3a3e', cap_color: '#141416', ring_color: '#7fd6ff', base_color: '#26262a', pedestal_color: '#4a4a4f', bg: '#1d1d21' } },
-  { id: 'sage', name: 'Sage', values: { body_color: '#a7b59d', cap_color: '#eef1ea', ring_color: '#fff1c2', base_color: '#cdbf9f', pedestal_color: '#d3d9cc', bg: '#dfe5d8' } },
-  { id: 'coral', name: 'Coral', values: { body_color: '#e8735c', cap_color: '#ffe2d8', ring_color: '#ffffff', base_color: '#f0d6c8', pedestal_color: '#f3c9b9', bg: '#f5ddd2' } },
-  { id: 'midnight', name: 'Midnight', values: { body_color: '#22304f', cap_color: '#0c1122', ring_color: '#9a8cff', base_color: '#c9a86a', pedestal_color: '#2c3858', bg: '#121a2c' } },
+  { id: 'brass', name: 'Brass', values: { body_color: '#c9a14a', cap_color: '#5a3a26', ring_color: '#d6b260', base_color: '#8a6a35', pedestal_color: '#f5d05a', bg: '#f2c744' } },
+  { id: 'achiote', name: 'Achiote', values: { body_color: '#e8582c', cap_color: '#2b1d14', ring_color: '#d6b260', base_color: '#8a6a35', pedestal_color: '#e7e3db', bg: '#f3f1eb' } },
+  { id: 'cielo', name: 'Cielo', values: { body_color: '#5db4e8', cap_color: '#e9e2d2', ring_color: '#c8c3ba', base_color: '#6e6a64', pedestal_color: '#e7e3db', bg: '#f3f1eb' } },
+  { id: 'nogal', name: 'Nogal', values: { body_color: '#5b4a32', cap_color: '#181411', ring_color: '#8a6a35', base_color: '#3b2f22', pedestal_color: '#2a2420', bg: '#151210' } },
+  { id: 'lana', name: 'Lana', values: { body_color: '#efe9dd', cap_color: '#8a5a3a', ring_color: '#c9a14a', base_color: '#8a6a35', pedestal_color: '#f3f1eb', bg: '#dcd7ce' } },
 ]
 export const colourwayOf = (v: V) => COLOURWAYS.find((c) => Object.entries(c.values).every(([k, x]) => String(v[k]).toLowerCase() === String(x).toLowerCase()))?.id ?? null
 
@@ -141,10 +143,10 @@ export type XYZ = [number, number, number]
 export interface Pose { position: XYZ; target: XYZ }
 export interface View extends Pose { id: string; name: string; builtin?: boolean }
 export const BUILTIN_VIEWS: View[] = [
-  { id: 'hero', name: 'Hero', builtin: true, position: [5.1, 3.9, 6.1], target: [0, 1.2, 0] },
-  { id: 'front', name: 'Front', builtin: true, position: [0, 1.7, 8.6], target: [0, 1.2, 0] },
-  { id: 'detail', name: 'Top detail', builtin: true, position: [1.25, 3.55, 1.7], target: [0, 1.9, 0] },
-  { id: 'low', name: 'Low angle', builtin: true, position: [-4.7, 0.7, 5.5], target: [0, 1.45, 0] },
+  { id: 'hero', name: 'Hero', builtin: true, position: [4.9, 3.6, 5.9], target: [0, 1.45, 0] },
+  { id: 'front', name: 'Front', builtin: true, position: [0, 1.6, 8.6], target: [0, 1.5, 0] },
+  { id: 'detail', name: 'Handle detail', builtin: true, position: [1.2, 2.9, 1.6], target: [0, 2.15, 0] },
+  { id: 'low', name: 'Low angle', builtin: true, position: [-3.6, 0.35, 4.2], target: [0, 1.0, 0] },
 ]
 
 /* --- editor ui ----------------------------------------------------------- */

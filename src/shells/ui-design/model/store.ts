@@ -21,7 +21,7 @@ import { layoutPage, union, sizeOf } from './layout'
 import { base, frame, solid } from './factory'
 import { uid, type Box, type BoolOp, type Doc, type Node, type Page, type Tool } from './types'
 
-const LS = 'studio:ui-design:doc:v2' // v2: wire-style demo doc (10 Oct 2026)
+const LS = 'studio:ui-design:doc:v3' // v3: Gabinete demo doc (11 Oct 2026)
 /** `label` names the step that LEFT this snapshot (what undo reverts). */
 type Snap = { doc: Doc; selection: string[]; pageId: string; label?: string }
 

@@ -1,3 +1,4 @@
+import '@fontsource-variable/newsreader'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from 'zustand'
 import {
@@ -255,7 +256,7 @@ export default function VideoShell() {
     const matte = v.matte
     const dur = v.duration
     clock.pause()
-    try { await Promise.all([800, 700, 600, 500].map((wt) => document.fonts.load(`${wt} 64px "Inter Variable"`))) } catch { /* fonts optional */ }
+    try { await Promise.all([...[800, 700, 600, 500].map((wt) => document.fonts.load(`${wt} 64px "Inter Variable"`)), document.fonts.load('400 64px "Newsreader Variable"')]) } catch { /* fonts optional */ }
     const EW = Math.round(W / 2) * 2, EH = Math.round(H / 2) * 2 // H.264 wants even sizes
     const canvas = document.createElement('canvas')
     canvas.width = EW; canvas.height = EH
@@ -267,7 +268,7 @@ export default function VideoShell() {
     let last = -1
     try {
       const blob = await recordFrames({
-        canvas, fps, frames: total, name: `orbit-teaser-${v.aspect.replace(':', 'x')}.mp4`, signal: ac.signal,
+        canvas, fps, frames: total, name: `campana-launch-${v.aspect.replace(':', 'x')}.mp4`, signal: ac.signal,
         draw: (ms) => { ctx.setTransform(EW / W, 0, 0, EH / H, 0, 0); drawComp(ctx, snapshot, ms, W, H, { matte }) },
         onProgress: (p) => { const q = Math.round(p * 100); if (q !== last) { last = q; pt.set(p, `frame ${Math.round(p * total)}/${total}`) } },
       })
@@ -284,7 +285,7 @@ export default function VideoShell() {
     c.toBlob((b) => { if (b) { download(b, `frame-${Math.round(clock.time())}ms.png`); toast('PNG exported', { type: 'success', description: `${W} × ${H} at ${fmtTime(clock.time(), 'timecode', fps)}` }) } })
   }
   const exportComp = () => {
-    exportJSON({ format: 'cut-composition/1', settings: { aspect: v.aspect, fps, duration: v.duration, width: W, height: H, matte: v.matte }, ...getComp() }, 'orbit-teaser.composition.json')
+    exportJSON({ format: 'cut-composition/1', settings: { aspect: v.aspect, fps, duration: v.duration, width: W, height: H, matte: v.matte }, ...getComp() }, 'campana-launch.composition.json')
     toast('Composition JSON exported', { type: 'success' })
   }
   const importComp = () => fileIn.current?.click()
@@ -377,7 +378,7 @@ export default function VideoShell() {
       leftWidth={232}
       toolbar={
         <Toolbar
-          start={<Brand name="Cut" doc="Orbit launch teaser" mark={
+          start={<Brand name="Cut" doc="Campana launch film" mark={
             <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><path d="M3 3h10v10H3z" fill="none" stroke="currentColor" strokeWidth="2" /><path d="M6.5 5.5l4 2.5-4 2.5z" fill="currentColor" /></svg>
           } />}
           center={

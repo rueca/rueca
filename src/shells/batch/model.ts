@@ -3,6 +3,7 @@ import { AlignCenter, AlignLeft } from 'lucide-react'
 import { createStore } from 'zustand/vanilla'
 import { defineSchema, folder, p, createParams, createDocStore, createHistory } from '@kit'
 import { WIRE } from '@/demo/wire'
+import { AGALLA } from '@/demo/clients'
 import { uid } from '../util'
 
 /* --- template + brand: schema-driven, so the kit Inspector renders them --- */
@@ -32,30 +33,30 @@ export const schema = defineSchema({
       { value: 'split', label: 'Split', hint: 'Paper and row tone, split behind the product.' },
     ], { label: 'Background' }),
     ctaStyle: p.select('pill', ['pill', 'outline', 'link'], { label: 'Button' }),
-    decor: p.boolean(true, { label: 'Fruit slices', hint: 'Slices drawn in hairline, scattered around the product.' }),
+    decor: p.boolean(true, { label: 'Wax seals', hint: 'Seals drawn in hairline, scattered around the product.' }),
     grain: p.number(0, { min: 0, max: 1, step: 0.05, label: 'Grain', hint: 'Print-like noise over the whole asset.' }),
-    seed: p.seed(11, { hint: 'Scatter of the decorative slices.' }),
+    seed: p.seed(11, { hint: 'Scatter of the decorative seals.' }),
   }),
   brand: folder('Brand', {
-    brandName: p.text('oro', { label: 'Name', hint: 'Wordmark text, used in the logo.', disabled: locked }),
+    brandName: p.text('agalla', { label: 'Name', hint: 'Wordmark text, used in the logo.', disabled: locked }),
     logoStyle: p.select('lockup', [{ value: 'mark', label: 'Mark' }, { value: 'lockup', label: 'Lockup' }, { value: 'word', label: 'Word' }], { label: 'Logo', disabled: locked }),
     logo: p.image(null, { label: 'Logo file', hint: 'Drop an SVG or PNG to replace the generated logo.', disabled: locked }),
     paper: p.color(WIRE.paper, { alpha: false, disabled: locked }),
     ink: p.color(WIRE.ink, { alpha: false, disabled: locked }),
-    displayFont: p.select('inter', [
-      { value: 'inter', label: 'Inter' }, { value: 'serif', label: 'Serif (system)' },
+    displayFont: p.select('serif', [
+      { value: 'inter', label: 'Inter' }, { value: 'serif', label: 'Newsreader' },
       { value: 'rounded', label: 'Rounded (system)' }, { value: 'mono', label: 'Mono (system)' },
     ], { label: 'Display font', disabled: locked }),
-    headlineWeight: p.number(700, { min: 300, max: 900, step: 50, label: 'Weight', disabled: locked }),
-    tracking: p.number(-3, { min: -8, max: 8, step: 0.5, unit: '%', label: 'Tracking', disabled: locked }),
-    bodyFont: p.select('inter', [{ value: 'inter', label: 'Inter' }, { value: 'serif', label: 'Serif (system)' }, { value: 'mono', label: 'Mono (system)' }], { label: 'Body font', disabled: locked }),
+    headlineWeight: p.number(450, { min: 300, max: 900, step: 50, label: 'Weight', disabled: locked }),
+    tracking: p.number(-2, { min: -8, max: 8, step: 0.5, unit: '%', label: 'Tracking', disabled: locked }),
+    bodyFont: p.select('inter', [{ value: 'inter', label: 'Inter' }, { value: 'serif', label: 'Newsreader' }, { value: 'mono', label: 'Mono (system)' }], { label: 'Body font', disabled: locked }),
   }),
   lock: folder('Lock', { brandLocked: p.boolean(false) }, { when: () => false }),
 })
 
 export const params = createParams(schema, {
   id: 'batch',
-  version: 2, // v2: wire-style defaults (paper/ink, no grain)
+  version: 3, // v3: Agalla's brand (Newsreader, the ink-drop mark); v2 was the wire style
   presets: [
     // Looks only touch Layout + Look — never the Brand folder, so they respect a locked brand.
     { name: 'Editorial', values: { bgStyle: 'paper', ctaStyle: 'link', decor: false, grain: 0, headlineScale: 92, padding: 9 } },
@@ -83,16 +84,20 @@ export const COLUMNS: { key: keyof DataRow; label: string; width: number; kind?:
   { key: 'badge', label: 'Badge', width: 88, placeholder: '—' },
 ]
 
-export const DEMO_ROWS: DataRow[] = [
-  { name: 'Yuzu & ginger', headline: 'Bright, sharp, a little bit wild.', subhead: 'Japanese yuzu meets fresh-pressed ginger. Zero sugar, all bite.', cta: 'Shop the drop', price: '£2.20', color: '#E8E1D6', badge: 'New' },
-  { name: 'Blood orange', headline: 'Sunset in a can.', subhead: 'Sicilian blood orange with a whisper of rosemary.', cta: 'Order now', price: '£2.20', color: '#DCD5CA', badge: 'Bestseller' },
-  { name: 'Cucumber & mint', headline: 'Cool it.', subhead: 'Garden cucumber, spearmint and a squeeze of lime.', cta: 'Try it cold', price: '£2.20', color: '#EFE9DF', badge: '' },
-  { name: 'Hibiscus & rose', headline: 'Pink, floral, never sweet.', subhead: 'Hibiscus flower steeped with Damask rose petals.', cta: 'Get 20% off', price: '£2.40', color: '#1C1A19', badge: 'Limited' },
-  { name: 'Pear & cardamom', headline: 'Autumn, bottled. Well — canned.', subhead: 'Comice pear and green cardamom for slow evenings in.', cta: 'Pre-order', price: '£2.40', color: '#D3CABC', badge: 'Seasonal' },
-  { name: 'Pink grapefruit', headline: 'The 3pm fix.', subhead: 'Ruby grapefruit, a pinch of sea salt, nothing else.', cta: 'Shop now', price: '£2.20', color: '#E8E1D6', badge: '' },
-  { name: 'Blackcurrant & sage', headline: 'Dark fruit, green finish.', subhead: 'Kentish blackcurrant with garden sage. Best over ice.', cta: 'Discover', price: '£2.40', color: '#1C1A19', badge: 'New' },
-]
-export const blankRow = (): DataRow => ({ name: 'New flavour', headline: 'Your headline here.', subhead: 'One line about what makes it good.', cta: 'Shop now', price: '£2.20', color: '#E8E1D6', badge: '' })
+/** Agalla's range: one row per ink, its colour the dye (src/demo/clients.ts). */
+const COPY: Record<string, [string, string, string, string]> = {
+  achiote: ['The red of the seed.', 'Annatto from Yucatán, ground and steeped for four days. Warm as brick.', 'Shop the ink', 'New'],
+  cochinilla: ['Crimson, from a beetle.', 'Cochineal from Oaxaca. It takes seventy thousand insects to make a pound of dye.', 'Order now', 'Bestseller'],
+  gualda: ['The painters’ yellow.', 'Weld from La Mancha, the yellow of three centuries of altarpieces.', 'Try a sample', ''],
+  anil: ['Blue that darkens as it dries.', 'Indigo from Guatemala. It goes on sky blue and dries to midnight.', 'Shop now', 'Limited'],
+  nogal: ['Brown ink for letters that last.', 'Walnut husk from Navarra, the ink of old ledgers and love letters.', 'Pre-order', 'Seasonal'],
+  hoja: ['A green only leaves can make.', 'Nettle and alum from Asturias. It dries to the green of a pressed leaf.', 'Discover', 'New'],
+}
+export const DEMO_ROWS: DataRow[] = AGALLA.inks.map((i) => {
+  const [headline, subhead, cta, badge] = COPY[i.id]
+  return { name: i.name, headline, subhead, cta, price: i.price, color: i.dye.toUpperCase(), badge }
+})
+export const blankRow = (): DataRow => ({ name: 'New ink', headline: 'Your headline here.', subhead: 'One line about what makes it good.', cta: 'Shop now', price: '€14', color: '#E8582C', badge: '' })
 
 /* --- output sizes --- */
 export interface Zone { x: number; y: number; w: number; h: number; label: string }
@@ -136,8 +141,8 @@ export const SIZE_PRESETS: Omit<SizeSpec, 'id'>[] = [
 export interface Doc { rows: DataRow[]; sizes: SizeSpec[]; overrides: Record<string, Overrides> }
 export const DEMO_DOC: Doc = { rows: DEMO_ROWS, sizes: DEFAULT_SIZES, overrides: { 'ig-story': { headlineScale: 112 }, linkedin: { showSubhead: false } } }
 
-/* v2: the template is drawn in the wire style; v1 docs (colourful flavour rows) are not carried over. */
-export const doc = createDocStore<Doc>(DEMO_DOC, { id: 'batch', version: 2 })
+/* v3: Agalla's six inks (11 Oct 2026); v2 (wire-style drinks) and v1 are not carried over. */
+export const doc = createDocStore<Doc>(DEMO_DOC, { id: 'batch', version: 3 })
 
 /** ⌘Z undoes whichever changed last — template/brand values or the document. */
 export const history = createHistory([params, doc])

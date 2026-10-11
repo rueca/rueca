@@ -4,27 +4,63 @@
    subseed) → pixels — so history can be re-rendered on reload instead of
    stored, and "same seed, same image" holds like the real thing.
 
-   Every output is the spinning top, in one ink on paper (the wire
-   style: the tool is the hero, not the pictures). The seed places it —
-   position, size, lean, which side the key light comes from; the prompt
-   moves it (night / dark → lit top on an ink ground, close-up → bigger,
-   wide / minimal → smaller, centred → upright in the middle). Guidance
-   drives contrast (and crushes past ~14 like real CFG). Too few steps
-   leaves blotchy residual noise. Models are dither styles: Lumen XL
-   Atkinson, Turbo a coarse draft Atkinson, Photon fine Floyd–Steinberg,
-   Riso Press a one-ink halftone.
+   The "weights" are a small library of real Midjourney outputs made for the
+   demo's three clients (src/demo/clients.ts, public/demo/): Campana's bell,
+   Agalla's inks and desk, Gabinete's engraved plates. The prompt picks the
+   subject (bell / ink / plate, a dye colour, night), the seed picks which
+   picture and where the frame sits on it. Models are treatments: Lumen XL
+   clean, Photon graded like film, Lumen Turbo a soft draft, Riso Press a
+   one-ink halftone. Guidance drives contrast (and crushes past ~14 like real
+   CFG); too few steps leaves blotchy residual noise.
 
-   All geometry is in fractions of the canvas, so a 220px progress preview,
-   the 1024px image and the 2048px upscale are the same picture.
+   Pictures decode asynchronously; call ready(p) before paint(p). Until then
+   paint() returns a plain paper frame, so a progress preview never throws.
+   All geometry is in fractions of the canvas, so a 220px preview, the 1024px
+   image and the 2048px upscale are the same picture.
 --------------------------------------------------------------------------- */
 import { modelOf, type GenParams } from './models'
-import { paintTop } from '@/demo/top'
+import { AGALLA, CAMPANA, DYE, GABINETE, demo, loadDemo } from '@/demo/clients'
 import { mulberry32 } from '../../util'
 
-const INK = '#1C1A19'
-const PAPER = '#F6F1EA'
-const INK_RGB = [0x1c, 0x1a, 0x19] as const
-const PAPER_RGB = [0xf6, 0xf1, 0xea] as const
+const INK = DYE.nogal
+const PAPER = DYE.lana
+const INK_RGB = [0x18, 0x14, 0x11] as const
+const PAPER_RGB = [0xf3, 0xf1, 0xeb] as const
+
+/* --- the library --- */
+type Subject = 'bell' | 'ink' | 'desk' | 'plate'
+interface Source { url: string; subject: Subject; night?: boolean; dye?: string; /** ink on transparent: lay it on paper */ inked?: boolean; label: string }
+const g = (name: string) => demo(`generate/${name}.webp`)
+const LIBRARY: Source[] = [
+  { url: CAMPANA.photo, subject: 'bell', label: 'brass bell · saffron' },
+  { url: g('bell-saffron-a'), subject: 'bell', label: 'brass bell · saffron' },
+  { url: g('bell-saffron-b'), subject: 'bell', label: 'brass bell · saffron' },
+  { url: g('bell-saffron-c'), subject: 'bell', label: 'brass bell · saffron' },
+  { url: CAMPANA.night, subject: 'bell', night: true, label: 'brass bell · night' },
+  { url: g('bell-night-a'), subject: 'bell', night: true, label: 'brass bell · night' },
+  { url: g('bell-night-b'), subject: 'bell', night: true, label: 'brass bell · night' },
+  { url: g('bell-night-c'), subject: 'bell', night: true, label: 'brass bell · night' },
+  ...AGALLA.inks.map((i) => ({ url: i.img, subject: 'ink' as const, dye: i.id, label: `${i.name.toLowerCase()} ink` })),
+  { url: AGALLA.hero, subject: 'ink', dye: 'achiote', label: 'ink and seal' },
+  { url: g('ink-seal-a'), subject: 'ink', dye: 'achiote', label: 'ink and seal' },
+  { url: g('ink-seal-b'), subject: 'ink', dye: 'achiote', label: 'ink and seal' },
+  { url: g('ink-seal-c'), subject: 'ink', dye: 'achiote', label: 'ink and seal' },
+  { url: AGALLA.still, subject: 'desk', night: true, label: 'desk still life' },
+  { url: g('desk-a'), subject: 'desk', night: true, label: 'desk still life' },
+  { url: g('desk-b'), subject: 'desk', night: true, label: 'desk still life' },
+  { url: g('desk-c'), subject: 'desk', night: true, label: 'desk still life' },
+  ...['orrery-a', 'orrery-b', 'armillary-a', 'armillary-b', 'astrolabe-a', 'astrolabe-b', 'telescope-a', 'balance-a', 'compass-a', 'bell-a']
+    .map((n) => ({ url: g(`plate-${n}`), subject: 'plate' as const, label: `${n.replace(/-[ab]$/, '')} plate` })),
+  ...GABINETE.instruments.map((i) => ({ url: i.img, subject: 'plate' as const, inked: true, label: `${i.id} plate` })),
+]
+
+const decoded = new Map<string, HTMLImageElement>()
+/** Decode the picture this image is made from (call before paint). */
+export async function ready(p: GenParams) {
+  const src = pick(p)
+  if (decoded.has(src.url)) return
+  try { decoded.set(src.url, await loadDemo(src.url)) } catch { /* paint falls back to paper */ }
+}
 
 /* --- randomness --- */
 export const fnv = (s: string) => { let h = 0x811c9dc5; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) } return h >>> 0 }
@@ -39,91 +75,126 @@ function rngFor(p: GenParams) {
 }
 
 /* --- reading the prompt --- */
-const has = (text: string, words: string[]) => words.some((w) => new RegExp(`\\b${w}\\b`).test(text))
-const NIGHT = ['night', 'midnight', 'dark', 'noir', 'low key', 'moody', 'spotlight']
-const CLOSE = ['close', 'close-up', 'closeup', 'macro', 'detail', 'tight']
-const WIDE = ['wide', 'minimal', 'minimalist', 'small', 'distant', 'negative space']
-const CENTRED = ['centred', 'centered', 'symmetrical', 'upright', 'still']
+const has = (text: string, words: string[]) => words.some((w) => new RegExp(`\\b${w}`).test(text))
+const NIGHT = ['night', 'midnight', 'dark', 'black', 'noir', 'low key', 'moody', 'spotlight']
+const CLOSE = ['close', 'macro', 'detail', 'tight']
+const WIDE = ['wide', 'minimal', 'small', 'distant', 'negative space']
+const SUBJECTS: [Subject, string[]][] = [
+  ['plate', ['engrav', 'plate', 'etching', 'copperplate', 'diagram', 'encyclop', 'astrolabe', 'orrery', 'armillary', 'telescope', 'compass', 'balance', 'instrument']],
+  ['bell', ['bell', 'campana', 'brass']],
+  ['desk', ['desk', 'quill', 'letter', 'window']],
+  ['ink', ['ink', 'bottle', 'agalla', 'wax', 'seal', 'dye']],
+]
+const DYES: [string, string[]][] = [
+  ['achiote', ['red', 'vermilion', 'orange', 'achiote', 'annatto']], ['cochinilla', ['pink', 'coral', 'crimson', 'cochineal', 'cochinilla']],
+  ['gualda', ['yellow', 'saffron', 'gold', 'weld', 'gualda']], ['anil', ['blue', 'indigo', 'sky', 'añil', 'anil']],
+  ['nogal', ['brown', 'walnut', 'sepia', 'nogal']], ['hoja', ['green', 'leaf', 'nettle', 'hoja']],
+]
 
-export type Style = 'atkinson' | 'draft' | 'diffusion' | 'halftone'
-const STYLE: Record<string, Style> = { 'lumen-xl': 'atkinson', 'lumen-turbo': 'draft', photon: 'diffusion', riso: 'halftone' }
+export type Style = 'clean' | 'draft' | 'film' | 'halftone'
+const STYLE: Record<string, Style> = { 'lumen-xl': 'clean', 'lumen-turbo': 'draft', photon: 'film', riso: 'halftone' }
 
-export interface Plan { night: boolean; at: number; size: number; tilt: number; key: number; con: number; residual: number; style: Style; grain: number }
+export interface Plan { source: Source; zoom: number; panX: number; panY: number; con: number; residual: number; style: Style; grain: number }
+
+function pick(p: GenParams): Source {
+  const text = p.prompt.toLowerCase(), neg = p.negative.toLowerCase()
+  const subject = SUBJECTS.find(([, w]) => has(text, w))?.[0]
+  const night = has(text, NIGHT) && !has(neg, ['night', 'dark'])
+  const dye = DYES.find(([, w]) => has(text, w))?.[0]
+  let pool = LIBRARY.filter((s) => !subject || s.subject === subject)
+  if (dye && pool.some((s) => s.dye === dye)) pool = pool.filter((s) => s.dye === dye)
+  if (subject !== 'plate' && pool.some((s) => !!s.night === night)) pool = pool.filter((s) => !!s.night === night)
+  // consecutive seeds walk the pool, so a batch of four shows four different pictures
+  return pool[(fnv(text) + (p.seed >>> 0)) % pool.length]
+}
 
 export function interpret(p: GenParams): Plan {
   const text = p.prompt.toLowerCase()
-  const neg = p.negative.toLowerCase()
   const r = rngFor(p)
-  const night = has(text, NIGHT) && !has(neg, ['night', 'dark'])
-  const centred = has(text, CENTRED)
-  const at = centred ? 0.5 : 0.5 + (r() - 0.5) * 0.34
-  const size = (has(text, CLOSE) ? 0.86 : has(text, WIDE) ? 0.42 : 0.5 + r() * 0.2) * (p.w > p.h * 1.8 ? 0.92 : 1)
-  const tilt = centred ? 0 : -0.34 + r() * 0.42
-  const key = r() < 0.5 ? -1 : 1
+  const zoom = has(text, CLOSE) ? 1.45 : has(text, WIDE) ? 0.82 : 1 + r() * 0.12
   const m = modelOf(p.model)
-  const g = p.guidance - m.guidance // relative to the model's own sweet spot
+  const g2 = p.guidance - m.guidance // relative to the model's own sweet spot
   const burn = Math.max(0, (p.guidance - 13) / 7)
-  const con = Math.max(0.7, 1.04 + g * 0.03) * (1 + burn * 0.9)
+  const con = Math.max(0.7, 1.02 + g2 * 0.03) * (1 + burn * 0.9)
   const residual = Math.max(0, Math.min(0.9, 1 - p.steps / m.steps)) * (p.model === 'lumen-turbo' ? 1.6 : 1)
-  return { night, at, size, tilt, key, con, residual, style: STYLE[p.model] ?? 'atkinson', grain: 0.45 + (p.detail ?? 0) * 0.8 }
+  return { source: pick(p), zoom, panX: (r() - 0.5) * 0.3, panY: (r() - 0.5) * 0.18, con, residual, style: STYLE[p.model] ?? 'clean', grain: 0.35 + (p.detail ?? 0) * 0.8 }
 }
 
-/** Day: the tone is painted on bare paper (paintTop `paper`); a small levels lift keeps that ground
-    above the threshold, so ink lands only on the top, its shadow and the floor right under it —
-    the brand's dithered top. Night: a light
-    levels stretch for the halftone screen; error diffusion takes night tones as they are. */
-const lift = (v: number, night: boolean, screen = false) => (night ? (screen ? (v - 0.08) / 0.78 : v) : Math.min(1, v / 0.9))
-
-/* --- dithering --- */
-const KERNELS: Record<'atkinson' | 'floyd', [number, number, number][]> = {
-  atkinson: [[1, 0, 1 / 8], [2, 0, 1 / 8], [-1, 1, 1 / 8], [0, 1, 1 / 8], [1, 1, 1 / 8], [0, 2, 1 / 8]],
-  floyd: [[1, 0, 7 / 16], [-1, 1, 3 / 16], [0, 1, 5 / 16], [1, 1, 1 / 16]],
+/* --- composing the frame --- */
+function compose(P: Plan, w: number, h: number): HTMLCanvasElement {
+  const c = document.createElement('canvas'); c.width = w; c.height = h
+  const x = c.getContext('2d')!
+  const img = decoded.get(P.source.url)
+  x.fillStyle = PAPER; x.fillRect(0, 0, w, h)
+  if (!img) return c
+  const iw = img.naturalWidth, ih = img.naturalHeight
+  if (P.source.inked || P.zoom < 1) {
+    // the object sits on paper: contain, with air (wide prompts and the inked plates)
+    if (!P.source.inked) { x.fillStyle = sampleEdge(img); x.fillRect(0, 0, w, h) }
+    const k = Math.min(w / iw, h / ih) * (P.source.inked ? 0.82 : 1) * Math.min(1, P.zoom + 0.1)
+    const dw = iw * k, dh = ih * k
+    x.drawImage(img, (w - dw) / 2 + P.panX * (w - dw) * 0.5, (h - dh) / 2 + P.panY * (h - dh) * 0.4, dw, dh)
+  } else {
+    // cover the frame, then crop further for close-ups; the seed pans the window
+    const k = Math.max(w / iw, h / ih) * P.zoom
+    const sw = w / k, sh = h / k
+    const sx = (iw - sw) / 2 + P.panX * (iw - sw), sy = (ih - sh) / 2 + P.panY * (ih - sh)
+    x.drawImage(img, Math.max(0, Math.min(iw - sw, sx)), Math.max(0, Math.min(ih - sh, sy)), sw, sh, 0, 0, w, h)
+  }
+  return c
+}
+/** the photo's backdrop colour, from its top-left corner (to extend it when the frame is wider) */
+function sampleEdge(img: HTMLImageElement) {
+  const c = document.createElement('canvas'); c.width = 4; c.height = 4
+  const x = c.getContext('2d', { willReadFrequently: true })!
+  x.drawImage(img, 0, 0, img.naturalWidth * 0.05, img.naturalHeight * 0.05, 0, 0, 4, 4)
+  const d = x.getImageData(0, 0, 4, 4).data
+  let r = 0, gg = 0, b = 0
+  for (let i = 0; i < 16; i++) { r += d[i * 4]; gg += d[i * 4 + 1]; b += d[i * 4 + 2] }
+  return `rgb(${r / 16 | 0},${gg / 16 | 0},${b / 16 | 0})`
 }
 
-/** Tone canvas → luminance grid at `cell` px, contrast + residual noise, error-diffused to ink / paper. */
-function diffuse(tone: HTMLCanvasElement, w: number, h: number, cell: number, P: Plan, kernel: 'atkinson' | 'floyd', r: () => number) {
-  const W = Math.max(8, Math.round(w / cell)), H = Math.max(8, Math.round(h / cell))
-  const sc = document.createElement('canvas'); sc.width = W; sc.height = H
-  const sx = sc.getContext('2d', { willReadFrequently: true })!
-  sx.imageSmoothingQuality = 'high'; sx.drawImage(tone, 0, 0, W, H)
-  const d = sx.getImageData(0, 0, W, H).data
-  const L = new Float32Array(W * H)
+/* --- treatments --- */
+function grade(c: HTMLCanvasElement, P: Plan, r: () => number) {
+  const w = c.width, h = c.height
+  const x = c.getContext('2d', { willReadFrequently: true })!
+  const img = x.getImageData(0, 0, w, h), d = img.data
+  const film = P.style === 'film'
   // residual noise is blotchy (low-frequency) like an under-cooked latent
-  const block = Math.max(2, Math.round(Math.min(W, H) / 24)), bw = Math.ceil(W / block)
-  const blotch = P.residual > 0 ? Float32Array.from({ length: bw * Math.ceil(H / block) }, () => r() - 0.5) : null
-  for (let i = 0; i < W * H; i++) {
-    let v = (0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2]) / 255
-    v = lift(v, P.night)
-    v = (v - 0.5) * P.con + 0.5
-    if (blotch) { const x = i % W, y = (i / W) | 0; v += blotch[Math.floor(y / block) * bw + Math.floor(x / block)] * P.residual * 0.9 + (r() - 0.5) * P.residual * 0.6 }
-    L[i] = v
+  const block = Math.max(2, Math.round(Math.min(w, h) / 24)), bw = Math.ceil(w / block)
+  const blotch = P.residual > 0 ? Float32Array.from({ length: bw * Math.ceil(h / block) }, () => r() - 0.5) : null
+  for (let i = 0; i < w * h; i++) {
+    let R = d[i * 4] / 255, G = d[i * 4 + 1] / 255, B = d[i * 4 + 2] / 255
+    R = (R - 0.5) * P.con + 0.5; G = (G - 0.5) * P.con + 0.5; B = (B - 0.5) * P.con + 0.5
+    if (film) { R = R * 1.04 + 0.015; B = B * 0.93 + 0.02; const l = (R + G + B) / 3; R = l + (R - l) * 0.86; G = l + (G - l) * 0.86; B = l + (B - l) * 0.86 }
+    if (blotch) { const px = i % w, py = (i / w) | 0; const n = blotch[Math.floor(py / block) * bw + Math.floor(px / block)] * P.residual * 0.5 + (r() - 0.5) * P.residual * 0.25; R += n; G += n; B += n }
+    if (film) { const n = (r() - 0.5) * 0.05 * P.grain; R += n; G += n; B += n }
+    d[i * 4] = Math.max(0, Math.min(255, R * 255)); d[i * 4 + 1] = Math.max(0, Math.min(255, G * 255)); d[i * 4 + 2] = Math.max(0, Math.min(255, B * 255))
   }
-  const k = KERNELS[kernel]
-  const on = new Uint8Array(W * H)
-  for (let y = 0; y < H; y++) {
-    const rtl = kernel === 'floyd' && y % 2 === 1 // serpentine for Floyd–Steinberg
-    for (let n = 0; n < W; n++) {
-      const x = rtl ? W - 1 - n : n, i = y * W + x
-      const o = L[i] < 0.5 ? 0 : 1, e = L[i] - o
-      on[i] = o
-      for (const [dx, dy, wt] of k) { const X = x + (rtl ? -dx : dx), Y = y + dy; if (X >= 0 && X < W && Y < H) L[Y * W + X] += e * wt }
-    }
+  x.putImageData(img, 0, 0)
+  if (film) {
+    const v = x.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.35, w / 2, h / 2, Math.hypot(w, h) * 0.6)
+    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.28)')
+    x.fillStyle = v; x.fillRect(0, 0, w, h)
   }
-  const pc = document.createElement('canvas'); pc.width = W; pc.height = H
-  const px = pc.getContext('2d')!, img = px.createImageData(W, H)
-  for (let i = 0; i < W * H; i++) img.data.set([...(on[i] ? PAPER_RGB : INK_RGB), 255], i * 4)
-  px.putImageData(img, 0, 0)
-  const out = document.createElement('canvas'); out.width = w; out.height = h
-  const oc = out.getContext('2d')!
-  oc.imageSmoothingEnabled = false
-  oc.drawImage(pc, 0, 0, w, h)
-  return out
+  return c
 }
 
-/** One ink, clustered-dot screen at 45°, a hair of paper noise. */
-function halftone(tone: HTMLCanvasElement, w: number, h: number, P: Plan, r: () => number) {
+/** a soft draft (Turbo's 6 steps): the picture out of focus, the detail not resolved yet */
+function draft(c: HTMLCanvasElement) {
+  const s = document.createElement('canvas'); s.width = c.width; s.height = c.height
+  s.getContext('2d')!.drawImage(c, 0, 0)
+  const x = c.getContext('2d')!
+  x.filter = `blur(${(Math.min(c.width, c.height) / 110).toFixed(2)}px)`
+  x.drawImage(s, 0, 0)
+  x.filter = 'none'
+  return c
+}
+
+/** One ink, clustered-dot screen at 45°, on Rueca's paper. */
+function halftone(tone: HTMLCanvasElement, P: Plan, r: () => number) {
+  const w = tone.width, h = tone.height
   const s = Math.min(w, h), cell = Math.max(3, s / 96)
-  // sample a softened copy so the paper grain doesn't fray the dot edges
   const soft = document.createElement('canvas'); soft.width = w; soft.height = h
   const sc = soft.getContext('2d', { willReadFrequently: true })!
   sc.filter = `blur(${(cell * 0.45).toFixed(2)}px)`; sc.drawImage(tone, 0, 0)
@@ -136,8 +207,7 @@ function halftone(tone: HTMLCanvasElement, w: number, h: number, P: Plan, r: () 
     for (let x = 0; x < w; x++) {
       const i = (y * w + x) * 4
       let l = (0.2126 * src[i] + 0.7152 * src[i + 1] + 0.0722 * src[i + 2]) / 255
-      l = lift(l, P.night, true)
-      l = Math.min(1, Math.max(0, (l - 0.5) * P.con + 0.5 + (r() - 0.5) * P.residual * 0.5))
+      l = Math.min(1, Math.max(0, (l - 0.5) * P.con * 1.15 + 0.55 + (r() - 0.5) * P.residual * 0.5))
       const u = (x * c + y * sn) / cell, v = (-x * sn + y * c) / cell
       const fu = u - Math.floor(u) - 0.5, fv = v - Math.floor(v) - 0.5
       const ink = fu * fu + fv * fv < (Math.pow(1 - l, 1.1) * 1.1) / Math.PI // dot area = ink coverage
@@ -152,20 +222,21 @@ export function paint(p: GenParams, scale = 1): HTMLCanvasElement {
   const w = Math.max(8, Math.round(p.w * (p.upscale ?? 1) * scale)), h = Math.max(8, Math.round(p.h * (p.upscale ?? 1) * scale))
   const P = interpret(p)
   const r = rngFor(p)
-  const tone = paintTop(w, h, { at: P.at, size: P.size, tilt: P.tilt, key: P.key, night: P.night, grain: P.grain, vignette: P.night ? 0.5 : 0, paper: true, seed: p.seed })
-  if (P.style === 'halftone') return halftone(tone, w, h, P, r)
-  // the grid is set by the nominal size, so a preview, the image and its upscale share one pattern
-  const s = Math.min(w, h), up = p.upscale ?? 1
-  const per = P.style === 'draft' ? 150 : P.style === 'diffusion' ? 380 : 270
-  return diffuse(tone, w, h, Math.max(1, s / (per * up)), P, P.style === 'diffusion' ? 'floyd' : 'atkinson', r)
+  const frame = compose(P, w, h)
+  if (!decoded.has(P.source.url)) return frame
+  if (P.style === 'halftone') return halftone(frame, P, r)
+  if (P.style === 'draft') draft(frame)
+  return grade(frame, P, r)
 }
 
-const STYLE_LABEL: Record<Style, string> = { atkinson: 'atkinson', draft: 'draft dither', diffusion: 'fine diffusion', halftone: 'halftone' }
+const STYLE_LABEL: Record<Style, string> = { clean: 'clean', draft: 'soft draft', film: 'film grade', halftone: 'one-ink halftone' }
 
 /** Short human description of what the "model" saw — shown in details. */
 export function describe(p: GenParams) {
   const pl = interpret(p)
-  const features = [pl.night ? 'night' : 'studio', pl.key < 0 ? 'key left' : 'key right', STYLE_LABEL[pl.style]]
+  const features = [pl.zoom > 1.3 ? 'close-up' : pl.zoom < 0.9 ? 'wide' : 'framed', STYLE_LABEL[pl.style]]
   if (pl.residual > 0.2) features.push('noisy')
-  return { scene: 'spinning top', palette: pl.night ? [INK, PAPER] : [PAPER, INK], features }
+  const dye = pl.source.dye ? AGALLA.inks.find((i) => i.id === pl.source.dye)?.dye : undefined
+  const palette = pl.style === 'halftone' ? [PAPER, INK] : pl.source.subject === 'plate' ? [PAPER, INK] : pl.source.subject === 'bell' ? (pl.source.night ? [INK, DYE.gualda] : [DYE.gualda, INK]) : [dye ?? PAPER, INK]
+  return { scene: pl.source.label, palette, features }
 }

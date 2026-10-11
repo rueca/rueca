@@ -1,3 +1,5 @@
+import '@fontsource/la-belle-aurore/latin-400.css'
+import '@fontsource-variable/ibm-plex-sans'
 import { useEffect, useRef } from 'react'
 import { useStore } from 'zustand'
 import {
@@ -105,7 +107,7 @@ export default function SynthShell() {
     { id: 'unmute', label: 'Unmute and unsolo all', group: 'Mixer', run: () => params.patch(Object.fromEntries(TRACKS.flatMap((t) => [[`${t.id}Mute`, false], [`${t.id}Solo`, false]])) as Partial<V>) },
     ...Object.keys(SOUNDS).map((name) => ({ id: `snd-${name}`, label: `Sound: ${name}`, group: 'Sound', run: () => params.applyPreset(name) })),
     ...TRACKS.map((t) => ({ id: `aud-${t.id}`, label: `Audition ${t.name.toLowerCase()}`, group: 'Sound', run: () => engine.audition(t.id as TrackId) })),
-    { id: 'visual', label: v.visual === 'orbit' ? 'Visual: Horizon' : 'Visual: Orbit', group: 'View', shortcut: 'v', icon: Eye, run: () => params.setValue('visual', params.values().visual === 'orbit' ? 'horizon' : 'orbit') },
+    { id: 'visual', label: v.visual === 'plate' ? 'Visual: Harmonograph' : 'Visual: Chladni plate', group: 'View', shortcut: 'v', icon: Eye, run: () => params.setValue('visual', params.values().visual === 'plate' ? 'harmonograph' : 'plate') },
     { id: 'reset', label: 'Reset everything', group: 'Values', run: () => params.reset() },
   ]
 
@@ -132,7 +134,7 @@ export default function SynthShell() {
       rightWidth={300}
       toolbar={
         <Toolbar
-          start={<Brand name="Synth" doc="Night drive" mark={Mark} />}
+          start={<Brand name="Synth" doc="Plate no. 4" mark={Mark} />}
           center={
             <Cluster className="gap-1 px-1.5">
               <IconButton icon={playing ? Square : Play} label={playing ? 'Stop' : 'Play'} shortcut="space" active={playing} variant={playing ? 'default' : 'ghost'} onClick={() => engine.toggle()} />
@@ -177,7 +179,7 @@ export default function SynthShell() {
             <>
               <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
                 <div className="cluster flex h-8 w-[168px] items-center px-1">
-                  <Segmented size="sm" value={v.visual} onChange={(s) => params.setValue('visual', s)} options={[{ value: 'orbit', label: 'Orbit' }, { value: 'horizon', label: 'Horizon' }]} label="Visual" />
+                  <Segmented size="sm" value={v.visual} onChange={(s) => params.setValue('visual', s)} options={[{ value: 'plate', label: 'Plate' }, { value: 'harmonograph', label: 'Pendulum' }]} label="Visual" />
                 </div>
               </div>
               {/* hidden in QA / thumbnail captures (?qa) — the card would cover the visual */}

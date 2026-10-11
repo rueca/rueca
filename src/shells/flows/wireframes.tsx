@@ -1,12 +1,14 @@
 /* ---------------------------------------------------------------------------
    Mini wireframes — procedural phone screens drawn with SVG primitives, in
-   the wire style (src/demo/wire.ts): one ink on card, hairline fields,
-   image slots as X-boxes, the dithered top for hero pictures. Tones are CSS
-   classes (flows.css) fixed to the wire palette in both themes; pictures are
-   data-URL <image>s painted lazily at render, so they survive the DOM export.
+   the wire style (src/demo/wire.ts): one ink on card, hairline fields, and
+   the Gabinete app's engraved plates as its pictures (src/demo/clients.ts),
+   on Cielo where a screen has its one bright. Tones are CSS classes
+   (flows.css) fixed to Rueca's paper and ink in both themes; pictures are
+   data URLs (src/demo/inline.ts), so they survive the DOM export.
 --------------------------------------------------------------------------- */
 import { memo, useId, type ReactNode } from 'react'
-import { ditherTop, wireImage } from '@/demo/wire'
+import { GABINETE } from '@/demo/clients'
+import { inlineDemo, useInlined } from '@/demo/inline'
 import type { Template } from './model'
 
 export const WF_W = 120
@@ -19,13 +21,18 @@ const Text = (x: number, y: number, w: number, t: Tone = 'wf-3') => R(x, y, w, 3
 const Title = (x: number, y: number, w: number, t: Tone = 'wf-title') => R(x, y, w, 6, t, 2)
 const Field = (x: number, y: number, w: number) => <rect x={x + 0.5} y={y + 0.5} width={w - 1} height={13} rx={3} className="wf-field" />
 const Btn = (x: number, y: number, w: number, t: Tone = 'wf-acc') => R(x, y, w, 14, t, 4)
-/** pictures: painted at 2–3× the viewBox so they stay crisp on the zoomed canvas */
-const Pic = (x: number, y: number, w: number, h: number, href: string) => <image x={x} y={y} width={w} height={h} href={href} preserveAspectRatio="none" />
-/** secondary image / thumbnail → an X-box slot */
-const Img = (x: number, y: number, w: number, h: number, label = '') => Pic(x, y, w, h, wireImage(w * 2, h * 2, label))
-/** hero image → the dithered top (grid keeps the dots big enough to read at node size) */
-const Hero = (x: number, y: number, w: number, h: number, o: { at?: number; size?: number; night?: boolean } = {}) =>
-  Pic(x, y, w, h, ditherTop(w * 3, h * 3, { grid: Math.round(Math.max(w, h) * 0.95), ...o }))
+/** a picture → one of the museum's plates, by index: ink on paper, or on the screen's one bright */
+const PLATES = GABINETE.instruments.map((i) => i.img)
+const Plate = (x: number, y: number, w: number, h: number, i: number, o: { bright?: boolean; pad?: number } = {}) => {
+  const p = o.pad ?? Math.min(w, h) * 0.1
+  return (
+    <g>
+      <rect x={x} y={y} width={w} height={h} className={o.bright ? 'wf-acc' : 'wf-1'} />
+      <image x={x + p} y={y + p} width={w - 2 * p} height={h - 2 * p} href={inlineDemo(PLATES[i % PLATES.length])} preserveAspectRatio="xMidYMid meet" />
+    </g>
+  )
+}
+const Face = (x: number, y: number, w: number, h: number) => <image x={x} y={y} width={w} height={h} href={inlineDemo(GABINETE.people[0].face)} preserveAspectRatio="xMidYMid slice" />
 const TabBar = (active = 0) => (
   <g>
     <rect x="0" y={WF_H - 20} width={WF_W} height="20" className="wf-bar" />
@@ -35,7 +42,7 @@ const TabBar = (active = 0) => (
 )
 const Row = (y: number, thumb = true, trailing?: ReactNode) => (
   <g>
-    {thumb && Img(10, y, 16, 16)}
+    {thumb && Plate(10, y, 16, 16, Math.round(y / 24), { pad: 1 })}
     {Text(thumb ? 32 : 10, y + 3, 44, 'wf-ink')}
     {Text(thumb ? 32 : 10, y + 10, 30)}
     {trailing}
@@ -45,16 +52,15 @@ const Row = (y: number, thumb = true, trailing?: ReactNode) => (
 const screens: Record<Template, (uid: string) => ReactNode> = {
   splash: () => (
     <g>
-      {/* the brand moment: lit top on an ink ground */}
-      {Hero(0, 0, WF_W, WF_H, { night: true, size: 0.55, at: 0.5 })}
-      {Title(38, 168, 44, 'wf-card')}
-      {Text(46, 180, 28, 'wf-2')}
+      {/* the brand moment: the orrery on the one bright */}
+      {Plate(0, 0, WF_W, WF_H, 2, { bright: true, pad: 16 })}
+      {Title(38, 168, 44, 'wf-title')}
+      {Text(46, 180, 28, 'wf-ink')}
     </g>
   ),
   welcome: () => (
     <g>
-      {Hero(10, 18, 100, 92, { size: 0.7 })}
-      <rect x="10.5" y="18.5" width="99" height="91" className="wf-hair" />
+      {Plate(10, 18, 100, 92, 0, { bright: true })}
       {Title(10, 122, 74)}
       {Text(10, 134, 96)}
       {Text(10, 141, 80)}
@@ -107,7 +113,7 @@ const screens: Record<Template, (uid: string) => ReactNode> = {
   ),
   paywall: () => (
     <g>
-      {Img(0, 0, WF_W, 70, 'image · 16:9')}
+      {Plate(0, 0, WF_W, 70, 1, { bright: true, pad: 8 })}
       {Title(30, 80, 60)}
       {Text(18, 92, 84)}
       <rect x="10.5" y="106.5" width="47" height="44" rx="5" className="wf-field wf-field-on" />
@@ -118,15 +124,16 @@ const screens: Record<Template, (uid: string) => ReactNode> = {
       {Text(40, 186, 40)}
     </g>
   ),
-  home: () => (
+  home: (uid) => (
     <g>
       {Title(10, 18, 50)}
-      {Img(96, 15, 12, 12)}
+      <clipPath id={`${uid}-me`}><circle cx="102" cy="21" r="6" /></clipPath>
+      <g clipPath={`url(#${uid}-me)`}>{R(96, 15, 12, 12, 'wf-1', 0)}{Face(96, 15, 12, 12)}</g>
       <rect x="10.5" y="32.5" width="99" height="13" rx="6.5" className="wf-field" />
       {[0, 1, 2].map((i) => <g key={i}>{R(10 + i * 34, 52, 30, 9, i === 0 ? 'wf-acc' : 'wf-1', 4.5)}</g>)}
       {[0, 1, 2, 3].map((i) => (
         <g key={i}>
-          {Img(10 + (i % 2) * 52, 70 + Math.floor(i / 2) * 60, 48, 36, '4:3')}
+          {Plate(10 + (i % 2) * 52, 70 + Math.floor(i / 2) * 60, 48, 36, i + 1, { bright: i === 0, pad: 3 })}
           {Text(10 + (i % 2) * 52, 110 + Math.floor(i / 2) * 60, 36, 'wf-ink')}
           {Text(10 + (i % 2) * 52, 117 + Math.floor(i / 2) * 60, 22)}
         </g>
@@ -143,7 +150,7 @@ const screens: Record<Template, (uid: string) => ReactNode> = {
   ),
   product: () => (
     <g>
-      {Hero(0, 0, WF_W, 96, { size: 0.72, at: 0.5 })}
+      {Plate(0, 0, WF_W, 96, 0, { pad: 8 })}
       <path d={`M0 95.5 H${WF_W}`} className="wf-hair" />
       {Title(10, 106, 70)}
       {R(10, 118, 26, 6, 'wf-acc')}
@@ -233,7 +240,7 @@ const screens: Record<Template, (uid: string) => ReactNode> = {
   profile: (uid) => (
     <g>
       <clipPath id={`${uid}-av`}><circle cx="60" cy="40" r="18" /></clipPath>
-      <g clipPath={`url(#${uid}-av)`}>{Img(42, 22, 36, 36, 'avatar')}</g>
+      <g clipPath={`url(#${uid}-av)`}>{R(42, 22, 36, 36, 'wf-1', 0)}{Face(42, 22, 36, 36)}</g>
       <circle cx="60" cy="40" r="17.5" className="wf-hair" />
       {Title(36, 66, 48)}
       {Text(44, 77, 32)}
@@ -258,6 +265,7 @@ const screens: Record<Template, (uid: string) => ReactNode> = {
 }
 
 export const Wireframe = memo(function Wireframe({ template, className }: { template: Template; className?: string }) {
+  useInlined() // repaint once the plates are data URLs (exports need them inline)
   const draw = screens[template] ?? screens.empty
   const uid = `wf${useId().replace(/[^a-zA-Z0-9]/g, '')}`
   return (

@@ -175,11 +175,11 @@ export function Gallery() {
 }
 
 const IDEAS = [
-  'A spinning top, studio light, seamless paper sweep',
-  'Spinning top at night, one spotlight from above',
-  'Spinning top close-up, hard key light, long shadow',
-  'A spinning top, centred, upright, soft light',
-  'Spinning top, wide, minimal, negative space',
+  'A brass hand bell on saffron paper, studio light',
+  'The bell at night, one spotlight from above',
+  'Close-up of a red wax seal beside an ink bottle',
+  'A bottle of indigo ink on pale blue paper',
+  'Engraving of a telescope, wide, plenty of paper',
 ]
 
 function EmptyState({ favourites, board }: { favourites: boolean; board: boolean }) {

@@ -78,7 +78,7 @@ export const schema = defineSchema({
     volume: p.number(0.8, { min: 0, max: 1, step: 0.01, fmt: db, unit: 'dB', display: 'knob', label: 'Master' }),
   }),
   view: folder('View', {
-    visual: p.select('orbit', [{ value: 'orbit', label: 'Orbit' }, { value: 'horizon', label: 'Horizon' }]),
+    visual: p.select('plate', [{ value: 'plate', label: 'Chladni plate' }, { value: 'harmonograph', label: 'Harmonograph' }]),
   }),
   doc: folder('Pattern', {
     pattern: p.data<Pattern>(DEFAULT_PATTERN, { share: true, validate: validPattern, hint: 'The 16-step pattern: drum velocities, bass velocities and notes.' }),
@@ -97,6 +97,7 @@ export const SOUNDS = {
 
 export const params = createParams(schema, {
   id: 'synth',
+  version: 2, // v2: the Chladni plate / harmonograph visuals; v1's orbit / horizon are gone
   presets: Object.entries(SOUNDS).map(([name, values]) => ({ name, values })),
   presetKeys: [...SOUND_KEYS],
 })

@@ -12,7 +12,8 @@
     "qa": "node scripts/qa.mjs",
     "check": "node scripts/sync.mjs --check && tsc --noEmit && vitest run",
     "test": "vitest run",
-    "thumbs:rail": "node scripts/thumbs-rail.mjs"
+    "thumbs:rail": "node scripts/thumbs-rail.mjs",
+    "thumbs:empty": "node scripts/thumbs-empty.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

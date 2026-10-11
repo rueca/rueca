@@ -8,7 +8,9 @@ import { DIFFUSION, RASTER, type EffectId, type Settings } from './engine'
 export const PALETTES: { name: string; colors: string[] }[] = [
   { name: 'Game Boy', colors: ['#0f380f', '#306230', '#8bac0f', '#9bbc0f'] },
   { name: '1-bit', colors: ['#000000', '#ffffff'] },
-  { name: 'Paper & ink', colors: ['#1c1a19', '#f6f1ea'] },
+  { name: 'Paper & ink', colors: ['#181411', '#f3f1eb'] },
+  { name: 'Gualda on Rubia', colors: ['#5e2219', '#f2c744'] },
+  { name: 'Riso cielo + achiote', colors: ['#f3f1eb', '#5db4e8', '#e8582c'] },
   { name: 'CGA', colors: ['#000000', '#55ffff', '#ff55ff', '#ffffff'] },
   { name: 'Riso blue + pink', colors: ['#f5efe0', '#0078bf', '#ff48b0'] },
   { name: 'Riso teal + orange', colors: ['#f5efe0', '#00838a', '#ff6c2f'] },
@@ -77,19 +79,20 @@ export const LOOKS = [
   look('Macintosh', { effect: 'atkinson', pixel: 2, contrast: 0.2, gamma: 1.3, ...pal('1-bit') }),
   look('CGA', { effect: 'bayer8', pixel: 3, spread: 1, contrast: 0.1, match: 'colour', ...pal('CGA') }),
   look('Newsprint', { effect: 'halftone', cell: 9, angle: 45, gain: 1.05, contrast: 0.15, ...pal('Paper & ink') }),
-  look('Riso', { effect: 'halftone', cell: 13, angle: 15, gain: 1.1, dotColor: 'palette', contrast: 0.1, ...pal('Riso blue + pink') }),
+  look('Riso', { effect: 'halftone', cell: 13, angle: 15, gain: 1.1, dotColor: 'palette', contrast: 0.1, ...pal('Riso cielo + achiote') }),
+  look('Brass', { effect: 'atkinson', pixel: 2, contrast: 0.18, gamma: 1.15, ...pal('Gualda on Rubia') }),
   look('Terminal', { effect: 'ascii', fontSize: 14, swap: true, asciiColor: 'ink', contrast: 0.3, ramp: ' .:-=+*#%@', ...pal('Phosphor') }),
   look('PICO-8', { effect: 'floyd', pixel: 4, strength: 0.75, contrast: 0.08, match: 'colour', ...pal('PICO-8') }),
   look('Big pixels', { effect: 'pixelate', pixel: 12, quantise: false, contrast: 0.05, ...pal('Vapor') }),
 ]
 
-export const params = createParams(schema, { id: 'dither', version: 2, presets: LOOKS as any }) // v2: Atkinson + Paper & ink defaults
+export const params = createParams(schema, { id: 'dither', version: 3, presets: LOOKS as any }) // v3: Rueca's paper & ink, the Campana bell; v2 the wire palette
 export type V = ReturnType<typeof params.values>
 export const settingsOf = (v: V): Settings => v as unknown as Settings
 
 /* ---------- the image (not undoable, not persisted) ---------- */
 export interface ImageState { name: string; w: number; h: number; data: ImageData | null; sample: boolean; url: string | null }
-export const image = createStore<ImageState>(() => ({ name: 'Sample — spinning top.png', w: 1600, h: 1000, data: null, sample: true, url: null }))
+export const image = createStore<ImageState>(() => ({ name: 'Sample — Campana bell.jpg', w: 1600, h: 1067, data: null, sample: true, url: null }))
 
 /* ---------- view state ---------- */
 export const view = createStore<{ split: boolean; pos: number; peek: boolean; grid: boolean; hover: { x: number; y: number; hex: string | null } | null; preview: string | null }>(() => ({

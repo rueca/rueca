@@ -8,6 +8,9 @@
    studio preferences are a kit param schema (model/prefs). T is the Text
    tool, so the theme toggle has no hotkey (it's in ⌘K).
 --------------------------------------------------------------------------- */
+import '@fontsource-variable/newsreader'
+import '@fontsource-variable/ibm-plex-sans'
+import '@fontsource/la-belle-aurore/latin-400.css'
 import { useEffect, useState } from 'react'
 import {
   MousePointer2, Hash, Square, Circle, Type, Hand, MessageCircle, Play, Download, Undo2, Redo2, Sun, Moon, ImageDown, CodeXml,
@@ -59,7 +62,11 @@ export default function CanvasShell() {
   const hasSel = selection.length > 0
 
   // web fonts change text metrics: re-measure once they are ready
-  useEffect(() => { document.fonts?.ready.then(() => { bumpFontEpoch(); S.design.setState({ doc: { ...S.get().doc } }) }) }, [])
+  useEffect(() => {
+    // the demo's faces load on first use; ask for them up front so the first layout measures the real glyphs
+    const wanted = ['400 16px "Newsreader Variable"', '400 16px "IBM Plex Sans Variable"', '600 16px "IBM Plex Sans Variable"', '400 16px "La Belle Aurore"']
+    Promise.allSettled(wanted.map((f) => document.fonts?.load(f))).then(() => document.fonts?.ready).then(() => { bumpFontEpoch(); S.design.setState({ doc: { ...S.get().doc } }) })
+  }, [])
 
   const nudge = (dx: number, dy: number) => () => { if (!inTree()) S.nudge(dx, dy) }
   const small = () => prefs.values().nudgeSmall

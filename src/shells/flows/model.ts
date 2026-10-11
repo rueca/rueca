@@ -1,6 +1,7 @@
 /* Flows — document model, screen templates and the demo content. Pure data. */
 import type { Edge, Node } from '@xyflow/react'
 import { WIRE } from '@/demo/wire'
+import { DYE } from '@/demo/clients'
 import { uid as makeUid } from '../util'
 
 export type Kind = 'screen' | 'decision' | 'terminal' | 'note' | 'section'
@@ -54,11 +55,12 @@ export interface Flow {
 export interface FlowsDoc { flows: Flow[] }
 
 /* ---------------------------------------------------------------- people */
+/** The Gabinete app team (src/demo/clients.ts); avatar hues are Rueca's dyes. */
 export const PEOPLE: Record<string, { name: string; initials: string; hue: string }> = {
-  ana: { name: 'Ana Ruiz', initials: 'AR', hue: '#8b5cf6' },
-  kai: { name: 'Kai Okafor', initials: 'KO', hue: '#f97316' },
-  mei: { name: 'Mei Tanaka', initials: 'MT', hue: '#10b981' },
-  you: { name: 'You', initials: 'Y', hue: '#0ea5e9' },
+  ana: { name: 'Marta Ibáñez', initials: 'MI', hue: DYE.malva },
+  kai: { name: 'Jon Arrieta', initials: 'JA', hue: DYE.achiote },
+  mei: { name: 'Sofía Vega', initials: 'SV', hue: DYE.hoja },
+  you: { name: 'You', initials: 'Y', hue: DYE.cielo },
 }
 
 /* ---------------------------------------------------------------- catalogue */
@@ -96,7 +98,7 @@ export const TRIGGERS: { value: Trigger; label: string }[] = [
 ]
 
 /* Demo content is drawn in the wire palette (src/demo/wire.ts): one ink on
-   paper, hairlines, pink only as the red pen. Swatches are the paper tones. */
+   Rueca's paper, hairlines, Achiote only as the red pen. Swatches are the paper tones. */
 export const STICKY: Record<StickyColor, string> = { pen: WIRE.pen, card: WIRE.card, sheet: WIRE.sheet }
 /** Section fills: paper tones, so every section reads as a sheet on the board. */
 export const SECTION_HUES: string[] = [WIRE.paper, WIRE.card, WIRE.sheet]
@@ -140,29 +142,29 @@ function demoMain(): Flow {
   const S = (id: string, template: Template, name: string, section: string, status: Status = 'ready', notes?: string) =>
     makeNode('screen', { x: 0, y: 0 }, { template, name, section, status, notes }, id)
   const nodes: FlowNode[] = [
-    makeNode('section', { x: 0, y: 0 }, { name: 'Onboarding', hue: WIRE.paper }, 'sec-onb'),
-    makeNode('section', { x: 0, y: 0 }, { name: 'Checkout', hue: WIRE.paper }, 'sec-chk'),
+    makeNode('section', { x: 0, y: 0 }, { name: 'First launch', hue: WIRE.paper }, 'sec-onb'),
+    makeNode('section', { x: 0, y: 0 }, { name: 'Tickets', hue: WIRE.paper }, 'sec-chk'),
     makeNode('terminal', { x: 0, y: 0 }, { name: 'App opened', role: 'start', section: 'sec-onb' }, 'start'),
-    S('splash', 'splash', 'Splash', 'sec-onb', 'shipped', 'Holds for at most 1.2s while the session token refreshes.'),
-    makeNode('decision', { x: 0, y: 0 }, { name: 'Has account?', section: 'sec-onb', status: 'shipped' }, 'd-account'),
-    S('welcome', 'welcome', 'Welcome', 'sec-onb', 'shipped', 'Three-card carousel. Skip is always visible.'),
-    S('signup', 'signup', 'Create account', 'sec-onb', 'ready', 'Email or Apple / Google. Password rules inline, never on submit.'),
-    S('otp', 'otp', 'Verify phone', 'sec-onb', 'ready', 'Auto-fills from SMS on iOS and Android.'),
-    S('perm', 'permissions', 'Notifications', 'sec-onb', 'draft', 'Ask after value is shown, not at launch. Copy still in review.'),
-    S('login', 'login', 'Log in', 'sec-onb', 'shipped'),
-    S('home', 'home', 'Home feed', 'sec-chk', 'shipped', 'Personalised shelves; the first is “Reorder”.'),
-    S('product', 'product', 'Product detail', 'sec-chk', 'ready'),
-    S('cart', 'cart', 'Cart', 'sec-chk', 'ready', 'Free delivery progress bar above the total.'),
-    makeNode('decision', { x: 0, y: 0 }, { name: 'Address saved?', section: 'sec-chk', status: 'ready' }, 'd-address'),
-    S('address', 'address', 'Delivery address', 'sec-chk', 'draft'),
+    S('splash', 'splash', 'Splash', 'sec-onb', 'shipped', 'The orrery on Cielo. Holds for at most 1.2s while the session refreshes.'),
+    makeNode('decision', { x: 0, y: 0 }, { name: 'Member?', section: 'sec-onb', status: 'shipped' }, 'd-account'),
+    S('welcome', 'welcome', 'Welcome', 'sec-onb', 'shipped', 'Three plates, one per room. Skip is always visible.'),
+    S('signup', 'signup', 'Create account', 'sec-onb', 'ready', 'Email or Apple / Google. Members get their discount from the first ticket.'),
+    S('otp', 'otp', 'Verify email', 'sec-onb', 'ready', 'Six-digit code; the link in the email signs in too.'),
+    S('perm', 'permissions', 'Indoor map', 'sec-onb', 'draft', 'Location lights up “you are here” on the floor plan. Copy still in review.'),
+    S('login', 'login', 'Sign in', 'sec-onb', 'shipped'),
+    S('home', 'home', 'On view today', 'sec-chk', 'shipped', 'Plates by room; the first card is today’s featured object.'),
+    S('product', 'product', 'Object', 'sec-chk', 'ready', 'Lettered parts A–D on the plate; tap one to hear about it.'),
+    S('cart', 'cart', 'Choose a visit', 'sec-chk', 'ready', 'Date strip, then half-hour slots. Busy slots shown, not hidden.'),
+    makeNode('decision', { x: 0, y: 0 }, { name: 'Bringing guests?', section: 'sec-chk', status: 'ready' }, 'd-address'),
+    S('address', 'address', 'Who’s coming', 'sec-chk', 'draft'),
     S('payment', 'payment', 'Payment', 'sec-chk', 'ready', 'Apple Pay sheet replaces this screen on iOS.'),
-    S('review', 'review', 'Review order', 'sec-chk', 'draft'),
+    S('review', 'review', 'Review', 'sec-chk', 'draft'),
     makeNode('decision', { x: 0, y: 0 }, { name: 'Payment OK?', section: 'sec-chk', status: 'ready' }, 'd-pay'),
-    S('success', 'success', 'Order confirmed', 'sec-chk', 'draft', 'Show the delivery window and a calendar add.'),
+    S('success', 'success', 'Tickets ready', 'sec-chk', 'draft', 'QR tickets in the wallet, and the room for the first object.'),
     S('failed', 'error', 'Payment failed', 'sec-chk', 'draft'),
-    makeNode('terminal', { x: 0, y: 0 }, { name: 'Order placed', role: 'end', section: 'sec-chk' }, 'end'),
-    makeNode('note', { x: 0, y: 0 }, { name: 'Skip the permission screen on Android 13+ until the first order ships.', color: 'pen', section: 'sec-onb', attach: 'perm' }, 'note-1'),
-    makeNode('note', { x: 0, y: 0 }, { name: 'Retry keeps the cart and the chosen slot for 10 minutes.', color: 'pen', section: 'sec-chk', attach: 'failed' }, 'note-2'),
+    makeNode('terminal', { x: 0, y: 0 }, { name: 'Visit booked', role: 'end', section: 'sec-chk' }, 'end'),
+    makeNode('note', { x: 0, y: 0 }, { name: 'Ask for location at the door, not at first launch: the map is only useful inside.', color: 'pen', section: 'sec-onb', attach: 'perm' }, 'note-1'),
+    makeNode('note', { x: 0, y: 0 }, { name: 'Retry holds the slot for 10 minutes. Sunday mornings sell out.', color: 'pen', section: 'sec-chk', attach: 'failed' }, 'note-2'),
   ]
   const E = (s: string, t: string, trigger: Trigger, label = '', happy = false) => makeEdge(s, t, { trigger, label, happy })
   const edges: FlowEdge[] = [
@@ -174,15 +176,15 @@ function demoMain(): Flow {
     E('signup', 'otp', 'submit', 'Continue', true),
     E('otp', 'perm', 'auto', 'Code verified', true),
     E('perm', 'home', 'tap', 'Allow', true),
-    E('login', 'home', 'submit', 'Log in'),
-    E('home', 'product', 'tap', 'Tap item', true),
-    E('product', 'cart', 'tap', 'Add to cart', true),
-    E('cart', 'd-address', 'tap', 'Checkout', true),
-    E('d-address', 'payment', 'condition', 'Yes', true),
-    E('d-address', 'address', 'condition', 'No'),
+    E('login', 'home', 'submit', 'Sign in'),
+    E('home', 'product', 'tap', 'Tap a plate', true),
+    E('product', 'cart', 'tap', 'Visit', true),
+    E('cart', 'd-address', 'tap', 'Book', true),
+    E('d-address', 'payment', 'condition', 'No', true),
+    E('d-address', 'address', 'condition', 'Yes'),
     E('address', 'payment', 'submit', 'Save'),
     E('payment', 'review', 'tap', 'Continue', true),
-    E('review', 'd-pay', 'submit', 'Place order', true),
+    E('review', 'd-pay', 'submit', 'Pay', true),
     E('d-pay', 'success', 'condition', 'Yes', true),
     E('d-pay', 'failed', 'condition', 'No'),
     E('failed', 'payment', 'back', 'Retry'),
@@ -190,11 +192,11 @@ function demoMain(): Flow {
   ]
   const now = Date.now()
   return {
-    id: 'flow-main', name: 'Onboarding & checkout', owner: 'ana',
-    description: 'First launch to first order for the Harvest grocery app. Happy path is highlighted; branches cover returning users and payment failure.',
+    id: 'flow-main', name: 'First visit', owner: 'ana',
+    description: 'First launch to first ticket in the Gabinete museum app. Happy path is highlighted; branches cover members and payment failure.',
     nodes, edges, updated: now - 1000 * 60 * 42,
     comments: [
-      { id: 'c1', node: 'otp', x: 160, y: -10, author: 'kai', text: 'Can we merge Verify phone into Create account? Two screens feels heavy for a grocery app.', at: now - 1000 * 60 * 60 * 5, replies: [{ id: 'r1', author: 'ana', text: 'Legal needs the phone verified before first delivery. Let’s test inline OTP though.', at: now - 1000 * 60 * 60 * 3 }] },
+      { id: 'c1', node: 'otp', x: 160, y: -10, author: 'kai', text: 'Can we fold Verify email into Create account? Two screens feels heavy for buying a ticket.', at: now - 1000 * 60 * 60 * 5, replies: [{ id: 'r1', author: 'ana', text: 'Members pay less, so we need the email before the price. Let’s test an inline code though.', at: now - 1000 * 60 * 60 * 3 }] },
       { id: 'c2', node: 'failed', x: 160, y: -10, author: 'mei', text: 'Failure copy should say whether the card was charged.', at: now - 1000 * 60 * 50, replies: [] },
     ],
   }
@@ -208,7 +210,7 @@ function demoReset(): Flow {
     makeNode('decision', { x: 0, y: 0 }, { name: 'Account found?', status: 'shipped', section: 'sec-reset' }, 'r-found'),
     makeNode('screen', { x: 0, y: 0 }, { template: 'otp', name: 'Check your inbox', status: 'ready', section: 'sec-reset' }, 'r-code'),
     makeNode('screen', { x: 0, y: 0 }, { template: 'signup', name: 'New password', status: 'ready', section: 'sec-reset' }, 'r-new'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'error', name: 'No account', status: 'draft', notes: 'Never confirm whether an email exists — show the same message.', section: 'sec-reset' }, 'r-none'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'error', name: 'No account', status: 'draft', notes: 'Never confirm whether an email exists. Show the same message either way.', section: 'sec-reset' }, 'r-none'),
     makeNode('screen', { x: 0, y: 0 }, { template: 'success', name: 'Password updated', status: 'ready', section: 'sec-reset' }, 'r-done'),
     makeNode('terminal', { x: 0, y: 0 }, { name: 'Signed in', role: 'end', section: 'sec-reset' }, 'r-end'),
   ]
@@ -221,24 +223,24 @@ function demoReset(): Flow {
     makeEdge('r-new', 'r-done', { trigger: 'submit', label: 'Save', happy: true }),
     makeEdge('r-done', 'r-end', { trigger: 'auto', label: 'After 2s', happy: true }),
   ]
-  return { id: 'flow-reset', name: 'Password reset', owner: 'mei', description: 'Recover access without leaking which emails have accounts.', nodes, edges, comments: [], updated: Date.now() - 1000 * 60 * 60 * 26 }
+  return { id: 'flow-reset', name: 'Password reset', owner: 'mei', description: 'Members recover access without the app leaking which emails have accounts.', nodes, edges, comments: [], updated: Date.now() - 1000 * 60 * 60 * 26 }
 }
 
 function demoUpgrade(): Flow {
   const nodes: FlowNode[] = [
-    makeNode('section', { x: 0, y: 0 }, { name: 'Upsell', hue: WIRE.paper }, 'sec-up'),
-    makeNode('terminal', { x: 0, y: 0 }, { name: 'Tap “Go Plus”', role: 'start', section: 'sec-up' }, 'u-start'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'paywall', name: 'Plans', status: 'ready', section: 'sec-up' }, 'u-plans'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'payment', name: 'Confirm plan', status: 'draft', section: 'sec-up' }, 'u-pay'),
-    makeNode('screen', { x: 0, y: 0 }, { template: 'success', name: 'Welcome to Plus', status: 'draft', section: 'sec-up' }, 'u-ok'),
-    makeNode('note', { x: 0, y: 0 }, { name: 'Annual plan pre-selected? Needs a pricing review first.', color: 'pen', section: 'sec-up', attach: 'u-plans' }, 'u-note'),
+    makeNode('section', { x: 0, y: 0 }, { name: 'Membership', hue: WIRE.paper }, 'sec-up'),
+    makeNode('terminal', { x: 0, y: 0 }, { name: 'Tap “Become a member”', role: 'start', section: 'sec-up' }, 'u-start'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'paywall', name: 'Memberships', status: 'ready', section: 'sec-up' }, 'u-plans'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'payment', name: 'Confirm membership', status: 'draft', section: 'sec-up' }, 'u-pay'),
+    makeNode('screen', { x: 0, y: 0 }, { template: 'success', name: 'Your member card', status: 'draft', section: 'sec-up' }, 'u-ok'),
+    makeNode('note', { x: 0, y: 0 }, { name: 'Family membership pre-selected? Needs a pricing review first.', color: 'pen', section: 'sec-up', attach: 'u-plans' }, 'u-note'),
   ]
   const edges: FlowEdge[] = [
     makeEdge('u-start', 'u-plans', { trigger: 'tap', label: '', happy: true }),
-    makeEdge('u-plans', 'u-pay', { trigger: 'tap', label: 'Choose plan', happy: true }),
-    makeEdge('u-pay', 'u-ok', { trigger: 'submit', label: 'Subscribe', happy: true }),
+    makeEdge('u-plans', 'u-pay', { trigger: 'tap', label: 'Choose', happy: true }),
+    makeEdge('u-pay', 'u-ok', { trigger: 'submit', label: 'Join', happy: true }),
   ]
-  return { id: 'flow-upgrade', name: 'Upgrade to Plus', owner: 'kai', description: 'Subscription upsell from the home feed banner.', nodes, edges, comments: [], updated: Date.now() - 1000 * 60 * 60 * 24 * 3 }
+  return { id: 'flow-upgrade', name: 'Become a member', owner: 'kai', description: 'Membership from the ticket confirmation: free entry for a year, talks, the member evenings.', nodes, edges, comments: [], updated: Date.now() - 1000 * 60 * 60 * 24 * 3 }
 }
 
 export const demoFlows = () => [demoMain(), demoReset(), demoUpgrade()]

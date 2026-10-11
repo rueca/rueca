@@ -79,8 +79,7 @@ export async function loadImage(input: Blob | string, name: string) {
 }
 
 export function loadSample() {
-  const data = paintSample()
-  image.setState({ data, w: data.width, h: data.height, name: 'Sample — spinning top.png', sample: true, url: previewURL(data) })
+  paintSample().then((data) => image.setState({ data, w: data.width, h: data.height, name: 'Sample — Campana bell.jpg', sample: true, url: previewURL(data) }))
 }
 
 /** Start the pipeline; returns a cleanup. Safe to call twice (StrictMode). */

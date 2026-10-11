@@ -10,18 +10,19 @@
    Copy is fitted, not cropped: a long headline shrinks to its line budget,
    and anything that had to give is reported back as an issue.
 
-   Drawn in the wire style (src/demo/wire.ts): the product is a framed
-   placeholder shot — the dithered top on the row's tone — with hairlines in
+   Drawn for Agalla, the demo's ink house (src/demo/clients.ts): the product
+   is the row's bottle, photographed on its own dye, with hairlines in
    place of shadows, and one ink for everything else.
 --------------------------------------------------------------------------- */
-import { WIRE, ditherTop } from '@/demo/wire'
+import { WIRE } from '@/demo/wire'
+import { AGALLA, type Ink } from '@/demo/clients'
 import type { DataRow, SizeSpec, V } from './model'
-import { contrastRatio, luminance } from '@kit'
+import { contrastRatio } from '@kit'
 import { mulberry32 } from '../util'
 
 export const FONTS: Record<string, string> = {
   inter: '"Inter Variable", Inter, system-ui, sans-serif',
-  serif: 'ui-serif, "New York", Georgia, "Times New Roman", serif',
+  serif: '"Newsreader Variable", Newsreader, ui-serif, Georgia, serif',
   rounded: 'ui-rounded, "SF Pro Rounded", system-ui, sans-serif',
   mono: 'ui-monospace, "SF Mono", Menlo, monospace',
 }
@@ -102,88 +103,84 @@ function drawLines(ctx: CanvasRenderingContext2D, f: Fitted, x: number, y: numbe
 }
 
 /* --- procedural pieces --- */
-const MONO = "'Geist Mono Variable', 'Geist Mono', ui-monospace, Menlo, monospace"
 /** width ÷ height of the product shot */
 export const PRODUCT_RATIO = 0.6
-const SHOT = { w: 312, h: 520 } // 156 × 260 dither cells, 2× — exactly PRODUCT_RATIO
 const hex6 = (c: string) => (/^#[0-9a-f]{6}/i.test(c) ? c.slice(0, 7).toUpperCase() : WIRE.sheet)
-const isNight = (tone: string) => luminance(tone) < 0.18
 
-/* The product shot is a data-URL image (ditherTop), decoded once per tone. drawPost is
-   synchronous, so it paints a plain slot until the image is ready and tells listeners. */
+/* The product shot is the row's ink bottle (a photo on its own dye): the ink whose name matches
+   the row, else the one whose dye is nearest the row's colour. drawPost is synchronous, so it
+   paints the plain tone until the photo has decoded, and tells listeners when it has. */
+const dist = (a: string, b: string) => { const [r1, g1, b1] = rgb(a), [r2, g2, b2] = rgb(b); return (r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2 }
+export function inkFor(row: DataRow): Ink {
+  const named = AGALLA.inks.find((i) => i.name.toLowerCase() === row.name.trim().toLowerCase())
+  if (named) return named
+  const tone = hex6(row.color)
+  return AGALLA.inks.reduce((best, i) => (dist(i.dye, tone) < dist(best.dye, tone) ? i : best))
+}
 const shots = new Map<string, HTMLImageElement>()
 const shotListeners = new Set<() => void>()
 export function onShotReady(fn: () => void) { shotListeners.add(fn); return () => { shotListeners.delete(fn) } }
-function shotImage(tone: string) {
-  const night = isNight(tone), key = night ? 'night' : tone
-  let img = shots.get(key)
+function shotImage(url: string) {
+  let img = shots.get(url)
   if (!img) {
     img = new Image()
     img.onload = () => shotListeners.forEach((f) => f())
-    img.src = night ? ditherTop(SHOT.w, SHOT.h, { night: true, at: 0.5 }) : ditherTop(SHOT.w, SHOT.h, { light: tone, at: 0.5 })
-    shots.set(key, img)
+    img.src = url
+    shots.set(url, img)
   }
   return img
 }
 /** decode the product shots for these rows (call before exporting) */
 export const ensureShots = (rows: DataRow[]) =>
-  Promise.all(rows.map((r) => shotImage(hex6(r.color)).decode().catch(() => {}))).then(() => {})
+  Promise.all(rows.map((r) => shotImage(inkFor(r).img).decode().catch(() => {}))).then(() => {})
 
-/** A fruit slice in hairline: rind, flesh line, segment spokes. Filled with the ground so it sits in front. */
+/** A wax seal in hairline: a pooled, lobed edge, the stamp's ring and the house letter.
+    Filled with the ground so it sits in front. (The decor used to be fruit slices.) */
 export function drawSlice(ctx: CanvasRenderingContext2D, x: number, y: number, r: number, ground: string, ink: string, rot: number) {
   ctx.save()
   ctx.lineWidth = Math.max(1, r * 0.035)
-  ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = ground; ctx.fill()
-  ctx.strokeStyle = ink; ctx.globalAlpha = 0.55; ctx.stroke()
-  ctx.globalAlpha = 0.3
-  ctx.beginPath(); ctx.arc(x, y, r * 0.86, 0, Math.PI * 2); ctx.stroke()
-  const n = 9
   ctx.beginPath()
-  for (let i = 0; i < n; i++) {
-    const a = rot + (i * Math.PI * 2) / n
-    ctx.moveTo(x + Math.cos(a) * r * 0.12, y + Math.sin(a) * r * 0.12)
-    ctx.lineTo(x + Math.cos(a) * r * 0.86, y + Math.sin(a) * r * 0.86)
+  const n = 64
+  for (let i = 0; i <= n; i++) {
+    const a = rot + (i / n) * Math.PI * 2
+    const k = 1 + 0.045 * Math.sin(a * 7 + rot * 3) + 0.03 * Math.sin(a * 3 - rot)
+    const px = x + Math.cos(a) * r * k, py = y + Math.sin(a) * r * k
+    if (i) ctx.lineTo(px, py); else ctx.moveTo(px, py)
   }
-  ctx.stroke()
+  ctx.closePath(); ctx.fillStyle = ground; ctx.fill()
+  ctx.strokeStyle = ink; ctx.globalAlpha = 0.55; ctx.stroke()
+  ctx.globalAlpha = 0.32
+  ctx.beginPath(); ctx.arc(x, y, r * 0.72, 0, Math.PI * 2); ctx.stroke()
+  ctx.beginPath(); ctx.arc(x, y, r * 0.64, 0, Math.PI * 2); ctx.stroke()
+  ctx.translate(x, y); ctx.rotate(rot * 0.15 - 0.1)
+  ctx.globalAlpha = 0.5
+  ctx.font = `400 ${r * 0.78}px ${FONTS.serif}`
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  ctx.fillStyle = ink
+  ctx.fillText('A', 0, r * 0.06)
   ctx.restore()
 }
 
-/** The product: a portrait shot slot — dithered top on the row tone, hairline frame, mono caption. */
+/** The product: the bottle photographed on its dye, cropped to a portrait slot, in a hairline frame. */
 function drawProduct(ctx: CanvasRenderingContext2D, cx: number, bottom: number, H: number, row: DataRow, v: V) {
   const W = H * PRODUCT_RATIO, x0 = cx - W / 2, top = bottom - H
-  const tone = hex6(row.color), night = isNight(tone)
-  const ink = night ? v.paper : v.ink
+  const tone = hex6(row.color)
   ctx.save()
-  ctx.fillStyle = night ? WIRE.ink : tone
+  ctx.fillStyle = tone
   ctx.fillRect(x0, top, W, H)
-  const img = shotImage(tone)
+  const img = shotImage(inkFor(row).img)
   if (img.complete && img.naturalWidth) {
-    // crisp dither cells when enlarging; let the browser average them when shrinking (no moiré)
-    const t = ctx.getTransform()
-    ctx.imageSmoothingEnabled = (H * Math.abs(t.d || 1)) / SHOT.h < 1.4
-    ctx.drawImage(img, x0, top, W, H)
-    ctx.imageSmoothingEnabled = true
+    // cover the slot: the photo is square, the slot is portrait, so crop the sides around the bottle
+    const iw = img.naturalWidth, ih = img.naturalHeight
+    const sw = Math.min(iw, ih * PRODUCT_RATIO), sh = sw / PRODUCT_RATIO
+    ctx.drawImage(img, (iw - sw) / 2, (ih - sh) / 2, sw, sh, x0, top, W, H)
   }
   // hairline frame
-  ctx.strokeStyle = night ? v.paper : v.ink
-  ctx.globalAlpha = night ? 0.3 : 0.42
+  ctx.strokeStyle = textOn(tone, v.ink, v.paper)
+  ctx.globalAlpha = 0.28
   const lw = Math.max(1, W * 0.004)
   ctx.lineWidth = lw
   ctx.strokeRect(x0 + lw / 2, top + lw / 2, W - lw, H - lw)
-  // caption, top-left (the badge takes the top-right, front slices the bottom)
-  const fs = W * 0.042
-  ctx.font = `${fs}px ${MONO}`
-  let name = (row.name || 'product').toLowerCase()
-  const max = W * 0.62 // clear of the badge
-  while (name.length > 2 && ctx.measureText(`${name}… · shot`).width > max) name = name.slice(0, -1)
-  const label = `${name !== (row.name || 'product').toLowerCase() ? `${name.trimEnd()}…` : name} · shot`
-  const tw = ctx.measureText(label).width, px = W * 0.05
-  ctx.globalAlpha = 1
-  ctx.fillStyle = night ? WIRE.ink : tone
-  ctx.fillRect(x0 + px - fs * 0.5, top + px - fs * 0.3, tw + fs, fs * 1.8)
-  ctx.fillStyle = ink; ctx.globalAlpha = 0.66
-  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'
-  ctx.fillText(label, x0 + px, top + px + fs * 0.6)
   ctx.restore()
   return { left: x0, right: x0 + W, top, bottom, w: W }
 }
@@ -191,8 +188,8 @@ function drawProduct(ctx: CanvasRenderingContext2D, cx: number, bottom: number, 
 /* --- logo --- */
 function logoWidth(ctx: CanvasRenderingContext2D, v: V, h: number, img: HTMLImageElement | null) {
   if (img) return (img.naturalWidth / Math.max(1, img.naturalHeight)) * h * 1.15
-  ctx.font = `800 ${h * 1.05}px ${FONTS[v.displayFont] ?? FONTS.inter}`
-  const word = ctx.measureText(v.brandName || 'oro').width
+  ctx.font = `${v.displayFont === 'serif' ? 500 : 800} ${h * 1.05}px ${FONTS[v.displayFont] ?? FONTS.inter}`
+  const word = ctx.measureText(v.brandName || 'agalla').width
   return v.logoStyle === 'mark' ? h : v.logoStyle === 'word' ? word : h + h * 0.32 + word
 }
 function drawLogo(ctx: CanvasRenderingContext2D, v: V, x: number, y: number, h: number, color: string, img: HTMLImageElement | null) {
@@ -201,20 +198,23 @@ function drawLogo(ctx: CanvasRenderingContext2D, v: V, x: number, y: number, h: 
   ctx.save()
   let cx = x
   if (v.logoStyle !== 'word') {
-    const r = h / 2
-    ctx.beginPath(); ctx.arc(x + r, y + r, r * 0.8, 0, Math.PI * 2)
-    ctx.strokeStyle = color; ctx.lineWidth = h * 0.2; ctx.stroke()
-    ctx.beginPath(); ctx.arc(x + r + r * 0.56, y + r - r * 0.56, r * 0.26, 0, Math.PI * 2)
+    // the mark: a drop of ink, its highlight left as paper
+    const r = h / 2, cxm = x + r, top = y + h * 0.04, bot = y + h
+    ctx.beginPath()
+    ctx.moveTo(cxm, top)
+    ctx.bezierCurveTo(cxm + r * 0.18, top + h * 0.22, cxm + r * 0.86, top + h * 0.42, cxm + r * 0.86, bot - r * 0.86)
+    ctx.arc(cxm, bot - r * 0.86, r * 0.86, 0, Math.PI)
+    ctx.bezierCurveTo(cxm - r * 0.86, top + h * 0.42, cxm - r * 0.18, top + h * 0.22, cxm, top)
     ctx.fillStyle = color; ctx.fill()
-    cx = x + h + h * 0.32
+    cx = x + h + h * 0.3
   }
   if (v.logoStyle !== 'mark') {
-    ctx.font = `800 ${h * 1.05}px ${FONTS[v.displayFont] ?? FONTS.inter}`
+    ctx.font = `${v.displayFont === 'serif' ? 500 : 800} ${h * 1.05}px ${FONTS[v.displayFont] ?? FONTS.inter}`
     ;(ctx as any).letterSpacing = `${-h * 0.03}px`
     ctx.fillStyle = color
     ctx.textAlign = 'left'
     ctx.textBaseline = 'alphabetic'
-    ctx.fillText(v.brandName || 'oro', cx, y + h * 0.86)
+    ctx.fillText(v.brandName || 'agalla', cx, y + h * 0.86)
     ;(ctx as any).letterSpacing = '0px'
   }
   ctx.restore()
@@ -499,4 +499,7 @@ export function peekImage(src: string | null, onReady?: () => void) {
 
 let fontsReady: Promise<unknown> | null = null
 export const ensureFonts = () =>
-  (fontsReady ??= Promise.all([400, 450, 500, 600, 650, 700, 750, 800, 900].map((wt) => document.fonts.load(`${wt} 40px "Inter Variable"`))).catch(() => {}))
+  (fontsReady ??= Promise.all([
+    ...[400, 450, 500, 600, 650, 700, 750, 800, 900].map((wt) => document.fonts.load(`${wt} 40px "Inter Variable"`)),
+    ...[400, 450, 500].map((wt) => document.fonts.load(`${wt} 40px "Newsreader Variable"`)),
+  ]).catch(() => {}))

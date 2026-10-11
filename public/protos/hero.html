@@ -1,137 +1,85 @@
 <!doctype html>
-<!-- A client's existing landing-page hero. Plain HTML/CSS/JS, no framework.
-     The only addition for the harness is studio-bridge.js + a few lines at the bottom.
-     Drawn in the wire style: one ink on paper, hairlines instead of shadows,
-     images as placeholders (a dithered spinning top, X-box slots). -->
+<!-- A client's existing landing-page hero: Agalla, a house of natural inks (src/demo/clients.ts).
+     Plain HTML/CSS/JS, no framework. The only addition for the harness is studio-bridge.js
+     + a few lines at the bottom. Rueca's Lámina técnica: ink on paper, hairlines instead of
+     shadows, one flat bright (Achiote) for the action, and the product photographed on its dye. -->
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Northwind — hero prototype</title>
+<title>Agalla — hero prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300..500;1,6..72,300..500&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #f6f1ea; --ink: #1c1a19; --accent: #1c1a19; --radius: 18px; --headline-size: 76px; --gap: 28px; --blob-speed: 14; --tilt: 0;
-    --line: color-mix(in srgb, var(--ink) 13%, var(--bg));
-    --sheet: color-mix(in srgb, var(--ink) 7%, var(--bg));
+    --bg: #f3f1eb; --ink: #181411; --accent: #e8582c; --radius: 4px; --headline-size: 80px; --gap: 36px; --blob-speed: 14; --tilt: 0;
+    --line: color-mix(in srgb, var(--ink) 14%, var(--bg));
+    --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    --serif: "Newsreader", Georgia, "Times New Roman", serif;
     --mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
   }
   * { box-sizing: border-box; margin: 0 }
   html, body { height: 100% }
-  body { font-family: Georgia, "Times New Roman", serif; background: var(--bg); color: var(--ink); overflow: hidden }
-  nav { display: flex; justify-content: space-between; align-items: center; padding: 22px 40px; font: 500 14px/1 ui-sans-serif, system-ui, sans-serif; border-bottom: 1px solid var(--line) }
-  nav .logo { display: flex; align-items: center; gap: 9px; font: 700 18px/1 ui-sans-serif, system-ui; letter-spacing: -0.02em }
-  nav .logo i { width: 18px; height: 18px; border: 1.5px solid var(--ink); border-radius: 50% }
-  nav .links { display: flex; gap: 26px; opacity: .62 }
-  nav .cta { background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 999px }
-  main { position: relative; display: grid; grid-template-columns: 1.1fr .9fr; align-items: center; gap: var(--gap); padding: 40px 40px 0; height: calc(100% - 64px) }
-  h1 { font-size: var(--headline-size); line-height: .98; letter-spacing: -0.035em; font-weight: 400 }
+  body { font-family: var(--serif); background: var(--bg); color: var(--ink); overflow: hidden }
+  nav { display: flex; justify-content: space-between; align-items: center; padding: 22px 40px; font: 500 14px/1 var(--sans); border-bottom: 1px solid var(--line) }
+  nav .logo { display: flex; align-items: center; gap: 9px; font: 450 23px/1 var(--serif); letter-spacing: -0.02em }
+  nav .logo svg { width: 15px; height: 19px; fill: var(--ink) }
+  nav .links { display: flex; gap: 26px; opacity: .66 }
+  nav .cta { padding: 10px 16px; border-radius: var(--radius); box-shadow: inset 0 0 0 1px var(--ink); color: var(--ink); text-decoration: none }
+  main { position: relative; display: grid; grid-template-columns: 1.08fr .92fr; align-items: center; gap: var(--gap); padding: 40px 40px 0; height: calc(100% - 64px) }
+  h1 { font-size: var(--headline-size); line-height: .98; letter-spacing: -0.03em; font-weight: 350; text-wrap: balance }
   h1 em { color: var(--accent); font-style: italic }
-  p.lede { margin-top: 22px; max-width: 460px; font: 400 18px/1.5 ui-sans-serif, system-ui; opacity: .68 }
-  .actions { margin-top: 30px; display: flex; gap: 12px; font: 500 15px/1 ui-sans-serif, system-ui }
+  p.lede { margin-top: 22px; max-width: 470px; font: 400 18px/1.55 var(--sans); opacity: .7 }
+  .actions { margin-top: 30px; display: flex; gap: 12px; font: 600 15px/1 var(--sans) }
   .actions a { padding: 15px 22px; border-radius: var(--radius); text-decoration: none }
-  .primary { background: var(--accent); color: var(--bg) }
+  /* on a bright, text is ink (never white) */
+  .primary { background: var(--accent); color: #181411 }
   .secondary { color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink) }
-  .logos { margin-top: 44px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px }
-  .logos small { width: 100%; margin-bottom: 2px; font: 400 11px/1 var(--mono); letter-spacing: .04em; opacity: .5 }
+  /* states: ink deepens on hover, a visible ring on keyboard focus, selection in the brand's paper and ink */
+  .actions a, nav .cta { transition: background-color .15s ease, box-shadow .15s ease }
+  .primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)) }
+  .secondary:hover, nav .cta:hover { background: color-mix(in srgb, var(--ink) 6%, var(--bg)) }
+  a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px }
+  ::selection { background: var(--accent); color: #181411 }
+  @media (prefers-reduced-motion: reduce) { .actions a, nav .cta { transition: none } }
+  .range { margin-top: 44px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px }
+  .range span { display: inline-flex; align-items: center; gap: 7px; font: 500 13px/1 var(--sans) }
+  .range i { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 18%, transparent) }
 
-  /* X-box: an image slot with both diagonals and a centred mono label */
-  .xbox { position: relative; display: grid; place-items: center; background:
-      linear-gradient(to top right, transparent calc(50% - .6px), var(--line) 50%, transparent calc(50% + .6px)),
-      linear-gradient(to bottom right, transparent calc(50% - .6px), var(--line) 50%, transparent calc(50% + .6px)),
-      var(--sheet);
-    box-shadow: inset 0 0 0 1px var(--line); border-radius: 6px }
-  .xbox span { padding: 2px 6px; background: var(--sheet); font: 400 10px/1.2 var(--mono); color: var(--ink); opacity: .62; white-space: nowrap }
-  .logos .xbox { width: 80px; height: 32px }
-
-  .art { position: relative; height: 78%; border-radius: calc(var(--radius) * 2); overflow: hidden; background: var(--bg); transform: rotate(calc(var(--tilt) * 1deg)) }
-  .art canvas { position: absolute; left: 0; top: -4%; width: 100%; height: 108%; image-rendering: pixelated; animation: float calc(var(--blob-speed) * 1s) ease-in-out infinite alternate }
+  .art { position: relative; height: 80%; border-radius: calc(var(--radius) * 2); overflow: hidden; background: #e8582c; transform: rotate(calc(var(--tilt) * 1deg)) }
+  .art img { position: absolute; left: 0; top: -4%; width: 100%; height: 108%; object-fit: cover; object-position: 50% 45%; animation: float calc(var(--blob-speed) * 1s) ease-in-out infinite alternate }
   .art::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--line); pointer-events: none }
-  .card { position: absolute; left: 8%; right: 8%; bottom: 8%; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--radius); background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); font: 400 12px/1.4 var(--mono) }
-  .card .xbox { flex: none; width: 34px; height: 34px; border-radius: 50% }
-  .card .xbox span { display: none }
-  .card b { display: block; font: 600 13px/1.3 ui-sans-serif, system-ui; margin-bottom: 2px }
-  .card em { font-style: normal; opacity: .6 }
+  .card { position: absolute; left: 7%; right: 7%; bottom: 7%; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--radius); background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); font: 400 13px/1.35 var(--sans) }
+  .card i { flex: none; width: 34px; height: 34px; border-radius: 50%; background: #e8582c; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 20%, transparent) }
+  .card b { display: block; font: 600 13px/1.3 var(--sans); margin-bottom: 2px }
+  .card em { font-style: normal; opacity: .62 }
   @keyframes float { from { transform: translateY(1.5%) } to { transform: translateY(-1.5%) } }
-  @media (prefers-reduced-motion: reduce) { .art canvas { animation: none } }
-  @media (max-width: 760px) { main { grid-template-columns: 1fr; padding: 24px } h1 { font-size: calc(var(--headline-size) * .55) } nav .links { display: none } .art { height: 300px } .logos { margin-top: 28px } .logos .xbox:nth-of-type(4) { display: none } }
+  @media (prefers-reduced-motion: reduce) { .art img { animation: none } }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; padding: 24px } h1 { font-size: calc(var(--headline-size) * .55) } nav .links { display: none } .art { height: 320px } .range { margin-top: 28px } }
 </style>
 </head>
 <body>
-  <nav><span class="logo"><i></i>Northwind</span><span class="links"><span>Product</span><span>Pricing</span><span>Journal</span></span><span class="cta">Get started</span></nav>
+  <nav>
+    <span class="logo"><svg viewBox="0 0 15 19" aria-hidden="true"><path d="M7.5 0C8.4 3.6 15 7.4 15 11.6 15 15.7 11.6 19 7.5 19S0 15.7 0 11.6C0 7.4 6.6 3.6 7.5 0Z" /></svg>agalla</span>
+    <span class="links"><span>Inks</span><span>Samples</span><span>Journal</span></span>
+    <a class="cta" href="#">Basket</a>
+  </nav>
   <main>
     <section>
-      <h1 id="headline">Freight that <em>moves</em> like software.</h1>
-      <p class="lede" id="lede">Book, track and settle every shipment in one place — with prices that update as fast as the road does.</p>
-      <div class="actions"><a class="primary" href="#">Start shipping</a><a class="secondary" href="#">Talk to sales</a></div>
-      <div class="logos"><small>TRUSTED BY</small><div class="xbox"><span>logo</span></div><div class="xbox"><span>logo</span></div><div class="xbox"><span>logo</span></div><div class="xbox"><span>logo</span></div></div>
+      <h1 id="headline">Ink that remembers where it came from.</h1>
+      <p class="lede" id="lede">Six natural inks, made in small batches from seeds, beetles, leaves and walnut husks. Each bottle says where its colour grew.</p>
+      <div class="actions"><a class="primary" href="#">Shop the six inks</a><a class="secondary" href="#">Order samples</a></div>
+      <div class="range" aria-label="The six inks">
+        <span><i style="background:#e8582c"></i>Achiote</span><span><i style="background:#ee7a68"></i>Cochinilla</span><span><i style="background:#f2c744"></i>Gualda</span>
+        <span><i style="background:#5db4e8"></i>Añil</span><span><i style="background:#8a5a3a"></i>Nogal</span><span><i style="background:#2fa57c"></i>Hoja</span>
+      </div>
     </section>
-    <div class="art" id="art"><canvas id="top" aria-hidden="true"></canvas><div class="card"><div class="xbox"><span>avatar</span></div><div><b>412 trucks moving right now</b><em>avg. quote 38s</em></div></div></div>
+    <div class="art" id="art">
+      <img src="../demo/agalla/hero.webp" width="1400" height="1750" fetchpriority="high" alt="A bottle of Achiote ink and a red wax seal on a vermilion ground" />
+      <div class="card"><i></i><div><b>Achiote, batch 14</b><em>Annatto seed from Yucatán, steeped for four days. 50 ml.</em></div></div>
+    </div>
   </main>
-
-  <script>
-    /* The hero image as a placeholder: a lit spinning top, Atkinson-dithered to two colours
-       (the page's ink and paper). Same look as ditherTop() in src/demo/wire.ts, inlined because this page has no build. */
-    var wire = (function () {
-      function cv(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c }
-      function hex(s) { s = s.trim(); if (s[0] !== '#') return null; if (s.length === 4) s = '#' + s[1] + s[1] + s[2] + s[2] + s[3] + s[3]; return [parseInt(s.slice(1, 3), 16), parseInt(s.slice(3, 5), 16), parseInt(s.slice(5, 7), 16)] }
-      function lum(c) { return (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]) / 255 }
-      function ditherTop(target, w, h, o) {
-        var night = o.night, at = o.at == null ? 0.5 : o.at, size = o.size || 0.62, grid = o.grid || 260
-        var W = w >= h ? grid : Math.round(grid * w / h), H = w >= h ? Math.round(grid * h / w) : grid
-        var SS = 3, cw = W * SS, ch = H * SS, big = cv(cw, ch), x = big.getContext('2d')
-        var bg = x.createRadialGradient(cw * .4, ch * .32, 0, cw * .5, ch * .5, Math.hypot(cw, ch) * .62)
-        if (night) { bg.addColorStop(0, '#141414'); bg.addColorStop(1, '#0a0a0a') } else { bg.addColorStop(0, '#fbfbfb'); bg.addColorStop(1, '#d4d4d4') }
-        x.fillStyle = bg; x.fillRect(0, 0, cw, ch)
-        var S = Math.min(cw, ch) * size / 32, cx = cw * at, cy = ch * (o.y == null ? .5 : o.y)
-        x.save(); x.filter = 'blur(' + S * 1.5 + 'px)'; x.fillStyle = 'rgba(0,0,0,.5)'
-        x.beginPath(); x.ellipse(cx + S * 3.8, cy + S * 14.6, S * 8.5, S * 1.5, 0, 0, Math.PI * 2); x.fill(); x.restore()
-        x.save(); x.translate(cx, cy); x.rotate(-.2); x.scale(S, S); x.translate(-16, -16)
-        var side = new Path2D('M5.4 11 C5.2 15.2 8.4 19.6 12.2 23.8 C13.8 25.6 15.2 27.2 16 28.8 C16.8 27.2 18.2 25.6 19.8 23.8 C23.6 19.6 26.8 15.2 26.6 11 Z')
-        function lin(x0, x1, stops) { var g = x.createLinearGradient(x0, 0, x1, 0); stops.forEach(function (s) { g.addColorStop(s[0], s[1]) }); return g }
-        x.fillStyle = lin(5.4, 26.6, [[0, '#303030'], [.24, '#8e8e8e'], [.38, '#cfcfcf'], [.66, '#6c6c6c'], [1, '#1e1e1e']]); x.fill(side)
-        var g2 = x.createLinearGradient(0, 11, 0, 28.8); g2.addColorStop(0, 'rgba(0,0,0,0)'); g2.addColorStop(1, 'rgba(0,0,0,.5)'); x.fillStyle = g2; x.fill(side)
-        x.save(); x.clip(side)
-        x.beginPath(); x.ellipse(16, 13.1, 10.6, 2.8, 0, 0, Math.PI); x.ellipse(16, 15.6, 10, 2.6, 0, Math.PI, 0, true); x.closePath()
-        x.fillStyle = lin(5.4, 26.6, [[0, '#101010'], [.36, '#474747'], [1, '#0a0a0a']]); x.fill(); x.restore()
-        var g4 = x.createRadialGradient(12.5, 10, .3, 16, 11, 11); g4.addColorStop(0, '#d4d4d4'); g4.addColorStop(1, '#7a7a7a')
-        x.fillStyle = g4; x.beginPath(); x.ellipse(16, 11, 10.6, 2.8, 0, 0, Math.PI * 2); x.fill()
-        x.strokeStyle = '#4c4c4c'; x.lineWidth = .25; x.stroke()
-        x.fillStyle = lin(15, 17, [[0, '#1c1c1c'], [.45, '#bdbdbd'], [1, '#141414']]); x.beginPath(); x.moveTo(15.1, 28.1); x.lineTo(16.9, 28.1); x.lineTo(16, 31); x.closePath(); x.fill()
-        x.fillStyle = 'rgba(0,0,0,.35)'; x.beginPath(); x.ellipse(16.6, 11.2, 2.2, .7, 0, 0, Math.PI * 2); x.fill()
-        x.fillStyle = lin(14.6, 17.4, [[0, '#262626'], [.42, '#a8a8a8'], [1, '#1a1a1a']]); x.beginPath(); x.roundRect(14.6, 3.6, 2.8, 7.6, [1.4, 1.4, .4, .4]); x.fill()
-        x.restore()
-        // downsample → luminance → Atkinson error diffusion
-        target.width = W; target.height = H
-        var t = target.getContext('2d'); t.imageSmoothingQuality = 'high'; t.drawImage(big, 0, 0, W, H)
-        var img = t.getImageData(0, 0, W, H), d = img.data, L = new Float32Array(W * H), i
-        for (i = 0; i < W * H; i++) { var v = (0.2126 * d[i * 4] + 0.7152 * d[i * 4 + 1] + 0.0722 * d[i * 4 + 2]) / 255; L[i] = Math.min(1, Math.max(0, (v - .5) * 1.12 + .52)) * (night ? 1.08 : 1) }
-        var N = [[1, 0], [2, 0], [-1, 1], [0, 1], [1, 1], [0, 2]], ground = o.ground, dots = o.dots
-        for (var yy = 0; yy < H; yy++) for (var xx = 0; xx < W; xx++) {
-          i = yy * W + xx; var on = L[i] < .5 ? 0 : 1, e = (L[i] - on) / 8
-          var col = night ? (on ? dots : ground) : (on ? ground : dots)
-          d[i * 4] = col[0]; d[i * 4 + 1] = col[1]; d[i * 4 + 2] = col[2]; d[i * 4 + 3] = 255
-          for (var k = 0; k < 6; k++) { var X = xx + N[k][0], Y = yy + N[k][1]; if (X >= 0 && X < W && Y < H) L[Y * W + X] += e }
-        }
-        t.putImageData(img, 0, 0)
-      }
-      return { ditherTop: ditherTop, hex: hex, lum: lum }
-    })()
-
-    var art = document.getElementById('art'), top_ = document.getElementById('top'), key = '', timer = 0
-    function paintArt() {
-      var cs = getComputedStyle(document.documentElement)
-      var bg = wire.hex(cs.getPropertyValue('--bg')) || [246, 241, 234], ink = wire.hex(cs.getPropertyValue('--ink')) || [28, 26, 25]
-      var night = wire.lum(bg) < wire.lum(ink)
-      var w = art.clientWidth, h = Math.round(art.clientHeight * 1.08), k = [w, h, bg, ink].join('|')
-      if (!w || !h || k === key) return
-      key = k
-      // ground = the page's paper, dots = its ink (swapped on a dark page: lit top on ink ground)
-      wire.ditherTop(top_, w, h, { night: night, ground: bg, dots: ink, at: .5, y: .41, size: w < h ? .8 : .64, grid: w < h ? 320 : 260 })
-    }
-    function schedule() { clearTimeout(timer); timer = setTimeout(paintArt, 60) }
-    new ResizeObserver(schedule).observe(art)
-    paintArt()
-  </script>
 
   <!-- the harness hook-up -->
   <script src="../studio-bridge.js"></script>
@@ -140,7 +88,6 @@
     studio.on(function (v) {
       if (v.headline != null) document.getElementById('headline').innerHTML = v.headline.replace(/\*(.+?)\*/g, '<em>$1</em>')
       if (v.lede != null) document.getElementById('lede').textContent = v.lede
-      schedule() // colours feed the dithered art
     })
   </script>
 </body>

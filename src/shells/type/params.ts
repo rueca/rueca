@@ -26,32 +26,33 @@ export const FORMATS: Record<string, { w: number; h: number; label: string }> = 
 }
 
 export const PAIRS: { name: string; fg: string; bg: string }[] = [
-  { name: 'Ink on paper', fg: '#15130f', bg: '#f3efe6' },
-  { name: 'Paper on ink', fg: '#f3efe6', bg: '#15130f' },
-  { name: 'Signal', fg: '#ff4b1f', bg: '#fff3ea' },
-  { name: 'Night lab', fg: '#c8ff3d', bg: '#0e1410' },
-  { name: 'Ultramarine', fg: '#e9ecff', bg: '#2430d6' },
-  { name: 'Blush', fg: '#5a1631', bg: '#ffd9e2' },
+  // Rueca's palette: ink on paper, and the brights with ink on them (never white on a bright)
+  { name: 'Ink on paper', fg: '#181411', bg: '#f3f1eb' },
+  { name: 'Paper on ink', fg: '#f3f1eb', bg: '#181411' },
+  { name: 'Achiote', fg: '#181411', bg: '#e8582c' },
+  { name: 'Gualda on Rubia', fg: '#f2c744', bg: '#5e2219' },
+  { name: 'Cielo', fg: '#181411', bg: '#5db4e8' },
+  { name: 'Malva', fg: '#181411', bg: '#a88bf6' },
 ]
 
 export const schema = defineSchema({
   /* ---------- Specimen ---------- */
   font: folder('Font', {
-    family: p.select('inter', Object.values(FAMILIES).map((f) => ({ value: f.id, label: f.label })), { hint: 'Compare the variable Inter against system faces. Axes it lacks are simulated or disabled.' }),
-    text: p.text('Quiet systems\nmake loud ideas.', { multiline: true, hint: 'Also editable directly on the artboard — click the headline and type.' }),
+    family: p.select('newsreader', Object.values(FAMILIES).map((f) => ({ value: f.id, label: f.label })), { hint: 'Compare the variable Newsreader and Inter against system faces. Axes a face lacks are simulated or disabled.' }),
+    text: p.text('The sky in\nyour hand.', { multiline: true, hint: 'Also editable directly on the artboard — click the headline and type.' }),
   }),
   axes: folder('Axes', {
-    wght: p.number(640, { min: 100, max: 900, step: 1, label: 'Weight', hint: 'wght axis. Inter is continuous from 100 to 900; static faces snap to the nearest weight.' }),
-    autoOpsz: p.boolean(false, { label: 'Auto optical', hint: 'Tie optical size to font size, the way font-optical-sizing: auto does.', when: (v) => v.family === 'inter' }),
-    opsz: p.number(32, { min: 14, max: 32, step: 0.5, label: 'Optical size', hint: 'opsz axis. Display cuts (32) tighten spacing and sharpen joins; text cuts (14) open up for small sizes.', when: (v) => v.family === 'inter' && !v.autoOpsz }),
+    wght: p.number(400, { min: 100, max: 900, step: 1, label: 'Weight', hint: 'wght axis. Newsreader runs 200–800 and Inter 100–900; static faces snap to the nearest weight.' }),
+    autoOpsz: p.boolean(false, { label: 'Auto optical', hint: 'Tie optical size to font size, the way font-optical-sizing: auto does.', when: (v) => !!FAMILIES[v.family]?.axes.opsz }),
+    opsz: p.number(72, { min: 6, max: 72, step: 0.5, label: 'Optical size', hint: 'opsz axis. Display cuts tighten spacing and sharpen hairlines; text cuts open up for small sizes. Newsreader runs 6–72, Inter 14–32 (clamped).', when: (v) => !!FAMILIES[v.family]?.axes.opsz && !v.autoOpsz }),
     width: p.number(100, { min: 70, max: 130, step: 1, unit: '%', label: 'Width', hint: 'Simulated — none of these faces has a wdth axis, so this scales horizontally.' }),
     slant: p.number(0, { min: 0, max: 15, step: 0.5, unit: '°', label: 'Slant', hint: 'Simulated oblique by skewing. Use Italic for a true italic.' }),
-    italic: p.boolean(false, { label: 'Italic', hint: 'True italic where the family ships one (Inter, Georgia); synthesised otherwise.' }),
+    italic: p.boolean(false, { label: 'Italic', hint: 'True italic where the family ships one (Newsreader, Inter, Georgia); synthesised otherwise.' }),
   }),
   setting: folder('Typesetting', {
-    size: p.number(148, { min: 12, max: 320, step: 1, unit: 'px', label: 'Size' }),
-    leading: p.number(0.98, { min: 0.7, max: 2, step: 0.01, label: 'Leading', fmt: (n) => `${n.toFixed(2)}×`, hint: 'Line height as a multiple of the size.' }),
-    tracking: p.number(-0.035, { min: -0.12, max: 0.3, step: 0.001, label: 'Tracking', fmt: (n) => `${(n * 100).toFixed(1)}%`, hint: 'Letter spacing in em, shown as a percentage of the size.' }),
+    size: p.number(156, { min: 12, max: 320, step: 1, unit: 'px', label: 'Size' }),
+    leading: p.number(1, { min: 0.7, max: 2, step: 0.01, label: 'Leading', fmt: (n) => `${n.toFixed(2)}×`, hint: 'Line height as a multiple of the size.' }),
+    tracking: p.number(-0.025, { min: -0.12, max: 0.3, step: 0.001, label: 'Tracking', fmt: (n) => `${(n * 100).toFixed(1)}%`, hint: 'Letter spacing in em, shown as a percentage of the size.' }),
     textCase: p.select('none', [
       { value: 'none', label: 'Aa', hint: 'As typed' },
       { value: 'upper', label: 'AA', hint: 'Uppercase' },
@@ -73,7 +74,7 @@ export const schema = defineSchema({
 
   /* ---------- Kinetic ---------- */
   kinetic: folder('Kinetic text', {
-    ktext: p.text('Kinetic', { maxLength: 24, label: 'Text', hint: 'One line, up to 24 letters — each letter gets its own lane.' }),
+    ktext: p.text('Campana', { maxLength: 24, label: 'Text', hint: 'One line, up to 24 letters — each letter gets its own lane.' }),
     effect: p.select('cascade', [
       { value: 'wave', icon: Waves, hint: 'Wave — a travelling sine, seamless loop' },
       { value: 'cascade', icon: ArrowDownToLine, hint: 'Cascade — letters drop in' },
@@ -103,8 +104,8 @@ export const schema = defineSchema({
   }),
 
   colour: folder('Colour', {
-    fg: p.color('#15130f', { label: 'Text', alpha: false }),
-    bg: p.color('#f3efe6', { label: 'Paper', alpha: false }),
+    fg: p.color('#181411', { label: 'Text', alpha: false }),
+    bg: p.color('#f3f1eb', { label: 'Paper', alpha: false }),
     contrast: p.monitor(() => contrastLabel(), { label: 'Contrast', hint: 'WCAG 2 contrast ratio of text on paper.' }),
   }),
 
@@ -139,17 +140,18 @@ export const schema = defineSchema({
     previewVw: p.number(1200, { min: 320, max: 1920, step: 10, unit: 'px', label: 'Preview at', hint: 'Artboard width — sizes resolve at this viewport.', when: (v) => v.fluidOn }),
   }, { collapsed: true }),
   sample: folder('Preview', {
-    sampleText: p.text('Grids give rhythm; type gives voice.', { label: 'Sample' }),
+    sampleText: p.text('Cast in bronze and rung once before it leaves the foundry.', { label: 'Sample' }),
   }, { collapsed: true }),
 })
 
 export const params = createParams(schema, {
   id: 'type',
+  version: 2, // v2: Newsreader and Rueca's palette; v1 was Inter on generic pairs
   presets: [
-    { name: 'Editorial serif', values: { family: 'georgia', wght: 400, size: 132, leading: 1.04, tracking: -0.02, fg: '#1d1a16', bg: '#f6f1e7', italic: true } },
-    { name: 'Swiss poster', values: { family: 'inter', wght: 820, size: 196, leading: 0.9, tracking: -0.05, textCase: 'none', fg: '#ff4b1f', bg: '#fff3ea', format: 'poster' } },
-    { name: 'Hairline', values: { family: 'inter', wght: 120, size: 168, leading: 1.02, tracking: -0.01, fg: '#e9ecff', bg: '#2430d6' } },
-    { name: 'Terminal', values: { family: 'mono', wght: 500, size: 92, leading: 1.2, tracking: 0, textCase: 'upper', fg: '#c8ff3d', bg: '#0e1410' } },
+    { name: 'Editorial serif', values: { family: 'newsreader', wght: 340, opsz: 72, size: 140, leading: 1.02, tracking: -0.02, fg: '#181411', bg: '#f3f1eb', italic: true } },
+    { name: 'Swiss poster', values: { family: 'inter', wght: 820, size: 196, leading: 0.9, tracking: -0.05, textCase: 'none', fg: '#181411', bg: '#e8582c', format: 'poster' } },
+    { name: 'Hairline', values: { family: 'inter', wght: 120, size: 168, leading: 1.02, tracking: -0.01, fg: '#f2c744', bg: '#5e2219' } },
+    { name: 'Terminal', values: { family: 'mono', wght: 500, size: 92, leading: 1.2, tracking: 0, textCase: 'upper', fg: '#5db4e8', bg: '#181411' } },
   ],
 })
 export type V = ReturnType<typeof params.values>
@@ -160,7 +162,7 @@ function contrastLabel() {
   return `${r.toFixed(2)}:1 · ${wcagGrade(r)}`
 }
 
-export const family = (v: V) => FAMILIES[v.family] ?? FAMILIES.inter
+export const family = (v: V) => FAMILIES[v.family] ?? FAMILIES.newsreader
 
 /** Kinetic clock — duration follows the animation maths. */
 export const clock = createClock({ duration: kineticDuration(params.values()), loop: true })

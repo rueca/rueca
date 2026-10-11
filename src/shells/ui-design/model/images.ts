@@ -1,32 +1,37 @@
 /* ---------------------------------------------------------------------------
-   Demo imagery, in the wire style (src/demo/wire.ts). No network: every
-   picture in the demo file is painted once, cached as a data URL and referenced
-   by key from image fills (`image: 'ridge'`). Uploaded images are data URLs.
-   The keys are historical (the file used to be painted landscapes); the
-   pictures are now placeholders — the dithered top for heroes, labelled slots
-   for everything else.
+   Demo imagery. Image fills reference pictures by key (`image: 'astrolabe'`):
+   the Gabinete plates are files in public/demo/gabinete (engravings, Nogal ink
+   on transparent, src/demo/clients.ts); the wire slots are painted once and
+   cached as data URLs (src/demo/wire.ts). Uploaded images are data URLs.
 --------------------------------------------------------------------------- */
-import { WIRE, blankSheet, ditherTop, wireImage } from '@/demo/wire'
+import { WIRE, blankSheet, wireImage } from '@/demo/wire'
+import { GABINETE } from '@/demo/clients'
 
 const cache = new Map<string, string>()
 const imgCache = new Map<string, HTMLImageElement>()
 
+const plates = Object.fromEntries(GABINETE.instruments.map((i) => [i.id, () => i.img]))
+const faces = Object.fromEntries(GABINETE.people.map((p) => [p.id, () => p.face]))
+
 const painters: Record<string, () => string> = {
-  ridge: () => ditherTop(720, 480, { at: 0.72, size: 0.56 }), // card hero: top sits right, clear of the title
-  top: () => ditherTop(720, 480),
-  lake: () => ditherTop(720, 480, { night: true, light: '#E9E1D6' }),
-  forest: () => wireImage(240, 240, 'image · 1:1'),
-  coast: () => wireImage(240, 240, 'image · 1:1', { fill: WIRE.card }),
-  dunes: () => blankSheet(720, 480, 'image', '3:2'),
+  ...plates,
+  ...faces,
+  slot: () => wireImage(240, 240, 'image · 1:1'),
+  card: () => wireImage(240, 240, 'image · 1:1', { fill: WIRE.card }),
+  sheet: () => blankSheet(720, 480, 'image', '3:2'),
   avatar: () => wireImage(160, 160, 'avatar'),
 }
 
-export const IMAGE_LABELS: Record<string, string> = { ridge: 'Top · card', top: 'Top · dithered', lake: 'Top · night', forest: 'Slot · 1:1', coast: 'Slot · card', dunes: 'Blank sheet · 3:2', avatar: 'Avatar slot' }
+export const IMAGE_LABELS: Record<string, string> = {
+  ...Object.fromEntries(GABINETE.instruments.map((i) => [i.id, `${i.name} · plate`])),
+  ...Object.fromEntries(GABINETE.people.map((p) => [p.id, `${p.name.split(' ')[0]} · portrait`])),
+  slot: 'Slot · 1:1', card: 'Slot · card', sheet: 'Blank sheet · 3:2', avatar: 'Avatar slot',
+}
 
-/** data URL for a key, or the value itself when it is already a URL */
+/** URL for a key, or the value itself when it is already a URL */
 export function imageURL(key?: string): string {
   if (!key) return ''
-  if (key.startsWith('data:') || key.startsWith('blob:')) return key
+  if (key.startsWith('data:') || key.startsWith('blob:') || key.startsWith('/') || key.startsWith('http')) return key
   let url = cache.get(key)
   if (!url && painters[key]) { url = painters[key](); cache.set(key, url) }
   return url ?? ''

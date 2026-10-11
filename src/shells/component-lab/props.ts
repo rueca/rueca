@@ -17,8 +17,8 @@ export const buttonSchema = defineSchema({
       { hint: 'Force an interaction state. Live = the real :hover / :focus / :active.', display: 'dropdown' }),
   }),
   content: folder('Content', {
-    label: p.text('Continue', { maxLength: 40 }),
-    icon: p.select('trailing', [{ value: 'none', label: 'None' }, { value: 'leading', label: 'Start' }, { value: 'trailing', label: 'End' }, { value: 'only', label: 'Only' }], { label: 'Icon' }),
+    label: p.text('Book a visit', { maxLength: 40 }),
+    icon: p.select('none', [{ value: 'none', label: 'None' }, { value: 'leading', label: 'Start' }, { value: 'trailing', label: 'End' }, { value: 'only', label: 'Only' }], { label: 'Icon' }),
     iconName: p.select('arrow-right', [
       { value: 'arrow-right', label: 'Arrow right', icon: ArrowRight }, { value: 'plus', label: 'Plus', icon: Plus },
       { value: 'download', label: 'Download', icon: Download }, { value: 'sparkles', label: 'Sparkles', icon: Sparkles }, { value: 'check', label: 'Check', icon: Check },
@@ -38,10 +38,10 @@ export const inputSchema = defineSchema({
     inputState: p.select('default', [{ value: 'default', label: 'Live' }, { value: 'hover', label: 'Hover' }, { value: 'focus', label: 'Focus' }, { value: 'error', label: 'Error' }], { label: 'State', display: 'dropdown', hint: 'Force a state. Live = real hover and focus.' }),
   }),
   content: folder('Content', {
-    fieldLabel: p.text('Work email', { label: 'Label' }),
-    placeholder: p.text('you@company.com'),
+    fieldLabel: p.text('Email for your tickets', { label: 'Label' }),
+    placeholder: p.text('you@example.com'),
     value: p.text(''),
-    helper: p.text('We’ll send a magic link — no password needed.', { label: 'Help text' }),
+    helper: p.text('Your tickets arrive here. No account needed.', { label: 'Help text' }),
     errorText: p.text('That doesn’t look like an email address.', { label: 'Error text', when: (v) => v.inputState === 'error' }),
     inputIcon: p.select('mail', [{ value: 'none', label: 'None', icon: Ban }, { value: 'mail', label: 'Mail', icon: Mail }, { value: 'search', label: 'Search', icon: Search }, { value: 'lock', label: 'Lock', icon: Lock }], { label: 'Icon' }),
   }),
@@ -60,28 +60,28 @@ export const cardSchema = defineSchema({
   }),
   content: folder('Content', {
     media: p.boolean(true),
-    badge: p.boolean(true, { label: 'New badge' }),
-    eyebrow: p.text('Case study'),
-    title: p.text('Shipping a design system in six weeks'),
-    body: p.text('How a four-person team replaced 140 one-off buttons with nine components — and what we would do differently.', { multiline: true }),
+    badge: p.boolean(false, { label: 'New badge' }),
+    eyebrow: p.text(''),
+    title: p.text('How to read an astrolabe'),
+    body: p.text('Turn the rete to the hour and it tells you the time, the date, and how high any star will climb tonight.', { multiline: true }),
     actions: p.select('two', [{ value: 'none', label: 'None' }, { value: 'one', label: 'One' }, { value: 'two', label: 'Two' }], { label: 'Actions' }),
   }),
 })
 
 export const buttonProps = createParams(buttonSchema, { id: 'component-lab-button', presets: [
   { name: 'Default', values: {} },
-  { name: 'Call to action', values: { variant: 'primary', size: 'lg', label: 'Start free trial', icon: 'trailing', iconName: 'arrow-right' } },
+  { name: 'Call to action', values: { variant: 'primary', size: 'lg', label: 'Become a member', icon: 'trailing', iconName: 'arrow-right' } },
   { name: 'Toolbar', values: { variant: 'ghost', size: 'sm', icon: 'only', iconName: 'plus', label: 'Add' } },
-  { name: 'Danger zone', values: { variant: 'destructive', label: 'Delete project', icon: 'none' } },
+  { name: 'Danger zone', values: { variant: 'destructive', label: 'Cancel booking', icon: 'none' } },
 ] })
 export const inputProps = createParams(inputSchema, { id: 'component-lab-input', presets: [
   { name: 'Default', values: {} },
-  { name: 'Search', values: { fieldLabel: '', placeholder: 'Search components…', helper: '', inputIcon: 'search', inputVariant: 'filled', required: false } },
-  { name: 'Validation error', values: { inputState: 'error', value: 'priya@', helper: '' } },
+  { name: 'Search', values: { fieldLabel: '', placeholder: 'Search instruments…', helper: '', inputIcon: 'search', inputVariant: 'filled', required: false } },
+  { name: 'Validation error', values: { inputState: 'error', value: 'ines@', helper: '' } },
 ] })
 export const cardProps = createParams(cardSchema, { id: 'component-lab-card', presets: [
   { name: 'Default', values: {} },
-  { name: 'Feature', values: { layout: 'horizontal', cardVariant: 'outline', eyebrow: 'Launch', title: 'Tokens that travel from Figma to code', badge: false } },
+  { name: 'Feature', values: { layout: 'horizontal', cardVariant: 'outline', eyebrow: 'New room', title: 'The navigation room opens on Saturday', badge: false } },
   { name: 'Text only', values: { media: false, actions: 'one', cardVariant: 'filled', badge: false, eyebrow: 'Note' } },
 ] })
 
@@ -153,7 +153,7 @@ export function jsxFor(id: CompId): string {
   if (v.eyebrow || v.badge) lines.push(`    <Card.Eyebrow>${v.eyebrow}${v.badge ? ' <Badge>New</Badge>' : ''}</Card.Eyebrow>`)
   lines.push(`    <Card.Title>${v.title}</Card.Title>`, `    <Card.Text>${v.body}</Card.Text>`)
   if (v.actions !== 'none') {
-    lines.push('    <Card.Actions>', '      <Button variant="primary">Read story</Button>')
+    lines.push('    <Card.Actions>', '      <Button variant="primary">Play the audio guide</Button>')
     if (v.actions === 'two') lines.push('      <Button variant="ghost">Save</Button>')
     lines.push('    </Card.Actions>')
   }

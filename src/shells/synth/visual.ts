@@ -30,170 +30,144 @@ export function triggerIndex(d: Float32Array, span: number) {
   return 0
 }
 
-function hash(n: number) { const x = Math.sin(n * 127.1) * 43758.5453; return x - Math.floor(x) }
+/* The stage is drawn the way the 18th century drew sound (brand/prototypes/DIRECTION.md):
+   ink on Rueca's paper, the four tracks as the only colour. Two plates:
+     plate          Chladni figures: sand on a bowed brass plate gathers on the lines that don't move.
+                    The bass note picks the mode; the kick scatters the sand; the rest settles it.
+     harmonograph   a pendulum drawing: two swings at the ratio of the bass intervals,
+                    decaying, restarted by each kick. */
+const PAPER = '#F3F1EB', INK = '#181411', MUTE = '#6E6A64', LINE = '#DCD7CE'
+const SANS = '"IBM Plex Sans Variable", "Inter Variable", system-ui, sans-serif'
+const HAND = '"La Belle Aurore", cursive'
 
 export function drawStage(ctx: CanvasRenderingContext2D, f: StageFrame) {
-  if (f.style === 'horizon') return drawHorizon(ctx, f)
-  const { w, h, env } = f
-  const cx = w / 2, cy = h / 2
-  const R = Math.min(w, h) * 0.2 * (1 + env.kick * 0.1)
-  const glowHue = 255 + Math.log2(f.cutoff / 620) * 18
-
-  // background: deep, tinted by the bass and the filter
-  const bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.75)
-  bg.addColorStop(0, `hsl(${glowHue}, 60%, ${8 + env.bass * 8 + env.kick * 5}%)`)
-  bg.addColorStop(1, '#07070a')
-  ctx.fillStyle = bg
-  ctx.fillRect(0, 0, w, h)
-
-  const idle = !f.started
-  const breath = 0.5 + 0.5 * Math.sin(f.t * 1.4)
-
-  // spectrum petals
-  const bars = 96
-  if (f.freq || idle) {
-    for (let i = 0; i < bars; i++) {
-      const a = (i / bars) * TAU - Math.PI / 2
-      let m: number
-      if (f.freq && !idle) {
-        const bin = Math.floor(Math.pow(i / bars, 2) * f.freq.length * 0.5) + 2
-        m = f.freq[bin] / 255
-      } else m = 0.12 + 0.08 * Math.sin(i * 0.5 + f.t * 2) * breath
-      const r0 = R * 1.72, r1 = r0 + m * R * 0.9
-      ctx.strokeStyle = `hsla(${glowHue + i * 1.2}, 90%, ${55 + m * 25}%, ${0.25 + m * 0.6})`
-      ctx.lineWidth = Math.max(1.5, (TAU * r0) / bars - 2.5)
-      ctx.lineCap = 'round'
-      ctx.beginPath()
-      ctx.moveTo(cx + Math.cos(a) * r0, cy + Math.sin(a) * r0)
-      ctx.lineTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1)
-      ctx.stroke()
-    }
-  }
-
-  // snare: expanding shock ring
-  if (env.snare > 0.01) {
-    const k = 1 - env.snare
-    ctx.strokeStyle = `rgba(255, 210, 90, ${env.snare * 0.7})`
-    ctx.lineWidth = 2 + env.snare * 6
-    ctx.beginPath(); ctx.arc(cx, cy, R * (1.25 + k * 1.6), 0, TAU); ctx.stroke()
-  }
-
-  // kick: core
-  const core = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.95)
-  core.addColorStop(0, `rgba(255, 120, 80, ${0.12 + env.kick * 0.55})`)
-  core.addColorStop(1, 'rgba(255, 90, 54, 0)')
-  ctx.fillStyle = core
-  ctx.beginPath(); ctx.arc(cx, cy, R * 0.95, 0, TAU); ctx.fill()
-
-  // circular oscilloscope
-  ctx.lineWidth = 2
-  ctx.strokeStyle = `rgba(232, 236, 255, ${idle ? 0.35 : 0.9})`
-  ctx.beginPath()
-  const N = 512
-  const d = f.scope
-  const start = d && !idle ? triggerIndex(d, N) : 0
-  for (let i = 0; i <= N; i++) {
-    const a = (i / N) * TAU - Math.PI / 2
-    const s = d && !idle ? d[start + (i % N)] ?? 0 : Math.sin(i / N * TAU * 3 + f.t * 2) * 0.05 * breath
-    const r = R * (1 + s * 0.55)
-    const x = cx + Math.cos(a) * r, y = cy + Math.sin(a) * r
-    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)
-  }
-  ctx.closePath()
-  ctx.stroke()
-
-  // 16 step beads, lit by the pattern, playhead bright
-  for (let i = 0; i < STEPS; i++) {
-    const a = (i / STEPS) * TAU - Math.PI / 2
-    const rr = R * 1.42
-    const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr
-    let top: TrackId | null = null, vel = 0
-    for (const id of ['bass', 'hat', 'snare', 'kick'] as TrackId[]) if (f.pattern[id][i] > 0 && f.pattern[id][i] >= vel * 0.7) { top = id; vel = Math.max(vel, f.pattern[id][i]) }
-    const on = i === f.step
-    ctx.beginPath()
-    ctx.arc(x, y, (on ? 5.5 : 3) + vel * 2.5, 0, TAU)
-    ctx.fillStyle = top ? COL[top] : 'rgba(255,255,255,0.14)'
-    ctx.globalAlpha = on ? 1 : top ? 0.45 + vel * 0.4 : 1
-    ctx.fill()
-    if (on) { ctx.globalAlpha = 0.25; ctx.beginPath(); ctx.arc(x, y, 14, 0, TAU); ctx.fill() }
-    ctx.globalAlpha = 1
-  }
-
-  // hats: sparks scattered around the ring
-  if (env.hat > 0.02) {
-    const seed = Math.floor(f.t * 20)
-    for (let k = 0; k < 14; k++) {
-      const a = hash(seed + k) * TAU, rr = R * (1.9 + hash(seed * 3 + k) * 0.9)
-      ctx.fillStyle = `rgba(61, 220, 255, ${env.hat * (0.4 + hash(k + seed) * 0.6)})`
-      ctx.fillRect(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, 2, 2)
-    }
-  }
+  ctx.fillStyle = PAPER
+  ctx.fillRect(0, 0, f.w, f.h)
+  if (f.style === 'harmonograph') drawHarmonograph(ctx, f)
+  else drawPlate(ctx, f)
 }
 
-function drawHorizon(ctx: CanvasRenderingContext2D, f: StageFrame) {
-  const { w, h, env } = f
-  const hy = h * 0.58
-  const sky = ctx.createLinearGradient(0, 0, 0, hy)
-  sky.addColorStop(0, '#07060f')
-  sky.addColorStop(1, `hsl(${290 - env.bass * 30}, 70%, ${14 + env.kick * 10}%)`)
-  ctx.fillStyle = sky
-  ctx.fillRect(0, 0, w, hy)
-  ctx.fillStyle = '#07060c'
-  ctx.fillRect(0, hy, w, h - hy)
+/* --- Chladni plate --- */
+/** Mode pairs (n, m) of a square plate, simplest first; the bass note walks them. */
+const MODES: [number, number][] = [[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5], [1, 5], [3, 5], [4, 5], [2, 7], [1, 6], [4, 7]]
+const chladni = (n: number, m: number, x: number, y: number) =>
+  Math.cos(n * Math.PI * x) * Math.cos(m * Math.PI * y) - Math.cos(m * Math.PI * x) * Math.cos(n * Math.PI * y)
+const SAND = 7000
+let sx: Float32Array | null = null, sy: Float32Array | null = null
+let modeFrom = 0, modeTo = 0, modeAt = 0, lastT = 0
 
-  // sun
-  const sr = Math.min(w, h) * 0.2 * (1 + env.kick * 0.08)
-  const sun = ctx.createLinearGradient(0, hy - sr * 2, 0, hy)
-  sun.addColorStop(0, '#ffd36b'); sun.addColorStop(1, '#ff3d7f')
-  ctx.save()
-  ctx.beginPath(); ctx.arc(w / 2, hy, sr, Math.PI, 0); ctx.clip()
-  ctx.fillStyle = sun; ctx.fillRect(w / 2 - sr, hy - sr, sr * 2, sr)
-  ctx.fillStyle = '#07060f'
-  for (let k = 0; k < 7; k++) { const y = hy - sr * 0.08 - k * sr * 0.13; ctx.fillRect(w / 2 - sr, y, sr * 2, 2 + (6 - k) * 0.9 + env.snare * 3) }
-  ctx.restore()
-
-  // spectrum ridge
-  const d = f.freq
-  ctx.beginPath()
-  ctx.moveTo(0, hy)
-  const N = 128
-  for (let i = 0; i <= N; i++) {
-    const x = (i / N) * w
-    const mirror = Math.abs(i / N - 0.5) * 2
-    const bin = Math.floor(Math.pow(mirror, 1.8) * (d ? d.length * 0.45 : 1)) + 2
-    const m = d && f.started ? d[bin] / 255 : 0.1 + 0.05 * Math.sin(i * 0.4 + f.t)
-    ctx.lineTo(x, hy - m * h * 0.22 * (0.4 + mirror))
-  }
-  ctx.lineTo(w, hy); ctx.closePath()
-  ctx.fillStyle = 'rgba(176, 124, 255, 0.28)'; ctx.fill()
-  ctx.strokeStyle = `rgba(214, 190, 255, ${0.6 + env.bass * 0.4})`; ctx.lineWidth = 1.5; ctx.stroke()
-
-  // floor grid, scrolling with the tempo
-  const speed = (f.bpm / 60) * 0.5
-  ctx.strokeStyle = `rgba(255, 61, 127, ${0.35 + env.kick * 0.4})`
-  ctx.lineWidth = 1
-  for (let k = 0; k < 18; k++) {
-    const z = ((k + (f.playing ? (f.t * speed) % 1 : 0)) / 18)
-    const y = hy + Math.pow(z, 2.2) * (h - hy)
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke()
-  }
-  for (let k = -12; k <= 12; k++) {
-    ctx.beginPath(); ctx.moveTo(w / 2 + k * 6, hy); ctx.lineTo(w / 2 + k * w * 0.12, h); ctx.stroke()
-  }
-  // hats twinkle
-  if (env.hat > 0.02) for (let k = 0; k < 24; k++) {
-    ctx.fillStyle = `rgba(61, 220, 255, ${env.hat * hash(k + Math.floor(f.t * 16))})`
-    ctx.fillRect(hash(k * 7.7) * w, hash(k * 3.3) * hy * 0.7, 2, 2)
-  }
-  // step strip along the horizon
-  for (let i = 0; i < STEPS; i++) {
-    const x = w * 0.2 + (i / (STEPS - 1)) * w * 0.6
-    ctx.fillStyle = i === f.step ? '#ffffff' : 'rgba(255,255,255,0.18)'
-    ctx.fillRect(x - 6, h - 22, 12, i === f.step ? 4 : 2)
-  }
+function modeFor(f: StageFrame) {
+  if (!f.started || !f.playing) return (Math.floor(f.t / 6) + 4) % MODES.length // idle: a new figure every few seconds, from (3, 4)
+  // the bass note of the current bar picks the figure
+  const bar = Math.floor(f.step / 4) * 4
+  let note = 36
+  for (let i = bar; i < bar + 4; i++) if (f.pattern.bass[i] > 0) { note = f.pattern.notes[i]; break }
+  return ((note % 12) + Math.floor(f.step / 8)) % MODES.length
 }
 
-/* ---------------- chrome instruments ---------------- */
+function drawPlate(ctx: CanvasRenderingContext2D, f: StageFrame) {
+  const { w, h, env } = f
+  const S = Math.min(w, h) * 0.66, x0 = (w - S) / 2, y0 = (h - S) / 2 - h * 0.02
+  const want = modeFor(f)
+  if (!sx || !sy) {
+    // first frame: scatter the sand and let it settle on the opening figure, so the plate never opens as noise
+    sx = new Float32Array(SAND); sy = new Float32Array(SAND)
+    modeFrom = modeTo = want
+    const [n, m] = MODES[want]
+    for (let i = 0; i < SAND; i++) {
+      let x = Math.random(), y = Math.random()
+      for (let k = 0; k < 420; k++) {
+        const hop = Math.abs(chladni(n, m, x, y)) * 0.05 + 0.0002 * Math.random()
+        x = Math.min(1, Math.max(0, x + (Math.random() - 0.5) * hop)); y = Math.min(1, Math.max(0, y + (Math.random() - 0.5) * hop))
+      }
+      sx[i] = x; sy[i] = y
+    }
+  }
+  if (want !== modeTo) { modeFrom = modeTo; modeTo = want; modeAt = f.t }
+  const k = Math.min(1, (f.t - modeAt) / 0.6) // cross-fade the figure over 0.6s
+  const [n0, m0] = MODES[modeFrom], [n1, m1] = MODES[modeTo]
+  const field = (x: number, y: number) => chladni(n0, m0, x, y) * (1 - k) + chladni(n1, m1, x, y) * k
+  const dt = Math.min(0.05, Math.max(0.001, f.t - lastT)); lastT = f.t
+  // each grain hops in proportion to how hard its spot vibrates; the kick shakes everything
+  const shake = 0.0004 + env.kick * 0.022 + env.snare * 0.006
+  for (let sub = 0; sub < 3; sub++)
+    for (let i = 0; i < SAND; i++) {
+      const a = Math.abs(field(sx[i], sy[i]))
+      const hop = (a * 0.06 + shake * Math.random()) * (dt * 30) // linear in the vibration: grains drift until they find a line that's still
+      sx[i] += (Math.random() - 0.5) * hop
+      sy[i] += (Math.random() - 0.5) * hop
+      if (sx[i] < 0 || sx[i] > 1 || sy[i] < 0 || sy[i] > 1) { sx[i] = Math.random(); sy[i] = Math.random() }
+    }
+
+  // the plate: a brass square in hairline, its clamp at the centre
+  ctx.strokeStyle = INK; ctx.globalAlpha = 0.5; ctx.lineWidth = 1
+  ctx.strokeRect(x0 - 0.5, y0 - 0.5, S + 1, S + 1)
+  ctx.globalAlpha = 0.18; ctx.strokeRect(x0 - 6.5, y0 - 6.5, S + 13, S + 13)
+  ctx.globalAlpha = 1
+  // the sand
+  ctx.fillStyle = INK
+  const g = Math.max(1, S / 520)
+  for (let i = 0; i < SAND; i++) ctx.fillRect(x0 + sx[i] * S - g / 2, y0 + sy[i] * S - g / 2, g, g)
+  ctx.beginPath(); ctx.arc(x0 + S / 2, y0 + S / 2, Math.max(2.5, S * 0.008), 0, TAU); ctx.fill()
+
+  // the four tracks: one dye mark per corner, filled as the track sounds
+  const ids: TrackId[] = ['kick', 'snare', 'hat', 'bass']
+  ids.forEach((id, i) => {
+    const cx = i % 2 ? x0 + S + 18 : x0 - 18, cy = i < 2 ? y0 - 18 : y0 + S + 18
+    ctx.beginPath(); ctx.arc(cx, cy, 6, 0, TAU)
+    ctx.fillStyle = COL[id]; ctx.globalAlpha = 0.18 + env[id] * 0.82; ctx.fill()
+    ctx.globalAlpha = 0.5; ctx.strokeStyle = INK; ctx.lineWidth = 0.75; ctx.stroke()
+  })
+  ctx.globalAlpha = 1
+
+  // the plate's caption, engraved small; the mode in the red pen
+  const fs = Math.max(10, S * 0.03)
+  ctx.font = `500 ${fs}px ${SANS}`; ctx.fillStyle = MUTE; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic'
+  ctx.fillText(`Fig. ${modeTo + 1} · ${f.started ? `${Math.round(f.bpm)} bpm` : 'click to start'}`, x0, y0 + S + fs * 3)
+  ctx.font = `${fs * 1.5}px ${HAND}`; ctx.fillStyle = COL.kick; ctx.textAlign = 'right'
+  ctx.fillText(`n = ${n1}, m = ${m1}`, x0 + S, y0 + S + fs * 3.1)
+}
+
+/* --- harmonograph --- */
+let swingAt = 0, lastKick = 0
+function drawHarmonograph(ctx: CanvasRenderingContext2D, f: StageFrame) {
+  const { w, h, env } = f
+  const S = Math.min(w, h) * 0.34, cx = w / 2, cy = h / 2 - h * 0.02
+  if (env.kick > 0.7 && lastKick <= 0.7) swingAt = f.t // a kick restarts the swing
+  lastKick = env.kick
+  // frequencies from the bass: the current note against the root, as a ratio near a simple fraction
+  const bar = Math.floor(f.step / 4) * 4
+  let rel = 7
+  if (f.started) for (let i = bar; i < bar + 4; i++) if (f.pattern.bass[i] > 0) { rel = ((f.pattern.notes[i] - 36) % 12 + 12) % 12 || 7; break }
+  const ratio = Math.pow(2, rel / 12)
+  const f1 = 2, f2 = 2 * ratio, decay = 0.0016 + (1 - Math.min(1, f.cutoff / 6000)) * 0.002
+  const age = f.started ? f.t - swingAt : (f.t % 12)
+  const ph = age * 0.35 + env.snare * 0.6
+  ctx.strokeStyle = INK; ctx.lineWidth = 0.7; ctx.globalAlpha = 0.85
+  ctx.beginPath()
+  const N = 2600
+  for (let i = 0; i <= N; i++) {
+    const t = i * 0.045
+    const d = Math.exp(-decay * i)
+    const x = cx + S * d * (Math.sin(f1 * t + ph) * 0.62 + Math.sin(f2 * t * 1.003) * 0.38)
+    const y = cy + S * d * (Math.sin(f2 * t + Math.PI / 2) * 0.62 + Math.sin(f1 * t * 0.997 + ph * 0.5) * 0.38)
+    if (i) ctx.lineTo(x, y); else ctx.moveTo(x, y)
+  }
+  ctx.stroke(); ctx.globalAlpha = 1
+  // the hat ticks round the rim like a dial; the bass a dye ring
+  ctx.strokeStyle = LINE; ctx.lineWidth = 1
+  ctx.beginPath(); ctx.arc(cx, cy, S * 1.12, 0, TAU); ctx.stroke()
+  for (let i = 0; i < STEPS; i++) {
+    const a = (i / STEPS) * TAU - Math.PI / 2, on = f.started && i === f.step
+    ctx.strokeStyle = on ? COL.hat : INK; ctx.globalAlpha = on ? 1 : 0.35; ctx.lineWidth = on ? 2 : 1
+    ctx.beginPath(); ctx.moveTo(cx + Math.cos(a) * S * 1.12, cy + Math.sin(a) * S * 1.12); ctx.lineTo(cx + Math.cos(a) * S * (1.12 + (i % 4 ? 0.04 : 0.08)), cy + Math.sin(a) * S * (1.12 + (i % 4 ? 0.04 : 0.08))); ctx.stroke()
+  }
+  ctx.globalAlpha = 0.25 + env.bass * 0.75; ctx.strokeStyle = COL.bass; ctx.lineWidth = 2
+  ctx.beginPath(); ctx.arc(cx, cy, S * 1.2, 0, TAU); ctx.stroke(); ctx.globalAlpha = 1
+  const fs = Math.max(10, S * 0.06)
+  ctx.font = `500 ${fs}px ${SANS}`; ctx.fillStyle = MUTE; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'
+  ctx.fillText(f.started ? `${f1} : ${f2.toFixed(2)}` : 'click to start', cx, cy + S * 1.2 + fs * 2.4)
+}
 
 export interface Ink { line: string; accent: string; faint: string; well: string }
 

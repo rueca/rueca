@@ -12,6 +12,9 @@ import type { Box, Node, Page, TextStyle } from './types'
 
 export const FONTS: { value: string; label: string; css: string }[] = [
   { value: 'Inter', label: 'Inter', css: '"Inter Variable", Inter, system-ui, sans-serif' },
+  { value: 'IBM Plex Sans', label: 'IBM Plex Sans', css: '"IBM Plex Sans Variable", "IBM Plex Sans", system-ui, sans-serif' },
+  { value: 'Newsreader', label: 'Newsreader', css: '"Newsreader Variable", Newsreader, Georgia, serif' },
+  { value: 'La Belle Aurore', label: 'La Belle Aurore', css: '"La Belle Aurore", cursive' },
   { value: 'SF Pro', label: 'SF Pro', css: '-apple-system, system-ui, "Segoe UI", sans-serif' },
   { value: 'Helvetica Neue', label: 'Helvetica Neue', css: '"Helvetica Neue", Helvetica, Arial, sans-serif' },
   { value: 'Georgia', label: 'Georgia', css: 'Georgia, "Times New Roman", serif' },

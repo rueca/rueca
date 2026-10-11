@@ -9,10 +9,10 @@ export const STEPS = 16
 
 /** Identity colours — used by the stage visual and echoed as legend dots. */
 export const TRACKS: { id: TrackId; name: string; short: string; color: string }[] = [
-  { id: 'kick', name: 'Kick', short: 'KCK', color: '#ff5a36' },
-  { id: 'snare', name: 'Snare', short: 'SNR', color: '#ffc53d' },
-  { id: 'hat', name: 'Hat', short: 'HAT', color: '#3ddcff' },
-  { id: 'bass', name: 'Bass', short: 'BSS', color: '#b07cff' },
+  { id: 'kick', name: 'Kick', short: 'KCK', color: '#E8582C' }, // Rueca's dyes: Achiote
+  { id: 'snare', name: 'Snare', short: 'SNR', color: '#F2C744' }, // Gualda
+  { id: 'hat', name: 'Hat', short: 'HAT', color: '#5DB4E8' }, // Cielo
+  { id: 'bass', name: 'Bass', short: 'BSS', color: '#A88BF6' }, // Malva
 ]
 
 export interface Pattern {

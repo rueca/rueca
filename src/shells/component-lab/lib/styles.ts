@@ -95,7 +95,7 @@ export const LIB_CSS = /* css */ `
 .cl-card[data-layout="horizontal"] { flex-direction: row; }
 @container (min-width: 520px) { .cl-card[data-layout="auto"] { flex-direction: row; } .cl-card[data-layout="auto"] .cl-media { width: 42%; aspect-ratio: auto; min-height: 220px; } }
 .cl-card[data-layout="horizontal"] .cl-media { width: 42%; aspect-ratio: auto; min-height: 200px; }
-.cl-media { position: relative; aspect-ratio: 16 / 9; flex: none; overflow: hidden; background: var(--cl-surface-2) var(--cl-media-day) center / cover no-repeat; image-rendering: pixelated; }
+.cl-media { position: relative; aspect-ratio: 16 / 9; flex: none; overflow: hidden; background: #5DB4E8 var(--cl-media-day) center / auto 86% no-repeat; }
 .cl-root[data-theme="dark"] .cl-media { background-image: var(--cl-media-night); }
 .cl-media::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 calc(var(--cl-border-w) * -1) 0 0 var(--cl-border); pointer-events: none; }
 .cl-card[data-layout="horizontal"] .cl-media::after { box-shadow: inset calc(var(--cl-border-w) * -1) 0 0 0 var(--cl-border); }

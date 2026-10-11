@@ -5,11 +5,11 @@ import { FAMILIES, FAMILY, mulberry32, sampleParams, type FamilyId } from './fam
 
 export const settingsSchema = defineSchema({
   brand: folder('Brand', {
-    name: p.text('Mentee', { label: 'Wordmark', hint: 'Set beside the mark in lockups and in the browser-tab preview.' }),
-    initials: p.text('MT', { maxLength: 3, hint: 'Letters for the monogram family — up to three.' }),
-    ink: p.color('#272727', { alpha: false }),
-    paper: p.color('#EFEEE8', { alpha: false }),
-    accent: p.color('#E4572E', { alpha: false, hint: 'Used sparingly: orbit planets, grid accents, bloom cores.' }),
+    name: p.text('Agalla', { label: 'Wordmark', hint: 'Set beside the mark in lockups and in the browser-tab preview.' }),
+    initials: p.text('AG', { maxLength: 3, hint: 'Letters for the monogram family — up to three.' }),
+    ink: p.color('#181411', { alpha: false }),
+    paper: p.color('#F3F1EB', { alpha: false }),
+    accent: p.color('#E8582C', { alpha: false, hint: 'Used sparingly: orbit planets, grid accents, bloom cores.' }),
   }),
   explore: folder('Explore', {
     families: p.multi(FAMILIES.map((f) => f.id), FAMILIES.map((f) => ({ value: f.id, label: f.name, icon: f.icon })), { min: 1, label: 'Families', hint: 'Which families a reroll draws from.' }),
@@ -31,10 +31,12 @@ export const settingsSchema = defineSchema({
 
 export const settings = createParams(settingsSchema, {
   id: 'marks',
+  version: 2, // v2: the demo's clients (src/demo/clients.ts); v1 was "Mentee"
   presets: [
-    { name: 'Mentee', values: { name: 'Mentee', initials: 'MT', ink: '#272727', paper: '#EFEEE8', accent: '#E4572E' } },
-    { name: 'Night', values: { ink: '#F1EFE8', paper: '#16181D', accent: '#7DD3FC' } },
-    { name: 'Forest', values: { name: 'Fernhill', initials: 'FH', ink: '#1F3B2D', paper: '#F4F1E6', accent: '#D9A441' } },
+    { name: 'Agalla', values: { name: 'Agalla', initials: 'AG', ink: '#181411', paper: '#F3F1EB', accent: '#E8582C' } },
+    { name: 'Night', values: { ink: '#F3F1EB', paper: '#181411', accent: '#F06A3E' } },
+    { name: 'Gabinete', values: { name: 'Gabinete', initials: 'G', ink: '#181411', paper: '#F3F1EB', accent: '#5DB4E8' } },
+    { name: 'Campana', values: { name: 'Campana', initials: 'C', ink: '#F3F1EB', paper: '#5E2219', accent: '#F2C744' } },
   ],
 })
 export type SV = ReturnType<typeof settings.values>

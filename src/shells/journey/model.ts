@@ -1,9 +1,10 @@
-/* Journey — document model and demo content (Harvest meal kits). Pure data. */
+/* Journey — document model and demo content (Gabinete, a museum of scientific instruments: src/demo/clients.ts). Pure data. */
 import {
   Footprints, MonitorSmartphone, MessageSquareQuote, HeartPulse, TriangleAlert, Lightbulb, Users,
   Smartphone, Globe, Mail, Bell, Store, Headphones, Megaphone, Package, MessageSquare, type LucideIcon,
 } from 'lucide-react'
 import { uid as makeUid } from '../util'
+import { DYE, GABINETE } from '@/demo/clients'
 
 export type LaneId = 'actions' | 'touchpoints' | 'thoughts' | 'emotion' | 'pains' | 'opps' | 'owner'
 export type Channel = 'app' | 'web' | 'email' | 'push' | 'store' | 'support' | 'social' | 'packaging' | 'sms'
@@ -25,8 +26,9 @@ export const CHANNELS: Record<Channel, { label: string; icon: LucideIcon }> = {
   social: { label: 'Social', icon: Megaphone }, packaging: { label: 'Packaging', icon: Package }, sms: { label: 'SMS', icon: MessageSquare },
 }
 
+/** The museum's teams; swatches are Rueca's dyes. */
 export const TEAMS: Record<string, string> = {
-  'Growth marketing': '#f97316', 'Web': '#0ea5e9', 'Product — app': '#8b5cf6', 'Lifecycle CRM': '#ec4899', 'Ops & logistics': '#14b8a6', 'Support': '#eab308',
+  'Marketing': DYE.achiote, 'Web': DYE.cielo, 'App team': DYE.malva, 'Membership': DYE.cochinilla, 'Front of house': DYE.hoja, 'Learning': DYE.gualda,
 }
 
 export interface Card {
@@ -45,6 +47,8 @@ export interface Card {
 export interface Stage { id: string; name: string; goal: string; duration: string; emotion: number; feeling: string }
 export interface Persona {
   id: string; name: string; role: string; age: number; hue: string; quote: string
+  /** portrait (an engraved medallion, ink on transparent); the wire avatar slot stands in without one */
+  photo?: string
   goals: string[]; frustrations: string[]; scenario: string
   stages: Stage[]; cards: Card[]
 }
@@ -52,13 +56,13 @@ export interface JourneyDoc { title: string; personas: Persona[] }
 
 export const uid = (p = 'c') => makeUid(p)
 export const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?'
-export const PERSONA_HUES = ['#8b5cf6', '#f97316', '#14b8a6', '#ec4899', '#0ea5e9', '#84cc16']
+export const PERSONA_HUES: string[] = [DYE.cielo, DYE.gualda, DYE.cochinilla, DYE.malva, DYE.hoja, DYE.achiote]
 
 export const emoji = (v: number) => (v >= 1.5 ? '😄' : v >= 0.5 ? '🙂' : v > -0.5 ? '😐' : v > -1.5 ? '🙁' : '😣')
 export const fmtEmotion = (v: number) => (v > 0 ? `+${v}` : v < 0 ? `−${Math.abs(v)}` : '0')
 
 /* ------------------------------------------------------------------ demo */
-const STAGE_NAMES = ['Discover', 'Consider', 'Purchase', 'Onboard', 'Use', 'Advocate']
+const STAGE_NAMES = ['Discover', 'Plan', 'Arrive', 'Explore', 'Leave', 'Return']
 
 type Row = [LaneId, number, string, string[]?, Partial<Card>?]
 function build(prefix: string, stages: Omit<Stage, 'id'>[], rows: Row[], links: [string, string][] = []): { stages: Stage[]; cards: Card[] } {
@@ -71,150 +75,144 @@ function build(prefix: string, stages: Omit<Stage, 'id'>[], rows: Row[], links: 
   return { stages: st, cards }
 }
 
-function maya(): Persona {
-  const { stages, cards } = build('m', [
-    { name: STAGE_NAMES[0], goal: 'Notice Harvest exists and why it is different.', duration: 'Week −2', emotion: 0.5, feeling: 'Curious' },
-    { name: STAGE_NAMES[1], goal: 'Decide whether it fits the family budget and schedule.', duration: 'Week −1', emotion: -0.5, feeling: 'Sceptical' },
-    { name: STAGE_NAMES[2], goal: 'Choose a plan and the first box with no surprises.', duration: 'Day 0', emotion: -1, feeling: 'Anxious' },
-    { name: STAGE_NAMES[3], goal: 'Get the first box and cook the first meal.', duration: 'Days 1–4', emotion: -1.5, feeling: 'Overwhelmed' },
-    { name: STAGE_NAMES[4], goal: 'Make Harvest part of the weekly routine.', duration: 'Weeks 2–6', emotion: 1, feeling: 'In control' },
-    { name: STAGE_NAMES[5], goal: 'Recommend Harvest to other parents.', duration: 'Week 6+', emotion: 1.5, feeling: 'Proud' },
+const [INES, TOMAS, RUTH] = GABINETE.people
+
+function ines(): Persona {
+  const { stages, cards } = build('i', [
+    { name: STAGE_NAMES[0], goal: 'Find a trip that fits the science syllabus.', duration: '6 weeks before', emotion: 0.5, feeling: 'Hopeful' },
+    { name: STAGE_NAMES[1], goal: 'Book 28 pupils and two helpers in one go.', duration: '4 weeks before', emotion: -1, feeling: 'Stretched' },
+    { name: STAGE_NAMES[2], goal: 'Get the class through the door and counted.', duration: 'Day · 9:40', emotion: -0.5, feeling: 'On edge' },
+    { name: STAGE_NAMES[3], goal: 'Keep thirty children curious for ninety minutes.', duration: 'Day · 10:00', emotion: 1.5, feeling: 'Delighted' },
+    { name: STAGE_NAMES[4], goal: 'Leave on time, nobody left behind.', duration: 'Day · 11:30', emotion: 0.5, feeling: 'Relieved' },
+    { name: STAGE_NAMES[5], goal: 'Bring next year’s class back.', duration: 'Next term', emotion: 1, feeling: 'Committed' },
   ], [
-    ['actions', 0, 'Sees a school-run parent unpacking a Harvest box on Instagram', ['#social']],
-    ['actions', 0, 'Searches “quick family dinners under 20 minutes”', ['#recipes']],
-    ['actions', 1, 'Compares Harvest with two competitors in browser tabs', ['#pricing']],
-    ['actions', 1, 'Asks partner whether the kids will eat it', []],
-    ['actions', 2, 'Picks the 4-person plan, 3 recipes a week', ['#subscription']],
-    ['actions', 2, 'Hunts for a discount code before paying', ['#pricing']],
-    ['actions', 3, 'Unpacks the box and sorts bags by recipe', ['#delivery']],
-    ['actions', 3, 'Cooks the first recipe with a child “helping”', ['#recipes']],
-    ['actions', 4, 'Skips a week during half-term', ['#subscription']],
-    ['actions', 4, 'Swaps one recipe a week for a kid favourite', ['#recipes']],
-    ['actions', 5, 'Shares a referral link in the class WhatsApp group', ['#social']],
-    ['touchpoints', 0, 'Influencer post', ['#social'], { channel: 'social' }],
-    ['touchpoints', 0, 'Search ad → landing page', [], { channel: 'web' }],
-    ['touchpoints', 1, 'Pricing page and plan calculator', ['#pricing'], { channel: 'web' }],
-    ['touchpoints', 1, 'Reviews on app store listing', ['#trust'], { channel: 'app' }],
-    ['touchpoints', 2, 'Checkout on mobile web', [], { channel: 'web' }],
-    ['touchpoints', 2, 'Order confirmation email', [], { channel: 'email' }],
-    ['touchpoints', 3, 'Delivery-day SMS with a 2-hour window', ['#delivery'], { channel: 'sms' }],
-    ['touchpoints', 3, 'The box and recipe cards', [], { channel: 'packaging' }],
-    ['touchpoints', 4, 'Weekly menu push on Thursday', [], { channel: 'push' }],
-    ['touchpoints', 4, 'App: skip, swap, pause', ['#subscription'], { channel: 'app' }],
-    ['touchpoints', 5, 'Referral page with £20 credit', [], { channel: 'app' }],
-    ['thoughts', 0, '“That looks easier than my Sunday meal plan.”', []],
-    ['thoughts', 1, '“Is this actually cheaper than the supermarket?”', ['#pricing']],
-    ['thoughts', 2, '“Will I be locked into a subscription?”', ['#subscription', '#trust']],
-    ['thoughts', 3, '“Where do I even start with all these bags?”', ['#onboarding']],
-    ['thoughts', 4, '“Tuesday dinner is solved and I didn’t think about it.”', []],
-    ['thoughts', 5, '“I’d tell anyone with kids to try it.”', []],
-    ['pains', 1, 'Price per meal only appears after choosing a plan', ['#pricing'], { level: 3, id: 'm-p1' }],
-    ['pains', 2, 'Cancellation terms buried in the FAQ', ['#trust', '#subscription'], { level: 3, id: 'm-p2' }],
-    ['pains', 3, 'Ingredients for three recipes mixed in one cool bag', ['#delivery', '#onboarding'], { level: 2, id: 'm-p3' }],
-    ['pains', 3, 'First recipe assumes adult-level knife skills', ['#recipes'], { level: 2, id: 'm-p4' }],
-    ['pains', 4, 'Missed the skip deadline once, paid for a week away', ['#subscription'], { level: 3, id: 'm-p5' }],
-    ['opps', 1, 'Show price per serving on every plan card', ['#pricing'], { level: 3, id: 'm-o1' }],
-    ['opps', 2, 'One-line “cancel anytime in two taps” promise at checkout', ['#trust'], { level: 2, id: 'm-o2' }],
-    ['opps', 3, 'Colour-coded bags per recipe + “start here” card', ['#delivery', '#onboarding'], { level: 3, id: 'm-o3' }],
-    ['opps', 3, '“Cook with kids” recipe track', ['#recipes'], { level: 1, id: 'm-o4' }],
-    ['opps', 4, 'Skip-deadline reminder 48h before cut-off', ['#subscription'], { level: 3, id: 'm-o5' }],
-    ['opps', 5, 'Referral credit for both sides, shown after a 5-star rating', ['#social'], { level: 2 }],
-    ['owner', 0, 'Growth marketing', [], { team: 'Growth marketing' }],
+    ['actions', 0, 'Searches “museum trip astronomy key stage 2”', ['#schools']],
+    ['actions', 0, 'Asks the staff-room group who has been', ['#social']],
+    ['actions', 1, 'Fills in the group booking form twice after a timeout', ['#booking']],
+    ['actions', 1, 'Downloads the risk assessment for the head', ['#schools']],
+    ['actions', 2, 'Counts heads in the courtyard, then again inside', ['#arrival']],
+    ['actions', 3, 'Splits the class into four rooms with the audio guide', ['#guide']],
+    ['actions', 3, 'Lets a pupil wind the orrery at the demo table', ['#guide']],
+    ['actions', 4, 'Buys a pocket compass for the classroom', ['#shop']],
+    ['actions', 5, 'Puts the visit on next year’s calendar', ['#schools']],
+    ['touchpoints', 0, 'Schools page', ['#schools'], { channel: 'web' }],
+    ['touchpoints', 1, 'Group booking form', ['#booking'], { channel: 'web' }],
+    ['touchpoints', 1, 'Booking confirmation with a PDF', [], { channel: 'email' }],
+    ['touchpoints', 2, 'Front desk and the coat room', ['#arrival'], { channel: 'store' }],
+    ['touchpoints', 3, 'Audio guide, child track', ['#guide'], { channel: 'app' }],
+    ['touchpoints', 4, 'Museum shop', ['#shop'], { channel: 'store' }],
+    ['thoughts', 1, '“Why can’t I book thirty people without phoning?”', ['#booking']],
+    ['thoughts', 2, '“Where do thirty coats go?”', ['#arrival']],
+    ['thoughts', 3, '“They’re quiet. They’re actually listening.”', ['#guide']],
+    ['pains', 1, 'Group booking caps at 10 tickets online', ['#booking'], { level: 3, id: 'i-p1' }],
+    ['pains', 1, 'Risk assessment hidden in a PDF on another page', ['#schools'], { level: 2, id: 'i-p2' }],
+    ['pains', 2, 'Coats and bags block the entrance at 9:45', ['#arrival'], { level: 2, id: 'i-p3' }],
+    ['opps', 1, 'Group booking up to 40, with helpers free', ['#booking'], { level: 3, id: 'i-o1' }],
+    ['opps', 1, 'Teacher pack: syllabus links, risk form, room map', ['#schools'], { level: 2, id: 'i-o2' }],
+    ['opps', 2, 'Schools entrance with crates for bags', ['#arrival'], { level: 2, id: 'i-o3' }],
+    ['opps', 3, 'A child track in the audio guide for every room', ['#guide'], { level: 2 }],
+    ['owner', 0, 'Learning', [], { team: 'Learning' }],
     ['owner', 1, 'Web', [], { team: 'Web' }],
-    ['owner', 2, 'Web', [], { team: 'Web' }],
-    ['owner', 3, 'Ops & logistics', [], { team: 'Ops & logistics' }],
-    ['owner', 3, 'Product — app', [], { team: 'Product — app' }],
-    ['owner', 4, 'Lifecycle CRM', [], { team: 'Lifecycle CRM' }],
-    ['owner', 5, 'Growth marketing', [], { team: 'Growth marketing' }],
-  ], [['m-o1', 'm-p1'], ['m-o2', 'm-p2'], ['m-o3', 'm-p3'], ['m-o4', 'm-p4'], ['m-o5', 'm-p5'], ['m-o2', 'm-p5']])
+    ['owner', 2, 'Front of house', [], { team: 'Front of house' }],
+    ['owner', 3, 'App team', [], { team: 'App team' }],
+    ['owner', 5, 'Learning', [], { team: 'Learning' }],
+  ], [['i-o1', 'i-p1'], ['i-o2', 'i-p2'], ['i-o3', 'i-p3']])
   return {
-    id: 'maya', name: 'Maya Chen', role: 'Busy parent of two', age: 38, hue: '#8b5cf6',
-    quote: 'If dinner takes more than twenty minutes to plan, it’s already lost.',
-    goals: ['Healthy weeknight dinners the kids will eat', 'Less time planning and shopping', 'Waste less food'],
-    frustrations: ['Subscriptions that are hard to pause', 'Recipes that assume a free evening'],
-    scenario: 'Works four days a week, shops on Sunday, cooks between pick-up and bath time.',
+    id: 'ines', name: INES.name, role: 'Schoolteacher, Year 6', age: 44, hue: INES.dye, photo: INES.medal,
+    quote: 'If thirty eleven-year-olds can’t touch anything, give them something to listen to.',
+    goals: ['A trip that teaches the solar system better than the textbook', 'Thirty children, nobody lost', 'Back on the coach by 11:45'],
+    frustrations: ['Booking forms built for one family', 'Museums that are all glass and no story'],
+    scenario: 'Teaches a class of 28 in a state school forty minutes away; takes one trip a term.',
     stages, cards,
   }
 }
 
-function leo(): Persona {
-  const { stages, cards } = build('l', [
-    { name: STAGE_NAMES[0], goal: 'Hear about Harvest from friends.', duration: 'Term start', emotion: 1, feeling: 'Intrigued' },
-    { name: STAGE_NAMES[1], goal: 'Work out if a box fits a student budget.', duration: '1 week', emotion: -1, feeling: 'Priced out' },
-    { name: STAGE_NAMES[2], goal: 'Buy the discounted first box.', duration: 'Day 0', emotion: 0.5, feeling: 'Hopeful' },
-    { name: STAGE_NAMES[3], goal: 'Cook in a shared kitchen.', duration: 'Days 1–3', emotion: -0.5, feeling: 'Awkward' },
-    { name: STAGE_NAMES[4], goal: 'Keep ordering when money allows.', duration: 'Monthly', emotion: 0, feeling: 'On and off' },
-    { name: STAGE_NAMES[5], goal: 'Split boxes with flatmates.', duration: 'Term 2', emotion: 1.5, feeling: 'Sociable' },
+function tomas(): Persona {
+  const { stages, cards } = build('t', [
+    { name: STAGE_NAMES[0], goal: 'See the orrery a lecturer mentioned.', duration: 'Monday', emotion: 1, feeling: 'Curious' },
+    { name: STAGE_NAMES[1], goal: 'Get in free with a student card.', duration: 'Thursday night', emotion: -0.5, feeling: 'Unsure' },
+    { name: STAGE_NAMES[2], goal: 'Walk in without queueing.', duration: 'Saturday · 15:00', emotion: 0.5, feeling: 'Easy' },
+    { name: STAGE_NAMES[3], goal: 'See the orrery actually move.', duration: 'Saturday · 15:20', emotion: -1.5, feeling: 'Let down' },
+    { name: STAGE_NAMES[4], goal: 'Take something home to remember it.', duration: 'Saturday · 16:30', emotion: 0.5, feeling: 'Satisfied' },
+    { name: STAGE_NAMES[5], goal: 'Come back for the Thursday talks.', duration: 'Next month', emotion: 1.5, feeling: 'Hooked' },
   ], [
-    ['actions', 0, 'Flatmate cooks a Harvest curry and shares it', ['#social']],
-    ['actions', 1, 'Reads the student discount terms twice', ['#pricing']],
-    ['actions', 2, 'Orders the 2-person box with 60% off', ['#pricing']],
-    ['actions', 3, 'Clears space in a shared fridge', ['#delivery']],
-    ['actions', 4, 'Orders only in weeks with a promo code', ['#pricing', '#subscription']],
-    ['actions', 5, 'Proposes a “Harvest night” with flatmates', ['#social']],
-    ['touchpoints', 0, 'Word of mouth', [], { channel: 'social' }],
-    ['touchpoints', 1, 'Student discount page', ['#pricing'], { channel: 'web' }],
-    ['touchpoints', 2, 'App checkout', [], { channel: 'app' }],
-    ['touchpoints', 3, 'Parcel left in the building lobby', ['#delivery'], { channel: 'packaging' }],
-    ['touchpoints', 4, 'Promo email', [], { channel: 'email' }],
-    ['thoughts', 1, '“After the discount it’s still more than Lidl.”', ['#pricing']],
-    ['thoughts', 3, '“Someone is going to take my chicken.”', ['#delivery']],
-    ['thoughts', 5, '“Cheaper if four of us share it.”', ['#pricing', '#social']],
-    ['pains', 1, 'Full price after the intro offer is a cliff', ['#pricing'], { level: 3, id: 'l-p1' }],
-    ['pains', 3, 'No safe-drop option for flats', ['#delivery'], { level: 2, id: 'l-p2' }],
-    ['opps', 1, 'Show the real price from week 2 up front', ['#pricing', '#trust'], { level: 2, id: 'l-o1' }],
-    ['opps', 3, 'Locker / pickup-point delivery', ['#delivery'], { level: 3, id: 'l-o2' }],
-    ['opps', 5, 'Split-the-box: one order, four payers', ['#social', '#pricing'], { level: 3, id: 'l-o3' }],
-    ['owner', 1, 'Growth marketing', [], { team: 'Growth marketing' }],
-    ['owner', 3, 'Ops & logistics', [], { team: 'Ops & logistics' }],
-    ['owner', 5, 'Product — app', [], { team: 'Product — app' }],
-  ], [['l-o1', 'l-p1'], ['l-o2', 'l-p2'], ['l-o3', 'l-p1']])
+    ['actions', 0, 'Looks up the orrery on the museum’s site', ['#collection']],
+    ['actions', 1, 'Scrolls for a student price that isn’t there', ['#pricing']],
+    ['actions', 2, 'Shows his student card at the desk', ['#arrival']],
+    ['actions', 3, 'Waits twenty minutes for a demo that was cancelled', ['#guide']],
+    ['actions', 3, 'Watches the orrery video in the app instead', ['#guide']],
+    ['actions', 4, 'Photographs the gear train for his notes', ['#collection']],
+    ['actions', 5, 'Signs up for the Thursday evening talks', ['#membership']],
+    ['touchpoints', 0, 'Object page: Orrery', ['#collection'], { channel: 'web' }],
+    ['touchpoints', 1, 'Prices page', ['#pricing'], { channel: 'web' }],
+    ['touchpoints', 3, 'Demo-table sign', ['#guide'], { channel: 'store' }],
+    ['touchpoints', 3, 'Object video in the app', ['#guide'], { channel: 'app' }],
+    ['touchpoints', 5, 'Talks newsletter', ['#membership'], { channel: 'email' }],
+    ['thoughts', 1, '“Is it free for students or not?”', ['#pricing']],
+    ['thoughts', 3, '“I came to see it move.”', ['#guide']],
+    ['thoughts', 5, '“A talk on how they cut the gears? I’m in.”', ['#membership']],
+    ['pains', 1, 'Free student entry only mentioned at the desk', ['#pricing'], { level: 2, id: 't-p1' }],
+    ['pains', 3, 'Demo times change and nobody says so', ['#guide'], { level: 3, id: 't-p2' }],
+    ['opps', 1, 'Say “students free” on the prices page', ['#pricing'], { level: 2, id: 't-o1' }],
+    ['opps', 3, 'Live demo times in the app, with a nudge 10 min before', ['#guide'], { level: 3, id: 't-o2' }],
+    ['opps', 5, 'Student membership for the evening talks', ['#membership'], { level: 2 }],
+    ['owner', 1, 'Web', [], { team: 'Web' }],
+    ['owner', 3, 'App team', [], { team: 'App team' }],
+    ['owner', 5, 'Membership', [], { team: 'Membership' }],
+  ], [['t-o1', 't-p1'], ['t-o2', 't-p2']])
   return {
-    id: 'leo', name: 'Leo Martins', role: 'Student on a budget', age: 22, hue: '#f97316',
-    quote: 'I’ll try it if the first box doesn’t cost me a week of groceries.',
-    goals: ['Eat better than pasta five nights a week', 'Stay inside £40 a week for food'],
-    frustrations: ['Offers that vanish after the first order', 'Deliveries to a shared building'],
-    scenario: 'Second-year student in a five-person flat; cooks for himself, sometimes for friends.',
+    id: 'tomas', name: TOMAS.name, role: 'Physics student', age: 21, hue: TOMAS.dye, photo: TOMAS.medal,
+    quote: 'I came to see the orrery move, not to read about it behind glass.',
+    goals: ['See the instruments working, not just behind glass', 'Spend nothing he doesn’t have to'],
+    frustrations: ['Pricing that hides the student deal', 'Demos that don’t happen'],
+    scenario: 'Second-year physics student; comes on Saturday afternoons with a notebook.',
     stages, cards,
   }
 }
 
-function priya(): Persona {
-  const { stages, cards } = build('p', [
-    { name: STAGE_NAMES[0], goal: 'Be reminded Harvest exists — again.', duration: 'Month 4 after churn', emotion: 0, feeling: 'Indifferent' },
-    { name: STAGE_NAMES[1], goal: 'Check what changed since she left.', duration: '2 weeks', emotion: 0.5, feeling: 'Open' },
-    { name: STAGE_NAMES[2], goal: 'Reactivate without re-entering everything.', duration: 'Day 0', emotion: 1, feeling: 'Relieved' },
-    { name: STAGE_NAMES[3], goal: 'Get the first box back.', duration: 'Week 1', emotion: 0.5, feeling: 'Reassured' },
-    { name: STAGE_NAMES[4], goal: 'Stay subscribed past week 6 this time.', duration: 'Weeks 2–8', emotion: -1, feeling: 'Wary' },
-    { name: STAGE_NAMES[5], goal: 'Become a loyal flexible subscriber.', duration: 'Month 3+', emotion: 1, feeling: 'Settled' },
+function ruth(): Persona {
+  const { stages, cards } = build('r', [
+    { name: STAGE_NAMES[0], goal: 'Hear about the new navigation room.', duration: 'Members’ email', emotion: 1, feeling: 'Interested' },
+    { name: STAGE_NAMES[1], goal: 'Book a quiet morning slot.', duration: 'A week before', emotion: 0.5, feeling: 'Organised' },
+    { name: STAGE_NAMES[2], goal: 'Get in with her member card.', duration: 'Tuesday · 10:00', emotion: 0, feeling: 'Patient' },
+    { name: STAGE_NAMES[3], goal: 'Understand how the compass gimbal works.', duration: 'Tuesday · 10:15', emotion: -1, feeling: 'Frustrated' },
+    { name: STAGE_NAMES[4], goal: 'Talk to someone who knows.', duration: 'Tuesday · 11:30', emotion: 1, feeling: 'Satisfied' },
+    { name: STAGE_NAMES[5], goal: 'Renew her membership.', duration: 'Month 11', emotion: 0.5, feeling: 'Loyal' },
   ], [
-    ['actions', 0, 'Opens a “We’ve changed” email', ['#subscription']],
-    ['actions', 1, 'Browses new recipes without logging in', ['#recipes']],
-    ['actions', 2, 'Reactivates with one tap from the email', ['#subscription']],
-    ['actions', 4, 'Sets the plan to “every other week”', ['#subscription']],
-    ['touchpoints', 0, 'Win-back email', [], { channel: 'email' }],
-    ['touchpoints', 2, 'Saved address and card', ['#trust'], { channel: 'app' }],
-    ['touchpoints', 4, 'Flexible delivery settings', ['#subscription'], { channel: 'app' }],
-    ['thoughts', 1, '“Do they finally let me skip without a phone call?”', ['#subscription']],
-    ['thoughts', 4, '“I’ll cancel again if I get a box I forgot about.”', ['#subscription', '#trust']],
-    ['pains', 4, 'Boxes arrived during holidays she had forgotten to skip', ['#subscription'], { level: 3, id: 'p-p1' }],
-    ['pains', 1, 'Old preferences lost after churn', ['#recipes'], { level: 1, id: 'p-p2' }],
-    ['opps', 4, 'Calendar-aware “are you away?” prompt', ['#subscription'], { level: 3, id: 'p-o1' }],
-    ['opps', 1, 'Keep taste profile for 12 months after cancel', ['#recipes', '#trust'], { level: 2, id: 'p-o2' }],
-    ['owner', 0, 'Lifecycle CRM', [], { team: 'Lifecycle CRM' }],
-    ['owner', 4, 'Product — app', [], { team: 'Product — app' }],
-  ], [['p-o1', 'p-p1'], ['p-o2', 'p-p2']])
+    ['actions', 0, 'Reads the members’ email in print size 150%', ['#membership']],
+    ['actions', 1, 'Books Tuesday 10:00, the quietest slot', ['#booking']],
+    ['actions', 2, 'Scans the member card in the app at the door', ['#arrival']],
+    ['actions', 3, 'Squints at a label set in 9-point type', ['#access']],
+    ['actions', 3, 'Plays the audio guide at full volume', ['#guide', '#access']],
+    ['actions', 4, 'Asks a volunteer about the compass card', ['#guide']],
+    ['actions', 5, 'Renews from the reminder email', ['#membership']],
+    ['touchpoints', 0, 'Members’ newsletter', ['#membership'], { channel: 'email' }],
+    ['touchpoints', 2, 'Member card in the app', ['#arrival'], { channel: 'app' }],
+    ['touchpoints', 3, 'Object labels', ['#access'], { channel: 'store' }],
+    ['touchpoints', 3, 'Audio guide, expert track', ['#guide'], { channel: 'app' }],
+    ['touchpoints', 4, 'Volunteer on the floor', ['#guide'], { channel: 'support' }],
+    ['thoughts', 3, '“Labels tell me the date. I want to know how it works.”', ['#guide']],
+    ['thoughts', 3, '“Why is the text so small?”', ['#access']],
+    ['pains', 3, 'Labels set too small to read without glasses', ['#access'], { level: 3, id: 'r-p1' }],
+    ['pains', 3, 'Audio guide has no expert depth', ['#guide'], { level: 2, id: 'r-p2' }],
+    ['opps', 3, 'Large-print label in the app for every object', ['#access'], { level: 3, id: 'r-o1' }],
+    ['opps', 3, 'Expert track: how it works, with the plate’s lettered parts', ['#guide'], { level: 3, id: 'r-o2' }],
+    ['opps', 4, 'Volunteer hours shown per room', ['#guide'], { level: 1 }],
+    ['owner', 0, 'Membership', [], { team: 'Membership' }],
+    ['owner', 3, 'App team', [], { team: 'App team' }],
+    ['owner', 4, 'Front of house', [], { team: 'Front of house' }],
+  ], [['r-o1', 'r-p1'], ['r-o2', 'r-p2']])
   return {
-    id: 'priya', name: 'Priya Nair', role: 'Lapsed subscriber', age: 45, hue: '#14b8a6',
-    quote: 'I loved the recipes. I hated getting boxes I forgot to skip.',
-    goals: ['Cook something new twice a week', 'Never pay for a box she didn’t want'],
-    frustrations: ['Rigid weekly plans', 'Re-entering details after a break'],
-    scenario: 'Cancelled after six weeks; travels for work one week in three.',
+    id: 'ruth', name: RUTH.name, role: 'Retired engineer, member', age: 71, hue: RUTH.dye, photo: RUTH.medal,
+    quote: 'Labels tell me the date. I want to know how it works.',
+    goals: ['Understand the mechanism, not just the history', 'Visit when it’s quiet'],
+    frustrations: ['Small print on labels', 'Guides written for children only'],
+    scenario: 'Spent forty years designing pumps; a member for nine years, visits monthly.',
     stages, cards,
   }
 }
 
-export const demoDoc = (): JourneyDoc => ({ title: 'Harvest · first 60 days', personas: [maya(), leo(), priya()] })
+export const demoDoc = (): JourneyDoc => ({ title: 'Gabinete · first visit', personas: [ines(), tomas(), ruth()] })
 
 export const blankStages = (prefix: string): Stage[] =>
   STAGE_NAMES.map((name, i) => ({ id: `${prefix}-s${i}`, name, goal: '', duration: '', emotion: 0, feeling: '' }))

@@ -60,7 +60,7 @@ function initialLibrary(): Library {
 }
 
 /** sessions · boards · image records — undoable, persisted (pixels re-render from params). */
-export const library = createDocStore<Library>(initialLibrary(), { id: 'generate', version: 2 }) // v2: spinning-top seed history
+export const library = createDocStore<Library>(initialLibrary(), { id: 'generate', version: 3 }) // v3: the clients' seed history (bell, inks, plates)
 /** One ⌘Z timeline: generation settings and the library (deletes, favourites, boards, renames). */
 export const history = createHistory([params, library])
 

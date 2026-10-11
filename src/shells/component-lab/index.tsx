@@ -6,6 +6,8 @@
    set has its OWN token theme and light/dark switch, independent of the
    studio chrome. Undo spans props and tokens (kit createHistory).
 --------------------------------------------------------------------------- */
+import '@fontsource-variable/ibm-plex-sans'
+import '@fontsource-variable/newsreader'
 import { Download, Braces, FileCode2, Wind, Code, Undo2, Redo2, Eye, Grid3x3, Sun, Moon, Smartphone, Tablet, Monitor, RotateCcw } from 'lucide-react'
 import {
   Studio, Toolbar, Brand, Cluster, Panel, PanelHeader, PanelTabs, Stage, CommandPalette, IconButton, Button, Menu, Divider, Segmented,
@@ -74,7 +76,7 @@ export default function ComponentLab() {
       rightWidth={308}
       toolbar={
         <Toolbar
-          start={<Brand name="Component lab" doc="Acme UI" mark={<svg viewBox="0 0 16 16" width="11" height="11"><rect x="2.5" y="4.5" width="11" height="7" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2" /></svg>} />}
+          start={<Brand name="Component lab" doc="Gabinete UI" mark={<svg viewBox="0 0 16 16" width="11" height="11"><rect x="2.5" y="4.5" width="11" height="7" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2" /></svg>} />}
           center={
             <Cluster className="px-1">
               <div className="w-[200px]">

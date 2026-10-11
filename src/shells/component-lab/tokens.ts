@@ -9,20 +9,20 @@ import { formatHex, clampChroma, displayable, inGamut, wcagContrast, type Oklch 
 
 export const tokenSchema = defineSchema({
   accent: folder('Accent', {
-    accentL: p.number(0.22, { min: 0.15, max: 0.95, step: 0.01, label: 'Lightness' }),
-    accentC: p.number(0.004, { min: 0, max: 0.37, step: 0.001, label: 'Chroma' }),
-    accentH: p.number(78, { min: 0, max: 360, step: 1, label: 'Hue' }),
-    neutralTint: p.number(0.012, { min: 0, max: 0.04, step: 0.001, label: 'Neutral tint', hint: 'How much of the accent hue bleeds into greys, borders and text.' }),
+    accentL: p.number(0.737, { min: 0.15, max: 0.95, step: 0.01, label: 'Lightness' }),
+    accentC: p.number(0.113, { min: 0, max: 0.37, step: 0.001, label: 'Chroma' }),
+    accentH: p.number(237, { min: 0, max: 360, step: 1, label: 'Hue' }),
+    neutralTint: p.number(0.005, { min: 0, max: 0.04, step: 0.001, label: 'Neutral tint', hint: 'How much of the accent hue bleeds into greys, borders and text.' }),
   }),
   shape: folder('Shape', {
-    radius: p.number(8, { min: 0, max: 24, step: 1, unit: 'px', hint: 'Control radius. Cards use 1.5×, pills ignore it.' }),
+    radius: p.number(10, { min: 0, max: 24, step: 1, unit: 'px', hint: 'Control radius. Cards use 1.5×, pills ignore it.' }),
     borderWidth: p.number(1, { min: 0, max: 3, step: 0.5, unit: 'px', label: 'Border' }),
     shadow: p.select('none', [{ value: 'none', label: 'None' }, { value: 'soft', label: 'Soft' }, { value: 'hard', label: 'Hard' }], { hint: 'Hard = offset solid shadow, the neo-brutalist look.' }),
   }),
   type: folder('Type', {
-    font: p.select('inter', [
-      { value: 'inter', label: 'Inter' }, { value: 'system', label: 'System UI' }, { value: 'rounded', label: 'Rounded' },
-      { value: 'serif', label: 'Serif' }, { value: 'mono', label: 'Mono' },
+    font: p.select('plex', [
+      { value: 'plex', label: 'IBM Plex Sans' }, { value: 'inter', label: 'Inter' }, { value: 'system', label: 'System UI' }, { value: 'rounded', label: 'Rounded' },
+      { value: 'serif', label: 'Newsreader' }, { value: 'mono', label: 'Mono' },
     ], { label: 'Family' }),
     baseSize: p.number(14, { min: 12, max: 18, step: 0.5, unit: 'px', label: 'Base size' }),
     scale: p.select('1.2', [
@@ -36,17 +36,19 @@ export const tokenSchema = defineSchema({
   }),
 })
 
-/* Every preset stays in the wire palette (one ink on warm paper, hairlines): the looks differ by
-   shape, type and density, not by colour. The accent is still free to dial in. */
+/* The default is Gabinete's own kit (src/demo/clients.ts): Plex on near-neutral paper with Cielo as
+   the one bright, its labels in ink (on a bright, text is Nogal, never white). Other looks change shape,
+   type and density; Editorial goes back to one ink, Agalla swaps the bright for Achiote. */
 export const tokens = createParams(tokenSchema, {
   id: 'component-lab-tokens',
-  version: 2, // v2: wire-palette defaults + presets (v1 saved a blue accent and soft shadows)
+  version: 3, // v3: Gabinete defaults (Cielo, Plex); v2 was the wire palette
   presets: [
-    { name: 'Wire', values: {} },
+    { name: 'Gabinete', values: {} },
     { name: 'Compact', values: { radius: 6, baseSize: 13, scale: '1.125', weight: 500, density: 'compact' } },
     { name: 'Soft', values: { accentL: 0.34, neutralTint: 0.018, radius: 16, font: 'rounded', baseSize: 15, weight: 600, density: 'comfortable' } },
     { name: 'Brutal', values: { neutralTint: 0, radius: 0, borderWidth: 2, shadow: 'hard', font: 'mono', weight: 700 } },
-    { name: 'Editorial', values: { radius: 2, font: 'serif', baseSize: 15, scale: '1.25', weight: 600 } },
+    { name: 'Editorial', values: { accentL: 0.195, accentC: 0.009, accentH: 59, radius: 2, font: 'serif', baseSize: 15, scale: '1.25', weight: 500 } },
+    { name: 'Agalla', values: { accentL: 0.645, accentC: 0.187, accentH: 37, radius: 4, weight: 600 } },
   ],
 })
 export type Tokens = ReturnType<typeof tokens.values>
@@ -64,10 +66,11 @@ export const hexOf = (l: number, c: number, h: number) => formatHex(clampChroma(
 const cssOf = (l: number, c: number, h: number, a = 1) => `oklch(${(l * 100).toFixed(1)}% ${c.toFixed(3)} ${h.toFixed(1)}${a < 1 ? ` / ${a}` : ''})`
 
 export const FONT_STACKS: Record<string, string> = {
+  plex: '"IBM Plex Sans Variable", "IBM Plex Sans", system-ui, sans-serif',
   inter: '"Inter Variable", Inter, system-ui, sans-serif',
   system: 'system-ui, -apple-system, "Segoe UI", sans-serif',
   rounded: 'ui-rounded, "SF Pro Rounded", "Nunito", system-ui, sans-serif',
-  serif: '"Iowan Old Style", Georgia, "Times New Roman", serif',
+  serif: '"Newsreader Variable", Newsreader, Georgia, serif',
   mono: '"JetBrains Mono", "SF Mono", ui-monospace, Menlo, monospace',
 }
 const DENSITY = {
@@ -127,7 +130,7 @@ export function deriveVars(t: Tokens, theme: Theme): Record<string, string> {
     '--cl-shadow-md': shadowMd,
     '--cl-shadow-lg': shadowLg,
     '--cl-press': hard ? 'translate(2px, 2px)' : 'translateY(1px)',
-    '--cl-font': FONT_STACKS[t.font] ?? FONT_STACKS.inter,
+    '--cl-font': FONT_STACKS[t.font] ?? FONT_STACKS.plex,
     '--cl-weight': String(t.weight),
     '--cl-text-xs': fs(-1),
     '--cl-text-sm': fs(0),

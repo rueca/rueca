@@ -1,3 +1,4 @@
+import '@fontsource-variable/newsreader'
 import { useDeferredValue, useMemo, useState } from 'react'
 import { useStore } from 'zustand'
 import {
@@ -117,7 +118,7 @@ export default function BatchShell() {
       rightWidth={296}
       toolbar={
         <Toolbar
-          start={<Brand name="Batch" doc="Oro — autumn range" mark={<Mark />} />}
+          start={<Brand name="Batch" doc="Agalla — the six inks" mark={<Mark />} />}
           center={
             <Cluster>
               <IconButton icon={ChevronLeft} label="Previous row" shortcut="arrowleft" onClick={prevRow} disabled={rows.length < 2} />

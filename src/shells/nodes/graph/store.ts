@@ -32,7 +32,7 @@ interface GraphState {
   live: boolean
 }
 
-const LS = 'studio:nodes:graph'
+const LS = 'studio:nodes:graph:v2' // v2: Rueca's samples (11 Oct 2026); the v1 key kept the neon terrain
 
 export const toSaved = (s: Pick<GraphState, 'name' | 'nodes' | 'edges'>): SavedGraph => ({
   version: 1,

@@ -25,13 +25,12 @@ import {
   params, ui, history, stepLabel, BANDS, ASPECTS, FULL, LOOK_KEYS, DEFAULTS, lookDefaults, lookValues, activeLook, allLooks, type V, type Look, type CropDraft,
 } from './state'
 import { Develop, type ViewOpts } from './develop'
-import { paintTop } from '@/demo/top'
+import { AGALLA, loadDemo } from '@/demo/clients'
 
 /* ===== engine glue (module level: outside React, like the artifact) ===== */
 const cam = createCamera()
 const eng: { dev: Develop | null } = { dev: null }
 const stats = createStore<{ bins: Bins | null; nav: ImageData | null }>(() => ({ bins: null, nav: null }))
-let sample: HTMLCanvasElement | null = null
 
 const lookById = (id: string) => allLooks().find((l) => l.id === id)
 function effective(): V {
@@ -118,7 +117,9 @@ function loadSource(src: HTMLImageElement | HTMLCanvasElement, name: string, fre
   requestAnimationFrame(() => cam.fit())
   return { w, h, from }
 }
-const openSample = (fresh: boolean) => { sample ??= paintTop(2000, 1333, { at: 0.5, size: 0.64, tilt: -0.18 }); loadSource(sample, 'Spinning top.jpg', fresh) }
+/** The sample: Agalla's desk still life, shot flat and a little under, so the looks have work to do (src/demo/clients.ts). */
+const SAMPLE_NAME = 'Agalla still life.jpg'
+const openSample = (fresh: boolean) => { loadDemo(AGALLA.still).then((img) => loadSource(img, SAMPLE_NAME, fresh)).catch(() => toast('Could not load the sample photo', { type: 'error' })) }
 async function openURL(url: string, name: string) {
   try {
     const img = new Image()

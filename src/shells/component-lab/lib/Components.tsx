@@ -2,7 +2,7 @@
    only --cl-* variables; `force` pins a state for the States matrix. */
 import { ArrowRight, Plus, Download, Sparkles, Check, Search, Mail, Lock, Bookmark } from 'lucide-react'
 import type { CSSProperties } from 'react'
-import { ditherTop } from '@/demo/wire'
+import { GABINETE } from '@/demo/clients'
 import type { ButtonV, InputV, CardV } from '../props'
 
 const GLYPH = { 'arrow-right': ArrowRight, plus: Plus, download: Download, sparkles: Sparkles, check: Check } as const
@@ -57,22 +57,19 @@ export function Card({ v, force, buttonV }: { v: CardV; force?: string; buttonV:
           <p className="cl-text">{v.body}</p>
           {v.actions !== 'none' && (
             <div className="cl-actions">
-              <Button v={{ ...buttonV, variant: 'primary', size: 'sm', label: 'Read story', icon: 'trailing', iconName: 'arrow-right', loading: false, disabled: false, fullWidth: false, state: 'default' }} force={force ? 'default' : undefined} />
-              {v.actions === 'two' && <Button v={{ ...buttonV, variant: 'ghost', size: 'sm', label: 'Save', icon: 'leading', iconName: 'plus', loading: false, disabled: false, fullWidth: false, state: 'default' }} force={force ? 'default' : undefined} />}
+              <Button v={{ ...buttonV, variant: 'primary', size: 'sm', label: 'Play the audio guide', icon: 'none', iconName: 'arrow-right', loading: false, disabled: false, fullWidth: false, state: 'default' }} force={force ? 'default' : undefined} />
+              {v.actions === 'two' && <Button v={{ ...buttonV, variant: 'ghost', size: 'sm', label: 'Save', icon: 'none', iconName: 'plus', loading: false, disabled: false, fullWidth: false, state: 'default' }} force={force ? 'default' : undefined} />}
             </div>
           )}
-          <div className="cl-meta"><span className="cl-avatar" aria-hidden />Priya Raman · 6 min read <Bookmark size={13} style={{ marginLeft: 'auto' }} /></div>
+          <div className="cl-meta"><span className="cl-avatar" aria-hidden />Room 3. Read by Marta Ibáñez, 3 minutes. <Bookmark size={13} style={{ marginLeft: 'auto' }} /></div>
         </div>
       </article>
     </div>
   )
 }
 
-/* The cover image is a placeholder: the dithered spinning top (paper ground; lit top on ink for dark).
-   Painted lazily on first render and cached by ditherTop. */
+/* The cover is one of the museum's engraved plates (ink on transparent, src/demo/clients.ts),
+   set on Cielo, Gabinete's one bright, in both themes. */
 function mediaStyle(): CSSProperties {
-  return {
-    '--cl-media-day': `url(${ditherTop(640, 400, { at: 0.5, size: 0.66 })})`,
-    '--cl-media-night': `url(${ditherTop(640, 400, { at: 0.5, size: 0.66, night: true })})`,
-  } as CSSProperties
+  return { '--cl-media-day': `url(${GABINETE.instruments[0].img})`, '--cl-media-night': `url(${GABINETE.instruments[0].img})` } as CSSProperties
 }

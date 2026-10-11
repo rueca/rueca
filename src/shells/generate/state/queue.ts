@@ -6,7 +6,7 @@
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
 import { stepMs, type GenParams } from '../engine/models'
-import { paint } from '../engine/paint'
+import { paint, ready } from '../engine/paint'
 import { addImages, uid, type ImageKind, type ImageRec } from './gallery'
 import { put, sketch, thumbFrom } from './images'
 
@@ -92,6 +92,7 @@ async function run(job: Job) {
     if (!(await wait(job.id, 0))) return
     const params = job.items[k]
     const id = uid('i-')
+    await ready(params)
     const c = paint(params, 1)
     await put(id, 'full', c)
     await put(id, 'thumb', thumbFrom(c, params))

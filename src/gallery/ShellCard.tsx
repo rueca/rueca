@@ -4,6 +4,11 @@ import { Chip } from '@/landing/parts'
 import { Hand } from '@/landing/plate'
 import { gridThumb } from './registry'
 
+/** Trial (Rafael, 10 Oct): true shows each shell empty, its stage blank and the window squeezed
+    to its chrome (scripts/thumbs-empty.mjs); false goes back to the full screenshots. */
+const EMPTY_THUMBS = true
+const emptyThumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/empty/${id}-${theme}.webp`
+
 /** One shell as a cell of the sheet (src/landing/plate.tsx): the thumbnail fills the top
     edge to edge and its bottom rule closes it, then the name, a handwritten figure number,
     the description and the chips. `data-shell-id` is what scripts/qa.mjs reads to discover shells. */
@@ -17,7 +22,7 @@ export function ShellCard({ shell: s, theme, n, className }: { shell: ShellMeta;
         <div className="relative flex aspect-square items-center justify-center overflow-hidden bg-fg/[0.03] p-[9%] shadow-[inset_0_-1px_0_var(--rule)]">
           <div className="relative aspect-[16/10] w-full overflow-hidden bg-well shadow-[0_0_0_1px_var(--rule),0_10px_28px_-14px_rgb(0_0_0/0.35)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.02] motion-reduce:transition-none">
             <div className="absolute inset-0 flex items-center justify-center px-6 text-center text-[11.5px] text-fg-faint">{s.archetype}</div>
-            <img src={gridThumb(s.id, theme)} alt="" loading="lazy" decoding="async" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+            <img src={(EMPTY_THUMBS ? emptyThumb : gridThumb)(s.id, theme)} alt="" loading="lazy" decoding="async" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
               className="absolute inset-0 size-full object-cover object-top" />
           </div>
         </div>

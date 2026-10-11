@@ -4,10 +4,12 @@
 import {
   ArrowLeft, Bell, Bookmark, ChevronRight, Clock, Compass, Heart, House, MapPin, Mountain, Navigation, Search, Share,
   SlidersHorizontal, Star, User, Activity, Wifi, BatteryFull, SignalHigh, Plus, Check, Footprints, Sun, Play, Settings,
+  Headphones, MapIcon, Ticket,
   type LucideIcon,
 } from 'lucide-react'
 
 export const ICONS: Record<string, LucideIcon> = {
   ArrowLeft, Bell, Bookmark, ChevronRight, Clock, Compass, Heart, House, MapPin, Mountain, Navigation, Search, Share,
   SlidersHorizontal, Star, User, Activity, Wifi, BatteryFull, SignalHigh, Plus, Check, Footprints, Sun, Play, Settings,
+  Headphones, Map: MapIcon, Ticket,
 }

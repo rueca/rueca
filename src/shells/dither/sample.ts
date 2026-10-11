@@ -1,7 +1,14 @@
-/* The demo photograph, painted procedurally so the lab works with no upload
-   and no network: the spinning top in continuous tone (see ./top). */
-import { paintTop } from '@/demo/top'
+/* The demo photograph: Campana's brass bell on black (src/demo/clients.ts), a hard
+   spotlight and deep shadow, which is what dithering loves. Decoded once and cached. */
+import { CAMPANA, loadDemo } from '@/demo/clients'
 
-export function paintSample(W = 1600, H = 1000): ImageData {
-  return paintTop(W, H, { at: 0.5, size: 0.66, tilt: -0.18, grain: 0.6, vignette: 0.12 }).getContext('2d')!.getImageData(0, 0, W, H)
+let cached: Promise<ImageData> | null = null
+export function paintSample(W = 1600): Promise<ImageData> {
+  return (cached ??= loadDemo(CAMPANA.night).then((img) => {
+    const H = Math.round((W * img.naturalHeight) / img.naturalWidth)
+    const c = document.createElement('canvas'); c.width = W; c.height = H
+    const x = c.getContext('2d', { willReadFrequently: true })!
+    x.imageSmoothingQuality = 'high'; x.drawImage(img, 0, 0, W, H)
+    return x.getImageData(0, 0, W, H)
+  }))
 }

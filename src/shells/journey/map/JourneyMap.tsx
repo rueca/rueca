@@ -23,7 +23,7 @@ export const LANE_W = 176
    Selection, drop bars and links in progress keep --signal: that is the tool. */
 const PAPER = {
   '--panel': WIRE.paper, '--overlay': WIRE.card, '--control': WIRE.card, '--well': WIRE.sheet, '--active': WIRE.sheet,
-  '--hover': 'rgb(28 26 25 / 0.05)', '--fg': WIRE.ink, '--fg-muted': WIRE.muted, '--fg-faint': WIRE.muted,
+  '--hover': 'rgb(24 20 17 / 0.05)', '--fg': WIRE.ink, '--fg-muted': WIRE.muted, '--fg-faint': WIRE.muted,
   '--line': WIRE.line, '--line-strong': WIRE.faint,
 } as React.CSSProperties
 const ADD_W = 56

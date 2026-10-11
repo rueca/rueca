@@ -16,7 +16,8 @@ export interface UIState {
   picked: string | null
 }
 const KEY = 'studio:component-lab:ui'
-const initial: UIState = { comp: 'button', view: 'preview', width: 768, previewTheme: 'light', matrixThemes: 'one', rightTab: 'tokens', codeTab: 'css', picked: null }
+// opens on the card: the Gabinete plate, copy and actions show the kit best
+const initial: UIState = { comp: 'card', view: 'preview', width: 768, previewTheme: 'light', matrixThemes: 'one', rightTab: 'tokens', codeTab: 'css', picked: null }
 const load = (): UIState => { try { return { ...initial, ...JSON.parse(localStorage.getItem(KEY) ?? '{}') } } catch { return initial } }
 
 export const ui = createStore<UIState>(load)

@@ -6,7 +6,7 @@
 --------------------------------------------------------------------------- */
 import { useEffect, useState } from 'react'
 import { download } from '@kit'
-import { paint } from '../engine/paint'
+import { paint, ready } from '../engine/paint'
 import type { GenParams } from '../engine/models'
 import { slug as toSlug } from '../../util'
 
@@ -55,6 +55,7 @@ async function pump() {
     pending.delete(k)
     if (cache.has(k)) continue
     await new Promise((r) => setTimeout(r, 0))
+    await ready(job.params)
     const c = paint(job.params, scaleFor(job.params, job.tier))
     cache.set(k, { url: await toURL(c), w: c.width, h: c.height })
     notify(k)
@@ -87,6 +88,7 @@ export function usePix(id: string | undefined, params: GenParams | undefined, ti
 
 /** A small, fast render for progress previews (data URL). */
 export function sketch(params: GenParams, longSide = 200) {
+  void ready(params) // first previews may be bare paper while the picture decodes
   const c = paint(params, longSide / (Math.max(params.w, params.h) * (params.upscale ?? 1)))
   return c.toDataURL('image/jpeg', 0.8)
 }
@@ -95,8 +97,8 @@ const slug = (s: string) => toSlug(s, 'image', 48)
 
 /** Full-resolution PNG, painted fresh. */
 export function exportPNG(params: GenParams, id: string) {
-  return new Promise<void>((res) => {
+  return ready(params).then(() => new Promise<void>((res) => {
     const c = paint(params, 1)
     c.toBlob((b) => { if (b) download(b, `${slug(params.prompt)}-${params.seed}${params.upscale ? '-2x' : ''}-${id.slice(-4)}.png`); res() }, 'image/png')
-  })
+  }))
 }

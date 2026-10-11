@@ -52,7 +52,7 @@ function initialDoc(): FlowsDoc {
   })
   return { flows }
 }
-export const doc = createDocStore<FlowsDoc>(initialDoc(), { id: 'flows', version: 3 })
+export const doc = createDocStore<FlowsDoc>(initialDoc(), { id: 'flows', version: 4 }) // v4: Gabinete demo (11 Oct 2026)
 export const history = createHistory([doc, params])
 
 /* ---------------------------------------------------------------- ui (not undoable) */

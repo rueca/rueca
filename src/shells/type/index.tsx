@@ -29,7 +29,8 @@ const readMode = (): Mode => { try { const m = localStorage.getItem(MODE_KEY); i
 const Mark = <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><path d="M3 3.5h10M8 3.5V13M5.5 13h5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg>
 
 async function embedFonts(): Promise<EmbedFont[]> {
-  return Promise.all((FAMILIES.inter.embed ?? []).map(async (f) => ({ family: SPECIMEN_FAMILY, dataURI: await fontDataURI(f.url), style: f.style })))
+  const files = Object.values(FAMILIES).flatMap((fam) => (fam.embed ?? []).map((f) => ({ ...f, family: fam.face ?? SPECIMEN_FAMILY })))
+  return Promise.all(files.map(async (f) => ({ family: f.family, dataURI: await fontDataURI(f.url), style: f.style })))
 }
 const fontFaceCSS = (fonts: EmbedFont[]) => fonts.map((f) => `@font-face{font-family:'${f.family}';src:url(${f.dataURI}) format('woff2');font-weight:100 900;font-style:${f.style}}`).join('')
 const slug = (s: string) => toSlug(s, 'type', 32)

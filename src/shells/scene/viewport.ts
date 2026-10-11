@@ -80,7 +80,7 @@ export function mountViewport(el: HTMLDivElement): EngineApi & { dispose: () => 
   const knit = knitNormalMap()
 
   const speaker = new THREE.Group()
-  speaker.name = 'Aura speaker'
+  speaker.name = 'Hand bell'
   content.add(speaker)
   nodes.set('speaker', speaker)
 
