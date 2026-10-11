@@ -39,7 +39,6 @@ export const getComp = () => doc.get()
 export const setComp = (c: Comp, final = true, label?: string) => doc.set(c, { commit: final, label })
 export const commitComp = (label?: string) => doc.commit(label)
 export const useComp = () => useDoc(doc)
-export const frameSize = (v: V = params.values()) => ASPECTS[(v.aspect as Aspect) ?? '9:16']
 
 export interface UI { sel: string[]; tool: 'select' | 'text' | 'shape' }
 export const ui = createStore<UI>(() => ({ sel: ['title'], tool: 'select' }))

@@ -37,7 +37,6 @@ export const OBJECTS: ObjDef[] = [
 export const OBJ: Record<string, ObjDef> = Object.fromEntries(OBJECTS.map((o) => [o.id, o]))
 export const MESHES = OBJECTS.filter((o) => o.kind === 'mesh').map((o) => o.id)
 export const LIGHTS = OBJECTS.filter((o) => o.kind === 'light').map((o) => o.id)
-export const TRANSFORMABLE = OBJECTS.filter((o) => o.kind === 'group' || o.kind === 'mesh' || o.kind === 'light').map((o) => o.id)
 
 /* --- schema builders --------------------------------------------------- */
 const v3 = (x = 0, y = 0, z = 0): Vec3 => ({ x, y, z })

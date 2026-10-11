@@ -21,7 +21,6 @@ const painters: Record<string, () => string> = {
   avatar: () => wireImage(160, 160, 'avatar'),
 }
 
-export const IMAGE_KEYS = Object.keys(painters)
 export const IMAGE_LABELS: Record<string, string> = { ridge: 'Top · card', top: 'Top · dithered', lake: 'Top · night', forest: 'Slot · 1:1', coast: 'Slot · card', dunes: 'Blank sheet · 3:2', avatar: 'Avatar slot' }
 
 /** data URL for a key, or the value itself when it is already a URL */

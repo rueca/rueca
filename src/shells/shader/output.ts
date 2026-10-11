@@ -40,7 +40,6 @@ export async function exportStill(w: number, h: number) {
 }
 
 let recording: AbortController | null = null
-export const isRecording = () => !!recording
 
 /** One seamless loop, frame by frame. Falls back to real-time capture of the live canvas. */
 export async function exportLoop(w: number, h: number, live: HTMLCanvasElement | null, fps = 60) {

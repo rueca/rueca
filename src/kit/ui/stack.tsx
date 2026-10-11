@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
-   EffectStack (alias StackList) — an ordered stack of fills, effects or
+   EffectStack — an ordered stack of fills, effects or
    adjustment layers: the list every pro tool converges on (Figma fills +
    effects, Paper fills, Affinity live filters, Rive / Spline post-fx,
    Lightroom-style adjustment layers). One row per item:
@@ -387,7 +387,6 @@ export function EffectStack<T extends StackItem>({
 }
 
 /** Same component, the name ui-design uses for fills / strokes / effects lists. */
-export const StackList = EffectStack
 
 function InsertLine({ bottom }: { bottom?: boolean }) {
   return <div aria-hidden className={cn('pointer-events-none absolute right-2.5 left-2.5 z-10 h-0.5 rounded-full bg-signal', bottom ? '-bottom-px' : '-top-px')} />

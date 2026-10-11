@@ -1,5 +1,5 @@
 /* Document mutations, shared by panels, the stage and the command palette. Each is one undo step. */
-import { toast, readFileAsDataURL, confirm } from '@kit'
+import { toast, confirm } from '@kit'
 import { doc, ui, params, history, blankRow, uid, COLUMNS, DEMO_DOC, SIZE_PRESETS, type DataRow, type Doc, type OverrideKey, type SizeSpec } from './model'
 import { parseDelimited, toCSV } from '@kit/ui/data-grid'
 import { download } from '@kit'
@@ -219,6 +219,3 @@ export function resetDemo() {
   toast('Demo data restored', { action: { label: 'Undo', onClick: () => history.undo() } })
 }
 
-export async function setLogoFromFile(file: File) {
-  params.setValue('logo', await readFileAsDataURL(file))
-}

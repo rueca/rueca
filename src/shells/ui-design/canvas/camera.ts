@@ -10,10 +10,6 @@ export function toWorld(clientX: number, clientY: number) {
   return { x: (clientX - (r?.left ?? 0) - c.x) / c.zoom, y: (clientY - (r?.top ?? 0) - c.y) / c.zoom }
 }
 
-export const toScreen = (b: Box) => {
-  const c = camera.getState()
-  return { x: b.x * c.zoom + c.x, y: b.y * c.zoom + c.y, w: b.w * c.zoom, h: b.h * c.zoom }
-}
 
 /** Zoom so a world box fills the stage (Shift+2 / Shift+1). The kit's fit() assumes content starts at 0,0. */
 export function zoomToBox(b: Box | null, pad = 80, maxZoom = 4) {

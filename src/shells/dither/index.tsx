@@ -3,7 +3,7 @@ import { useStore } from 'zustand'
 import {
   Braces, Columns2, Copy, Download, Eye, FileText, Grid3x3, Image as ImageIcon, ImageUp, Pipette, RotateCcw, Shapes, Sparkles, Type,
 } from 'lucide-react'
-import {
+import { ZoomPill,
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Artboard, Menu, Button, IconButton, Divider, Badge,
   PaletteField, ImageDrop, ParamActions, CommandPalette, useValues, useCamera, useHoldKey, shareMenuItems, equal, toast, promptText,
   copyText, download, stamp, cn, type Command, type MenuItem,
@@ -18,7 +18,9 @@ import { out, loadImage, loadSample, start } from './run'
 import { colorAt, drawVector, halftoneSVG, outSize, rasterCanvas, renderOutput } from './draw'
 import { extractPalette, MAX_SIDE } from './image'
 import { PalettePicker } from './local/PalettePicker'
-import { ZoomSteps } from './local/ZoomSteps'
+
+/** integer-friendly zoom ladder: nearest-neighbour pixels stay square and crisp */
+const PIXEL_STEPS = [0.125, 0.25, 0.5, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32]
 
 const MAX_CANVAS = 16_777_216 // Safari's canvas area limit; Chrome allows more but files get silly
 
@@ -192,7 +194,7 @@ export default function DitherLab() {
     >
       <div className="relative h-full">
         <Stage contentSize={contentSize} grid hud={false}
-          overlay={<><ZoomSteps /><StatusPill /><ViewDock /></>}>
+          overlay={<><ZoomPill steps={PIXEL_STEPS} presets={[0.5, 1, 2, 4, 8, 16]} keys /><StatusPill /><ViewDock /></>}>
           <Canvas result={result} split={split} grid={grid} />
         </Stage>
         {intake.over && (

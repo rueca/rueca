@@ -129,4 +129,3 @@ export type Tool = 'move' | 'frame' | 'rect' | 'ellipse' | 'text' | 'hand' | 'co
 let n = 0
 export const uid = (p = 'n') => `${p}${Date.now().toString(36).slice(-4)}${(n++).toString(36)}${Math.random().toString(36).slice(2, 5)}`
 
-export const isContainer = (node: Node) => node.type === 'frame'

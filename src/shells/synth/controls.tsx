@@ -41,4 +41,3 @@ export function PSegmented({ k, size = 'md' }: { k: string; size?: 'sm' | 'md' }
   return <Segmented size={size} value={value} onChange={(s) => params.setValue(k as never, s as never)} options={opts} iconOnly={opts.every((o) => o.icon)} label={def.label ?? humanize(k)} />
 }
 
-export const sectionChanged = (keys: string[]) => keys.some((k) => params.isChanged(k as never))

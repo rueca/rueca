@@ -133,4 +133,3 @@ export function demoComp(): Comp {
   return { tracks, clips, design: '9:16' }
 }
 
-export const clipEnd = (c: Clip) => c.start + c.dur

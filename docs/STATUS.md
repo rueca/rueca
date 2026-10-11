@@ -31,7 +31,7 @@ Brand board: http://localhost:5273/brand/
   in shader + photo; registry re-synced.
 
 ## Progress since the break (2026-10-09 evening)
-- Tokens namespaced (accent→signal, input→control, muted→fg-muted, faint→fg-faint, font-sans→font-ui) via scripts/codemod-tokens.py.
+- Tokens namespaced (accent→signal, input→control, muted→fg-muted, faint→fg-faint, font-sans→font-ui) (one-off codemod, since removed).
 - Kit core rebuilt: createDocStore/useDoc, createHistory/HistoryList, p.data, persist/share flags, scoped presets,
   params.replace/version/labels, createItemParams/bindItem, hotkey dispatcher with priorities/labels/useHoldKey,
   clock once/loop/pingpong + hidden-tab pause, Stage fit-by-value/fitMaxZoom/touch, ZoomPill props, useSafeArea,

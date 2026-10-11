@@ -233,8 +233,8 @@ const BLEED = {
  * a custom canvas) pass zoom / onZoom / onFit.
  */
 export function ZoomPill({
-  className, style, zoom: zoomProp, onZoom, onFit, step = 1.25, steps, presets = [0.5, 1, 2], floating = true, extra, fitShortcut = 'shift+1',
-}: { className?: string; style?: React.CSSProperties; zoom?: number; onZoom?: (z: number) => void; onFit?: () => void; step?: number; /** a zoom ladder (e.g. integer pixel zooms) instead of ×step */ steps?: number[]; presets?: number[]; floating?: boolean; /** more menu items after "Zoom to fit" (e.g. Zoom to selection) */ extra?: MenuItem[]; /** shown next to Zoom to fit; false hides it */ fitShortcut?: string | false }) {
+  className, style, zoom: zoomProp, onZoom, onFit, step = 1.25, steps, presets, floating = true, extra, fitShortcut = 'shift+1', keys = false,
+}: { className?: string; style?: React.CSSProperties; zoom?: number; onZoom?: (z: number) => void; onFit?: () => void; step?: number; /** a zoom ladder (e.g. integer pixel zooms) instead of ×step */ steps?: number[]; /** menu shortcuts (default: the ladder, or 50/100/200%) */ presets?: number[]; floating?: boolean; /** more menu items after "Zoom to fit" (e.g. Zoom to selection) */ extra?: MenuItem[]; /** shown next to Zoom to fit; false hides it */ fitShortcut?: string | false; /** bind `=` / `-` to step in / out */ keys?: boolean }) {
   const cam = useContext(CamCtx) ?? NO_CAMERA
   const camZoom = useStore(cam, (s) => s.zoom)
   const zoom = zoomProp ?? camZoom
@@ -243,20 +243,26 @@ export function ZoomPill({
   const go = (dir: 1 | -1) => steps
     ? (dir > 0 ? steps.find((z) => z > zoom * 1.001) : [...steps].reverse().find((z) => z < zoom * 0.999)) ?? zoom
     : dir > 0 ? zoom * step : zoom / step
+  useHotkeys(keys ? {
+    '=': { run: () => set(go(1)), label: steps ? 'Zoom in (next step)' : 'Zoom in', group: 'View' },
+    '-': { run: () => set(go(-1)), label: steps ? 'Zoom out (next step)' : 'Zoom out', group: 'View' },
+  } : {}, [keys, zoom, steps], { priority: 0 })
+  const btn = 'flex size-6 items-center justify-center rounded-[5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal'
+  const pct = Math.round(zoom * 100)
   return (
     <div style={style} className={cn('cluster flex h-8 items-center gap-0.5 px-1', floating && 'absolute right-3 bottom-3 z-10', className)}>
-      <button type="button" aria-label="Zoom out" onClick={() => set(go(-1))} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg"><Minus size={13} /></button>
+      <button type="button" aria-label="Zoom out" onClick={() => set(go(-1))} className={btn}><Minus size={13} strokeWidth={1.5} /></button>
       <Menu
         side="top"
         align="end"
-        trigger={<button type="button" className="h-6 min-w-[46px] rounded-[5px] px-1 tabular text-[11.5px] text-fg hover:bg-hover">{Math.round(zoom * 100)}%</button>}
+        trigger={<button type="button" aria-label={`Zoom level ${pct}%`} className="h-6 min-w-[46px] rounded-[5px] px-1 tabular text-[11.5px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">{pct}%</button>}
         items={[
           { label: 'Zoom to fit', shortcut: fitShortcut || undefined, onClick: fit },
           ...(extra ?? []),
-          ...(steps ?? presets).map((z) => ({ label: `Zoom to ${Math.round(z * 100)}%`, shortcut: z === 1 ? 'shift+0' : undefined, onClick: () => set(z) })),
+          ...(presets ?? steps ?? [0.5, 1, 2]).map((z) => ({ label: `Zoom to ${Math.round(z * 100)}%`, shortcut: z === 1 ? 'shift+0' : undefined, checked: Math.abs(zoom - z) < 0.001, onClick: () => set(z) })),
         ]}
       />
-      <button type="button" aria-label="Zoom in" onClick={() => set(go(1))} className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted hover:bg-hover hover:text-fg"><Plus size={13} /></button>
+      <button type="button" aria-label="Zoom in" onClick={() => set(go(1))} className={btn}><Plus size={13} strokeWidth={1.5} /></button>
     </div>
   )
 }

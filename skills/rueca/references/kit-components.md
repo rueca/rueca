@@ -14,7 +14,7 @@ rename/hide/lock, zoom, follow) · `ruler` helpers (`rulerTicks`, `RulerTicks`, 
 `EnvelopeEditor` (ADSR) · `core/ease`: `cubicBezier`, `EASINGS`, `SPRINGS`, `springAt`,
 `springToPhysics`/`physicsToSpring`, `cssEasing`, `cssLinear`.
 
-**Stacks, presets, compare** — `EffectStack` / `StackList` (fills · effects · adjustments: eye, swatch/thumb,
+**Stacks, presets, compare** — `EffectStack` (fills · effects · adjustments: eye, swatch/thumb,
 blend chip, opacity scrub, reorder by drag or ⌥↑↓, + menu by category, expandable params; per-action
 callbacks or `onChange(next, final)`) · `PresetGrid` + `Filmstrip` (thumbnails, hover/focus preview) ·
 `CompareSplit` (wipe · handle · side-by-side, keyboard divider, hold-key peek).

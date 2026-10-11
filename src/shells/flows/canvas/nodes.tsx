@@ -10,7 +10,7 @@ import { InlineText } from '@kit/ui/inline-text'
 import { Wireframe } from '../wireframes'
 import { WIRE } from '@/demo/wire'
 import { STICKY, stickyOf, templateLabel, type FlowNode, type Status } from '../model'
-import { params, updateNodeData, useUI, useFlow, setNodes, doc } from '../store'
+import { params, updateNodeData, useUI, useFlow, doc } from '../store'
 
 export const STATUS: Record<Status, { label: string; dot: string; text: string }> = {
   draft: { label: 'Draft', dot: 'bg-fg-faint', text: 'text-fg-faint' },
@@ -175,7 +175,3 @@ export function ShapeGlyph({ kind, children }: { kind: 'decision' | 'start' | 'e
   if (kind === 'note') return <span className="size-5 rounded-[2px] shadow-[inset_0_0_0_1.5px_currentColor]" />
   return <span className="h-4 w-6 rounded-[4px] border border-dashed border-current">{children}</span>
 }
-
-/** Expose a helper for the section drag: members move with their section. */
-export const moveSectionMembers = (sectionId: string, dx: number, dy: number) =>
-  setNodes((ns) => ns.map((n) => (n.data.section === sectionId ? { ...n, position: { x: n.position.x + dx, y: n.position.y + dy } } : n)), { commit: false })

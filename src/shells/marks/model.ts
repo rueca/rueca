@@ -66,17 +66,11 @@ const valid = (raw: unknown): raw is Doc => {
 
 // `marks` is a record keyed by random ids, so the default shape check (against a fresh demo) always failed and
 // every reload threw the user's work away (break-it ST1). Validate the structure instead.
-export const doc = createDocStore<Doc>(demoDoc(), { id: 'marks', version: 1, validate: valid })
-// A stored doc from an older build (or a different family set) falls back to the demo;
-// the pre-kit store kept its doc under `studio:marks:doc` — carry it over once.
-{
-  let start: unknown = doc.get()
-  try {
-    const legacy = localStorage.getItem('studio:marks:doc')
-    if (legacy) { localStorage.removeItem('studio:marks:doc'); const d = JSON.parse(legacy); if (valid(d)) start = d }
-  } catch { /* private mode / bad json */ }
-  if (start !== doc.get() || !valid(start)) doc.replace(valid(start) ? start : demoDoc(), { history: false })
-}
+export const doc = createDocStore<Doc>(demoDoc(), {
+  id: 'marks', version: 1, validate: valid,
+  // the pre-kit store kept its doc under `studio:marks:doc`; carried over once (and removed) if it still fits
+  legacyKeys: ['studio:marks:doc'], migrate: (raw) => (valid(raw) ? raw : null),
+})
 export const resetDemoDoc = () => doc.set(demoDoc(), { label: 'Restore demo variants' })
 
 /** ⌘Z undoes the last change — to brand settings or to the marks. */

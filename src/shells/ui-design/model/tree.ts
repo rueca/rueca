@@ -116,14 +116,6 @@ export function topMost(nodes: Node[], ids: string[]): string[] {
   return ids.filter((id) => !ancestors(nodes, id).some((a) => set.has(a.id)))
 }
 
-export function isDescendant(nodes: Node[], id: string, of: string): boolean {
-  return ancestors(nodes, id).some((a) => a.id === of)
-}
 
 export const pageNodes = (p: Page) => p.nodes
 
-export function countNodes(nodes: Node[]) {
-  let c = 0
-  walk(nodes, () => { c++ })
-  return c
-}
