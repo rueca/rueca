@@ -84,7 +84,9 @@ export const note = (x, y, text, { rotate = -3, size = 30, anchor = "middle" } =
    `w` is the note's width at size 30, measured in La Belle Aurore; `lines` splits a long note on phones. */
 export const BAND = { d: { size: 30, y: 532, rise: 30 }, m: { size: 42, y: 546, rise: 40 } }
 const EDGE = [60, 540] // the band's margins, inside the 6% the tiles keep clear
-function captionOne(v, { text, w, side, to, loop: lp, bend = 0.22, seed = 1, lines }) {
+function captionOne(v, { text, w, side, to: target, loop: lp, bend = 0.22, seed = 1, lines }) {
+  // `to` can differ per breakpoint: { d: [x, y], m: [x, y] }
+  const to = Array.isArray(target) ? target : target[v]
   const { size, y, rise } = BAND[v], k = size / 30
   const rows = v === 'm' && lines ? lines : [text]
   const width = Math.max(...rows.map((t) => (t === text ? w : w * (t.length / text.length)))) * k

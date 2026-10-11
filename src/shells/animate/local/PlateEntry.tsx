@@ -40,7 +40,7 @@ export function PlateEntry() {
       <text x={R - 44} y={HEAD_TOP + 64} textAnchor="end" style={small(24)}>MMXXVI</text>
       <text x={CX} y={HEAD_TOP + 158} textAnchor="middle" style={{ font: `400 150px ${DISPLAY}`, letterSpacing: '-0.015em', fill: 'var(--fg)' }}>Rueca</text>
       <text x={CX} y={HEAD_TOP + 206} textAnchor="middle" style={small(22)}>
-        RU·E·CA<tspan dx="26" style={{ letterSpacing: '0.02em' }}>/ˈrwe.ka/</tspan><tspan dx="26">NOUN, FROM THE SPANISH</tspan>
+        RUE·CA<tspan dx="26" style={{ letterSpacing: '0.02em' }}>/ˈrwe.ka/</tspan><tspan dx="26">SPANISH NOUN</tspan>
       </text>
       {SENSES.map((s, i) => (
         <text key={i} x={CX} y={HEAD_TOP + 246 + i * 34} textAnchor="middle" style={{ font: `italic 400 27px ${DISPLAY}`, fill: 'var(--fg)' }}>

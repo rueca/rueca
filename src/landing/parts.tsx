@@ -72,9 +72,8 @@ export function ThemeButton({ className }: { className?: string }) {
    (brand/logo/): drive wheel, whorl and band on true arcs round two centres, the whorl centred in
    its loop, gaps 22.5 / 19.5, bottoms level. The wordmark is outlined and fills the band's inner
    box, as in Rafael's file: baseline on the band's inner bottom edge, x-height up to its inner top,
-   weight 450 (500 small) so the word carries the discs' mass, half an x-height between them. Two cuts: regular, and a heavier small
-   one at 24px and under (band 34) so the whorl survives a favicon. The word is Signifier (Klim),
-   shipping ahead of the licence Rafael is buying; Newsreader (OFL) outlines are the fallback. */
+   weight 450 (500 small) so the word carries the discs' mass, half an x-height between them.
+   Now v2 (Rafael's updated lockup, 11 Oct): a thinner band, one drawing at every size (his call). */
 const MARK_DYES = ['cielo', 'achiote', 'gualda'] as const // LOCKUP mark order: wheel, whorl, band
 const cutFor = (size: number) => LOCKUP[size <= 24 ? 'small' : 'regular']
 /** brand dyes: light value, then the lifted dark value */

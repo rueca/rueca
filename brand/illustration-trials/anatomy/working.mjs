@@ -44,10 +44,12 @@ const cmdGlyph = (cx, cy, z) => {
 const zText = (cx, cy, z) => k.faceTextSvg(k.topMatrix([cx - 5, cy + 6], z, P, "x"), "Z", { size: 17, tone: "ink" }); // Nogal on the bright, in both themes
 
 const zKey = at([Z.x + KEY.w * 0.4, Z.y + KEY.d, MT + (KEY_H - PRESSED) * 0.5]); // the pressed key's front face
+const zTop = at([Z.x + KEY.w * 0.62, Z.y + KEY.d * 0.82, MT + KEY_H - PRESSED]); // the pressed key's top, near its front edge
 const back = at([TILES_X[3] + TILE.w / 2, TILES_Y + TILE.d / 2, MT + 9]);
 emit({
   name: "working", exportName: "WORKING_SVG", bright: "hoja",
   label: "A command key and a pressed Z key on a plate, in front of a row of saved states, the last one undone.",
   art: [plate(), history(), `<g ${up(14, 0.1)}>${undone()}</g>`, well(CMD), well(Z), keycap(CMD, KEY_H, false, cmdMark), `<g ${up(PRESSED)}>${keycap(Z, KEY_H - PRESSED, true, zText)}</g>`],
-  pen: caption({ text: "undo anything", w: 164, side: "right", to: [zKey[0], zKey[1] + 6], bend: 0.2, seed: 13 }),
+  // desktop: the arrow comes up from the right, so it lands on the key's top by its front edge, clear of the shadow cast to the right
+  pen: caption({ text: "undo anything", w: 164, side: "right", to: { d: [zTop[0] + 4, zTop[1] + 4], m: [zKey[0], zKey[1] + 6] }, bend: 0.2, seed: 13 }),
 });

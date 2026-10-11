@@ -18,7 +18,10 @@ import { k, P, at, S, L, D, MT, MOD, bright, emit, note, arrow, loop, seg, moves
 
 // the logo's outlines, as the landing draws them (only the mark is used)
 const SRC = readFileSync(join(dirname(fileURLToPath(import.meta.url)), "../../../src/landing/logo.generated.ts"), "utf8");
-const LOCKUP = JSON.parse(SRC.slice(SRC.indexOf("= {", SRC.indexOf("export const LOCKUP")) + 2).trim().replace(/;?\s*$/, "")).regular;
+// logo.generated.ts holds one cut as JSON (const V2 = {...}) since the v2 lockup; older files held { regular, small }
+const LOCKUP = SRC.includes("const V2")
+  ? JSON.parse(SRC.slice(SRC.indexOf("{", SRC.indexOf("const V2")), SRC.indexOf("\nexport const LOCKUP")).trim())
+  : JSON.parse(SRC.slice(SRC.indexOf("= {", SRC.indexOf("export const LOCKUP")) + 2).trim().replace(/;?\s*$/, "")).regular;
 
 // ── the motion shell, laid out as the real one: toolbar on top, artboard in the middle, the
 //    Design inspector on the right, the timeline along the bottom ("up" on screen is −y) ──
@@ -78,11 +81,12 @@ const playhead = (lit) => {
 // isometric illustration draws a mark: the band is one line of constant weight round its centre
 // (the outline of the two circles it runs round), the drive wheel and whorl are filled ellipses.
 // A projected fill would thin the band where the view foreshortens it; a line keeps its weight.
-// Geometry from the mark's own outlines (logo.generated.ts): wheel r 61 at (200, 108), whorl
-// r 22.5 at (67.5, 150.5), the band 25 wide with its centre 96 round the wheel, 54.5 round the whorl.
+// Geometry from the mark's own outlines (logo.generated.ts, the v2 lockup of 11 Oct): wheel r 74.07 at
+// (228.77, 117.36), whorl r 27.04 at (66.68, 168.06), the band 16 wide with its centre 109.36 round the
+// wheel and 58.68 round the whorl.
 // It arrives as an outline (step 2); as step 3 scrubs it draws itself: the band at full weight,
 // then each wheel traced and inked, and the outline fades.
-const MARK = { wheel: [200, 108, 61], whorl: [67.5, 150.5, 22.5], band: [[200, 108, 96.1], [67.5, 150.5, 54.5]], width: 25 };
+const MARK = { wheel: [228.77, 117.36, 74.07], whorl: [66.68, 168.06, 27.04], band: [[228.73, 117.36, 109.36], [66.68, 168.06, 58.68]], width: 16 };
 const LOGO_H = 34, LS = LOGO_H / LOCKUP.markH, LOGO_AT = [CARD.x + (CARD.w - LOCKUP.markW * LS) / 2, CARD.y + (CARD.d - LOGO_H) / 2];
 const hull = (pts) => {
   const p = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]), cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
