@@ -113,7 +113,7 @@ export function Timeline({
         <IconButton icon={ModeIcon} label={`${modeLabel} — click for ${nextMode === 'pingpong' ? 'ping-pong' : nextMode}`} tipSide="top" active={mode !== 'once'} onClick={() => clock.setState({ mode: nextMode })} />
         <Menu
           side="top" align="end"
-          trigger={<button type="button" className={cn('flex h-7 items-center gap-1 rounded-[6px] px-1.5 tabular text-[11.5px] hover:bg-hover', rate !== 1 ? 'text-signal' : 'text-fg-muted')}><Gauge size={13} strokeWidth={1.5} />{rate}×</button>}
+          trigger={<button type="button" className={cn('flex h-7 items-center gap-1 rounded-[6px] px-1.5 tabular text-[11.5px] hover:bg-hover', rate !== 1 ? 'text-signal-text' : 'text-fg-muted')}><Gauge size={13} strokeWidth={1.5} />{rate}×</button>}
           items={[0.1, 0.25, 0.5, 1, 2].map((r) => ({ label: `${r}×`, checked: r === rate, onClick: () => clock.setRate(r), shortcut: r === 0.25 ? 's' : undefined }))}
         />
         {collapsible && (
@@ -217,7 +217,7 @@ function TrackArea({
             return (
               <div key={m} className="pointer-events-none absolute bottom-0" style={{ left: X(m) }}>
                 <div className={cn('w-px', major ? 'h-2 bg-line-strong' : 'h-1 bg-line')} />
-                {major && <div className="absolute bottom-2.5 left-1 tabular text-[10px] text-fg-faint">{m >= 1000 ? `${m / 1000}s` : `${m}ms`}</div>}
+                {major && <div className="absolute bottom-2.5 left-1 tabular text-[10px] text-fg-muted">{m >= 1000 ? `${m / 1000}s` : `${m}ms`}</div>}
               </div>
             )
           })}

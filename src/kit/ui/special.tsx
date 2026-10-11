@@ -184,7 +184,7 @@ export function CurveEditor({ value, onChange, presets = EASINGS, height = 132 }
       <div className="flex flex-wrap gap-1">
         {Object.entries(presets).map(([name, v]) => (
           <button key={name} type="button" onClick={() => onChange(v, true)}
-            className={cn('h-5 rounded-[5px] px-1.5 text-[10.5px] outline-none', presetName === name ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted hover:text-fg')}>
+            className={cn('h-5 rounded-[5px] px-1.5 text-[10.5px] outline-none', presetName === name ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
             {name}
           </button>
         ))}

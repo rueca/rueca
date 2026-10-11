@@ -111,7 +111,7 @@ export function Section({
           type="button"
           aria-expanded={collapsible ? open : undefined}
           onClick={(e) => toggle(e.altKey)}
-          className={cn('flex h-full min-w-0 flex-1 items-center gap-1 text-left text-[11.5px] font-medium text-fg outline-none no-select rounded-[4px] focus-visible:text-signal focus-visible:ring-2 focus-visible:ring-signal', !collapsible && 'cursor-default')}
+          className={cn('flex h-full min-w-0 flex-1 items-center gap-1 text-left text-[11.5px] font-medium text-fg outline-none no-select rounded-[4px] focus-visible:text-signal-text focus-visible:ring-2 focus-visible:ring-signal', !collapsible && 'cursor-default')}
         >
           <Tip label={hint} side="left"><span className="truncate">{title}</span></Tip>
           {changed && <span className="size-1 shrink-0 rounded-full bg-signal" aria-label="changed" />}

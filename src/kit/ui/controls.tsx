@@ -77,7 +77,7 @@ export function Tiles({
               aria-label={labelOf(o)}
               className={cn(
                 aspect === 'square' ? 'aspect-square' : 'h-8', 'flex min-h-0 flex-col items-center justify-center gap-1 rounded-[7px] bg-control text-fg-muted outline-none transition-colors',
-                'hover:text-fg data-[pressed]:bg-signal-soft data-[pressed]:text-signal data-[pressed]:shadow-[inset_0_0_0_1px_var(--signal)]',
+                'hover:text-fg data-[pressed]:bg-signal-soft data-[pressed]:text-signal-text data-[pressed]:shadow-[inset_0_0_0_1px_var(--signal)]',
                 'focus-visible:ring-2 focus-visible:ring-signal',
               )}
             >
@@ -277,7 +277,7 @@ export function Divider({ vertical, className }: { vertical?: boolean; className
 export function Badge({ children, tone = 'default', className }: { children: ReactNode; tone?: 'default' | 'accent' | 'key' | 'rec' | 'ok'; className?: string }) {
   const tones = {
     default: 'bg-hover text-fg-muted',
-    accent: 'bg-signal-soft text-signal',
+    accent: 'bg-signal-soft text-signal-text',
     key: 'bg-key/15 text-key',
     rec: 'bg-rec/15 text-rec',
     ok: 'bg-ok/15 text-ok',

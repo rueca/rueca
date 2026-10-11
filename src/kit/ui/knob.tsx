@@ -192,7 +192,7 @@ export function Knob({
       )}
       {!hideValue && (
         <ScrubValue value={value} onChange={onChange} min={min} max={max} step={step} defaultValue={defaultValue} fmt={fmt} parse={parse} unit={unit}
-          label={`${label} value`} changed={changed} align="left" className={cn('h-[18px] justify-center px-0.5 text-[10.5px] [&>span]:text-center', dragging && 'text-signal')} />
+          label={`${label} value`} changed={changed} align="left" className={cn('h-[18px] justify-center px-0.5 text-[10.5px] [&>span]:text-center', dragging && 'text-signal-text')} />
       )}
     </div>
   )

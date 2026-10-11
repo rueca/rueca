@@ -46,7 +46,7 @@ export function VariantAction({ label, shortcut, onClick, icon: Icon, on, childr
     <Tip label={label} shortcut={shortcut}>
       <button type="button" aria-label={label} aria-pressed={on} onClick={(e) => { e.stopPropagation(); onClick() }} onDoubleClick={(e) => e.stopPropagation()}
         className={cn('flex size-7 items-center justify-center rounded-[7px] bg-overlay/90 text-fg-muted shadow-[var(--shadow-segment)] outline-none backdrop-blur-sm',
-          'hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', on && 'text-signal hover:text-signal')}>
+          'hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', on && 'text-signal-text hover:text-signal-text')}>
         {Icon ? <Icon size={13} strokeWidth={1.5} /> : children}
       </button>
     </Tip>

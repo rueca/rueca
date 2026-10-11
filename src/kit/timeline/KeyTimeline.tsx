@@ -425,7 +425,7 @@ export function KeyTimeline(props: KeyTimelineProps) {
                           a.out === 'hold' ? 'border-t border-dashed' : 'h-[2px] rounded-full',
                           active ? (a.out === 'hold' ? 'border-signal' : 'bg-signal') : a.out === 'hold' ? 'border-fg-faint group-hover/seg:border-fg' : 'bg-line-strong group-hover/seg:bg-fg/50')} />
                         {w > 44 && a.glyph && (
-                          <span className={cn('relative rounded-[4px] bg-panel px-0.5', active ? 'text-signal' : 'text-fg-faint group-hover/seg:text-fg')}>{a.glyph}</span>
+                          <span className={cn('relative rounded-[4px] bg-panel px-0.5', active ? 'text-signal-text' : 'text-fg-faint group-hover/seg:text-fg')}>{a.glyph}</span>
                         )}
                       </button>
                     )

@@ -271,7 +271,7 @@ export function Artboard({
       {label && (
         <div
           onPointerDown={onSelect}
-          className={cn('absolute bottom-full left-0 flex origin-bottom-left items-center gap-1.5 pb-1.5 text-[11px] whitespace-nowrap no-select', selected ? 'text-signal' : 'text-fg-faint')}
+          className={cn('absolute bottom-full left-0 flex origin-bottom-left items-center gap-1.5 pb-1.5 text-[11px] whitespace-nowrap no-select', selected ? 'text-signal-text' : 'text-fg-faint')}
           style={{ transform: `scale(${1 / zoom})` }}
         >
           {label}

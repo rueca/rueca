@@ -107,7 +107,7 @@ function List() {
           <Toast.Description className="text-[11.5px] text-fg-muted" />
         </div>
       </Toast.Content>
-      <Toast.Action className="h-6 rounded-[5px] px-2 text-[11.5px] font-medium text-signal hover:bg-hover" />
+      <Toast.Action className="h-6 rounded-[5px] px-2 text-[11.5px] font-medium text-signal-text hover:bg-hover" />
       <Toast.Close aria-label="Dismiss" className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint hover:bg-hover hover:text-fg">
         <X size={12} />
       </Toast.Close>

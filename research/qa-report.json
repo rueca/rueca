@@ -69,7 +69,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 115
+    "textSampled": 3
   },
   {
     "id": "ui-design",
@@ -117,7 +117,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 3
+    "textSampled": 142
   },
   {
     "id": "video",
@@ -205,7 +205,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 127
+    "textSampled": 125
   },
   {
     "id": "nodes",
@@ -213,7 +213,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 103
+    "textSampled": 105
   },
   {
     "id": "nodes",

@@ -44,7 +44,7 @@ export function LeftPanel() {
               <Workflow size={14} strokeWidth={1.5} className={on ? 'text-signal' : 'text-fg-faint'} />
               <InlineText bare focusable={false} value={f.name} onCommit={(s) => renameFlow(f.id, s)} editing={renaming === f.id} onEditingChange={(b) => setRenaming(b ? f.id : null)}
                 className="min-w-0 flex-1 truncate text-[12px]" label="Flow name" />
-              <span className="text-[11px] text-fg-faint tabular group-hover/row:hidden group-focus-within/row:hidden">{screens}</span>
+              <span className="text-[11px] text-fg-muted tabular group-hover/row:hidden group-focus-within/row:hidden">{screens}</span>
               <div className="hidden group-hover/row:block group-focus-within/row:block" onClick={(e) => e.stopPropagation()}>
                 <Menu align="end" trigger={<IconButton icon={MoreHorizontal} size="icon-sm" label="Flow actions" />}
                   items={[

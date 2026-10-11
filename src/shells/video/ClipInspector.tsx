@@ -150,7 +150,7 @@ function ClipSections({ c }: { c: Clip }) {
           </Row>
           <Row label="Max width" hint="Text wraps beyond this share of the frame width.">
             <Slider value={c.maxWidth ?? 0.9} min={0.2} max={1} step={0.01} label="Max width" onChange={(v, f) => set({ maxWidth: v }, f)} />
-            <Pct value={c.maxWidth ?? 0.9} min={0.1} max={1} step={0.01} className="w-[52px] shrink-0" onChange={(v, f) => set({ maxWidth: v }, f)} />
+            <Pct label="Max width" value={c.maxWidth ?? 0.9} min={0.2} max={1} step={0.01} className="w-[52px] shrink-0" onChange={(v, f) => set({ maxWidth: v }, f)} />
           </Row>
           <Row label="Highlight" hint="A rounded marker behind each line (caption style).">
             <div className="flex w-full items-center gap-1.5">
@@ -170,11 +170,11 @@ function ClipSections({ c }: { c: Clip }) {
           <Row label="Fill"><ColorField value={c.fill ?? '#ffffff'} onChange={(v, f) => set({ fill: v }, f)} /></Row>
           {c.shape === 'rect' && <Row label="Radius" hint="Corner radius as a share of the short side; 100% makes a pill.">
             <Slider value={Math.min(c.radius ?? 0, 0.5)} min={0} max={0.5} step={0.005} label="Radius" onChange={(v, f) => set({ radius: v >= 0.5 ? 1 : v }, f)} />
-            <Pct value={c.radius ?? 0} min={0} max={1} step={0.005} className="w-[52px] shrink-0" onChange={(v, f) => set({ radius: v }, f)} />
+            <Pct label="Radius" value={c.radius ?? 0} min={0} max={1} step={0.005} className="w-[52px] shrink-0" onChange={(v, f) => set({ radius: v }, f)} />
           </Row>}
           {c.shape === 'ring' && <Row label="Stroke">
             <Slider value={c.stroke ?? 0.02} min={0.002} max={0.1} step={0.001} label="Stroke" onChange={(v, f) => set({ stroke: v }, f)} />
-            <Pct value={c.stroke ?? 0.02} min={0.001} max={0.2} step={0.001} className="w-[52px] shrink-0" onChange={(v, f) => set({ stroke: v }, f)} />
+            <Pct label="Stroke" value={c.stroke ?? 0.02} min={0.001} max={0.2} step={0.001} className="w-[52px] shrink-0" onChange={(v, f) => set({ stroke: v }, f)} />
           </Row>}
         </Section>
       )}
@@ -196,11 +196,11 @@ function ClipSections({ c }: { c: Clip }) {
           </Row>
           <Row label="Ken Burns" hint="Slow zoom across the clip’s duration.">
             <Slider value={c.kenBurns ?? 0} min={0} max={0.4} step={0.01} label="Ken Burns" onChange={(v, f) => set({ kenBurns: v }, f)} />
-            <Pct value={c.kenBurns ?? 0} min={0} max={1} step={0.01} className="w-[52px] shrink-0" onChange={(v, f) => set({ kenBurns: v }, f)} />
+            <Pct label="Ken Burns" value={c.kenBurns ?? 0} min={0} max={1} step={0.01} className="w-[52px] shrink-0" onChange={(v, f) => set({ kenBurns: v }, f)} />
           </Row>
           {!c.frame && <Row label="Radius">
             <Slider value={c.radius ?? 0} min={0} max={0.2} step={0.002} label="Radius" onChange={(v, f) => set({ radius: v }, f)} />
-            <Pct value={c.radius ?? 0} min={0} max={0.5} step={0.002} className="w-[52px] shrink-0" onChange={(v, f) => set({ radius: v }, f)} />
+            <Pct label="Radius" value={c.radius ?? 0} min={0} max={0.5} step={0.002} className="w-[52px] shrink-0" onChange={(v, f) => set({ radius: v }, f)} />
           </Row>}
         </Section>
       )}
@@ -247,7 +247,7 @@ function ClipSections({ c }: { c: Clip }) {
           )}
           <Row label="Opacity">
             <Slider value={c.opacity} min={0} max={1} step={0.01} label="Opacity" onChange={(v, f) => set({ opacity: v }, f)} />
-            <Pct value={c.opacity} min={0} max={1} step={0.01} className="w-[52px] shrink-0" onChange={(v, f) => set({ opacity: v }, f)} />
+            <Pct label="Opacity" value={c.opacity} min={0} max={1} step={0.01} className="w-[52px] shrink-0" onChange={(v, f) => set({ opacity: v }, f)} />
           </Row>
         </Section>
       )}

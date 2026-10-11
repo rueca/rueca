@@ -35,7 +35,7 @@ const KW = /\b(?:const|let|var|function|return|import|from|export|default|if|els
 const SCRIPT: [RegExp, string][] = [
   [/\{\/\*[\s\S]*?\*\/\}|\/\*[\s\S]*?\*\/|\/\/.*$/m, 'text-fg-faint italic'],
   [/"[^"]*"|'[^']*'|`[^`]*`/, 'text-ok'],
-  [/<\/?[A-Z][\w.]*|<\/?[a-z][\w-]*|\/?>/, 'text-signal'],
+  [/<\/?[A-Z][\w.]*|<\/?[a-z][\w-]*|\/?>/, 'text-signal-text'],
   [/\b[a-zA-Z-]+(?==)/, 'text-key'],
   [KW, 'text-cat-7'],
   [/\b-?\d*\.?\d+\b|\b(?:true|false|null|undefined)\b/, 'text-key'],
@@ -43,11 +43,11 @@ const SCRIPT: [RegExp, string][] = [
 ]
 const RULES: Record<CodeLang, [RegExp, string][]> = {
   jsx: SCRIPT, tsx: SCRIPT, js: SCRIPT, ts: SCRIPT,
-  css: [[/\/\*[\s\S]*?\*\//, 'text-fg-faint italic'], [/--[\w-]+/, 'text-signal'], [/^[^:{}\n]+(?=\s*\{)|@[\w-]+/m, 'text-key'], [/#[0-9a-fA-F]{3,8}\b|-?\d*\.?\d+(px|%|em|rem|deg|s|ms)?\b/, 'text-ok'], [/[{}:;]/, 'text-fg-faint']],
-  json: [[/"[^"]*"(?=\s*:)/, 'text-signal'], [/"[^"]*"/, 'text-ok'], [/-?\d*\.?\d+\b|\btrue\b|\bfalse\b|\bnull\b/, 'text-key'], [/[{}[\],:]/, 'text-fg-faint']],
-  html: [[/<!--[\s\S]*?-->/, 'text-fg-faint italic'], [/"[^"]*"|'[^']*'/, 'text-ok'], [/<\/?[\w-]+|\/?>/, 'text-signal'], [/\b[\w-]+(?==)/, 'text-key']],
+  css: [[/\/\*[\s\S]*?\*\//, 'text-fg-faint italic'], [/--[\w-]+/, 'text-signal-text'], [/^[^:{}\n]+(?=\s*\{)|@[\w-]+/m, 'text-key'], [/#[0-9a-fA-F]{3,8}\b|-?\d*\.?\d+(px|%|em|rem|deg|s|ms)?\b/, 'text-ok'], [/[{}:;]/, 'text-fg-faint']],
+  json: [[/"[^"]*"(?=\s*:)/, 'text-signal-text'], [/"[^"]*"/, 'text-ok'], [/-?\d*\.?\d+\b|\btrue\b|\bfalse\b|\bnull\b/, 'text-key'], [/[{}[\],:]/, 'text-fg-faint']],
+  html: [[/<!--[\s\S]*?-->/, 'text-fg-faint italic'], [/"[^"]*"|'[^']*'/, 'text-ok'], [/<\/?[\w-]+|\/?>/, 'text-signal-text'], [/\b[\w-]+(?==)/, 'text-key']],
   glsl: [[/\/\*[\s\S]*?\*\/|\/\/.*$/m, 'text-fg-faint italic'], [/\b(?:uniform|varying|attribute|in|out|precision|highp|mediump|lowp|void|return|if|else|for|const)\b/, 'text-cat-7'], [/\b(?:float|int|bool|vec[234]|mat[234]|sampler2D)\b/, 'text-signal'], [/-?\d*\.?\d+\b/, 'text-key']],
-  shell: [[/#.*$/m, 'text-fg-faint italic'], [/"[^"]*"|'[^']*'/, 'text-ok'], [/^\s*[\w.-]+/m, 'text-signal'], [/\s--?[\w-]+/, 'text-key']],
+  shell: [[/#.*$/m, 'text-fg-faint italic'], [/"[^"]*"|'[^']*'/, 'text-ok'], [/^\s*[\w.-]+/m, 'text-signal-text'], [/\s--?[\w-]+/, 'text-key']],
   text: [],
 }
 

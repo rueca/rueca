@@ -48,6 +48,7 @@
   --signal-strong: #0a72c6;
   --signal-fg: #ffffff;
   --signal-soft: rgba(13, 153, 255, 0.16); /* selection wash */
+  --signal-text: #4db0ff; /* accent-coloured TEXT: ≥4.5:1 on panel, control and the soft wash (--signal is 4.4) */
 
   /* semantic, used sparingly: keyframes, recording, errors */
   --key: #f5b400;      /* keyframed / animated field */
@@ -104,6 +105,7 @@
   --signal-strong: #0a6fc0;
   --signal-fg: #ffffff;
   --signal-soft: rgba(11, 132, 224, 0.12);
+  --signal-text: #0866b0;
 
   --key: #c98a00;
   --rec: #e5383b;
@@ -151,6 +153,7 @@
     --signal-strong: #0a6fc0;
     --signal-fg: #ffffff;
     --signal-soft: rgba(11, 132, 224, 0.12);
+  --signal-text: #0866b0;
 
     --key: #c98a00;
     --rec: #e5383b;
@@ -203,6 +206,7 @@
   --color-signal-strong: var(--signal-strong);
   --color-signal-fg: var(--signal-fg);
   --color-signal-soft: var(--signal-soft);
+  --color-signal-text: var(--signal-text);
   --color-key: var(--key);
   --color-rec: var(--rec);
   --color-ok: var(--ok);
@@ -268,4 +272,10 @@
     linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
   background-size: 8px 8px;
   background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+}
+
+/* Faint text never sits on a tinted surface: on the selection wash, the active fill, a well or a selected row
+   it drops below 4.5:1 (cleanup QA C5). Unlayered on purpose so it beats the utility class; hover colours win. */
+:where(.studio, .pop) :is(.bg-active, .bg-signal-soft, .bg-well, [aria-selected="true"], [data-selected="true"]) .text-fg-faint:not(:hover) {
+  color: var(--fg-muted);
 }

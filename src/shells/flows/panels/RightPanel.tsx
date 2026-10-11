@@ -290,7 +290,7 @@ const sectionCount = () => doc.get().flows.find((f) => f.id === ui.getState().fl
 function Stat({ label, value, children }: { label: string; value: ReactNode; children?: ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5 rounded-[8px] bg-well px-2.5 py-2">
-      <span className="text-[11px] text-fg-faint">{label}</span>
+      <span className="text-[11px] text-fg-muted">{label}</span>
       <span className="text-[15px] font-semibold tabular">{value}</span>
       {children}
     </div>

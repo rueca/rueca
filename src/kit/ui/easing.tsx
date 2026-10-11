@@ -99,7 +99,7 @@ export function EasingEditor({ value, onChange, span, presets = EASE_PRESETS, cu
             return (
               <button key={p.name} type="button" aria-pressed={on} onClick={() => set(p.ease, true)}
                 className={cn('flex h-6 items-center gap-1 rounded-[5px] pr-1.5 pl-1 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-signal',
-                  on ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted hover:text-fg')}>
+                  on ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
                 <EaseGlyph ease={p.ease} className="size-3.5" />
                 {p.name}
               </button>
@@ -189,7 +189,7 @@ export function SpringField({ value, onChange, span, presets = SPRINGS, defaultP
       <div className="flex items-center gap-1">
         {Object.entries(presets).map(([n, p]) => (
           <button key={n} type="button" aria-pressed={presetName === n} onClick={() => onChange(p, true)}
-            className={cn('h-5 rounded-[5px] px-1.5 text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal', presetName === n ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted hover:text-fg')}>
+            className={cn('h-5 rounded-[5px] px-1.5 text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal', presetName === n ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
             {n}
           </button>
         ))}

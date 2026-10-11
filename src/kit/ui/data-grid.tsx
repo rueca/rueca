@@ -187,7 +187,7 @@ export function DataGrid<R extends object>({
               {/* controls live inside cells — a row can only own cells (axe aria-required-children / nested-interactive) */}
               <div role="rowheader" className="flex h-full min-w-0">
               <button type="button" tabIndex={-1} aria-label={`Row ${r + 1}`} onClick={() => { onActiveRow?.(r); setSel({ r, c: sel?.c ?? 0 }); root.current?.focus() }}
-                className={cn('flex h-full flex-1 items-center gap-1 pl-3 text-left tabular text-[11px]', isActive ? 'text-signal' : 'text-fg-muted hover:text-fg')}>
+                className={cn('flex h-full flex-1 items-center gap-1 pl-3 text-left tabular text-[11px]', isActive ? 'text-signal-text' : 'text-fg-muted hover:text-fg')}>
                 {rowLabel ? rowLabel(r) : r + 1}
                 {issues?.length ? (
                   <Tip label={issues.join(' · ')}><span className="text-key" aria-label={`${issues.length} issues`}><AlertTriangle size={11} strokeWidth={1.75} /></span></Tip>

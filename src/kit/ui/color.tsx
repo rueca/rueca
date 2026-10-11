@@ -263,7 +263,7 @@ export function ColorField({ value, onChange, alpha = true, swatches, changed, t
       >
         <Swatch color={value} />
         <span className={cn('flex-1 truncate tabular text-[11px] uppercase', changed === false ? 'text-fg-muted' : 'text-fg')}>{formatColor(value, 'hex')}</span>
-        {alpha && <span className="tabular text-[11px] text-fg-faint">{Math.round(a * 100)}%</span>}
+        {alpha && <span className="tabular text-[11px] text-fg-muted">{Math.round(a * 100)}%</span>}
         {trailing}
       </Popover.Trigger>
       <Popover.Portal>
