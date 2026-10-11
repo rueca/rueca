@@ -294,9 +294,11 @@
 .studio-touch [role="switch"]::after { inset: -13px -7px; }
 /* A slider moves only by its thumb on touch, like iOS's own: a swipe across the track scrolls the sheet
    instead of jumping the value (client-view C10). Events from the thumb still bubble to the control. */
-.studio-touch [data-studio-slider-control] { pointer-events: none; }
-.studio-touch [data-studio-thumb] { pointer-events: auto; }
-.studio-touch [data-studio-thumb]::after { content: ""; position: absolute; inset: -10px; }
+@media (pointer: coarse) {
+  .studio-touch [data-studio-slider-control] { pointer-events: none; }
+  .studio-touch [data-studio-thumb] { pointer-events: auto; }
+  .studio-touch [data-studio-thumb]::after { content: ""; position: absolute; inset: -10px; }
+}
 /* labels get room at 14px instead of the desktop 84px column */
 .studio-touch [data-row-label] { width: auto !important; min-width: 96px; max-width: 46%; flex-shrink: 0; }
 .studio-touch :where(button, [role="slider"], [role="spinbutton"]) { -webkit-touch-callout: none; }
