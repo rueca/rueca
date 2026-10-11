@@ -65,7 +65,7 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
     <div>
       {/* the window: a minimal browser bar on top of the live tool; the frame and shadow wrap both */}
       <div data-reveal="head" style={{ '--reveal-delay': '0.9s' } as React.CSSProperties} className="shadow-[var(--shadow-artboard),0_0_0_1px_var(--artboard-ring)]">
-        {!narrow && shell && <BrowserBar id={current} />}
+        {shell && <BrowserBar id={current} query={narrow ? '?client' : ''} />}
         <div ref={wrap} className="relative overflow-hidden bg-field"
           style={{ height: box.h || undefined, aspectRatio: box.h ? undefined : `${NATIVE.w} / ${NATIVE.h}` }}>
           {/* the thumbnail is always underneath: switching and loading never flash empty */}
@@ -84,21 +84,22 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
   )
 }
 
-/* A minimal browser bar (the window chrome product sites put round a live demo): three flat
+/* A minimal browser bar (the window chrome product sites put round a live demo), on phones too
+   (there it names the client view): three flat
    dots in the brand dyes standing in for close, minimise and full screen, the shell's real
    address in the mono face, and a link to open it full screen. Sheet-toned, one hairline. */
 const DOTS = ['#E8582C', '#F2C744', '#2FA57C'] // Achiote, Gualda, Hoja
-function BrowserBar({ id }: { id: string }) {
+function BrowserBar({ id, query = '' }: { id: string; query?: string }) {
   const host = site.url.replace(/^https?:\/\//, '')
   return (
     <div className="relative flex h-9 items-center bg-[var(--sheet)] px-3.5 shadow-[inset_0_-1px_var(--rule)]">
       <div aria-hidden className="flex gap-1.5">{DOTS.map((c) => <span key={c} className="size-2.5 rounded-full" style={{ background: c }} />)}</div>
       <div className="pointer-events-none absolute inset-x-0 flex justify-center">
         <span className="pointer-events-auto flex h-6 max-w-[60%] items-center px-3 font-code text-[11px] text-fg-muted">
-          <span className="truncate">{host}<span className="text-fg-faint">/#/</span>{id}</span>
+          <span className="truncate">{host}<span className="text-fg-faint">/#/</span>{id}<span className="text-fg-faint">{query}</span></span>
         </span>
       </div>
-      <a href={`#/${id}`} aria-label="Open full screen" className="ml-auto flex size-6 items-center justify-center rounded-[2px] text-fg-faint outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+      <a href={`#/${id}${query}`} aria-label="Open full screen" className="ml-auto flex size-6 items-center justify-center rounded-[2px] text-fg-faint outline-none transition-colors hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
         <ArrowUpRight size={13} strokeWidth={1.5} />
       </a>
     </div>

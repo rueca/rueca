@@ -11,7 +11,7 @@ import './plate.css'
     columns land on whole pixels (it divides by 6, 3 and the 5/12 split), keeping crosshairs crisp. */
 export function Sheet({ children, className, as: As = 'div' }: { children: ReactNode; className?: string; as?: 'div' | 'main' }) {
   return (
-    <As className={cn('sheet relative mx-auto w-[calc(100%-24px)] max-w-[1128px] sm:w-[calc(100%-48px)]', className)}>
+    <As className={cn('sheet relative mx-auto w-[calc(100%-12px)] max-w-[1128px] sm:w-[calc(100%-48px)]', className)}>
       {children}
       {/* the rails sit on top, so a cell with its own background never hides them */}
       <span aria-hidden className="rail left-0" /><span aria-hidden className="rail right-0" />
@@ -68,7 +68,7 @@ export function Hand({ children, className, delay = 0, pen = true }: { children:
 /** One field of a printed form: a small-caps label in the corner, the value written in. */
 export function Field({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
   return (
-    <span className={cn('relative flex items-end px-4 pt-7 pb-2 sm:px-5', className)}>
+    <span className={cn('relative flex items-end px-4 pt-7 pb-0.5 sm:px-5', className)}>
       <span className="strip absolute top-1.5 left-2.5 text-[8.5px] text-fg-faint sm:left-3">{label}</span>
       {children}
     </span>
@@ -82,7 +82,7 @@ export function TitleStrip({ n, label, of, aside }: { n: number; label: string; 
       <Field label="No." className="w-14 flex-none sm:w-16"><Hand className="text-[23px]">{String(n)}</Hand></Field>
       <Field label="Title" className="min-w-0 flex-1"><Hand className="text-[24px]" delay={0.15}>{label}</Hand></Field>
       {aside && <span className="strip hidden items-center px-5 text-fg-faint md:flex">{aside}</span>}
-      <Field label="Sheet" className="w-24 flex-none sm:w-28"><Hand className="text-[23px]" delay={0.35}>{`${n} of ${of}`}</Hand></Field>
+      <Field label="Sheet" className="hidden w-24 flex-none sm:flex sm:w-28"><Hand className="text-[23px]" delay={0.35}>{`${n} of ${of}`}</Hand></Field>
     </Row>
   )
 }

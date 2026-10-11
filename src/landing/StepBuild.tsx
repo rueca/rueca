@@ -5,8 +5,8 @@
    sets each step's progress, --s1 … --s3, written straight onto the drawing.
    - Desktop: the heading and the steps sit in a pinned left column, the active one open; the
      drawing pins on the right. Clicking a step scrolls to where it's finished.
-   - Phones and short screens: the drawing pins under the nav and the step texts scroll up
-     beneath it, the one in view marked.
+   - Phones and short screens: under the heading, the drawing and a text slot pin together;
+     the drawing builds and each step's text fades into the slot in turn.
    Reduced motion: each step cuts in once you're halfway through it. */
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from '@kit/core/cn'
@@ -131,57 +131,39 @@ function Side({ steps, head }: { steps: DeckStep[]; head?: ReactNode }) {
   )
 }
 
-/** phones and short screens: the drawing pins under the nav, the step texts scroll up beneath it.
-    Each step's progress follows its own text: it starts once the text is three-quarters of the
-    way up the space under the drawing and is complete when the text sits in the middle of it,
-    so the drawing always shows the step you're reading. */
+/** phones and short screens: the drawing has its own spot under the heading. Scrolling a track
+    below it, the drawing and a text slot under it pin together; the drawing keeps building and
+    each step's text fades into the slot in turn (no text scrolls under the drawing, so nothing
+    needs a backdrop). The same progress model as desktop (useBuild), over a shorter track. */
 function Stacked({ steps }: { steps: DeckStep[] }) {
-  const pinned = useRef<HTMLDivElement>(null), art = useRef<HTMLDivElement>(null), texts = useRef<(HTMLElement | null)[]>([])
-  const [active, setActive] = useState(0)
-  useEffect(() => {
-    const first = texts.current[0]
-    if (!first) return
-    const scroller = scrollParent(first), target: HTMLElement | Window = scroller ?? window
-    const still = matchMedia('(prefers-reduced-motion: reduce)')
-    let raf = 0, last = -1
-    const update = () => {
-      raf = 0
-      const top = scroller ? scroller.getBoundingClientRect().top : 0, vh = scroller ? scroller.clientHeight : innerHeight
-      const below = NAV_H + pinned.current!.offsetHeight, middle = (below + vh) / 2
-      let now = 0
-      texts.current.forEach((el, i) => {
-        if (!el) return
-        const r = el.getBoundingClientRect(), y = r.top - top
-        // from its top three-quarters down the open space to its centre on the middle of it
-        const start = (middle + vh) / 2, end = middle - r.height / 2
-        const p = Math.min(1, Math.max(0, (start - y) / (start - end)))
-        art.current?.style.setProperty(`--s${i + 1}`, String(still.matches ? (p >= 0.5 ? 1 : 0) : +p.toFixed(3)))
-        if (p > 0.04) now = i // the step being built is the one marked
-      })
-      if (now !== last) { last = now; setActive(now) }
-    }
-    const on = () => { if (!raf) raf = requestAnimationFrame(update) }
-    update()
-    target.addEventListener('scroll', on, { passive: true })
-    addEventListener('resize', on)
-    return () => { target.removeEventListener('scroll', on); removeEventListener('resize', on); cancelAnimationFrame(raf) }
-  }, [steps.length])
+  const track = useRef<HTMLDivElement>(null), pinned = useRef<HTMLDivElement>(null), art = useRef<HTMLDivElement>(null)
+  // the build starts while the drawing is still rising into its spot (a third of a screen early),
+  // so it never sits there empty
+  const { active } = useBuild(track, pinned, art, steps.length, useCallback(() => NAV_H + 8 + (scrollParent(track.current)?.clientHeight ?? innerHeight) * 0.35, []))
   return (
-    <div className="relative bg-field">
-      {/* no rule under it: the drawing and the steps are one piece, on one ground; the texts fade out as they pass under it */}
-      <div ref={pinned} className="sticky z-10 bg-field" style={{ top: NAV_H }} role="img" aria-label={steps.map((s) => s.title).join(', then ')}>
-        <div className="mx-auto aspect-square w-full max-w-[min(100vw,52vh)]"><BuildArt el={art} /></div>
-        <div aria-hidden className="pointer-events-none absolute inset-x-0 top-full h-10 bg-gradient-to-b from-field to-transparent" />
+    // the pinned piece is about 80vh tall on a phone; the rest of the track is the scroll that builds it (~60vh a step)
+    <div ref={track} className="relative" style={{ height: `${steps.length * 60 + 95}vh` }}>
+      <div ref={pinned} className="sticky flex flex-col gap-6 px-5 pt-6 pb-10 sm:px-6" style={{ top: NAV_H + 8 }}>
+        <div className="mx-auto aspect-square w-full max-w-[min(100%,46vh)]" role="img" aria-label={steps.map((s) => s.title).join(', then ')}>
+          <BuildArt el={art} />
+        </div>
+        {/* where you are: one short rule per step, the current one in ink */}
+        <div aria-hidden className="flex gap-1.5">
+          {steps.map((s, i) => <span key={s.n} className={cn('h-px flex-1 transition-colors duration-500', i <= active ? 'bg-fg' : 'bg-[var(--rule)]')} />)}
+        </div>
+        {/* the text slot: every step in one grid cell (so it's as tall as the longest), only the current one shown */}
+        <div className="grid">
+          {steps.map((s, i) => (
+            <article key={s.n} aria-hidden={active !== i}
+              className={cn('[grid-area:1/1] transition-[opacity,translate] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none',
+                active === i ? 'translate-y-0 opacity-100' : i < active ? '-translate-y-1.5 opacity-0' : 'translate-y-1.5 opacity-0')}>
+              <div className="tabular text-[13px] text-fg-faint">Step {s.n} of {steps.length}</div>
+              <h3 className="mt-2 text-[22px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance">{s.title}</h3>
+              <p className="mt-2.5 text-[14px] leading-[1.6] text-pretty text-fg-muted">{s.body}</p>
+            </article>
+          ))}
+        </div>
       </div>
-      {/* a lead-in, so step 1's text starts arriving just as the drawing pins (and its chat plays in view) */}
-      <div aria-hidden className="h-[34vh]" />
-      {steps.map((s, i) => (
-        <article key={s.n} ref={(el) => { texts.current[i] = el }} className={cn('flex min-h-[46vh] flex-col justify-center px-5 py-8 transition-opacity duration-500 sm:px-6', active === i ? 'opacity-100' : 'opacity-35')}>
-          <div className="tabular text-[13px] text-fg-faint">Step {s.n}</div>
-          <h3 className="mt-2 text-[24px] leading-[1.15] font-semibold tracking-[-0.02em] text-balance">{s.title}</h3>
-          <p className="mt-3 text-[14px] leading-[1.6] text-pretty text-fg-muted">{s.body}</p>
-        </article>
-      ))}
     </div>
   )
 }

@@ -495,25 +495,34 @@ function SwipeRow({ shells, rest, theme, head, strip }: { shells: Shell[]; rest:
       <Row className="py-14">
       <div className="px-5 sm:px-6">
         {head}
-        <a href="#/shells" className="mt-4 inline-flex items-center gap-1 text-[13px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">All shells<ArrowUpRight size={13} strokeWidth={1.5} /></a>
       </div>
       <div className="mt-8 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none]">
         {shells.map((s) => (
-          // not links: the shells aren't built for phones, so here they're pictures only
-          <div key={s.id} data-shell-id={s.id} className={cn('flex w-[78vw] flex-none snap-start flex-col', CARDED ? 'shadow-[inset_0_0_0_1px_var(--rule)]' : 'gap-2.5')}>
-            {CARDED && <div className="px-4 pt-3.5 pb-3"><span className="block truncate font-display text-[19px] leading-tight text-fg">{s.name}</span></div>}
-            <div className={cn('relative aspect-[16/10] overflow-hidden', CARDED ? 'mx-2.5 bg-well shadow-[0_0_0_1px_var(--rule)]' : 'panel rounded-none!')}>
-              <img src={rail(s.id, theme)} alt={`${s.name}, a ${s.category.toLowerCase()} tool built with the kit`} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" />
+          // links again (Rafael, 11 Oct): a shell opens with the "best on a desktop" notice on phones.
+          // A square picture with the name under it.
+          <a key={s.id} href={`#/${s.id}`} data-shell-id={s.id}
+            className="flex w-[70vw] flex-none snap-start flex-col shadow-[inset_0_0_0_1px_var(--rule)] outline-none focus-visible:ring-2 focus-visible:ring-signal">
+            <div className="relative m-2.5 mb-0 aspect-square overflow-hidden bg-well shadow-[0_0_0_1px_var(--rule)]">
+              <img src={rail(s.id, theme)} alt={`${s.name}, a ${s.category.toLowerCase()} tool built with the kit`} loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover object-left-top" />
             </div>
-            {CARDED ? <div className="h-2.5" /> : <span className="truncate text-[14px] font-medium text-fg">{s.name}</span>}
-          </div>
+            <div className="flex items-center justify-between gap-3 px-4 pt-3 pb-3.5">
+              <span className="truncate font-display text-[19px] leading-tight text-fg">{s.name}</span>
+              <ArrowUpRight size={14} strokeWidth={1.5} className="flex-none text-fg-faint" />
+            </div>
+          </a>
         ))}
         {rest.length > 0 && (
-          <a href="#/shells" className="flex w-[60vw] flex-none snap-start flex-col justify-between bg-signal-strong p-4 text-signal-fg outline-none focus-visible:ring-2 focus-visible:ring-fg">
+          <a href="#/shells" className="flex w-[52vw] flex-none snap-start flex-col justify-between bg-signal-strong p-4 text-signal-fg outline-none focus-visible:ring-2 focus-visible:ring-fg">
             <span className="strip text-[10.5px] opacity-70">+{rest.length} more</span>
             <span className="flex items-end justify-between gap-3 font-display text-[22px] leading-[1.05]">See all {shells.length + rest.length} shells<ArrowRight size={18} strokeWidth={1.5} className="mb-0.5 flex-none" /></span>
           </a>
         )}
+      </div>
+      {/* the way on: a primary button under the cards, like the hero's Install */}
+      <div className="mt-6 px-5 sm:px-6">
+        <a href="#/shells" className="inline-flex h-10 items-center gap-2 rounded-[2px] bg-signal-strong px-4 text-[13.5px] font-semibold text-signal-fg outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sheet)]">
+          See all {shells.length + rest.length} shells
+        </a>
       </div>
       </Row>
     </section>

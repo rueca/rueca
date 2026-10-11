@@ -158,7 +158,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
           {/* ── footer: the drawing's title block ────────────────── */}
           <Row as="footer">
             {/* 15+15 | 14+14+14: the first two columns end exactly at the 5/12 split above, so that divider runs straight on */}
-            <div data-md="5" className="cells title-block text-[12.5px] md:grid-cols-[repeat(2,minmax(0,15fr))_repeat(3,minmax(0,14fr))]">
+            <div data-md="5" className="cells title-block auto-rows-fr text-[12.5px] md:grid-cols-[repeat(2,minmax(0,15fr))_repeat(3,minmax(0,14fr))]">
               <div className="flex items-center px-5 py-5 sm:px-6"><Logo height={16} /></div>
               <TitleCell label="Drawn by">{site.author.url
                 ? <a href={site.author.url} target="_blank" rel="noreferrer" className="underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-signal"><Hand>{site.author.name}</Hand></a>
@@ -184,7 +184,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
 }
 
 /** The hero preview's width: wider than the sheet, up to 1360, always inside the screen. */
-const BREAKOUT = 'min(calc(100vw - 32px), 1360px)'
+const BREAKOUT = 'min(calc(100vw - 16px), 1360px)'
 /** How many numbered sheets (sections) the page has, for the title strips. */
 const SHEETS = 6
 
