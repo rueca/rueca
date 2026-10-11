@@ -11,7 +11,9 @@
      text  { x, y, w }         one line per run of text, on its vertical centre
      track { x, y, w, v }      a slider: the track, and its knob at v (0–1)
      pill  { x, y, w, h, on }  a switch
-     dot   { x, y, r }         an icon button
+     dot   { x, y, r }         an icon button (toolbars only)
+     vrule { x, y, h }         a vertical edge (a docked panel's inner side)
+   Then tidied (tidy, below): fewer marks where dense, no doubled lines.
    --------------------------------------------------------------------------- */
 export function traceBlueprint() {
   const W = innerWidth, H = innerHeight, out = []
@@ -88,7 +90,7 @@ export function traceBlueprint() {
     const el = n.parentElement
     if (!el || el.closest('svg, [aria-hidden="true"], script, style, [data-studio-toaster]') || !shown(el)) continue
     const rg = document.createRange(); rg.selectNodeContents(n)
-    for (const r of rg.getClientRects()) if (vis(r) && r.width >= 4 && within(r, el)) out.push({ k: 'text', x: R(r.x), y: R(r.y + r.height / 2), w: R(r.width) })
+    for (const r of rg.getClientRects()) if (vis(r) && r.width >= 4 && within(r, el)) out.push({ k: 'text', x: R(r.x), y: R(r.y + r.height / 2), w: R(r.width), size: R(r.height) })
   }
 
   // sliders (the kit's: a track with an indicator), switches, icon buttons
@@ -106,7 +108,53 @@ export function traceBlueprint() {
     if (e.textContent.trim() || !shown(e)) continue
     const r = e.getBoundingClientRect()
     if (!vis(r) || r.width > 44 || Math.abs(r.width - r.height) > 6) continue
-    out.push({ k: 'dot', x: R(r.x + r.width / 2), y: R(r.y + r.height / 2), r: R(Math.min(r.width, r.height) * 0.22) })
+    out.push({ k: 'dot', x: R(r.x + r.width / 2), y: R(r.y + r.height / 2), r: R(Math.min(r.width, r.height) * 0.22), bar: !!e.closest('.cluster, header') })
+  }
+  return { w: W, h: H, marks: out }
+}
+
+/* Tidy the tracing so it reads as a clean drawing at card size (~0.55×):
+   - fewer marks where it's dense: text runs on one line merge into one stroke, tiny text (rulers,
+     captions under ~10px) is dropped, and icon buttons are kept only in toolbars;
+   - no doubled lines: near-identical boxes are drawn once, a divider on a box's own edge is dropped,
+     and a box against the screen's edge loses that side (the card's frame already draws it). */
+export function tidy({ w: W, h: H, marks }) {
+  const near = (a, b, d = 4) => Math.abs(a - b) <= d
+  const boxes = [], out = []
+  // boxes: dedupe; those touching the screen edge become their interior edges
+  for (const m of marks.filter((m) => m.k === 'box')) {
+    // the same box twice, or a box hugging the inside of another (a panel and its scroll area): drawn once
+    if (boxes.some((b) => near(b.x, m.x, 6) && near(b.y, m.y, 6) && near(b.x + b.w, m.x + m.w, 6) && near(b.y + b.h, m.y + m.h, 6))) continue
+    boxes.push(m)
+    const L = near(m.x, 0, 3), T = near(m.y, 0, 3), Rt = near(m.x + m.w, W, 3), B = near(m.y + m.h, H, 3)
+    if (!L && !T && !Rt && !B) { out.push(m); continue }
+    if (!T) out.push({ k: 'rule', x: m.x, y: m.y, w: m.w })
+    if (!B) out.push({ k: 'rule', x: m.x, y: m.y + m.h, w: m.w })
+    if (!L) out.push({ k: 'vrule', x: m.x, y: m.y, h: m.h })
+    if (!Rt) out.push({ k: 'vrule', x: m.x + m.w, y: m.y, h: m.h })
+  }
+  const edgeAt = (y, x0, x1) => boxes.some((b) => (near(b.y, y) || near(b.y + b.h, y)) && b.x - 4 <= x0 && b.x + b.w + 4 >= x1)
+  const rules = []
+  for (const m of marks.filter((m) => m.k === 'rule')) {
+    if (edgeAt(m.y, m.x, m.x + m.w) || rules.some((r) => near(r.y, m.y) && near(r.x, m.x, 8) && near(r.w, m.w, 8))) continue
+    rules.push(m); out.push(m)
+  }
+  // text: drop the tiny, merge runs that sit on one line with a small gap
+  // a row of seven or more short labels on one line is a ruler or a scale: it reads as clutter, so it goes
+  const rows = new Map()
+  for (const m of marks) if (m.k === 'text') { const key = Math.round(m.y / 3); rows.set(key, (rows.get(key) ?? 0) + 1) }
+  const ruler = (m) => (rows.get(Math.round(m.y / 3)) ?? 0) >= 7
+  const text = marks.filter((m) => m.k === 'text' && (m.size ?? 14) >= 10.5 && m.w >= 12 && !ruler(m)).sort((a, b) => a.y - b.y || a.x - b.x)
+  for (const m of text) {
+    const prev = out.findLast((o) => o.k === 'text' && near(o.y, m.y, 2) && m.x - (o.x + o.w) < 14 && m.x >= o.x)
+    if (prev) { prev.w = Math.max(prev.w, m.x + m.w - prev.x); continue }
+    out.push({ k: 'text', x: m.x, y: m.y, w: m.w })
+  }
+  for (const m of marks) {
+    if (m.k === 'dot') { if (m.bar) out.push({ k: 'dot', x: m.x, y: m.y, r: m.r }); continue }
+    // media sitting in a box already drawn (an artboard) keeps only its diagonal
+    if (m.k === 'media') { out.push(boxes.some((b) => near(b.x, m.x, 8) && near(b.y, m.y, 8) && near(b.w, m.w, 8) && near(b.h, m.h, 8)) ? { ...m, framed: true } : m); continue }
+    if (m.k === 'track' || m.k === 'pill') out.push(m)
   }
   return { w: W, h: H, marks: out }
 }

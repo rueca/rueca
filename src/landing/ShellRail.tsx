@@ -270,6 +270,7 @@ function fromBlueprint(bp: Blueprint): { marks: Mark[]; w: number; h: number } {
     const w = m.w ?? 0, h = m.h ?? 0
     if (m.k === 'box') marks.push({ r: [m.x, m.y, w, h, m.r ?? 0], s: 0 })
     else if (m.k === 'rule') marks.push({ d: `M${m.x} ${m.y}H${m.x + w}`, s: 0 })
+    else if (m.k === 'vrule') marks.push({ d: `M${m.x} ${m.y}V${m.y + h}`, s: 0 })
     else if (m.k === 'media') { if (!m.framed) marks.push({ r: [m.x, m.y, w, h, 0], s: 0 }); marks.push({ d: `M${m.x} ${m.y + h}L${m.x + w} ${m.y}`, s: 1 }) }
     else if (m.k === 'track') marks.push({ d: `M${m.x} ${m.y}H${m.x + w}`, s: 1 }, { c: [m.x + w * (m.v ?? 0.5), m.y, 4], s: 1 })
     else if (m.k === 'pill') marks.push({ r: [m.x, m.y, w, h, h / 2], s: 1 }, { c: [m.on ? m.x + w - h / 2 : m.x + h / 2, m.y + h / 2, h / 2 - 3], s: 1 })
@@ -306,7 +307,7 @@ const SKELETON: Mark[] = (() => {
 function Skeleton({ drawn, marks = SKELETON, w = 1600, h = 1000 }: { drawn: boolean; marks?: Mark[]; w?: number; h?: number }) {
   return (
     <svg aria-hidden viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" className={cn('skeleton absolute inset-0 size-full bg-[var(--sheet)]', !DRAW_SKELETON && 'skeleton-static')} data-drawn={drawn || undefined}
-      fill="none" stroke="var(--cross)" strokeWidth="1" vectorEffect="non-scaling-stroke">
+      fill="none" stroke="var(--rule)" strokeWidth="1" vectorEffect="non-scaling-stroke" shapeRendering="geometricPrecision">
       {marks.map((k, i) => {
         // out: timed by where the stroke starts across the board, so the wipe edge erases each line just
         // before it passes · in: by stage (frames, then controls, then text), each stage sweeping in the
@@ -367,7 +368,7 @@ function CardedRailCard({ shell: s, theme, delay, focused }: { shell: Shell; the
           </a>
         </div>
         <svg aria-hidden className={cn('skeleton pointer-events-none absolute inset-x-5 top-4 h-[28px] w-[calc(100%-40px)] overflow-visible', !DRAW_SKELETON && 'skeleton-static wipe-out')} data-drawn={drawn || undefined} data-on={focused || undefined}
-          fill="none" stroke="var(--cross)" strokeWidth="1" strokeLinecap="round">
+          fill="none" stroke="var(--rule)" strokeWidth="1" strokeLinecap="round">
           {/* the name: a line about as long as the name, on its x-height */}
           <path d={`M0 15H${Math.min(260, 40 + s.name.length * 10)}`} pathLength={1} style={{ '--in': '480ms', '--out': '50ms' } as React.CSSProperties} />
           {/* the link: a short line and its arrow, at the right */}
@@ -422,7 +423,7 @@ function IndexCard({ rest, first, total, focused }: { rest: Shell[]; first: numb
           <span className="strip flex-none text-[10.5px] text-fg-faint">Plates {String(first).padStart(2, '0')}–{String(total).padStart(2, '0')}</span>
         </div>
         <svg aria-hidden className={cn('skeleton pointer-events-none absolute inset-x-5 top-4 h-[28px] w-[calc(100%-40px)] overflow-visible', !DRAW_SKELETON && 'skeleton-static wipe-out')} data-drawn={drawn || undefined} data-on={focused || undefined}
-          fill="none" stroke="var(--cross)" strokeWidth="1" strokeLinecap="round">
+          fill="none" stroke="var(--rule)" strokeWidth="1" strokeLinecap="round">
           <path d="M0 15H150" pathLength={1} style={{ '--in': '480ms', '--out': '50ms' } as React.CSSProperties} />
           <svg x="100%" overflow="visible"><path d="M-96 15H0" pathLength={1} style={{ '--in': '100ms', '--out': '500ms' } as React.CSSProperties} /></svg>
         </svg>

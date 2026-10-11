@@ -14,7 +14,7 @@
 --------------------------------------------------------------------------- */
 import { chromium } from 'playwright-core'
 import { mkdirSync, writeFileSync } from 'node:fs'
-import { traceBlueprint } from './blueprint.mjs'
+import { tidy, traceBlueprint } from './blueprint.mjs'
 import { NEUTRAL_ACCENT_CSS } from '../src/landing/neutral.ts'
 
 const BASE = process.env.BASE ?? 'http://localhost:5273'
@@ -57,7 +57,7 @@ for (const id of shells) {
       return c.toDataURL('image/webp', 0.82).split(',')[1]
     }, shot.toString('base64'))
     writeFileSync(`public/thumbs/grid/${id}-${theme}.webp`, Buffer.from(webp, 'base64'))
-    if (theme === 'light') writeFileSync(`public/thumbs/blueprints/${id}.json`, JSON.stringify(await page.evaluate(`(${traceBlueprint.toString()})()`)))
+    if (theme === 'light') writeFileSync(`public/thumbs/blueprints/${id}.json`, JSON.stringify(tidy(await page.evaluate(`(${traceBlueprint.toString()})()`))))
     console.log(`✓ ${id.padEnd(14)} ${theme}`)
   }
 }
