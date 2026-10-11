@@ -11,7 +11,8 @@ class of "the active state looks wrong" bugs before the person sees them.
 
 ```js
 const root = document.documentElement
-const V = n => getComputedStyle(root).getPropertyValue(n).trim()
+const studio = document.querySelector('.studio') ?? root   // the kit's tokens live on its own root
+const V = n => getComputedStyle(studio).getPropertyValue(n).trim()
 const parse = c => { const d = document.createElement('div'); d.style.color = c
   document.body.appendChild(d)
   const m = getComputedStyle(d).color.match(/[\d.]+/g).map(Number); d.remove(); return m }
@@ -22,6 +23,7 @@ const ratio = (a,b) => +(((Math.max(lum(a),lum(b))+0.05)/(Math.min(lum(a),lum(b)
 
 const fails = []
 for (const theme of ['dark','light']) {
+  root.setAttribute('data-studio-theme', theme)   // the kit's theme (a site using .dark/.light classes: toggle those too)
   root.classList.toggle('light', theme === 'light'); root.classList.toggle('dark', theme === 'dark')
   const g = n => parse(V(n)), panel = g('--panel')
   ;[['well/panel',              g('--well'),      panel,                 1.08],

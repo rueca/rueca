@@ -287,7 +287,7 @@
 .studio-touch { --row: 48px; -webkit-tap-highlight-color: transparent; }
 .studio-touch :is(.h-6) { height: 36px; }
 .studio-touch :is(.text-\[11px\], .text-\[11\.5px\], .text-\[12px\]) { font-size: 14px; }
-.studio-touch :where(input:not([type="range"]), textarea, select) { font-size: 16px; }
+
 .studio-touch [data-studio-thumb] { width: 24px; height: 24px; scale: 1; }
 /* icon buttons and switches: 36px boxes, a 44px reach */
 .studio-touch :is(.size-6) { width: 36px; height: 36px; }
@@ -301,9 +301,11 @@
 }
 .studio-touch [data-section-header] { height: 44px; }
 /* popups (colour picker, selects) are portaled out of the client view: while one is shown, size them for touch too */
-:root[data-studio-client] .pop :where(input:not([type="range"]), textarea, select) { font-size: 16px; }
 :root[data-studio-client] .pop :is(.h-6) { height: 36px; }
 :root[data-studio-client] .pop :is(.text-\[11px\], .text-\[11\.5px\]) { font-size: 14px; }
+:root[data-studio-client] .pop :is(input:not([type="range"]), textarea, select) { font-size: 16px; }
+/* inputs last and with :is(), so they beat the 14px text rule above: 16px or iOS zooms the page (i3) */
+.studio-touch :is(input:not([type="range"]), textarea, select) { font-size: 16px; }
 /* labels get room at 14px instead of the desktop 84px column */
 .studio-touch [data-row-label] { width: auto !important; min-width: 96px; max-width: 46%; flex-shrink: 0; }
 .studio-touch :where(button, [role="slider"], [role="spinbutton"]) { -webkit-touch-callout: none; }

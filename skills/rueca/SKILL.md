@@ -29,7 +29,8 @@ you read rides along in every later turn.
      `npx shadcn@latest add https://rueca.dev/r/studio.json -y` (lands in
      `src/components/studio/`; import from `@/components/studio`; add
      `@import "./components/studio/theme.css";` and `html, body, #root { height: 100% }` to the main CSS).
-     No `components.json` yet (`add` then prompts and silently installs nothing), a new project,
+     An existing app with no `components.json` (never `shadcn init` there — it rewrites the app's
+     CSS; install.md has a components.json to write instead), a new project, Next.js,
      strict TypeScript or `shadcn init` trouble → `references/install.md`. After installing, run
      the production build once (`npm run build`), not just the dev server. **Can't install right now** (no shell, told not to run
      anything, registry unreachable)? Still write against the kit and put the install command in your handoff — never

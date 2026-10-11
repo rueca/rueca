@@ -106,7 +106,7 @@ export function ClientView({
     // h-dvh: the visible height on phones, which changes as Safari's toolbar shows and hides (100vh doesn't)
     // side by side on wide screens AND on short ones (a phone held sideways is ~390px tall: stacked, the art was a stamp)
     // touch-action: no page pinch-zoom anywhere in the view (C11); the art handles its own gestures
-    <div data-studio-client style={{ touchAction: 'pan-x pan-y' }} className={cn('studio studio-touch flex h-dvh w-full flex-col overflow-hidden bg-field md:flex-row [@media(max-height:500px)]:flex-row', className)}>
+    <div data-studio-client style={{ touchAction: 'pan-x pan-y' }} className={cn('studio studio-touch relative flex h-dvh w-full flex-col overflow-hidden bg-field md:flex-row [@media(max-height:500px)]:flex-row', className)}>
       {/* touch-none: a pinch on the art must not zoom the whole page (C11) */}
       <main aria-label="Artwork" className="relative min-h-0 min-w-0 flex-1 touch-none">{children}</main>
       <section

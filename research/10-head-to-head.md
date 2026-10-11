@@ -204,6 +204,17 @@ Interrupted by the crash after 14 findings; the comparison table and perf/a11y p
 | C13 | P2 | an older-version link shows the client the wrong artwork with a 6 s toast | improved: `migrate` carries old links; toast now actually shows (queued) |
 | C14 | P3 | seed field announced "Seed" under the "Arrangement" row; sheet not a landmark | **fixed**: SeedField takes the row label; sheet is `<section aria-label="Controls">` |
 
+**Re-test (b7, after the fixes; Chrome emulation + real Safari):** fixed C2–C7, C14; C9 mostly (section headers then
+fixed to 44 px); partly C1/C8/C10/C11/C12; C13 still broken in the shell. New: N1 (P1) short landscape phones shrank the
+art to a 54×96 stamp; N2 art too small to judge, no zoom; N3 the designer opening a client's link was locked in;
+N4 a client's first Undo went to bare defaults; N6 thumb-only rule hit the mouse too. **Then fixed:** N1 (side layout
+when height ≤ 500 px — verified at 667×375), C11 (no page pinch anywhere in the client view), N6 (thumb-only on coarse
+pointers only), N4 (no "Open link" undo over bare defaults), N3 (a client link is locked only on touch devices),
+C1 (desktop notice decides after 1.5 s), C13 (Client demo has a `migrate` for v1 links).
+**Open after launch:** N2 (pinch/zoom the art in the client view); slider direction lock + cancel on rotation (C10);
+Download via the share sheet on iOS (C12); Gradient studio's own looks sheet → ClientView (it feeds the landing's phone
+hero still, so do it with the landing owner).
+
 **Kit addition: `ClientView` + `useClientMode` + `clientLink`** (src/kit/layout/ClientView.tsx), and the Client demo
 shell now uses it. Before this the "client view" was a shell-only pattern: the t5 Rueca builder had to hand-build its
 phone view (F22) because the skill pointed at `<Inspector published />` in a bottom sheet (24 px rows, hex fields).
@@ -222,6 +233,14 @@ a live site" (1,005 chars). New evals, 1 run each:
 | no-trigger-shipped-animation ("make the hero logo spin") | 1.00 — did not fire | 1.00 | 0 |
 | no-trigger-unrelated (typo fix) | 1.00 — did not fire | 1.00 | 0 |
 Kit note from the same session: keys are flat across folders — now documented in KIT.md.
+
+## Pre-launch QA (live registry, gate down) — 2026-10-11 evening
+| Test | Result | Found → fixed |
+|---|---|---|
+| i1 fresh Vite app, skill as written | install §A first time, verbatim (70 files, no extra `npm i`); tsc + build pass; designer tool, undo, presets, A/B, link round-trip pass; theme toggle + reload pass; client view: published-only, 48 px rows, 16 px inputs, link opens client view with values | "Send to designer" made `/&client#p=…` (404 on static hosts, lost the flag) → shareURL keeps the hash; starter's exportPNG failed `onDownload` types → prop widened; colour popover 11 px input → touch sizes for portaled popups; `<Stage fill>` advice cropped a 1080 artboard → camera Stage + Artboard in docs/skill; accent-check read tokens from `<html>` (empty since isolation) → reads `.studio`, sets `data-studio-theme` |
+| i2 existing shadcn app (own `--gutter/--panel/--line/--row`, ThemeProvider on `.dark`, media `dark:`) | host page **byte-identical** before/after install (482/484 computed values; screenshots md5-equal) both OS themes; kit toggle never touches the host's `.dark`, host theme never moves the tool (0 px); host media `dark:` still follows the OS; portaled popups themed; tsc/build/console clean | Monitor sparkline drew black (read `--signal` from `<html>`) → reads its canvas; `--font-mono` in `@theme` replaced the host's mono stack → dropped from the registry copy; host `.panel` / `.tabular` rules repaint the tool (known class overlap) → install.md now says it plainly; rename after launch |
+| i3 Next.js App Router | every documented step ran; tsc + `next build` pass; `/tool` in production: 0 console and 0 hydration errors on first load, reload after changes, share link, reload with saved theme; link render pixel-exact; client view published-only, 48 px rows, art fitted, client link locked on touch; **kit alone leaves the home page pixel-identical** both themes | the guide's "run `shadcn init` first" for an existing app rewrote globals.css (dark mode gone, fonts → Times) → guide/skill: never init an existing app, write components.json instead (tested: CSS untouched); inputs 14 px (text rule out-specified the input rule) → fixed, measured 16 px; an sr-only span added a 22 px page scroll → ClientView root is `relative`; qa.md contrast audit read `<html>` → reads `.studio`, sets `data-studio-theme` |
+| Full eval suite (8 cases) | running | |
 
 ## Fixes so far (in the repo, not yet pushed; the bench keeps testing the frozen 50a299e copy)
 - **mediabunny** (F1/B5-01/B2-01/B1-03): `sync.mjs` now also reads dynamic `import('…')`; `core` lists `mediabunny`.

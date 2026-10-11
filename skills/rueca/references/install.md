@@ -68,8 +68,16 @@ printf '\n@import "./components/studio/theme.css";\nhtml, body, #root { height: 
   the project root): add `resolve: { dedupe: ['react', 'react-dom'] }` to Vite (or every page
   throws "Invalid hook call"), and `@source "<path to kit>";` in your CSS (or Tailwind never sees
   the kit's classes and it renders unstyled).
-- **An existing React app with no `components.json`:** `add … -y` stops at a prompt (or exits
-  having installed nothing). Run the `init` line above first.
+- **An existing app with no `components.json`:** `add … -y` stops at a prompt (or exits having
+  installed nothing) — but do NOT run `shadcn init` there: it rewrites the app's main CSS (in a
+  Next.js test it deleted the dark-mode query and broke the site's fonts). Write this file instead
+  (point `css` at the app's main stylesheet; `rsc: true` for Next.js), then `add`:
+  ```json
+  { "$schema": "https://ui.shadcn.com/schema.json", "style": "new-york", "rsc": false, "tsx": true,
+    "tailwind": { "config": "", "css": "src/index.css", "baseColor": "neutral", "cssVariables": true },
+    "iconLibrary": "lucide",
+    "aliases": { "components": "@/components", "utils": "@/lib/utils", "ui": "@/components/ui", "lib": "@/lib", "hooks": "@/hooks" } }
+  ```
 - **Next.js (App Router):** the tool reads localStorage and the URL on load, so render it
   client-only or every reload after a save is a hydration error: `'use client'` page +
   `const Tool = dynamic(() => import('./Tool'), { ssr: false })`. The theme script goes in
