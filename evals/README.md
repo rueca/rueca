@@ -1,7 +1,7 @@
 # Evals
 
-Six cases for the skill. Each is a realistic request plus graders: `tool_used` checks the skill fired (or,
-for the negative case, didn't), and `regex` + `llm` graders read the FILE the prompt names (`src/RippleTool.tsx`
+Eight cases for the skill. Each is a realistic request plus graders: `tool_used` checks the skill fired (or,
+for the negative cases, didn't), and `regex` + `llm` graders read the FILE the prompt names (`src/RippleTool.tsx`
 etc.). Graders never read the transcript: an `llm` judge only sees its first and last 12 messages (the code is
 written in the middle), and a regex over the trace also matches the skill docs the agent read.
 
@@ -12,7 +12,9 @@ written in the middle), and a regex over the trace also matches the skill docs t
 | vanilla-three | A sign-off tool around a vanilla three.js scene: mount once, two-way selection, undo/redo, named colourways + compare, persistence + share link, expensive control applied on commit |
 | client-view | `publish: true` params + a client sheet, not a hand-built second form |
 | docs-state | Layer stack as undoable, validated state (p.data / createDocStore + createHistory) |
+| implicit-motion-study | The skill fires UNASKED: "sketch this logo animation so I can react" gets a kit harness (params, clock, timeline), not hand-built sliders and a rAF loop (a peer session missed this, 11 Oct) |
 | no-trigger-unrelated | The skill stays out of an unrelated typo fix |
+| no-trigger-shipped-animation | …and out of a shipped site animation ("make the hero logo spin") — the counterweight to implicit-motion-study |
 
 Run from the repo root. `--scaffold` seeds each case's starting files (fixture.sh, in this repo); Write/Edit must be
 granted or the agent can't produce code. Each run is a full Claude session on your account.
