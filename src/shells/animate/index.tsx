@@ -514,7 +514,7 @@ export default function AnimateShell() {
         </div>
       )}
     >
-      <Stage contentSize={{ w: doc.width, h: doc.height }} grid onBackgroundPointerDown={() => { if (!preview) ui.setState({ sel: null, keySel: [] }) }} overlay={
+      <Stage contentSize={{ w: doc.width, h: doc.height }} fitMaxZoom={0.45} grid onBackgroundPointerDown={() => { if (!preview) ui.setState({ sel: null, keySel: [] }) }} overlay={
         preview ? (
           <div className="pointer-events-none absolute top-3 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 cluster h-8 px-3 text-[11.5px]">
             <span className="size-1.5 animate-pulse rounded-full bg-ok" />

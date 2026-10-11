@@ -5,6 +5,7 @@ import { useStore } from 'zustand'
 import { useCamera, useValues } from '@kit'
 import { bindText, childrenOf, resolve, type Doc, type Obj, type PropKey, type Resolved, type Val } from './engine'
 import { HAND } from './demo'
+import { PartsManual } from './local/PartsManual'
 import { animTime, clock, currentAnim, editProps, params, runtime, ui, useDoc, useUI } from './store'
 
 const num = (v: Val) => (typeof v === 'number' ? v : parseFloat(v))
@@ -80,7 +81,7 @@ export function SceneSVG({
     return chain.reduceRight<React.ReactNode>((inner, o) => <g transform={tf(res[o.id])}>{inner}</g>, node(target, res, false))
   }
   return (
-    <svg ref={svgRef} width={doc.width} height={doc.height} viewBox={`0 0 ${doc.width} ${doc.height}`} className="block" xmlns="http://www.w3.org/2000/svg">
+    <svg ref={svgRef} width={doc.width} height={doc.height} viewBox={`0 0 ${doc.width} ${doc.height}`} className="block" xmlns="http://www.w3.org/2000/svg" overflow={bare ? 'visible' : undefined}>
       <defs>
         <linearGradient id="tw-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={bg[0]} /><stop offset="1" stopColor={bg[1]} /></linearGradient>
         {/* engraved layers are ink-alpha images: recolour them to the plate ink */}
@@ -246,6 +247,7 @@ export function LiveScene({ svgRef }: { svgRef: React.RefObject<SVGSVGElement | 
     <div className="h-full w-full" style={preview ? { cursor: 'pointer' } : undefined} {...previewProps}
       onPointerDown={preview ? previewProps.onPointerDown : (e) => { if ((e.target as Element).hasAttribute('data-bg')) ui.setState({ sel: null }) }}>
       <SceneSVG doc={doc} r={r} inputs={inputs} bg={[v.bgTop, v.bgBottom]} bare interactive={!preview} onObjectDown={onObjectDown} svgRef={svgRef} ghosts={ghosts} ghostOf={sel}>
+        <PartsManual />
         {!preview && <PenMarks doc={doc} r={r} />}
         <g data-overlay pointerEvents="none">
           <polygon ref={outline} fill="none" stroke="var(--signal)" strokeWidth={2} vectorEffect="non-scaling-stroke" visibility="hidden" />

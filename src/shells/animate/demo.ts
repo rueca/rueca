@@ -49,22 +49,24 @@ export function demoDoc(): Doc {
     // the drive band sits above the turning wheel and wraps its rim, so it never looks cut
     obj('band', 'Drive band', 'image', null, { x: 558, y: 416.5, w: 1116, h: 833 }, { href: ART.band, locked: true }),
     obj('thread', 'Thread', 'group', null, { x: ORIFICE.x, y: ORIFICE.y, rotation: 25 }),
-    obj('yarn', 'Yarn', 'rect', 'thread', { x: 0, w: 0, h: 2.5, radius: 1.25, fill: ACHIOTE }),
+    obj('yarn', 'Yarn', 'rect', 'thread', { x: YARN / 2, w: YARN, h: 2.5, radius: 1.25, fill: ACHIOTE }),
     obj('count', 'Count', 'text', null, { x: 1272, y: 400, fill: ACHIOTE }, { text: '{turns} turns', fontSize: 38, fontWeight: 400, align: 'middle', font: 'hand' }),
     obj('cta', 'Call to action', 'group', null, { x: 1272, y: 444 }),
     obj('caption', 'Caption', 'text', 'cta', { fill: ACHIOTE }, { text: 'click to spin', fontSize: 24, fontWeight: 400, align: 'middle', font: 'hand' }),
     obj('underline', 'Underline', 'rect', 'cta', { x: -2, y: 17, rotation: -2.5, w: 112, h: 1.8, radius: 0.9, fill: ACHIOTE }),
   ]
 
-  // the yarn grows from the orifice: its centre rides at half its length
-  const yarn = (t0: number, t1: number, ease: Ease) => ({
-    'yarn.w': [k(0, 0, E.hold), k(t0, 0, ease), k(t1, YARN)],
-    'yarn.x': [k(0, 0, E.hold), k(t0, 0, ease), k(t1, YARN / 2)],
+  // the underline under "click to spin" draws itself in from the left, like a pen stroke (left end fixed at x = -58)
+  const UL = 112
+  const underline = (t0: number, t1: number) => ({
+    'underline.w': [k(0, 0, E.hold), k(t0, 0, E.expo), k(t1, UL)],
+    'underline.x': [k(0, -58, E.hold), k(t0, -58, E.expo), k(t1, -58 + UL / 2)],
   })
 
   const idle: Anim = {
     id: 'idle', name: 'Idle', duration: 9000, loop: 'loop', tracks: {
       'wheel.rotation': [k(0, 0, E.lin), k(9000, 360)],
+      ...underline(400, 1400),
     },
   }
   const hover: Anim = {
@@ -75,8 +77,7 @@ export function demoDoc(): Doc {
   const press: Anim = {
     id: 'press', name: 'Spin up', duration: 2400, loop: 'loop', tracks: {
       'wheel.rotation': [k(0, 0, E.lin), k(2400, 1080)], // constant speed: 1080° in 2.4s loops seamlessly
-      ...yarn(240, 1300, E.expo),
-      'yarn.opacity': [k(0, 1, E.hold), k(2050, 1, E.in), k(2400, 0)],
+      ...underline(200, 1000),
     },
   }
   return {
