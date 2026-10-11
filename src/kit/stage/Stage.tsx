@@ -271,11 +271,12 @@ export function Artboard({
       {label && (
         <div
           onPointerDown={onSelect}
-          className={cn('absolute bottom-full left-0 flex origin-bottom-left items-center gap-1.5 pb-1.5 text-[11px] whitespace-nowrap no-select', selected ? 'text-signal-text' : 'text-fg-faint')}
-          style={{ transform: `scale(${1 / zoom})` }}
+          className={cn('absolute bottom-full left-0 flex origin-bottom-left items-center gap-1.5 overflow-hidden pb-1.5 text-[11px] whitespace-nowrap no-select', selected ? 'text-signal-text' : 'text-fg-faint')}
+          // never wider than the board on screen, so neighbouring boards' labels can't overlap (cleanup L5)
+          style={{ transform: `scale(${1 / zoom})`, maxWidth: Math.max(48, width * zoom) }}
         >
-          {label}
-          <span className="tabular opacity-60">{width} × {height}</span>
+          <span className="min-w-0 truncate">{label}</span>
+          <span className="shrink-0 tabular opacity-60">{width} × {height}</span>
         </div>
       )}
       <div

@@ -7,6 +7,7 @@ import {
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Button, IconButton, Menu, Divider, PresetMenu, ThemeToggle, CommandPalette,
   createCamera, shareMenuItems, useHotkeys, useValues, useDoc, exportCanvasPNG, exportJSON, toast, Badge, Tip, HistoryButtons, type Command,
+  cn,
 } from '@kit'
 import { doc, params, ui, history, effective, SIZE_PRESETS, type V } from './model'
 import { drawPost, ensureFonts, ensureShots, loadImage, peekImage } from './artifact'
@@ -121,7 +122,7 @@ export default function BatchShell() {
             <Cluster>
               <IconButton icon={ChevronLeft} label="Previous row" shortcut="arrowleft" onClick={prevRow} disabled={rows.length < 2} />
               <Menu align="center" trigger={
-                <Button size="md" className="min-w-[180px] max-w-[260px] justify-between gap-2 px-2">
+                <Button size="md" className="min-w-[180px] max-w-[260px] justify-between gap-2 px-2 max-[1180px]:min-w-[132px] max-[1180px]:max-w-[160px]">
                   <span className="tabular text-fg-faint">{rows.length ? row + 1 : 0}/{rows.length}</span>
                   <span className="min-w-0 flex-1 truncate text-left text-fg">{current?.name ?? 'No rows'}</span>
                   {rowIssueCount[row] ? <span className="text-key"><Badge tone="key">{rowIssueCount[row]}</Badge></span> : null}
@@ -137,9 +138,9 @@ export default function BatchShell() {
               <Divider vertical />
               <IconButton icon={SquareDashed} label={safe ? 'Hide safe areas' : 'Show safe areas'} shortcut="s" active={safe} onClick={toggleSafe} />
               <Tip label={totalIssues ? `${totalIssues} layout issues across all rows — jump to next` : 'Every row fits every size'} shortcut="i">
-                <Button size="md" className="gap-1 px-2" onClick={nextIssue} aria-label={totalIssues ? `${totalIssues} layout issues` : 'Fits — no layout issues'}>
+                <Button size="md" className="gap-1 px-2" onClick={nextIssue} aria-label={totalIssues ? `${totalIssues} layout issues` : 'Fits: no layout issues'}>
                   <span aria-hidden className={totalIssues ? 'size-1.5 rounded-full bg-key' : 'size-1.5 rounded-full bg-ok'} />
-                  <span className="tabular">{totalIssues || 'Fits'}</span>
+                  <span className={cn('tabular', !totalIssues && 'max-[1180px]:hidden')}>{totalIssues || 'Fits'}</span>
                 </Button>
               </Tip>
             </Cluster>

@@ -59,6 +59,13 @@ export function GraphCanvas() {
   // a hidden graph (preview-only view) has no size; fitting it gives a NaN zoom (break-it F12)
   const visible = () => { const r = wrap.current?.getBoundingClientRect(); return !!r && r.width > 0 && r.height > 0 }
   canvasApi.fit = () => { if (visible()) rf.fitView({ padding: 0.18, duration: 250 }) }
+  // refit when the interface hides or returns, or the graph drifts off-centre (cleanup L2)
+  const firstPresent = useRef(true)
+  useEffect(() => {
+    if (firstPresent.current) { firstPresent.current = false; return }
+    const t = requestAnimationFrame(() => canvasApi.fit())
+    return () => cancelAnimationFrame(t)
+  }, [present])
   canvasApi.center = () => { const r = wrap.current!.getBoundingClientRect(); return rf.screenToFlowPosition({ x: r.left + r.width / 2, y: r.top + r.height / 2 }) }
 
   // Tab opens add-node at the cursor (Cables). Only when the pointer is over the graph.

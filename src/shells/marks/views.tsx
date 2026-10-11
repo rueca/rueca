@@ -38,9 +38,9 @@ export function GridView({ columns }: { columns: React.MutableRefObject<number> 
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-[1280px] px-6 pt-5 pb-10">
         <div className="mb-4 flex items-center gap-2 text-[11.5px] text-fg-muted">
-          <span className="text-fg">{d.grid.length} variants</span>
+          <span className="whitespace-nowrap text-fg">{d.grid.length} variants</span>
           <span className="text-fg-faint">·</span>
-          <span>{kept} kept</span>
+          <span className="whitespace-nowrap">{kept} kept</span>
           <span className="text-fg-faint">·</span>
           <span>Space rerolls everything not kept · Enter opens · L keeps · F favourites</span>
         </div>

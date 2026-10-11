@@ -68,6 +68,14 @@ export function FlowCanvas() {
   const rf = useReactFlow<FlowNode, FlowEdge>()
   const { zoom } = useViewport()
   const { present, setPresent } = useStudio()
+  // The canvas box changes size when the interface hides or returns (⌘\\ / Esc); React Flow keeps its transform,
+  // so the graph ended up off-centre and then under the inspector (cleanup L2). Refit on each toggle.
+  const firstPresent = useRef(true)
+  useEffect(() => {
+    if (firstPresent.current) { firstPresent.current = false; return }
+    const t = requestAnimationFrame(() => rf.fitView({ padding: 0.12, maxZoom: 1.25, duration: 200 }))
+    return () => cancelAnimationFrame(t)
+  }, [present]) // eslint-disable-line react-hooks/exhaustive-deps
   const wrap = useRef<HTMLDivElement>(null)
   const [connecting, setConnecting] = useState(false)
   const [adding, setAdding] = useState<AddAt | null>(null)

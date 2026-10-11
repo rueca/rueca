@@ -29,9 +29,9 @@ const StudioCtx = createContext<{ present: boolean; setPresent: (b: boolean) => 
 export const useStudio = () => useContext(StudioCtx)
 
 export function Studio({
-  toolbar, left, right, bottom, children, layout = 'islands', className, leftWidth = 240, rightWidth, statusbar,
+  toolbar, left, right, bottom, children, layout = 'islands', className, leftWidth = 240, rightWidth,
 }: {
-  toolbar?: ReactNode; left?: ReactNode; right?: ReactNode; bottom?: ReactNode; statusbar?: ReactNode
+  toolbar?: ReactNode; left?: ReactNode; right?: ReactNode; bottom?: ReactNode
   children: ReactNode; layout?: Layout; className?: string; leftWidth?: number; rightWidth?: number
 }) {
   const [present, setPresent] = useState(false)
@@ -107,7 +107,6 @@ export function Studio({
       <TipProvider>
         <div ref={rootRef} className={cn('studio h-full w-full overflow-hidden bg-field text-fg no-select', className)}>
           {shell}
-          {statusbar}
           {present && (
             <button type="button" onClick={() => setPresent(false)}
               className="cluster fixed right-3 bottom-3 z-50 h-7 px-2.5 text-[11.5px] text-fg-muted opacity-30 transition-opacity hover:opacity-100 focus-visible:opacity-100">

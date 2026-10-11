@@ -30,18 +30,20 @@ export function PreviewPane() {
   const bg = v.backdrop === 'dark' ? '#0c0c0c' : v.backdrop === 'light' ? '#f4f4f4' : undefined
   const error = preview?.error
 
+  // One row that wraps: in a narrow pane (split view at 1024) the stats drop below the toggle instead of
+  // sliding under it (cleanup L3).
   const hud = (
-    <>
-      <div className="pointer-events-auto absolute top-3 left-3 z-10 w-[164px]">
+    <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-center justify-between gap-1.5">
+      <div className="pointer-events-auto w-[164px] shrink-0">
         <Segmented size="sm" value={v.previewOf} onChange={(x) => doc.setValue('previewOf', x as 'output' | 'selection')} label="Preview"
           options={[{ value: 'output', label: 'Output', hint: 'Show the Output node' }, { value: 'selection', label: 'Selection', hint: 'Show the selected node (P)' }]} />
       </div>
-      <div className="pointer-events-none absolute top-3 right-3 z-10 flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5">
         {busy && <span role="img" className="size-3 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" aria-label="Cooking" />}
         {preview?.draft && <Badge tone="key">Draft</Badge>}
         {preview && !error && <Badge className="bg-panel shadow-[var(--shadow-cluster)]">{preview.res}px · {preview.ms < 10 ? preview.ms.toFixed(1) : Math.round(preview.ms)} ms</Badge>}
       </div>
-    </>
+    </div>
   )
 
   return (

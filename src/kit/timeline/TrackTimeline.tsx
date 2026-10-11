@@ -103,7 +103,8 @@ export function TrackTimeline(props: TrackTimelineProps) {
     ro.observe(scroller.current!)
     return () => ro.disconnect()
   }, [HEAD_W])
-  const fitPx = Math.max(0.01, (vw - 48) / Math.max(1, duration))
+  // content is duration·ppm + 64, so fit must leave the same 64 or the track is always 16px too wide (L6)
+  const fitPx = Math.max(0.01, (vw - 64) / Math.max(1, duration))
   const [zoom, setZoom] = useState(1) // × fit
   const ppm = fitPx * zoom // px per ms
   const contentW = Math.max(vw, duration * ppm + 64)
