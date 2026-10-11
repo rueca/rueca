@@ -30,7 +30,8 @@ export const schema = defineSchema({
   }),
 })
 
-export const params = createParams(schema, { id: 'present', version: 2 }) // v2: engraved thread; `weight` became `band` so old share links drop it
+// v2: engraved thread; `weight` became `band` (a different scale), so a v1 link or save keeps everything else (client-view C13)
+export const params = createParams(schema, { id: 'present', version: 2, migrate: (old) => { const { weight: _w, ...rest } = old; return rest } })
 export const clock = createClock({ duration: 10000, loop: true })
 export type V = ReturnType<typeof params.values>
 

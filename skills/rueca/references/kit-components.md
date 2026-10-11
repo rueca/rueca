@@ -48,8 +48,7 @@ attribution visible).
 
 ## 7. Conventions borrowed from Spline · Paper · Figma · Framer · Affinity · Rive
 
-See `research/04-six-tool-matrix.md` (control-by-control defaults) and
-`research/02-pro-tool-patterns.md` (inspector, timeline, layers, canvas, shortcuts). Highlights:
+Highlights:
 Space play · `,` `.` frame step · J/K prev/next key · Shift+0/1 zoom · `\` A/B · ⌘K palette ·
 `?` shortcuts · ⌘\ hide UI · keyframe diamond: hollow faint → hollow accent → solid accent ·
 springs default Duration + Bounce · fills/effects as stacks with eye + blend + opacity ·

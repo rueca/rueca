@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createElement } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { act } from 'react'
-import { useHotkeys, splitCombos } from '@kit/core/hotkeys'
+import { useHotkeys, useHoldKey, splitCombos } from '@kit/core/hotkeys'
 
 ;(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true
 let root: Root | null = null
@@ -68,5 +68,21 @@ describe('dispatcher', () => {
     document.body.append(input)
     key('keydown', 't', input)
     expect(t).not.toHaveBeenCalled()
+  })
+})
+
+describe('hold keys share the dispatcher (break-it B3-S8)', () => {
+  it('a held key beats a kit default on the same key, once per hold', () => {
+    const theme = vi.fn(), held: boolean[] = []
+    const host = document.createElement('div')
+    document.body.append(host)
+    root = createRoot(host)
+    const C = () => { useHotkeys({ t: theme }, [], { priority: 0 }); useHoldKey('t', (d) => held.push(d)); return null }
+    act(() => root!.render(createElement(C)))
+    key('keydown', 't')
+    key('keydown', 't', window, { repeat: true })
+    key('keyup', 't')
+    expect(theme).not.toHaveBeenCalled()
+    expect(held).toEqual([true, false])
   })
 })

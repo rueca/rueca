@@ -15,3 +15,12 @@ describe('writeCssVars (FrameSurface cssVars / studio-bridge parity)', () => {
     expect(document.documentElement.style.getPropertyValue('--size')).toBe('')
   })
 })
+
+describe('readCssVars', () => {
+  it('reads a page’s custom properties back into values', async () => {
+    const { readCssVars } = await import('@kit/stage/Surface')
+    document.documentElement.style.setProperty('--headline-size', '64px')
+    document.documentElement.style.setProperty('--accent', '#ff5a1f')
+    expect(readCssVars(document, ['headlineSize', 'accent', 'missing'])).toEqual({ headlineSize: 64, accent: '#ff5a1f' })
+  })
+})

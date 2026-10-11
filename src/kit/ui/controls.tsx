@@ -4,7 +4,7 @@ import { Switch as BaseSwitch } from '@base-ui/react/switch'
 import { Select as BaseSelect } from '@base-ui/react/select'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Check, ChevronDown, ChevronRight } from 'lucide-react'
-import type { ComponentType, ReactElement, ReactNode } from 'react'
+import { useRef, type ComponentType, type ReactElement, type ReactNode } from 'react'
 import { cn } from '../core/cn'
 import { prettyCombo } from '../core/hotkeys'
 import { Tip } from './tooltip'
@@ -188,6 +188,17 @@ export function Select<T extends string = string>({
 export function TextInput({
   value, onChange, placeholder, className, multiline, mono, maxLength, onCommit, rows = 3, label, onKeyDown,
 }: { value: string; onChange: (v: string) => void; placeholder?: string; className?: string; multiline?: boolean; mono?: boolean; maxLength?: number; onCommit?: (v: string) => void; rows?: number; label?: string; onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void }) {
+  // Commit only a real edit, and commit it BEFORE whatever the pointer goes on to press: blurring on a
+  // slider's pointerdown used to fold the slider's first drag value into the text's undo step (break-it B3-S3).
+  const start = useRef<string | null>(null)
+  const settle = (v: string) => { if (start.current !== null && v !== start.current) { start.current = v; onCommit?.(v) } }
+  const focus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const el = e.currentTarget
+    start.current = el.value
+    const early = (ev: PointerEvent) => { if (!el.contains(ev.target as Node)) settle(el.value) }
+    window.addEventListener('pointerdown', early, true)
+    el.addEventListener('blur', () => { window.removeEventListener('pointerdown', early, true); settle(el.value); start.current = null }, { once: true })
+  }
   const cls = cn(
     'w-full min-w-0 rounded-[5px] bg-control px-2 text-[11.5px] text-fg outline-none placeholder:text-fg-faint',
     'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus:shadow-[inset_0_0_0_1px_var(--signal)]',
@@ -197,10 +208,10 @@ export function TextInput({
   )
   return multiline ? (
     <textarea aria-label={label} className={cls} rows={rows} value={value} maxLength={maxLength} placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)} onBlur={(e) => onCommit?.(e.target.value)} onKeyDown={onKeyDown} />
+      onChange={(e) => onChange(e.target.value)} onFocus={focus} onKeyDown={onKeyDown} />
   ) : (
     <input aria-label={label} className={cls} value={value} maxLength={maxLength} placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)} onBlur={(e) => onCommit?.(e.target.value)}
+      onChange={(e) => onChange(e.target.value)} onFocus={focus}
       onKeyDown={(e) => { onKeyDown?.(e); if (!e.defaultPrevented && e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
   )
 }

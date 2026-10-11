@@ -32,7 +32,7 @@ export function Slider({
       onValueCommitted={(v) => onChange(v, true)}
       className={cn('group/slider relative flex h-6 w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}
     >
-      <Base.Control className="flex h-6 w-full cursor-default items-center">
+      <Base.Control data-studio-slider-control className="flex h-6 w-full cursor-default touch-pan-y items-center">
         <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[3px] bg-track shadow-[0_0_0_0.5px_var(--line-strong)]')} style={track ? { background: track } : undefined}>
           {track ? null : fillFrom === null ? (
             <Base.Indicator className="rounded-full bg-signal" />
@@ -45,6 +45,7 @@ export function Slider({
           {(range ? [0, 1] : [0]).map((i) => (
             <Base.Thumb
               key={i}
+              data-studio-thumb
               index={range ? i : undefined}
               aria-label={label}
               getAriaValueText={format ? (_f: string, v: number) => format(v) : undefined}

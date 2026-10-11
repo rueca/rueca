@@ -13,7 +13,7 @@ import type { CropRect as Rect } from '@kit/stage/overlays'
 export type V = Record<string, any>
 
 /** A document value the Inspector has no row for (curve points, a crop rect): hidden, but
-    undoable, persisted and — unlike the p.data default — kept in share links. The shell draws its own UI. */
+    undoable, persisted and kept in share links. The shell draws its own UI. */
 // Shape-checked against the default: values arrive from share links (break-it S4).
 const doc = <T,>(value: T, label: string) => p.data<T>(value, { label, share: true, validate: (v) => matchesShape(v, value) })
 

@@ -171,20 +171,20 @@ export function useHotkeyRegistry() {
 }
 
 /** Fire on press and on release — hold-to-peek, hold-to-pan. */
-export function useHoldKey(combo: string, onChange: (down: boolean) => void, opts: { enabled?: boolean } = {}) {
+export function useHoldKey(combo: string, onChange: (down: boolean) => void, opts: { enabled?: boolean; priority?: number } = {}) {
   const ref = useRef(onChange)
   ref.current = onChange
+  const down = useRef(false)
+  // Pressing goes through the one dispatcher, so priority holds: a tool's held T beats the kit's T (break-it B3-S8).
+  useHotkeys({ [combo]: () => { if (down.current) return; down.current = true; ref.current(true) } }, [], { enabled: opts.enabled !== false, priority: opts.priority })
   useEffect(() => {
-    if (opts.enabled === false) return
-    let down = false
-    const kd = (e: KeyboardEvent) => { if (down || typing(e) || e.repeat || !matches(combo, e)) return; down = true; e.preventDefault(); ref.current(true) }
-    const ku = (e: KeyboardEvent) => { if (!down) return; if (normKey(e.key) === combo.split('+').pop() || e.code.toLowerCase().endsWith(combo.split('+').pop()!)) { down = false; ref.current(false) } }
-    const blur = () => { if (down) { down = false; ref.current(false) } }
-    window.addEventListener('keydown', kd)
+    const last = combo.split('+').pop()!
+    const release = () => { if (down.current) { down.current = false; ref.current(false) } }
+    const ku = (e: KeyboardEvent) => { if (down.current && (normKey(e.key) === last || e.code.toLowerCase().endsWith(last))) release() }
     window.addEventListener('keyup', ku)
-    window.addEventListener('blur', blur)
-    return () => { window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); window.removeEventListener('blur', blur) }
-  }, [combo, opts.enabled])
+    window.addEventListener('blur', release)
+    return () => { window.removeEventListener('keyup', ku); window.removeEventListener('blur', release); release() }
+  }, [combo])
 }
 
 /** ⌘⇧Z on Mac, Ctrl+Shift+Z elsewhere — for tooltips and menus. */

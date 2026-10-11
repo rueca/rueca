@@ -1,6 +1,6 @@
 ---
 name: rueca
-description: Build the design-tool harness around an interactive prototype — inspector, timeline, layers, presets, export — so it can be felt and tuned, not just looked at. Use whenever creating or wrapping a prototype, playground, motion study, shader or 3D toy, generator, photo effect, UX flow, journey map, node graph, parameter explorer or client demo, in any runtime (Canvas, WebGL, three.js, SVG, React, plain HTML, an existing app). Triggers on: prototype, playground, motion study, animation harness, tuning tool, design tool, parameter explorer, instrument, "let me test this", "make me a tool to", "add controls to this".
+description: Build the design-tool harness around an interactive visual prototype — inspector of sliders and knobs, timeline, layers, presets, undo, share link, export. Use when someone wants to tweak, tune, scrub, dial in or play with how something looks or moves — a motion study, canvas / WebGL / three.js / p5 sketch, shader, SVG or generative art, photo effect, UI component, UX flow, node graph, playground, client demo — in any runtime, new or existing. Also use unasked when sketching an animation, logo or brand motion, or any visual for someone to react to, and whenever you start hand-adding sliders, a scrubber or a replay button; the piece may ship on a marketing site, but the tool to design it is in scope. Triggers on "add sliders / controls / knobs to this", "make this a little editor", "a leva / tweakpane / dat.gui panel", tuning tool, design tool. Not for building shipped features (settings pages, forms, dashboards, a slider or animation in a live site), tests, CLIs, APIs or backend prototypes.
 license: MIT
 ---
 
@@ -8,8 +8,8 @@ license: MIT
 
 A prototype needs two things: **the artifact** (the screen, animation, shader, flow)
 and **the harness** around it — the tool that lets someone feel it and tune it. This
-skill builds the harness. Build it every time: a prototype with no controls is a
-screenshot.
+skill builds the harness. When someone wants to feel or tune a visual prototype, build the
+harness, not just the artifact: a prototype with no controls is a screenshot.
 
 The harness is a **design tool**, not a web page. It should feel like Figma, Framer,
 Spline, Paper, Affinity or Rive — and it stays **neutral**, so whatever is being
@@ -24,22 +24,32 @@ you read rides along in every later turn.
 1. **Identify the artifact and its runtime** — Canvas 2D, WebGL/three.js, SVG, DOM/React,
    an existing page or app — and who uses the tool (the designer, or a client).
 2. **Pick the route.**
-   - React project, or a new one → the kit. Not installed yet? Install it:
+   - React 19 + Tailwind v4 project, or a new one → the kit (Next.js too: render the tool
+     client-only, see install.md). Not installed yet? Install it:
      `npx shadcn@latest add https://rueca.dev/r/studio.json -y` (lands in
      `src/components/studio/`; import from `@/components/studio`; add
-     `@import "./components/studio/theme.css";` and `html, body, #root { height: 100% }` to the main CSS). New project or `shadcn init`
-     trouble → `references/install.md`. **Can't install right now** (no shell, or told not to run
-     anything)? Still write against the kit and put the install command in your handoff — never
+     `@import "./components/studio/theme.css";` and `html, body, #root { height: 100% }` to the main CSS).
+     No `components.json` yet (`add` then prompts and silently installs nothing), a new project,
+     strict TypeScript or `shadcn init` trouble → `references/install.md`. After installing, run
+     the production build once (`npm run build`), not just the dev server. **Can't install right now** (no shell, told not to run
+     anything, registry unreachable)? Still write against the kit and put the install command in your handoff — never
      hand-build what the kit already gives you (undo, presets, A/B, share links, persistence, the
-     inspector, scrubbers). A hand-rolled harness is the failure this skill exists to prevent.
-   - An existing page you must not rewrite → `FrameSurface`. Same dev server (same origin)?
+     inspector, scrubbers). Keep the user's app building meanwhile: put the tool in its own entry
+     (`tool.html` + `src/tool/`) that nothing else imports until the kit is installed.
+     A hand-rolled harness is the failure this skill exists to prevent.
+   - An existing page you must not rewrite, or an app on React 18 / Tailwind v3 / Vue / Svelte
+     (never run `shadcn init` in those) → a small separate harness app with `FrameSurface`. Same dev server (same origin)?
      Drive it with `cssVars` / `apply={(doc, v) => …}` and leave the page untouched.
      Otherwise add `assets/studio-bridge.js` to it.
-   - One HTML file, no build step → `references/install.md` §C (theme.css + visual rules).
+   - One HTML file, no build step, no npm → `references/install.md` §C: the one case where you
+     hand-build the same harness (theme.css + visual rules).
 3. **Write the schema first** — one line per knob, each with a `hint`. It drives the
    inspector, defaults, reset, the changed cue, presets, undo, share link and agent export.
 4. **Build the artifact as a pure function of `(values, t)`**, drawn by a surface the clock
-   ticks — never by React re-renders or a hand-written rAF loop.
+   ticks — never by React re-renders or a hand-written rAF loop. A component that times itself
+   and that you mustn't rewrite (motion/react, CSS transitions, a Lottie): feed it the values as
+   props, replay it by changing its React `key` (button + `R`, and after each commit), and skip
+   the timeline unless it exposes its time.
 5. **Pick the layout** — `islands` (default: panels float over the canvas, which runs underneath), `docked` (Figma-like
    editors with layers + properties), `overlay` (full-bleed art, panels on top).
 6. **QA by measuring, not looking**: typecheck, production build, both themes, the accent
@@ -54,9 +64,9 @@ import {
   CanvasSurface, Button, createClock, createParams, defineSchema, folder, p, renderCanvasPNG,
   useHotkeys, useValues, toast,
 } from '@/components/studio'
-import { draw as art } from './art'          // the artifact: draw(ctx, t, values), pure
+import { draw as art } from './art'          // the artifact: draw(ctx, t, w, h, values), pure
 
-const schema = defineSchema({
+const schema = defineSchema({                // top level is always folders
   shape: folder('Shape', {
     count: p.number(12, { min: 1, max: 40, step: 1, hint: 'How many rings.' }),
     ease: p.select('easeOut', ['linear', 'easeOut', 'easeInOut'], { hint: 'How each ring fades in.' }),
@@ -65,7 +75,7 @@ const schema = defineSchema({
   output: folder('Output', { size: p.size({ w: 1080, h: 1080 }, { hint: 'Artboard and export size.' }) }),
 })
 const params = createParams(schema, {
-  id: 'rings', version: 1,                                     // id = storage key; bump version when the shape changes
+  id: 'rings', version: 1,     // id = storage key; bump version when a param is renamed/rescaled, with migrate(old, from) to keep saved values
   presets: [{ name: 'Calm', values: { count: 8, ease: 'easeInOut' } }],
 })
 const clock = createClock({ duration: 2400, mode: 'loop' })    // ms; 'once' | 'loop' | 'pingpong'
@@ -102,8 +112,15 @@ in `params.onCommit((v, meta) => …)` — that fires on pointer-up, not every d
 Other surfaces, same contract: `WebGLSurface` (`setup(gl)` → `draw(gl, frame, state)`),
 `MountSurface` (`mount={(el, api) => { const s = start(el); return () => s.dispose() }}` for
 vanilla three.js / any imperative lib; push changes via `params.subscribe` / `params.onCommit`,
-never re-mount), `FrameSurface` (an existing page). Client view: mark knobs `publish: true` and
-render `<Inspector params={params} published />` in a bottom sheet. Lists the user edits (layers,
+never re-mount), `FrameSurface` (an existing page).
+
+**Client view** (showing the result to a client on their phone): mark the few knobs they may touch
+`publish: true`, then `const { client, forced, setClient } = useClientMode()` and, when `client`,
+return `<ClientView params={params} onDownload={…} onExit={forced ? undefined : () => setClient(false)}>`
+with the art inside — never hand-build the sheet. It gives touch-size controls, undo, Download,
+"Send to designer" (share sheet on phones) and locks a client link (`&client`) out of the designer view;
+the share menu gains "Copy client link". Show the art framed as it will export (same aspect), and draw
+in output units so the download looks like what the client tuned. Lists the user edits (layers,
 nodes, clips) live in `p.data<T>(…, { validate })` or `createDocStore` + `createHistory([params, doc])`
 so they undo, persist and share — never in `useState`.
 
@@ -120,6 +137,7 @@ so they undo, persist and share — never in `useState`.
 - **Every number is a scrubber** (drag, type, expressions) and every drag has a non-drag
   alternative — kit controls already do this; don't hand-build inputs.
 - **Derive the timeline from the same maths that draws the render**, never a hand-kept list.
+- **Exports are the artwork only**: hide selection outlines, guides and handles while rendering a PNG/video.
 - **Light theme must work.** Test both.
 - **Never put live values in a rAF effect's dependency array.**
 

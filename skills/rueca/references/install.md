@@ -13,6 +13,11 @@ Registry base URL: `https://rueca.dev/r/` (each item is
 
 ## A. Kit (shadcn registry)
 
+**Requires React 19 and Tailwind v4.** On React 18 or Tailwind v3 do NOT run `shadcn init` — it
+rewrites the main CSS for v4 and the user's own app stops building; the kit's types also fail on
+`@types/react` 18 and its classes render unstyled under v3. Use route B instead: a small separate
+harness app (React 19 + v4) that wraps the existing one.
+
 New project:
 
 ```bash
@@ -20,11 +25,12 @@ npm create vite@latest studio -- --template react-ts
 cd studio && npm i && npm i -D tailwindcss @tailwindcss/vite
 printf '@import "tailwindcss";\n' > src/index.css          # shadcn init only finds Tailwind v4 through this import
 # add tailwindcss() to vite.config.ts plugins, an "@/*": ["./src/*"] path to BOTH
-# tsconfig.json and tsconfig.app.json (one alone makes shadcn write a literal ./@/ folder), and the
+# tsconfig.json and tsconfig.app.json (one alone makes shadcn write a literal ./@/ folder) — paths
+# only, NO baseUrl (deprecated in TypeScript 6, removed in 7: tsc -b fails with TS5101) — and the
 # matching alias in vite.config.ts: resolve: { alias: { '@': path.resolve(import.meta.dirname, 'src') } }
 npx shadcn@latest init -y -b base --no-monorepo -p nova   # flags matter: init is interactive and hangs otherwise
 npx shadcn@latest add https://rueca.dev/r/studio.json -y
-printf '@import "./components/studio/theme.css";\nhtml, body, #root { height: 100%%; margin: 0 }\n' >> src/index.css
+printf '\n@import "./components/studio/theme.css";\nhtml, body, #root { height: 100%%; margin: 0 }\n' >> src/index.css   # leading \n: init's file has no final newline
 ```
 
 - `studio` installs everything; individual pieces (`inspector`, `timeline`, `stage`,
@@ -35,19 +41,23 @@ printf '@import "./components/studio/theme.css";\nhtml, body, #root { height: 10
   `index.ts` ships only with the full `studio` item — after installing single pieces, import
   from the file (`@/components/studio/ui/slider`). The kit docs write `@kit`: alias it to that
   folder in `vite.config.ts` + `tsconfig`, or rewrite the imports.
-- **Theme:** `@import "./components/studio/theme.css";` in the main CSS. Kit token names are
-  namespaced (`fg-muted`, `signal`, `control`, `font-ui`, …) so they coexist with shadcn's
-  (`muted`, `accent`, `input`) — order doesn't matter. The kit styles only `.studio` (the
-  `<Studio>` root) and `.pop` popups; it never touches your `<body>`. Using kit controls outside
-  `<Studio>`? Put `className="studio"` on their container.
+- **Theme:** `@import "./components/studio/theme.css";` in the main CSS. Its tokens (`--panel`, `--line`,
+  `--gutter`…) are declared only on the kit's own roots — `.studio` (the `<Studio>` root), the `.pop`
+  popups and `[data-studio]` — so the app's own variables, `dark:` variant and `<body>` are untouched,
+  and the utility names (`fg-muted`, `signal`, `control`, `font-ui`, …) don't overlap shadcn's. Using
+  kit controls outside `<Studio>`? Put `className="studio"` on their container. Known overlap: the kit's
+  utility classes `panel`, `pop`, `cluster`, `tabular`, `checker`, `no-select` share names with any
+  app class of the same name — rename the app's if one clashes.
+- **Light / dark:** the tool has its own theme on `<html data-studio-theme="light|dark">`, separate from
+  the app's (its `.dark` class is never read or set). With no attribute it follows the OS; the kit's
+  toggle remembers the choice (`studio:theme`).
 - **Give the page a height.** `<Studio>` fills its parent, and Vite's template sets no height, so
   without `html, body, #root { height: 100%; margin: 0 }` the tool renders 0 px tall (a blank page,
   no errors). The kit warns about this in dev.
-- **Theme class before first paint.** Put this in `index.html` `<head>` so the stored
-  theme never flashes (the kit's `useTheme` / `ThemeToggle` read the same key). Without a
-  `.dark`/`.light` class the tokens follow the OS:
+- **No flash of the wrong theme** (optional): put this in `index.html` `<head>` so a saved choice applies
+  before first paint (otherwise it applies on mount):
   ```html
-  <script>try{var t=localStorage.getItem('studio:theme');document.documentElement.classList.add((t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light')}catch(e){document.documentElement.classList.add('dark')}</script>
+  <script>try{var t=localStorage.getItem('studio:theme');if(t)document.documentElement.setAttribute('data-studio-theme',t)}catch(e){}</script>
   ```
 - **Installing from a fork, a staging copy or localhost:** registry items reference each other
   by absolute URL. Rebuild them against your host first:
@@ -56,6 +66,19 @@ printf '@import "./components/studio/theme.css";\nhtml, body, #root { height: 10
   the project root): add `resolve: { dedupe: ['react', 'react-dom'] }` to Vite (or every page
   throws "Invalid hook call"), and `@source "<path to kit>";` in your CSS (or Tailwind never sees
   the kit's classes and it renders unstyled).
+- **An existing React app with no `components.json`:** `add … -y` stops at a prompt (or exits
+  having installed nothing). Run the `init` line above first.
+- **Next.js (App Router):** the tool reads localStorage and the URL on load, so render it
+  client-only or every reload after a save is a hydration error: `'use client'` page +
+  `const Tool = dynamic(() => import('./Tool'), { ssr: false })`. The theme script goes in
+  `app/layout.tsx` `<head>` with `<html suppressHydrationWarning>` (or skip it: the theme then applies on mount). From `src/app/globals.css`
+  the import is `@import "../components/studio/theme.css";`.
+- **Strict TypeScript / ESLint:** the kit compiles under `strict` and `verbatimModuleSyntax`, but
+  not yet under `noUncheckedIndexedAccess` / `exactOptionalPropertyTypes` — if the project uses
+  them, say so in the handoff rather than editing kit files. Add `src/components/studio` to the
+  linter's ignores (it is vendored source).
+- **Build once after installing** (`npm run build`), not just `npm run dev` — the dev server
+  doesn't typecheck, so a missing dependency only shows there.
 - If `shadcn init` refuses (no Tailwind detected, odd setup), write the files
   directly — they are just source. Fetch the item JSON and write each
   `files[].content` to its target.
@@ -90,13 +113,22 @@ studio (AGPL), tldraw (licence key), Remotion (company licence), GSAP (non-OSI),
 3. Values flow down on every change; the page can push values back with
    `studio.set(key, value)` (e.g. text edited in place).
 
+What route B gives: inspector, presets, undo, A/B, share links and persistence for the page's
+values, and live breakpoints. What it doesn't: a timeline (the page keeps its own time) or
+render export (the harness can't draw the page into a canvas) — leave the starter's `Timeline`
+and Export button out, or wire Export to something real (copy CSS, JSON).
+
 Several `FrameSurface`s at once give live breakpoints (mobile / tablet / desktop).
 Iframes eat pointer events — give the stage a Hand / Interact toggle (`architecture.md`).
 
 ## C. Hand-built single file
 
-When no build step is allowed: inline `assets/theme.css` (drop its two `@import`
-lines and the `@theme inline` block; use the raw `var(--panel)` etc. directly), and
+This is the one place hand-building is right: with no npm the kit can't be installed, so build
+the same harness by hand (one param table, undo, presets, share link) rather than skip it.
+Inline `assets/theme.css`, dropping its `@import` lines, `@custom-variant` and the `@theme inline`
+block — but first copy the block's `--font-ui` / `--font-mono` lines into `:root` (or the chrome
+renders in Times), and rewrite each `@utility name { … }` (`panel`, `cluster`, `pop`, `tabular`, …)
+as a plain `.name { … }` rule. Use the raw `var(--panel)` etc. directly, and
 follow `visual-rules.md` to the letter. Keep the same architecture — one param table,
 pure render, refs — so it can be upgraded to the kit later.
 

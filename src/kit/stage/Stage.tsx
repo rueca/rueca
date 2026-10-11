@@ -140,7 +140,11 @@ export function Stage({
       const r = node.getBoundingClientRect()
       if (e.ctrlKey || e.metaKey) {
         const s = cam.getState()
-        zoomTo(s.zoom * Math.exp(-e.deltaY * (e.ctrlKey && !e.metaKey ? 0.01 : 0.0025)), { x: e.clientX - r.left, y: e.clientY - r.top })
+        // Trackpad pinches send small deltas; a mouse-wheel notch sends ~100 (×16 in line mode). Cap one event at ~1.35×
+        // (it was 2.7× a notch, 12× for a big delta — t2 judge); pinches stay smooth and proportional.
+        const dy = e.deltaY * (e.deltaMode === 1 ? 16 : 1)
+        const step = Math.max(-0.3, Math.min(0.3, -dy * (e.ctrlKey && !e.metaKey ? 0.01 : 0.0025)))
+        zoomTo(s.zoom * Math.exp(step), { x: e.clientX - r.left, y: e.clientY - r.top })
       } else {
         const s = cam.getState()
         cam.setState({ x: s.x - (e.shiftKey ? e.deltaY : e.deltaX), y: s.y - (e.shiftKey ? 0 : e.deltaY) })

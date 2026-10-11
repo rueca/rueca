@@ -39,14 +39,24 @@ export function exportCanvasPNG(canvas: HTMLCanvasElement, name = `export-${stam
  * upscaling the on-screen canvas. Takes the same draw you give <CanvasSurface>, so export is one line:
  *   renderCanvasPNG(draw, { width: 1080, height: 1080, v: params.values(), t: clock.time(), scale: 2 })
  */
+/** What Chrome and Firefox will reliably allocate for one canvas. */
+export const MAX_CANVAS_SIDE = 16384
+export const MAX_CANVAS_AREA = 16384 * 16384 / 2
+/** iOS Safari's ceiling for an on-screen canvas (16.7 MP) — previews stay under it. */
+export const MAX_PREVIEW_AREA = 16_777_216
+
 export function renderCanvasPNG<V>(
   draw: (ctx: CanvasRenderingContext2D, f: { t: number; dt: number; w: number; h: number; dpr: number; v: V; frame: number }) => void,
   o: { width: number; height: number; v: V; t?: number; scale?: number; name?: string },
 ) {
   const scale = o.scale ?? 1
+  const W = Math.round(o.width * scale), H = Math.round(o.height * scale)
+  // Browsers fail silently past these (a blank canvas, then "could not encode") — say what to do instead (break-it B3-S7).
+  if (W > MAX_CANVAS_SIDE || H > MAX_CANVAS_SIDE || W * H > MAX_CANVAS_AREA)
+    return Promise.reject(new Error(`${W} × ${H} px is larger than browsers can draw (max ${MAX_CANVAS_SIDE} px a side, ${Math.round(MAX_CANVAS_AREA / 1e6)} MP). Export at a smaller scale.`))
   const c = document.createElement('canvas')
-  c.width = Math.round(o.width * scale)
-  c.height = Math.round(o.height * scale)
+  c.width = W
+  c.height = H
   const ctx = c.getContext('2d')
   if (!ctx) return Promise.reject(new Error('No 2D context'))
   ctx.setTransform(scale, 0, 0, scale, 0, 0)

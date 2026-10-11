@@ -108,7 +108,8 @@ CSS custom property (`fontSize` → `--font-size`).
 
 Iframes swallow wheel and pointer events, so a canvas camera can't pan over an iframe
 artboard. Pattern: **Hand vs Interact** mode with a transparent shield (Figma's
-design vs prototype).
+design vs prototype) — built in: `const [interact, setInteract] = useInteractMode()`,
+`<FrameSurface … shield={!interact} />`, `<InteractToggle interact={interact} onChange={setInteract} />`.
 
 ## Hand-off features that carry their weight
 

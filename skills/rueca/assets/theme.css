@@ -82,7 +82,7 @@
 
 }
 
-:root.light {
+:root:is(.light, [data-studio-theme="light"]) {
   --field: #ececec;
   --panel: #ffffff;
   --overlay: #ffffff;
@@ -130,7 +130,7 @@
 
 /* No theme class on <html>: follow the OS rather than forcing dark on a host app. */
 @media (prefers-color-scheme: light) {
-  :root:not(.dark) {
+  :root:not(.dark, [data-studio-theme="dark"]) {
     --field: #ececec;
     --panel: #ffffff;
     --overlay: #ffffff;
@@ -232,8 +232,8 @@
     text-rendering: optimizeLegibility;
   }
   :where(.studio) { color: var(--fg); font-size: 12px; line-height: 1.4; }
-  :root.light :where(.studio, .pop) { color-scheme: light; }
-  @media (prefers-color-scheme: light) { :root:not(.dark) :where(.studio, .pop) { color-scheme: light; } }
+  :root:is(.light, [data-studio-theme="light"]) :where(.studio, .pop) { color-scheme: light; }
+  @media (prefers-color-scheme: light) { :root:not(.dark, [data-studio-theme="dark"]) :where(.studio, .pop) { color-scheme: light; } }
   :where(.studio) button { cursor: default; }
 
   /* Browsers paint a light native scrollbar on dark UI: a bright slab against the
@@ -280,3 +280,23 @@
 :where(.studio, .pop) :is(.bg-active, .bg-signal-soft, .bg-well, [aria-selected="true"], [data-selected="true"]) .text-fg-faint:not(:hover) {
   color: var(--fg-muted);
 }
+
+/* Touch density — the client view (<ClientView> sets .studio-touch). Finger-sized rows, controls and slider
+   thumbs; text inputs at 16px so iOS Safari doesn't zoom the page when one is focused; no tap highlight or
+   callout. Unlayered on purpose so it beats the controls' utility sizes. */
+.studio-touch { --row: 48px; -webkit-tap-highlight-color: transparent; }
+.studio-touch :is(.h-6) { height: 36px; }
+.studio-touch :is(.text-\[11px\], .text-\[11\.5px\], .text-\[12px\]) { font-size: 14px; }
+.studio-touch :where(input:not([type="range"]), textarea, select) { font-size: 16px; }
+.studio-touch [data-studio-thumb] { width: 24px; height: 24px; scale: 1; }
+/* icon buttons and switches: 36px boxes, a 44px reach */
+.studio-touch :is(.size-6) { width: 36px; height: 36px; }
+.studio-touch [role="switch"]::after { inset: -13px -7px; }
+/* A slider moves only by its thumb on touch, like iOS's own: a swipe across the track scrolls the sheet
+   instead of jumping the value (client-view C10). Events from the thumb still bubble to the control. */
+.studio-touch [data-studio-slider-control] { pointer-events: none; }
+.studio-touch [data-studio-thumb] { pointer-events: auto; }
+.studio-touch [data-studio-thumb]::after { content: ""; position: absolute; inset: -10px; }
+/* labels get room at 14px instead of the desktop 84px column */
+.studio-touch [data-row-label] { width: auto !important; min-width: 96px; max-width: 46%; flex-shrink: 0; }
+.studio-touch :where(button, [role="slider"], [role="spinbutton"]) { -webkit-touch-callout: none; }

@@ -10,7 +10,7 @@
    Kit hotkeys here register at priority 0, so a shell binding the same key
    (T for a Text tool, \ for before/after) wins without configuration.
 --------------------------------------------------------------------------- */
-import { Bookmark, Moon, Redo2, Sun, Undo2, Link, Braces, SplitSquareHorizontal, Trash2, Plus, Download, ChevronDown, Bot } from 'lucide-react'
+import { Bookmark, Moon, Redo2, Sun, Undo2, Link, Braces, SplitSquareHorizontal, Trash2, Plus, Download, ChevronDown, Bot, Smartphone } from 'lucide-react'
 import type { ReactElement } from 'react'
 import { useStore } from 'zustand'
 import type { AnyParams } from '../core/params'
@@ -113,7 +113,10 @@ export function CompareButton({ params, hotkey = '\\' }: { params: AnyParams; ho
 
 /** Copy values in the form an engineer or an agent can act on. */
 export function shareMenuItems(params: AnyParams): MenuItem[] {
+  // Tools with published knobs have a client view: the link for a client must open it, not the designer tool (client-view C1/C2).
+  const published = Object.values(params.defs).some((d) => 'publish' in d && d.publish)
   return [
+    ...(published ? [{ label: 'Copy client link', icon: Smartphone, hint: 'Opens the client view, with these values', onClick: async () => { const u = params.shareURL(); await copyText(/[#?&]client\b/.test(u) ? u : `${u}&client`); toast('Client link copied', { type: 'success' }) } }] : []),
     { label: 'Copy link with values', icon: Link, onClick: async () => { await copyText(params.shareURL()); toast('Link copied', { type: 'success' }) } },
     { label: 'Copy changed values (JSON)', icon: Braces, onClick: async () => { await copyText(JSON.stringify(params.toJSON({ changedOnly: true, shareable: true }), null, 2)); toast('Changed values copied', { type: 'success' }) } },
     {

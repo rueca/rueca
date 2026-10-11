@@ -8,6 +8,7 @@ const make = (o: Partial<Parameters<typeof createParams<typeof schema>>[1]> = {}
   createParams(schema, { id: `t${++n}`, url: false, presets: [{ name: 'Dense', values: { rings: 32 } }, { name: 'Calm', values: { rings: 8 } }], ...o })
 
 beforeEach(() => localStorage.clear())
+const frames = () => new Promise((r) => setTimeout(r, 300))
 
 describe('params store', () => {
   it('coerces every write and ignores bad values', () => {
@@ -111,13 +112,40 @@ describe('share links carry their version', () => {
 })
 
 describe('share links and presets across reloads and versions', () => {
-  it('a link’s values survive a plain reload (ST2)', () => {
+  it('a link’s values survive a plain reload (ST2)', async () => {
     const id = `keep${++n}`
     location.hash = '#p=' + btoa(JSON.stringify({ $v: 1, rings: 31 }))
     sessionStorage.clear()
     expect(createParams(schema, { id }).values().rings).toBe(31)
+    await frames()
     // reload: same URL, link already seen this tab → saved values must hold the link's value
     expect(createParams(schema, { id }).values().rings).toBe(31)
+  })
+  it('a link is saved only once the page has drawn healthy frames (B5-03)', async () => {
+    const id = `hang${++n}`
+    location.hash = '#p=' + btoa(JSON.stringify({ $v: 1, rings: 33 }))
+    sessionStorage.clear()
+    createParams(schema, { id })
+    // a link that hung the artwork would never get here, so a fresh tab without it opens clean
+    expect(localStorage.getItem(`studio:${id}:values`)).toBeNull()
+    await frames()
+    expect(JSON.parse(localStorage.getItem(`studio:${id}:values`)!).rings).toBe(33)
+  })
+  it('saved keys named like Object methods are ignored, not fatal (B5-05)', () => {
+    location.hash = ''
+    localStorage.setItem('studio:proto:values', '{"constructor":1,"toString":"x","__proto__":{"rings":5},"hasOwnProperty":2,"rings":12}')
+    const s = createParams(schema, { id: 'proto' })
+    expect(s.values().rings).toBe(12)
+    expect(({} as any).rings).toBeUndefined()
+  })
+  it('p.data values travel in share links by default', () => {
+    location.hash = ''
+    const ds = defineSchema({ s: folder('Stack', { layers: p.data([{ id: 'a' }], { validate: Array.isArray }) }) })
+    const a = createParams(ds, { id: `data${++n}`, persist: false })
+    a.setValue('layers', [{ id: 'b' }])
+    location.hash = new URL(a.shareURL()).hash
+    sessionStorage.clear()
+    expect(createParams(ds, { id: `data${++n}`, persist: false }).values().layers).toEqual([{ id: 'b' }])
   })
   it('two links that differ only late in the payload are both honoured (ST3)', () => {
     const id = `two${++n}`
@@ -142,5 +170,40 @@ describe('share links and presets across reloads and versions', () => {
     const s = createParams(schema, { id: 'pv', version: 2 })
     expect(s.getState().presets.some((p) => p.name === 'Mine')).toBe(true)
     expect(localStorage.getItem('studio:pv:presets')).not.toBeNull()
+  })
+})
+
+describe('migrate carries old values and links forward (break-it B4-F2/F7)', () => {
+  const v2 = defineSchema({ look: folder('Look', { count: p.number(14, { min: 3, max: 40, step: 1 }), shape: p.select('circle', ['circle', 'square']) }) })
+  const migrate = (old: Record<string, unknown>, from: number) => (from === 1 ? { ...old, count: old.rings } : old)
+  it('saved values from v1, renamed through migrate', () => {
+    location.hash = ''
+    localStorage.setItem('studio:mig:values:v1', JSON.stringify({ rings: 30, shape: 'square' }))
+    const s = createParams(v2, { id: 'mig', version: 2, migrate })
+    expect(s.values()).toEqual({ count: 30, shape: 'square' })
+    expect(JSON.parse(localStorage.getItem('studio:mig:values:v2')!).count).toBe(30)
+  })
+  it('without migrate a bump still starts fresh', () => {
+    location.hash = ''
+    localStorage.setItem('studio:nomig:values:v1', JSON.stringify({ shape: 'square' }))
+    expect(createParams(v2, { id: 'nomig', version: 2 }).values().shape).toBe('circle')
+  })
+  it('an old link is upgraded instead of ignored', () => {
+    sessionStorage.clear()
+    location.hash = '#p=' + btoa(JSON.stringify({ $v: 1, rings: 25 }))
+    expect(createParams(v2, { id: `migl${++n}`, version: 2, persist: false, migrate }).values().count).toBe(25)
+  })
+})
+
+describe('a link is the whole shared design (client view C4/C5)', () => {
+  it('keys the link leaves out are defaults, not this browser’s saved values; Undo brings mine back', () => {
+    const id = `full${++n}`
+    localStorage.setItem(`studio:${id}:values`, JSON.stringify({ rings: 30, shape: 'square' }))
+    sessionStorage.clear()
+    location.hash = '#p=' + btoa(JSON.stringify({ $v: 1, shape: 'square' }))   // sender left rings at its default
+    const s = createParams(schema, { id })
+    expect(s.values()).toEqual({ rings: 14, shape: 'square' })
+    s.undo()
+    expect(s.values()).toEqual({ rings: 30, shape: 'square' })
   })
 })

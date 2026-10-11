@@ -49,10 +49,12 @@ The contrast audit proves the accent is legible on the *chrome*. This proves it 
 legible on the *work*, where the selection outline actually sits (rule and fallbacks:
 `visual-rules.md` §3).
 
+`scripts/` sits next to this file's `references/` folder (the skill's own folder):
+
 ```bash
 npm i -D playwright-core            # once; uses the installed Chrome
-node <skill>/scripts/accent-check.mjs http://localhost:5173/#/my-tool
-node <skill>/scripts/accent-check.mjs <url> --artboard "#preview"   # if it picks the wrong element
+node <skill folder>/scripts/accent-check.mjs http://localhost:5173/#/my-tool
+node <skill folder>/scripts/accent-check.mjs <url> --artboard "#preview"   # if it picks the wrong element
 ```
 
 It finds the artboard (`--artboard` selector → the kit's `[data-studio-artifact]`
@@ -85,8 +87,8 @@ stage background then dilutes the sample.
 - **Gutter** — `aside.top - header.bottom === aside.left - main.right`.
 - **Theme completeness** — flip the class and confirm every panel colour changed. Any
   hardcoded `bg-white` or `rgba(0,0,0,.4)` in chrome is a theme leak.
-- **A11y** — count `[role="radio"]`, `[role="slider"]`, `[role="spinbutton"]` to
-  confirm real primitives rather than divs; tab through — hover-only affordances must
+- **A11y** — count `[role="radio"]`, `input[type="range"], [role="slider"]`, `[role="spinbutton"]` to
+  confirm real primitives rather than divs (kit sliders are native range inputs); tab through — hover-only affordances must
   appear on focus.
 - **Truncation** — labels and segmented options must not ellipsise at the inspector
   width.
@@ -117,7 +119,7 @@ Unused dependencies: compare `package.json` against `grep -rhoE "from '[^'.][^']
 For repeatable checks across many screens, drive the installed Chrome with
 `playwright-core` (`chromium.launch({ channel: 'chrome' })` — no browser download):
 console errors, the contrast audit in both themes, rendered-text contrast, and
-thumbnails. The kit repo's `scripts/qa.mjs` is a complete example.
+thumbnails. A complete example: [scripts/qa.mjs](https://github.com/rueca/rueca/blob/main/scripts/qa.mjs).
 
 ## 6. Measure the reference too
 

@@ -152,10 +152,10 @@ export function SizeFields({
 }
 
 /* --- Seed: number + dice. R in the studio rerolls the focused seed. --- */
-export function SeedField({ value, onChange, changed }: { value: number; onChange: (v: number, final: boolean) => void; changed?: boolean }) {
+export function SeedField({ value, onChange, changed, label = 'Seed' }: { value: number; onChange: (v: number, final: boolean) => void; changed?: boolean; label?: string }) {
   return (
     <div className="flex w-full items-center gap-1">
-      <ScrubValue boxed align="left" prefix="#" value={value} min={0} max={99999} step={1} changed={changed} onChange={onChange} className="flex-1" label="Seed" />
+      <ScrubValue boxed align="left" prefix="#" value={value} min={0} max={99999} step={1} changed={changed} onChange={onChange} className="flex-1" label={label} />
       <Tip label="New seed">
         <button type="button" aria-label="Randomise seed" onClick={() => onChange(Math.floor(Math.random() * 99999), true)}
           className="flex size-6 shrink-0 items-center justify-center rounded-[5px] text-fg-muted outline-none hover:bg-hover hover:text-fg active:scale-90 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
@@ -236,22 +236,44 @@ export function CurveGlyph({ value, className }: { value: [number, number, numbe
 }
 
 /* --- Spring: stiffness / damping / mass with a live response preview. --- */
+/** Simulate a unit spring (0 → 1): damping ratio, overshoot and time to settle within 1%. */
+export function springStats({ stiffness: k, damping: d, mass: m }: { stiffness: number; damping: number; mass: number }) {
+  const zeta = d / (2 * Math.sqrt(Math.max(1e-6, k * m)))
+  const dt = 1 / 240
+  let x = 0, v = 0, peak = 0, settle = 0
+  for (let i = 1; i <= 240 * 10; i++) {
+    v += ((-k * (x - 1) - d * v) / m) * dt
+    x += v * dt
+    peak = Math.max(peak, x)
+    if (Math.abs(x - 1) > 0.01 || Math.abs(v) > 0.05) settle = i * dt
+  }
+  return { zeta, overshoot: Math.max(0, peak - 1), settle }
+}
+
 export function SpringEditor({ value, onChange }: { value: { stiffness: number; damping: number; mass: number }; onChange: (v: { stiffness: number; damping: number; mass: number }, final: boolean) => void }) {
+  // the plot spans the whole motion (a slow spring isn't cut off at a fixed 2 s), plus readouts a motion designer reads (t1 judge)
+  const st = springStats(value)
+  const span = clamp(st.settle * 1.15, 0.5, 10)
   const pts: string[] = []
   let x = 0, v = 0
-  const dt = 1 / 120
-  for (let i = 0; i <= 240; i++) {
+  const n = 240, dt = span / n
+  for (let i = 0; i <= n; i++) {
     const f = -value.stiffness * (x - 1) - value.damping * v
     v += (f / value.mass) * dt
     x += v * dt
-    pts.push(`${(i / 240) * 100},${50 - clamp(x, -0.4, 1.6) * 34 + 14}`)
+    pts.push(`${(i / n) * 100},${50 - clamp(x, -0.4, 1.6) * 34 + 14}`)
   }
+  const feel = st.zeta >= 1 ? 'no bounce' : st.zeta > 0.7 ? 'soft' : st.zeta > 0.4 ? 'bouncy' : 'very bouncy'
   return (
     <div className="flex w-full flex-col gap-1.5">
-      <svg viewBox="0 0 100 64" className="h-16 w-full rounded-[6px] bg-control" preserveAspectRatio="none">
+      <svg viewBox="0 0 100 64" className="h-16 w-full rounded-[6px] bg-control" preserveAspectRatio="none" role="img" aria-label={`Spring curve over ${span.toFixed(1)} s`}>
         <line x1={0} x2={100} y1={30} y2={30} stroke="var(--line-strong)" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
         <polyline points={pts.join(' ')} fill="none" stroke="var(--signal)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
       </svg>
+      <div className="flex justify-between gap-2 tabular text-[11px] text-fg-muted">
+        <span>{feel} · ζ {st.zeta.toFixed(2)}</span>
+        <span>{st.overshoot > 0.005 ? `+${Math.round(st.overshoot * 100)}% · ` : ''}settles {st.settle.toFixed(2)} s</span>
+      </div>
       <div className="grid grid-cols-3 gap-1">
         <ScrubValue boxed align="left" prefix="K" value={value.stiffness} min={1} max={1000} step={1} label="Stiffness" onChange={(s, f) => onChange({ ...value, stiffness: s }, f)} />
         <ScrubValue boxed align="left" prefix="D" value={value.damping} min={0} max={100} step={0.5} label="Damping" onChange={(s, f) => onChange({ ...value, damping: s }, f)} />

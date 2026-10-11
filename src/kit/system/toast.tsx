@@ -29,6 +29,9 @@ function ensureHost() {
   document.body.appendChild(selfHost)
   createRoot(selfHost).render(<Toaster />)
 }
+// Toasts raised before any Toaster has subscribed (a store announcing at load) would be dropped: hold them (break-it B5-06).
+const waiting: (() => void)[] = []
+const whenMounted = (fn: () => void) => { if (owner) fn(); else { waiting.push(fn); ensureHost() } }
 
 /** Show a toast; returns its id. Loading toasts stay until updated or dismissed. */
 export function toast(title: string, opts: ToastOpts = {}) {
@@ -63,10 +66,16 @@ toast.progress = (title: string, opts: { onCancel?: () => void } = {}) => {
 
 if (typeof window !== 'undefined') {
   // Params / doc stores announce storage failures once; tell the person, quietly.
-  window.addEventListener('studio:storage-error', () =>
-    toast('Settings could not be saved', { type: 'error', description: 'Browser storage is full or blocked. Your work is fine until you reload.', timeout: 6000 }))
-  window.addEventListener('studio:link-ignored', () =>
-    toast('This link is from an older version', { description: 'The tool has changed since it was shared, so it opened with your own settings instead.', timeout: 6000 }))
+  window.addEventListener('studio:storage-error', () => whenMounted(() =>
+    toast('Settings could not be saved', { type: 'error', description: 'Browser storage is full or blocked. Your work is fine until you reload.', timeout: 6000 })))
+  window.addEventListener('studio:link-ignored', (e) => {
+    const d = (e as CustomEvent<{ linkVersion?: number; version?: number }>).detail
+    const newer = (d?.linkVersion ?? 0) > (d?.version ?? 0)
+    whenMounted(() => toast(newer ? 'This link is from a newer version' : 'This link is from an older version', {
+      description: newer ? 'It was made with a newer copy of this tool, so it opened with your own settings instead.' : 'The tool has changed since it was shared, so it opened with your own settings instead.',
+      timeout: 6000,
+    }))
+  })
 }
 
 export function Toaster() {
@@ -78,6 +87,8 @@ export function Toaster() {
     setActive(true)
     return () => { if (owner === id) owner = null }
   }, [id])
+  // runs after the Provider below has subscribed (child effects first)
+  useEffect(() => { if (active) waiting.splice(0).forEach((fn) => fn()) }, [active])
   if (!active) return null
   return (
     <Toast.Provider toastManager={toastManager} limit={3}>

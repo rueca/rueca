@@ -139,16 +139,24 @@ const ABOUT = {
   color: ['Colour', 'Colour field, panel and swatches with OKLCH.'],
   bridge: ['Studio bridge', '2 KB script that lets the harness drive any page inside an iframe via postMessage.'],
 }
-/* The registry copy of theme.css lands next to an existing stylesheet — often
-   shadcn's, whose @theme also defines muted / accent / input / font-ui.
-   Imported LAST, the kit's @theme wins (Tailwind v4 inlines @import anywhere);
-   doubling :root also lifts the raw tokens above shadcn's .dark block. The
-   user's main CSS already imports tailwindcss. Verified against a fresh
-   `shadcn init` project. */
+/* The registry copy of theme.css lands in SOMEONE ELSE'S app (often next to shadcn's), so it must not touch
+   anything outside the tool (break-it B2-02/05/08):
+   - the raw tokens (--panel, --line, --gutter, --row…) are declared on the kit's own roots — `.studio`, the
+     `.pop` popups and `[data-studio]` — not on :root, so a host's own --gutter or --panel is never overwritten;
+   - the theme follows ONLY <html data-studio-theme>, never the host's `.dark` / `.light` classes;
+   - no `@custom-variant dark`, so the host's `dark:` keeps working the way it did.
+   The repo's own copy keeps :root and the classes (this site themes the whole page from them). */
+const KIT_ROOTS = ':where(.studio, .pop, [data-studio])'
 const registryTheme = (css) => '/* Installed from the ' + site.name + ' registry.\n' +
-  '   Import it as the LAST line of your main CSS so its tokens win over any shadcn theme:\n' +
-  '     @import "./components/studio/theme.css";\n   */\n' +
-  css.replace(/^@import "tailwindcss";\n/m, '').replace(/^:root(?=[\s.[{])/gm, ':root:root')
+  '   Import it in your main CSS, after @import "tailwindcss":\n' +
+  '     @import "./components/studio/theme.css";\n' +
+  '   Its tokens apply only inside the tool (.studio and its popups); your app keeps its own.\n   */\n' +
+  css.replace(/^@import "tailwindcss";\n/m, '')
+    .replace(/^@custom-variant dark[^\n]*\n/m, '')
+    .replace(/:is\(\.light, (\[data-studio-theme="light"\])\)/g, '$1')
+    .replace(/:not\(\.dark, (\[data-studio-theme="dark"\])\)/g, ':not($1)')
+    // a rule whose whole selector is :root (+ attributes/pseudo-classes) declares tokens: move them onto the kit's roots
+    .replace(/^(\s*)(:root(?:[:[][^\s{]*)?)\s*\{/gm, (_, sp, sel) => `${sp}${sel} ${KIT_ROOTS} {`)
 const files = walk(KIT).filter((f) => /\.(tsx?|css)$/.test(f))
 const items = new Map()
 const ensure = (name) => items.get(name) ?? items.set(name, { name, files: [], deps: new Set(), reg: new Set() }).get(name)
@@ -162,7 +170,7 @@ for (const f of files) {
     target: `@components/studio/${relative(KIT, f)}`,
     content: src,
   })
-  for (const [, spec] of src.matchAll(/(?:from|import)\s+['"]([^'"]+)['"]/g)) {
+  for (const [, spec] of src.matchAll(/(?:from\s+|import\s+|import\(\s*)['"]([^'"]+)['"]/g)) {
     if (spec.startsWith('.')) {
       const target = posix.normalize(posix.join(posix.dirname(f), spec))
       const hit = files.find((g) => g === target || g.replace(/\.(tsx?|css)$/, '') === target || g === `${target}/index.ts`)

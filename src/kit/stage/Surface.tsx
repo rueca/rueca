@@ -14,11 +14,15 @@
    Draw functions should be pure in (values, t) so scrubbing, slow-mo and
    frame-accurate export work for free.
 --------------------------------------------------------------------------- */
-import { useEffect, useImperativeHandle, useLayoutEffect, useRef, type Ref } from 'react'
+import { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type Ref } from 'react'
+import { Hand, MousePointer2 } from 'lucide-react'
 import type { Clock } from '../core/clock'
 import type { ParamStore } from '../core/params'
 import type { Schema, SchemaValues } from '../core/schema'
 import { cn } from '../core/cn'
+import { MAX_CANVAS_SIDE, MAX_PREVIEW_AREA } from '../core/io'
+import { useHotkeys } from '../core/hotkeys'
+import { IconButton } from '../ui/button'
 
 export interface FrameInfo<V> { t: number; dt: number; w: number; h: number; dpr: number; v: V; frame: number }
 
@@ -65,9 +69,12 @@ function useCanvasLoop<S extends Schema, C>(
     const ctx = getContext(c)
     let w = 0, h = 0, dpr = 1, t0 = performance.now()
     const resize = () => {
-      dpr = pixelRatio ?? Math.min(devicePixelRatio, 2)
       w = width ?? c.clientWidth
       h = height ?? c.clientHeight
+      // A preview canvas is never bigger than a phone can hold: past ~16.7 MP iOS Safari draws nothing,
+      // and past 16k a side every browser does. A 4K artboard at 2× would be 33 MP (break-it B3-S7).
+      const cap = Math.sqrt(MAX_PREVIEW_AREA / Math.max(1, w * h))
+      dpr = Math.min(pixelRatio ?? Math.min(devicePixelRatio, 2), cap, MAX_CANVAS_SIDE / Math.max(1, w, h))
       c.width = Math.max(1, Math.round(w * dpr))
       c.height = Math.max(1, Math.round(h * dpr))
       redraw.current()
@@ -180,13 +187,39 @@ export function MountSurface<S extends Schema, H extends object = object>({
  * Drop public/studio-bridge.js into the prototype for a 6-line hookup.
  */
 /** Mirror scalar values to CSS custom properties (`accentColor` → `--accent-color`), like studio-bridge's `cssVars()`. */
-export function writeCssVars(doc: Document, values: Record<string, unknown>, o: { unitless?: string[]; suffix?: string } = {}) {
+export interface CssVarsOptions {
+  /** only these param keys (default: every scalar) — keep texts and private knobs off the client's page */
+  keys?: string[]
+  /** numbers written without a unit */
+  unitless?: string[]
+  /** unit for numbers (default 'px'); per key: `{ headlineSize: 'rem', gap: 'px' }` */
+  suffix?: string | Record<string, string>
+}
+export function writeCssVars(doc: Document, values: Record<string, unknown>, o: CssVarsOptions = {}) {
   const s = doc.documentElement.style
   for (const [k, val] of Object.entries(values)) {
+    if (o.keys && !o.keys.includes(k)) continue
     const name = '--' + k.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()
-    if (typeof val === 'number') s.setProperty(name, o.unitless?.includes(k) ? String(val) : val + (o.suffix ?? 'px'))
+    const unit = typeof o.suffix === 'object' ? (o.suffix[k] ?? 'px') : (o.suffix ?? 'px')
+    if (typeof val === 'number') s.setProperty(name, o.unitless?.includes(k) ? String(val) : val + unit)
     else if (typeof val === 'string' || typeof val === 'boolean') s.setProperty(name, String(val))
   }
+}
+
+/** The inverse of writeCssVars: read a page's own custom properties (`--headline-size: 64px` → headlineSize: 64), so a
+    wrapped page's current values become the tool's starting point and the client team's edits carry through (t4 judge).
+    Numbers lose their unit; anything else stays a string. Only keys that exist on the page come back. */
+export function readCssVars(doc: Document, keys: string[]): Record<string, string | number> {
+  const cs = doc.defaultView?.getComputedStyle(doc.documentElement)
+  const out: Record<string, string | number> = {}
+  if (!cs) return out
+  for (const k of keys) {
+    const raw = cs.getPropertyValue('--' + k.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()).trim()
+    if (!raw) continue
+    const n = /^-?\d*\.?\d+(px|rem|em|%|s|ms|deg)?$/.test(raw) ? parseFloat(raw) : NaN
+    out[k] = Number.isFinite(n) ? n : raw
+  }
+  return out
 }
 
 /**
@@ -195,12 +228,15 @@ export function writeCssVars(doc: Document, values: Record<string, unknown>, o: 
  *    into its DOM — the page needs NO changes, so a client's file stays untouched;
  *  - any other page: add studio-bridge.js to it and handle values there (postMessage, always sent).
  */
-export function FrameSurface<S extends Schema>({ src, params, className, title = 'Prototype', apply, cssVars }: {
+export function FrameSurface<S extends Schema>({ src, params, className, title = 'Prototype', apply, cssVars, shield }: {
   src: string; params?: ParamStore<S>; className?: string; title?: string
+  /** a transparent cover so the canvas camera can pan/zoom over the page ("Hand" mode); pair with
+      `useInteractMode()` and `<InteractToggle>` so I flips to using the page itself */
+  shield?: boolean
   /** same-origin only: write values into the page's document (runs on load and on every change) */
   apply?: (doc: Document, values: SchemaValues<S>) => void
   /** same-origin only: mirror scalar values to CSS custom properties on the page's :root */
-  cssVars?: boolean | { unitless?: string[]; suffix?: string }
+  cssVars?: boolean | CssVarsOptions
 }) {
   const frame = useRef<HTMLIFrameElement>(null)
   const applyRef = useRef(apply)
@@ -221,7 +257,10 @@ export function FrameSurface<S extends Schema>({ src, params, className, title =
         applyRef.current?.(doc, v)
       } catch (err) { console.error('[studio] FrameSurface apply failed:', err) }
     }
-    const post = () => { frame.current?.contentWindow?.postMessage({ type: 'studio:params', values: params.toJSON({ shareable: false }) }, '*'); direct() }
+    // Values (private ones too) go only to the origin of `src`, never to whatever the frame navigated to (break-it B5-11).
+    let target = '*'
+    try { const o = new URL(src, location.href).origin; if (o !== 'null') target = o } catch { /* keep '*' for odd srcs */ }
+    const post = () => { frame.current?.contentWindow?.postMessage({ type: 'studio:params', values: params.toJSON({ shareable: false }) }, target); direct() }
     const off = params.subscribe(post)
     let commitTimer: ReturnType<typeof setTimeout> | undefined
     const onMsg = (e: MessageEvent) => {
@@ -239,6 +278,19 @@ export function FrameSurface<S extends Schema>({ src, params, className, title =
     const f = frame.current
     f?.addEventListener('load', post)
     return () => { off(); clearTimeout(commitTimer); params.commit(); window.removeEventListener('message', onMsg); f?.removeEventListener('load', post) }
-  }, [params])
-  return <iframe ref={frame} src={src} title={title} className={cn('block h-full w-full border-0 bg-white', className)} />
+  }, [params, src])
+  const iframe = <iframe ref={frame} src={src} title={title} className={cn('block h-full w-full border-0 bg-white', className)} />
+  if (shield === undefined) return iframe
+  return <div className="relative h-full w-full">{iframe}{shield && <div className="absolute inset-0" aria-hidden data-studio-shield />}</div>
+}
+
+/** Hand vs Interact (Figma's design vs prototype): iframes swallow pointer and wheel events, so a shield
+    covers them while you pan the canvas; `I` hands the pointer to the page. */
+export function useInteractMode(key = 'i') {
+  const [interact, setInteract] = useState(false)
+  useHotkeys({ [key]: { run: () => setInteract((v) => !v), label: 'Hand / interact with the page', group: 'View' } }, [])
+  return [interact, setInteract] as const
+}
+export function InteractToggle({ interact, onChange }: { interact: boolean; onChange: (v: boolean) => void }) {
+  return <IconButton icon={interact ? MousePointer2 : Hand} label={interact ? 'Interacting with the page' : 'Panning the canvas'} shortcut="i" active={interact} onClick={() => onChange(!interact)} />
 }

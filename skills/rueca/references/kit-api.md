@@ -6,7 +6,8 @@
 
 The kit is the **harness**: the design-tool chrome around a prototype. The prototype (the
 *artifact*) can be anything — Canvas 2D, WebGL, vanilla three.js, SVG, DOM/React, an iframe.
-Import everything from `@kit`. Read `src/shells/motion/` for a complete worked example.
+Import everything from `@kit`. A complete worked example: the Motion study shell
+([live](https://rueca.dev/#/motion) · [source](https://github.com/rueca/rueca/tree/main/src/shells/motion)).
 
 ## 1. Rules that keep it looking pro
 
@@ -49,6 +50,8 @@ something else there): ours are `fg-muted`, `signal`, `control`; font is `font-u
 ```ts
 import { defineSchema, folder, p, createParams, createClock } from '@kit'
 
+// Top level is always folders. Keys are FLAT across folders (values are one object): a duplicate throws at
+// load, and a helper that builds several folders must prefix its keys (bandDelay, wheelDelay — not delay twice).
 export const schema = defineSchema({
   shape: folder('Shape', {
     count:  p.number(12, { min: 1, max: 64, step: 1, hint: 'One sentence. This IS the docs.' }),
@@ -90,9 +93,11 @@ range; typing can exceed it), `parse` (typed text → number, e.g. percent), `di
 
 ```ts
 export const params = createParams(schema, {
-  id: 'my-tool', version: 2,                          // bump when the schema's shape changes
+  id: 'my-tool', version: 2,                          // bump when the schema's shape changes…
+  migrate: (old, from) => from === 1 ? { ...old, band: old.weight } : old, // …and keep users' saved values + old links
   presets: [{ name: 'Calm', values: { … } }],          // merge by default: only the listed keys change
-  presetKeys: ['palette', 'grain'],                    // what "Save preset" captures (default: all shareable)
+  presetKeys: ['palette', 'grain'],                    // what "Save preset" captures (default: all shareable, not data)
+  // persist: false — no localStorage for values; historyLimit: 100 — undo depth (oldest steps drop silently)
 })
 params.values()                       // current values (non-reactive)
 params.subscribe((s) => …)            // every change, incl. mid-drag (zustand)
@@ -101,12 +106,18 @@ params.setValue('count', 3, { label: 'Count' })   // commits one labelled undo s
 params.patch({ … }); params.reset(['count']); params.undo(); params.redo()
 params.replace(values, { history: false })        // load/import without an undo step
 params.savePreset(name); params.applyPreset(name); params.activePreset(); params.toggleCompare()
+// A/B side by side (motion, looks): the other slot is state.compare — render the artifact twice
+//   const b = useParamState(params, (s) => s.compare)
+//   b ? <CompareSplit layout="side" before={<Art v={b} />} after={<Art v={v} />} /> : <Art v={v} />
 params.toJSON({ changedOnly: true, shareable: true }); params.shareURL()
 const v = useValues(params)            // React
 ```
 
-Persistence (localStorage, debounced; a quota failure shows a toast once) and `#p=` URL share
-are automatic. **Every write is validated against the schema** (setValue, patch, presets, saved
+Persistence (localStorage key `studio:<id>:values:v<version>`, debounced; a quota failure shows a toast once) and
+`#p=` URL share (base64 JSON stamped with `$v`) are automatic. Renamed or rescaled a param? Bump `version`; without
+`migrate` every visitor starts from the defaults and links made before the bump are ignored with a notice, with
+`migrate` both are carried forward. A link's values are saved only after the page has drawn a few healthy frames,
+so a hostile link that hangs the artwork can't stick. **Every write is validated against the schema** (setValue, patch, presets, saved
 values, share links, the iframe bridge): `"30"` becomes `30`, out-of-range numbers clamp, values that
 can't fit (a number for a colour, an unknown option) are rejected and the store keeps its value,
 unknown keys are ignored — dev builds log why. A schema whose own defaults don't validate logs an
@@ -168,6 +179,9 @@ stops ticks while paused too (default true for artifacts with their own life).
 <WebGLSurface params={params} clock={clock} setup={(gl) => program} draw={(gl, f, program) => …} />
 <MountSurface ref={m} params={params} clock={clock} mount={(el, api) => { const engine = start(el, api.values()); api.params.subscribe((s) => engine.update(s.values)); return { engine, dispose: () => engine.stop() } }} />
 <FrameSurface src="/proto.html" params={params} cssVars apply={(doc, v) => …} />  // same-origin: writes into the page, no edits to it
+// cssVars={{ keys: ['accent', 'headlineSize'], suffix: { headlineSize: 'px' }, unitless: ['lineHeight'] }} — only those, with units
+// start from the page's own values: apply={(doc) => …} runs on load — or once: params.replace(readCssVars(doc, ['accent', 'headlineSize']), { history: false })
+// const [interact, setInteract] = useInteractMode()  →  <FrameSurface … shield={!interact} /> + <InteractToggle interact={interact} onChange={setInteract} /> in the toolbar
 <FrameSurface src="https://other.site/x" params={params} />  // anything else: add public/studio-bridge.js to the page
 ```
 `h.current.canvas` gives the canvas for export; `m.current.handle` the object `mount` returned.
@@ -182,7 +196,7 @@ stops ticks while paused too (default true for artifacts with their own life).
   left={<Panel header={<PanelHeader title="Layers" />}>…</Panel>}
   right={<Panel header={<PanelHeader><PanelTabs …/></PanelHeader>}><Inspector params={params} /></Panel>}
   bottom={<Timeline clock={clock} lanes={lanes} />}
-  leftWidth={240} rightWidth={280}>
+  leftWidth={240} rightWidth={280}>     // an Inspector on the LEFT needs leftWidth={280} (size fields need the room)
   <Stage>…</Stage>   or   <Stage fill>…</Stage>
 </Studio>
 ```
@@ -194,7 +208,7 @@ stops ticks while paused too (default true for artifacts with their own life).
   editors). The covered edges are exposed as `useSafeArea()` and `--safe-top/right/bottom/left`.
 - `⌘\` hides all chrome (present mode).
 - The app should also wrap each route/shell in `<ErrorBoundary resetPrefix={\`studio:\${id}\`}>` — stores
-  are created at module load, before `<Studio>` exists (see src/gallery/App.tsx).
+  are created at module load, before `<Studio>` exists.
 - Each region (toolbar, panels, timeline, stage) sits in an `ErrorBoundary`: a crash shows "Try
   again / Reset saved settings / Reload" in that region instead of blanking the app.
 - Kit base styles (font, size, scrollbars, focus ring, colour-scheme) apply inside `.studio` (the
@@ -216,6 +230,11 @@ stops ticks while paused too (default true for artifacts with their own life).
 ## 6. Components
 
 - `Inspector params folders? keys? published? id?` — schema → sections + rows (folders render in the order given).
+- `ClientView params title? subtitle? actions? onDownload? onExit?` + `useClientMode({ narrow?, hotkey? })` →
+  `{ client, forced, setClient }` + `clientLink(params)` — the client's phone view: art full-bleed above (beside, on
+  wide/landscape screens) a sheet of `publish: true` knobs at touch size (48px rows, 16px inputs so iOS doesn't zoom,
+  thumb-only sliders, 44px reach), undo/redo, Download, "Send to designer" (share sheet on touch, else copy). On a phone
+  or from a `&client` link it is forced (no way into the designer view). Marks `<html data-studio-client>` while shown.
 - Hand-built panels that must match: `Section title (open+onToggle | defaultOpen persistKey) onReset changed actions collapsible`,
   `Row label hint changed onReset stacked trailing labelWidth`, `ParamRow k params` (one schema row),
   `ParamControl def value onChange` (just the control).

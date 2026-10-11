@@ -13,7 +13,7 @@
    Building a panel by hand? Use <Section>, <Row>, <ParamRow> (one schema row
    bound to a store) and <ParamControl> (just the control) so it matches.
 --------------------------------------------------------------------------- */
-import { useState, type ReactNode } from 'react'
+import { memo, useState, type ReactNode } from 'react'
 import { ChevronRight, RotateCcw } from 'lucide-react'
 import { Popover } from '@base-ui/react/popover'
 import { cn } from '../core/cn'
@@ -78,7 +78,7 @@ export function Inspector({ params, folders, keys, published, className, id }: {
             onToggle={(solo) => persist(solo ? Object.fromEntries(entries.map(([k]) => [k, k === fid])) : { ...open, [fid]: !isOpen })}
             onReset={changed ? () => params.reset(valueKeys) : undefined}
           >
-            {rows.map(([key, def]) => <ParamRow key={key} k={key} def={def} params={params} values={values} defaults={defaults} />)}
+            {rows.map(([key, def]) => <LiveRow key={key} k={key} def={def} params={params} />)}
           </Section>
         )
       })}
@@ -139,6 +139,7 @@ export function Row({
   const lab = label != null && (
     <Tip label={hint} side="left">
       <span
+        data-row-label
         onDoubleClick={onReset}
         className={cn('flex min-w-0 items-center gap-1 truncate text-[11.5px] no-select', changed ? 'text-fg' : 'text-fg-muted', stacked ? 'h-6' : 'shrink-0')}
         style={stacked ? undefined : { width: labelWidth }}
@@ -166,19 +167,30 @@ export function Row({
 }
 
 /** A schema row bound to a params store — what <Inspector> renders per param. */
-export function ParamRow({ k, def, params, values: valuesProp, defaults: defaultsProp, trailing }: { k: string; def?: ParamDef; params: AnyParams; values?: Record<string, unknown>; defaults?: Record<string, unknown>; trailing?: ReactNode }) {
-  const liveValues = useParamState(params, (s) => (valuesProp ? null : s.values)) as Record<string, unknown> | null
-  const values = valuesProp ?? liveValues!
+/* The Inspector's own rows: each subscribes to ITS value (plus booleans for `when` / `disabled`), so a drag
+   re-renders one row, not all of them — 150 open rows cost 15 ms per move before (break-it B3-S2). */
+const LiveRow = memo(function LiveRow({ k, def, params }: { k: string; def: ParamDef; params: AnyParams }) {
+  const v = useParamState(params, (s) => (s.values as Record<string, unknown>)[k])
+  const shown = useParamState(params, (s) => !def.when || def.when(s.values as Record<string, unknown>))
+  const off = useParamState(params, (s) => isValueDef(def) && typeof def.disabled === 'function' ? def.disabled(s.values as Record<string, unknown>) : false)
+  if (!shown) return null
+  return <ParamRow k={k} def={def} params={params} single={{ v, off }} />
+})
+
+export function ParamRow({ k, def, params, values: valuesProp, defaults: defaultsProp, trailing, single }: { k: string; def?: ParamDef; params: AnyParams; values?: Record<string, unknown>; defaults?: Record<string, unknown>; trailing?: ReactNode; /** @internal LiveRow's own subscription */ single?: { v: unknown; off: boolean } }) {
+  const liveValues = useParamState(params, (s) => (valuesProp || single ? null : s.values)) as Record<string, unknown> | null
+  // with `single`, the rest of the values are read only when needed (action clicks), never subscribed to
+  const values = valuesProp ?? liveValues ?? (params.getState().values as Record<string, unknown>)
   const defaults = defaultsProp ?? (params.getState().defaults as Record<string, unknown>)
   def = def ?? params.defs[k]
   if (!def || def.type === 'data') return null
-  if (def.when && !def.when(values)) return null
+  if (!single && def.when && !def.when(values)) return null
   const label = ('label' in def && def.label) || humanize(k)
 
   if (def.type === 'action')
     return (
       <div className="px-3 py-1">
-        <Button variant={def.variant === 'primary' ? 'primary' : 'default'} size="md" className="w-full" onClick={() => def.onClick(values)}>
+        <Button variant={def.variant === 'primary' ? 'primary' : 'default'} size="md" className="w-full" onClick={() => def.onClick(single ? params.getState().values : values)}>
           {def.icon && <def.icon size={14} strokeWidth={1.5} />}
           {def.label}
         </Button>
@@ -188,11 +200,11 @@ export function ParamRow({ k, def, params, values: valuesProp, defaults: default
     return <Row label={label} hint={def.hint}><Monitor get={def.get} graph={def.graph} min={def.min} max={def.max} fmt={def.fmt} /></Row>
 
   const d = def as ValueDef
-  const v = values[k]
+  const v = single ? single.v : values[k]
   const changed = !equal(v, defaults[k])
   const set = (nv: unknown, final = true) => params.setValue(k, nv as never, { commit: final })
   const reset = () => params.reset([k])
-  const disabled = typeof d.disabled === 'function' ? d.disabled(values) : d.disabled
+  const disabled = single ? (typeof d.disabled === 'function' ? single.off : d.disabled) : typeof d.disabled === 'function' ? d.disabled(values) : d.disabled
   const common = { label, hint: d.hint, changed, onReset: reset, trailing }
 
   const control = <ParamControl def={d} value={v} onChange={set} changed={changed} defaultValue={defaults[k]} label={label} />
@@ -313,7 +325,7 @@ export function ParamControl({ def: d, value: v, onChange: set, changed, default
         ? <Checkbox checked={v} onChange={(b) => set(b)} label={label} />
         : <div className="flex flex-1 justify-end"><Switch checked={v} onChange={(b) => set(b)} label={label} /></div>
     case 'text': return <TextInput value={v} onChange={(s) => set(s, false)} onCommit={(s) => set(s, true)} placeholder={d.placeholder} multiline={d.multiline} mono={d.mono} maxLength={d.maxLength} label={label} />
-    case 'seed': return <SeedField value={v} onChange={(n, f) => set(n, f)} changed={changed} />
+    case 'seed': return <SeedField value={v} onChange={(n, f) => set(n, f)} changed={changed} label={label} />
     case 'curve': return <CurveEditor value={v} onChange={(c, f) => set(c, f)} presets={d.presets} />
     case 'spring': return <SpringEditor value={v} onChange={(s, f) => set(s, f)} />
     case 'image': return <ImageDrop value={v} onChange={(s, f) => set(s, f)} accept={d.accept} />

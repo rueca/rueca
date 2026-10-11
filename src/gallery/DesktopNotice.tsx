@@ -2,7 +2,7 @@
    or a touch-only tablet, a bottom sheet says so the first time a shell opens in a
    visit (sessionStorage), then stays out of the way. Never inside an iframe (the
    landing's live previews) or a shell's phone-friendly ?client view. */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Monitor } from 'lucide-react'
 import { Button } from '@kit/ui/button'
 
@@ -17,7 +17,21 @@ function shouldShow() {
 }
 
 export function DesktopNotice() {
-  const [open, setOpen] = useState(shouldShow)
+  // decide after the shell has had a moment to load: a client view marks <html> as it mounts (client-view C1)
+  const [open, setOpen] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setOpen(shouldShow() && !document.documentElement.hasAttribute('data-studio-client')), 1500)
+    return () => clearTimeout(t)
+  }, [])
+  // A shell showing its client view (the kit's <ClientView> marks <html>) is built for this phone: stand down (client-view C1).
+  useEffect(() => {
+    const html = document.documentElement
+    const check = () => { if (html.hasAttribute('data-studio-client')) setOpen(false) }
+    check()
+    const mo = new MutationObserver(check)
+    mo.observe(html, { attributes: true, attributeFilter: ['data-studio-client'] })
+    return () => mo.disconnect()
+  }, [])
   if (!open) return null
   const close = () => { try { sessionStorage.setItem(KEY, '1') } catch { /* private mode: show again next time */ } setOpen(false) }
   return (

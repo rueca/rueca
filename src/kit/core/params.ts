@@ -89,8 +89,12 @@ export interface ParamOptions<V> {
   id: string
   /** remember the last values in localStorage (default true) */
   persist?: boolean
-  /** bump when the schema's shape changes so stale saved values are ignored */
+  /** bump when the schema's shape changes so stale saved values (and old links) are ignored… */
   version?: number
+  /** …or carried forward: turn values saved / linked under an older `version` into this one's
+      (rename keys, rescale numbers). Return null to drop them. The result is validated like any input.
+        migrate: (old, from) => from === 1 ? { ...old, band: old.weight } : old */
+  migrate?: (old: Record<string, unknown>, fromVersion: number) => Partial<V> | Record<string, unknown> | null
   /** read `#p=` from the URL on load (default true) */
   url?: boolean
   presets?: { name: string; values: Partial<V>; mode?: 'merge' | 'replace' }[]
@@ -123,6 +127,19 @@ const b64 = {
 }
 
 const liveIds = new Set<string>()
+
+/** Run `fn` once the page has painted a few frames without long stalls (immediately where there are no frames). */
+function afterHealthyFrames(fn: () => void, frames = 4) {
+  if (typeof requestAnimationFrame === 'undefined' || typeof document === 'undefined') return fn()
+  let last = -1, healthy = 0, tries = 0
+  const step = (t: number) => {
+    healthy = last >= 0 && t - last < 250 ? healthy + 1 : 0
+    last = t
+    if (healthy >= frames) fn()
+    else if (++tries < 2000) requestAnimationFrame(step)
+  }
+  requestAnimationFrame(step)
+}
 
 export function createParams<S extends Schema>(schema: S, opts: ParamOptions<SchemaValues<S>>): ParamStore<S> {
   {
@@ -174,9 +191,28 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     if (!r.ok) console.error(`[studio] ${opts.id}: default for "${k}" does not fit its ${d.type} def — ${r.reason}`)
   }
 
+  const current = opts.version ?? 1
+  // Values from an older version: only through `migrate` (a bump means the meaning changed). Links and storage alike.
+  const upgrade = (raw: Record<string, unknown>, from: number): Record<string, unknown> | null => {
+    if (from === current) return raw
+    if (!opts.migrate || from > current) return null
+    try { return (opts.migrate({ ...raw }, from) as Record<string, unknown> | null) ?? null } catch (e) { warn(`migrate from v${from} threw: ${e}`); return null }
+  }
   let initial = { ...defaults }
-  if (opts.persist !== false) initial = { ...initial, ...sanitize(LS.get<Partial<V>>(keyLS), 'localStorage') }
+  if (opts.persist !== false) {
+    let saved = LS.get<Record<string, unknown>>(keyLS)
+    if (saved === null && opts.migrate) for (let v = current - 1; v >= 1 && saved === null; v--) {
+      // version 1 may have been saved before `version` was set at all (no suffix)
+      const old = LS.get<Record<string, unknown>>(`studio:${opts.id}:values:v${v}`) ?? (v === 1 ? LS.get<Record<string, unknown>>(`studio:${opts.id}:values`) : null)
+      if (old && typeof old === 'object') { saved = upgrade(old, v); if (saved) LS.set(keyLS, pick(sanitize(saved as Partial<V>, `saved v${v} values`) as Values, 'persist')) }
+    }
+    initial = { ...initial, ...sanitize(saved as Partial<V>, 'localStorage') }
+  }
   let linkApplied = false
+  let beforeLink: V | null = null
+  /** every shareable value at its default — what a link's omitted keys mean */
+  const linkBase = () => pick(defaults as Values, 'share') as Partial<V>
+  let markSeen = () => {}
   if (opts.url !== false && typeof location !== 'undefined') {
     const m = location.hash.match(/[#&]p=([^&]+)/)
     // A link applies ONCE per tab: reloading after tweaking must keep the tweaks (break-it S5).
@@ -184,29 +220,31 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     let seen = false
     try { seen = !!m && sessionStorage.getItem(seenKey) === '1' } catch { /* noop */ }
     if (m && !seen) try {
-      const raw = JSON.parse(b64.dec(m[1])) as Record<string, unknown>
+      let raw = JSON.parse(b64.dec(m[1])) as Record<string, unknown>
       // Links carry the schema version they were made with ($v; links from before this existed count as 1).
       // A link from another version could mean something else entirely (a renamed or re-scaled param), so it
       // is ignored, not half-applied — the page opens with the saved settings and says why.
       const linkVersion = typeof raw?.$v === 'number' ? raw.$v : 1
       if (raw) delete raw.$v
-      if (linkVersion !== (opts.version ?? 1)) {
+      const up = upgrade(raw, linkVersion)
+      if (!up) {
         try { sessionStorage.setItem(seenKey, '1') } catch { /* noop */ }
-        if (typeof window !== 'undefined') queueMicrotask(() => window.dispatchEvent(new CustomEvent('studio:link-ignored', { detail: { id: opts.id, linkVersion, version: opts.version ?? 1 } })))
+        if (typeof window !== 'undefined') queueMicrotask(() => window.dispatchEvent(new CustomEvent('studio:link-ignored', { detail: { id: opts.id, linkVersion, version: current } })))
         throw new Error('version')
       }
+      raw = up
       // keys marked share:false (images, private data) can never arrive by link
       for (const k of Object.keys(raw ?? {})) if (!flag(k, 'share')) { delete raw[k]; warn(`ignored "${k}" from share link (share: false)`) }
-      initial = { ...initial, ...sanitize(raw as Partial<V>, 'share link') }
+      // A link is the WHOLE shared design: shareable knobs it leaves out are at their defaults, not at whatever this
+      // browser saved (client-view C4). The values from before the link stay one Undo away (C5).
+      beforeLink = initial
+      initial = { ...initial, ...linkBase(), ...sanitize(raw as Partial<V>, 'share link') }
       linkApplied = true
-      try { sessionStorage.setItem(seenKey, '1') } catch { /* noop */ }
+      markSeen = () => { try { sessionStorage.setItem(seenKey, '1') } catch { /* noop */ } }
     } catch (e) { if ((e as Error)?.message !== 'version') warn('ignored an unreadable share link') }
   }
 
   const builtin: Preset<V>[] = (opts.presets ?? []).map((pr) => ({ name: pr.name, values: sanitize(pr.values), mode: pr.mode, builtin: true }))
-  // A link's values become the saved values right away, or a plain reload (which skips the already-seen link)
-  // would fall back to the old ones (break-it ST2).
-  if (linkApplied && opts.persist !== false) LS.set(keyLS, pick(initial as Values, 'persist'))
   let rawSaved = LS.get<unknown>(keyPresets)
   if (rawSaved === null) for (let v = opts.version ?? 0; v >= 1; v--) {
     const old = `studio:${opts.id}:presets:v${v}`, found = LS.get<unknown>(old)
@@ -220,13 +258,21 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     values: initial,
     defaults,
     committed: initial,
-    past: [],
+    // undo back to what THIS browser had — not to bare defaults nobody chose (client-view N4)
+    past: beforeLink && !equal(beforeLink, initial) && !equal(beforeLink, defaults) ? [beforeLink] : [],
     future: [],
-    pastLabels: [],
+    pastLabels: beforeLink && !equal(beforeLink, initial) && !equal(beforeLink, defaults) ? ['Open link'] : [],
     futureLabels: [],
     presets: [...builtin, ...saved],
     compare: null,
   }))
+  // A link's values become the saved values, or a plain reload (which skips the already-seen link) would fall
+  // back to the old ones (break-it ST2) — but only once the page has drawn a few healthy frames: a hostile link (count: 3e9) that hangs the
+  // artwork is then never saved, so opening the tool without it recovers (break-it B5-03).
+  if (linkApplied) afterHealthyFrames(() => {
+    markSeen()
+    if (opts.persist !== false) LS.set(keyLS, pick(store.getState().values as Values, 'persist'))
+  })
 
   const commitListeners = new Set<(v: V, meta: CommitMeta) => void>()
   let lastPreset: string | undefined
@@ -423,13 +469,15 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     const seenKey = `studio:link:${opts.id}:${hash(m[1])}`
     try { if (sessionStorage.getItem(seenKey) === '1') return; sessionStorage.setItem(seenKey, '1') } catch { /* noop */ }
     try {
-      const raw = JSON.parse(b64.dec(m[1])) as Record<string, unknown>
+      let raw = JSON.parse(b64.dec(m[1])) as Record<string, unknown>
       const linkVersion = typeof raw?.$v === 'number' ? raw.$v : 1
       if (raw) delete raw.$v
-      if (linkVersion !== (opts.version ?? 1)) { window.dispatchEvent(new CustomEvent('studio:link-ignored', { detail: { id: opts.id, linkVersion, version: opts.version ?? 1 } })); return }
+      const up = upgrade(raw, linkVersion)
+      if (!up) { window.dispatchEvent(new CustomEvent('studio:link-ignored', { detail: { id: opts.id, linkVersion, version: current } })); return }
+      raw = up
       for (const k of Object.keys(raw ?? {})) if (!flag(k, 'share')) delete raw[k]
       const vals = sanitize(raw as Partial<V>, 'share link')
-      if (Object.keys(vals).length) api.patch(vals, { label: 'Open link' })
+      if (Object.keys(vals).length) api.patch({ ...linkBase(), ...vals } as Partial<V>, { label: 'Open link' })
     } catch { warn('ignored an unreadable share link') }
   })
 

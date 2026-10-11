@@ -32,7 +32,7 @@ interface Base<V> {
   publish?: boolean
   /** Remember in localStorage (default true; false for big or private values — images default false). */
   persist?: boolean
-  /** Include in share links (default true; images and data default false). */
+  /** Include in share links (default true; images default false). */
   share?: boolean
 }
 
@@ -72,7 +72,8 @@ export interface SeedDef extends Base<number> { type: 'seed' }
 export interface CurveDef extends Base<[number, number, number, number]> { type: 'curve'; presets?: Record<string, [number, number, number, number]> }
 export interface SpringDef extends Base<{ stiffness: number; damping: number; mass: number }> { type: 'spring' }
 export interface ImageDef extends Base<string | null> { type: 'image'; accept?: string }
-/** Opaque document value — never rendered as a row, but undoable, persisted and (optionally) shared.
+/** Opaque document value — never rendered as a row, but undoable, persisted and shared
+   (`share: false` keeps a large one out of links).
     Use for collections (a layer stack, clips, pattern steps) that other UI edits. */
 export interface DataDef<T = unknown> extends Base<T> {
   type: 'data'
@@ -121,7 +122,7 @@ export const p = {
   /** images are kept out of localStorage and share links by default (quota, privacy) */
   image: (value: string | null = null, o: Opt<ImageDef> = {}): ImageDef => ({ type: 'image', value, persist: false, share: false, ...o }),
   /** hidden document value: `p.data<Layer[]>([])` — typed, undoable, persisted, not rendered */
-  data: <T,>(value: T, o: Opt<DataDef<T>> = {}): DataDef<T> => ({ type: 'data', value, share: false, ...o }),
+  data: <T,>(value: T, o: Opt<DataDef<T>> = {}): DataDef<T> => ({ type: 'data', value, ...o }),
   action: (label: string, onClick: (v: any) => void, o: Omit<ActionDef, 'type' | 'label' | 'onClick'> = {}): ActionDef => ({ type: 'action', label, onClick, ...o }),
   monitor: (get: () => number | string, o: Omit<MonitorDef, 'type' | 'get'> = {}): MonitorDef => ({ type: 'monitor', get, ...o }),
 }
@@ -159,7 +160,8 @@ export function defaultsOf<S extends Schema>(schema: S): SchemaValues<S> {
 }
 
 export function defIndex(schema: Schema): Record<string, ParamDef> {
-  const out: Record<string, ParamDef> = {}
+  // no prototype: a saved or linked key like "constructor" or "toString" must not find Object's (break-it B5-05)
+  const out: Record<string, ParamDef> = Object.create(null)
   for (const f of Object.values(schema)) Object.assign(out, f.params)
   return out
 }
@@ -198,6 +200,17 @@ const obj = (v: unknown, keys: string[]): Record<string, number> | undefined => 
   for (const k of keys) { const n = num((v as Record<string, unknown>)[k]); if (n === undefined) return undefined; out[k] = n }
   return out
 }
+/** clamp every number in a record to the def's min / max (break-it B5-04: bounds held for vectors and sizes too) */
+const within = <R extends Record<string, number>>(o: R, d: { min?: number; max?: number }): R => {
+  const out = { ...o }
+  for (const k of Object.keys(out) as (keyof R)[]) {
+    let n = out[k] as number
+    if (d.min !== undefined) n = Math.max(d.min, n)
+    if (d.max !== undefined) n = Math.min(d.max, n)
+    out[k] = n as R[keyof R]
+  }
+  return out
+}
 const optValues = (o: Option[]) => o.map((x) => (typeof x === 'string' ? x : x.value))
 
 /** Coerce `value` to fit `def`, or report it invalid. */
@@ -214,12 +227,12 @@ export function coerce(def: ParamDef, value: unknown): { ok: true; value: unknow
     }
     case 'range': { const r = nums(value, 2); if (!r) return bad('expected [lo, hi]'); const lo = Math.max(def.min, Math.min(r[0], r[1])), hi = Math.min(def.max, Math.max(r[0], r[1])); return { ok: true, value: [lo, hi] } }
     case 'curve': { const c = nums(value, 4); return c ? { ok: true, value: c } : bad('expected [x1, y1, x2, y2]') }
-    case 'vec2': { const o = obj(value, ['x', 'y']); return o ? { ok: true, value: o } : bad('expected { x, y }') }
-    case 'vec3': { const o = obj(value, ['x', 'y', 'z']); return o ? { ok: true, value: o } : bad('expected { x, y, z }') }
-    case 'size': { const o = obj(value, ['w', 'h']); return o && o.w > 0 && o.h > 0 ? { ok: true, value: o } : bad('expected { w, h } > 0') }
+    case 'vec2': { const o = obj(value, ['x', 'y']); return o ? { ok: true, value: within(o, def) } : bad('expected { x, y }') }
+    case 'vec3': { const o = obj(value, ['x', 'y', 'z']); return o ? { ok: true, value: within(o, def) } : bad('expected { x, y, z }') }
+    case 'size': { const o = obj(value, ['w', 'h']); return o && o.w > 0 && o.h > 0 ? { ok: true, value: within(o, def) } : bad('expected { w, h } > 0') }
     case 'spring': { const o = obj(value, ['stiffness', 'damping', 'mass']); return o ? { ok: true, value: o } : bad('expected { stiffness, damping, mass }') }
     case 'color': return typeof value === 'string' && HEX.test(value.trim()) ? { ok: true, value: value.trim() } : bad('expected a hex colour')
-    case 'palette': return Array.isArray(value) && value.length > 0 && value.every((c) => typeof c === 'string' && HEX.test(c)) ? { ok: true, value } : bad('expected hex colours')
+    case 'palette': return Array.isArray(value) && value.length > 0 && value.every((c) => typeof c === 'string' && HEX.test(c)) ? { ok: true, value: def.max ? value.slice(0, def.max) : value } : bad('expected hex colours')
     case 'gradient': {
       const g = value as { angle?: unknown; stops?: unknown }
       const angle = num(g?.angle)
@@ -228,7 +241,12 @@ export function coerce(def: ParamDef, value: unknown): { ok: true; value: unknow
       return { ok: true, value: { angle, stops } }
     }
     case 'select': { const s = typeof value === 'number' ? String(value) : value; return typeof s === 'string' && optValues(def.options).includes(s) ? { ok: true, value: s } : bad(`expected one of ${optValues(def.options).join(', ')}`) }
-    case 'multi': { const ok = optValues(def.options); return Array.isArray(value) && value.every((x) => typeof x === 'string' && ok.includes(x)) ? { ok: true, value } : bad('expected a subset of the options') }
+    case 'multi': {
+      const ok = optValues(def.options)
+      if (!Array.isArray(value) || !value.every((x) => typeof x === 'string' && ok.includes(x))) return bad('expected a subset of the options')
+      const picked = [...new Set(value as string[])]
+      return picked.length >= (def.min ?? 0) ? { ok: true, value: picked } : bad(`expected at least ${def.min} options`)
+    }
     case 'boolean': return typeof value === 'boolean' ? { ok: true, value } : value === 'true' || value === 'false' ? { ok: true, value: value === 'true' } : bad('expected true / false')
     case 'text': { if (typeof value === 'number') value = String(value); if (typeof value !== 'string') return bad('expected text'); return { ok: true, value: def.maxLength ? value.slice(0, def.maxLength) : value } }
     case 'image': return value === null || typeof value === 'string' ? { ok: true, value } : bad('expected an image URL or null')
