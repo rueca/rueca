@@ -85,8 +85,8 @@ const LOGO_DYE = {
   gualda: 'fill-[#F2C744] dark:fill-[#F5D05A]',
 }
 
-/** In colour since 11 Oct (Rafael: "let me see E on the site"); false puts the whole logo back in the page's ink. The word stays ink either way. */
-const LOGO_IN_COLOUR = true
+/** Flat again (Rafael, 11 Oct): the whole logo in the page's ink. True brings colour E back (the dyes above); the word stays ink either way. */
+const LOGO_IN_COLOUR = false
 const markFill = (dye: keyof typeof LOGO_DYE) => (LOGO_IN_COLOUR ? { className: LOGO_DYE[dye] } : { fill: 'currentColor' })
 
 /** The mark alone. The band's two rings wind the same way, so it fills evenodd. */
