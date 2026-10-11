@@ -9,6 +9,7 @@ import { SiteNav } from '@/landing/SiteNav'
 import { useReveals } from '@/landing/reveals'
 import { CELL, Field, Hand, Row, Sheet } from '@/landing/plate'
 import { ShellCard, categoriesOf } from './ShellCard'
+import { FOOTER_LINKS, SiteFooter } from '@/landing/SiteFooter'
 
 /** The category filter. From md it's a ruled row of cells in printed small caps, like the
     header; on phones it wraps as plain buttons in one cell. */
@@ -52,7 +53,7 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
     <TipProvider>
       <div ref={root} className="site h-full overflow-x-hidden overflow-y-auto bg-field text-fg">
         <SiteNav scroller={root} />
-        <Sheet as="main" className="mb-16 sm:mb-24">
+        <Sheet as="main">
           {/* the title strip, like a drawing sheet's: printed fields, handwritten values */}
           {/* -mt-px: its top rule lands on the header's closing rule, so the two read as one */}
           <Row className="divide-rule -mt-px flex h-[60px] items-stretch">
@@ -76,6 +77,10 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
               <Fillers n={list.length} />
             </div>
           </Row>
+        </Sheet>
+        {/* the same footer as the landing: the drawing's title block, continuing the sheet's rails */}
+        <Sheet className="mb-16 sm:mb-24">
+          <SiteFooter count={{ label: 'Shells', value: `${shells.length} in all` }} elsewhere={FOOTER_LINKS.shells} />
           <Row />
         </Sheet>
       </div>

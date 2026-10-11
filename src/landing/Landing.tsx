@@ -8,11 +8,10 @@ import { Segmented } from '@kit/ui/controls'
 import { TipProvider } from '@kit/ui/tooltip'
 import { useTheme } from '@kit/core/theme'
 import { cn } from '@kit/core/cn'
-import { site } from '@/site.config'
 import './landing.css'
 import type { Shell } from '@/gallery/registry'
-import { Chip, CommandLine, Heading, Logo, scrollToSection } from './parts'
-import { CELL, Hand, Row, Sheet, SheetSection, TitleStrip } from './plate'
+import { Chip, CommandLine, Heading, scrollToSection } from './parts'
+import { CELL, Row, Sheet, SheetSection, TitleStrip } from './plate'
 import { useReveals } from './reveals'
 import { SiteNav, usePendingSection } from './SiteNav'
 import { LiveShell } from './LiveShell'
@@ -20,6 +19,7 @@ import { HeroArrow } from './HeroArrow'
 import { StepDeck } from './StepDeck'
 import { KIT_THUMBS, useKitScroll } from './KitThumbs'
 import { ShellRail } from './ShellRail'
+import { FOOTER_LINKS, SiteFooter } from './SiteFooter'
 import { HERO_PHONE_SHELL, HERO_SHELLS, RAIL_SHELLS, credits, faq, hero, installs, kitGroups, links, steps } from './content'
 
 export function Landing({ shells }: { shells: Shell[] }) {
@@ -155,25 +155,8 @@ export function Landing({ shells }: { shells: Shell[] }) {
             </Row>
           </SheetSection>
 
-          {/* ── footer: the drawing's title block ────────────────── */}
-          <Row as="footer">
-            {/* 15+15 | 14+14+14: the first two columns end exactly at the 5/12 split above, so that divider runs straight on */}
-            <div data-md="5" className="cells title-block auto-rows-fr text-[12.5px] md:grid-cols-[repeat(2,minmax(0,15fr))_repeat(3,minmax(0,14fr))]">
-              <div className="flex items-center px-5 py-5 sm:px-6"><Logo height={16} /></div>
-              <TitleCell label="Drawn by">{site.author.url
-                ? <a href={site.author.url} target="_blank" rel="noreferrer" className="underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-signal"><Hand>{site.author.name}</Hand></a>
-                : <Hand>{site.author.name}</Hand>}</TitleCell>
-              <TitleCell label="Licence"><Hand delay={0.15}>{site.license}</Hand></TitleCell>
-              <TitleCell label="Sheets"><Hand delay={0.3}>{`${SHEETS} in all`}</Hand></TitleCell>
-              <TitleCell label="Elsewhere">
-                <span className="flex gap-4 text-[12.5px]">
-                  <a href="#/shells" className="hover:underline">Shells</a>
-                  <a href={links.repo} className="hover:underline">GitHub</a>
-                  <a href={links.contributing} className="hover:underline">Contributing</a>
-                </span>
-              </TitleCell>
-            </div>
-          </Row>
+          {/* ── footer: the drawing's title block (SiteFooter, shared with the shells page) ── */}
+          <SiteFooter count={{ label: 'Sheets', value: `${SHEETS} in all` }} elsewhere={FOOTER_LINKS.landing} />
           {/* the sheet's closing rule */}
           <Row />
           </div>
@@ -187,17 +170,6 @@ export function Landing({ shells }: { shells: Shell[] }) {
 const BREAKOUT = 'min(calc(100vw - 16px), 1360px)'
 /** How many numbered sheets (sections) the page has, for the title strips. */
 const SHEETS = 6
-
-/** A title-block cell: a small-caps label over its value. */
-function TitleCell({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1.5 px-5 py-5 sm:px-6">
-      <span className="strip text-[8.5px] text-fg-faint">{label}</span>
-      {/* one fixed-height row, centred, so handwritten values and the plain links sit on the same line */}
-      <span className="flex h-8 items-center text-[24px] text-fg">{children}</span>
-    </div>
-  )
-}
 
 /* Two navs: the bar at the top of the page scrolls away with it, and once the
    reader is past it a floating pill (80% of the body, blurred) drops in from above.

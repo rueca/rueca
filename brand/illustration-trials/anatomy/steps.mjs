@@ -81,12 +81,12 @@ const playhead = (lit) => {
 // isometric illustration draws a mark: the band is one line of constant weight round its centre
 // (the outline of the two circles it runs round), the drive wheel and whorl are filled ellipses.
 // A projected fill would thin the band where the view foreshortens it; a line keeps its weight.
-// Geometry from the mark's own outlines (logo.generated.ts, the v2 lockup of 11 Oct): wheel r 74.07 at
-// (228.77, 117.36), whorl r 27.04 at (66.68, 168.06), the band 16 wide with its centre 109.36 round the
-// wheel and 58.68 round the whorl.
-// It arrives as an outline (step 2); as step 3 scrubs it draws itself: the band at full weight,
-// then each wheel traced and inked, and the outline fades.
-const MARK = { wheel: [228.77, 117.36, 74.07], whorl: [66.68, 168.06, 27.04], band: [[228.73, 117.36, 109.36], [66.68, 168.06, 58.68]], width: 16 };
+// Geometry from the mark's own outlines (logo.generated.ts, the v3 lockup of 11 Oct): wheel r 74.07 at
+// (230.77, 119.36), whorl r 27.04 at (68.68, 170.06), the band 18 wide with its centre 110.36 round the
+// wheel and 59.68 round the whorl.
+// It arrives as an outline (step 2); as step 3 scrubs it draws itself: the band's two edges, then each
+// wheel's rim, never filled, in a slightly heavier pen line; the faint outline fades.
+const MARK = { wheel: [230.77, 119.36, 74.07], whorl: [68.68, 170.06, 27.04], band: [[230.73, 119.36, 110.36], [68.68, 170.06, 59.68]], width: 18 };
 const LOGO_H = 34, LS = LOGO_H / LOCKUP.markH, LOGO_AT = [CARD.x + (CARD.w - LOCKUP.markW * LS) / 2, CARD.y + (CARD.d - LOGO_H) / 2];
 const hull = (pts) => {
   const p = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]), cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
@@ -132,10 +132,14 @@ function logo() {
   // the outline: the band's two edges, half its weight either side of its line, and each wheel's rim
   const outline = `<g style="opacity:calc(1 - ${seg(3, 0.84, 0.98)})"><path class="rueca-mark-outline" d="${path(inset(bandPts, -weight / 2))}"/><path class="rueca-mark-outline" d="${path(inset(bandPts, weight / 2))}"/>`
     + `<path class="rueca-mark-outline" d="${wheel}"/><path class="rueca-mark-outline" d="${whorl}"/></g>`;
-  const draw = `<path class="rueca-mark-band" style="stroke-width:${weight.toFixed(2)};${drawn(bandPts, seg(3, 0.18, 0.56))}" d="${band}"/>`
-    + `<path class="rueca-mark-trace" style="${drawn(wheelPts, seg(3, 0.4, 0.62))};opacity:calc(1 - ${seg(3, 0.84, 0.98)})" d="${wheel}"/>`
-    + `<path class="rueca-mark-trace" style="${drawn(whorlPts, seg(3, 0.54, 0.76))};opacity:calc(1 - ${seg(3, 0.84, 0.98)})" d="${whorl}"/>`
-    + `<path class="rueca-mark-fill" style="opacity:${seg(3, 0.6, 0.72)}" d="${wheel}"/><path class="rueca-mark-fill" style="opacity:${seg(3, 0.74, 0.86)}" d="${whorl}"/>`;
+  // drawn, never filled (Rafael, 11 Oct): the band's two edges trace round, then each wheel's rim, in a pen
+  // line a little heavier than the faint outline it redraws (no thickening at the end)
+  const ink = 'stroke-width:1.6px'
+  const outer = inset(bandPts, -weight / 2), inner = inset(bandPts, weight / 2)
+  const draw = `<path class="rueca-mark-trace" style="${drawn(outer, seg(3, 0.18, 0.5))};${ink}" d="${path(outer)}"/>`
+    + `<path class="rueca-mark-trace" style="${drawn(inner, seg(3, 0.24, 0.56))};${ink}" d="${path(inner)}"/>`
+    + `<path class="rueca-mark-trace" style="${drawn(wheelPts, seg(3, 0.4, 0.66))};${ink}" d="${wheel}"/>`
+    + `<path class="rueca-mark-trace" style="${drawn(whorlPts, seg(3, 0.54, 0.78))};${ink}" d="${whorl}"/>`;
   return outline + draw;
 }
 // the card the logo arrives on: Cielo, a deeper one in dark (the logo card colours, shared.mjs)

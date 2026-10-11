@@ -27,8 +27,8 @@ export function Heading({ kicker, title, lede, className }: { kicker?: string; t
   return (
     <div className={cn('max-w-[640px]', className)}>
       {kicker && <div data-reveal="fade" data-kicker className="font-hand mb-2.5 text-[24px] leading-none text-fg-muted">{kicker}</div>}
-      <h2 data-reveal="head" className="font-display text-[36px] leading-[0.88] font-normal tracking-[-0.02em] text-balance text-fg sm:text-[56px]">{title}</h2>
-      {lede && <p data-reveal style={{ '--reveal-delay': '80ms' } as React.CSSProperties} className="mt-5 text-[17px] leading-[1.6] text-pretty text-fg-muted">{lede}</p>}
+      <h2 data-reveal="head" className="font-display text-[36px] leading-[0.88] font-normal tracking-[-0.02em] text-balance text-fg sm:text-[48px]">{title}</h2>
+      {lede && <p data-reveal style={{ '--reveal-delay': '80ms' } as React.CSSProperties} className="mt-[18px] text-[17px] leading-[1.6] text-pretty text-fg-muted">{lede}</p>}
     </div>
   )
 }
