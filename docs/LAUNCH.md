@@ -22,9 +22,9 @@ checks in part 3.
 
 Before this step, two things from the readiness gate (oss-launch, 2026-10-10) must be done:
 
-- [ ] **Logo licence.** The wordmark in `src/landing/logo.generated.ts` is outlined from
-      Signifier (Klim), which is on trial. Buy the licence, or set `SHIP` in
-      `brand/tools/outline_rueca.py` to Newsreader (OFL) and regenerate.
+- [x] **Logo licence.** Resolved 11 Oct: the wordmark and the display face are now Sorts Mill
+      Goudy (SIL OFL), so nothing needs buying. If the face changes back to a paid one
+      (`SHIP` in `brand/tools/outline_rueca.py`), this item reopens.
 - [ ] **Name.** A knockout trademark search for RUECA in classes 9 and 42 on
       [USPTO](https://tmsearch.uspto.gov), [EUIPO](https://euipo.europa.eu/eSearch) and
       [WIPO](https://branddb.wipo.int). Reserve the `@rueca` npm scope and an X handle.

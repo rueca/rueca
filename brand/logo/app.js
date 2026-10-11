@@ -2,7 +2,7 @@ import { marks, svg, base, ORIGINAL, belt, beltPts, SMALL, G, gCirc, gLine, gCro
 
 const $ = (s) => document.querySelector(s)
 const DYE = { light: { band: '#F2C744', wheel: '#5DB4E8', whorl: '#E8582C' }, dark: { band: '#F5D05A', wheel: '#6FC0EE', whorl: '#F06A3E' } }
-const state = { guides: true, colour: false, dark: false, p: { w: 25, Ra: 96.1, Rb: 54.3, dist: 133.7, gapA: 22.5, gapB: 19.5 } }
+const state = { guides: true, colour: false, dark: false, p: { w: 25, Ra: 96.1, Rb: 64, dist: 124, gapA: 22.5, gapB: 22.5 } }
 
 const ink = () => (state.dark ? '#f3f1eb' : '#181411')
 const paper = () => (state.dark ? '#201c19' : '#faf8f4')
@@ -201,7 +201,7 @@ function renderKnobs() {
   reset.className = 'row'
   reset.innerHTML = `<button class="tg" id="kreset">Reset</button><button class="tg" id="kcopy">Copy SVG</button>`
   box.appendChild(reset)
-  $('#kreset').onclick = () => { Object.assign(state.p, { w: 25, Ra: 96.1, Rb: 54.3, dist: 133.7, gapA: 22.5, gapB: 19.5 }); box.querySelectorAll('label').forEach((l, i) => { const k = KNOBS[i][0]; l.querySelector('input').value = state.p[k]; l.querySelector('output').textContent = state.p[k] }); renderAll() }
+  $('#kreset').onclick = () => { Object.assign(state.p, { w: 25, Ra: 96.1, Rb: 64, dist: 124, gapA: 22.5, gapB: 22.5 }); box.querySelectorAll('label').forEach((l, i) => { const k = KNOBS[i][0]; l.querySelector('input').value = state.p[k]; l.querySelector('output').textContent = state.p[k] }); renderAll() }
   $('#kcopy').onclick = () => navigator.clipboard?.writeText(svg('pulido', { ...opts(), dye: null, ink: '#181411' }))
 }
 

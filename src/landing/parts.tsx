@@ -70,21 +70,23 @@ export function ThemeButton({ className }: { className?: string }) {
 /* The Rueca logo, all vectors (src/landing/logo.generated.ts, from brand/tools/outline_rueca.py).
    The mark is Rafael's two-wheel drawing (brand/moodboards/rueca-logo.svg) rebuilt as "I · Pulido"
    (brand/logo/): drive wheel, whorl and band on true arcs round two centres, the whorl centred in
-   its loop, gaps 22.5 / 19.5, bottoms level. The wordmark is outlined and fills the band's inner
-   box, as in Rafael's file: baseline on the band's inner bottom edge, x-height up to its inner top,
-   weight 450 (500 small) so the word carries the discs' mass, half an x-height between them.
-   Now v2 (Rafael's updated lockup, 11 Oct): a thinner band, one drawing at every size (his call). */
-const MARK_DYES = ['cielo', 'achiote', 'gualda'] as const // LOCKUP mark order: wheel, whorl, band
+   its loop, the same 22.5 gap round both discs (11 Oct: whorl 30% bigger, its loop grown to match and moved right so the mark keeps its width), bottoms level. The wordmark is Sorts Mill Goudy (OFL), outlined, and
+   fills the band's inner box: baseline on the band's inner bottom edge, x-height up to its inner
+   top, thickened so the stems carry the discs' mass, half an x-height between them. Two cuts:
+   regular, and a heavier small one at 24px and under (band 34) so the whorl survives a favicon. */
+/* Colour assignment E (brand/logo/colour.html, Rafael 11 Oct): wheel Malva, whorl Achiote, band Gualda. */
+const MARK_DYES = ['malva', 'achiote', 'gualda'] as const // LOCKUP mark order: wheel, whorl, band
 const cutFor = (size: number) => LOCKUP[size <= 24 ? 'small' : 'regular']
 /** brand dyes: light value, then the lifted dark value */
 const LOGO_DYE = {
   achiote: 'fill-[#E8582C] dark:fill-[#F06A3E]',
   cielo: 'fill-[#5DB4E8] dark:fill-[#6FC0EE]',
+  malva: 'fill-[#A88BF6] dark:fill-[#B39AF8]',
   gualda: 'fill-[#F2C744] dark:fill-[#F5D05A]',
 }
 
-/** Mono for now (Rafael, 10 Oct 2026): the whole logo in the page's ink. Flip to bring the dyes back. */
-const LOGO_IN_COLOUR = false
+/** In colour since 11 Oct (Rafael: "let me see E on the site"); false puts the whole logo back in the page's ink. The word stays ink either way. */
+const LOGO_IN_COLOUR = true
 const markFill = (dye: keyof typeof LOGO_DYE) => (LOGO_IN_COLOUR ? { className: LOGO_DYE[dye] } : { fill: 'currentColor' })
 
 /** The mark alone. The band's two rings wind the same way, so it fills evenodd. */
@@ -109,15 +111,29 @@ export function Logo({ height = 20, className }: { height?: number; className?: 
   )
 }
 
-/** The word's box inside the lockup (x, y, w, h), measured from the V2 cut's word path. Re-measure if
-    outline_rueca.py moves the word. */
-const WORD_BOX = [453.23, 31.85, 799.15, 181.02] as const
+/** A path's box (x, y, w, h) from its points and control points, so it follows the word wherever
+    outline_rueca.py puts it. Generated paths are absolute (M L H V C Q Z); every command but H and V
+    takes x,y pairs, and control points only ever widen the box a hair. */
+function pathBox(d: string) {
+  const xs: number[] = [], ys: number[] = []
+  let cmd = '', x = 0, y = 0
+  const t = d.match(/[a-z]|-?\d*\.?\d+(?:e-?\d+)?/gi) ?? []
+  for (let i = 0; i < t.length;) {
+    if (/[a-z]/i.test(t[i])) { cmd = t[i++].toUpperCase(); continue }
+    if (cmd === 'H') x = +t[i++]
+    else if (cmd === 'V') y = +t[i++]
+    else { x = +t[i++]; y = +t[i++] }
+    xs.push(x); ys.push(y)
+  }
+  const x0 = Math.min(...xs), y0 = Math.min(...ys)
+  return [x0, y0, Math.max(...xs) - x0, Math.max(...ys) - y0] as const
+}
 
 /** The wordmark alone. `height` is the mark's height it would sit beside in the Logo, so the word
     comes out the same size as in the full lockup. */
 export function Wordmark({ height = 20, className }: { height?: number; className?: string }) {
   const { markH, word } = cutFor(height)
-  const [x, y, w, h] = WORD_BOX
+  const [x, y, w, h] = pathBox(word)
   const k = height / markH
   return (
     <svg role="img" aria-label={site.name} viewBox={`${x} ${y} ${w} ${h}`} height={h * k} width={w * k} className={cn('flex-none text-fg', className)}>

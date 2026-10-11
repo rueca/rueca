@@ -300,3 +300,10 @@ Read this first. Full history is in `BRAND.md`. The board is http://localhost:52
     - Masks live inside the set so they inherit `--pw`. The mask follows the note's tilt.
   - **Trial pages** (static HTML) don't run the pen; their notes just show.
 - **Every `<Hand>` writes now (11 Oct, Rafael: footer and fig labels too).** `pen` defaults to true; `pen={false}` keeps the wipe. That covers the footer title block (author, licence, sheets) and the gallery cards' "fig. n", with no edits to their files. The explicit `pen` props in TitleStrip and Gallery are gone.
+
+## Display face: Sorts Mill Goudy (11 Oct, logo session)
+- Rafael found Signifier too sharp. Compared installed and free faces (`brand/references/fonts/friendly-display.html`, `friendly-closeup.html`, `friendly-free.html`); GT Alpina was picked, then **Sorts Mill Goudy** (OFL) swapped in. It ships from `src/landing/fonts/` (woff2 + OFL), `size-adjust: 106%`, one weight. Installed on Rafael's Mac (`~/Library/Fonts`).
+- Logo: the generator handles single-weight faces by thickening the outline (skia-pathops) to stem/x-height 0.228 (0.26 small) and opening the spacing to match. `SHIP = 'goudy'`. Mark is still I · Pulido; Rafael's 11 Oct redraw (`brand/logo/rafael/`) was tried and reverted on his call.
+- The animate shell's plate headword (`src/shells/animate/local/plate-entry.css`) now loads the same Goudy woff2 (Rafael asked; shells are OG agent's area, so tell it).
+- Paid alternatives researched, not installed: ABC Marist (Dinamo; best "Alpina but warmer", Book/Regular/Medium), LL Bradford (Lineto; Alpina's relative), Quincy CF (Connary Fagen; friendliest bookish, cheap, demo), Feijoa (Klim; softest, 400/500 only). Too 70s: Recoleta, Gelica, Souvenir, GT Super. Too sharp: Fragment, Fern, Gaisyr.
+- Unused now: the GT Alpina local() rules were replaced; `brand/lamina/*` study pages still load Signifier locally.

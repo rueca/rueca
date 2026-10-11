@@ -88,10 +88,10 @@ export const ORIGINAL = {
 export function base(p = {}) {
   const w = p.w ?? 25
   const Ra = p.Ra ?? 96.1
-  const Rb = p.Rb ?? 54.3
-  const dist = p.dist ?? 133.7
+  const Rb = p.Rb ?? 64 // 54.3 until 11 Oct: the loop grew round the bigger whorl so both gaps match
+  const dist = p.dist ?? 124 // 133.7 until 11 Oct: the whorl moved right so the mark keeps its width
   const gapA = p.gapA ?? 22.5
-  const gapB = p.gapB ?? 19.5
+  const gapB = p.gapB ?? 22.5 // = gapA. Whorl r 29: 30% bigger than the original 22.3 (Rafael, 11 Oct)
   const pad = w / 2
   const A = [pad + 2 * Rb + dist - Rb + 0, pad + Ra] // placed so the mark starts at x = 0
   A[0] = pad + Rb + dist
@@ -105,7 +105,7 @@ export function base(p = {}) {
 }
 
 /** Small-size cut: under ~24px the band thickens, the gaps close and the whorl grows, so 16px still reads. */
-export const SMALL = { w: 34, gapA: 19, gapB: 15 }
+export const SMALL = { w: 34, gapA: 19, gapB: 19, Rb: 65, dist: 123 }
 
 const baseGuides = (g, extra = '') => {
   const [t1, t2, b2, b1] = beltPts(g.A, g.Ra, g.B, g.Rb)
