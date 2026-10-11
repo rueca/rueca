@@ -1,18 +1,22 @@
-@import "@fontsource-variable/libre-franklin";
+@import "@fontsource-variable/ibm-plex-sans";
 @import "@fontsource-variable/geist-mono";
-@import "@fontsource/caveat/latin-500.css";
+@import "@fontsource/la-belle-aurore/latin-400.css";
 
 /* ---------------------------------------------------------------------------
    Rueca brand type for the marketing pages (brand/BRAND.md, chosen 11 Oct 2026):
-     Martina Plantijn — headlines and the wordmark (.font-display), on trial
-                  since 11 Oct (was Dominicale). A paid Klim face that isn't
-                  licensed yet, so it loads from the visitor's own fonts (local())
-                  and everyone else gets Alegreya at the same weight. Once
+     Signifier — headlines and the wordmark (.font-display), on trial since 11 Oct
+                  (after Dominicale, then Martina Plantijn). Klim's re-reading of the
+                  17th-century Fell types. Paid and not licensed yet, so it loads from
+                  the visitor's own fonts (local()) and everyone else gets Newsreader
+                  (free, OFL) at its display optical size and the same weight. Once
                   licensed, add its woff2 as the first url() below and drop the
-                  local() lines. To go back to Dominicale, swap the local() names.
-     Libre Franklin — body, the page's base font (chosen 11 Oct: a Franklin Gothic
-                  revival, the same era as Martina's Plantin; replaced Hanken Grotesk)
-     Caveat — handwritten notes and labels (.font-hand)
+                  local() lines. To go back to Martina, use
+                  local("TestMartinaPlantijnVF-Roman").
+     IBM Plex Sans — body, the page's base font (chosen 11 Oct for Lámina: born in
+                  IBM's engineering documentation, the technical-manual voice; it
+                  replaced Libre Franklin, which read heavy under Signifier 400)
+     La Belle Aurore — handwritten notes and labels (.font-hand): a fine-nib period
+                  hand, the plate annotator's pen (chosen 11 Oct for Lámina; replaced Caveat)
      Geist Mono — commands and code only (.font-code, code, kbd, pre)
    Anything that SHOWS the product goes back to the kit's chrome fonts: .preview,
    [data-studio-embed], and kit surfaces (.studio / .pop set their own font).
@@ -22,19 +26,21 @@
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
-  src: local("Martina Plantijn"), local("Martina Plantijn VF"), local("TestMartinaPlantijnVF-Roman"), local("Test Martina Plantijn VF"),
-    url("../../node_modules/@fontsource-variable/alegreya/files/alegreya-latin-wght-normal.woff2") format("woff2-variations");
+  src: local("Signifier VF"), local("TestSignifier-VF"), local("Test Signifier VF"),
+    url("../../node_modules/@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2") format("woff2-variations");
 }
 .site {
   --font-display: "Rueca Display", Georgia, ui-serif, serif;
-  --font-body: "Libre Franklin Variable", "Libre Franklin", ui-sans-serif, system-ui, sans-serif;
-  --font-hand: "Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --font-body: "IBM Plex Sans Variable", "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-hand: "La Belle Aurore", "Segoe Script", "Bradley Hand", cursive;
   --font-code: "Geist Mono Variable", "Geist Mono", ui-monospace, monospace;
   font-family: var(--font-body);
 }
-/* Martina and the Alegreya fallback are both variable: one weight for both, no synthetic bold. */
-.site .font-display { font-family: var(--font-display); font-synthesis: none; font-variation-settings: "wght" 700; }
-.site .font-hand { font-family: var(--font-hand); font-weight: 500; }
+/* Signifier and the Newsreader fallback are both variable: one weight for both, no synthetic bold.
+   opsz 72 only reaches Newsreader (its display cut); Signifier has no opsz axis.
+   Lámina sits in the light–medium range (Rafael, 11 Oct: "lets not use bold"): 400. */
+.site .font-display { font-family: var(--font-display); font-synthesis: none; font-variation-settings: "wght" 400, "opsz" 72; }
+.site .font-hand { font-family: var(--font-hand); font-weight: 400; font-synthesis: none; }
 .site :is(.font-code, code, kbd, pre) { font-family: var(--font-code); }
 .site :is(.preview, [data-studio-embed]) { font-family: var(--font-ui); }
 .site :is(.preview, [data-studio-embed]) :is(code, kbd, pre) { font-family: var(--font-mono); }
@@ -100,24 +106,6 @@
   --ink-gualda: #f2c744;
   --ink-malva: #a88bf6;
 }
-/* Hero background texture (WheelField.tsx): the logo's two wheels and band, drawn in short
-   dashes that turn in place. Faint ink, faded out toward the text and the preview below.
-   Motion and its reduced-motion still frame live in the component (canvas). */
-.site .wheel-field { opacity: 0.14; -webkit-mask-image: radial-gradient(ellipse 62% 70% at 78% 40%, #000 22%, transparent 78%); mask-image: radial-gradient(ellipse 62% 70% at 78% 40%, #000 22%, transparent 78%); }
-:root.light .site .wheel-field { opacity: 0.18; }
-
-/* Section kickers (Heading in parts.tsx) are handwritten and take the dyed brights in turn,
-   one per section: Achiote, Malva, Hoja, Cielo, Gualda, Cochinilla (brand/data.js ruecaRamps).
-   Light uses each family's 700 step (≥5.2:1 on the paper), dark its 300–400 (≥6.8:1). */
-.site { --kick-1: #fe8562; --kick-2: #a88bf6; --kick-3: #5dc39b; --kick-4: #5db4e8; --kick-5: #f2c744; --kick-6: #feaea0; }
-:root.light .site { --kick-1: #a53016; --kick-2: #694b9d; --kick-3: #067056; --kick-4: #1b668e; --kick-5: #7c5800; --kick-6: #983e36; }
-.site section:nth-of-type(6n + 1) [data-kicker] { color: var(--kick-1); }
-.site section:nth-of-type(6n + 2) [data-kicker] { color: var(--kick-2); }
-.site section:nth-of-type(6n + 3) [data-kicker] { color: var(--kick-3); }
-.site section:nth-of-type(6n + 4) [data-kicker] { color: var(--kick-4); }
-.site section:nth-of-type(6n + 5) [data-kicker] { color: var(--kick-5); }
-.site section:nth-of-type(6n + 6) [data-kicker] { color: var(--kick-6); }
-
 /* product previews: back to the kit's neutral chrome (values from src/kit/theme.css) */
 .site :is(.preview, [data-studio-embed]) {
   --field: #131313; --panel: #1e1e1e; --overlay: #262626; --control: #2a2a2a; --well: #141414;
@@ -171,6 +159,26 @@ html[data-reveals] [data-reveal='words']:not([data-in]) { opacity: 1; }
 html[data-reveals] [data-reveal='words'][data-in] { animation: none; }
 html[data-reveals] [data-reveal='words']:not([data-in]) .reveal-word > span { opacity: 0; }
 html[data-reveals] [data-reveal='words'][data-in] .reveal-word > span { animation: reveal-word 0.9s var(--ease-mind) calc(0.12s + var(--word, 0) * 45ms) both; }
+
+/* the footer's title block: each cell in its own dye (brand/data.js ruecaRamps), Achiote, Gualda,
+   Hoja, Cielo, Malva. Deep 800 shades in dark (chroma cut about 45%, Rafael) and pale 200 tints in light, so the text keeps its
+   theme colour (light on dark, dark on light) at 8:1 or better; the small labels step up from
+   faint to muted to stay above 4.5:1 on the colour. */
+.site { --tb-1: #68362c; --tb-2: #54442a; --tb-3: #2b4a40; --tb-4: #2d4859; --tb-5: #4b3e62; }
+:root.light .site { --tb-1: #fed0c3; --tb-2: #f0dba1; --tb-3: #b6ead2; --tb-4: #b9e3ff; --tb-5: #ded6ff; }
+.site .title-block > * { --fg-faint: var(--fg-muted); }
+.site .title-block > :nth-child(1) { background: var(--tb-1); }
+.site .title-block > :nth-child(2) { background: var(--tb-2); }
+.site .title-block > :nth-child(3) { background: var(--tb-3); }
+.site .title-block > :nth-child(4) { background: var(--tb-4); }
+.site .title-block > :nth-child(5) { background: var(--tb-5); }
+
+/* the hero's pen annotation (HeroArrow.tsx): it mounts once the hero has come to rest, then the loop round the word draws, the line, the head */
+.site .hero-arrow path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: arrow-draw 0.75s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards; }
+.site .hero-arrow .hero-arrow-line { animation-duration: 1s; animation-delay: 0.8s; }
+.site .hero-arrow .hero-arrow-head { animation-duration: 0.3s; animation-delay: 1.75s; }
+@keyframes arrow-draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) { .site .hero-arrow path { stroke-dashoffset: 0; animation: none; } }
 
 @media (prefers-reduced-motion: reduce) {
   html[data-reveals] [data-reveal][data-in],

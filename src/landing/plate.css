@@ -1,0 +1,179 @@
+/* The sheet (Lámina técnica, brand/RUECA.md): the landing laid out as one technical
+   plate. A centred sheet with hairline rails, sections in ruled cells, crosshairs
+   where rules cross inside the sheet (never on its edge), and ruler ticks in the margins.
+   Pens: ink for the rules, and the measure pen (crosshairs, dimension
+   line, ticks) in a darker neutral ink. It was Añil until Rafael chose neutral, 11 Oct.
+   Dark is the default theme; :root.light overrides. */
+
+.site {
+  --sheet: #1a1714;
+  /* rules and crosshairs are solid (pre-mixed onto the sheet), so where two parts
+     mark the same crossing the marks land on the same pixels and read as one */
+  --rule: #302d2a;
+  --cross: #5b5855;
+  --measure: rgba(243, 241, 235, 0.4);
+  --tick: rgba(243, 241, 235, 0.3);
+  --tick-minor: rgba(243, 241, 235, 0.12);
+}
+:root.light .site {
+  --sheet: #fbfaf7;
+  --rule: #e0dedb;
+  --cross: #aba9a6;
+  --measure: rgba(24, 20, 17, 0.42);
+  --tick: rgba(24, 20, 17, 0.3);
+  --tick-minor: rgba(24, 20, 17, 0.11);
+}
+
+/* the sheet: rails down both sides, ruler ticks in the margins (desktop only) */
+.site .sheet { background: var(--sheet); }
+.site .sheet > .rail { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--rule); pointer-events: none; z-index: 1; }
+.site .sheet::before,
+.site .sheet::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 18px; pointer-events: none; display: none;
+  /* major tick every 160px; minor ticks every 16px in between, skipping the majors so they never overlap */
+  background:
+    repeating-linear-gradient(to bottom, var(--tick) 0 1px, transparent 1px 160px) 0 0 / 18px 100% no-repeat,
+    repeating-linear-gradient(to bottom, transparent 0 16px, var(--tick-minor) 16px 17px, transparent 17px 32px, var(--tick-minor) 32px 33px, transparent 33px 48px, var(--tick-minor) 48px 49px, transparent 49px 64px, var(--tick-minor) 64px 65px, transparent 65px 80px, var(--tick-minor) 80px 81px, transparent 81px 96px, var(--tick-minor) 96px 97px, transparent 97px 112px, var(--tick-minor) 112px 113px, transparent 113px 128px, var(--tick-minor) 128px 129px, transparent 129px 144px, var(--tick-minor) 144px 145px, transparent 145px 160px) 0 0 / 7px 100% no-repeat;
+}
+.site .sheet::before { right: calc(100% + 10px); background-position: right top, right top; }
+.site .sheet::after { left: calc(100% + 10px); }
+@media (min-width: 1200px) { .site .sheet::before, .site .sheet::after { display: block; } }
+
+/* a ruled row: the top hairline. Its ends meet the rails without a mark: a crosshair only
+   goes where two lines cross inside the sheet, never on its edge (Rafael, 11 Oct) */
+/* the row's top hairline is its own layer on top, so a cell or drawing with a background never hides it */
+.site .rule { position: relative; }
+.site .rule::before { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: var(--rule); pointer-events: none; z-index: 2; }
+.site .cross {
+  position: absolute; width: 11px; height: 11px; margin: -5px 0 0 -5px; pointer-events: none; z-index: 2;
+  background:
+    linear-gradient(var(--cross), var(--cross)) 0 5px / 11px 1px no-repeat,
+    linear-gradient(var(--cross), var(--cross)) 5px 0 / 1px 11px no-repeat;
+}
+
+/* Cells and dividers draw their own left and top rules and mark their own left corners:
+   a crosshair at top-left and bottom-left (::after), where their left rule meets the rules
+   above and below. A cell whose left is the rail marks nothing. Neighbours share pixels,
+   so nothing doubles. */
+.site .cells { display: grid; }
+.site .cells > *, .site .split > *, .site .divide-rule > :not(.cross) { position: relative; min-width: 0; }
+.site .cells > * { box-shadow: inset 1px 0 var(--rule), inset 0 1px var(--rule); }
+.site :is(.cells > *, .split > * + *, .divide-rule > :not(.cross) + :not(.cross))::after {
+  content: ""; position: absolute; top: -5px; bottom: -5px; left: -5px; width: 11px; pointer-events: none; z-index: 2;
+  background:
+    linear-gradient(var(--cross), var(--cross)) 0 5px / 11px 1px no-repeat,
+    linear-gradient(var(--cross), var(--cross)) 5px 0 / 1px 11px no-repeat,
+    linear-gradient(var(--cross), var(--cross)) 0 calc(100% - 4px) / 11px 1px no-repeat,
+    linear-gradient(var(--cross), var(--cross)) 5px calc(100% + 1px) / 1px 11px no-repeat;
+}
+/* .no-cross: dividers with plain rules, no crosshairs (the site nav, Rafael) */
+.site .divide-rule.no-cross > :not(.cross) + :not(.cross)::after { content: none; }
+/* which cells sit off the left rail: none in a single column, all but every (n+1)th in n
+   columns. A mark the cell's content puts on its left rule (.cell-cross) goes with it.
+   The hide rules match the show rules' specificity (:nth-child(n)), so a wider
+   breakpoint's hide beats a narrower one's show and only the current layout marks. */
+.site .cells > :nth-child(n)::after, .site .cells > :nth-child(n) .cell-cross { display: none; }
+.site .cells[data-base='2'] > :not(:nth-child(2n + 1))::after, .site .cells[data-base='2'] > :not(:nth-child(2n + 1)) .cell-cross { display: block; }
+@media (min-width: 640px) {
+  .site .cells[data-sm] > :nth-child(n)::after, .site .cells[data-sm] > :nth-child(n) .cell-cross { display: none; }
+  .site .cells[data-sm='2'] > :not(:nth-child(2n + 1))::after, .site .cells[data-sm='2'] > :not(:nth-child(2n + 1)) .cell-cross { display: block; }
+  .site .cells[data-sm='4'] > :not(:nth-child(4n + 1))::after, .site .cells[data-sm='4'] > :not(:nth-child(4n + 1)) .cell-cross { display: block; }
+}
+@media (min-width: 768px) {
+  .site .cells[data-md] > :nth-child(n)::after, .site .cells[data-md] > :nth-child(n) .cell-cross { display: none; }
+  .site .cells[data-md='5'] > :not(:nth-child(5n + 1))::after, .site .cells[data-md='5'] > :not(:nth-child(5n + 1)) .cell-cross { display: block; }
+}
+@media (min-width: 1024px) {
+  .site .cells[data-lg] > :nth-child(n)::after, .site .cells[data-lg] > :nth-child(n) .cell-cross { display: none; }
+  .site .cells[data-lg='3'] > :not(:nth-child(3n + 1))::after, .site .cells[data-lg='3'] > :not(:nth-child(3n + 1)) .cell-cross { display: block; }
+  .site .cells[data-lg='6'] > :not(:nth-child(6n + 1))::after, .site .cells[data-lg='6'] > :not(:nth-child(6n + 1)) .cell-cross { display: block; }
+}
+
+/* a two-cell row: stacked with a plain rule between on phones (its ends are on the rails),
+   side by side with a divider from md (crosshairs where the divider meets the rules) */
+.site .split > * + * { box-shadow: inset 0 1px var(--rule); }
+@media (min-width: 768px) {
+  .site .split > * + * { box-shadow: inset 1px 0 var(--rule); }
+}
+@media (max-width: 767px) {
+  .site .split > * + *::after { display: none; }
+}
+
+/* vertical divider inside a row */
+.site .divide-rule > :not(.cross) + :not(.cross) { box-shadow: inset 1px 0 var(--rule); }
+
+
+/* title strip: small caps labels, tabular numbers */
+.site .strip { font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase; font-variant-numeric: tabular-nums; }
+
+/* handwriting writes itself in, left to right, like a pen (RUECA.md motion: lines are drawn, never faded) */
+html[data-reveals] .site [data-reveal='write']:not([data-in]) { opacity: 1; }
+html[data-reveals] .site [data-reveal='write'][data-in] { animation: none; }
+html[data-reveals] .site [data-reveal='write']:not([data-in]) > span { clip-path: inset(-30% 100% -30% -10%); }
+html[data-reveals] .site [data-reveal='write'][data-in] > span { animation: write-in var(--write, 0.6s) cubic-bezier(0.65, 0, 0.35, 1) var(--reveal-delay, 0s) both; }
+@keyframes write-in { from { clip-path: inset(-30% 100% -30% -10%); } to { clip-path: inset(-30% -10% -30% -10%); } }
+@media (prefers-reduced-motion: reduce) {
+  html[data-reveals] .site [data-reveal='write']:not([data-in]) > span { clip-path: none; }
+  html[data-reveals] .site [data-reveal='write'][data-in] > span { animation: none; }
+}
+
+/* The pen (<Hand>, handwrite.ts): once its strokes are worked out, the written SVG lies over the
+   span's own text, which stays for layout but is hidden. The mask's strokes carry their own timing
+   (--at, --for, --len), so on the reveal each runs at the pen's speed in the pen's order. Without
+   reveals it shows written; until the pen is ready ("wait") the text stays hidden, so it never wipes
+   in first and then writes again. */
+.site [data-pen] > span:first-child { visibility: hidden; }
+.site [data-pen] > .hw { position: absolute; overflow: visible; pointer-events: none; }
+.site .hw text { fill: currentColor; }
+.site .hw-pen path { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; }
+html[data-reveals] .site [data-reveal='write']:not([data-in]) .hw-pen path { stroke-dasharray: var(--len) var(--len); stroke-dashoffset: var(--len); }
+html[data-reveals] .site [data-reveal='write'][data-in] .hw-pen path {
+  stroke-dasharray: var(--len) var(--len);
+  animation: pen-write var(--for) linear calc(var(--reveal-delay, 0s) + var(--at)) both;
+}
+@keyframes pen-write { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  html[data-reveals] .site [data-reveal='write'] .hw-pen path { stroke-dashoffset: 0; animation: none; }
+}
+
+/* A coloured plate: sheet 6 and the footer printed on Platino, the brand's 90s chrome grey
+   (Rafael picked it from eight dyes, 11 Oct). Light mode #DCDAD5 with the usual dark ink;
+   dark mode #383430 with light text, so the text keeps the theme's colour. Every sheet
+   token is re-mixed for it (solid rules and crosshairs). It sits above the rails (z-index)
+   so they end at its edge. */
+.site .tone-platino { position: relative; z-index: 2; background: var(--sheet); color: var(--fg); }
+.site .tone-platino { --sheet: #383430; --field: #383430; --well: #332f2b; --fg: #f3f1eb; --fg-muted: #cecbc6; --fg-faint: #b7b5af; --rule: #56524e; --cross: #7b7873; --line: rgba(243, 241, 235, 0.16); --hover: rgba(243, 241, 235, 0.08); }
+:root.light .site .tone-platino { --sheet: #dcdad5; --field: #dcdad5; --well: #d2d0cb; --fg: #181411; --fg-muted: #4f4b48; --fg-faint: #625f5b; --rule: #c3c0bc; --cross: #999792; --line: rgba(24, 20, 17, 0.12); --hover: rgba(24, 20, 17, 0.06); }
+
+/* The install tabs (the kit's Segmented) squared to the sheet, in printed small caps.
+   Scoped to the site's sections, so the kit and the shells keep their own shape. */
+.site [data-section] [role='radiogroup'] { border-radius: 2px; box-shadow: inset 0 0 0 1px var(--rule); }
+.site [data-section] [role='radiogroup'] > * { border-radius: 1px; font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase; }
+
+/* The shell-card skeleton draws like a pen: strokes run in, in order, when data-drawn is set,
+   and run back out (last first, quicker) when it's removed. Reduced motion shows it drawn. */
+/* Skeleton ↔ real UI is a wipe (RUECA.md §7: lines are drawn, the new half wipes in).
+   In: the wipe runs left to right in 0.75s; each line is erased just ahead of the edge
+   (--out from its x position). Out: the edge retreats right to left in 0.45s and the lines
+   redraw in its wake (--in), at the pen's speed. */
+.site .skeleton > * { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 0.26s cubic-bezier(0.4, 0, 1, 1) var(--out, 0ms); }
+.site .skeleton[data-drawn] > * { stroke-dashoffset: 0; transition: stroke-dashoffset 0.8s cubic-bezier(0.65, 0, 0.35, 1) var(--in, 0ms); }
+.site .wipe { clip-path: inset(0 100% 0 0); transition: clip-path 0.45s cubic-bezier(0.4, 0, 1, 1); }
+.site .wipe[data-on] { clip-path: inset(0 0 0 0); transition: clip-path 0.75s cubic-bezier(0.65, 0, 0.35, 1) 0.1s; }
+/* the wipe's edge: a hairline riding the boundary. At rest it sits on the frame's own edge */
+.site .wipe-edge { position: absolute; top: 0; bottom: 0; left: 0; width: 1px; background: var(--cross); pointer-events: none; z-index: 1; opacity: 0; }
+/* the edge only exists while it moves: it rides the wipe and fades at both ends, so it never sits on the frame
+   and doubles its border. It only plays once a card has changed focus (data-wiped), not on first paint. */
+.site .wipe-edge[data-wiped][data-on] { animation: wipe-edge-in 0.75s cubic-bezier(0.65, 0, 0.35, 1) 0.1s both; }
+.site .wipe-edge[data-wiped]:not([data-on]) { animation: wipe-edge-out 0.45s cubic-bezier(0.4, 0, 1, 1) both; }
+@keyframes wipe-edge-in { 0% { left: 0; opacity: 0; } 10%, 88% { opacity: 1; } 100% { left: calc(100% - 1px); opacity: 0; } }
+@keyframes wipe-edge-out { 0% { left: calc(100% - 1px); opacity: 0; } 12%, 88% { opacity: 1; } 100% { left: 0; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .site .wipe, .site .wipe[data-on] { transition: none; } .site .wipe-edge { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .site .skeleton > * { stroke-dashoffset: 0; transition: none; } }
+
+/* the skeleton without its pen animation: always drawn; the wipe alone swaps it for the screenshot */
+.site .skeleton-static > * { stroke-dashoffset: 0; transition: none; }
+/* the header's stand-in lines have nothing on top of them, so the wipe clears them as it passes (the mirror of .wipe) */
+.site .wipe-out { clip-path: inset(-6px 0 -6px 0); transition: clip-path 0.45s cubic-bezier(0.4, 0, 1, 1); }
+.site .wipe-out[data-on] { clip-path: inset(-6px 0 -6px 100%); transition: clip-path 0.75s cubic-bezier(0.65, 0, 0.35, 1) 0.1s; }
+@media (prefers-reduced-motion: reduce) { .site .wipe-out, .site .wipe-out[data-on] { transition: none; } }

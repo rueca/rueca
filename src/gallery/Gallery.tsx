@@ -6,47 +6,78 @@ import { TipProvider } from '@kit/ui/tooltip'
 import type { ShellMeta } from '@/shells/types'
 import '@/landing/landing.css'
 import { SiteNav } from '@/landing/SiteNav'
+import { useReveals } from '@/landing/reveals'
+import { CELL, Field, Hand, Row, Sheet } from '@/landing/plate'
 import { ShellCard, categoriesOf } from './ShellCard'
 
-export function CategoryChips({ shells, value, onChange }: { shells: ShellMeta[]; value: string; onChange: (c: string) => void }) {
+/** The category filter. From md it's a ruled row of cells in printed small caps, like the
+    header; on phones it wraps as plain buttons in one cell. */
+function Filter({ shells, value, onChange }: { shells: ShellMeta[]; value: string; onChange: (c: string) => void }) {
+  const count = (c: string) => (c === 'All' ? shells.length : shells.filter((s) => s.category === c).length)
+  const btn = (c: string, extra: string) => (
+    <button key={c} type="button" onClick={() => onChange(c)} aria-pressed={value === c}
+      className={cn('strip flex items-center gap-1.5 text-[11px] outline-none transition-colors focus-visible:text-fg', value === c ? 'text-fg' : 'text-fg-faint hover:text-fg', extra)}>
+      {c}<span className="text-fg-faint">{count(c)}</span>
+    </button>
+  )
   return (
-    <div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by category">
-      {categoriesOf(shells).map((c) => (
-        <button key={c} type="button" onClick={() => onChange(c)} aria-pressed={value === c}
-          className={cn('h-7 rounded-full px-3 text-[12px] font-medium transition-colors outline-none focus-visible:ring-2 focus-visible:ring-signal',
-            value === c ? 'bg-fg text-field' : 'bg-panel text-fg-muted shadow-[var(--shadow-cluster)] hover:text-fg')}>
-          {c}
-          <span className="ml-1.5 opacity-60">{c === 'All' ? shells.length : shells.filter((s) => s.category === c).length}</span>
-        </button>
-      ))}
-    </div>
+    <Row>
+      {/* a grid of ruled cells, one per category: 2 across on phones, 4 from sm, 6 from lg */}
+      <div role="group" aria-label="Filter by category" data-base="2" data-sm="4" data-lg="6" className="cells grid-cols-2 sm:grid-cols-4 lg:grid-cols-6">
+        {categoriesOf(shells).map((c) => btn(c, cn('h-12 justify-center px-3', value === c ? 'bg-fg/[0.05]' : 'hover:bg-fg/[0.025]')))}
+      </div>
+    </Row>
   )
 }
 
-/** #/shells — every test shell. Each is a different kind of instrument built from the same kit. */
+/** Empty cells that finish the grid's last row, so every rule runs
+    the full width. Shown per breakpoint: 2 columns from sm, 3 from lg. */
+function Fillers({ n }: { n: number }) {
+  const sm = (2 - (n % 2)) % 2
+  const lg = (3 - (n % 3)) % 3
+  return [1, 2].map((i) => (
+    <div key={i} aria-hidden className={cn('relative hidden overflow-hidden', i <= sm ? 'sm:block' : 'sm:hidden', i <= lg ? 'lg:block' : 'lg:hidden')}>
+    </div>
+  ))
+}
+
+/** #/shells — every shell, as one sheet: title strip, title, filter, then a grid of ruled cells. */
 export function Gallery({ shells }: { shells: ShellMeta[] }) {
   const { theme } = useTheme()
   const root = useRef<HTMLDivElement>(null)
+  useReveals(root)
   const [cat, setCat] = useState('All')
   const list = shells.filter((s) => cat === 'All' || s.category === cat)
   return (
     <TipProvider>
-      <div ref={root} className="site h-full overflow-y-auto bg-field text-fg">
+      <div ref={root} className="site h-full overflow-x-hidden overflow-y-auto bg-field text-fg">
         <SiteNav scroller={root} />
-        <div className="mx-auto max-w-[1120px] px-4 pb-24 sm:px-8">
-          <a href="#/" className="mt-6 inline-flex items-center gap-1.5 text-[12.5px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
-            <ArrowLeft size={13} strokeWidth={1.5} />Overview
-          </a>
-          <h1 className="mt-3 font-display text-[clamp(52px,9vw,96px)] leading-[0.84] font-black tracking-[-0.045em]">Shells</h1>
-          <p className="mt-2 max-w-[600px] text-[13.5px] leading-relaxed text-fg-muted">
-            Every one is built from the same kit. Inside any of them, press <span className="text-fg">⌘K</span> for
-            commands and <span className="text-fg">?</span> for shortcuts.
-          </p>
-          <div className="mt-8"><CategoryChips shells={shells} value={cat} onChange={setCat} /></div>
-          <div className="mt-6 grid grid-cols-[repeat(auto-fill,minmax(min(100%,320px),1fr))] gap-4">
-            {list.map((s) => <ShellCard key={s.id} shell={s} theme={theme} />)}
-          </div>
-        </div>
+        <Sheet as="main" className="mb-16 sm:mb-24">
+          {/* the title strip, like a drawing sheet's: printed fields, handwritten values */}
+          {/* -mt-px: its top rule lands on the header's closing rule, so the two read as one */}
+          <Row className="divide-rule -mt-px flex h-[60px] items-stretch">
+            <a href="#/" className="strip flex flex-none items-center gap-1.5 px-5 text-[11px] text-fg-muted outline-none transition-colors hover:bg-fg/[0.035] hover:text-fg focus-visible:bg-fg/[0.05] sm:px-6">
+              <ArrowLeft size={12} strokeWidth={1.5} />Overview
+            </a>
+            <Field label="Title" className="min-w-0 flex-1"><Hand className="text-[24px]" delay={0.1}>All the shells</Hand></Field>
+            <Field label="Count" className="flex-none"><Hand className="text-[23px]" delay={0.3}>{`${shells.length} in all`}</Hand></Field>
+          </Row>
+          <Row className={CELL}>
+            <h1 className="font-display text-[clamp(52px,9vw,104px)] leading-[0.84] font-normal tracking-[-0.025em]">Shells</h1>
+            <p className="mt-6 max-w-[600px] text-[17px] leading-[1.6] text-pretty text-fg-muted">
+              Every one is built from the same kit. Inside any of them, press <span className="text-fg">⌘K</span> for
+              commands and <span className="text-fg">?</span> for shortcuts.
+            </p>
+          </Row>
+          <Filter shells={shells} value={cat} onChange={setCat} />
+          <Row>
+            <div data-sm="2" data-lg="3" className="cells sm:grid-cols-2 lg:grid-cols-3">
+              {list.map((s) => <ShellCard key={s.id} shell={s} theme={theme} n={shells.indexOf(s) + 1} />)}
+              <Fillers n={list.length} />
+            </div>
+          </Row>
+          <Row />
+        </Sheet>
       </div>
     </TipProvider>
   )

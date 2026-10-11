@@ -7,7 +7,8 @@
      scrolling the page instead of driving the shell (iframes swallow both). */
 import { useEffect, useRef, useState } from 'react'
 import { MousePointerClick, X } from 'lucide-react'
-import { cn, useTheme } from '@kit'
+import { cn } from '@kit/core/cn'
+import { useTheme } from '@kit/core/theme'
 import { NEUTRAL_ACCENT_CSS } from './neutral'
 
 const NATIVE = { w: 1440, h: 900 }
@@ -52,6 +53,8 @@ export function LiveFrame({ id, name, query = '', native = NATIVE, hint = 'Click
     <div ref={wrap} className="absolute inset-0" onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActive(false) }}>
       {w > 0 && (
         <iframe ref={frame} src={`${import.meta.env.BASE_URL}#/${id}${query}`} title={`${name} — live`} tabIndex={active ? 0 : -1}
+          // inert until clicked: tabIndex alone doesn't stop a shell's own autofocus pulling page focus into the frame
+          inert={!active}
           onLoad={() => {
             try {
               const d = frame.current?.contentDocument
@@ -66,9 +69,9 @@ export function LiveFrame({ id, name, query = '', native = NATIVE, hint = 'Click
       )}
       {!active && (
         <button type="button" onClick={() => { setActive(true); requestAnimationFrame(() => frame.current?.focus()) }}
-          aria-label={`Try ${name}`} className={cn('group/live absolute inset-0 flex justify-center outline-none', hintAlways ? 'items-end pb-5' : 'items-center')}>
-          {/* centred and hover-only on desktop, so it never covers the tool's own controls */}
-          <span className={cn('pop flex h-9 items-center gap-2 px-3.5 text-[12.5px] font-medium text-fg transition-opacity duration-200 group-focus-visible/live:opacity-100 group-focus-visible/live:ring-2 group-focus-visible/live:ring-signal',
+          aria-label={`Try ${name}`} className={cn('group/live absolute inset-0 flex justify-center outline-none', hintAlways ? 'items-start pt-5' : 'items-center')}>
+          {/* centred and hover-only on desktop; on touch it sits at the top, clear of the client sheet at the bottom */}
+          <span className={cn('pop flex h-9 items-center gap-2 rounded-[2px] px-3.5 text-[12.5px] font-medium text-fg transition-opacity duration-200 group-focus-visible/live:opacity-100 group-focus-visible/live:ring-2 group-focus-visible/live:ring-signal',
             hintAlways ? 'opacity-90' : 'opacity-0', ready && 'group-hover/live:opacity-100')}>
             <MousePointerClick size={14} strokeWidth={1.5} />{hint}
           </span>
@@ -76,7 +79,7 @@ export function LiveFrame({ id, name, query = '', native = NATIVE, hint = 'Click
       )}
       {active && hintAlways && (
         <button type="button" onClick={() => setActive(false)} aria-label="Stop interacting"
-          className="pop absolute top-3 right-3 flex h-8 items-center gap-1.5 px-2.5 text-[12px] text-fg-muted hover:text-fg">
+          className="pop absolute top-3 right-3 flex h-8 rounded-[2px] items-center gap-1.5 px-2.5 text-[12px] text-fg-muted hover:text-fg">
           <X size={13} strokeWidth={1.5} />Done
         </button>
       )}

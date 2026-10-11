@@ -50,26 +50,30 @@ export const hero = {
   lede: 'The inspector, timeline, layers and export of a design tool, wrapped around the prototype you already have.',
 }
 
-export const HERO_SHELLS = ['shader', 'animate', 'motion', 'scene', 'dropin', 'present', 'nodes', 'type']
+export const HERO_SHELLS = ['animate', 'shader', 'scene']
+/** On a phone the hero shows this one instead, in its client view. */
+export const HERO_PHONE_SHELL = 'shader' // its ?client view: the gradient full-bleed with looks, Shuffle and Download
+/** The shell rail shows these six (the gallery's first six by `order`); the rest sit behind its "see all" card. */
+export const RAIL_SHELLS = ['motion', 'dropin', 'ui-design'] // three that aren't in the hero; the index card lists the rest
 
 export const steps = [
   {
     n: 1,
-    short: 'Describe',
-    title: 'Name what you want to tune',
-    body: 'Tell the agent what to make adjustable: size, colour, speed, mood. Each one becomes a control, with undo, presets and a share link built in.',
+    short: 'Ask',
+    title: 'Describe what you need',
+    body: 'Tell your agent what you’re making. It sets up a real editor around it: canvas, timeline and controls.',
   },
   {
     n: 2,
-    short: 'Drop in',
-    title: 'Bring the thing you are designing',
-    body: 'An animation, a shader, a 3D scene or a page you already built. The agent wires it to the controls without rebuilding it.',
+    short: 'Bring',
+    title: 'Bring your design',
+    body: 'Your logo, animation or page comes in as it is. Nothing gets rebuilt.',
   },
   {
     n: 3,
     short: 'Tune',
-    title: 'Get a tool that feels like a real one',
-    body: 'Inspector, timeline, layers and export, laid out like Figma, Framer and Rive. Keep tuning, or hand it to a client.',
+    title: 'Tune it like a real tool',
+    body: 'Scrub the timeline, nudge the curves and export when it looks right.',
   },
 ]
 

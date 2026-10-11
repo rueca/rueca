@@ -22,3 +22,5 @@ export const RESERVED_ROUTES = ['', 'shells'] as const
 
 /** Marketing thumbnail: the neutral-accent capture from scripts/thumbs-rail.mjs (qa.mjs's PNGs stay QA artefacts). */
 export const thumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/rail/${id}-${theme}.jpg`
+/** the small one, for the shells page grid (~340px cards): 720w WebP */
+export const gridThumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/grid/${id}-${theme}.webp`

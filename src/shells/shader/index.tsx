@@ -1,13 +1,13 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { useStore } from 'zustand'
 import {
-  ArrowDown, ArrowUp, Braces, Code, Copy, Dices, Download, Eye, Film, FileCode, Gauge, Image as ImageIcon, Layers2, Pause, Play,
+  ArrowDown, ArrowUp, Braces, ChevronUp, Code, Copy, Dices, Download, Eye, Film, FileCode, Gauge, Image as ImageIcon, Layers2, Pause, Play,
   Plus, RotateCcw, SkipBack, StepBack, StepForward, Trash2,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Slider, ScrubValue, Select, Menu, Button, IconButton,
   Divider, Empty, Monitor, ParamActions, CommandPalette, useValues, useHotkeys, useClock, useClockTime, shareMenuItems, equal, toast, fmtTime,
-  createItemParams, bindItem, type Command,
+  createItemParams, bindItem, cn, type Command,
 } from '@kit'
 import { EffectStack, StackAddMenu, type StackAddGroup } from '@kit/ui/stack'
 import { PresetGrid } from '@kit/ui/preset-grid'
@@ -41,6 +41,7 @@ const useSelected = () => {
 }
 
 export default function GradientStudio() {
+  const client = useClientView()
   const layers = useLayers()
   const sel = useSelected()
   const presets = useStore(params, (s) => s.presets)
@@ -109,6 +110,18 @@ export default function GradientStudio() {
 
   // Number keys set the selected layer's opacity (Figma / Paper): 1 = 10% … 0 = 100%.
   useHotkeys(Object.fromEntries('1234567890'.split('').map((k, i) => [k, () => { const id = ui.getState().selected; if (id) updateLayer(id, (l) => ({ ...l, opacity: (i + 1) / 10 })) }])), [])
+
+  // Client view (#/shader?client): the gradient full-bleed with a bottom sheet of looks, Shuffle
+  // and Download, the same pattern as the Client demo. The landing's phone hero shows this.
+  if (client) return (
+    <Studio layout="overlay">
+      <Stage fill>
+        <ShaderStage />
+      </Stage>
+      <ClientSheet presets={presets} active={activeLook?.name} onApply={applyLook} onShuffle={randomise}
+        onSave={() => exportStill(sizes.x2.w, sizes.x2.h).then(() => toast('Saved to downloads', { type: 'success' }))} />
+    </Studio>
+  )
 
   return (
     <Studio
@@ -241,7 +254,7 @@ function LayerInspector({ layer }: { layer: Layer }) {
 }
 
 /* ---------- looks grid ---------- */
-function Looks({ presets, active, onApply, onSave }: { presets: { name: string; values: any; builtin?: boolean }[]; active?: string; onApply: (n: string) => void; onSave: () => void }) {
+function Looks({ presets, active, onApply, onSave }: { presets: { name: string; values: any; builtin?: boolean }[]; active?: string; onApply: (n: string) => void; onSave?: () => void }) {
   const [thumbs, setThumbs] = useState<Record<string, string>>({})
   const loopLen = useValues(params, (v) => v.loop)
   const key = useMemo(() => JSON.stringify(presets.map((p) => [p.name, lookOf(p.values)])), [presets])
@@ -273,7 +286,7 @@ function Looks({ presets, active, onApply, onSave }: { presets: { name: string; 
   return (
     <div className="border-t border-line">
       <Section title="Looks" hint="Hover or focus to preview on the canvas, click to apply. Applying is one undo step." persistKey="shader:looks" first
-        actions={<IconButton icon={Plus} label="Save current look" size="icon-sm" onClick={onSave} />}>
+        actions={onSave && <IconButton icon={Plus} label="Save current look" size="icon-sm" onClick={onSave} />}>
         <PresetGrid
           label="Looks"
           value={active ?? null}
@@ -283,6 +296,42 @@ function Looks({ presets, active, onApply, onSave }: { presets: { name: string; 
           onRemove={(n) => params.deletePreset(n)}
         />
       </Section>
+    </div>
+  )
+}
+
+/* ---------- client view ---------- */
+const useClientView = () => {
+  const read = () => /[?&]client\b/.test(location.hash)
+  const [on, setOn] = useState(read)
+  useEffect(() => { const f = () => setOn(read()); addEventListener('hashchange', f); return () => removeEventListener('hashchange', f) }, [])
+  // bigger touch targets, as in the Client demo
+  useEffect(() => { document.documentElement.dataset.density = on ? 'comfortable' : ''; return () => { document.documentElement.dataset.density = '' } }, [on])
+  return on
+}
+
+function ClientSheet({ presets, active, onApply, onShuffle, onSave }: {
+  presets: { name: string; values: any; builtin?: boolean }[]; active?: string; onApply: (n: string) => void; onShuffle: () => void; onSave: () => void
+}) {
+  const [open, setOpen] = useState(true)
+  return (
+    <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+      <div className={cn('panel pointer-events-auto flex w-full max-w-[420px] flex-col overflow-hidden transition-[max-height] duration-300', open ? 'max-h-[62vh]' : 'max-h-[64px]')}>
+        <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex h-[64px] flex-none items-center gap-3 px-4 text-left">
+          <div className="flex-1">
+            <div className="text-[14px] font-semibold">Make it yours</div>
+            <div className="text-[12px] text-fg-muted">Pick a look, shuffle, download</div>
+          </div>
+          <ChevronUp size={18} strokeWidth={1.5} className={cn('text-fg-faint transition-transform', open && 'rotate-180')} />
+        </button>
+        <div className="min-h-0 overflow-y-auto">
+          <Looks presets={presets} active={active} onApply={onApply} />
+        </div>
+        <div className="flex flex-none gap-2 border-t border-line p-3">
+          <Button variant="default" size="lg" className="h-11 flex-1 text-[13px]" onClick={onShuffle}><Dices size={16} strokeWidth={1.5} />Shuffle</Button>
+          <Button variant="primary" size="lg" className="h-11 flex-1 text-[13px]" onClick={onSave}><Download size={16} strokeWidth={1.5} />Download</Button>
+        </div>
+      </div>
     </div>
   )
 }

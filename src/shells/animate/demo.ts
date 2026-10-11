@@ -58,15 +58,16 @@ export function demoDoc(): Doc {
 
   // the underline under "click to spin" draws itself in from the left, like a pen stroke (left end fixed at x = -58)
   const UL = 112
-  const underline = (t0: number, t1: number) => ({
-    'underline.w': [k(0, 0, E.hold), k(t0, 0, E.expo), k(t1, UL)],
-    'underline.x': [k(0, -58, E.hold), k(t0, -58, E.expo), k(t1, -58 + UL / 2)],
+  // draws in left→right at pen speed, holds, then lifts off left→right before the loop comes round
+  const underline = (t0: number, t1: number, t2: number, t3: number) => ({
+    'underline.w': [k(0, 0, E.hold), k(t0, 0, E.io), k(t1, UL, E.hold), k(t2, UL, E.io), k(t3, 0)],
+    'underline.x': [k(0, -58, E.hold), k(t0, -58, E.io), k(t1, -58 + UL / 2, E.hold), k(t2, -58 + UL / 2, E.io), k(t3, -58 + UL)],
   })
 
   const idle: Anim = {
     id: 'idle', name: 'Idle', duration: 9000, loop: 'loop', tracks: {
       'wheel.rotation': [k(0, 0, E.lin), k(9000, 360)],
-      ...underline(400, 1400),
+      ...underline(500, 1700, 8000, 8800),
     },
   }
   const hover: Anim = {
@@ -77,7 +78,7 @@ export function demoDoc(): Doc {
   const press: Anim = {
     id: 'press', name: 'Spin up', duration: 2400, loop: 'loop', tracks: {
       'wheel.rotation': [k(0, 0, E.lin), k(2400, 1080)], // constant speed: 1080° in 2.4s loops seamlessly
-      ...underline(200, 1000),
+      ...underline(150, 1150, 1850, 2350),
     },
   }
   return {
