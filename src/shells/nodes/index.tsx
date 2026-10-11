@@ -22,8 +22,9 @@ import { GraphCanvas, canvasApi } from './graph/Canvas'
 import { Library } from './graph/Library'
 import { NodeInspector } from './graph/NodeInspector'
 import { PreviewPane } from './graph/Preview'
+import { slug as toSlug } from '../util'
 
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'graph'
+const slug = (s: string) => toSlug(s, 'graph')
 
 async function exportPng() {
   const out = outputId()

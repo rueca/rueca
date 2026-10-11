@@ -2,7 +2,7 @@
 import { AlignCenter, AlignJustify, AlignLeft, AlignRight, ArrowDownToLine, Bold, Droplets, Maximize2, RotateCw, Waves } from 'lucide-react'
 import { defineSchema, folder, p, createParams, createClock, EASINGS } from '@kit'
 import { FAMILIES } from './fonts'
-import { contrastRatio, wcagGrade } from './local/contrast'
+import { contrastRatio, wcagGrade } from '@kit'
 import { kineticDuration } from './kinetic'
 
 export type Mode = 'specimen' | 'kinetic' | 'scale'

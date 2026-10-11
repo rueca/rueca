@@ -277,6 +277,21 @@ export function ColorField({ value, onChange, alpha = true, swatches, changed, t
   )
 }
 
+/* --- WCAG 2.x contrast (one implementation for the kit and every shell) --- */
+const linear = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }
+/** relative luminance of a hex colour (alpha ignored) */
+export function luminance(hex: string) {
+  const [r, g, b] = hexToRgba(hex)
+  return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
+}
+/** WCAG contrast ratio between two hex colours: `contrastRatio('#111', '#fff')` → 18.88 */
+export function contrastRatio(a: string, b: string) {
+  const la = luminance(a), lb = luminance(b)
+  return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
+}
+/** 'AAA' ≥ 7 · 'AA' ≥ 4.5 · 'AA large' ≥ 3 · 'Fail' */
+export const wcagGrade = (ratio: number) => (ratio >= 7 ? 'AAA' : ratio >= 4.5 ? 'AA' : ratio >= 3 ? 'AA large' : 'Fail')
+
 /**
  * Darken a colour until white text on it clears `min` contrast (4.5 = WCAG AA body).
  * For avatars, tags and pins coloured by identity (--cat-*) that carry white labels.
@@ -284,8 +299,7 @@ export function ColorField({ value, onChange, alpha = true, swatches, changed, t
  */
 export function readableOn(hex: string, min = 4.5) {
   const [r, g, b] = hexToRgba(hex)
-  const lin = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }
-  const white = (t: number) => 1.05 / (0.2126 * lin(r * t) + 0.7152 * lin(g * t) + 0.0722 * lin(b * t) + 0.05)
+  const white = (t: number) => 1.05 / (0.2126 * linear(r * t) + 0.7152 * linear(g * t) + 0.0722 * linear(b * t) + 0.05)
   let t = 1
   while (t > 0.2 && white(t) < min) t -= 0.02
   return rgbaToHex(r * t, g * t, b * t)

@@ -3,6 +3,7 @@ import {
   Footprints, MonitorSmartphone, MessageSquareQuote, HeartPulse, TriangleAlert, Lightbulb, Users,
   Smartphone, Globe, Mail, Bell, Store, Headphones, Megaphone, Package, MessageSquare, type LucideIcon,
 } from 'lucide-react'
+import { uid as makeUid } from '../util'
 
 export type LaneId = 'actions' | 'touchpoints' | 'thoughts' | 'emotion' | 'pains' | 'opps' | 'owner'
 export type Channel = 'app' | 'web' | 'email' | 'push' | 'store' | 'support' | 'social' | 'packaging' | 'sms'
@@ -49,7 +50,7 @@ export interface Persona {
 }
 export interface JourneyDoc { title: string; personas: Persona[] }
 
-export const uid = (p = 'c') => `${p}${Math.random().toString(36).slice(2, 8)}`
+export const uid = (p = 'c') => makeUid(p)
 export const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?'
 export const PERSONA_HUES = ['#8b5cf6', '#f97316', '#14b8a6', '#ec4899', '#0ea5e9', '#84cc16']
 

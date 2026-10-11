@@ -16,6 +16,8 @@
 --------------------------------------------------------------------------- */
 import { WIRE, ditherTop } from '@/demo/wire'
 import type { DataRow, SizeSpec, V } from './model'
+import { contrastRatio, luminance } from '@kit'
+import { mulberry32 } from '../util'
 
 export const FONTS: Record<string, string> = {
   inter: '"Inter Variable", Inter, system-ui, sans-serif',
@@ -27,15 +29,7 @@ export const FONTS: Record<string, string> = {
 export interface DrawResult { issues: string[]; mode: 'stack' | 'hero' | 'split' }
 
 /* --- small maths --- */
-export function mulberry32(seed: number) {
-  let a = seed >>> 0
-  return () => {
-    a = (a + 0x6d2b79f5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
+export { mulberry32 }
 const rgb = (hex: string): [number, number, number] => {
   const h = /^#?[0-9a-f]{6}/i.test(hex) ? hex.replace('#', '').slice(0, 6) : '888888'
   const n = parseInt(h, 16)
@@ -46,14 +40,8 @@ export const mix = (a: string, b: string, k: number) => {
   const m = (x: number, y: number) => Math.round(x + (y - x) * k)
   return `rgb(${m(r1, r2)},${m(g1, g2)},${m(b1, b2)})`
 }
-const lum = (hex: string) => {
-  const f = (c: number) => { const s = c / 255; return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4 }
-  const [r, g, b] = rgb(hex)
-  return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
-}
-const contrast = (a: string, b: string) => { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05) }
 /** whichever of ink / paper reads better on bg */
-export const textOn = (bg: string, ink: string, paper: string) => (contrast(bg, ink) >= contrast(bg, paper) ? ink : paper)
+export const textOn = (bg: string, ink: string, paper: string) => (contrastRatio(bg, ink) >= contrastRatio(bg, paper) ? ink : paper)
 
 /* --- text fitting --- */
 function wrap(ctx: CanvasRenderingContext2D, text: string, maxW: number) {
@@ -119,7 +107,7 @@ const MONO = "'Geist Mono Variable', 'Geist Mono', ui-monospace, Menlo, monospac
 export const PRODUCT_RATIO = 0.6
 const SHOT = { w: 312, h: 520 } // 156 × 260 dither cells, 2× — exactly PRODUCT_RATIO
 const hex6 = (c: string) => (/^#[0-9a-f]{6}/i.test(c) ? c.slice(0, 7).toUpperCase() : WIRE.sheet)
-const isNight = (tone: string) => lum(tone) < 0.18
+const isNight = (tone: string) => luminance(tone) < 0.18
 
 /* The product shot is a data-URL image (ditherTop), decoded once per tone. drawPost is
    synchronous, so it paints a plain slot until the image is ready and tells listeners. */

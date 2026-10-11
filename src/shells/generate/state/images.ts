@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react'
 import { download } from '@kit'
 import { paint } from '../engine/paint'
 import type { GenParams } from '../engine/models'
+import { slug as toSlug } from '../../util'
 
 export type Tier = 'thumb' | 'full'
 export interface Pix { url: string; w: number; h: number }
@@ -90,7 +91,7 @@ export function sketch(params: GenParams, longSide = 200) {
   return c.toDataURL('image/jpeg', 0.8)
 }
 
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48) || 'image'
+const slug = (s: string) => toSlug(s, 'image', 48)
 
 /** Full-resolution PNG, painted fresh. */
 export function exportPNG(params: GenParams, id: string) {

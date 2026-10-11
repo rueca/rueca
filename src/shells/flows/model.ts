@@ -1,6 +1,7 @@
 /* Flows — document model, screen templates and the demo content. Pure data. */
 import type { Edge, Node } from '@xyflow/react'
 import { WIRE } from '@/demo/wire'
+import { uid as makeUid } from '../util'
 
 export type Kind = 'screen' | 'decision' | 'terminal' | 'note' | 'section'
 export type Status = 'draft' | 'ready' | 'shipped'
@@ -113,7 +114,7 @@ export const SIZE: Record<Kind, { w: number; h: number }> = {
 export const screenSize = (thumbs: boolean) => (thumbs ? SIZE.screen : { w: 176, h: 58 })
 
 /* ---------------------------------------------------------------- factories */
-export const uid = (p = 'n') => `${p}${Math.random().toString(36).slice(2, 8)}`
+export const uid = (p = 'n') => makeUid(p)
 
 export function makeNode(kind: Kind, at: { x: number; y: number }, data: Partial<NodeData> = {}, id = uid()): FlowNode {
   const base: FlowNode = { id, type: kind, position: at, data: { name: '', ...data } }

@@ -3,6 +3,7 @@ import { AlignCenter, AlignLeft } from 'lucide-react'
 import { createStore } from 'zustand/vanilla'
 import { defineSchema, folder, p, createParams, createDocStore, createHistory } from '@kit'
 import { WIRE } from '@/demo/wire'
+import { uid } from '../util'
 
 /* --- template + brand: schema-driven, so the kit Inspector renders them --- */
 const locked = (v: any) => !!v.brandLocked
@@ -147,4 +148,4 @@ export const ui = createStore<{ row: number; selected: string | null; safe: bool
 }))
 
 export const effective = (v: V, o?: Overrides): V => (o ? { ...v, ...o } : v)
-export const uid = () => Math.random().toString(36).slice(2, 8)
+export { uid }

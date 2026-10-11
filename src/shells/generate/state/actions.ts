@@ -7,6 +7,7 @@ import { history, snapshot, setView, byId, select, deleteImages, visible, viewTi
 import { enqueue } from './queue'
 import { ui, focusPrompt } from './ui'
 import { exportPNG } from './images'
+import { slug as toSlug } from '../../util'
 
 const rnd = () => Math.floor(Math.random() * 999_999)
 
@@ -96,7 +97,7 @@ export async function exportSelected() {
   toast.update(id, `Exported ${recs.length} PNG${recs.length > 1 ? 's' : ''}`, { type: 'success', description: recs.length === 1 ? `${recs[0].params.w * (recs[0].params.upscale ?? 1)} × ${recs[0].params.h * (recs[0].params.upscale ?? 1)}` : undefined })
 }
 
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'session'
+const slug = (s: string) => toSlug(s, 'session')
 
 export function exportSession() {
   const s = snapshot()

@@ -4,8 +4,9 @@ import { snapshotElement } from '@kit'
 import { activeFlow, importFlow, select, sizeOf, ui, viewport } from './store'
 import type { Flow } from './model'
 import { site } from '../../site.config'
+import { slug as toSlug } from '../util'
 
-export const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'flow'
+export const slug = (s: string) => toSlug(s, 'flow')
 
 export async function exportPNG(scale = 2) {
   const f = activeFlow()

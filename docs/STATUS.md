@@ -76,8 +76,8 @@ Geist Mono code — landing + gallery only; product chrome stays Inter.
   kit ZoomPill (gained focus rings/label/steps/keys), generate on kit CompareSplit, scene on kit Vec3Fields (gained
   uniform lock), marks legacyKeys, reserved ids enforced, 13 dead exports, em dashes out of UI labels/notices,
   24px hit areas, comment-pin names. ST9 (nodes 2048 export) didn't reproduce: 1.4 s, 2048×2048.
-- Still open — Rafael's calls: shared contrast maths in the kit (M3, grows the API); one util module for slug/uid/
-  PRNG (M4: kit or shells-only); type-scale tokens (C15); start shells paused under reduced motion (C10); og.png +
+- Done: contrast maths in the kit (luminance / contrastRatio / wcagGrade; type + batch use it) and a shells-only
+  util (src/shells/util.ts: slug, uid, mulberry32; demo pictures pixel-identical). Still open — Rafael's calls: type-scale tokens (C15); start shells paused under reduced motion (C10); og.png +
   touch icon (needs design); em dashes in tooltip prose (P3).
 
 ## Current state — 2026-10-10 (afternoon)

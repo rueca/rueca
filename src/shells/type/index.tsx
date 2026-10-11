@@ -14,7 +14,8 @@ import { ScaleArtboard, TokensPanel, scaleWidth } from './scaleView'
 import { buildScale, scaleCSS, scaleHeight, scaleTailwind3, scaleTailwind4 } from './scale'
 import { clearMetrics, drawKinetic, kineticCSS, kineticSVG, kineticTiming } from './kinetic'
 import { domTextToSVG, svgToPNG, type EmbedFont } from './local/textToSvg'
-import { contrastRatio, wcagGrade } from './local/contrast'
+import { contrastRatio, wcagGrade } from '@kit'
+import { slug as toSlug } from '../util'
 
 const KINETIC = { w: 1280, h: 720 }
 const MODE_KEY = 'studio:type:mode'
@@ -31,7 +32,7 @@ async function embedFonts(): Promise<EmbedFont[]> {
   return Promise.all((FAMILIES.inter.embed ?? []).map(async (f) => ({ family: SPECIMEN_FAMILY, dataURI: await fontDataURI(f.url), style: f.style })))
 }
 const fontFaceCSS = (fonts: EmbedFont[]) => fonts.map((f) => `@font-face{font-family:'${f.family}';src:url(${f.dataURI}) format('woff2');font-weight:100 900;font-style:${f.style}}`).join('')
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 32) || 'type'
+const slug = (s: string) => toSlug(s, 'type', 32)
 
 export default function TypeShell() {
   const v = useValues(params) as V

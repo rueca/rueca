@@ -9,6 +9,7 @@ import { createDocStore, createHistory, useDoc } from '@kit'
 import { params } from './params'
 import type { GenParams } from '../engine/models'
 import { seedGallery } from './seed'
+import { uid } from '../../util'
 
 export type ImageKind = 'generate' | 'variation' | 'remix' | 'upscale'
 export interface ImageRec {
@@ -42,7 +43,7 @@ export interface ViewState {
 }
 export type GalleryState = Library & ViewState
 
-export const uid = (p = '') => `${p}${Math.random().toString(36).slice(2, 8)}`
+export { uid }
 
 const LEGACY = 'studio:generate:gallery' // before the kit doc store: library + view in one key
 const VIEW = 'studio:generate:view'

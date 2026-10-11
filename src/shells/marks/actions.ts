@@ -5,9 +5,10 @@ import { doc, history, settings, ui, newMark, uid, colorsOf, markLabel, type Doc
 import { lockupSVG, markSVG, svgToPNG } from './render'
 import { createZip } from '@kit'
 import { site } from '../../site.config'
+import { slug as toSlug } from '../util'
 
 const rng = () => mulberry32((Math.random() * 2 ** 31) | 0)
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'mark'
+const slug = (s: string) => toSlug(s, 'mark')
 const gc = (d: Doc): Doc => {
   const keep = new Set([...d.grid, ...d.favs])
   return { ...d, marks: Object.fromEntries(Object.entries(d.marks).filter(([id]) => keep.has(id))) }

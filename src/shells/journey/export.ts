@@ -5,8 +5,9 @@ import { CHANNELS, LANES, emoji, fmtEmotion, type JourneyDoc, type Persona } fro
 import { doc, persona, ui, history } from './store'
 import { LEVEL } from './map/Card'
 import { site } from '../../site.config'
+import { slug as toSlug } from '../util'
 
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'journey'
+const slug = (s: string) => toSlug(s, 'journey')
 const fileBase = () => `${slug(doc.get().title)}-${slug(persona().name)}`
 
 export const mapElement = { current: null as HTMLDivElement | null }

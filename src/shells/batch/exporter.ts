@@ -6,6 +6,7 @@ import { doc, params, ui, effective, type DataRow, type SizeSpec } from './model
 import { canvasBlob, createZip, fmtBytes } from '@kit'
 import { createJobRunner, type JobTask } from '@kit/system/jobs'
 import { site } from '@/site.config'
+import { slug } from '../util'
 
 export interface ExportSettings {
   rows: 'all' | 'current'
@@ -32,7 +33,7 @@ export const jobs = createJobRunner()
 
 const blobs = new Map<string, { blob: Blob; name: string }>()
 
-export const slug = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'untitled'
+export { slug }
 
 export function fileName(pattern: string, ctx: { brand: string; row: DataRow; index: number; size: SizeSpec }, ext: string) {
   const name = pattern

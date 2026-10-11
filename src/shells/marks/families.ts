@@ -7,6 +7,7 @@
 import { Grid2x2, Orbit, Flower2, Spline, Type, type LucideIcon } from 'lucide-react'
 import { defineSchema, folder, p, createParams, type AnyParams } from '@kit'
 import { glyph } from './letters'
+import { mulberry32 } from '../util'
 
 export type FamilyId = 'scribble' | 'orbit' | 'grid' | 'bloom' | 'monogram'
 export interface Colors { ink: string; paper: string; accent: string }
@@ -24,15 +25,7 @@ export interface Family {
 }
 
 /* --- maths --- */
-export function mulberry32(seed: number) {
-  let a = seed >>> 0
-  return () => {
-    a = (a + 0x6d2b79f5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
+export { mulberry32 }
 const f = (n: number) => Math.round(n * 100) / 100
 const TAU = Math.PI * 2
 
