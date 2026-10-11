@@ -8,6 +8,9 @@ The rule (brand/logo/, "the word is built from the mark"; Rafael's own file had 
              the mark's solid mass (the wheel and whorl are discs), not just match its line.
   gap        half the x-height, from the mark's right edge to the r's ink.
   spacing    tracking -0.045em (-0.025em small) plus PAIRS
+  v3         Rafael's lockup (brand/logo/rafael/rueca-lockup-updated-3.svg, 11 Oct) on top of that: the
+             word 2.9% bigger and 3.3 lower, the gap 90.2 (0.54 of the x-height), the u's top serifs
+             removed (TRIM) so it sits apart from the r. The generator reproduces his file to 0.2 units.
   (Tried first: x-height = the whorl's loop, baseline on the bottom edge, weight solved so the stems
   match the band. Every line matched, but the word read small and light next to the discs.
   Rafael's 11 Oct redraw of the mark was tried and reverted on his call; it's kept in brand/logo/rafael/.)
@@ -40,12 +43,17 @@ FACES = {
 # The mark, from brand/logo/marks.js: base() and base(SMALL). Bottoms level; y grows down.
 MARK = json.load(open(os.path.join(ROOT, 'brand/logo/pulido.json')))
 CUTS = {
-    'regular': {'w': 25, 'Ra': 96.1, 'Rb': 64, 'track': -0.045, 'wght': 450, 'stemTarget': 0.228, **MARK['regular']},
-    'small': {'w': 34, 'Ra': 96.1, 'Rb': 65, 'track': -0.025, 'wght': 500, 'stemTarget': 0.26, **MARK['small']},
+    'regular': {'w': 25, 'Ra': 96.1, 'Rb': 64, 'track': -0.045, 'wght': 450, 'stemTarget': 0.228, 'xhScale': 1.029, 'baseShift': 3.3, 'gapK': 0.5395, **MARK['regular']},
+    'small': {'w': 34, 'Ra': 96.1, 'Rb': 65, 'track': -0.025, 'wght': 500, 'stemTarget': 0.26, 'xhScale': 1.029, 'baseShift': 3.12, 'gapK': 0.5395, **MARK['small']},
 }
-# Pair adjustments on top of the font's kerning and the tracking, in 1/1000 em. The open pairs
-# (e-c, r-u) close a little more than the tight one (c-a), so the word reads evenly once tightened.
-PAIRS = {'ru': -8, 'ec': -14, 'ca': 6}
+# Pair adjustments on top of the font's kerning and the tracking, in 1/1000 em. e-c closes and c-a opens
+# so the word reads evenly once tightened. r-u and u-e come from Rafael's v3 lockup: with the u's top
+# serifs gone (TRIM) it can sit closer to both neighbours.
+PAIRS = {'ru': -26.9, 'ue': -29.8, 'ec': -14, 'ca': 6}
+# Glyph surgery from Rafael's v3 lockup (brand/logo/rafael/rueca-lockup-updated-3.svg): the u loses the
+# top serifs on both arms, so its arms end flat and the r and u stay apart. Rectangles to cut, in the
+# face's font units (x0, y0, x1, y1). Only defined for the shipped face.
+TRIM = {'goudy': {'u': [(-100, 330, 94, 600), (300, 300, 402, 600)]}}
 # The face the site ships: Sorts Mill Goudy (OFL), swapped in 11 Oct, so no licence is needed.
 SHIP = 'goudy'
 
@@ -102,17 +110,24 @@ def outline(face, wght, size, track_em, dx=0.0, dy=0.0, grow=0.0):
         ox, oy = x + pos.x_offset, pos.y_offset
         pen = SVGPathPen(gs, ntos=lambda v: f'{v:.2f}'.rstrip('0').rstrip('.'))
         tf = (k, 0, 0, -k, ox * k + dx + grow, -oy * k + dy)
-        if grow:
+        cuts = TRIM.get(face.get('key'), {}).get(TEXT[len(parts)], [])
+        if grow or cuts:
             import pathops
-            g = pathops.Path(); gs[name].draw(TransformPen(g.getPen(), tf))
-            rim = pathops.Path(); gs[name].draw(TransformPen(rim.getPen(), tf))
-            rim.stroke(2 * grow, pathops.LineCap.ROUND_CAP, pathops.LineJoin.ROUND_JOIN, 4)
-            rim.convertConicsToQuads()  # round joins come back as conics, which the union can't take
-            pathops.op(g, rim, pathops.PathOp.UNION).draw(pen)
+            g = pathops.Path(); gs[name].draw(g.getPen())
+            for x0, y0, x1, y1 in cuts:  # glyph surgery, in font units
+                r = pathops.Path(); rp = r.getPen(); rp.moveTo((x0, y0)); rp.lineTo((x1, y0)); rp.lineTo((x1, y1)); rp.lineTo((x0, y1)); rp.closePath()
+                g = pathops.op(g, r, pathops.PathOp.DIFFERENCE)
+            g.draw(TransformPen(bounds, (1, 0, 0, 1, ox, oy)))  # measured before thickening; grow is added below
+            if grow:  # thicken by `grow` mark units per side
+                rim = pathops.Path(); g.draw(rim.getPen())
+                rim.stroke(2 * grow / k, pathops.LineCap.ROUND_CAP, pathops.LineJoin.ROUND_JOIN, 4)
+                rim.convertConicsToQuads()  # round joins come back as conics, which the union can't take
+                g = pathops.op(g, rim, pathops.PathOp.UNION)
+            g.draw(TransformPen(pen, tf))
         else:
             gs[name].draw(TransformPen(pen, tf))
+            gs[name].draw(TransformPen(bounds, (1, 0, 0, 1, ox, oy)))
         parts.append(pen.getCommands())
-        gs[name].draw(TransformPen(bounds, (1, 0, 0, 1, ox, oy)))
         x += pos.x_advance + track_em * upm + 2 * grow / k
         nxt = TEXT[len(parts):len(parts) + 1]
         if nxt: x += PAIRS.get(TEXT[len(parts) - 1] + nxt, 0) / 1000 * upm
@@ -121,7 +136,7 @@ def outline(face, wght, size, track_em, dx=0.0, dy=0.0, grow=0.0):
 
 
 def lockup(face_key, cut_key):
-    face, cut = as_ttf(FACES[face_key]), CUTS[cut_key]
+    face, cut = {**as_ttf(FACES[face_key]), 'key': face_key}, CUTS[cut_key]
     W, H = cut['vb']
     xh_units = 2 * (cut['Ra'] - cut['w'] / 2)  # the band's inner box, top to bottom
     baseline = H - cut['w']  # the band's inner bottom edge
@@ -134,10 +149,11 @@ def lockup(face_key, cut_key):
         got = cut['stemTarget'] if grow else got
     # the thickened outline grows `grow` past the x-height and the baseline, so draw the letters that
     # much smaller and lift them, and the ink still fills the band's inner box exactly
-    size = (xh_units - 2 * grow) / x_height(f) * f['head'].unitsPerEm  # font size in mark units
-    baseline -= grow
+    xh_ink = xh_units * cut.get('xhScale', 1)  # Rafael's v3: the word 2.9% bigger than the band's inner box
+    size = (xh_ink - 2 * grow) / x_height(f) * f['head'].unitsPerEm  # font size in mark units
+    baseline += cut.get('baseShift', 0) - grow  # ...and 3.3 lower
     _, b = outline(face, wght, size, cut['track'], grow=grow)
-    gap = xh_units / 2
+    gap = xh_units * cut.get('gapK', 0.5)  # v3: 90.2 at the regular size (was half the x-height)
     dx = W + gap - b['xmin']  # the r's ink starts one gap after the mark
     word, _ = outline(face, wght, size, cut['track'], dx, baseline, grow)
     vb_w = dx + b['xmax']

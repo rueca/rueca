@@ -72,7 +72,8 @@ export function ThemeButton({ className }: { className?: string }) {
    (brand/logo/): drive wheel, whorl and band on true arcs round two centres, the whorl centred in
    its loop, the same 22.5 gap round both discs (11 Oct: whorl 30% bigger, its loop grown to match and moved right so the mark keeps its width), bottoms level. The wordmark is Sorts Mill Goudy (OFL), outlined, and
    fills the band's inner box: baseline on the band's inner bottom edge, x-height up to its inner
-   top, thickened so the stems carry the discs' mass, half an x-height between them. Two cuts:
+   top, thickened so the stems carry the discs' mass; Rafael's v3 (11 Oct) makes it 2.9% bigger with a
+   flat-topped u and a 90.2 gap. Two cuts:
    regular, and a heavier small one at 24px and under (band 34) so the whorl survives a favicon. */
 /* Colour assignment E (brand/logo/colour.html, Rafael 11 Oct): wheel Malva, whorl Achiote, band Gualda. */
 const MARK_DYES = ['malva', 'achiote', 'gualda'] as const // LOCKUP mark order: wheel, whorl, band
