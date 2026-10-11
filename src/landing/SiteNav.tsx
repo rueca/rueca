@@ -8,7 +8,8 @@
 import { useEffect, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@kit/core/cn'
-import { Logo, ThemeButton, scrollToSection } from './parts'
+import { ThemeButton, scrollToSection } from './parts'
+import { LogoIntro } from './LogoIntro'
 import { Row, Sheet } from './plate'
 import { links } from './content'
 
@@ -71,7 +72,8 @@ function SheetNavItems({ scroller }: { scroller: React.RefObject<HTMLDivElement 
     <>
       <a href="#/" onClick={(e) => { if (onLanding()) toTop(e) }} aria-label="Rueca home"
         className="flex h-full min-w-0 flex-1 items-center px-5 outline-none focus-visible:bg-fg/[0.05] sm:px-6">
-        <Logo height={18} />
+        {/* the approved logo animation (E2) plays here once, on the first load */}
+        <LogoIntro height={18} />
       </a>
       <a href="#/shells" onClick={(e) => { if (location.hash.startsWith('#/shells')) toTop(e) }} className={cn(cell, 'hidden md:flex')}>Shells</a>
       <button type="button" onClick={() => goToSection('install')} className={cn(cell, 'hidden md:flex')}>Install</button>
