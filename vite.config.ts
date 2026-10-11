@@ -26,7 +26,11 @@ export default defineConfig({
         `<meta name="twitter:card" content="summary" />`,
         `<meta name="twitter:title" content="${esc(title)}" />`,
         `<meta name="twitter:description" content="${esc(site.description)}" />`,
-      ].join('\n    ')
+      ]
+        // index.html's own tags win (the share image and its card are set there): add only what it doesn't have,
+        // or link previews see two og:title / twitter:card values and many take the first (launch check)
+        .filter((tag) => { const key = tag.match(/(?:name|property|rel)="[^"]+"/)?.[0]; return !key || !html.includes(key) })
+        .join('\n    ')
       return html.replace(/<title>.*<\/title>/, `<title>${esc(title)}</title>\n    ${meta}`)
     } },
   ],

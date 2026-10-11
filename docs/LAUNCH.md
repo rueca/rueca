@@ -61,13 +61,13 @@ Do these on the live site, not on localhost.
 - [ ] Landing page loads; every example tool opens; the theme toggle works; it's usable
       on your phone.
 - [ ] `https://<url>/r/registry.json` loads.
-- [ ] Plugin, from any folder in Claude Code:
+- [ ] **Right after the repo goes public** (they read GitHub, so they can't be tested before): plugin, from any folder in Claude Code:
       `/plugin marketplace add <owner>/<slug>` → `/plugin install <slug>@<slug>`,
       then ask *"make me a tool to tune a gradient"* and watch it use the skill.
 - [ ] Skill for other agents: `npx skills add <owner>/<slug>`.
-- [ ] Kit, in a fresh folder (this exact sequence was re-checked against rueca.dev by the
-      2026-10-10 cleanup QA, before the password gate; re-run it once the gate is down. The
-      README's kit section now says it needs a project already set up for shadcn):
+- [x] Kit, in a fresh folder — re-checked against the live, ungated rueca.dev on 2026-10-11 (fresh Vite,
+      an existing shadcn app, Next.js: research/10-head-to-head.md, pre-launch QA). In an existing app,
+      never `shadcn init` (it rewrites the app's CSS); install.md has a components.json to write instead:
       ```bash
       npm create vite@latest kit-check -- --template react-ts --no-interactive
       cd kit-check && npm i && npm i -D tailwindcss @tailwindcss/vite
@@ -75,7 +75,7 @@ Do these on the live site, not on localhost.
       # add tailwindcss() + an '@' alias to vite.config.ts, "@/*" paths to tsconfig.json AND tsconfig.app.json
       npx shadcn@latest init -y -b base --no-monorepo -p nova
       npx shadcn@latest add https://<url>/r/studio.json -y
-      printf '@import "./components/studio/theme.css";\nhtml, body, #root { height: 100%%; margin: 0 }\n' >> src/index.css
+      printf '\n@import "./components/studio/theme.css";\nhtml, body, #root { height: 100%%; margin: 0 }\n' >> src/index.css
       ```
 - [ ] `claude plugin validate .` passes in the repo (it does today).
 

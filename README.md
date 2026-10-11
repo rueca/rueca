@@ -32,11 +32,13 @@ Then ask for a prototype, a playground or "a tool to tune this". Update with
 npx skills add rueca/rueca
 ```
 
-**Just the kit** (React + Tailwind v4, via the shadcn CLI)
+**Just the kit** (React 19 + Tailwind v4, via the shadcn CLI)
 
 Needs a React project with Tailwind v4 that's already set up for shadcn. Starting fresh
 with Vite? Follow [shadcn's Vite guide](https://ui.shadcn.com/docs/installation/vite)
-first: it adds the `@` import alias and runs `npx shadcn@latest init`.
+first: it adds the `@` import alias and runs `npx shadcn@latest init`. Adding it to an existing app
+that has no `components.json`? Don't run `init` there (it rewrites your main CSS): write the small
+`components.json` from the [install guide](skills/rueca/references/install.md) instead.
 
 ```bash
 npx shadcn@latest add https://rueca.dev/r/studio.json
@@ -46,8 +48,8 @@ Or one piece at a time — `theme`, `core`, `inspector`, `timeline`, `stage`, `l
 `scrub`, `color`, `palette`… Each pulls what it needs. The full list is at
 [`/r/registry.json`](https://rueca.dev/r/registry.json). Files land in
 your project (`components/studio/`), so you own them. Then add the theme to your main CSS
-(anywhere: kit tokens are namespaced, so they never collide with shadcn's) and give the page a
-height, because `<Studio>` fills its parent:
+(its tokens apply only inside the tool, so your app's own variables and dark mode stay as they are)
+and give the page a height, because `<Studio>` fills its parent:
 
 ```css
 @import "./components/studio/theme.css";
