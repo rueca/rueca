@@ -60,12 +60,13 @@
    captured thumbnails get the neutral accent from neutral.ts instead.
 --------------------------------------------------------------------------- */
 .site {
-  /* dark: walnut night, tint halved 11 Oct so the shells’ neutral UI sits comfortably on it */
-  --field: #151210;
-  --panel: #201c19;
-  --overlay: #282320;
-  --control: #2b2623;
-  --well: #1a1714;
+  /* dark: walnut night, tint halved 11 Oct so the shells’ neutral UI sits comfortably on it, then
+     every surface's chroma cut by a third (Rafael: a touch less yellow; the same on the sheet tokens in plate.css) */
+  --field: #141211;
+  --panel: #1f1c1a;
+  --overlay: #272321;
+  --control: #2a2624;
+  --well: #191715;
   --fg: #f3f1eb;
   --fg-muted: #b9b3ac;
   --fg-faint: #99928c;
@@ -85,11 +86,11 @@
 }
 :root.light .site {
   /* light: undyed wool paper, walnut ink; tint halved 11 Oct (see dark) */
-  --field: #f3f1eb;
-  --panel: #faf8f4;
-  --overlay: #faf8f4;
-  --control: #ece9e2;
-  --well: #e8e4dd;
+  --field: #f2f1ed;
+  --panel: #f9f8f5;
+  --overlay: #f9f8f5;
+  --control: #ebe9e5;
+  --well: #e7e4e0;
   --fg: #181411;
   --fg-muted: #58524d;
   --fg-faint: #68625d;

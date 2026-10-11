@@ -6,19 +6,19 @@
    Dark is the default theme; :root.light overrides. */
 
 .site {
-  --sheet: #1a1714;
+  --sheet: #191715;
   /* rules and crosshairs are solid (pre-mixed onto the sheet), so where two parts
      mark the same crossing the marks land on the same pixels and read as one */
-  --rule: #302d2a;
-  --cross: #5b5855;
+  --rule: #2f2d2b;
+  --cross: #5a5856;
   --measure: rgba(243, 241, 235, 0.4);
   --tick: rgba(243, 241, 235, 0.3);
   --tick-minor: rgba(243, 241, 235, 0.12);
 }
 :root.light .site {
-  --sheet: #fbfaf7;
-  --rule: #e0dedb;
-  --cross: #aba9a6;
+  --sheet: #fbfaf8;
+  --rule: #dfdedc;
+  --cross: #aaa9a7;
   --measure: rgba(24, 20, 17, 0.42);
   --tick: rgba(24, 20, 17, 0.3);
   --tick-minor: rgba(24, 20, 17, 0.11);
@@ -153,8 +153,8 @@ html[data-reveals] .site [data-reveal='write'][data-in] .hw-pen path {
    token is re-mixed for it (solid rules and crosshairs). It sits above the rails (z-index)
    so they end at its edge. */
 .site .tone-platino { position: relative; z-index: 2; background: var(--sheet); color: var(--fg); }
-.site .tone-platino { --sheet: #383430; --field: #383430; --well: #332f2b; --fg: #f3f1eb; --fg-muted: #cecbc6; --fg-faint: #b7b5af; --rule: #56524e; --cross: #7b7873; --line: rgba(243, 241, 235, 0.16); --hover: rgba(243, 241, 235, 0.08); }
-:root.light .site .tone-platino { --sheet: #dcdad5; --field: #dcdad5; --well: #d2d0cb; --fg: #181411; --fg-muted: #4f4b48; --fg-faint: #625f5b; --rule: #c3c0bc; --cross: #999792; --line: rgba(24, 20, 17, 0.12); --hover: rgba(24, 20, 17, 0.06); }
+.site .tone-platino { --sheet: #373432; --field: #373432; --well: #322f2d; --fg: #f3f1eb; --fg-muted: #cecbc6; --fg-faint: #b7b5af; --rule: #555250; --cross: #7a7875; --line: rgba(243, 241, 235, 0.16); --hover: rgba(243, 241, 235, 0.08); }
+:root.light .site .tone-platino { --sheet: #dbdad7; --field: #dbdad7; --well: #d1d0cd; --fg: #181411; --fg-muted: #4f4b48; --fg-faint: #625f5b; --rule: #c2c0be; --cross: #989794; --line: rgba(24, 20, 17, 0.12); --hover: rgba(24, 20, 17, 0.06); }
 
 /* The install tabs (the kit's Segmented) squared to the sheet, in printed small caps.
    Scoped to the site's sections, so the kit and the shells keep their own shape. */
