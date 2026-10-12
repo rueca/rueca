@@ -35,12 +35,12 @@ Then, in this order:
    `middleware.ts` (the password gate) is gone, so the kit install fails for everyone.
    Delete the file, commit and push; Vercel redeploys. Check
    `curl -s -o /dev/null -w "%{http_code}" https://rueca.dev/r/studio.json` prints `200`.
-2. **Open the repo and turn on private vulnerability reporting** (`SECURITY.md` points at it):
+2. ✅ (2026-10-11) **Open the repo and turn on private vulnerability reporting** (`SECURITY.md` points at it):
    ```bash
    gh repo edit rueca/rueca --visibility public --accept-visibility-change-consequences
    gh api -X PUT repos/rueca/rueca/private-vulnerability-reporting
    ```
-3. **Fix the repo's front page.** The description is still the old tagline and the homepage
+3. ✅ (2026-10-11) **Fix the repo's front page.** The description is still the old tagline and the homepage
    is `rueca.vercel.app`:
    ```bash
    gh repo edit rueca/rueca --description "Spin your prototype into a tool." --homepage https://rueca.dev
@@ -61,10 +61,10 @@ Do these on the live site, not on localhost.
 - [ ] Landing page loads; every example tool opens; the theme toggle works; it's usable
       on your phone.
 - [ ] `https://<url>/r/registry.json` loads.
-- [ ] **Right after the repo goes public** (they read GitHub, so they can't be tested before): plugin, from any folder in Claude Code:
+- [x] **Right after the repo goes public** (checked 2026-10-11 in a clean config: marketplace add + install → rueca@rueca 0.1.0 enabled, current SKILL.md; `npx skills add rueca/rueca -y` → .agents/skills/rueca for Claude Code, Cursor, Copilot +19): plugin, from any folder in Claude Code:
       `/plugin marketplace add <owner>/<slug>` → `/plugin install <slug>@<slug>`,
       then ask *"make me a tool to tune a gradient"* and watch it use the skill.
-- [ ] Skill for other agents: `npx skills add <owner>/<slug>`.
+- [x] Skill for other agents: `npx skills add <owner>/<slug>`.
 - [x] Kit, in a fresh folder — re-checked against the live, ungated rueca.dev on 2026-10-11 (fresh Vite,
       an existing shadcn app, Next.js: research/10-head-to-head.md, pre-launch QA). In an existing app,
       never `shadcn init` (it rewrites the app's CSS); install.md has a components.json to write instead:
