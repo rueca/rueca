@@ -93,7 +93,7 @@ export const faq = [
   },
   {
     q: 'And DialKit, Leva, Tweakpane?',
-    a: `They’re tuning panels, great for developers, and DialKit’s springs are lovely. ${site.name} adds the rest of the tool around the panel: canvas, timeline, layers, export and a client view.`,
+    a: `They’re tuning panels, great for developers, and DialKit’s springs and timeline are lovely. ${site.name} builds the rest of the tool around the panel: a canvas with layers, undo, export and a view your client can open on their phone.`,
   },
   {
     q: 'Do I need to code?',
