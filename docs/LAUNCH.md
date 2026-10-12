@@ -46,7 +46,7 @@ Then, in this order:
    gh repo edit rueca/rueca --description "Spin your prototype into a tool." --homepage https://rueca.dev
    gh repo edit rueca/rueca --add-topic claude-code-plugin,agent-skills,shadcn-registry,design-tools,prototyping
    ```
-4. **Tag the release.** There's no tag yet; plugin users and the launch posts point at it:
+4. ✅ (2026-10-12) **Tag the release.** There's no tag yet; plugin users and the launch posts point at it:
    ```bash
    gh release create v0.1.0 --generate-notes --title "Rueca 0.1.0"
    ```
