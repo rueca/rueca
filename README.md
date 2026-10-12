@@ -2,6 +2,10 @@
 
 **Spin your prototype into a tool.**
 
+[![A motion study wrapped in a Rueca tool: inspector, timeline and export around the artwork. Click to watch the 25-second video.](docs/media/demo-poster.jpg)](https://github.com/rueca/rueca/releases/download/v0.1.0/rueca-demo.mp4)
+
+<sub>▶ [Watch the 25-second video](https://github.com/rueca/rueca/releases/download/v0.1.0/rueca-demo.mp4)</sub>
+
 A prototype needs two things: the thing you are designing, and a tool around it to
 feel and tune it. Rueca is that tool — the inspector, timeline, layers,
 presets, export and client view of a real design app — dropped in around any
