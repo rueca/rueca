@@ -1,5 +1,9 @@
 """Outline the Rueca wordmark to vector paths, sized and weighted from the mark (I · Pulido).
 
+Current (12 Oct): Host Grotesk 500 (SHIP = 'host'), placed by its `rules` in FACES: x-height 0.86 of the
+band's inner box, centred on the mark, gap 0.54 of the x-height, tracking -0.015em. The notes below are
+the Sorts Mill Goudy wordmark's rules (11 Oct), still used for the comparison lockups.
+
 The rule (brand/logo/, "the word is built from the mark"; Rafael's own file had it this way):
   the word fills the band's inner box. Baseline on the band's inner bottom edge (so the band's
   lower run sits under the word like a rule), x-height up to the band's inner top.
@@ -37,6 +41,12 @@ FACES = {
     'signifier': {'path': os.path.expanduser('~/Library/Fonts/TestSignifierVF-Roman.ttf'), 'fixed': {}},
     # OFL, shipped by the landing from src/landing/fonts. Static: one weight (400).
     'goudy': {'path': os.path.expanduser('~/Library/Fonts/SortsMillGoudy-Regular.ttf'), 'fixed': {}, 'static': True},
+    # OFL, in the repo (brand/fonts/host-grotesk, from google/fonts). The logo's face since 12 Oct: the
+    # site's headings stay in Sorts Mill Goudy, the wordmark is a sans that matches the mark's geometry.
+    # Its own placement (`rules`), from brand/logo/wordmark-sans.html: x-height 0.86 of the band's inner
+    # box, centred on the mark (the drive wheel's centre), gap 0.54 of the x-height, weight 500.
+    'host': {'path': os.path.join(ROOT, 'brand/fonts/host-grotesk/HostGrotesk[wght].ttf'), 'fixed': {},
+             'rules': {'xhK': 0.86, 'gapK': 0.54, 'wght': 500, 'track': -0.015, 'pairs': {}}},
     # OFL, already a dependency: safe to ship. The display optical size, like the landing's h1.
     'newsreader': {'path': os.path.join(ROOT, 'node_modules/@fontsource-variable/newsreader/files/newsreader-latin-opsz-normal.woff2'), 'fixed': {'opsz': 72}},
 }
@@ -54,8 +64,9 @@ PAIRS = {'ru': -26.9, 'ue': -29.8, 'ec': -14, 'ca': 6}
 # top serifs on both arms, so its arms end flat and the r and u stay apart. Rectangles to cut, in the
 # face's font units (x0, y0, x1, y1). Only defined for the shipped face.
 TRIM = {'goudy': {'u': [(-100, 330, 94, 600), (300, 300, 402, 600)]}}
-# The face the site ships: Sorts Mill Goudy (OFL), swapped in 11 Oct, so no licence is needed.
-SHIP = 'goudy'
+# The face the site's logo ships: Host Grotesk (OFL), Rafael's pick on 12 Oct. Sorts Mill Goudy was
+# the wordmark from 11 Oct (its v3 rules above: TRIM, PAIRS, xhScale) and stays the headings' face.
+SHIP = 'host'
 
 
 def as_ttf(face):
@@ -92,7 +103,7 @@ def stem(font):
     return runs[0]
 
 
-def outline(face, wght, size, track_em, dx=0.0, dy=0.0, grow=0.0):
+def outline(face, wght, size, track_em, dx=0.0, dy=0.0, grow=0.0, pairs=None):
     """Shape with HarfBuzz (kerning on), draw each glyph at `size` units per em. Baseline at y=0, y down.
     grow > 0 thickens every outline by that much per side (mark units) and opens the spacing by the
     same amount, for a single-weight face that is lighter than the lockup needs."""
@@ -130,15 +141,26 @@ def outline(face, wght, size, track_em, dx=0.0, dy=0.0, grow=0.0):
         parts.append(pen.getCommands())
         x += pos.x_advance + track_em * upm + 2 * grow / k
         nxt = TEXT[len(parts):len(parts) + 1]
-        if nxt: x += PAIRS.get(TEXT[len(parts) - 1] + nxt, 0) / 1000 * upm
+        if nxt: x += (PAIRS if pairs is None else pairs).get(TEXT[len(parts) - 1] + nxt, 0) / 1000 * upm
     xmin, ymin, xmax, ymax = bounds.bounds
-    return ' '.join(parts), {'xmin': xmin * k, 'xmax': xmax * k + 2 * grow, 'top': -ymax * k - grow, 'bottom': -ymin * k + grow}
+    return ' '.join(parts), {'xmin': xmin * k, 'xmax': xmax * k + 2 * grow, 'top': -ymax * k - grow, 'bottom': -ymin * k + grow, 'parts': parts}
 
 
 def lockup(face_key, cut_key):
     face, cut = {**as_ttf(FACES[face_key]), 'key': face_key}, CUTS[cut_key]
     W, H = cut['vb']
     xh_units = 2 * (cut['Ra'] - cut['w'] / 2)  # the band's inner box, top to bottom
+    if face.get('rules'):  # a face with its own placement: x-height centred on the mark, no thickening
+        R = face['rules']; wght = R['wght']; f = instance(face, wght)
+        xh = xh_units * R['xhK']
+        size = xh / x_height(f) * f['head'].unitsPerEm
+        baseline = H / 2 + xh / 2  # the mark's centre is the drive wheel's centre (bottoms level, H = 2 * A.y)
+        _, b = outline(face, wght, size, R['track'], pairs=R['pairs'])
+        dx = W + xh * R['gapK'] - b['xmin']
+        word, b2 = outline(face, wght, size, R['track'], dx, baseline, pairs=R['pairs'])
+        return {'face': face_key, 'wght': wght, 'stemRatio': round(stem(f) / x_height(f), 4),
+                'vb': [round(dx + b['xmax'], 2), round(max(H, baseline + b['bottom']), 2)], 'markW': W, 'markH': H,
+                'word': word, 'letters': b2['parts'], 'mark': [cut['wheel'], cut['whorl'], cut['band']]}
     baseline = H - cut['w']  # the band's inner bottom edge
     wght = 400 if face.get('static') else cut['wght']
     got = stem(instance(face, wght)) / x_height(instance(face, wght))
@@ -176,8 +198,29 @@ if __name__ == '__main__':
                 open(os.path.join(ROOT, f'brand/logo/rueca-lockup-{fk}-{ck}{name}.svg'), 'w').write(svg)
     ship = out[SHIP]
     ts = ('/* GENERATED by brand/tools/outline_rueca.py. Do not edit by hand.\n'
-          '   The Rueca lockup as vectors: the Pulido mark plus the outlined wordmark, two cuts.\n'
+          '   The Rueca lockup as vectors: the Pulido mark plus the outlined wordmark (the site uses the regular cut at every size).\n'
           f"   Face: {SHIP} (set SHIP in the generator to change it). */\n"
           'export type LockupCut = { vb: [number, number]; markW: number; markH: number; wght: number; mark: [string, string, string]; word: string }\n'
           f"export const LOCKUP: Record<'regular' | 'small', LockupCut> = {json.dumps({k: {kk: v[kk] for kk in ('vb', 'markW', 'markH', 'wght', 'mark', 'word')} for k, v in ship.items()}, indent=1)}\n")
     open(os.path.join(ROOT, 'src/landing/logo.generated.ts'), 'w').write(ts)
+
+    # The logo animation (brand/logo/fan/, which the launch trailer imports) takes the word letter by
+    # letter: write its data file from the same regular cut so it always matches the site.
+    from fontTools.pens.boundsPen import BoundsPen as _BP
+    from fontTools.svgLib.path import parse_path
+    R = ship['regular']
+    def box(d):
+        b = _BP(None); parse_path(d, b); return b.bounds
+    lb = [box(d) for d in R['letters']]
+    wb = box(R['word'])
+    r2 = lambda v: round(v, 2)
+    fan = ('/* GENERATED by brand/tools/outline_rueca.py from the shipped lockup (src/landing/logo.generated.ts,\n'
+           f"   regular cut, face: {SHIP}). Do not edit by hand: change the generator and rerun it. */\n"
+           f"export const LOCKUP_SIZE = {{ w: {r2(R['vb'][0])}, h: {r2(R['vb'][1])} }} as const\n"
+           f"export const MARK_PATHS = {{ wheel: {json.dumps(R['mark'][0])}, whorl: {json.dumps(R['mark'][1])}, band: {json.dumps(R['mark'][2])} }} as const\n"
+           f"export const WORD_BOX = {{ x0: {r2(wb[0])}, x1: {r2(wb[2])}, top: {r2(wb[1])}, bottom: {r2(wb[3])} }} as const\n"
+           '/** r, u, e, c, a; a letter with a counter carries it. */\n'
+           f"export const LETTERS = {json.dumps(R['letters'], indent=1)} as const\n"
+           '/** Each letter\'s left and right edge, in lockup units (same order as LETTERS). */\n'
+           f"export const LETTER_X = {json.dumps([[r2(b[0]), r2(b[2])] for b in lb])} as const\n")
+    open(os.path.join(ROOT, 'brand/logo/fan/wordmark.ts'), 'w').write(fan)

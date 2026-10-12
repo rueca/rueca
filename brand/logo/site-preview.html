@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wordmark on the site</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+  html, body { margin: 0; height: 100%; background: #151210; font: 13px/1.4 "IBM Plex Sans", system-ui, sans-serif; }
+  iframe { border: 0; width: 100%; height: 100%; display: block; }
+  .bar { position: fixed; right: 16px; bottom: 16px; z-index: 10; display: flex; gap: 6px; align-items: center; padding: 6px; border-radius: 10px;
+    background: rgba(24, 20, 17, .92); color: #f3f1eb; box-shadow: 0 6px 24px rgba(0, 0, 0, .35); }
+  .bar span { padding: 0 6px; color: #b9b3ac; }
+  .bar button { font: inherit; border: 0; border-radius: 7px; padding: 6px 10px; background: transparent; color: #f3f1eb; cursor: pointer; }
+  .bar button[aria-pressed="true"] { background: #f3f1eb; color: #181411; }
+</style>
+<iframe id="site" src="/" title="Rueca site"></iframe>
+<div class="bar">
+  <span>Wordmark</span>
+  <button data-font="Host Grotesk" data-w="500" data-xs="0.86" data-tr="-0.015" aria-pressed="true">Host Grotesk</button>
+  <button data-font="Quicksand" data-w="650" data-xs="0.88" data-tr="-0.03" aria-pressed="false">Quicksand</button>
+  <button data-font="" aria-pressed="false">Current</button>
+</div>
+<script>
+/* Previews a wordmark face on the real site without touching its code: the site loads in the frame,
+   and every logo svg (aria-label "Rueca") gets its outlined word hidden and replaced by live text,
+   x-height centred on the mark (the rule from brand/logo/wordmark-sans.html). A MutationObserver
+   re-applies it when React re-renders, and the frame's load event when the dev server reloads. */
+const FONTS = 'https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400..700&family=Quicksand:wght@400..700&display=swap'
+const H = 217.2, MARK_W = 309.1, XH_BOX = 167.2 // the Pulido mark's units (brand/logo/pulido.json)
+let choice = { font: 'Host Grotesk', w: 500, xs: 0.86, tr: -0.015 }
+const frame = document.getElementById('site')
+
+function apply(doc) {
+  if (!doc) return
+  if (!doc.getElementById('wm-fonts')) {
+    const l = doc.createElement('link'); l.id = 'wm-fonts'; l.rel = 'stylesheet'; l.href = FONTS; doc.head.appendChild(l)
+  }
+  for (const s of doc.querySelectorAll('svg[aria-label="Rueca"]')) {
+    const paths = [...s.querySelectorAll(':scope > path')]
+    if (!paths.length) continue
+    const word = paths[paths.length - 1]
+    if (!s.dataset.wmOrig) s.dataset.wmOrig = JSON.stringify({ vb: s.getAttribute('viewBox'), w: s.getAttribute('width'), h: s.getAttribute('height') })
+    const orig = JSON.parse(s.dataset.wmOrig)
+    s.querySelectorAll('text.wm').forEach((t) => t.remove())
+    s.setAttribute('viewBox', orig.vb); s.setAttribute('width', orig.w); s.setAttribute('height', orig.h)
+    word.style.display = ''
+    if (!choice.font) continue
+    const c = doc.createElement('canvas').getContext('2d')
+    c.font = `${choice.w} 1000px "${choice.font}"`
+    const r = c.measureText('x').actualBoundingBoxAscent / 1000 || 0.5
+    const xh = XH_BOX * choice.xs, fs = xh / r, base = H / 2 + xh / 2
+    const wordOnly = paths.length === 1
+    const t = doc.createElementNS('http://www.w3.org/2000/svg', 'text')
+    t.setAttribute('class', 'wm'); t.textContent = 'rueca'
+    t.setAttribute('font-family', choice.font); t.setAttribute('font-weight', choice.w)
+    t.setAttribute('font-size', fs); t.setAttribute('letter-spacing', choice.tr * fs); t.setAttribute('fill', 'currentColor')
+    t.setAttribute('x', wordOnly ? 0 : MARK_W + xh * 0.54); t.setAttribute('y', base)
+    word.style.display = 'none'
+    s.appendChild(t)
+    const bb = t.getBBox(), [, , vw, vh] = orig.vb.split(/\s+/).map(Number), hpx = +orig.h
+    if (wordOnly) { // the footer's word on its own: keep the old word's x-height (Goudy v3, 172 units of its box)
+      const k = (hpx * (172.05 / vh)) / xh
+      s.setAttribute('viewBox', `${bb.x} ${base - xh - 2} ${bb.width} ${xh + 4}`); s.setAttribute('height', (xh + 4) * k); s.setAttribute('width', bb.width * k)
+    } else {
+      const k = hpx / vh, W = bb.x + bb.width
+      s.setAttribute('viewBox', `0 0 ${W} ${H}`); s.setAttribute('width', W * k)
+    }
+  }
+}
+
+function watch() {
+  const doc = frame.contentDocument
+  if (!doc) return
+  doc.fonts && doc.fonts.ready.then(() => apply(doc))
+  apply(doc)
+  // re-apply only when a logo has lost (or wrongly kept) the preview, so our own edits don't retrigger it
+  const stale = () => [...doc.querySelectorAll('svg[aria-label="Rueca"]')].some((s) =>
+    s.querySelector(':scope > path') && !!s.querySelector('text.wm') !== !!choice.font)
+  let busy = false
+  new MutationObserver(() => { if (busy || !stale()) return; busy = true; requestAnimationFrame(() => { apply(doc); busy = false }) })
+    .observe(doc.body, { childList: true, subtree: true })
+  setTimeout(() => apply(doc), 1200) // the face may finish loading after the first pass
+}
+frame.addEventListener('load', watch)
+
+document.querySelectorAll('.bar button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('.bar button').forEach((x) => x.setAttribute('aria-pressed', x === b))
+  choice = { font: b.dataset.font, w: +b.dataset.w || 500, xs: +b.dataset.xs || 0.86, tr: +b.dataset.tr || 0 }
+  const doc = frame.contentDocument
+  if (doc && choice.font) doc.fonts.load(`${choice.w} 100px "${choice.font}"`).then(() => apply(doc))
+  apply(doc)
+}))
+</script>
+</html>

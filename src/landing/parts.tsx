@@ -70,11 +70,9 @@ export function ThemeButton({ className }: { className?: string }) {
 /* The Rueca logo, all vectors (src/landing/logo.generated.ts, from brand/tools/outline_rueca.py).
    The mark is Rafael's two-wheel drawing (brand/moodboards/rueca-logo.svg) rebuilt as "I · Pulido"
    (brand/logo/): drive wheel, whorl and band on true arcs round two centres, the whorl centred in
-   its loop, the same 22.5 gap round both discs (11 Oct: whorl 30% bigger, its loop grown to match and moved right so the mark keeps its width), bottoms level. The wordmark is Sorts Mill Goudy (OFL), outlined, and
-   fills the band's inner box: baseline on the band's inner bottom edge, x-height up to its inner
-   top, thickened so the stems carry the discs' mass; Rafael's v3 (11 Oct) makes it 2.9% bigger with a
-   flat-topped u and a 90.2 gap. One drawing at every size, as in Rafael's file (brand/logo/rafael/
-   rueca-lockup-updated-3.svg, 12 Oct): the generator's heavier small cut (band 34) isn't used. */
+   its loop, the same 22.5 gap round both discs (11 Oct: whorl 30% bigger, its loop grown to match and moved right so the mark keeps its width), bottoms level. The wordmark is Host Grotesk 500 (OFL, brand/fonts/host-grotesk), outlined: its x-height
+   is 0.86 of the band's inner box, centred on the mark, with 0.54 of an x-height between them (Rafael,
+   12 Oct; the headings stay in Sorts Mill Goudy). One drawing at every size. */
 /* Colour assignment E (brand/logo/colour.html, Rafael 11 Oct): wheel Malva, whorl Achiote, band Gualda. */
 const MARK_DYES = ['malva', 'achiote', 'gualda'] as const // LOCKUP mark order: wheel, whorl, band
 const cutFor = (_size: number) => LOCKUP.regular
