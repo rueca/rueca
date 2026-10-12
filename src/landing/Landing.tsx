@@ -79,7 +79,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
           {/* ── how it works ─────────────────────────────────────── */}
           <SheetSection id="how" n={1} of={SHEETS} label="How it works">
             <StepDeck steps={steps} head={
-              <Heading title="From debug sliders to a design tool."
+              <Heading title="From a few sliders to a design tool."
                 lede={<>Install the {site.name} skill and ask your agent for “a tool to tune this”. The tool stays neutral: <span className="text-fg">the brand lives inside the artboard, never around it.</span></>} />
             } />
           </SheetSection>
