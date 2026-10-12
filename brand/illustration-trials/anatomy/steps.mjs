@@ -81,12 +81,12 @@ const playhead = (lit) => {
 // isometric illustration draws a mark: the band is one line of constant weight round its centre
 // (the outline of the two circles it runs round), the drive wheel and whorl are filled ellipses.
 // A projected fill would thin the band where the view foreshortens it; a line keeps its weight.
-// Geometry from the mark's own outlines (logo.generated.ts, the v3 lockup of 11 Oct): wheel r 74.07 at
-// (230.77, 119.36), whorl r 27.04 at (68.68, 170.06), the band 18 wide with its centre 110.36 round the
-// wheel and 59.68 round the whorl.
+// Geometry from the mark's own outlines (logo.generated.ts, the Pulido mark, regular cut): wheel r 61.1 at
+// (200.5, 108.6), whorl r 29 at (76.5, 140.7), the band 25 wide with its centre 96.1 round the wheel and
+// 64 round the whorl. (Until 12 Oct this still held the reverted v3 mark's numbers.)
 // It arrives as an outline (step 2); as step 3 scrubs it draws itself: the band's two edges, then each
 // wheel's rim, never filled, in a slightly heavier pen line; the faint outline fades.
-const MARK = { wheel: [230.77, 119.36, 74.07], whorl: [68.68, 170.06, 27.04], band: [[230.73, 119.36, 110.36], [68.68, 170.06, 59.68]], width: 18 };
+const MARK = { wheel: [200.5, 108.6, 61.1], whorl: [76.5, 140.7, 29], band: [[200.5, 108.6, 96.1], [76.5, 140.7, 64]], width: 25 };
 const LOGO_H = 34, LS = LOGO_H / LOCKUP.markH, LOGO_AT = [CARD.x + (CARD.w - LOCKUP.markW * LS) / 2, CARD.y + (CARD.d - LOGO_H) / 2];
 const hull = (pts) => {
   const p = [...pts].sort((a, b) => a[0] - b[0] || a[1] - b[1]), cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
@@ -102,7 +102,9 @@ function logo() {
   const path = (sp) => "M" + sp.map((q) => q.map((v) => v.toFixed(2)).join(" ")).join("L") + "Z";
   // each closed path's length, so its dash can run exactly once round it
   const length = (sp) => sp.reduce((sum, q, i) => sum + Math.hypot(q[0] - sp[(i + 1) % sp.length][0], q[1] - sp[(i + 1) % sp.length][1]), 0);
-  const drawn = (sp, t) => { const n = length(sp).toFixed(1); return `stroke-dasharray:${n} ${n};stroke-dashoffset:calc((1 - ${t}) * ${n})`; };
+  // the dash waits a little before the line's start (pad), not on it: a dash ending exactly at the start still
+  // paints its round cap there, a dot before the pen has moved (Rafael, 12 Oct)
+  const drawn = (sp, t) => { const n = length(sp), pad = 3; return `stroke-dasharray:${n.toFixed(1)} ${(n + pad * 2).toFixed(1)};stroke-dashoffset:calc((1 - ${t}) * ${(n + pad).toFixed(1)})`; };
   // a closed line moved d inward (d < 0: outward), square to itself at every point
   const inset = (sp, d) => {
     const n = sp.length, c = sp.reduce((m, q) => [m[0] + q[0] / n, m[1] + q[1] / n], [0, 0]);

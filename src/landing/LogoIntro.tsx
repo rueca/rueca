@@ -70,7 +70,7 @@ export function LogoIntro({ height }: { height: number }) {
   const [run] = useState(() => !played && typeof matchMedia !== 'undefined' && !matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [done, setDone] = useState(!run)
   const svg = useRef<SVGSVGElement>(null)
-  const cut = LOCKUP[height <= 24 ? 'small' : 'regular']
+  const cut = LOCKUP.regular // one drawing at every size, as the static logo (parts.tsx)
   const [w, h] = cut.vb, k = height / cut.markH, span = w - cut.markW
 
   useEffect(() => {
