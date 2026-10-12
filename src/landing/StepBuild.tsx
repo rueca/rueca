@@ -137,6 +137,15 @@ function Side({ steps, head }: { steps: DeckStep[]; head?: ReactNode }) {
     needs a backdrop). The same progress model as desktop (useBuild), over a shorter track. */
 function Stacked({ steps }: { steps: DeckStep[] }) {
   const track = useRef<HTMLDivElement>(null), pinned = useRef<HTMLDivElement>(null), art = useRef<HTMLDivElement>(null)
+  const slot = useRef<HTMLDivElement>(null)
+  const [side, setSide] = useState(0)
+  useEffect(() => {
+    const el = slot.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setSide(Math.floor(Math.min(e.contentRect.width, e.contentRect.height))))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
   // the build starts while the drawing is still rising into its spot (a third of a screen early),
   // so it never sits there empty
   const { active } = useBuild(track, pinned, art, steps.length, useCallback(() => NAV_H + (scrollParent(track.current)?.clientHeight ?? innerHeight) * 0.35, []))
@@ -144,11 +153,16 @@ function Stacked({ steps }: { steps: DeckStep[] }) {
     // the pinned piece is about 80vh tall on a phone; the rest of the track is the scroll that builds it (~60vh a step)
     <div ref={track} className="relative" style={{ height: `${steps.length * 60 + 95}vh` }}>
       {/* pinned flush under the nav, so the tinted drawing band meets its rule */}
-      <div ref={pinned} className="sticky flex flex-col gap-6 px-5 pt-6 pb-10 sm:px-6" style={{ top: NAV_H }}>
+      {/* the pinned piece fills the screen under the nav (Rafael: no empty band under the bars); the drawing's band takes
+          the slack and the text + bars sit at the bottom */}
+      <div ref={pinned} className="sticky flex flex-col gap-6 px-5 pt-6 pb-10 sm:px-6" style={{ top: NAV_H, minHeight: `calc(100svh - ${NAV_H}px)` }}>
         {/* the drawing on the kit visuals' tint, edge to edge with a closing rule, like a kit cell (Rafael) */}
-        <div className="-mx-5 -mt-6 bg-fg/[0.025] px-5 py-6 shadow-[inset_0_-1px_var(--rule)] sm:-mx-6 sm:px-6">
-          <div className="mx-auto aspect-square w-full max-w-[min(100%,46vh)]" role="img" aria-label={steps.map((s) => s.title).join(', then ')}>
-            <BuildArt el={art} />
+        <div className="-mx-5 -mt-6 flex flex-1 flex-col bg-fg/[0.025] px-5 py-6 shadow-[inset_0_-1px_var(--rule)] sm:-mx-6 sm:px-6">
+          {/* the square drawing is as big as the band allows, whichever side is shorter */}
+          <div ref={slot} className="flex min-h-[min(calc(100vw-40px),46vh)] flex-1 items-center justify-center">
+            <div className="aspect-square" style={{ width: side || '100%' }} role="img" aria-label={steps.map((s) => s.title).join(', then ')}>
+              <BuildArt el={art} />
+            </div>
           </div>
         </div>
         {/* the text slot: every step in one grid cell (so it's as tall as the longest), only the current one shown */}
