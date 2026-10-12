@@ -8,3 +8,6 @@ public/r/
 brand/references/
 evals/results/
 research/qa-shots/
+
+# Signifier (Klim) is on a trial licence: its outlined lockups stay local, never in the public repo
+brand/logo/*signifier*
