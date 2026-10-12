@@ -169,7 +169,7 @@ export function SeedField({ value, onChange, changed, label = 'Seed' }: { value:
 /* --- Cubic-bezier editor with presets. Handles may overshoot vertically. --- */
 export { EASINGS }
 export function CurveEditor({ value, onChange, presets = EASINGS, height = 132 }: { value: [number, number, number, number]; onChange: (v: [number, number, number, number], final: boolean) => void; presets?: Record<string, [number, number, number, number]>; height?: number }) {
-  const ref = useRef<SVGSVGElement>(null)
+  const ref = useRef<HTMLDivElement>(null)
   const which = useRef<0 | 1 | null>(null)
   const W = 100, H = 100, padY = 30
   const toPx = (x: number, y: number) => [x * W, padY + (1 - y) * H] as const
@@ -188,25 +188,28 @@ export function CurveEditor({ value, onChange, presets = EASINGS, height = 132 }
   const presetName = Object.entries(presets).find(([, v]) => v.join() === value.join())?.[0]
   return (
     <div className="flex w-full flex-col gap-2">
-      <svg
+      {/* the plot stretches to fit (preserveAspectRatio none), so the handles sit in an HTML overlay to stay round at any size */}
+      <div
         ref={ref}
-        viewBox={`0 0 ${W} ${H + padY * 2}`}
-        className="w-full touch-none overflow-visible rounded-[6px] bg-control"
+        className="relative w-full touch-none"
         style={{ height }}
-        preserveAspectRatio="none"
         onPointerMove={(e) => move(e, false)}
         onPointerUp={(e) => { move(e, true); which.current = null }}
       >
-        <rect x={0} y={padY} width={W} height={H} fill="none" stroke="var(--line)" vectorEffect="non-scaling-stroke" />
-        <line x1={sx} y1={sy} x2={ex} y2={ey} stroke="var(--line)" strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />
-        <line x1={sx} y1={sy} x2={ax} y2={ay} stroke="var(--fg-faint)" vectorEffect="non-scaling-stroke" />
-        <line x1={ex} y1={ey} x2={bx} y2={by} stroke="var(--fg-faint)" vectorEffect="non-scaling-stroke" />
-        <path d={`M${sx},${sy} C${ax},${ay} ${bx},${by} ${ex},${ey}`} fill="none" stroke="var(--signal)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+        <svg viewBox={`0 0 ${W} ${H + padY * 2}`} className="block size-full overflow-visible rounded-[6px] bg-control" preserveAspectRatio="none">
+          <rect x={0} y={padY} width={W} height={H} fill="none" stroke="var(--line)" vectorEffect="non-scaling-stroke" />
+          <line x1={sx} y1={sy} x2={ex} y2={ey} stroke="var(--line)" strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />
+          <line x1={sx} y1={sy} x2={ax} y2={ay} stroke="var(--fg-faint)" vectorEffect="non-scaling-stroke" />
+          <line x1={ex} y1={ey} x2={bx} y2={by} stroke="var(--fg-faint)" vectorEffect="non-scaling-stroke" />
+          <path d={`M${sx},${sy} C${ax},${ay} ${bx},${by} ${ex},${ey}`} fill="none" stroke="var(--signal)" strokeWidth={2} vectorEffect="non-scaling-stroke" />
+        </svg>
         {[[ax, ay], [bx, by]].map(([x, y], i) => (
-          <ellipse key={i} cx={x} cy={y} rx={4} ry={4 * ((H + padY * 2) / W) * (100 / height) * (height / 132)} fill="var(--panel)" stroke="var(--signal)" strokeWidth={2} vectorEffect="non-scaling-stroke"
-            className="cursor-grab" onPointerDown={(e) => { which.current = i as 0 | 1; (e.target as Element).setPointerCapture?.(e.pointerId); (ref.current as SVGSVGElement).setPointerCapture(e.pointerId) }} />
+          <span key={i} aria-hidden
+            className="absolute size-2.5 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 border-signal bg-panel before:absolute before:-inset-1.5 before:content-['']"
+            style={{ left: `${(x / W) * 100}%`, top: `${(y / (H + padY * 2)) * 100}%` }}
+            onPointerDown={(e) => { which.current = i as 0 | 1; ref.current!.setPointerCapture(e.pointerId) }} />
         ))}
-      </svg>
+      </div>
       <div className="grid grid-cols-4 gap-1">
         {value.map((n, i) => (
           <ScrubValue key={i} boxed align="left" value={n} step={0.01} min={i % 2 === 0 ? 0 : -1} max={i % 2 === 0 ? 1 : 2} label={['x1', 'y1', 'x2', 'y2'][i]}
