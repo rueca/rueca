@@ -140,7 +140,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
           <SheetSection id="credits" n={6} of={SHEETS} label="Credits">
             <Row>
               <div className="split grid md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-                <div className={CELL}><Heading title="Standing on good tools." /></div>
+                <div className={CELL}><Heading title="Learned from the tools you already use." /></div>
                 <div className={CELL}>
                   <div data-reveal="cards" className="grid grid-cols-2 gap-8 lg:grid-cols-4">
                     {credits.map((c, i) => (
