@@ -74,6 +74,8 @@
 @media (max-width: 639px) { .site { --breakout: calc(100vw - 14px); } }
 /* phones: the footer is one column, so its cells drop their left rule (Rafael) and keep only the rule above */
 @media (max-width: 767px) { .site footer .cells > * { box-shadow: inset 0 1px var(--rule); } }
+/* desktop: the first cell (the wordmark) sits on the sheet's edge, so it needs no left rule either (Rafael) */
+@media (min-width: 768px) { .site footer .cells > :first-child { box-shadow: inset 0 1px var(--rule); } }
 /* phones: a top rule too (Rafael), at rest and pinned: on the strip's sheet (its paper would sit under the sheet's
    own background) and, once pinned, on the paper as well, so it runs out to the window's edges like the bottom one */
 @media (max-width: 767px) {
