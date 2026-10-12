@@ -12,8 +12,7 @@ Rueca's **brand** is not. The MIT licence does not cover:
 - the design, artwork and copy of the rueca.dev site (`src/landing/`), and its share image and icon
   (`public/og-*.jpg`, `public/favicon.svg`).
 
-These are © 2026 Rafael Cespedes, all rights reserved (third-party works that `brand/` links to
-belong to their owners). They are in this repository so the site can
+These are © 2026 Rafael Cespedes, all rights reserved. They are in this repository so the site can
 be built and so you can see how it was made, not for reuse.
 
 The site's display font, Sorts Mill Goudy, keeps its own licence (SIL Open Font License,

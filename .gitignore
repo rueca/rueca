@@ -11,3 +11,6 @@ research/qa-shots/
 
 # Signifier (Klim) is on a trial licence: its outlined lockups stay local, never in the public repo
 brand/logo/*signifier*
+
+# Moodboards link to third-party images (Cosmos, are.na, Pinterest…): local only, never in the public repo
+brand/moodboards/
