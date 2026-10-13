@@ -22,6 +22,7 @@
         "https://rueca.dev/r/controls.json",
         "https://rueca.dev/r/core.json",
         "https://rueca.dev/r/data-grid.json",
+        "https://rueca.dev/r/detent.json",
         "https://rueca.dev/r/dialog.json",
         "https://rueca.dev/r/easing.json",
         "https://rueca.dev/r/envelope.json",
@@ -346,6 +347,25 @@
       ]
     },
     {
+      "name": "detent",
+      "type": "registry:component",
+      "title": "Detent",
+      "description": "Detent — part of the Rueca kit.",
+      "dependencies": [
+        "@base-ui/react@^1.9.0"
+      ],
+      "registryDependencies": [
+        "https://rueca.dev/r/core.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/ui/detent.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/ui/detent.tsx"
+        }
+      ]
+    },
+    {
       "name": "dialog",
       "type": "registry:component",
       "title": "Dialog",
@@ -457,6 +477,7 @@
         "https://rueca.dev/r/color.json",
         "https://rueca.dev/r/controls.json",
         "https://rueca.dev/r/core.json",
+        "https://rueca.dev/r/detent.json",
         "https://rueca.dev/r/knob.json",
         "https://rueca.dev/r/scrub.json",
         "https://rueca.dev/r/slider.json",
