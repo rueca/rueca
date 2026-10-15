@@ -10,9 +10,10 @@
 import { Command as Cmdk } from 'cmdk'
 import { Dialog } from '@base-ui/react/dialog'
 import { useRef, useState, type ComponentType } from 'react'
-import { Search } from 'lucide-react'
+import { Check, Search } from 'lucide-react'
 import { useHotkeys, useHotkeyRegistry, prettyCombo } from '../core/hotkeys'
 import { Kbd } from '../ui/button'
+import { useDensity, type Density } from '../core/density'
 
 export interface Command { id: string; label: string; group?: string; shortcut?: string; icon?: ComponentType<{ size?: number; strokeWidth?: number }>; run: () => void; keywords?: string[] }
 
@@ -35,7 +36,13 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
     '?': { run: () => setSheet((s) => !s), label: 'Keyboard shortcuts', group: 'Help' },
   }, [], { priority: 0 })
   const registry = useHotkeyRegistry()
-  const groups = [...new Set(commands.map((c) => c.group ?? 'Actions'))]
+  // every palette gets the kit's density choice (remembered per browser, see core/density)
+  const { density, setDensity } = useDensity()
+  const all: Command[] = [...commands, ...(['default', 'comfortable', 'compact'] as Density[]).map((d) => ({
+    id: `density-${d}`, label: `Density: ${d[0].toUpperCase()}${d.slice(1)}`, group: 'View',
+    icon: density === d ? Check : undefined, keywords: ['size', 'spacing', 'compact', 'roomy'], run: () => setDensity(d),
+  }))]
+  const groups = [...new Set(all.map((c) => c.group ?? 'Actions'))]
 
   return (
     <>
@@ -66,7 +73,7 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
                 <Cmdk.Empty className="px-pad py-6 text-center text-ui text-fg-muted">No matching commands</Cmdk.Empty>
                 {groups.map((g) => (
                   <Cmdk.Group key={g} heading={g} className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-2 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-ui [&_[cmdk-group-heading]]:text-fg-faint">
-                    {commands.filter((c) => (c.group ?? 'Actions') === g).map((c) => {
+                    {all.filter((c) => (c.group ?? 'Actions') === g).map((c) => {
                       const Icon = c.icon
                       return (
                         <Cmdk.Item key={c.id} value={`${c.label}`} keywords={c.keywords} onSelect={() => { setOpen(false); setTimeout(c.run, 0) }}

@@ -100,29 +100,16 @@
     "theme": "dark",
     "errors": [],
     "fails": [],
-    "lowText": [
-      "2.03 \"Aa\"",
-      "2.03 \"Aa\"",
-      "2.03 \"Aa\""
-    ],
-    "textSampled": 130
+    "lowText": [],
+    "textSampled": 126
   },
   {
     "id": "component-lab",
     "theme": "light",
     "errors": [],
     "fails": [],
-    "lowText": [
-      "2.03 \"Aa\"",
-      "2.03 \"Aa\"",
-      "2.03 \"Aa\"",
-      "2.1 \"sRGB\"",
-      "2.1 \"AAA\"",
-      "2.1 \"AAA\"",
-      "2.1 \"AA\"",
-      "2.1 \"AA\""
-    ],
-    "textSampled": 130
+    "lowText": [],
+    "textSampled": 126
   },
   {
     "id": "video",
@@ -226,7 +213,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 102
+    "textSampled": 104
   },
   {
     "id": "nodes",
@@ -281,12 +268,7 @@
     "theme": "light",
     "errors": [],
     "fails": [],
-    "lowText": [
-      "2.99 \"🙁\"",
-      "2.99 \"−1\"",
-      "2.13 \"😄\"",
-      "2.13 \"+1.5\""
-    ],
+    "lowText": [],
     "textSampled": 98
   },
   {

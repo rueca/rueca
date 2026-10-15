@@ -184,11 +184,17 @@ Chrome coverage at 1440×900. Method: the union of every `.panel` and `.cluster`
 
 What's left on the timeline shells is mostly the bottom band: video's 248px timeline, synth's sequencer, and photo's 135px looks strip, whose tiles are fixed-size previews. Labels longer than the 72px label column still truncate in schema rows ("Column wi…", "Node previ…", "Headline …" with its changed dot). That's the phase-1 column width, not something a shell can fix.
 
+## Follow-ups done (2026-10-15)
+
+- **Density setting.** ⌘K → View → Density: Default / Comfortable / Compact. Remembered per browser (`studio:density`) and restored by `<Studio>`.
+- **Labels fit.** The inspector's label column widens to its longest label, from 72px up to 42% of the row. "Stroke weight", "Column width" and "Reroll parameters" no longer truncate in schema inspectors. Hand-built `Row`s outside an `<Inspector>` keep the 72px column.
+- **Badge contrast.** Badges use `text-ok-text`, `text-key-text` and `text-rec-text`, at least 4.5:1 on their wash in both themes. That fixes oklch's "sRGB", component-lab's AA/AAA grades and journey's high and low points. Component-lab's variant tiles pick ink or paper by real contrast.
+- **Glass over WebGL.** Measured in the app's browser on Apple silicon at 120Hz, on the scene shell with the canvas forced to redraw every frame (a worst case): 111–117fps with the blur, 120 without, and the same slowest-5% frame time (9ms). The blur stays. `prefers-reduced-transparency` makes islands solid. Weaker GPUs haven't been measured.
+
 ## Still open
 
-1. **Glass over WebGL.** Measure what `backdrop-filter` costs on the shader and scene stages. If it costs frames, drop the blur there and keep the 90% fill.
-2. **Fields.** B's faint wash is built. Bare values until hover (C) is still an option.
-3. **Presence levels**, as a follow-up:
+1. **Fields.** B's faint wash is built. Bare values until hover (C) is still an option.
+2. **Presence levels:**
    - ⌘\ hides all chrome (Figma).
    - ⇧\ minimises: panels collapse to pills, and the inspector shows only while something is selected.
    - Idle islands fade to about 35% while you drag or scrub on the canvas.

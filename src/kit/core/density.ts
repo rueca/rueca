@@ -38,3 +38,37 @@ function subscribe(cb: () => void) {
 export function useDensityPx(name: string, fallback: number): number {
   return useSyncExternalStore(subscribe, () => densityPx(name, fallback), () => fallback)
 }
+
+/* ---------------------------------------------------------------------------
+   The density choice: default, comfortable or compact, remembered per browser
+   (`studio:density`) like the theme. <Studio> restores it on mount; the
+   command palette lists the three as View commands.
+--------------------------------------------------------------------------- */
+export type Density = 'default' | 'comfortable' | 'compact'
+const KEY = 'studio:density'
+
+export function currentDensity(): Density {
+  if (typeof document === 'undefined') return 'default'
+  const d = document.documentElement.dataset.density
+  return d === 'comfortable' || d === 'compact' ? d : 'default'
+}
+
+export function setDensity(d: Density) {
+  const root = document.documentElement
+  if (d === 'default') delete root.dataset.density
+  else root.dataset.density = d
+  try { localStorage.setItem(KEY, d) } catch { /* noop */ }
+}
+
+/** Apply the saved choice, unless something already set the attribute (a host app, a client view). */
+export function restoreDensity() {
+  if (typeof document === 'undefined' || document.documentElement.dataset.density) return
+  let d: string | null = null
+  try { d = localStorage.getItem(KEY) } catch { /* noop */ }
+  if (d === 'comfortable' || d === 'compact') document.documentElement.dataset.density = d
+}
+
+export function useDensity() {
+  const density = useSyncExternalStore(subscribe, currentDensity, () => 'default' as Density)
+  return { density, setDensity }
+}
