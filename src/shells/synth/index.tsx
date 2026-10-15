@@ -134,7 +134,7 @@ export default function SynthShell() {
       rightWidth={300}
       toolbar={
         <Toolbar
-          start={<Brand name="Synth" doc="Plate no. 4" mark={Mark} />}
+          start={<Brand name="Synth" mark={Mark} />}
           center={
             <Cluster className="gap-1 px-1.5">
               <IconButton icon={playing ? Square : Play} label={playing ? 'Stop' : 'Play'} shortcut="space" active={playing} variant={playing ? 'default' : 'ghost'} onClick={() => engine.toggle()} />

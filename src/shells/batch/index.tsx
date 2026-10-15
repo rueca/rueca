@@ -118,7 +118,7 @@ export default function BatchShell() {
       rightWidth={296}
       toolbar={
         <Toolbar
-          start={<Brand name="Batch" doc="Agalla — the six inks" mark={<Mark />} />}
+          start={<Brand name="Batch" mark={<Mark />} />}
           center={
             <Cluster>
               <IconButton icon={ChevronLeft} label="Previous row" shortcut="arrowleft" onClick={prevRow} disabled={rows.length < 2} />

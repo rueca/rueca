@@ -76,7 +76,7 @@ export default function ComponentLab() {
       rightWidth={308}
       toolbar={
         <Toolbar
-          start={<Brand name="Component lab" doc="Gabinete UI" mark={<svg viewBox="0 0 16 16" width="11" height="11"><rect x="2.5" y="4.5" width="11" height="7" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2" /></svg>} />}
+          start={<Brand name="Component lab" mark={<svg viewBox="0 0 16 16" width="11" height="11"><rect x="2.5" y="4.5" width="11" height="7" rx="3.5" fill="none" stroke="currentColor" strokeWidth="2" /></svg>} />}
           center={
             <Cluster className="px-1">
               <div className="w-[200px]">

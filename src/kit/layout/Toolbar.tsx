@@ -3,14 +3,17 @@
    actions are bare low-opacity glyphs; only the primary action is filled.
 
      <Toolbar
-       start={<><Brand name="Ripple" /> <Cluster>…</Cluster></>}
+       start={<><Brand name="Ripple" /> <Cluster>…</Cluster></>}   // the mark alone; doc only for live state
        center={<Cluster>tools</Cluster>}
        end={<><Cluster>…</Cluster><Button variant="primary">Export</Button></>}
      />
 --------------------------------------------------------------------------- */
-import { isValidElement, type ComponentType, type ReactNode } from 'react'
+import { forwardRef, type ButtonHTMLAttributes, type ComponentType, type ReactNode } from 'react'
+import { LayoutGrid } from 'lucide-react'
 import { cn } from '../core/cn'
 import { useStudio } from './Studio'
+import { Menu, type MenuItem } from '../ui/controls'
+import { Tip } from '../ui/tooltip'
 
 export function Toolbar({ start, center, end, className }: { start?: ReactNode; center?: ReactNode; end?: ReactNode; className?: string }) {
   return (
@@ -27,22 +30,44 @@ export function Cluster({ children, className }: { children: ReactNode; classNam
   return <div className={cn('flex h-bar items-center gap-0.5 px-1', layout === 'docked' ? '' : 'cluster', className)}>{children}</div>
 }
 
-/** Title block: a small mark + the instrument name + optional doc name. */
-export function Brand({ name, doc, mark, href = '#/' }: { name: string; doc?: ReactNode; mark?: ReactNode; href?: string | false }) {
+/**
+ * The tool's mark: a button with the tool name as its tooltip, opening the tool menu ("All tools", then any
+ * `menu` items). `doc` sits beside it only when it's live state, such as the open file, an editable title or
+ * the active look. A fixed caption repeats what the artboard already shows, so leave it out.
+ *   <Brand name="Dither lab" doc={file.name} mark={<Glyph />} />
+ */
+export function Brand({ name, doc, mark, href = '#/', menu = [] }: {
+  name: string; doc?: ReactNode; mark?: ReactNode
+  /** where "All tools" goes; false drops it */
+  href?: string | false
+  /** more items for the mark's menu (About, Keyboard shortcuts…) */
+  menu?: MenuItem[]
+}) {
   const { layout } = useStudio()
-  const markEl = mark ?? <svg viewBox="0 0 16 16" width="11" height="11"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>
+  const items: MenuItem[] = [
+    { type: 'label', label: name },
+    ...(href ? [{ label: 'All tools', icon: LayoutGrid, onClick: () => { location.href = href } } as MenuItem] : []),
+    ...(menu.length ? [{ type: 'separator' } as MenuItem, ...menu] : []),
+  ]
   return (
-    <div className={cn('flex h-bar min-w-0 items-center gap-2 pr-3 pl-2', layout !== 'docked' && 'cluster')}>
-      {href && !(isValidElement(mark) && mark.type === 'a') /* shells that pass their own <a> keep it */ ? (
-        <a href={href} aria-label="Home" className="flex size-5 shrink-0 items-center justify-center rounded-[5px] bg-fg text-field outline-none focus-visible:ring-2 focus-visible:ring-signal">{markEl}</a>
-      ) : (
-        <div className="flex size-5 shrink-0 items-center justify-center rounded-[5px] bg-fg text-field">{markEl}</div>
-      )}
-      <span className="shrink-0 text-title font-semibold">{name}</span>
-      {doc && <><span className="text-fg-faint">/</span><span className="truncate text-title text-fg-muted">{doc}</span></>}
+    <div className={cn('flex h-bar min-w-0 items-center gap-1', doc ? 'pr-3 pl-1' : 'px-1', layout !== 'docked' && 'cluster')}>
+      <Menu items={items} trigger={<BrandMark name={name} mark={mark} />} />
+      {doc && <span className="min-w-0 truncate text-title text-fg-muted">{doc}</span>}
     </div>
   )
 }
+
+const BrandMark = forwardRef<HTMLButtonElement, { name: string; mark?: ReactNode } & ButtonHTMLAttributes<HTMLButtonElement>>(({ name, mark, className, ...rest }, ref) => (
+  <Tip label={name}>
+    <button ref={ref} type="button" aria-label={name} {...rest}
+      className={cn('flex size-icon shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover', className)}>
+      <span className="flex size-5 items-center justify-center rounded-[5px] bg-fg text-field">
+        {mark ?? <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>}
+      </span>
+    </button>
+  </Tip>
+))
+BrandMark.displayName = 'BrandMark'
 
 /* Bottom-centre floating tool dock (Figma UI3 / Rive). */
 export function ToolDock<T extends string>({

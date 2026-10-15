@@ -245,7 +245,9 @@ stops ticks while paused too (default true for artifacts with their own life).
   Studio root) and `.pop` popups only — the kit never restyles a host app's `<body>`. Using kit
   controls outside `<Studio>`? Put `className="studio"` on their container. With no `.dark`/`.light`
   class on `<html>`, tokens follow the OS theme.
-- Toolbar: `<Brand name doc mark>` (the mark links home itself — pass a plain glyph),
+- Toolbar: `<Brand name doc? mark? href? menu?>`: the mark is a button with the tool name as its tooltip, opening
+  a menu ("All tools" → `href`, then `menu` items); pass a plain glyph as `mark`. Pass `doc` only for live state
+  (the open file, an editable title, the active look), never a fixed caption.
   `<Cluster>` groups, `<ToolDock value onChange tools>` (bottom-centre tools, place it yourself
   absolutely inside the Stage overlay), `<Button variant="primary">` for the ONE primary action.
 - `<Stage>` = camera (wheel pan, ⌘wheel/pinch zoom, space-drag, Shift+0/1), `contentSize`

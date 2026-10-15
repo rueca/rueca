@@ -174,7 +174,7 @@ export default function SceneShell() {
       rightWidth={RIGHT_W}
       toolbar={
         <Toolbar
-          start={<Brand name="Scene" doc="Campana hand bell" mark={mark} />}
+          start={<Brand name="Scene" mark={mark} />}
           center={
             <Cluster className="gap-1.5 pr-2 pl-3">
               <span className="text-[11.5px] text-fg-muted">Colourway</span>

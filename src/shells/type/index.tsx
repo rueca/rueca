@@ -264,7 +264,7 @@ export default function TypeShell() {
     <Studio
       toolbar={
         <Toolbar
-          start={<Brand name="Type" doc={mode === 'kinetic' ? v.ktext || 'Kinetic' : mode === 'scale' ? 'Type scale' : 'Specimen 01'} mark={Mark} />}
+          start={<Brand name="Type" mark={Mark} />}
           center={<Cluster className="w-[276px] px-1.5"><Segmented value={mode} onChange={(m) => setMode(m as Mode)} options={MODES.map((m) => ({ value: m.value, label: m.label, hint: m.hint }))} label="Mode" /></Cluster>}
           end={
             <>
