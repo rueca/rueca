@@ -117,8 +117,9 @@ design vs prototype) — built in: `const [interact, setInteract] = useInteractM
 - **Copy as agent prompt** — the changed values plus their hints, phrased so another
   agent can apply them.
 - **Share link** — state in the URL hash (`#p=`).
-- **Save defaults to source** (dev only) — write the current values back as the new
-  defaults.
+- **Send to agent** (dev only) — writes the changed values, the share link and the history
+  to `.rueca/notes/`, so the agent makes them the new defaults without anyone retyping them.
+  `ruecaNotes()` in `vite.config.ts`; `notes.md` has the setup and how to act on a note.
 - **Presets** with A/B compare (`\`).
 - **Export** — PNG at 1×/2×/4×, SVG when the artifact is vector, WebM/MP4 for motion
   (mediabunny, `recordFrames`), JSON for settings. Batch multi-size when the tool makes assets.
