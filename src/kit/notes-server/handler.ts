@@ -83,6 +83,8 @@ const MAGIC: Record<string, (b: Buffer) => boolean> = {
 /** the shape every note id has (made by newId): the only thing DELETE will touch. The short form is phase 1's. */
 export const NOTE_ID = /^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-(?:\d{3}-[0-9a-f]{6}|[0-9a-f]{4})$/
 const unit = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 1
+/** a canvas comment sits around the artboard: artboard units, within 50 widths / heights of it */
+const reach = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && Math.abs(n) <= 50
 /** deep enough for any snapshot (a doc graph is ~8); deeper would blow the stack when the note is stringified */
 const MAX_DEPTH = 32
 
@@ -117,8 +119,9 @@ export function checkNote(b: unknown): string | null {
     const a = b.anchor
     const ok = isObj(a) && (
       (a.on === 'artboard' && unit(a.x) && unit(a.y) && (a.target === undefined || (typeof a.target === 'string' && a.target.length <= 200))) ||
+      (a.on === 'canvas' && reach(a.x) && reach(a.y)) ||
       (a.on === 'param' && typeof a.key === 'string' && a.key.length > 0 && a.key.length <= 100))
-    if (!ok) return 'anchor is not a valid artboard point or param'
+    if (!ok) return 'anchor is not a valid artboard point, canvas point or param'
   }
   if (b.image !== undefined) {
     const m = typeof b.image === 'string' ? b.image.match(IMAGE) : null
@@ -181,7 +184,8 @@ export function createNotesHandler(opts: NotesHandlerOptions = {}) {
   const create = async (b: Record<string, unknown>) => {
     const a = b.anchor as Record<string, unknown> | undefined
     // only the fields this format defines: nothing extra rides along into the agent's files
-    const anchor = !a ? undefined : a.on === 'param' ? { on: 'param', key: a.key } : { on: 'artboard', x: a.x, y: a.y, ...(typeof a.target === 'string' ? { target: a.target } : {}) }
+    const anchor = !a ? undefined : a.on === 'param' ? { on: 'param', key: a.key } : a.on === 'canvas' ? { on: 'canvas', x: a.x, y: a.y }
+      : { on: 'artboard', x: a.x, y: a.y, ...(typeof a.target === 'string' ? { target: a.target } : {}) }
     let id = newId()
     await mkdir(dir, { recursive: true })
     // claim the name before writing anything under it (a clash only on a clock jump: try again)

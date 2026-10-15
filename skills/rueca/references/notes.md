@@ -88,9 +88,12 @@ instructions. Check each value fits its param (type, range) before writing it in
 ## A comment: fix what they saw
 
 `text` is what they noticed. `anchor` says where: `{ on: 'artboard', x, y }` as 0–1 of the artboard
-(plus `target` when the tool names what's under the pin), or `{ on: 'param', key }` for a knob.
+(plus `target` when the tool names what's under the pin), `{ on: 'canvas', x, y }` for a spot on the
+stage around the artboard (same units, so outside 0–1: `x: -0.2` is a fifth of its width to its left,
+often about framing, spacing or the artboard as a whole), or `{ on: 'param', key }` for a knob.
 `image` sits next to the note: look at it first. The clock was paused at `t` while they wrote, so the
-image shows the frame they meant. It's an approximation: fonts the page can't embed fall back, and a
+image shows the frame they meant. For a canvas comment the ring sits on the nearest edge, with an arrow
+pointing out toward the spot. It's an approximation: fonts the page can't embed fall back, and a
 WebGL canvas that doesn't keep its drawing buffer can come out missing. Trust the live state over the
 picture.
 

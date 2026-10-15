@@ -197,6 +197,7 @@ export function Stage({
     <CamCtx.Provider value={cam}>
       <div
         ref={el}
+        data-studio-stage=""
         className={cn(bleed ? 'absolute' : 'relative h-full w-full', 'overflow-hidden', fill ? '' : 'touch-none', space && (pan.current ? 'cursor-grabbing' : 'cursor-grab'), className)}
         style={{
           ...(bleed ? BLEED : null),

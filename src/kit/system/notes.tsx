@@ -30,7 +30,7 @@ import { humanize } from '../core/schema'
 import { useHotkeys } from '../core/hotkeys'
 import { clamp, cn } from '../core/cn'
 import {
-  captureImage, captureSnapshot, deleteNote, findNotesEndpoint, refreshNotes, restoreSnapshot, sendNote, snapshotStatus, watchNotes,
+  CANVAS_REACH, captureImage, captureSnapshot, deleteNote, findNotesEndpoint, refreshNotes, restoreSnapshot, sendNote, snapshotStatus, watchNotes,
   type NoteAnchor, type StudioNote,
 } from '../core/notes'
 import { useZoom } from '../stage/Stage'
@@ -185,14 +185,14 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
 }) {
   const id = useId()
   const ref = useRef<HTMLSpanElement>(null)
-  const [el, setEl] = useState<{ art: HTMLElement; host: HTMLElement } | null>(null)
+  const [el, setEl] = useState<{ art: HTMLElement; host: HTMLElement; stage: HTMLElement | null } | null>(null)
   useLayoutEffect(() => {
     const me = ref.current!
     const art = (me.closest('[data-studio-artifact]') as HTMLElement | null) ?? me.parentElement!
     // pins render beside the artboard's clipping box, so a thread near an edge isn't cut off — but only when that
     // box is an Artboard's own, sized the same (in a ViewportFrame the parent is wider, so pins stay inside)
     const parent = art.parentElement
-    setEl({ art, host: parent?.hasAttribute('data-studio-artboard') ? parent : art })
+    setEl({ art, host: parent?.hasAttribute('data-studio-artboard') ? parent : art, stage: art.closest('[data-studio-stage]') as HTMLElement | null })
   }, [])
   useEffect(() => {
     bump('tools', params.id, 1)
@@ -337,7 +337,9 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
     return () => { cancelAnimationFrame(raf); document.removeEventListener('scroll', soon, true); window.removeEventListener('resize', soon); clearInterval(id2) }
   }, [keysId])   // eslint-disable-line react-hooks/exhaustive-deps
 
+  /** A point in artboard units: on it (0–1) it's an artboard comment, anywhere else on the stage a canvas comment. */
   const placeAt = (x: number, y: number) => {
+    if (x < 0 || x > 1 || y < 0 || y > 1) return begin({ on: 'canvas', x: clamp(x, -CANVAS_REACH, CANVAS_REACH), y: clamp(y, -CANVAS_REACH, CANVAS_REACH) })
     const target = describeAt?.(x, y)
     begin({ on: 'artboard', x, y, ...(target ? { target } : {}) })
   }
@@ -346,8 +348,21 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
     if (e.button !== 0 || space.current) return
     e.preventDefault(); e.stopPropagation()
     const r = el!.art.getBoundingClientRect()
-    placeAt(clamp((e.clientX - r.left) / r.width, 0, 1), clamp((e.clientY - r.top) / r.height, 0, 1))
+    placeAt((e.clientX - r.left) / r.width, (e.clientY - r.top) / r.height)
   }
+
+  // The stage around the artboard takes comments too. Its catcher sits UNDER the artboard's world layer (the
+  // stage's first child), so a click on the artboard or on a pin still reaches them.
+  const [behind, setBehind] = useState<HTMLElement | null>(null)
+  useLayoutEffect(() => {
+    const stage = el?.stage
+    if (!stage) return
+    const box = document.createElement('div')
+    box.className = 'absolute inset-0'
+    stage.insertBefore(box, stage.firstChild)
+    setBehind(box)
+    return () => { box.remove(); setBehind(null) }
+  }, [el?.stage])
 
   const post = async (text: string) => {
     const d = notesUI.getState().draft
@@ -357,7 +372,7 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
       // capture while the frame is still frozen; clearing the draft lets the clock run again
       const snapshot = captureSnapshot({ params, history, clock, doc, view: { width: el.art.offsetWidth, height: el.art.offsetHeight } })
       if (d.t !== undefined) snapshot.t = Math.round(d.t)
-      const image = await captureImage(el.art, { anchor: d.anchor.on === 'artboard' ? d.anchor : undefined })
+      const image = await captureImage(el.art, { anchor: d.anchor.on === 'param' ? undefined : d.anchor })
       const note = await sendNote({ kind: 'comment', text, anchor: d.anchor, snapshot, image })
       notesUI.setState({ draft: null, commenting: false, open: note.id })
       refreshNotes()
@@ -392,7 +407,7 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
               onPointerDown={place}
               onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); placeAt(0.5, 0.5) } }} />
           )}
-          {notes.map((n) => n.anchor?.on === 'artboard' && (
+          {notes.map((n) => n.anchor && n.anchor.on !== 'param' && (
             <PinAt key={n.id} x={n.anchor.x} y={n.anchor.y} zoom={zoom} scale={pinScale} z={open === n.id ? 3 : 1} sides={sides}
               render={(side) => (
                 <>
@@ -401,12 +416,20 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
                 </>
               )} />
           ))}
-          {draft?.anchor.on === 'artboard' && (
+          {draft && draft.anchor.on !== 'param' && (
             <PinAt x={draft.anchor.x} y={draft.anchor.y} zoom={zoom} scale={pinScale} z={4} sides={sides}
               render={(side) => (<><DraftPin /><Composer draft={draft} onPost={post} className={cardClass(side)} /></>)} />
           )}
         </div>,
         el.host,
+      )}
+      {behind && commenting && createPortal(
+        <div data-note-ui="" role="button" tabIndex={0} aria-label="Place a comment on the canvas around the artboard (Enter for the artboard's middle)"
+          className="absolute inset-0 outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--signal)]"
+          style={{ cursor: COMMENT_CURSOR }}
+          onPointerDown={place}
+          onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); placeAt(0.5, 0.5) } }} />,
+        behind,
       )}
       {createPortal(
         <div data-studio="" className="studio-notes">
