@@ -51,7 +51,7 @@ export function PalettePicker({ value, options, onChange, columns = 2, className
             <span className={cn('flex h-4 w-full overflow-hidden rounded-[4px]', on ? 'shadow-[0_0_0_1.5px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}>
               {o.colors.map((c, j) => <span key={j} className="h-full min-w-0 flex-1" style={{ background: c }} />)}
             </span>
-            <span className={cn('flex items-center justify-between gap-1 px-0.5 text-[11px]', on ? 'text-fg' : 'text-fg-muted')}>
+            <span className={cn('flex items-center justify-between gap-1 px-0.5 text-ui', on ? 'text-fg' : 'text-fg-muted')}>
               <span className="truncate">{o.name}</span>
               <span className="tabular text-fg-faint">{o.colors.length}</span>
             </span>

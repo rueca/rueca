@@ -203,7 +203,7 @@ export default function TypeShell() {
 
   const pairs = (
     <Section title="Colour pairs" first={false}>
-      <div className="grid grid-cols-6 gap-1 px-3 pt-0.5">
+      <div className="grid grid-cols-6 gap-1 px-pad pt-0.5">
         {PAIRS.map((p) => {
           const on = p.fg.toLowerCase() === v.fg.toLowerCase() && p.bg.toLowerCase() === v.bg.toLowerCase()
           return (
@@ -223,8 +223,8 @@ export default function TypeShell() {
   const codePreview = (
     <Section title="Code" first={false}
       actions={<IconButton size="icon-sm" icon={Copy} label="Copy CSS variables" onClick={() => copy(scaleCSS(v, steps), 'CSS variables')} />}>
-      <div className="px-3">
-        <pre className="max-h-[220px] overflow-auto rounded-[6px] bg-control p-2 font-mono text-[10.5px] leading-[1.55] text-fg-muted select-text">{scaleCSS(v, steps)}</pre>
+      <div className="px-pad">
+        <pre className="max-h-[220px] overflow-auto rounded-[6px] bg-control p-2 font-mono text-ui-sm leading-[1.55] text-fg-muted select-text">{scaleCSS(v, steps)}</pre>
         <div className="mt-2 grid grid-cols-2 gap-1">
           <Button size="sm" variant="default" onClick={() => copy(scaleTailwind4(v, steps), 'Tailwind theme')}>Tailwind v4</Button>
           <Button size="sm" variant="default" onClick={() => copy(scaleTailwind3(v, steps), 'Tailwind config')}>Tailwind v3</Button>
@@ -235,20 +235,20 @@ export default function TypeShell() {
 
   const right = (
     <Panel header={<PanelHeader title={mode === 'specimen' ? 'Specimen' : mode === 'kinetic' ? 'Kinetic' : 'Type scale'}>
-      <span className="truncate text-[11px] text-fg-faint">{fam.label}</span>
+      <span className="truncate text-ui text-fg-faint">{fam.label}</span>
     </PanelHeader>}>
       {mode === 'specimen' && (
         <>
           <Inspector params={params} folders={['font', 'axes', 'setting', 'colour', 'artboard']} />
           {pairs}
-          <Row className="pb-3"><span className="text-[11px] leading-relaxed text-fg-faint">{fam.note}{!fam.axes.opsz ? ' — optical size is unavailable for this face.' : ''}</span></Row>
+          <Row className="pb-3"><span className="text-ui leading-relaxed text-fg-faint">{fam.note}{!fam.axes.opsz ? ' — optical size is unavailable for this face.' : ''}</span></Row>
         </>
       )}
       {mode === 'kinetic' && (
         <>
           <Inspector params={params} folders={['kinetic', 'motion', 'colour']} />
           {pairs}
-          {v.effect === 'weight' && !fam.axes.wght && <Row className="pb-3"><span className="text-[11px] text-fg-faint">{fam.label} has static weights, so the weight effect steps instead of morphing. Switch to Inter for a smooth wght animation.</span></Row>}
+          {v.effect === 'weight' && !fam.axes.wght && <Row className="pb-3"><span className="text-ui text-fg-faint">{fam.label} has static weights, so the weight effect steps instead of morphing. Switch to Inter for a smooth wght animation.</span></Row>}
         </>
       )}
       {mode === 'scale' && (
@@ -275,7 +275,6 @@ export default function TypeShell() {
         />
       }
       left={left}
-      leftWidth={264}
       right={right}
       bottom={mode === 'kinetic' ? <Timeline clock={clock} lanes={lanes} /> : undefined}
     >

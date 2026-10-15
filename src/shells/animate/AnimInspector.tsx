@@ -75,7 +75,7 @@ function ObjectSections({ o, first }: { o: Obj; first: boolean }) {
           onChange={(n, f) => editProp(o.id, p, n, f)} />
     return (
       <Row key={p} label={d.label} className={cn('group/row', st === 'edited' && animate && 'bg-key/10')}
-        trailing={animate ? <KeyButton state={st} shortcut="k" property={d.label} onToggle={() => toggleKey(o.id, p)} {...nav(p)} className="[&>button]:w-6" /> : undefined}>
+        trailing={animate ? <KeyButton state={st} shortcut="k" property={d.label} onToggle={() => toggleKey(o.id, p)} {...nav(p)} className="[&>button]:w-icon-sm" /> : undefined}>
         {control}
       </Row>
     )
@@ -104,7 +104,7 @@ function ObjectSections({ o, first }: { o: Obj; first: boolean }) {
         return <Section key={g} title={g}>{ps.map(row)}</Section>
       })}
       {animate && (
-        <div className="border-t border-line px-3 py-2.5 text-[11px] leading-relaxed text-fg-faint">
+        <div className="border-t border-line px-pad py-2.5 text-ui leading-relaxed text-fg-faint">
           {autoKey
             ? 'Auto-key is on: every change writes a key at the playhead.'
             : 'Changes to animated properties turn amber until you key them (K). Unanimated properties change the base value.'}
@@ -146,9 +146,9 @@ function KeysSection({ ids }: { ids: string[] }) {
       )}
       <Row label="Easing" hint="The easing of the segment that starts at this key.">
         <Popover.Root>
-          <Popover.Trigger className="flex h-6 w-full min-w-0 items-center gap-2 rounded-[5px] bg-control px-1.5 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
+          <Popover.Trigger className="flex h-control w-full min-w-0 items-center gap-2 rounded-control bg-control px-1.5 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
             <EaseGlyph ease={ease} className="size-4 text-signal" />
-            <span className="truncate text-[11px] text-fg">{eases.length > 1 ? 'Mixed' : easeName(ease)}</span>
+            <span className="truncate text-ui text-fg">{eases.length > 1 ? 'Mixed' : easeName(ease)}</span>
           </Popover.Trigger>
           <Popover.Portal>
             <Popover.Positioner side="left" align="start" sideOffset={12} collisionPadding={12} className="z-[100]">
@@ -187,7 +187,7 @@ function DocumentSections() {
           <Segmented value={anim.loop} label="Loop mode" onChange={(l) => updateAnim({ loop: l as typeof anim.loop })}
             options={[{ value: 'loop', label: 'Loop', icon: Repeat }, { value: 'once', label: 'Once', icon: ArrowRight }, { value: 'pingpong', label: 'Ping-pong', icon: ArrowLeftRight }]} />
         </Row>
-        <div className="flex gap-1.5 px-3 pt-1">
+        <div className="flex gap-1.5 px-pad pt-1">
           <Button size="sm" variant="default" className="flex-1" onClick={() => ui.setState({ sel: 'wheel' })}>Select wheel</Button>
           <Button size="sm" variant="default" className="flex-1" onClick={() => ui.setState({ mode: mode === 'design' ? 'animate' : 'design' })}>{mode === 'design' ? 'Animate mode' : 'Design mode'}</Button>
         </div>

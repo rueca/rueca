@@ -120,7 +120,7 @@ export function Vec3Fields({
       {lockable && (
         <Tip label={locked ? 'Uniform. Click to scale axes independently' : 'Scale axes together'}>
           <button type="button" aria-pressed={locked} aria-label="Uniform scale" onClick={() => setLocked(!locked)}
-            className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', locked ? 'text-signal' : 'text-fg-faint')}>
+            className={cn('flex size-icon shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', locked ? 'text-signal' : 'text-fg-faint')}>
             {locked ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
           </button>
         </Tip>
@@ -141,7 +141,7 @@ export function SizeFields({
         onChange={(w, f) => onChange(lock ? { w, h: Math.round(w / ratio) } : { ...value, w }, f)} className="flex-1" />
       <Tip label={lock ? 'Unlink proportions' : 'Link proportions'}>
         <button type="button" aria-label={lock ? 'Unlink proportions' : 'Link proportions'} aria-pressed={lock} onClick={() => setLock(!lock)}
-          className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
+          className={cn('flex size-icon shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
           {lock ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
         </button>
       </Tip>
@@ -158,7 +158,7 @@ export function SeedField({ value, onChange, changed, label = 'Seed' }: { value:
       <ScrubValue boxed align="left" prefix="#" value={value} min={0} max={99999} step={1} changed={changed} onChange={onChange} className="flex-1" label={label} />
       <Tip label="New seed">
         <button type="button" aria-label="Randomise seed" onClick={() => onChange(Math.floor(Math.random() * 99999), true)}
-          className="flex size-6 shrink-0 items-center justify-center rounded-[5px] text-fg-muted outline-none hover:bg-hover hover:text-fg active:scale-90 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
+          className="flex size-icon shrink-0 items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg active:scale-90 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
           <Dices size={14} strokeWidth={1.5} />
         </button>
       </Tip>
@@ -219,7 +219,7 @@ export function CurveEditor({ value, onChange, presets = EASINGS, height = 132 }
       <div className="flex flex-wrap gap-1">
         {Object.entries(presets).map(([name, v]) => (
           <button key={name} type="button" onClick={() => onChange(v, true)}
-            className={cn('h-5 rounded-[5px] px-1.5 text-[10.5px] outline-none', presetName === name ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
+            className={cn('h-icon-sm rounded-control px-1.5 text-ui-sm outline-none', presetName === name ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
             {name}
           </button>
         ))}
@@ -390,8 +390,8 @@ export function PaletteField({ value, onChange, max = 8, min = 1 }: { value: str
               <Popover.Popup className="pop outline-none">
                 <ColorPanel value={c} onChange={(nc, f) => onChange(value.map((x, j) => (j === i ? nc : x)), f)} />
                 {value.length > min && (
-                  <div className="border-t border-line px-3 py-2">
-                    <Popover.Close onClick={() => remove(i)} className="flex h-7 w-full items-center justify-center gap-1.5 rounded-[6px] text-[12px] text-fg-muted outline-none hover:bg-hover hover:text-rec focus-visible:ring-2 focus-visible:ring-signal">
+                  <div className="border-t border-line px-pad py-2">
+                    <Popover.Close onClick={() => remove(i)} className="flex h-icon w-full items-center justify-center gap-1.5 rounded-control text-ui text-fg-muted outline-none hover:bg-hover hover:text-rec focus-visible:ring-2 focus-visible:ring-signal">
                       <X size={12} strokeWidth={1.75} />Remove colour
                     </Popover.Close>
                   </div>
@@ -403,7 +403,7 @@ export function PaletteField({ value, onChange, max = 8, min = 1 }: { value: str
       ))}
       {value.length < max && (
         <button type="button" aria-label="Add colour" onClick={() => onChange([...value, value.at(-1) ?? '#ffffff'], true)}
-          className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint shadow-[inset_0_0_0_1px_var(--line-strong)] outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">+</button>
+          className="flex size-icon items-center justify-center rounded-control text-fg-faint shadow-[inset_0_0_0_1px_var(--line-strong)] outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">+</button>
       )}
     </div>
   )

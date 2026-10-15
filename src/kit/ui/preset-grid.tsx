@@ -85,14 +85,14 @@ export function PresetGrid({ items, value, onApply, onPreview, onRemove, columns
   const { refs, focus } = useRoving(items.length)
   const cur = items.findIndex((it) => isActive(it, value))
   return (
-    <div role="listbox" aria-label={label} className={cn('grid gap-2 px-3 pb-3', className)} style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
+    <div role="listbox" aria-label={label} className={cn('grid gap-2 px-pad pb-3', className)} style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}
       onPointerLeave={() => onPreview?.(null)}>
       {items.map((it, i) => {
         const on = i === cur
         const head = it.group && (i === 0 || items[i - 1].group !== it.group)
         return (
           <div key={it.id} role="presentation" className="group/tile relative flex min-w-0 flex-col gap-1" style={head && i ? { gridColumnStart: 1 } : undefined}>
-            {head && <span aria-hidden className="px-0.5 text-[11px] text-fg-faint">{it.group}</span>}
+            {head && <span aria-hidden className="px-0.5 text-ui text-fg-faint">{it.group}</span>}
             <button
               ref={(el) => { refs.current[i] = el }}
               type="button"
@@ -120,7 +120,7 @@ export function PresetGrid({ items, value, onApply, onPreview, onRemove, columns
             >
               <Thumb it={it} pixelated={pixelated} />
             </button>
-            <span aria-hidden className={cn('truncate px-0.5 text-[11.5px]', on ? 'text-fg' : 'text-fg-muted')}>{it.name}</span>
+            <span aria-hidden className={cn('truncate px-0.5 text-ui', on ? 'text-fg' : 'text-fg-muted')}>{it.name}</span>
             {it.removable && onRemove && <RemoveButton it={it} onRemove={onRemove} className="top-1 right-1 group-focus-within/tile:flex group-hover/tile:flex" />}
           </div>
         )
@@ -142,7 +142,7 @@ export function Filmstrip({
       role="listbox"
       aria-label={label}
       aria-orientation="horizontal"
-      className={cn('flex h-full items-center gap-2 overflow-x-auto overflow-y-hidden px-3 pb-2', grouped ? 'pt-6' : 'pt-2', className)}
+      className={cn('flex h-full items-center gap-2 overflow-x-auto overflow-y-hidden px-pad pb-2', grouped ? 'pt-6' : 'pt-2', className)}
       onPointerLeave={() => onPreview?.(null)}
       onWheel={(e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && scroller.current) scroller.current.scrollLeft += e.deltaY }}
     >
@@ -152,7 +152,7 @@ export function Filmstrip({
         return (
           <div key={it.id} className="group/film relative shrink-0">
             {it.group && (i === 0 || items[i - 1].group !== it.group) && (
-              <div className="absolute -top-0.5 left-1 -translate-y-full text-[10.5px] whitespace-nowrap text-fg-faint">{it.group}</div>
+              <div className="absolute -top-0.5 left-1 -translate-y-full text-ui-sm whitespace-nowrap text-fg-faint">{it.group}</div>
             )}
             <button
               ref={(n) => { refs.current[i] = n }}
@@ -177,7 +177,7 @@ export function Filmstrip({
                 style={{ width: thumbW, height: thumbH }}>
                 <Thumb it={it} pixelated={pixelated} />
               </div>
-              <span className={cn('truncate px-0.5 text-[11.5px]', on ? 'text-fg' : 'text-fg-muted')} style={{ maxWidth: thumbW }}>{it.name}</span>
+              <span className={cn('truncate px-0.5 text-ui', on ? 'text-fg' : 'text-fg-muted')} style={{ maxWidth: thumbW }}>{it.name}</span>
             </button>
             {it.removable && onRemove && <RemoveButton it={it} onRemove={onRemove} className="top-2 right-2 group-focus-within/film:flex group-hover/film:flex" />}
           </div>

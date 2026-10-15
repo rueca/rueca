@@ -68,10 +68,10 @@ export function Dialog({ open, onOpenChange, title, description, children, foote
         >
           <div className="flex items-start gap-3 px-4 pt-4 pb-3">
             <div className="min-w-0 flex-1">
-              <D.Title className="text-[13px] font-semibold text-fg">{title}</D.Title>
-              {description && <D.Description className="mt-1 text-[11.5px] leading-relaxed text-fg-muted">{description}</D.Description>}
+              <D.Title className="text-title font-semibold text-fg">{title}</D.Title>
+              {description && <D.Description className="mt-1 text-ui leading-relaxed text-fg-muted">{description}</D.Description>}
             </div>
-            <D.Close aria-label="Close" className="-mt-0.5 -mr-1 flex size-6 shrink-0 items-center justify-center rounded-[5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+            <D.Close aria-label="Close" className="-mt-0.5 -mr-1 flex size-icon shrink-0 items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
               <X size={14} strokeWidth={1.5} />
             </D.Close>
           </div>
@@ -191,14 +191,14 @@ function PromptDialog({ open, o, onDone }: { open: boolean; o: PromptOptions; on
       </>}>
       <form onSubmit={(e) => { e.preventDefault(); submit() }}>
         <label className="flex flex-col gap-1.5">
-          <span className={cn('text-[11.5px] text-fg-muted', !o.label && 'sr-only')}>{o.label ?? o.title}</span>
+          <span className={cn('text-ui text-fg-muted', !o.label && 'sr-only')}>{o.label ?? o.title}</span>
           <input ref={input} value={value} maxLength={o.maxLength} placeholder={o.placeholder}
             aria-invalid={!!error || undefined} aria-describedby={error ? errId : undefined}
             onChange={(e) => { setValue(e.target.value); if (error) setError(null) }}
-            className={cn('h-7 w-full rounded-[6px] bg-control px-2 text-[12px] text-fg outline-none placeholder:text-fg-faint',
+            className={cn('h-icon w-full rounded-control bg-control px-2 text-ui text-fg outline-none placeholder:text-fg-faint',
               error ? 'shadow-[inset_0_0_0_1px_var(--rec)]' : 'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus:shadow-[inset_0_0_0_1px_var(--signal)]')} />
         </label>
-        {error && <div id={errId} role="alert" className="mt-1.5 text-[11.5px] text-rec">{error}</div>}
+        {error && <div id={errId} role="alert" className="mt-1.5 text-ui text-rec">{error}</div>}
       </form>
     </Dialog>
   )

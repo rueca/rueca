@@ -5,7 +5,7 @@
      <Inspector params={params} folders={['look', 'size']} /> // a subset, in THIS order
      <Inspector params={params} published />                 // client view: publish:true only
 
-   Rows are 28px lanes: label · control · value. A value that differs from
+   Rows are --row lanes (24px by default): label · control · value. The label column fits the longest label. A value that differs from
    its default renders at full contrast and gets a dot; untouched ones are
    faint — the single most useful cue in the panel. Double-click a label to
    reset. Hover a section header for its reset. Alt-click a header to solo it.
@@ -13,10 +13,11 @@
    Building a panel by hand? Use <Section>, <Row>, <ParamRow> (one schema row
    bound to a store) and <ParamControl> (just the control) so it matches.
 --------------------------------------------------------------------------- */
-import { memo, useState, type ReactNode } from 'react'
+import { memo, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
 import { ChevronRight, RotateCcw } from 'lucide-react'
 import { Popover } from '@base-ui/react/popover'
 import { cn } from '../core/cn'
+import { useDensityPx } from '../core/density'
 import { useParamState, type AnyParams } from '../core/params'
 import { equal, humanize, isValueDef, type Folder, type ParamDef, type Schema, type ValueDef, type NumberDef } from '../core/schema'
 import { Tip } from '../ui/tooltip'
@@ -56,9 +57,14 @@ export function Inspector({ params, folders, keys, published, className, id }: {
   const [open, setOpen] = useState<Record<string, boolean>>(() => LS.get(lsKey) ?? Object.fromEntries(entries.map(([k, f]) => [k, !f.collapsed])))
   const persist = (next: Record<string, boolean>) => { setOpen(next); LS.set(lsKey, next) }
 
+  // the label column widens to this inspector's longest label (capped in <Row>), so "Stroke weight" never truncates
+  const fit = useLabelFit(entries.flatMap(([, f]) => Object.entries(f.params)
+    .filter(([, d]) => d.type !== 'data' && d.type !== 'action')
+    .map(([k, d]) => ('label' in d && d.label) || humanize(k))))
+
   let shown = 0
   return (
-    <div className={cn('flex flex-col', className)}>
+    <div className={cn('flex flex-col', className)} style={fit ? ({ '--label-fit': `${fit}px` } as CSSProperties) : undefined}>
       {entries.map(([fid, f]) => {
         if (f.when && !f.when(values)) return null
         const rows = Object.entries(f.params).filter(([k, d]) => d.type !== 'data' && (!keys || keys.includes(k)) && (!published || ('publish' in d && d.publish)))
@@ -84,6 +90,22 @@ export function Inspector({ params, folders, keys, published, className, id }: {
       })}
     </div>
   )
+}
+
+/** Width of the longest label at the UI type size, plus room for the changed dot. Re-measures once fonts load. */
+function useLabelFit(labels: unknown[]) {
+  const size = useDensityPx('--ui-text', 11)
+  const [fontsReady, setFontsReady] = useState(false)
+  useEffect(() => { let live = true; document.fonts?.ready.then(() => live && setFontsReady(true)); return () => { live = false } }, [])
+  const key = labels.filter((l): l is string => typeof l === 'string').join('\n')
+  return useMemo(() => {
+    if (typeof document === 'undefined' || !key) return 0
+    const ctx = document.createElement('canvas').getContext('2d')
+    if (!ctx) return 0
+    ctx.font = `450 ${size}px InterVariable, "Inter Variable", system-ui, sans-serif`
+    const widest = Math.max(...key.split('\n').map((l) => ctx.measureText(l).width))
+    return Math.ceil(widest + 10) // dot (4) + gap (4) + slack
+  }, [key, size, fontsReady])
 }
 
 /**
@@ -144,7 +166,7 @@ export function Row({
         data-row-label
         onDoubleClick={onReset}
         // labels sit a step under their values: read once, while the values are read on every scrub
-        className={cn('flex min-w-0 items-center gap-1 truncate text-ui font-[450] no-select', changed ? 'text-fg' : 'text-fg-faint', stacked ? 'h-control' : 'w-label shrink-0')}
+        className={cn('flex min-w-0 items-center gap-1 truncate text-ui font-[450] no-select', changed ? 'text-fg' : 'text-fg-faint', stacked ? 'h-control' : 'w-[min(max(var(--d-label),var(--label-fit,0px)),42%)] shrink-0')}
         style={stacked || labelWidth == null ? undefined : { width: labelWidth }}
       >
         <span className="truncate">{label}</span>

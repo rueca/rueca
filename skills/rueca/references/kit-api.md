@@ -38,6 +38,7 @@ Surfaces: `bg-field` (window) · `bg-panel` (islands) · `bg-overlay` (menus) ·
 Text: `text-fg` · `text-fg-value` (untouched values) · `text-fg-muted` · `text-fg-faint` (row labels).
 Lines: `border-line` · `border-line-strong`. Neutral ink for ON states that aren't selection: `bg-ink` /
 `text-ink-fg` (a switch that's on, a ticked box) · `bg-fill` (a slider's fill).
+Semantic text on its own wash (badges): `text-key-text` · `text-rec-text` · `text-ok-text` (≥4.5:1 in both themes).
 Accent, for focus, selection and the primary action only: `bg-signal` · `bg-signal-strong` (surfaces
 carrying text) · `text-signal-fg` · `bg-signal-soft` (selection wash). Semantic: `key` (keyframed, amber) · `rec` (playhead/record/
 error) · `ok`. Lanes: `bg-lane`. Utilities: `panel` `cluster` `pop` `tabular` `no-select`
@@ -65,6 +66,10 @@ variables for phones. Use the names, never literals, so a part follows the densi
 Widths: `--inspector-w` (256), `--sidebar-w` (224), `--gutter` (8). Hierarchy is weight, not half-pixel
 sizes: labels 450, section titles 550, panel titles 600. In JS (timelines, canvas rows) read a token with
 `useDensityPx('--d-lane', 24)` from `core/density`; it re-reads when the density changes.
+People choose a density in ⌘K (View → Density: Default / Comfortable / Compact). The choice is remembered
+per browser (`studio:density`) and `<Studio>` restores it on mount, unless something already set the
+attribute. In code: `setDensity('compact')`, `useDensity()`, `currentDensity()`. The inspector's label
+column fits its longest label (from 72px up to 42% of the row), so long labels don't truncate.
 Token names are namespaced so they never collide with shadcn (`muted`, `accent`, `input` mean
 something else there): ours are `fg-muted`, `signal`, `control`; font is `font-ui`.
 

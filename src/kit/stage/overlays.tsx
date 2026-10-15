@@ -326,7 +326,7 @@ export function Navigator({
   const presets = zoomPresets || []
   const preset = presets.find((p) => Math.abs(zoom - p) < 0.005)
   return (
-    <div className={cn('flex flex-col gap-2 px-3 pb-1', className)}>
+    <div className={cn('flex flex-col gap-2 px-pad pb-1', className)}>
       <div ref={box} className="flex items-center justify-center rounded-[6px] bg-well" style={{ height }}>
         <div
           role="group"
@@ -357,7 +357,7 @@ export function Navigator({
         <div className="flex items-center gap-2">
           <Segmented size="sm" label="Zoom" value={preset !== undefined ? String(preset) : 'fit'} onChange={(z) => setZoom(z === 'fit' ? 'fit' : Number(z))}
             options={[{ value: 'fit', label: 'Fit' }, ...presets.map((p) => ({ value: String(p), label: `${Math.round(p * 100)}%` }))]} />
-          <span className="w-10 shrink-0 text-right text-[11px] tabular text-fg-faint">{Math.round(zoom * 100)}%</span>
+          <span className="w-10 shrink-0 text-right text-ui tabular text-fg-faint">{Math.round(zoom * 100)}%</span>
         </div>
       )}
     </div>

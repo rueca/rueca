@@ -191,7 +191,8 @@ export function EnvelopeEditor({
         {handle('r', pR, 'Release', fmtMs(value.r))}
       </svg>
       {!hideFields && (
-        <div className="grid grid-cols-4 gap-1">
+        // two by two: four boxed values don't fit an inspector-wide row once they read "220ms"
+        <div className="grid grid-cols-2 gap-1">
           {([
             ['a', 'A', 1, min.a, max.a, fmtMs],
             ['d', 'D', 1, min.d, max.d, fmtMs],

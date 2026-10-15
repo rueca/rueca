@@ -166,8 +166,8 @@ export function DataGrid<R extends object>({
       className={cn('relative min-h-0 overflow-auto outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--signal)]', className)}
     >
       <div className="min-w-max" role="rowgroup">
-        <div role="row" aria-rowindex={1} className="sticky top-0 z-10 grid h-7 items-center border-b border-line bg-panel text-[11px] text-fg-muted" style={{ gridTemplateColumns: template }}>
-          <div role="columnheader" className="pl-3 tabular"><span aria-hidden>#</span><span className="sr-only">Row</span></div>
+        <div role="row" aria-rowindex={1} className="sticky top-0 z-10 grid h-row items-center border-b border-line bg-panel text-ui text-fg-muted" style={{ gridTemplateColumns: template }}>
+          <div role="columnheader" className="pl-pad tabular"><span aria-hidden>#</span><span className="sr-only">Row</span></div>
           {columns.map((c, ci) => (
             <Tip key={c.key} label={c.hint}>
               <div role="columnheader" aria-colindex={ci + 1} className={cn('truncate px-2', c.align === 'right' && 'text-right')}>{c.label}</div>
@@ -181,13 +181,13 @@ export function DataGrid<R extends object>({
           const isActive = r === activeRow
           return (
             <div key={r} role="row" aria-rowindex={r + 2} aria-selected={isActive}
-              className={cn('group/row relative grid h-7 items-center border-b border-line text-[12px]', isActive ? 'bg-signal-soft' : 'hover:bg-hover')}
+              className={cn('group/row relative grid h-row items-center border-b border-line text-ui', isActive ? 'bg-signal-soft' : 'hover:bg-hover')}
               style={{ gridTemplateColumns: template }}>
               {isActive && <span className="absolute inset-y-0 left-0 w-[2px] bg-signal" aria-hidden />}
               {/* controls live inside cells — a row can only own cells (axe aria-required-children / nested-interactive) */}
               <div role="rowheader" className="flex h-full min-w-0">
               <button type="button" tabIndex={-1} aria-label={`Row ${r + 1}`} onClick={() => { onActiveRow?.(r); setSel({ r, c: sel?.c ?? 0 }); root.current?.focus() }}
-                className={cn('flex h-full flex-1 items-center gap-1 pl-3 text-left tabular text-[11px]', isActive ? 'text-signal-text' : 'text-fg-muted hover:text-fg')}>
+                className={cn('flex h-full flex-1 items-center gap-1 pl-pad text-left tabular text-ui', isActive ? 'text-signal-text' : 'text-fg-muted hover:text-fg')}>
                 {rowLabel ? rowLabel(r) : r + 1}
                 {issues?.length ? (
                   <Tip label={issues.join(' · ')}><span className="text-key" aria-label={`${issues.length} issues`}><AlertTriangle size={11} strokeWidth={1.75} /></span></Tip>
@@ -223,10 +223,10 @@ export function DataGrid<R extends object>({
                           if (e.key === 'Tab') { e.preventDefault(); commit(e.shiftKey ? 'left' : 'right') }
                           if (e.key === 'Escape') { e.preventDefault(); setEditing(false); root.current?.focus() }
                         }}
-                        className={cn('h-6 w-full min-w-0 rounded-[4px] bg-control px-1 text-[12px] text-fg outline-none', col.mono && 'font-mono text-[11.5px]', col.align === 'right' && 'text-right')}
+                        className={cn('h-control w-full min-w-0 rounded-control bg-control px-1 text-ui text-fg outline-none', col.mono && 'font-mono', col.align === 'right' && 'text-right')}
                       />
                     ) : (
-                      <span className={cn('min-w-0 flex-1 truncate', !value && 'text-fg-faint', col.mono && 'font-mono text-[11.5px] uppercase', col.align === 'right' && 'text-right tabular')}>
+                      <span className={cn('min-w-0 flex-1 truncate', !value && 'text-fg-faint', col.mono && 'font-mono uppercase', col.align === 'right' && 'text-right tabular')}>
                         {value || col.placeholder || ''}
                       </span>
                     )}
@@ -237,7 +237,7 @@ export function DataGrid<R extends object>({
                 <div role="gridcell" className="flex items-center">
                 <Tip label="Delete row">
                   <button type="button" aria-label={`Delete row ${r + 1}`} onClick={() => onRemoveRow(r)}
-                    className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted opacity-0 outline-none hover:bg-hover hover:text-rec group-hover/row:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal">
+                    className="flex size-icon-sm items-center justify-center rounded-control text-fg-muted opacity-0 outline-none hover:bg-hover hover:text-rec group-hover/row:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal">
                     <Trash2 size={12} strokeWidth={1.5} />
                   </button>
                 </Tip>
@@ -252,7 +252,7 @@ export function DataGrid<R extends object>({
         {onAddRow && (
           <div role="row"><div role="gridcell">
           <button type="button" onClick={onAddRow}
-            className="flex h-7 w-full items-center gap-1.5 pl-3 text-left text-[11.5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+            className="flex h-row w-full items-center gap-1.5 pl-pad text-left text-ui text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
             <Plus size={12} strokeWidth={1.75} /> Add row
           </button>
           </div></div>

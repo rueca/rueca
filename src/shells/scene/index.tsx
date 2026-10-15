@@ -24,8 +24,6 @@ type Viewport = { el: HTMLDivElement | null; handle: (EngineApi & { dispose: () 
 const viewport: { current: Viewport | null } = { current: null }
 const engine = () => viewport.current?.handle ?? null
 
-const LEFT_W = 248
-const RIGHT_W = 304
 
 const MESH_ICON: Record<string, typeof Box> = { speaker: Package, body: Cylinder, cap: Circle, ring: CircleDot, base: Disc, pedestal: Cylinder, floor: SquareDashed, camera: Video }
 const LIGHT_ICON = { directional: Sun, spot: Spotlight, point: Lightbulb }
@@ -170,14 +168,12 @@ export default function SceneShell() {
   return (
     <Studio
       layout="overlay"
-      leftWidth={LEFT_W}
-      rightWidth={RIGHT_W}
       toolbar={
         <Toolbar
           start={<Brand name="Scene" doc="Campana hand bell" mark={mark} />}
           center={
             <Cluster className="gap-1.5 pr-2 pl-3">
-              <span className="text-[11.5px] text-fg-muted">Colourway</span>
+              <span className="text-ui text-fg-muted">Colourway</span>
               <SwatchTiles size="sm" value={cw} options={swatchOptions} onChange={applyColourway} onPreview={(p) => ui.setState({ preview: p })} label="Colourway" />
             </Cluster>
           }
@@ -218,10 +214,10 @@ export default function SceneShell() {
               >
                 <Divider vertical className="mx-1" />
                 <IconButton tipSide="top" icon={Box} label={v.projection === 'perspective' ? 'Switch to orthographic' : 'Switch to perspective'} shortcut="m" active={v.projection === 'orthographic'}
-                  onClick={() => params.setValue('projection', v.projection === 'perspective' ? 'orthographic' : 'perspective')} className="size-8 rounded-[8px]" />
-                <IconButton tipSide="top" icon={Grid3x3} label="Grid floor" shortcut="g" active={!!v.grid} onClick={() => toggle('grid')} className="size-8 rounded-[8px]" />
-                <IconButton tipSide="top" icon={Orbit} label="Turntable" shortcut="o" active={!!v.turntable} onClick={() => toggle('turntable')} className="size-8 rounded-[8px]" />
-                <IconButton tipSide="top" icon={Focus} label="Frame selection" shortcut="f" onClick={() => engine()?.frame()} className="size-8 rounded-[8px]" />
+                  onClick={() => params.setValue('projection', v.projection === 'perspective' ? 'orthographic' : 'perspective')} className="size-dock-button rounded-[8px]" />
+                <IconButton tipSide="top" icon={Grid3x3} label="Grid floor" shortcut="g" active={!!v.grid} onClick={() => toggle('grid')} className="size-dock-button rounded-[8px]" />
+                <IconButton tipSide="top" icon={Orbit} label="Turntable" shortcut="o" active={!!v.turntable} onClick={() => toggle('turntable')} className="size-dock-button rounded-[8px]" />
+                <IconButton tipSide="top" icon={Focus} label="Frame selection" shortcut="f" onClick={() => engine()?.frame()} className="size-dock-button rounded-[8px]" />
               </ToolDock>
             </div>
             <AxisGizmoSlot />
@@ -294,8 +290,8 @@ function ViewChip({ v }: { v: V }) {
   const all = [...BUILTIN_VIEWS, ...views]
   const cur = all.find((x) => x.id === active)
   return (
-    <div className="cluster absolute top-0 left-0 flex h-8 items-center gap-0.5 px-1">
-      <span className="px-1.5 text-[11.5px] text-fg-muted">{v.projection === 'perspective' ? `Perspective · ${v.fov}°` : 'Orthographic'}</span>
+    <div className="cluster absolute top-0 left-0 flex h-bar items-center gap-0.5 px-1">
+      <span className="px-1.5 text-ui text-fg-muted">{v.projection === 'perspective' ? `Perspective · ${v.fov}°` : 'Orthographic'}</span>
       <Divider vertical />
       <Menu
         items={[
@@ -315,7 +311,7 @@ function Stats() {
   const s = useStore(ui, (x) => x.stats)
   return (
     // top-right: bottom-left collided with the tool dock on stages ≤1280px wide (break-it F5)
-    <div className="pointer-events-none absolute top-0 right-0 h-8 max-w-[calc(100%-220px)] truncate leading-8 text-[11px] tabular text-fg-faint no-select">
+    <div className="pointer-events-none absolute top-0 right-0 h-bar max-w-[calc(100%-220px)] truncate leading-[var(--d-bar)] text-ui tabular text-fg-faint no-select">
       {(s.tris / 1000).toFixed(1)}k triangles · {s.meshes} meshes · {s.lights} lights
     </div>
   )
@@ -342,7 +338,7 @@ function Outliner({ v, selected }: { v: V; selected: string | null }) {
   const onSelect = (ids: string[]) => ui.setState({ selected: ids.at(-1) ?? null })
   const onToggle = (id: string, prop: 'visible' | 'locked') => { const k = `${id}_${prop}`; params.setValue(k, !params.values()[k]) }
   const onRename = (id: string, name: string) => ui.setState((s) => ({ names: { ...s.names, [id]: name } }))
-  const head = (t: string) => <div className="px-3 pt-2.5 pb-0.5 text-[11px] text-fg-faint no-select">{t}</div>
+  const head = (t: string) => <div className="px-pad pt-2.5 pb-0.5 text-ui text-fg-faint no-select">{t}</div>
   return (
     <div className="pb-2">
       {head('Objects')}
@@ -377,21 +373,21 @@ function ViewsPanel() {
                 {thumbs[x.id] && <img src={thumbs[x.id]} alt="" className="size-full object-cover" />}
               </div>
               <div className="flex items-center gap-1 px-0.5">
-                <span className={cn('min-w-0 flex-1 truncate text-[11.5px]', active === x.id ? 'text-fg' : 'text-fg-muted')}>{x.name}</span>
+                <span className={cn('min-w-0 flex-1 truncate text-ui', active === x.id ? 'text-fg' : 'text-fg-muted')}>{x.name}</span>
                 {i < 9 && <Kbd>{i + 1}</Kbd>}
               </div>
             </button>
             {!x.builtin && (
               <button type="button" aria-label={`Delete ${x.name}`}
                 onClick={() => ui.setState((s) => ({ views: s.views.filter((y) => y.id !== x.id) }))}
-                className="absolute top-2 right-2 hidden size-6 items-center justify-center rounded-full bg-black/60 text-white group-focus-within/view:flex group-hover/view:flex">
+                className="absolute top-2 right-2 hidden size-icon items-center justify-center rounded-full bg-black/60 text-white group-focus-within/view:flex group-hover/view:flex">
                 <X size={11} />
               </button>
             )}
           </div>
         ))}
       </div>
-      {views.length === 0 && <p className="px-1 pt-1 text-[11.5px] leading-relaxed text-fg-faint">Orbit to a framing you like and save it. Saved views get a number key and survive reloads.</p>}
+      {views.length === 0 && <p className="px-1 pt-1 text-ui leading-relaxed text-fg-faint">Orbit to a framing you like and save it. Saved views get a number key and survive reloads.</p>}
     </div>
   )
 }
@@ -405,7 +401,7 @@ function InspectorHeader({ id, v }: { id: string | null; v: V }) {
   return (
     <PanelHeader>
       <Icon size={14} strokeWidth={1.5} className="shrink-0 text-signal" />
-      <div className="ml-1 min-w-0 flex-1 truncate text-[12px] font-semibold">{nameOf(id)}</div>
+      <div className="ml-1 min-w-0 flex-1 truncate text-title font-semibold">{nameOf(id)}</div>
       <Badge>{kindLabel(id, v)}</Badge>
       {hideable && <IconButton size="icon-sm" icon={hidden ? EyeOff : Eye} label={hidden ? 'Show' : 'Hide'} shortcut="h" onClick={() => params.setValue(`${id}_visible`, hidden)} />}
       <IconButton size="icon-sm" icon={X} label="Deselect" shortcut="esc" onClick={() => ui.setState({ selected: null })} />
@@ -417,16 +413,16 @@ function SceneSettings({ v, cw }: { v: V; cw: string | null }) {
   return (
     <>
       <Section title="Colourway" first>
-        <div className="px-3 pt-0.5 pb-1">
+        <div className="px-pad pt-0.5 pb-1">
           <SwatchTiles value={cw} options={swatchOptions} onChange={applyColourway} onPreview={(p) => ui.setState({ preview: p })} label="Colourway" />
         </div>
-        <p className="px-3 pt-1 text-[11px] leading-relaxed text-fg-faint">
+        <p className="px-pad pt-1 text-ui leading-relaxed text-fg-faint">
           {cw ? 'Colourways change materials and background only — transforms and lights stay put.' : 'Custom colours. Pick a colourway to snap back to a defined variant.'}
         </p>
       </Section>
       <div className="border-t border-line"><Inspector params={params} folders={['look', 'env', 'render', 'viewport']} /></div>
       <Section title="Selection">
-        <p className="px-3 text-[11.5px] leading-relaxed text-fg-muted">
+        <p className="px-pad text-ui leading-relaxed text-fg-muted">
           Click the product to select it, click again to select a part. <Kbd>W</Kbd> <Kbd>E</Kbd> <Kbd>R</Kbd> switch the gizmo; <Kbd>F</Kbd> frames it. {v.turntable ? 'Turntable is on.' : ''}
         </p>
       </Section>
@@ -448,7 +444,7 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
               </Row>
             ))}
           </div>
-          <div className="flex gap-1.5 px-3 pt-2">
+          <div className="flex gap-1.5 px-pad pt-2">
             <Button size="md" variant="default" className="flex-1" onClick={saveView}><Plus size={13} strokeWidth={1.5} />Save view</Button>
             <Button size="md" variant="default" className="flex-1" onClick={copyCamera}><Braces size={13} strokeWidth={1.5} />Copy JSON</Button>
           </div>
@@ -463,7 +459,7 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
       {kind === 'light' && (
         <>
           <div className="border-t border-line"><Inspector params={params} folders={[`${id}_light`]} /></div>
-          <p className="px-3 pb-3 text-[11px] leading-relaxed text-fg-faint">Spot and directional lights always aim at the product, so moving one re-angles it.</p>
+          <p className="px-pad pb-3 text-ui leading-relaxed text-fg-faint">Spot and directional lights always aim at the product, so moving one re-angles it.</p>
         </>
       )}
       {kind === 'group' && (
@@ -472,11 +468,11 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
             const Icon = iconOf(c, v)
             return (
               <button key={c} type="button" onClick={() => ui.setState({ selected: c })}
-                className="mx-1.5 flex h-7 items-center gap-2 rounded-[6px] px-2 text-left text-[12px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
+                className="mx-1.5 flex h-row items-center gap-2 rounded-[6px] px-2 text-left text-ui text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
                 <Icon size={14} strokeWidth={1.5} className="text-fg-faint" />
                 <span className="flex-1 truncate">{nameOf(c)}</span>
                 <Swatch color={v[`${c}_color`]} size={12} className="rounded-full" />
-                <span className="text-[11px] text-fg-faint">{String(v[`${c}_mtype`]).replace(/^./, (x) => x.toUpperCase())}</span>
+                <span className="text-ui text-fg-faint">{String(v[`${c}_mtype`]).replace(/^./, (x) => x.toUpperCase())}</span>
               </button>
             )
           })}

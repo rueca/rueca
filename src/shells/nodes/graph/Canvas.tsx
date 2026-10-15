@@ -190,7 +190,7 @@ export function GraphCanvas() {
       {nodes.length <= 1 && (
         <div className="pointer-events-none absolute inset-x-0 top-[38%] flex flex-col items-center gap-2 text-center">
           <div className="text-[13px] font-medium text-fg">Start by adding a generator</div>
-          <div className="flex items-center gap-1.5 text-[12px] text-fg-muted">Press <Kbd>Tab</Kbd> or double-click the canvas, or drag one in from the library</div>
+          <div className="flex items-center gap-1.5 text-ui text-fg-muted">Press <Kbd>Tab</Kbd> or double-click the canvas, or drag one in from the library</div>
         </div>
       )}
 

@@ -23,6 +23,7 @@ import { useHotkeys } from '../core/hotkeys'
 import { TipProvider } from '../ui/tooltip'
 import { Toaster } from '../system/toast'
 import { ErrorBoundary } from '../system/error-boundary'
+import { restoreDensity } from '../core/density'
 
 type Layout = 'islands' | 'overlay' | 'docked'
 const StudioCtx = createContext<{ present: boolean; setPresent: (b: boolean) => void; layout: Layout }>({ present: false, setPresent: () => {}, layout: 'islands' })
@@ -37,6 +38,7 @@ export function Studio({
   const [present, setPresent] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
   // The #1 install trap: <Studio> fills its parent, and a fresh Vite page has no height → a blank page, no error.
+  useLayoutEffect(restoreDensity, []) // the saved density (⌘K → Density), before first paint
   useLayoutEffect(() => {
     if (import.meta.env?.DEV && rootRef.current && rootRef.current.clientHeight === 0)
       console.warn('[studio] <Studio> is 0px tall. It fills its parent — give the page a height: html, body, #root { height: 100%; margin: 0 }')

@@ -122,7 +122,7 @@ export function CodeBlock({
   const panelId = `${uid}-panel`
   return (
     <div className={cn('overflow-hidden rounded-[8px] bg-well shadow-[inset_0_0_0_1px_var(--line)]', className)}>
-      <div className="flex h-8 items-center gap-2 border-b border-line pr-1 pl-2.5">
+      <div className="flex h-section items-center gap-2 border-b border-line pr-1 pl-pad">
         {tabs?.length ? (
           <div ref={tabList} role="tablist" aria-label="Format" onKeyDown={onTabKey} className="-ml-1.5 flex min-w-0 items-center gap-0.5">
             {tabs.map((t) => {
@@ -130,20 +130,20 @@ export function CodeBlock({
               return (
                 <button key={idOf(t)} type="button" role="tab" id={`${uid}-tab-${idOf(t)}`} aria-selected={on} aria-controls={panelId} tabIndex={on ? 0 : -1}
                   onClick={() => select(t)}
-                  className={cn('h-6 shrink-0 rounded-[5px] px-2 text-[11px] font-medium outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
+                  className={cn('h-icon-sm shrink-0 rounded-control px-2 text-ui font-medium outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
                   {t.label}
                 </button>
               )
             })}
           </div>
         ) : null}
-        <span className={cn('min-w-0 flex-1 truncate text-[11px] text-fg-muted', tabs?.length && 'text-right text-fg-faint')}>{head}</span>
+        <span className={cn('min-w-0 flex-1 truncate text-ui text-fg-muted', tabs?.length && 'text-right text-fg-faint')}>{head}</span>
         {actions}
         <IconButton icon={copied ? Check : Copy} label="Copy" size="icon-sm" onClick={copy} />
       </div>
       <pre id={panelId} role={tabs?.length ? 'tabpanel' : 'region'} aria-label={tabs?.length ? undefined : label ?? (typeof head === 'string' ? head : 'Code')}
         aria-labelledby={tabs?.length && active ? `${uid}-tab-${idOf(active)}` : undefined} tabIndex={0}
-        className="overflow-auto py-2 font-mono text-[11px] leading-[1.6] text-fg outline-none select-text focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-inset" style={{ maxHeight }}>
+        className="overflow-auto py-2 font-mono text-ui leading-[1.6] text-fg outline-none select-text focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-inset" style={{ maxHeight }}>
         <code>
           {lines.map((l, i) => (
             <div key={i} className="flex">

@@ -62,6 +62,10 @@
   --key: #f5b400;      /* keyframed / animated field */
   --rec: #ff4d4d;
   --ok: #3ccf8e;
+  /* the same three as TEXT on their own 15% wash (badges): ≥4.5:1. In dark the fills already pass */
+  --key-text: #f5b400;
+  --rec-text: #ff6b6b;
+  --ok-text: #3ccf8e;
 
   --lane: #474747;     /* idle timeline lane */
   /* categorical — node ports, lanes, tags, series. Distinct in hue AND lightness,
@@ -168,6 +172,9 @@
   --key: #c98a00;
   --rec: #e5383b;
   --ok: #1fa971;
+  --key-text: #8a5d00;
+  --rec-text: #b8282b;
+  --ok-text: #0b7247;
 
   --lane: #c6c6c6;
   --cat-1: #2f6fe0; --cat-2: #c26a00; --cat-3: #12965c; --cat-4: #b43fb0;
@@ -220,6 +227,9 @@
     --key: #c98a00;
     --rec: #e5383b;
     --ok: #1fa971;
+    --key-text: #8a5d00;
+    --rec-text: #b8282b;
+    --ok-text: #0b7247;
 
     --lane: #c6c6c6;
     --cat-1: #2f6fe0; --cat-2: #c26a00; --cat-3: #12965c; --cat-4: #b43fb0;
@@ -274,6 +284,9 @@
   --color-key: var(--key);
   --color-rec: var(--rec);
   --color-ok: var(--ok);
+  --color-key-text: var(--key-text);
+  --color-rec-text: var(--rec-text);
+  --color-ok-text: var(--ok-text);
   --color-lane: var(--lane);
   --color-cat-1: var(--cat-1); --color-cat-2: var(--cat-2); --color-cat-3: var(--cat-3); --color-cat-4: var(--cat-4);
   --color-cat-5: var(--cat-5); --color-cat-6: var(--cat-6); --color-cat-7: var(--cat-7); --color-cat-8: var(--cat-8);
@@ -385,20 +398,17 @@
 
 /* Touch density — the client view (<ClientView> sets .studio-touch). Finger-sized rows, controls and slider
    thumbs; text inputs at 16px so iOS Safari doesn't zoom the page when one is focused; no tap highlight or
-   callout. Kit parts size from the density variables, so touch is mostly a variable override; the class
-   selectors after it catch shells that still write literal sizes. Unlayered so it beats utility sizes. */
+   callout. Kit parts and shells size from the density variables, so touch is a variable override (a
+   literal like h-6 or text-[11px] won't follow it: use the token names). Unlayered so it beats utility sizes. */
 .studio-touch, :root[data-studio-client] .pop {
   --row: 48px; --d-control: 36px; --d-control-sm: 32px; --d-icon: 36px; --d-icon-sm: 36px; --d-button-lg: 40px;
   --d-section: 44px; --d-header: 44px; --d-pad: 12px;
   --ui-text: 14px; --ui-text-sm: 12px; --ui-text-title: 15px; --ui-leading: 20px;
 }
 .studio-touch { -webkit-tap-highlight-color: transparent; }
-.studio-touch :is(.h-6) { height: 36px; }
-.studio-touch :is(.text-\[11px\], .text-\[11\.5px\], .text-\[12px\]) { font-size: 14px; }
 
 .studio-touch [data-studio-thumb] { width: 24px; height: 24px; scale: 1; }
-/* icon buttons and switches: 36px boxes, a 44px reach */
-.studio-touch :is(.size-6) { width: 36px; height: 36px; }
+/* switches: a 44px reach */
 .studio-touch [role="switch"]::after { inset: -13px -7px; }
 /* A slider moves only by its thumb on touch, like iOS's own: a swipe across the track scrolls the sheet
    instead of jumping the value (client-view C10). Events from the thumb still bubble to the control. */
@@ -407,13 +417,12 @@
   .studio-touch [data-studio-thumb] { pointer-events: auto; }
   .studio-touch [data-studio-thumb]::after { content: ""; position: absolute; inset: -10px; }
 }
-/* popups (colour picker, selects) are portaled out of the client view: while one is shown, size them for touch too */
-:root[data-studio-client] .pop :is(.h-6) { height: 36px; }
-:root[data-studio-client] .pop :is(.text-\[11px\], .text-\[11\.5px\]) { font-size: 14px; }
+/* popups (colour picker, selects) are portaled out of the client view: they take the touch variables above;
+   their text inputs still need 16px */
 :root[data-studio-client] .pop :is(input:not([type="range"]), textarea, select) { font-size: 16px; }
-/* inputs last and with :is(), so they beat the 14px text rule above: 16px or iOS zooms the page (i3) */
+/* text inputs at 16px, over the 14px --ui-text, or iOS zooms the page (i3) */
 .studio-touch :is(input:not([type="range"]), textarea, select) { font-size: 16px; }
-/* labels get room at 14px instead of the desktop 84px column */
+/* labels get room at 14px instead of the desktop label column */
 .studio-touch [data-row-label] { width: auto !important; min-width: 96px; max-width: 46%; flex-shrink: 0; }
 .studio-touch :where(button, [role="slider"], [role="spinbutton"]) { -webkit-touch-callout: none; }
 

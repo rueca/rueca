@@ -65,11 +65,11 @@ function NodeInspector({ node }: { node: FlowNode }) {
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center gap-2 px-3 pt-3 pb-1">
-        <span className="flex size-6 items-center justify-center rounded-[6px] bg-active text-fg-muted"><Icon size={13} strokeWidth={1.5} /></span>
+      <div className="flex items-center gap-2 px-pad pt-3 pb-1">
+        <span className="flex size-icon items-center justify-center rounded-[6px] bg-active text-fg-muted"><Icon size={13} strokeWidth={1.5} /></span>
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[12.5px] font-semibold">{d.name || 'Untitled'}</div>
-          <div className="text-[11px] text-fg-faint">{node.type === 'screen' ? templateLabel(d.template) : node.type === 'terminal' ? (d.role === 'end' ? 'End point' : 'Start point') : node.type === 'decision' ? 'Decision' : node.type === 'note' ? 'Sticky note' : 'Section'}</div>
+          <div className="truncate text-title font-semibold">{d.name || 'Untitled'}</div>
+          <div className="text-ui text-fg-faint">{node.type === 'screen' ? templateLabel(d.template) : node.type === 'terminal' ? (d.role === 'end' ? 'End point' : 'Start point') : node.type === 'decision' ? 'Decision' : node.type === 'note' ? 'Sticky note' : 'Section'}</div>
         </div>
         <IconButton icon={Copy} label="Duplicate" shortcut="mod+d" size="icon-sm" onClick={duplicate} />
         <IconButton icon={Trash2} label="Delete" shortcut="backspace" size="icon-sm" onClick={deleteSelection} />
@@ -80,7 +80,7 @@ function NodeInspector({ node }: { node: FlowNode }) {
           <LiveText label="Name" value={d.name} multiline={node.type === 'note'} rows={4} onLive={(s) => set({ name: s }, false)} />
         </Row>
         {flowish && (
-          <Row label="Status" hint="Draft → ready for build → shipped. Shown as the dot on the canvas.">
+          <Row label="Status" stacked hint="Draft → ready for build → shipped. Shown as the dot on the canvas.">
             <Segmented value={d.status ?? 'draft'} onChange={(s) => set({ status: s as Status })} options={STATUS_OPTS} label="Status" />
           </Row>
         )}
@@ -115,7 +115,7 @@ function NodeInspector({ node }: { node: FlowNode }) {
           <Row label="Template">
             <Select value={d.template ?? 'home'} onChange={(t) => set({ template: t as Template })} options={TEMPLATES.map((t) => ({ value: t.value, label: t.label }))} label="Template" />
           </Row>
-          <div className="px-3 pt-1">
+          <div className="px-pad pt-1">
             <div className="mx-auto w-[124px] overflow-hidden rounded-[10px] shadow-[0_0_0_1px_var(--line-strong)]"><Wireframe template={d.template ?? 'home'} className="block h-auto w-full" /></div>
           </div>
         </Section>
@@ -123,13 +123,13 @@ function NodeInspector({ node }: { node: FlowNode }) {
 
       {node.type !== 'note' && (
         <Section title="Notes">
-          <div className="px-3 py-1"><LiveText label="Notes" multiline rows={4} placeholder="Behaviour, edge cases, copy to review…" value={d.notes ?? ''} onLive={(s) => set({ notes: s }, false)} /></div>
+          <div className="px-pad py-1"><LiveText label="Notes" multiline rows={4} placeholder="Behaviour, edge cases, copy to review…" value={d.notes ?? ''} onLive={(s) => set({ notes: s }, false)} /></div>
         </Section>
       )}
 
       {flowish && (
         <Section title="Connections" actions={<IconButton icon={Plus} size="icon-sm" label="Add next screen" shortcut="s" onClick={() => addScreen('home')} />}>
-          {!ins.length && !outs.length && <div className="px-3 py-1 text-[11.5px] text-fg-faint">Drag from a handle, pick a screen below, or add the next screen.</div>}
+          {!ins.length && !outs.length && <div className="px-pad py-1 text-ui text-fg-faint">Drag from a handle, pick a screen below, or add the next screen.</div>}
           {/* The keyboard / single-pointer way to connect (WCAG 2.1.1, 2.5.7). */}
           <Row label="Connect to">
             <Select label="Connect to" value="" placeholder="Choose a node…"
@@ -143,8 +143,8 @@ function NodeInspector({ node }: { node: FlowNode }) {
             const T = TRIGGER_ICON[e.data?.trigger ?? 'tap']
             return (
               <button key={e.id} type="button" onClick={() => select([], [e.id])}
-                className="mx-1.5 flex h-7 items-center gap-2 rounded-[6px] px-1.5 text-left text-[11.5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
-                <span className="w-7 shrink-0 text-[10.5px] text-fg-faint">{dir === 'in' ? 'From' : 'To'}</span>
+                className="mx-1.5 flex h-row items-center gap-2 rounded-[6px] px-1.5 text-left text-ui text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+                <span className="w-7 shrink-0 text-ui-sm text-fg-faint">{dir === 'in' ? 'From' : 'To'}</span>
                 <span className="min-w-0 flex-1 truncate text-fg">{name(dir === 'in' ? e.source : e.target)}</span>
                 <T size={11} strokeWidth={1.5} className="shrink-0 text-fg-faint" />
                 <span className="max-w-[72px] truncate text-fg-faint">{e.data?.label || e.data?.trigger}</span>
@@ -167,13 +167,13 @@ function EdgeInspector({ edge }: { edge: FlowEdge }) {
   const T = TRIGGER_ICON[d.trigger]
   return (
     <div className="flex flex-col">
-      <div className="flex items-center gap-2 px-3 pt-3 pb-1">
-        <span className="flex size-6 items-center justify-center rounded-[6px] bg-active text-fg-muted"><T size={13} strokeWidth={1.5} /></span>
-        <div className="min-w-0 flex-1 text-[12.5px] font-semibold">Connection</div>
+      <div className="flex items-center gap-2 px-pad pt-3 pb-1">
+        <span className="flex size-icon items-center justify-center rounded-[6px] bg-active text-fg-muted"><T size={13} strokeWidth={1.5} /></span>
+        <div className="min-w-0 flex-1 text-title font-semibold">Connection</div>
         <IconButton icon={ArrowLeftRight} label="Reverse direction" size="icon-sm" onClick={() => setEdges((es) => es.map((e) => (e.id === edge.id ? { ...e, source: e.target, target: e.source, sourceHandle: e.targetHandle, targetHandle: e.sourceHandle } : e)), { label: 'Reverse' })} />
         <IconButton icon={Trash2} label="Delete" shortcut="backspace" size="icon-sm" onClick={deleteSelection} />
       </div>
-      <div className="mx-3 my-1.5 flex items-center gap-1.5 rounded-[8px] bg-well p-1.5 text-[11.5px]">
+      <div className="mx-pad my-1.5 flex items-center gap-1.5 rounded-[8px] bg-well p-1.5 text-ui">
         <button type="button" className="min-w-0 flex-1 truncate rounded-[5px] bg-raised px-2 py-1 text-left shadow-[var(--shadow-segment)] hover:text-signal" onClick={() => src && select([src.id])}>{src?.data.name ?? '—'}</button>
         <ArrowRight size={12} className="shrink-0 text-fg-faint" />
         <button type="button" className="min-w-0 flex-1 truncate rounded-[5px] bg-raised px-2 py-1 text-left shadow-[var(--shadow-segment)] hover:text-signal" onClick={() => tgt && select([tgt.id])}>{tgt?.data.name ?? '—'}</button>
@@ -190,7 +190,7 @@ function EdgeInspector({ edge }: { edge: FlowEdge }) {
         </Row>
       </Section>
       <Section title="Route">
-        <Row label="Style">
+        <Row label="Style" stacked>
           <Segmented value={d.style ?? 'default'} onChange={(s) => set({ style: s === 'default' ? undefined : (s as EdgeStyle) })} label="Route style"
             options={[{ value: 'default', label: 'Auto' }, { value: 'smooth', label: 'Step' }, { value: 'bezier', label: 'Curve' }, { value: 'straight', label: 'Line' }]} />
         </Row>
@@ -198,7 +198,7 @@ function EdgeInspector({ edge }: { edge: FlowEdge }) {
           <div className="flex flex-1 justify-end"><Switch checked={!!d.pinned} onChange={(b) => set({ pinned: b })} label="Keep sides" /></div>
         </Row>
         <Row label="Sides">
-          <span className="text-[11.5px] text-fg-muted tabular">{side(edge.sourceHandle)} → {side(edge.targetHandle)}</span>
+          <span className="text-ui text-fg-muted tabular">{side(edge.sourceHandle)} → {side(edge.targetHandle)}</span>
         </Row>
       </Section>
     </div>
@@ -249,15 +249,15 @@ function MultiInspector({ nodes, edges }: { nodes: FlowNode[]; edges: FlowEdge[]
   const flowish = nodes.filter((n) => n.type !== 'note' && n.type !== 'section')
   return (
     <div className="flex flex-col">
-      <div className="px-3 pt-3 pb-2 text-[12.5px] font-semibold">{nodes.length ? `${nodes.length} nodes` : ''}{nodes.length && edges.length ? ', ' : ''}{edges.length ? `${edges.length} connections` : ''}</div>
+      <div className="px-pad pt-3 pb-2 text-title font-semibold">{nodes.length ? `${nodes.length} nodes` : ''}{nodes.length && edges.length ? ', ' : ''}{edges.length ? `${edges.length} connections` : ''}</div>
       {movable.length > 1 && (
         <Section title="Arrange" first>
-          <div className="flex items-center gap-0.5 px-2.5">
+          <div className="flex items-center gap-0.5 px-pad">
             {([['l', AlignStartVertical, 'Align left'], ['c', AlignCenterVertical, 'Align centre'], ['r', AlignEndVertical, 'Align right'], ['t', AlignStartHorizontal, 'Align top'], ['m', AlignCenterHorizontal, 'Align middle'], ['b', AlignEndHorizontal, 'Align bottom']] as const).map(([k, I, l]) => (
               <IconButton key={k} icon={I} label={l} onClick={() => align(k)} />
             ))}
           </div>
-          <div className="flex items-center gap-0.5 px-2.5">
+          <div className="flex items-center gap-0.5 px-pad">
             <IconButton icon={AlignHorizontalDistributeCenter} label="Distribute horizontally" disabled={movable.length < 3} onClick={() => distribute('x')} />
             <IconButton icon={AlignVerticalDistributeCenter} label="Distribute vertically" disabled={movable.length < 3} onClick={() => distribute('y')} />
             <div className="flex-1" />
@@ -267,10 +267,10 @@ function MultiInspector({ nodes, edges }: { nodes: FlowNode[]; edges: FlowEdge[]
       )}
       {flowish.length > 0 && (
         <Section title="Status" first={movable.length < 2}>
-          <Row label="All">
+          <Row>
             <Segmented value={statuses.size === 1 ? [...statuses][0] : ''} onChange={(s) => setNodes((ns) => ns.map((n) => (flowish.some((f) => f.id === n.id) ? { ...n, data: { ...n.data, status: s as Status } } : n)), { label: 'Set status' })} options={STATUS_OPTS} label="Status" />
           </Row>
-          {statuses.size > 1 && <div className="px-3 text-[11px] text-fg-faint">Mixed — pick one to apply to all.</div>}
+          {statuses.size > 1 && <div className="px-pad text-ui text-fg-faint">Mixed — pick one to apply to all.</div>}
         </Section>
       )}
       {edges.length > 0 && (
@@ -278,7 +278,7 @@ function MultiInspector({ nodes, edges }: { nodes: FlowNode[]; edges: FlowEdge[]
           <Row label="Trigger"><Select value={new Set(edges.map((e) => e.data?.trigger)).size === 1 ? edges[0].data?.trigger ?? 'tap' : ''} placeholder="Mixed" onChange={(t) => setEdges((es) => es.map((e) => (edges.some((x) => x.id === e.id) ? { ...e, data: { ...e.data!, trigger: t as Trigger } } : e)), { label: 'Set trigger' })} options={TRIGGERS} label="Trigger" /></Row>
         </Section>
       )}
-      <div className="flex gap-1.5 px-3 pt-2 pb-3">
+      <div className="flex gap-1.5 px-pad pt-2 pb-3">
         <Button size="md" variant="default" className="flex-1" onClick={duplicate} disabled={!nodes.length}><Copy size={13} strokeWidth={1.5} />Duplicate</Button>
         <Button size="md" variant="danger" className="flex-1" onClick={deleteSelection}><Trash2 size={13} strokeWidth={1.5} />Delete</Button>
       </div>
@@ -290,7 +290,7 @@ const sectionCount = () => doc.get().flows.find((f) => f.id === ui.getState().fl
 function Stat({ label, value, children }: { label: string; value: ReactNode; children?: ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5 rounded-[8px] bg-well px-2.5 py-2">
-      <span className="text-[11px] text-fg-muted">{label}</span>
+      <span className="text-ui text-fg-muted">{label}</span>
       <span className="text-[15px] font-semibold tabular">{value}</span>
       {children}
     </div>
@@ -318,24 +318,24 @@ function DocInspector() {
         </Row>
       </Section>
       <Section title="Overview">
-        <div className="grid grid-cols-3 gap-1.5 px-3">
+        <div className="grid grid-cols-3 gap-1.5 px-pad">
           <Stat label="Screens" value={screens.length} />
           <Stat label="Decisions" value={flow.nodes.filter((n) => n.type === 'decision').length} />
           <Stat label="Links" value={flow.edges.length} />
         </div>
-        <div className="px-3 pt-2.5">
+        <div className="px-pad pt-2.5">
           <div className="flex h-1.5 overflow-hidden rounded-full bg-track" role="img" aria-label={`Status breakdown: ${counts.shipped} shipped, ${counts.ready} ready, ${counts.draft} draft`}>
             {(['shipped', 'ready', 'draft'] as Status[]).map((s) => <div key={s} className={cn(STATUS[s].dot, s === 'draft' && 'bg-line-strong')} style={{ width: `${(counts[s] / total) * 100}%` }} />)}
           </div>
-          <div className="mt-1.5 flex gap-3 text-[11px] text-fg-muted">
+          <div className="mt-1.5 flex gap-3 text-ui text-fg-muted">
             {(['shipped', 'ready', 'draft'] as Status[]).map((s) => <span key={s} className="flex items-center gap-1.5 tabular"><StatusDot status={s} decorative />{STATUS[s].label} {counts[s]}</span>)}
           </div>
         </div>
-        <div className="flex items-center gap-2 px-3 pt-3">
-          <div className="min-w-0 flex-1 text-[11.5px] text-fg-muted">Happy path · <span className="tabular text-fg">{steps}</span> steps</div>
+        <div className="flex items-center gap-2 px-pad pt-3">
+          <div className="min-w-0 flex-1 text-ui text-fg-muted">Happy path · <span className="tabular text-fg">{steps}</span> steps</div>
           <Tip label="Walk through the happy path" shortcut="p"><Button size="sm" variant="default" onClick={startWalkthrough} disabled={steps < 2}><Play size={12} strokeWidth={1.5} />Walkthrough</Button></Tip>
         </div>
-        <div className="px-3 pt-1 text-[11px] text-fg-faint">Edited {ago(flow.updated)} · {PEOPLE[flow.owner]?.name ?? 'You'}</div>
+        <div className="px-pad pt-1 text-ui text-fg-faint">Edited {ago(flow.updated)} · {PEOPLE[flow.owner]?.name ?? 'You'}</div>
       </Section>
       <div className="border-t border-line">
         <Inspector params={params} />
@@ -352,7 +352,7 @@ function CommentsTab() {
   const resolved = flow.comments.filter((c) => c.resolved).length
   return (
     <div className="flex flex-col">
-      <div className="flex h-9 items-center gap-2 border-b border-line px-3 text-[11.5px] text-fg-muted">
+      <div className="flex h-bar items-center gap-2 border-b border-line px-pad text-ui text-fg-muted">
         <span className="flex-1">Show resolved{resolved ? ` (${resolved})` : ''}</span>
         <Switch size="sm" checked={showResolved} onChange={(b) => ui.setState({ showResolved: b })} label="Show resolved" />
       </div>
@@ -365,13 +365,13 @@ function CommentsTab() {
         return (
           <button key={c.id} type="button"
             onClick={() => { ui.setState({ openComment: c.id, draft: null }); viewport.focusPoint?.(commentPos(flow, c)) }}
-            className={cn('flex gap-2.5 border-b border-line px-3 py-2.5 text-left outline-none hover:bg-hover focus-visible:bg-hover', open === c.id && 'bg-signal-soft', c.resolved && 'opacity-60')}>
+            className={cn('flex gap-2.5 border-b border-line px-pad py-2.5 text-left outline-none hover:bg-hover focus-visible:bg-hover', open === c.id && 'bg-signal-soft', c.resolved && 'opacity-60')}>
             <Avatar who={c.author} size={22} />
             <div className="min-w-0 flex-1">
-              <div className="flex items-baseline gap-1.5 text-[12px]"><span className="font-medium">{PEOPLE[c.author]?.name ?? 'You'}</span><span className="text-[11px] text-fg-faint">{ago(c.at)}</span></div>
-              {host && <div className="truncate text-[11px] text-signal">on {host.data.name}</div>}
-              <p className="mt-0.5 line-clamp-3 text-[12px] leading-relaxed text-fg/90">{c.text}</p>
-              {c.replies.length > 0 && <div className="mt-1 text-[11px] text-fg-faint">{c.replies.length} {c.replies.length === 1 ? 'reply' : 'replies'}</div>}
+              <div className="flex items-baseline gap-1.5 text-ui"><span className="font-medium">{PEOPLE[c.author]?.name ?? 'You'}</span><span className="text-ui text-fg-faint">{ago(c.at)}</span></div>
+              {host && <div className="truncate text-ui text-signal">on {host.data.name}</div>}
+              <p className="mt-0.5 line-clamp-3 text-ui leading-relaxed text-fg/90">{c.text}</p>
+              {c.replies.length > 0 && <div className="mt-1 text-ui text-fg-faint">{c.replies.length} {c.replies.length === 1 ? 'reply' : 'replies'}</div>}
             </div>
           </button>
         )

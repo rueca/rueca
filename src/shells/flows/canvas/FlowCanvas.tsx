@@ -350,7 +350,7 @@ export function FlowCanvas() {
           </div>
           <ZoomPill zoom={zoom} onZoom={(z) => rf.zoomTo(z, { duration: 200 })} onFit={() => viewport.fit?.()} />
           {tool === 'comment' && (
-            <div className="cluster absolute top-3 left-1/2 z-10 flex h-8 -translate-x-1/2 items-center gap-2 px-3 text-[11.5px] text-fg-muted">
+            <div className="cluster absolute top-3 left-1/2 z-10 flex h-bar -translate-x-1/2 items-center gap-2 px-pad text-ui text-fg-muted">
               <MessageCircle size={13} strokeWidth={1.5} className="text-signal" />Click anywhere to leave a comment
               <button type="button" className="text-fg hover:underline" onClick={() => ui.setState({ tool: 'select', draft: null })}>Done</button>
             </div>
@@ -379,7 +379,7 @@ function WalkHUD({ index, onStep, onExit, playing, onPlay, canPlay }: { index: n
   if (!node) return null
   return (
     <>
-      <div className="cluster absolute top-3 left-3 z-10 flex h-9 items-center gap-2 px-3 text-[12px]">
+      <div className="cluster absolute top-3 left-3 z-10 flex h-bar items-center gap-2 px-pad text-ui">
         <span className="font-semibold">{flow.name}</span>
         <span className="text-fg-faint">Walkthrough · happy path</span>
       </div>

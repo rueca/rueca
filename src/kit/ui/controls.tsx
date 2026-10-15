@@ -292,9 +292,9 @@ export function Badge({ children, tone = 'default', className }: { children: Rea
   const tones = {
     default: 'bg-hover text-fg-muted',
     accent: 'bg-signal-soft text-signal-text',
-    key: 'bg-key/15 text-key',
-    rec: 'bg-rec/15 text-rec',
-    ok: 'bg-ok/15 text-ok',
+    key: 'bg-key/15 text-key-text',
+    rec: 'bg-rec/15 text-rec-text',
+    ok: 'bg-ok/15 text-ok-text',
   }
   return <span className={cn('inline-flex h-[18px] items-center gap-1 rounded-[5px] px-1.5 text-ui-sm font-medium tabular', tones[tone], className)}>{children}</span>
 }
