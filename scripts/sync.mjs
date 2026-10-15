@@ -137,6 +137,7 @@ const ABOUT = {
   'studio-layout': ['Studio layout', 'Islands, overlay and docked layouts, toolbar, brand, clusters, tool dock, panels.'],
   scrub: ['Scrub value', 'Drag, type or write expressions into a number. Shift ×10, Alt ×0.1.'],
   color: ['Colour', 'Colour field, panel and swatches with OKLCH.'],
+  'notes-server': ['Notes server', 'Dev-server route that lets the tool send notes to your agent: writes them to .rueca/notes/. Vite plugin plus a handler for any Node server.'],
   bridge: ['Studio bridge', '2 KB script that lets the harness drive any page inside an iframe via postMessage.'],
 }
 /* The registry copy of theme.css lands in SOMEONE ELSE'S app (often next to shadcn's), so it must not touch

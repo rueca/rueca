@@ -77,7 +77,7 @@ export default function MotionShell() {
           center={<Cluster><Button size="md" variant="ghost"><Smartphone size={14} strokeWidth={1.5} />iPhone 15</Button><IconButton icon={RotateCcw} label="Replay" shortcut="r" onClick={() => clock.replay()} /></Cluster>}
           end={
             <>
-              <Cluster><ParamActions params={params} /></Cluster>
+              <Cluster><ParamActions params={params} clock={clock} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>}
                 items={[
                   { type: 'label', label: 'Export' },

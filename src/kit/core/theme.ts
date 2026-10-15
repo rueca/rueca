@@ -25,6 +25,9 @@ const read = (): Theme => {
   return a === 'light' || a === 'dark' ? a : stored() ?? os()
 }
 
+/** The theme the tool is showing right now (non-reactive). */
+export const currentTheme = read
+
 const apply = (t: Theme) => {
   const root = document.documentElement
   if (htmlClass) { root.classList.toggle('light', t === 'light'); root.classList.toggle('dark', t === 'dark') }

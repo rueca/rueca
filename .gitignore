@@ -14,3 +14,6 @@ brand/logo/*signifier*
 
 # Moodboards link to third-party images (Cosmos, are.na, Pinterest…): local only, never in the public repo
 brand/moodboards/
+
+# notes the shell sends to the agent (snapshots of local tuning): local only
+.rueca/

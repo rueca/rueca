@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
 import { site } from './src/site.config'
+import { ruecaNotes } from './src/kit/notes-server/vite'
 
 export default defineConfig({
   // GitHub Pages serves a project site under /<repo>/; the deploy workflow sets BASE_PATH.
@@ -10,6 +11,8 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    // "Send to agent" in the shells writes notes to .rueca/notes/ (dev server only)
+    ruecaNotes(),
     // Title + link-preview meta from site.config (bots don't run JS, so it must be in the HTML).
     { name: 'site-meta', transformIndexHtml: (html) => {
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')

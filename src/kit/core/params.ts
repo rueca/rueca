@@ -54,6 +54,8 @@ export interface ParamStore<S extends Schema, V extends Values = SchemaValues<S>
   schema: S
   defs: Record<string, ParamDef>
   id: string
+  /** the schema version (ParamOptions.version, default 1) — what share links carry as $v */
+  version: number
   /** current values (non-reactive) */
   values(): V
   setValue<K extends keyof V>(key: K, value: V[K], opts?: { commit?: boolean; label?: string }): void
@@ -345,6 +347,7 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
     schema,
     defs,
     id: opts.id,
+    version: opts.version ?? 1,
     values: () => store.getState().values,
     setValue: (key: any, value: any, o: { commit?: boolean; label?: string } = {}) => {
       const clean = sanitize({ [key]: value } as Partial<V>, 'setValue')

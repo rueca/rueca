@@ -1,19 +1,24 @@
 /* ---------------------------------------------------------------------------
    The standard cluster every instrument gets for free: undo/redo, presets
-   (save, apply, delete), A/B compare, share link, copy values for an agent,
-   theme. Drop <ParamActions params={params} /> into a toolbar cluster.
+   (save, apply, delete), A/B compare, send to agent, share link, copy values
+   for an agent, theme. Drop <ParamActions params={params} /> into a toolbar cluster.
 
    With document state too, pass the joined history:
      const history = createHistory([params, doc])
      <ParamActions params={params} history={history} />
 
+   "Send to agent" appears only when the dev server has the notes route
+   (ruecaNotes()); pass `clock` / `doc` so the note carries the playhead and doc.
+
    Kit hotkeys here register at priority 0, so a shell binding the same key
    (T for a Text tool, \ for before/after) wins without configuration.
 --------------------------------------------------------------------------- */
-import { Bookmark, Moon, Redo2, Sun, Undo2, Link, Braces, SplitSquareHorizontal, Trash2, Plus, Download, ChevronDown, Bot, Smartphone } from 'lucide-react'
-import type { ReactElement } from 'react'
+import { Bookmark, Moon, Redo2, Sun, Undo2, Link, Braces, SplitSquareHorizontal, Trash2, Plus, Download, ChevronDown, Bot, Smartphone, Send } from 'lucide-react'
+import { useEffect, useState, type ReactElement } from 'react'
 import { useStore } from 'zustand'
 import type { AnyParams } from '../core/params'
+import type { DocStore } from '../core/doc'
+import { captureSnapshot, findNotesEndpoint, formatNotePrompt, sendNote } from '../core/notes'
 import { useCanUndo, type HistoryLike } from '../core/history'
 import { copyText, exportJSON } from '../core/io'
 import { useHotkeys } from '../core/hotkeys'
@@ -121,18 +126,39 @@ export function shareMenuItems(params: AnyParams): MenuItem[] {
     { label: 'Copy changed values (JSON)', icon: Braces, onClick: async () => { await copyText(JSON.stringify(params.toJSON({ changedOnly: true, shareable: true }), null, 2)); toast('Changed values copied', { type: 'success' }) } },
     {
       label: 'Copy as agent prompt', icon: Bot, hint: 'Values plus what each one means', onClick: async () => {
-        const changed = params.toJSON({ changedOnly: true, shareable: true }) as Record<string, unknown>
-        const lines = Object.entries(changed).map(([k, v]) => {
-          const d = params.defs[k] as any
-          return `- ${d?.label ?? k} (\`${k}\`): ${JSON.stringify(v)} (default ${JSON.stringify(params.getState().defaults[k])})${d?.hint ? ` — ${d.hint}` : ''}`
-        })
-        const text = `Apply these tuned values to ${params.id}. Each is a param key in the schema:\n\n${lines.join('\n') || '- (no changes from defaults)'}\n`
-        await copyText(text)
+        await copyText(formatNotePrompt({ kind: 'values', snapshot: captureSnapshot({ params }) }))
         toast('Prompt copied', { type: 'success' })
       },
     },
     { label: 'Download all values', icon: Download, onClick: () => exportJSON(params.toJSON({ shareable: true }), `${params.id}-values.json`) },
   ]
+}
+
+/** True once the dev server's notes route answers (ruecaNotes()); false on a static build. */
+export function useNotesEndpoint() {
+  const [ok, setOk] = useState(false)
+  useEffect(() => { let live = true; findNotesEndpoint().then((u) => { if (live) setOk(!!u) }); return () => { live = false } }, [])
+  return ok
+}
+
+/** Writes the changed values to .rueca/notes/ for the agent to bake in. Renders nothing without the notes route. */
+export function SendToAgentButton({ params, history, clock, doc }: { params: AnyParams; history?: HistoryLike; clock?: { time(): number }; doc?: DocStore<any> }) {
+  const available = useNotesEndpoint()
+  const [busy, setBusy] = useState(false)
+  if (!available) return null
+  const run = async () => {
+    const snapshot = captureSnapshot({ params, history, clock, doc })
+    const n = Object.keys(snapshot.changed).length
+    if (!n && !doc) { toast('Nothing to send', { description: 'Every value is at its default.' }); return }
+    setBusy(true)
+    try {
+      await sendNote({ kind: 'values', snapshot })
+      toast(n ? `Sent ${n} ${n === 1 ? 'value' : 'values'} to the agent` : 'Sent to the agent', { type: 'success', description: 'Ask it to check the notes.' })
+    } catch (e) {
+      toast('Could not send', { type: 'error', description: (e as Error).message })
+    } finally { setBusy(false) }
+  }
+  return <IconButton icon={Send} label="Send to agent" disabled={busy} onClick={run} />
 }
 
 export function ThemeToggle({ hotkey = 't' }: { hotkey?: string | false }) {
@@ -143,14 +169,18 @@ export function ThemeToggle({ hotkey = 't' }: { hotkey?: string | false }) {
 
 /** The usual right-hand cluster: history · compare · presets · share · theme. Each part can be switched off. */
 export function ParamActions({
-  params, history, presets = true, compare = true, share = true, theme = true,
-}: { params: AnyParams; history?: HistoryLike; presets?: boolean; compare?: boolean | { hotkey: string | false }; share?: boolean; theme?: boolean | { hotkey: string | false } }) {
+  params, history, clock, doc, presets = true, compare = true, agent = true, share = true, theme = true,
+}: {
+  params: AnyParams; history?: HistoryLike; clock?: { time(): number }; doc?: DocStore<any>
+  presets?: boolean; compare?: boolean | { hotkey: string | false }; agent?: boolean; share?: boolean; theme?: boolean | { hotkey: string | false }
+}) {
   return (
     <>
       <HistoryButtons params={params} history={history} />
       {compare && <CompareButton params={params} hotkey={typeof compare === 'object' ? compare.hotkey : '\\'} />}
       <Divider vertical />
       {presets && <PresetMenu params={params} />}
+      {agent && <SendToAgentButton params={params} history={history} clock={clock} doc={doc} />}
       {share && <Menu align="end" trigger={<IconButton icon={Link} label="Share & copy" />} items={shareMenuItems(params)} />}
       {theme && <ThemeToggle hotkey={typeof theme === 'object' ? theme.hotkey : 't'} />}
     </>

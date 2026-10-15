@@ -34,6 +34,7 @@
         "https://rueca.dev/r/layers.json",
         "https://rueca.dev/r/layout-fields.json",
         "https://rueca.dev/r/masonry.json",
+        "https://rueca.dev/r/notes-server.json",
         "https://rueca.dev/r/oklch.json",
         "https://rueca.dev/r/palette.json",
         "https://rueca.dev/r/param-slider.json",
@@ -285,6 +286,11 @@
           "path": "src/kit/core/io.ts",
           "type": "registry:lib",
           "target": "@components/studio/core/io.ts"
+        },
+        {
+          "path": "src/kit/core/notes.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/notes.ts"
         },
         {
           "path": "src/kit/core/params.ts",
@@ -590,6 +596,28 @@
           "path": "src/kit/ui/masonry.tsx",
           "type": "registry:component",
           "target": "@components/studio/ui/masonry.tsx"
+        }
+      ]
+    },
+    {
+      "name": "notes-server",
+      "type": "registry:lib",
+      "title": "Notes server",
+      "description": "Dev-server route that lets the tool send notes to your agent: writes them to .rueca/notes/. Vite plugin plus a handler for any Node server.",
+      "dependencies": [
+        "vite@^8.3.4"
+      ],
+      "registryDependencies": [],
+      "files": [
+        {
+          "path": "src/kit/notes-server/handler.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/notes-server/handler.ts"
+        },
+        {
+          "path": "src/kit/notes-server/vite.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/notes-server/vite.ts"
         }
       ]
     },
