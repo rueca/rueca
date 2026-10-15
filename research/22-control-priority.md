@@ -315,7 +315,7 @@ Verified in this session: the live counts (11 shells, 1440×900, default density
 | generate | 41 | 41 | no | Share sat in the "…" menu |
 | **13 shells** | **927** | **828** | | **−99 (−11%)** |
 
-Checked in both themes in the browser. tsc and the 106 tests pass.
+Checked in both themes in the browser. tsc and the 118 tests pass (after merging #10).
 
 **Still open:**
 - video's clip inspector scrolls by 135 px with the default clip selected; outside this pass.
