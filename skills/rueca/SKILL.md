@@ -169,3 +169,4 @@ so they undo, persist and share — never in `useState`.
 `assets/theme.css` is the token set (only for the no-build route — the kit ships it).
 `assets/studio-bridge.js` lets the harness drive a page on another origin.
 `scripts/accent-check.mjs` checks the accent against the rendered artboard.
+`scripts/open-notes.mjs` is the hook that tells you about open notes from the tool (`references/notes.md`).

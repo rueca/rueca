@@ -33,9 +33,17 @@ HTML pages have no route yet: rely on "Copy as agent prompt".
 
 ## When to read notes
 
+- A line at the top of the turn says "Rueca: … waiting in .rueca/notes". That's the open-notes hook:
+  pick them up without being asked, unless the message is clearly about something else (then mention
+  them in one line at the end).
 - The person says "check the notes", "I sent it", or anything else about values they sent.
 - At the start of any turn about a tool whose project has open notes:
   `grep -lE '"status": ?"open"' .rueca/notes/*.json`.
+
+The hook comes with the Rueca plugin. With the skill installed another way, add it to
+`~/.claude/settings.json` (or the project's `.claude/settings.json`) under `hooks`:
+`"UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node <skill folder>/scripts/open-notes.mjs" }] }]`.
+It looks in `.rueca/notes/` and one folder down, and only ever reports counts and tool names.
 
 Read every open note before acting. Oldest first is the order they were written.
 
