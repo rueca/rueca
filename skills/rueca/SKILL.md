@@ -106,7 +106,8 @@ export function Tool() {
 
 What the starter already gives you, so don't rebuild it: `createParams` = undo/redo (⌘Z / ⇧⌘Z),
 persistence across reloads and `#p=` share links; `ParamActions` = undo buttons, named presets
-(save / apply / delete), A/B compare (`\`), copy link, theme toggle; `Inspector` = every control,
+(save / apply / delete), A/B compare (`\`), copy link, theme toggle, and **Send to agent** once
+`ruecaNotes()` is in `vite.config.ts` (set it up by default: `references/notes.md`); `Inspector` = every control,
 scrubbable, with reset and the changed cue. Expensive params: `p.number(…, { live: false })` and apply them
 in `params.onCommit((v, meta) => …)` — that fires on pointer-up, not every drag frame.
 
@@ -157,6 +158,7 @@ so they undo, persist and share — never in `useState`.
 | `references/qa.md` | Before claiming it works |
 | `references/gotchas.md` | Something behaves strangely — not before |
 | `references/figma.md` | Content comes from Figma or the web |
+| `references/notes.md` | Setting up Send to agent, or the person says "check the notes", or `.rueca/notes/` has open notes |
 
 `assets/theme.css` is the token set (only for the no-build route — the kit ships it).
 `assets/studio-bridge.js` lets the harness drive a page on another origin.
