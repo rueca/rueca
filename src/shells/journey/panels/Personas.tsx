@@ -1,5 +1,5 @@
 /* Left panel: personas. Switching persona swaps the whole map. */
-import { MoreHorizontal, Plus, Copy, Trash2, X } from 'lucide-react'
+import { MoreHorizontal, Plus, Trash2, X, CopyPlus } from 'lucide-react'
 import { Panel, PanelHeader, Section, IconButton, Menu, Row, ScrubValue, useDoc, cn, Kbd } from '@kit'
 import { InlineText } from '@kit/ui/inline-text'
 import { wireImage, WIRE } from '@/demo/wire'
@@ -39,7 +39,7 @@ export function PersonasPanel() {
               <div className="hidden group-hover/row:block group-focus-within/row:block" onClick={(e) => e.stopPropagation()}>
                 <Menu align="end" trigger={<IconButton icon={MoreHorizontal} size="icon-sm" label="Persona actions" />}
                   items={[
-                    { label: 'Duplicate with journey', icon: Copy, onClick: () => duplicatePersona(x.id) },
+                    { label: 'Duplicate with journey', icon: CopyPlus, onClick: () => duplicatePersona(x.id) },
                     { type: 'separator' },
                     { label: 'Delete', icon: Trash2, danger: true, disabled: personas.length < 2, onClick: () => deletePersona(x.id) },
                   ]} />

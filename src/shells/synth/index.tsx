@@ -3,7 +3,8 @@ import '@fontsource-variable/ibm-plex-sans'
 import { useEffect, useRef } from 'react'
 import { useStore } from 'zustand'
 import {
-  Braces, Download, FileAudio, FileUp, Image as ImageIcon, Play, Power, Repeat, Square, Volume2, ArrowLeft, ArrowRight, Dices, Eraser, Sparkles, Eye, Gauge,
+  Braces, Download, FileAudio, FileUp, Image as ImageIcon, Play, Power, Repeat, Square, Volume2, ArrowLeft, ArrowRight, Dices, Eraser, Eye, Gauge,
+  Fingerprint, VolumeX,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Stage, CanvasSurface, ParamActions, Menu, Button, IconButton, CommandPalette, ScrubValue, Segmented,
@@ -99,10 +100,10 @@ export default function SynthShell() {
     { id: 'shl', label: 'Shift pattern left', group: 'Pattern', shortcut: 'alt+arrowleft', icon: ArrowLeft, run: () => mutate((p) => shiftPattern(p, -1)) },
     { id: 'shr', label: 'Shift pattern right', group: 'Pattern', shortcut: 'alt+arrowright', icon: ArrowRight, run: () => mutate((p) => shiftPattern(p, 1)) },
     { id: 'hats', label: 'New hat groove', group: 'Pattern', shortcut: 'h', icon: Dices, run: () => mutate((p) => randomHats(p)) },
-    { id: 'human', label: 'Humanise velocities', group: 'Pattern', icon: Sparkles, run: () => mutate((p) => humanise(p)) },
+    { id: 'human', label: 'Humanise velocities', group: 'Pattern', icon: Fingerprint, run: () => mutate((p) => humanise(p)) },
     { id: 'clear', label: 'Clear pattern', group: 'Pattern', icon: Eraser, run: () => mutate((p) => clearTrack(p)) },
     ...TRACKS.map((t) => ({ id: `clear-${t.id}`, label: `Clear ${t.name.toLowerCase()} track`, group: 'Pattern', icon: Eraser, run: () => mutate((p) => clearTrack(p, t.id)) })),
-    ...TRACKS.map((t, i) => ({ id: `mute-${t.id}`, label: `Mute ${t.name.toLowerCase()}`, group: 'Mixer', shortcut: String(i + 1), icon: Volume2, run: () => toggleKey(`${t.id}Mute`) })),
+    ...TRACKS.map((t, i) => ({ id: `mute-${t.id}`, label: `Mute ${t.name.toLowerCase()}`, group: 'Mixer', shortcut: String(i + 1), icon: VolumeX, run: () => toggleKey(`${t.id}Mute`) })),
     ...TRACKS.map((t, i) => ({ id: `solo-${t.id}`, label: `Solo ${t.name.toLowerCase()}`, group: 'Mixer', shortcut: `shift+${i + 1}`, run: () => toggleKey(`${t.id}Solo`) })),
     { id: 'unmute', label: 'Unmute and unsolo all', group: 'Mixer', run: () => params.patch(Object.fromEntries(TRACKS.flatMap((t) => [[`${t.id}Mute`, false], [`${t.id}Solo`, false]])) as Partial<V>) },
     ...Object.keys(SOUNDS).map((name) => ({ id: `snd-${name}`, label: `Sound: ${name}`, group: 'Sound', run: () => params.applyPreset(name) })),

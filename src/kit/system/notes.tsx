@@ -20,7 +20,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { createPortal } from 'react-dom'
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { Check, MessageSquarePlus, RotateCcw, Send, Trash2 } from 'lucide-react'
+import { Check, Send, Trash2, History, MessageCirclePlus } from 'lucide-react'
 import { useParamState, type AnyParams } from '../core/params'
 import type { HistoryLike } from '../core/history'
 import type { DocStore } from '../core/doc'
@@ -99,7 +99,7 @@ export function CommentButton({ params, hotkey = 'c' }: { params?: AnyParams; ho
   useHotkeys(on && hotkey ? { [hotkey]: { run: toggle, label: 'Comment', group: 'Tools' } } : {}, [on, hotkey], { priority: 0 })
   if (!on) return null
   return (
-    <IconButton icon={MessageSquarePlus} label={commenting ? 'Stop commenting' : 'Comment'} shortcut={hotkey || undefined} active={commenting} onClick={toggle} className="relative">
+    <IconButton icon={MessageCirclePlus} label={commenting ? 'Stop commenting' : 'Comment'} shortcut={hotkey || undefined} active={commenting} onClick={toggle} className="relative">
       {waiting > 0 && (
         <span aria-label={`${waiting} waiting for the agent`} className="absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-signal-strong px-0.5 text-[9.5px] leading-none font-semibold text-signal-fg tabular">
           {waiting}
@@ -319,7 +319,7 @@ function Thread({ n, num, params, clock, stale, style, className }: {
         <span className="min-w-0 flex-1 truncate font-medium text-fg-muted">
           Comment {num}{n.anchor?.on === 'param' ? ` · ${paramLabel(params, n.anchor.key)}` : ''}
         </span>
-        {stale && <IconButton icon={RotateCcw} size="icon-sm" label="Show the state it was made in" onClick={() => restoreSnapshot(n.snapshot, { params, clock })} />}
+        {stale && <IconButton icon={History} size="icon-sm" label="Show the state it was made in" onClick={() => restoreSnapshot(n.snapshot, { params, clock })} />}
         <IconButton icon={Trash2} size="icon-sm" label="Clear comment" onClick={clear} />
       </div>
       <div className="max-h-[280px] overflow-y-auto">

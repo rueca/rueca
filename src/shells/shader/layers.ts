@@ -10,7 +10,8 @@
      domain    bends the coordinates of everything below it (warp)
      resample  re-reads what is below at other coordinates (halftone, RGB split)
 --------------------------------------------------------------------------- */
-import { Aperture, Blend, Contrast, Focus, Grip, Rainbow, Rows3, Sparkles, Sunset, Waves, type LucideIcon } from 'lucide-react'
+import { Aperture, Blend, Contrast, Focus, Grip, Rainbow, Rows3, Waves, type LucideIcon } from 'lucide-react'
+import { Grain, Gradient } from '../icons'
 import { defineSchema, folder, p, defaultsOf, type Schema } from '@kit'
 import { hexToOklab, hexToRgb01 } from './color'
 
@@ -90,7 +91,7 @@ export const LAYER_TYPES: Record<LayerType, LayerTypeDef> = {
   },
 
   gradient: {
-    type: 'gradient', label: 'Gradient', category: 'Fill', icon: Sunset, kind: 'fill', blend: 'normal', opacity: 1,
+    type: 'gradient', label: 'Gradient', category: 'Fill', icon: Gradient, kind: 'fill', blend: 'normal', opacity: 1,
     hint: 'Linear, radial or conic ramp, interpolated in OKLab.',
     schema: defineSchema({
       gradient: folder('Gradient', {
@@ -236,7 +237,7 @@ export const LAYER_TYPES: Record<LayerType, LayerTypeDef> = {
   },
 
   grain: {
-    type: 'grain', label: 'Grain', category: 'Finish', icon: Sparkles, kind: 'fill', blend: 'overlay', opacity: 0.32,
+    type: 'grain', label: 'Grain', category: 'Finish', icon: Grain, kind: 'fill', blend: 'overlay', opacity: 0.32,
     hint: 'Film grain. Overlay at low opacity is the classic recipe.',
     schema: defineSchema({
       grain: folder('Grain', {

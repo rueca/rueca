@@ -2,8 +2,8 @@
    with nothing selected, the composition settings from the schema. */
 import { Popover } from '@base-ui/react/popover'
 import {
-  AlignCenter, AlignHorizontalJustifyCenter, AlignLeft, AlignRight, AlignVerticalJustifyCenter, Circle, CircleDashed, Copy, Image as ImageIcon,
-  Scissors, Settings2, Shapes, Square, Trash2, Type,
+  AlignCenter, AlignHorizontalJustifyCenter, AlignLeft, AlignRight, AlignVerticalJustifyCenter, Circle, CircleDashed, Image as ImageIcon, Scissors,
+  Settings2, Shapes, Square, Trash2, Type, Minus, CopyPlus,
 } from 'lucide-react'
 import {
   AngleDial, Badge, Button, ColorField, CurveEditor, CurveGlyph, IconButton, Inspector, Row, ScrubValue, SeedField, Section, Segmented, Select, Slider,
@@ -46,7 +46,7 @@ export function ClipInspector() {
       </Section>
       <Section title="Add clip">
         <div className="grid grid-cols-2 gap-1.5 px-pad pb-1">
-          {([['text', Type, 'Text'], ['shape', Shapes, 'Shape'], ['image', ImageIcon, 'Image'], ['progress', CircleDashed, 'Progress']] as const).map(([k, Icon, l]) => (
+          {([['text', Type, 'Text'], ['shape', Shapes, 'Shape'], ['image', ImageIcon, 'Image'], ['progress', Minus, 'Progress']] as const).map(([k, Icon, l]) => (
             <Button key={k} size="md" variant="default" onClick={() => addClip(k)}><Icon size={14} strokeWidth={1.5} />{l}</Button>
           ))}
         </div>
@@ -60,7 +60,7 @@ function MultiSection({ ids }: { ids: string[] }) {
   return (
     <Section title={`${ids.length} clips`} first actions={<IconButton size="icon-sm" icon={Trash2} label="Delete" shortcut="backspace" onClick={() => deleteClips(ids)} />}>
       <div className="flex flex-col gap-1.5 px-pad pb-1">
-        <Button size="md" variant="default" onClick={() => duplicateClips(ids)}><Copy size={14} strokeWidth={1.5} />Duplicate</Button>
+        <Button size="md" variant="default" onClick={() => duplicateClips(ids)}><CopyPlus size={14} strokeWidth={1.5} />Duplicate</Button>
         <Button size="md" variant="default" onClick={() => splitAt(ids)}><Scissors size={14} strokeWidth={1.5} />Split at playhead</Button>
       </div>
     </Section>
@@ -110,7 +110,7 @@ function ClipSections({ c }: { c: Clip }) {
       <Section title="Clip" first actions={
         <div className="flex items-center">
           <Badge>{KIND_LABEL[c.kind]}</Badge>
-          <IconButton size="icon-sm" icon={Copy} label="Duplicate" shortcut="mod+d" onClick={() => duplicateClips([c.id])} />
+          <IconButton size="icon-sm" icon={CopyPlus} label="Duplicate" shortcut="mod+d" onClick={() => duplicateClips([c.id])} />
           <IconButton size="icon-sm" icon={Trash2} label="Delete" shortcut="backspace" onClick={() => deleteClips([c.id])} />
         </div>
       }>

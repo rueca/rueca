@@ -1,6 +1,6 @@
 /* One image in the grid: select, favourite, hover actions, provenance badges. */
 import { memo } from 'react'
-import { Heart, Sparkles, Maximize2, Download, Check, MoreHorizontal, Wand2, Copy, Trash2, FolderHeart, Expand } from 'lucide-react'
+import { Heart, Download, Check, MoreHorizontal, Wand2, Copy, Trash2, FolderHeart, Expand, ImageUpscale, Grid2x2Plus } from 'lucide-react'
 import { Menu, Tip, toast, cn } from '@kit'
 import { wireImage } from '@/demo/wire'
 import { clickSelect, toggleFavourite, toggleBoard, library, type ImageRec } from '../state/gallery'
@@ -51,8 +51,8 @@ export const Tile = memo(function Tile({ rec, selected, multi }: { rec: ImageRec
       </div>
 
       <div className="absolute right-2 bottom-2 flex gap-1 opacity-0 transition-opacity group-hover/tile:opacity-100 group-focus-within/tile:opacity-100">
-        <Tip label="Variations" shortcut="v"><button type="button" aria-label="Variations" className={glass} onClick={() => variations(rec)}><Sparkles size={14} strokeWidth={1.5} /></button></Tip>
-        <Tip label="Upscale 2×" shortcut="u"><button type="button" aria-label="Upscale 2×" className={glass} onClick={() => upscale(rec)}><Maximize2 size={14} strokeWidth={1.5} /></button></Tip>
+        <Tip label="Variations" shortcut="v"><button type="button" aria-label="Variations" className={glass} onClick={() => variations(rec)}><Grid2x2Plus size={14} strokeWidth={1.5} /></button></Tip>
+        <Tip label="Upscale 2×" shortcut="u"><button type="button" aria-label="Upscale 2×" className={glass} onClick={() => upscale(rec)}><ImageUpscale size={14} strokeWidth={1.5} /></button></Tip>
         <Menu align="end" side="top" trigger={<button type="button" aria-label="More actions" className={glass}><MoreHorizontal size={14} strokeWidth={1.5} /></button>}
           items={[
             { label: 'Open', icon: Expand, shortcut: 'space', onClick: open },

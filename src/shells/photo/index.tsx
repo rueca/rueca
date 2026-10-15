@@ -6,8 +6,8 @@ import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
 import { Popover } from '@base-ui/react/popover'
 import {
-  Braces, Columns2, Contrast, Crop, Download, ImageDown, ImagePlus, ImageUp, Images, Palette, Plus, RectangleHorizontal, RectangleVertical,
-  RotateCcw, Triangle, WandSparkles, X, ZoomIn,
+  Columns2, Crop, Download, ImageDown, ImagePlus, ImageUp, Images, Palette, Plus, RectangleHorizontal, RectangleVertical, RotateCcw, Triangle,
+  WandSparkles, X, ZoomIn, Eye, TriangleAlert, Link,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Section, Row, Stage, Artboard, Menu, Button, IconButton, CommandPalette,
@@ -380,7 +380,7 @@ export default function DevelopShell() {
             <Cluster>
               <IconButton icon={Crop} label={s.cropping ? 'Apply crop' : 'Crop & straighten'} shortcut="c" active={!!s.cropping} onClick={toggleCrop} disabled={!s.hasImage} />
               <IconButton icon={Columns2} label="Before / after split" shortcut="y" active={s.split !== null} onClick={toggleSplit} disabled={!s.hasImage || !!s.cropping} />
-              <IconButton icon={Contrast} label="Hold to see the original" shortcut="\\" active={s.bypass} disabled={!s.hasImage}
+              <IconButton icon={Eye} label="Hold to see the original" shortcut="\\" active={s.bypass} disabled={!s.hasImage}
                 onPointerDown={() => ui.setState({ bypass: true })} onPointerUp={() => ui.setState({ bypass: false })} onPointerLeave={() => s.bypass && ui.setState({ bypass: false })} />
               <Divider vertical />
               <IconButton icon={Triangle} label="Clipping warnings" shortcut="j" active={s.clip.shadows && s.clip.highlights} onClick={toggleClip} disabled={!s.hasImage} />
@@ -392,7 +392,7 @@ export default function DevelopShell() {
               <Cluster>
                 <HistoryButtons history={history} />
                 <Divider vertical />
-                <Menu align="end" trigger={<IconButton icon={Braces} label="Share & copy" />}
+                <Menu align="end" trigger={<IconButton icon={Link} label="Share & copy" />}
                   items={[...shareMenuItems(params), { type: 'separator' }, { label: 'Export look as .cube LUT', icon: Palette, shortcut: 'shift+mod+l', onClick: () => exportCube(33) }]} />
                 <ThemeToggle />
               </Cluster>
@@ -478,7 +478,7 @@ export default function DevelopShell() {
         )}
         {failed && (
           <div className="absolute inset-0 flex items-center justify-center bg-field">
-            <Empty icon={X} title="The develop engine couldn’t start" hint={`It needs WebGL2. ${failed}`} />
+            <Empty icon={TriangleAlert} title="The develop engine couldn’t start" hint={`It needs WebGL2. ${failed}`} />
           </div>
         )}
         {intake.over && <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-[12px] bg-signal-soft text-title font-medium text-signal shadow-[inset_0_0_0_2px_var(--signal)]">Drop to open</div>}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from 'zustand'
 import {
-  Braces, Columns2, Copy, Download, Eye, FileText, Grid3x3, Image as ImageIcon, ImageUp, Pipette, RotateCcw, Shapes, Sparkles, Type,
+  Columns2, Download, Eye, FileText, Grid3x3, Image as ImageIcon, ImageUp, Pipette, RotateCcw, Shapes, Images, ClipboardType, Link,
 } from 'lucide-react'
 import { ZoomPill,
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Artboard, Menu, Button, IconButton, Divider, Badge,
@@ -104,7 +104,7 @@ export default function DitherLab() {
 
   const commands: Command[] = [
     { id: 'open', label: 'Open image…', group: 'Image', shortcut: 'mod+o', icon: ImageUp, run: intake.open },
-    { id: 'sample', label: 'Use the sample image', group: 'Image', icon: Sparkles, run: loadSample },
+    { id: 'sample', label: 'Use the sample image', group: 'Image', icon: Images, run: loadSample },
     ...EFFECTS.map((e, i) => ({ id: `fx-${e.value}`, label: `Effect: ${e.label}`, group: 'Effect', shortcut: String(i + 1), keywords: ['dither', e.hint], run: () => params.setValue('effect', e.value) })),
     { id: 'invert', label: 'Invert', group: 'Adjust', shortcut: 'i', run: () => params.setValue('invert', !params.values().invert) },
     { id: 'reset-adj', label: 'Reset adjustments', group: 'Adjust', icon: RotateCcw, run: () => params.reset(['levels', 'brightness', 'contrast', 'gamma', 'blur', 'sharpen', 'invert']) },
@@ -117,7 +117,7 @@ export default function DitherLab() {
     { id: 'png2', label: 'Export PNG 2×', group: 'Export', icon: ImageIcon, run: () => exportPNG(2) },
     { id: 'png4', label: 'Export PNG 4×', group: 'Export', icon: ImageIcon, run: () => exportPNG(4) },
     { id: 'svg', label: 'Export SVG (halftone circles)', group: 'Export', shortcut: 'shift+mod+e', icon: Shapes, run: exportSVG },
-    { id: 'ascii', label: 'Copy ASCII text', group: 'Export', shortcut: 'shift+mod+c', icon: Copy, run: copyASCII },
+    { id: 'ascii', label: 'Copy ASCII text', group: 'Export', shortcut: 'shift+mod+c', icon: ClipboardType, run: copyASCII },
     { id: 'txt', label: 'Download ASCII (.txt)', group: 'Export', icon: FileText, run: downloadTXT },
     { id: 'reset', label: 'Reset all settings', group: 'Values', icon: RotateCcw, run: () => params.reset() },
   ]
@@ -130,7 +130,7 @@ export default function DitherLab() {
           center={
             <Cluster>
               <Button size="md" variant="ghost" onClick={intake.open} title="Open image (⌘O), or drop or paste anywhere"><ImageUp size={14} strokeWidth={1.5} />Open image</Button>
-              <IconButton icon={Sparkles} label="Use the sample image" onClick={loadSample} active={img.sample} />
+              <IconButton icon={Images} label="Use the sample image" onClick={loadSample} active={img.sample} />
             </Cluster>
           }
           end={
@@ -147,10 +147,10 @@ export default function DitherLab() {
                   { label: `PNG 4× · ${size.w * 4} × ${size.h * 4}`, icon: ImageIcon, onClick: () => exportPNG(4) },
                   { type: 'separator' },
                   { label: 'SVG (halftone circles)', icon: Shapes, shortcut: 'shift+mod+e', disabled: v.effect !== 'halftone', onClick: exportSVG },
-                  { label: 'Copy ASCII text', icon: Copy, shortcut: 'shift+mod+c', disabled: v.effect !== 'ascii', onClick: copyASCII },
+                  { label: 'Copy ASCII text', icon: ClipboardType, shortcut: 'shift+mod+c', disabled: v.effect !== 'ascii', onClick: copyASCII },
                   { label: 'Download ASCII .txt', icon: FileText, disabled: v.effect !== 'ascii', onClick: downloadTXT },
                   { type: 'separator' },
-                  { type: 'submenu', label: 'Share settings', icon: Braces, items: shareMenuItems(params) } as MenuItem,
+                  { type: 'submenu', label: 'Share settings', icon: Link, items: shareMenuItems(params) } as MenuItem,
                 ]} />
             </>
           }
@@ -365,7 +365,7 @@ function ViewDock() {
         onKeyUp={() => view.setState({ peek: false })} />
       <Divider vertical />
       <IconButton icon={Grid3x3} label={grid ? 'Hide pixel grid' : 'Show pixel grid (at high zoom)'} shortcut="shift+g" tipSide="top" active={grid} onClick={() => view.setState({ grid: !grid })} />
-      <IconButton icon={Type} label="Copy ASCII text" shortcut="shift+mod+c" tipSide="top" onClick={copyASCII} disabled={useValues(params, (v) => v.effect) !== 'ascii'} />
+      <IconButton icon={ClipboardType} label="Copy ASCII text" shortcut="shift+mod+c" tipSide="top" onClick={copyASCII} disabled={useValues(params, (v) => v.effect) !== 'ascii'} />
     </div>
   )
 }

@@ -2,7 +2,7 @@
 import { memo, useEffect, useRef, type CSSProperties } from 'react'
 import { Handle, Position, useConnection, type NodeProps } from '@xyflow/react'
 import { useStore } from 'zustand'
-import { AlertTriangle, EyeOff } from 'lucide-react'
+import { AlertTriangle, PowerOff } from 'lucide-react'
 import { ScrubValue, Tip, cn, useValues } from '@kit'
 import { InlineText } from '@kit/ui/inline-text'
 import { specOf, portOf, type PortSpec, type PortType } from '../engine/spec'
@@ -79,7 +79,7 @@ export const NodeView = memo(function NodeView({ id, data, selected }: NodeProps
       <div className="flex h-8 items-center gap-1.5 pt-[3px] pr-2 pl-2.5">
         <span className="flex shrink-0" style={{ color: cat }}><Icon size={14} strokeWidth={1.5} /></span>
         <InlineText focusable={false} value={data.title} onCommit={(t) => updateData([id], () => ({ title: t }))} className="flex-1 truncate text-[12px] font-medium text-fg" label="Rename node" />
-        {data.bypass && <Tip label="Bypassed (B)"><span className="text-fg-faint"><EyeOff size={12} strokeWidth={1.5} /></span></Tip>}
+        {data.bypass && <Tip label="Bypassed (B)"><span className="text-fg-faint"><PowerOff size={12} strokeWidth={1.5} /></span></Tip>}
         {error && <Tip label={error}><span className="text-rec"><AlertTriangle size={13} strokeWidth={1.75} /></span></Tip>}
         {!error && thumb && thumb.ms >= 0.5 && <span className="tabular text-[10.5px] text-fg-faint">{thumb.ms < 10 ? thumb.ms.toFixed(1) : Math.round(thumb.ms)}ms</span>}
       </div>

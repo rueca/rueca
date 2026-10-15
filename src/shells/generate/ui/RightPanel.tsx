@@ -1,5 +1,5 @@
 /* Right panel: Create (sampling settings via the kit Inspector) and Details (how the selected image was made). */
-import { Copy, CornerUpLeft, Sparkles, Maximize2, Wand2, Heart, Download, Trash2, FolderHeart, Lock, Settings2, Columns2, Plus, Info, ChevronDown } from 'lucide-react'
+import { Copy, CornerUpLeft, Wand2, Heart, Download, Trash2, FolderHeart, Lock, Settings2, Columns2, Plus, ChevronDown, ImageUpscale, Grid2x2Plus, MousePointerClick } from 'lucide-react'
 import { Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Button, IconButton, Menu, Badge, Empty, Tip, toast, copyText, useValues } from '@kit'
 import { promptText } from '@kit/system/dialog'
 import { modelOf, aspectOf, type GenParams } from '../engine/models'
@@ -16,7 +16,7 @@ export function RightPanel() {
   return (
     <Panel header={<PanelHeader><PanelTabs value={tab} onChange={(t) => ui.setState({ tab: t })} tabs={[{ value: 'create', label: 'Create' }, { value: 'details', label: 'Details' }]} /></PanelHeader>}>
       {tab === 'create' ? <Create /> : selection.length === 1 ? <Details id={selection[0]} /> : selection.length === 2 ? <Pair a={selection[0]} b={selection[1]} /> : selection.length > 2 ? <Many n={selection.length} /> : (
-        <Empty icon={Info} title="Select an image" hint="Its prompt, seed and every setting used appear here — with one click to reuse them." />
+        <Empty icon={MousePointerClick} title="Select an image" hint="Its prompt, seed and every setting used appear here — with one click to reuse them." />
       )}
     </Panel>
   )
@@ -71,7 +71,7 @@ function Details({ id }: { id: string }) {
           {pix ? <img src={pix.url} alt="" className="h-full w-full object-cover" /> : <span className="block h-full w-full animate-pulse bg-hover" />}
         </button>
         <div className="mt-2 flex items-center gap-1">
-          <Button size="md" variant="primary" className="flex-1" onClick={() => variations(rec)}><Sparkles size={14} strokeWidth={1.5} />Variations</Button>
+          <Button size="md" variant="primary" className="flex-1" onClick={() => variations(rec)}><Grid2x2Plus size={14} strokeWidth={1.5} />Variations</Button>
           <Menu align="end" trigger={<Button size="icon" variant="default" aria-label="Variation strength"><ChevronDown size={14} strokeWidth={1.5} /></Button>}
             items={[
               { type: 'label', label: 'Variation strength' },
@@ -79,7 +79,7 @@ function Details({ id }: { id: string }) {
               { label: 'Medium', hint: '0.4', onClick: () => variations(rec, 0.4) },
               { label: 'Strong', hint: '0.7', onClick: () => variations(rec, 0.7) },
             ]} />
-          <Tip label={p.upscale ? 'Already upscaled' : 'Upscale 2×'} shortcut="u"><Button size="icon" variant="default" aria-label="Upscale" disabled={!!p.upscale} onClick={() => upscale(rec)}><Maximize2 size={14} strokeWidth={1.5} /></Button></Tip>
+          <Tip label={p.upscale ? 'Already upscaled' : 'Upscale 2×'} shortcut="u"><Button size="icon" variant="default" aria-label="Upscale" disabled={!!p.upscale} onClick={() => upscale(rec)}><ImageUpscale size={14} strokeWidth={1.5} /></Button></Tip>
           <Tip label="Remix" shortcut="r"><Button size="icon" variant="default" aria-label="Remix" onClick={() => remix(rec)}><Wand2 size={14} strokeWidth={1.5} /></Button></Tip>
         </div>
         <div className="mt-1 flex items-center gap-0.5">
@@ -175,7 +175,7 @@ function Many({ n }: { n: number }) {
     <div className="flex flex-col gap-1.5 p-pad">
       <div className="pb-1 text-title font-medium text-fg">{n} images selected</div>
       <Button variant="default" onClick={() => toggleFavourite(sel)}><Heart size={14} strokeWidth={1.5} />Toggle favourite</Button>
-      <Button variant="default" onClick={() => { for (const id of sel) { const r = byId(id); if (r) upscale(r) } }}><Maximize2 size={14} strokeWidth={1.5} />Upscale all</Button>
+      <Button variant="default" onClick={() => { for (const id of sel) { const r = byId(id); if (r) upscale(r) } }}><ImageUpscale size={14} strokeWidth={1.5} />Upscale all</Button>
       <Button variant="danger" onClick={() => removeWithUndo(sel)}><Trash2 size={14} strokeWidth={1.5} />Delete {n} images</Button>
       <p className="pt-1 text-ui leading-relaxed text-fg-muted">Select exactly two to compare them side by side.</p>
       <Button variant="ghost" onClick={() => select([])}>Clear selection</Button>

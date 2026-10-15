@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { useStore } from 'zustand'
 import {
-  ArrowDown, ArrowUp, Braces, ChevronUp, Code, Copy, Dices, Download, Eye, Film, FileCode, Gauge, Image as ImageIcon, Layers2, Pause, Play,
-  Plus, RotateCcw, SkipBack, StepBack, StepForward, Trash2,
+  ArrowDown, ArrowUp, ChevronUp, Code, Dices, Download, Eye, Film, FileCode, Gauge, Image as ImageIcon, Layers2, Pause, Play, Plus, RotateCcw,
+  SkipBack, StepBack, StepForward, Trash2, CopyPlus, Link,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Slider, ScrubValue, Select, Menu, Button, IconButton,
@@ -90,7 +90,7 @@ export default function GradientStudio() {
     { id: 'save-look', label: 'Save current look…', group: 'Look', icon: Plus, run: saveLook },
     ...presets.map((p) => ({ id: `look-${p.name}`, label: `Look: ${p.name}`, group: 'Look', run: () => applyLook(p.name) })),
     ...Object.values(LAYER_TYPES).map((d) => ({ id: `add-${d.type}`, label: `Add ${d.label.toLowerCase()}`, group: 'Layers', icon: d.icon, keywords: [d.category, 'effect', 'layer'], run: () => addLayer(d.type) })),
-    { id: 'dup', label: 'Duplicate layer', group: 'Layers', shortcut: 'mod+d', icon: Copy, run: () => sid && duplicateLayer(sid) },
+    { id: 'dup', label: 'Duplicate layer', group: 'Layers', shortcut: 'mod+d', icon: CopyPlus, run: () => sid && duplicateLayer(sid) },
     { id: 'del', label: 'Remove layer', group: 'Layers', shortcut: 'backspace', icon: Trash2, run: () => sid && removeLayer(sid) },
     { id: 'up', label: 'Move layer up', group: 'Layers', shortcut: 'mod+]', icon: ArrowUp, run: () => sid && moveBy(sid, -1) },
     { id: 'down', label: 'Move layer down', group: 'Layers', shortcut: 'mod+[', icon: ArrowDown, run: () => sid && moveBy(sid, 1) },
@@ -153,7 +153,7 @@ export default function GradientStudio() {
                   { label: 'Copy shader + uniforms', icon: Code, shortcut: 'shift+mod+c', onClick: copyShader },
                   { label: 'Download .frag + .json', icon: FileCode, onClick: downloadShader },
                   { type: 'separator' },
-                  { type: 'submenu', label: 'Share values', icon: Braces, items: shareMenuItems(params) },
+                  { type: 'submenu', label: 'Share values', icon: Link, items: shareMenuItems(params) },
                 ]} />
             </>
           }
@@ -191,7 +191,7 @@ export default function GradientStudio() {
           <PanelHeader title={sel ? <span className="flex min-w-0 items-center gap-1.5">{(() => { const I = LAYER_TYPES[sel.type].icon; return <I size={14} strokeWidth={1.5} className="shrink-0 text-signal" /> })()}<span className="truncate">{sel.name}</span></span> : 'Document'}>
             {sel && (
               <>
-                <IconButton icon={Copy} label="Duplicate" shortcut="mod+d" size="icon-sm" onClick={() => duplicateLayer(sel.id)} />
+                <IconButton icon={CopyPlus} label="Duplicate" shortcut="mod+d" size="icon-sm" onClick={() => duplicateLayer(sel.id)} />
                 <IconButton icon={Trash2} label="Remove" shortcut="backspace" size="icon-sm" onClick={() => removeLayer(sel.id)} />
               </>
             )}

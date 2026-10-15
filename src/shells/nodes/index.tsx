@@ -4,8 +4,8 @@ import './graph/graph.css'
 import { useRef } from 'react'
 import { ReactFlowProvider } from '@xyflow/react'
 import {
-  Plus, Maximize, Download, Image as ImageIcon, Braces, FolderOpen, Copy, ClipboardPaste, EyeOff, Undo2, Redo2, Workflow, Columns2,
-  Image, ScanEye, Map as MapIcon, FilePlus2, LayoutGrid, Trash2, BoxSelect, ClipboardCopy,
+  Plus, Download, Image as ImageIcon, Braces, FolderOpen, Copy, ClipboardPaste, Undo2, Redo2, Workflow, Columns2, Image, ScanEye, Map as MapIcon,
+  FilePlus2, LayoutGrid, Trash2, BoxSelect, Fullscreen, CopyPlus, PowerOff,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Brand, Cluster, Button, IconButton, Menu, Segmented, Divider, ThemeToggle, CommandPalette, HistoryButtons,
@@ -82,12 +82,12 @@ export default function NodesShell() {
 
   const commands: Command[] = [
     { id: 'add', label: 'Add node…', group: 'Graph', icon: Plus, run: () => canvasApi.openAdd(), keywords: ['tab', 'search', 'insert'] },
-    { id: 'fit', label: 'Frame all nodes', group: 'Graph', shortcut: 'f', icon: Maximize, run: () => canvasApi.fit() },
+    { id: 'fit', label: 'Frame all nodes', group: 'Graph', shortcut: 'f', icon: Fullscreen, run: () => canvasApi.fit() },
     { id: 'all', label: 'Select all nodes', group: 'Graph', shortcut: 'mod+a', icon: BoxSelect, run: () => select(graph.getState().nodes.map((n) => n.id)) },
-    { id: 'dup', label: 'Duplicate selection', group: 'Graph', shortcut: 'mod+d', icon: Copy, run: () => duplicate(selectedIds()) },
-    { id: 'copy', label: 'Copy nodes', group: 'Graph', shortcut: 'mod+c', icon: ClipboardCopy, run: () => { const n = copy(selectedIds()); if (n) toast(`Copied ${n} node${n > 1 ? 's' : ''}`) } },
+    { id: 'dup', label: 'Duplicate selection', group: 'Graph', shortcut: 'mod+d', icon: CopyPlus, run: () => duplicate(selectedIds()) },
+    { id: 'copy', label: 'Copy nodes', group: 'Graph', shortcut: 'mod+c', icon: Copy, run: () => { const n = copy(selectedIds()); if (n) toast(`Copied ${n} node${n > 1 ? 's' : ''}`) } },
     { id: 'paste', label: 'Paste nodes', group: 'Graph', shortcut: 'mod+v', icon: ClipboardPaste, run: () => paste() },
-    { id: 'bypass', label: 'Bypass / enable selection', group: 'Graph', shortcut: 'b', icon: EyeOff, run: toggleBypass },
+    { id: 'bypass', label: 'Bypass / enable selection', group: 'Graph', shortcut: 'b', icon: PowerOff, run: toggleBypass },
     { id: 'delete', label: 'Delete selection', group: 'Graph', icon: Trash2, run: () => removeNodes(selectedIds()), keywords: ['remove'] },
     { id: 'undo', label: 'Undo', group: 'Graph', icon: Undo2, run: undo },
     { id: 'redo', label: 'Redo', group: 'Graph', icon: Redo2, run: redo },
@@ -123,7 +123,7 @@ export default function NodesShell() {
                 </div>
                 <Divider vertical />
                 <IconButton icon={Plus} label="Add node" shortcut="tab" onClick={() => canvasApi.openAdd()} />
-                <IconButton icon={Maximize} label="Frame all nodes" shortcut="f" onClick={() => canvasApi.fit()} />
+                <IconButton icon={Fullscreen} label="Frame all nodes" shortcut="f" onClick={() => canvasApi.fit()} />
               </Cluster>
             }
             end={

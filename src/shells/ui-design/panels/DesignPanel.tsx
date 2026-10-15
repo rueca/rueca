@@ -7,10 +7,10 @@
 import { useState } from 'react'
 import { Popover } from '@base-ui/react/popover'
 import {
-  AlignStartVertical, AlignCenterVertical, AlignEndVertical, AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
-  ArrowRight, ArrowDown, Plus, Minus, Link2, Unlink2, Scan, SquareDashed, Sun, TextAlignStart, TextAlignCenter, TextAlignEnd,
-  RotateCcw, ArrowDownToLine, Maximize2, Component, ImageDown, CodeXml, ChevronDown, Square, Type, Hash, Circle, Shapes, Combine, Columns3, Rows3, Group,
-  PanelLeft, PanelTop,
+  AlignStartVertical, AlignCenterVertical, AlignEndVertical, AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal, ArrowRight, ArrowDown,
+  Plus, Minus, Link2, Unlink2, Sun, TextAlignStart, TextAlignCenter, TextAlignEnd, RotateCcw, Component, ImageDown, CodeXml, ChevronDown, Square,
+  Type, Hash, Circle, Shapes, Combine, Columns3, Rows3, Group, RotateCcwSquare, RulerDimensionLine, FoldHorizontal, FoldVertical, UnfoldHorizontal,
+  UnfoldVertical, AlignHorizontalSpaceBetween, AlignVerticalSpaceBetween, Blend as BlendIcon,
 } from 'lucide-react'
 import { PanelHeader, Section, Row, ScrubValue, Segmented, Select, Checkbox, IconButton, Button, Tip, Menu, ColorField, Badge, cn, type MenuItem } from '@kit'
 import * as S from '../model/store'
@@ -93,8 +93,8 @@ export function DesignPanel() {
         <Row label="Rotation">
           <ScrubValue boxed align="left" prefix="↻" label="Rotation" unit="°" step={0.1} {...R} className="flex-1" defaultValue={0} />
           <div className="flex flex-1 justify-end gap-0.5">
-            <IconButton icon={RotateCcw} size="icon-sm" label="Rotate 90° left" onClick={() => setAll(nodes, (n) => ({ rotation: ((n.rotation + 90 + 180) % 360) - 180 }))} />
-            <IconButton icon={ArrowDownToLine} size="icon-sm" label="Reset rotation" disabled={!nodes.some((n) => n.rotation)} onClick={() => setAll(nodes, () => ({ rotation: 0 }))} />
+            <IconButton icon={RotateCcwSquare} size="icon-sm" label="Rotate 90° left" onClick={() => setAll(nodes, (n) => ({ rotation: ((n.rotation + 90 + 180) % 360) - 180 }))} />
+            <IconButton icon={RotateCcw} size="icon-sm" label="Reset rotation" disabled={!nodes.some((n) => n.rotation)} onClick={() => setAll(nodes, () => ({ rotation: 0 }))} />
           </div>
         </Row>
       </Section>
@@ -114,7 +114,7 @@ export function DesignPanel() {
 
       <Section title="Appearance" {...sec('appearance')}>
         <Row label="Opacity">
-          <ScrubValue boxed align="left" prefix={<Sun size={10} strokeWidth={1.75} />} unit="%" min={0} max={100} label="Opacity" {...O} className="flex-1" defaultValue={100} />
+          <ScrubValue boxed align="left" prefix={<BlendIcon size={10} strokeWidth={1.75} />} unit="%" min={0} max={100} label="Opacity" {...O} className="flex-1" defaultValue={100} />
           <div className="flex-1">
             <Select value={blendOf(nodes)} placeholder="Mixed" label="Blend mode"
               onChange={(b) => setAll(nodes, () => ({ blend: b as Blend }))} options={BLENDS.map((b) => ({ value: b, label: b === 'color-dodge' ? 'Colour dodge' : b[0].toUpperCase() + b.slice(1) }))} />
@@ -167,9 +167,9 @@ function SizeRow({ nodes, W, H, anyAuto }: { nodes: Node[]; W: NF; H: NF; anyAut
   const canFill = anyAuto
   const sizingMenu = (axis: 'w' | 'h', cur: Sizing | typeof MIXED): MenuItem[] => [
     { type: 'label', label: axis === 'w' ? 'Horizontal resizing' : 'Vertical resizing' },
-    { label: 'Fixed', checked: cur === 'fixed', icon: Scan, onClick: () => setAll(nodes, (n) => { const b = S.layout().get(n.id)!; return axis === 'w' ? { sizingW: 'fixed', w: Math.round(b.w), ...(n.text?.resize === 'auto-width' ? { text: { ...n.text, resize: 'auto-height' as const } } : {}) } : { sizingH: 'fixed', h: Math.round(b.h), ...(n.text ? { text: { ...n.text, resize: 'fixed' as const } } : {}) } }) },
-    { label: 'Hug contents', checked: cur === 'hug', icon: SquareDashed, disabled: !hasLayout, onClick: () => setAll(nodes, (n) => (n.layout || n.text ? (axis === 'w' ? { sizingW: 'hug', ...(n.text ? { text: { ...n.text, resize: 'auto-width' as const } } : {}) } : { sizingH: 'hug', ...(n.text ? { text: { ...n.text, resize: n.text.resize === 'auto-width' ? 'auto-width' as const : 'auto-height' as const } } : {}) }) : {})) },
-    { label: 'Fill container', checked: cur === 'fill', icon: Maximize2, disabled: !canFill, onClick: () => setAll(nodes, (n) => (axis === 'w' ? { sizingW: 'fill', ...(n.text?.resize === 'auto-width' ? { text: { ...n.text, resize: 'auto-height' as const } } : {}) } : { sizingH: 'fill', ...(n.text ? { text: { ...n.text, resize: 'fixed' as const } } : {}) })) },
+    { label: 'Fixed', checked: cur === 'fixed', icon: RulerDimensionLine, onClick: () => setAll(nodes, (n) => { const b = S.layout().get(n.id)!; return axis === 'w' ? { sizingW: 'fixed', w: Math.round(b.w), ...(n.text?.resize === 'auto-width' ? { text: { ...n.text, resize: 'auto-height' as const } } : {}) } : { sizingH: 'fixed', h: Math.round(b.h), ...(n.text ? { text: { ...n.text, resize: 'fixed' as const } } : {}) } }) },
+    { label: 'Hug contents', checked: cur === 'hug', icon: axis === 'w' ? FoldHorizontal : FoldVertical, disabled: !hasLayout, onClick: () => setAll(nodes, (n) => (n.layout || n.text ? (axis === 'w' ? { sizingW: 'hug', ...(n.text ? { text: { ...n.text, resize: 'auto-width' as const } } : {}) } : { sizingH: 'hug', ...(n.text ? { text: { ...n.text, resize: n.text.resize === 'auto-width' ? 'auto-width' as const : 'auto-height' as const } } : {}) }) : {})) },
+    { label: 'Fill container', checked: cur === 'fill', icon: axis === 'w' ? UnfoldHorizontal : UnfoldVertical, disabled: !canFill, onClick: () => setAll(nodes, (n) => (axis === 'w' ? { sizingW: 'fill', ...(n.text?.resize === 'auto-width' ? { text: { ...n.text, resize: 'auto-height' as const } } : {}) } : { sizingH: 'fill', ...(n.text ? { text: { ...n.text, resize: 'fixed' as const } } : {}) })) },
   ]
   const tag = (s: Sizing | typeof MIXED) => (s === 'hug' ? 'Hug' : s === 'fill' ? 'Fill' : null)
   const field = (axis: 'w' | 'h', f: NF, s: Sizing | typeof MIXED) => (
@@ -223,7 +223,7 @@ function AutoLayoutRows({ n }: { n: Node }) {
       <div className="flex gap-2 px-pad py-1">
         <AlignGrid x={L.alignX} y={L.alignY} dir={L.dir} between={L.between} onChange={(x, y) => set({ alignX: x, alignY: y })} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <ScrubValue boxed align="left" prefix={L.dir === 'row' ? <PanelLeft size={10} strokeWidth={1.75} className="rotate-90" /> : <PanelTop size={10} strokeWidth={1.75} />} label="Gap"
+          <ScrubValue boxed align="left" prefix={L.dir === 'row' ? <AlignHorizontalSpaceBetween size={10} strokeWidth={1.75} /> : <AlignVerticalSpaceBetween size={10} strokeWidth={1.75} />} label="Gap"
             value={L.gap} min={0} max={400} mixed={L.between} fmt={L.between ? () => 'Auto' : undefined} onChange={(v, f) => set({ gap: v, between: false }, f)} className="w-full" />
           <div className="text-ui-sm leading-tight text-fg-faint">Gap between items{L.between ? ' — distributed' : ''}</div>
         </div>
