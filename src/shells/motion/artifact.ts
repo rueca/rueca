@@ -5,11 +5,11 @@ import { CAMPANA, DYE, loadDemo } from '@/demo/clients'
 
 export const schema = defineSchema({
   geometry: folder('Geometry', {
-    rings: p.number(12, { min: 3, max: 40, step: 1, hint: 'How many rings radiate from the centre.' }),
-    voidR: p.number(78, { min: 0, max: 160, step: 1, unit: 'px', label: 'Centre void', hint: 'Inner radius kept clear for the bell.' }),
-    gap: p.number(10, { min: 4, max: 30, step: 0.5, unit: 'px', hint: 'Distance between rings.' }),
-    weight: p.number(1.3, { min: 0.5, max: 4, step: 0.05, label: 'Stroke weight', hint: 'Line thickness. Never scales, so it stays crisp at any zoom.' }),
-    dash: p.select('solid', ['solid', 'dashed', 'dotted'], { hint: 'Ring stroke style.' }),
+    rings: p.number(22, { min: 3, max: 40, step: 1, hint: 'How many rings radiate from the centre.' }),
+    voidR: p.number(140, { min: 0, max: 160, step: 1, unit: 'px', label: 'Centre void', hint: 'Inner radius kept clear for the bell.' }),
+    gap: p.number(13.5, { min: 4, max: 30, step: 0.5, unit: 'px', hint: 'Distance between rings.' }),
+    weight: p.number(2.7, { min: 0.5, max: 4, step: 0.05, label: 'Stroke weight', hint: 'Line thickness. Never scales, so it stays crisp at any zoom.' }),
+    dash: p.select('dotted', ['solid', 'dashed', 'dotted'], { hint: 'Ring stroke style.' }),
   }),
   timing: folder('Timing', {
     duration: p.number(1450, { min: 400, max: 3000, step: 50, fmt: (v) => `${(v / 1000).toFixed(2)}s`, hint: 'Length of one outward sweep.' }),
