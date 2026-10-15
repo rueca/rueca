@@ -279,7 +279,7 @@ export function Artboard({
 }: { width: number; height: number; label?: ReactNode; x?: number; y?: number; children?: ReactNode; className?: string; background?: string; selected?: boolean; onSelect?: () => void; style?: React.CSSProperties }) {
   const zoom = useStore(useContext(CamCtx) ?? NO_CAMERA, (s) => s.zoom)
   return (
-    <div className="absolute" style={{ left: x, top: y, width, height }}>
+    <div data-studio-artboard="" className="absolute" style={{ left: x, top: y, width, height }}>
       {label && (
         <div
           onPointerDown={onSelect}

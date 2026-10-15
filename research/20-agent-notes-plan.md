@@ -237,3 +237,46 @@ Changes from the plan:
   The route gained images and DELETE. Dogfooded on the motion shell.
 - Not built yet: the notes panel (a list of all comments), the standalone server for static pages
   (Candil), Next.js.
+
+## QA round (2026-10-15)
+
+Five agents tried to break phases 1 and 2 (the server route, the comment UI, snapshots and restore,
+live updates, and a code and docs review). About 50 findings, deduplicated; fixed in one PR:
+
+- **Crashes:** a note file without a snapshot, or a reply that wasn't a string, took down the toolbar
+  and artwork. The server now serves only well-formed notes (no symlinks, no non-notes), and the
+  client normalizes every note (`normalizeNote`).
+- **Server:** nesting cap (a deep body broke GET for everyone), stored-file cap (22 KB → 22 MB),
+  ids to the millisecond plus 3 random bytes with an exclusive claim (no silent overwrites), a
+  local-host check (DNS rebinding on non-Vite servers), image magic bytes, plain 500s with no paths,
+  the image is written only once the JSON can be, express body parsers handled.
+- **Install:** `vite` is no longer forced into consumers' dependencies (sync skips type-only
+  imports), and the server lands in `rueca/notes-server/` outside `src/`, so its Node types never leak
+  into the app's type-check.
+- **State:** snapshots store every shareable value (`values`), so pins stay right after the agent
+  bakes values in; restore and the stale check coerce like the tool (removed keys, clamping); a note
+  from another schema version is never restored (`snapshotStatus`). Doc edits travel with Send to
+  agent in the animate and video shells.
+- **Thumbnails:** canvases are copied inside an animation frame (WebGL without preserveDrawingBuffer),
+  blank ones are dropped, `<img>` is drawn, clipping is respected, and a transparent artboard takes its
+  backdrop's colour instead of black.
+- **Comment UI:** one send per comment, and text kept when a send fails or the comment moves to
+  another knob; middle, right and Space-drag pan instead of pinning; holding C doesn't flicker; cards
+  flip to stay on the visible stage; knob pins track scrolling and hide outside their panel, below the
+  palette; long text wraps; small pins on tiny artboards; IME-safe Enter; keyboard placement (Enter on
+  the artboard target or a focused knob); focus returns; dialog and expanded-state semantics; answered
+  pins keep their number and stand out in light theme.
+- **Live:** the probe never runs in production and retries after a failure; fetches time out; a poll
+  runs on returning to the tab; replies are announced once even across a half-written file or a quick
+  resolve, only for tools on screen; Show keeps a draft; resolved values notes clear themselves; the
+  poll stops when no notes UI is mounted.
+- **Docs:** the agent guide now matches the code (the Comment button comes from ParamActions; the
+  trust boundary covers every field and the link; how to reach `t`; thumbnail limits).
+
+Corrections to the plan above: there's no websocket push (the tool polls); the route accepts only the
+page's own origin on a local host; there's no `localhost:4388` standalone server yet; the handler is
+`createNotesHandler`; thumbnails are JPEG.
+
+Still open: a notes panel (a list of every comment, including ones on hidden knobs), the standalone
+server for static pages (Candil), Next.js, embedding non-Inter fonts in thumbnails, the colour-case
+mismatch that marks `#a39e96` vs `#A39E96` as changed (kit-wide, in `equal`).
