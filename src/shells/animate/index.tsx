@@ -434,7 +434,7 @@ export default function AnimateShell() {
     <Studio
       toolbar={
         <Toolbar
-          start={<Brand name="Tween" doc="La rueca" mark={brandMark} />}
+          start={<Brand name="Tween" mark={brandMark} />}
           center={
             <Cluster className="gap-1.5 pr-1.5">
               <div className="w-[176px]">

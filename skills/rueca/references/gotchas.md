@@ -14,7 +14,7 @@ Check here before debugging.
 | Fonts silently fall back | Chrome blocks `@font-face` over `file://`. Serve over HTTP. |
 | TS error about `baseUrl` | TypeScript 7 removed it. `paths` must be relative (`"./src/*"`). |
 | Canvas won't pan over an iframe artboard | Iframes swallow wheel and pointer events. Use a Hand vs Interact mode with a transparent shield over the frame (see the Drop-in shell). |
-| `<a> cannot contain a nested <a>` | `Brand` links the mark home itself — pass a plain glyph. |
+| `<button> cannot contain a nested <button>` / `<a>` | `Brand`'s mark is already a menu button: pass a plain glyph. |
 | Parallel agents' tests interfere | Each agent needs its own dev-server port, its own headless-Chrome debugging port and profile, and its own scratch folder. Shared `cdp.mjs` / port 9333 collisions happened. |
 
 ## Layout

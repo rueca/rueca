@@ -130,3 +130,12 @@ it. That is how a "glass" pill got solved: it turned out to *darken* a bright ba
 (0.61×) but *brighten* a dark one (2.13×) — a pull toward mid grey — with edges 0.63×
 the interior, i.e. a **dark** inner rim and no light catch. The guessed-first recipe
 (bevel + top highlight + face gradient) is exactly what reads as brushed metal.
+
+## 7. Count what shows at rest
+
+At 1440×900, with nothing selected and only the default-open sections, list every control in view. For each,
+note whether a preset changes it.
+- The inspector fits without scrolling. Over about 12 rows, move the rows no preset touches to `more: true`.
+- No control appears twice on screen (toolbar, inspector, context bar, transport).
+- View preferences sit in `<SettingsMenu>`, not in the resting inspector.
+- Every `more` row, off toggle and settings button shows the changed dot when something inside is off its default.

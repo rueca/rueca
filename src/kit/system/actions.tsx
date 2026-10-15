@@ -14,7 +14,7 @@
    Kit hotkeys here register at priority 0, so a shell binding the same key
    (T for a Text tool, \ for before/after) wins without configuration.
 --------------------------------------------------------------------------- */
-import { Bookmark, Moon, Redo2, Sun, Undo2, Link, Braces, SplitSquareHorizontal, Trash2, Plus, Download, ChevronDown, Bot, Smartphone, Send } from 'lucide-react'
+import { Bookmark, Ellipsis, Moon, Redo2, Sun, Undo2, Link, Braces, SplitSquareHorizontal, Trash2, Plus, Download, ChevronDown, Bot, Smartphone, Send } from 'lucide-react'
 import { useState, type ReactElement } from 'react'
 import { useStore } from 'zustand'
 import type { AnyParams } from '../core/params'
@@ -122,9 +122,11 @@ export function CompareButton({ params, hotkey = '\\' }: { params: AnyParams; ho
 export function shareMenuItems(params: AnyParams): MenuItem[] {
   // Tools with published knobs have a client view: the link for a client must open it, not the designer tool (client-view C1/C2).
   const published = Object.values(params.defs).some((d) => 'publish' in d && d.publish)
+  // a store that ignores #p= links (url: false) would hand out a link that opens on the defaults
+  const links = params.linkable !== false
   return [
-    ...(published ? [{ label: 'Copy client link', icon: Smartphone, hint: 'Opens the client view, with these values', onClick: async () => { const u = params.shareURL(); await copyText(/[#?&]client\b/.test(u) ? u : `${u}&client`); toast('Client link copied', { type: 'success' }) } }] : []),
-    { label: 'Copy link with values', icon: Link, onClick: async () => { await copyText(params.shareURL()); toast('Link copied', { type: 'success' }) } },
+    ...(links && published ? [{ label: 'Copy client link', icon: Smartphone, hint: 'Opens the client view, with these values', onClick: async () => { const u = params.shareURL(); await copyText(/[#?&]client\b/.test(u) ? u : `${u}&client`); toast('Client link copied', { type: 'success' }) } }] : []),
+    ...(links ? [{ label: 'Copy link with values', icon: Link, onClick: async () => { await copyText(params.shareURL()); toast('Link copied', { type: 'success' }) } } as MenuItem] : []),
     { label: 'Copy changed values (JSON)', icon: Braces, onClick: async () => { await copyText(JSON.stringify(params.toJSON({ changedOnly: true, shareable: true }), null, 2)); toast('Changed values copied', { type: 'success' }) } },
     {
       label: 'Copy as agent prompt', icon: Bot, hint: 'Values plus what each one means', onClick: async () => {
@@ -136,11 +138,10 @@ export function shareMenuItems(params: AnyParams): MenuItem[] {
   ]
 }
 
-/** Writes the changed values to .rueca/notes/ for the agent to bake in. Renders nothing without the notes route. */
-export function SendToAgentButton({ params, history, clock, doc }: { params: AnyParams; history?: HistoryLike; clock?: { time(): number }; doc?: DocStore<any> }) {
+/** The Send to agent action: `available` once the dev server's notes route answers. */
+export function useSendToAgent({ params, history, clock, doc }: { params: AnyParams; history?: HistoryLike; clock?: { time(): number }; doc?: DocStore<any> }) {
   const available = useNotesEndpoint()
   const [busy, setBusy] = useState(false)
-  if (!available) return null
   const run = async () => {
     const snapshot = captureSnapshot({ params, history, clock, doc })
     const n = Object.keys(snapshot.changed).length
@@ -154,7 +155,14 @@ export function SendToAgentButton({ params, history, clock, doc }: { params: Any
       toast('Could not send', { type: 'error', description: (e as Error).message })
     } finally { setBusy(false) }
   }
-  return <IconButton icon={Send} label="Send to agent" disabled={busy} onClick={run} />
+  return { available, busy, run }
+}
+
+/** Writes the changed values to .rueca/notes/ for the agent to bake in. Renders nothing without the notes route. */
+export function SendToAgentButton(props: { params: AnyParams; history?: HistoryLike; clock?: { time(): number }; doc?: DocStore<any> }) {
+  const send = useSendToAgent(props)
+  if (!send.available) return null
+  return <IconButton icon={Send} label="Send to agent" disabled={send.busy} onClick={send.run} />
 }
 
 export function ThemeToggle({ hotkey = 't' }: { hotkey?: string | false }) {
@@ -163,23 +171,68 @@ export function ThemeToggle({ hotkey = 't' }: { hotkey?: string | false }) {
   return <IconButton icon={theme === 'dark' ? Sun : Moon} label={theme === 'dark' ? 'Light theme' : 'Dark theme'} shortcut={hotkey || undefined} onClick={toggle} />
 }
 
-/** The usual right-hand cluster: history · compare · presets · share · theme. Each part can be switched off. */
+/**
+ * The usual right-hand cluster. At rest it shows undo, redo and presets; A/B shows while an A is stored,
+ * and Send to agent while the dev server's notes route is up. Compare, theme and the share and copy
+ * actions live in one "…" menu, with their hotkeys (\, T) still live. `inline` restores the old
+ * row of icons. Each part can be switched off.
+ */
 export function ParamActions({
-  params, history, clock, doc, presets = true, compare = true, agent = true, share = true, theme = true,
+  params, history, clock, doc, presets = true, compare = true, agent = true, share = true, theme = true, inline = false,
 }: {
   params: AnyParams; history?: HistoryLike; clock?: { time(): number }; doc?: DocStore<any>
   presets?: boolean; compare?: boolean | { hotkey: string | false }; agent?: boolean; share?: boolean; theme?: boolean | { hotkey: string | false }
+  /** every action as its own icon, as before the overflow menu */
+  inline?: boolean
 }) {
+  if (inline)
+    return (
+      <>
+        <HistoryButtons params={params} history={history} />
+        {compare && <CompareButton params={params} hotkey={typeof compare === 'object' ? compare.hotkey : '\\'} />}
+        <Divider vertical />
+        {presets && <PresetMenu params={params} />}
+        {agent && <CommentButton params={params} />}
+        {agent && <SendToAgentButton params={params} history={history} clock={clock} doc={doc} />}
+        {share && <Menu align="end" trigger={<IconButton icon={Link} label="Share & copy" />} items={shareMenuItems(params)} />}
+        {theme && <ThemeToggle hotkey={typeof theme === 'object' ? theme.hotkey : 't'} />}
+      </>
+    )
+  return <ParamActionsMenu params={params} history={history} clock={clock} doc={doc} presets={presets} compare={compare} agent={agent} share={share} theme={theme} />
+}
+
+function ParamActionsMenu({ params, history, clock, doc, presets, compare, agent, share, theme }: {
+  params: AnyParams; history?: HistoryLike; clock?: { time(): number }; doc?: DocStore<any>
+  presets: boolean; compare: boolean | { hotkey: string | false }; agent: boolean; share: boolean; theme: boolean | { hotkey: string | false }
+}) {
+  const stored = useStore(params, (s) => !!s.compare)
+  const send = useSendToAgent({ params, history, clock, doc })
+  const { theme: mode, toggle: toggleTheme } = useTheme()
+  const compareKey = compare ? (typeof compare === 'object' ? compare.hotkey : '\\') : false
+  const themeKey = theme ? (typeof theme === 'object' ? theme.hotkey : 't') : false
+  const runCompare = () => { const r = params.toggleCompare(); toast(r === 'stored' ? 'Stored A. Tweak, then swap to compare' : 'Swapped A ↔ B') }
+  useHotkeys({
+    ...(compareKey ? { [compareKey]: { run: runCompare, label: 'A / B compare', group: 'View' } } : {}),
+    ...(themeKey ? { [themeKey]: { run: toggleTheme, label: 'Toggle theme', group: 'View' } } : {}),
+  }, [params, compareKey, themeKey, mode], { priority: 0 })
+
+  const items: MenuItem[] = [
+    ...(compare ? [{ label: stored ? 'Swap A / B' : 'Store A for comparison', icon: SplitSquareHorizontal, shortcut: compareKey || undefined, onClick: runCompare } as MenuItem] : []),
+    ...(compare && stored ? [{ label: 'Clear comparison', onClick: () => params.clearCompare() } as MenuItem] : []),
+    ...(theme ? [{ label: mode === 'dark' ? 'Light theme' : 'Dark theme', icon: mode === 'dark' ? Sun : Moon, shortcut: themeKey || undefined, onClick: toggleTheme } as MenuItem] : []),
+    ...(share ? [{ type: 'separator' } as MenuItem, ...shareMenuItems(params)] : []),
+  ]
+  if (items[0] && 'type' in items[0] && items[0].type === 'separator') items.shift()
   return (
     <>
       <HistoryButtons params={params} history={history} />
-      {compare && <CompareButton params={params} hotkey={typeof compare === 'object' ? compare.hotkey : '\\'} />}
+      {/* A/B is state: while an A is stored, the swap stays in view */}
+      {compare && stored && <IconButton icon={SplitSquareHorizontal} label="Swap A / B" shortcut={compareKey || undefined} active onClick={runCompare} />}
       <Divider vertical />
       {presets && <PresetMenu params={params} />}
       {agent && <CommentButton params={params} />}
-      {agent && <SendToAgentButton params={params} history={history} clock={clock} doc={doc} />}
-      {share && <Menu align="end" trigger={<IconButton icon={Link} label="Share & copy" />} items={shareMenuItems(params)} />}
-      {theme && <ThemeToggle hotkey={typeof theme === 'object' ? theme.hotkey : 't'} />}
+      {agent && send.available && <IconButton icon={Send} label="Send to agent" disabled={send.busy} onClick={send.run} />}
+      {items.length > 0 && <Menu align="end" trigger={<IconButton icon={Ellipsis} label="More actions" />} items={items} />}
     </>
   )
 }

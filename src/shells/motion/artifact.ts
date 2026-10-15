@@ -23,7 +23,7 @@ export const schema = defineSchema({
     ink: p.color('#A39E96', { label: 'Ring', hint: 'A ring at rest.' }),
     glow: p.color('#181411', { label: 'Highlight', hint: 'A ring at the crest of the sweep, and the headline.' }),
     headline: p.text('Ring once.', { hint: 'Set under the rings.' }),
-  }, { collapsed: false }),
+  }, { collapsed: true }),
 })
 
 export const params = createParams(schema, {

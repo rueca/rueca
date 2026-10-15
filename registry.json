@@ -934,6 +934,7 @@
       ],
       "registryDependencies": [
         "https://rueca.dev/r/button.json",
+        "https://rueca.dev/r/controls.json",
         "https://rueca.dev/r/core.json",
         "https://rueca.dev/r/error-boundary.json",
         "https://rueca.dev/r/inspector.json",

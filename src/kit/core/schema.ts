@@ -30,6 +30,9 @@ interface Base<V> {
   live?: boolean
   /** Expose in the simplified client / present view (Nodes.io "publish"). */
   publish?: boolean
+  /** A detail of its section: kept under the section's "N more" row until opened. A changed value always
+      stays in view, so nothing hidden is ever off its default without showing. */
+  more?: boolean
   /** Remember in localStorage (default true; false for big or private values — images default false). */
   persist?: boolean
   /** Include in share links (default true; images default false). */
@@ -89,13 +92,22 @@ export type ValueDef =
   | SelectDef | MultiDef | BoolDef | TextDef | SeedDef | CurveDef | SpringDef | ImageDef | DataDef<any>
 export type ParamDef = ValueDef | ActionDef | MonitorDef
 
-export interface Folder<P extends Record<string, ParamDef> = Record<string, ParamDef>> {
-  kind: 'folder'
-  label: string
-  params: P
+export interface FolderOptions {
   collapsed?: boolean
   hint?: string
   when?: (v: any) => boolean
+  /** key of a boolean param in this folder that turns the whole section on and off. It renders as a switch in
+      the header; while it's off the section stays closed and shows only that switch (vignette, grain, delay). */
+  toggle?: string
+  /** 'settings': view and document preferences (grid, snap, fps, units). Kept out of the Inspector and shown by
+      <SettingsMenu> in the toolbar instead. An Inspector that names the folder in `folders` still renders it. */
+  place?: 'settings'
+}
+
+export interface Folder<P extends Record<string, ParamDef> = Record<string, ParamDef>> extends FolderOptions {
+  kind: 'folder'
+  label: string
+  params: P
 }
 
 type Opt<D> = Omit<D, 'type' | 'value'>
@@ -130,7 +142,7 @@ export const p = {
 export const folder = <P extends Record<string, ParamDef>>(
   label: string,
   params: P,
-  o: { collapsed?: boolean; hint?: string; when?: (v: any) => boolean } = {},
+  o: FolderOptions = {},
 ): Folder<P> => ({ kind: 'folder', label, params, ...o })
 
 /* --- typing: flatten folders into one values object --- */
@@ -142,15 +154,65 @@ export type Schema = Record<string, Folder>
 
 export function defineSchema<S extends Schema>(schema: S): S {
   const seen = new Set<string>()
-  for (const f of Object.values(schema))
+  for (const f of Object.values(schema)) {
     for (const k of Object.keys(f.params)) {
       if (seen.has(k)) throw new Error(`defineSchema: duplicate key "${k}" — keys are flat across folders`)
       seen.add(k)
     }
+    if (f.toggle && f.params[f.toggle]?.type !== 'boolean')
+      throw new Error(`defineSchema: folder "${f.label}" toggles on "${f.toggle}", which isn't a boolean param in that folder`)
+  }
   return schema
 }
 
 export const isValueDef = (d: ParamDef): d is ValueDef => d.type !== 'action' && d.type !== 'monitor'
+
+export interface FolderLayout {
+  /** the folder's on/off switch, if it has one, and whether it's on */
+  toggle?: { key: string; on: boolean }
+  /** rows to render, in schema order (excludes the toggle; empty while the toggle is off) */
+  rows: string[]
+  /** `more` rows waiting under the "N more" row: active, unchanged and not opened */
+  more: string[]
+  /** how many rows the "N more" row governs (whether open or not); 0 = no "more" row */
+  moreCount: number
+  /** something that affects the output differs from its default — the header dot. Rows hidden by `when`
+      or by an off toggle don't count: there'd be nothing in view to explain the dot. */
+  changed: boolean
+  /** every value key in the folder, for "Reset section" */
+  valueKeys: string[]
+}
+
+/** Which rows of a folder show, which wait under "N more", and whether its header gets the changed dot. */
+export function layoutFolder(
+  f: Folder, values: Values, defaults: Values,
+  o: { keys?: string[]; published?: boolean; moreOpen?: boolean } = {},
+): FolderLayout {
+  const entries = Object.entries(f.params).filter(([k, d]) => d.type !== 'data' && (!o.keys || o.keys.includes(k)) && (!o.published || ('publish' in d && d.publish)))
+  const changedKey = (k: string) => !equal(values[k], defaults[k])
+  const active = ([, d]: [string, ParamDef]) => !d.when || d.when(values)
+  const toggleDef = f.toggle ? f.params[f.toggle] : undefined
+  const toggle = f.toggle && toggleDef?.type === 'boolean' && !o.published ? { key: f.toggle, on: values[f.toggle] === true } : undefined
+  const body = entries.filter(([k]) => k !== toggle?.key)
+  const live = toggle && !toggle.on ? [] : body.filter(active)
+  const rows: string[] = [], more: string[] = []
+  let moreCount = 0
+  for (const [k, d] of live) {
+    const extra = isValueDef(d) && d.more && !o.published && !changedKey(k)
+    if (extra) moreCount++
+    if (extra && !o.moreOpen) more.push(k)
+    else rows.push(k)
+  }
+  const counted = [...(toggle ? [toggle.key] : []), ...live.filter(([, d]) => isValueDef(d)).map(([k]) => k)]
+  return {
+    toggle,
+    rows,
+    more,
+    moreCount,
+    changed: counted.some(changedKey),
+    valueKeys: entries.filter(([, d]) => isValueDef(d)).map(([k]) => k),
+  }
+}
 
 export function defaultsOf<S extends Schema>(schema: S): SchemaValues<S> {
   const out: Values = {}

@@ -40,19 +40,19 @@ const is = (...ids: EffectId[]) => (v: { effect: EffectId }) => ids.includes(v.e
 
 export const schema = defineSchema({
   adjust: folder('Adjust', {
-    levels: p.boolean(true, { label: 'Auto levels', hint: 'Stretch the darkest and lightest tones of the photo to the full range first. Most dithers need it.' }),
-    brightness: p.number(0, { min: -1, max: 1, step: 0.01, hint: 'Shift every tone up or down before dithering.' }),
+    levels: p.boolean(true, { more: true, label: 'Auto levels', hint: 'Stretch the darkest and lightest tones of the photo to the full range first. Most dithers need it.' }),
+    brightness: p.number(0, { min: -1, max: 1, step: 0.01, more: true, hint: 'Shift every tone up or down before dithering.' }),
     contrast: p.number(0, { min: -1, max: 1, step: 0.01, hint: 'Dithers love contrast — push it to separate the subject.' }),
     gamma: p.number(1, { min: 0.2, max: 3, step: 0.01, hint: 'Above 1 opens shadows, below 1 deepens them.' }),
-    blur: p.number(0, { min: 0, max: 12, step: 0.1, unit: 'px', hint: 'Soften noise first so the pattern carries the tone.' }),
-    sharpen: p.number(0, { min: 0, max: 3, step: 0.05, hint: 'Unsharp mask. Crisper edges survive the dither.' }),
-    invert: p.boolean(false),
+    blur: p.number(0, { min: 0, max: 12, step: 0.1, unit: 'px', more: true, hint: 'Soften noise first so the pattern carries the tone.' }),
+    sharpen: p.number(0, { min: 0, max: 3, step: 0.05, more: true, hint: 'Unsharp mask. Crisper edges survive the dither.' }),
+    invert: p.boolean(false, { more: true }),
   }),
   effect: folder('Effect', {
     effect: p.select('atkinson', EFFECTS.map((e) => ({ value: e.value, label: e.label, hint: e.hint })), { hint: 'How tone becomes pattern.' }),
     pixel: p.number(3, { min: 1, max: 24, step: 1, unit: 'px', label: 'Pixel size', hint: 'Size of one output pixel in image pixels.', when: is(...RASTER) }),
     strength: p.number(1, { min: 0, max: 1, step: 0.01, label: 'Diffusion', hint: 'How much quantisation error spreads to neighbours. 0 = flat posterise.', when: is(...DIFFUSION) }),
-    serpentine: p.boolean(true, { hint: 'Alternate scan direction each row — fewer diagonal worms.', when: is(...DIFFUSION) }),
+    serpentine: p.boolean(true, { more: true, hint: 'Alternate scan direction each row — fewer diagonal worms.', when: is(...DIFFUSION) }),
     spread: p.number(1, { min: 0, max: 2, step: 0.01, hint: 'Strength of the threshold pattern.', when: is('bayer4', 'bayer8') }),
     quantise: p.boolean(true, { label: 'Snap to palette', hint: 'Off keeps the original colours.', when: is('pixelate') }),
     match: p.select('tone', [{ value: 'tone', label: 'Tone' }, { value: 'colour', label: 'Colour' }], { label: 'Match by', hint: 'Tone maps brightness onto the palette’s light-to-dark ramp (Game Boy, 1-bit). Colour picks the nearest hue (PICO-8, CGA).', when: (v) => RASTER.includes(v.effect) && (v.effect !== 'pixelate' || v.quantise) }),

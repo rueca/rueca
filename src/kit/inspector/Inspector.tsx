@@ -14,12 +14,12 @@
    bound to a store) and <ParamControl> (just the control) so it matches.
 --------------------------------------------------------------------------- */
 import { memo, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
-import { ChevronRight, RotateCcw } from 'lucide-react'
+import { ChevronDown, ChevronRight, RotateCcw, Settings2 } from 'lucide-react'
 import { Popover } from '@base-ui/react/popover'
 import { cn } from '../core/cn'
 import { useDensityPx } from '../core/density'
 import { useParamState, type AnyParams } from '../core/params'
-import { equal, humanize, isValueDef, type Folder, type ParamDef, type Schema, type ValueDef, type NumberDef } from '../core/schema'
+import { equal, humanize, isValueDef, layoutFolder, type Folder, type ParamDef, type Schema, type ValueDef, type NumberDef } from '../core/schema'
 import { Tip } from '../ui/tooltip'
 import { ScrubValue } from '../ui/scrub'
 import { Slider } from '../ui/slider'
@@ -36,7 +36,7 @@ const LS = {
 
 export function Inspector({ params, folders, keys, published, className, id }: {
   params: AnyParams
-  /** a subset of folders, rendered in the order given */
+  /** a subset of folders, rendered in the order given (a `place: 'settings'` folder renders only when named here) */
   folders?: string[]
   /** only these param keys (sections without any are skipped) */
   keys?: string[]
@@ -51,11 +51,15 @@ export function Inspector({ params, folders, keys, published, className, id }: {
   const schema = params.schema as Schema
   if ((import.meta as any).env?.DEV && folders) for (const f of folders) if (!schema[f])
     console.warn(`[studio] <Inspector folders>: "${f}" isn't a folder id in ${params.id} (ids: ${Object.keys(schema).join(', ')}). Folder ids are the schema keys, not their labels.`)
-  const entries = (folders ? folders.filter((k) => schema[k]).map((k) => [k, schema[k]]) : Object.entries(schema)) as [string, Folder][]
+  const entries = (folders
+    ? folders.filter((k) => schema[k]).map((k) => [k, schema[k]])
+    : Object.entries(schema).filter(([, f]) => f.place !== 'settings')) as [string, Folder][]
   const lsKey = `studio:${params.id}:sections:${id ?? (folders?.join(',') ?? 'all')}${published ? ':pub' : ''}`
 
   const [open, setOpen] = useState<Record<string, boolean>>(() => LS.get(lsKey) ?? Object.fromEntries(entries.map(([k, f]) => [k, !f.collapsed])))
   const persist = (next: Record<string, boolean>) => { setOpen(next); LS.set(lsKey, next) }
+  const [moreOpen, setMoreOpen] = useState<Record<string, boolean>>(() => LS.get(`${lsKey}:more`) ?? {})
+  const toggleMore = (fid: string) => { const next = { ...moreOpen, [fid]: !moreOpen[fid] }; setMoreOpen(next); LS.set(`${lsKey}:more`, next) }
 
   // the label column widens to this inspector's longest label (capped in <Row>), so "Stroke weight" never truncates
   const fit = useLabelFit(entries.flatMap(([, f]) => Object.entries(f.params)
@@ -67,12 +71,11 @@ export function Inspector({ params, folders, keys, published, className, id }: {
     <div className={cn('flex flex-col', className)} style={fit ? ({ '--label-fit': `${fit}px` } as CSSProperties) : undefined}>
       {entries.map(([fid, f]) => {
         if (f.when && !f.when(values)) return null
-        const rows = Object.entries(f.params).filter(([k, d]) => d.type !== 'data' && (!keys || keys.includes(k)) && (!published || ('publish' in d && d.publish)))
-        if (!rows.length) return null
-        const valueKeys = rows.filter(([, d]) => isValueDef(d)).map(([k]) => k)
-        const changed = valueKeys.some((k) => !equal(values[k], defaults[k]))
+        const lay = layoutFolder(f, values, defaults, { keys, published, moreOpen: !!moreOpen[fid] })
+        if (!lay.rows.length && !lay.toggle && !lay.moreCount) return null
         const isOpen = open[fid] ?? !f.collapsed
         const first = shown++ === 0
+        const toggleDef = lay.toggle && (f.params[lay.toggle.key] as ValueDef)
         return (
           <Section
             key={fid}
@@ -80,15 +83,75 @@ export function Inspector({ params, folders, keys, published, className, id }: {
             hint={f.hint}
             open={isOpen}
             first={first}
-            changed={changed}
+            changed={lay.changed}
+            enabled={lay.toggle?.on}
+            onEnabledChange={lay.toggle ? (on) => {
+              params.setValue(lay.toggle!.key, on as never, { label: `${on ? 'Turn on' : 'Turn off'} ${f.label.toLowerCase()}` })
+              // turning a feature on shows what it just revealed
+              if (on && !isOpen) persist({ ...open, [fid]: true })
+            } : undefined}
+            enabledLabel={toggleDef ? (toggleDef.label ?? f.label) : undefined}
             onToggle={(solo) => persist(solo ? Object.fromEntries(entries.map(([k]) => [k, k === fid])) : { ...open, [fid]: !isOpen })}
-            onReset={changed ? () => params.reset(valueKeys) : undefined}
+            onReset={lay.changed ? () => params.reset(lay.valueKeys) : undefined}
           >
-            {rows.map(([key, def]) => <LiveRow key={key} k={key} def={def} params={params} />)}
+            {lay.rows.map((key) => <LiveRow key={key} k={key} def={f.params[key]} params={params} />)}
+            {lay.moreCount > 0 && <MoreRow count={lay.moreCount} open={!!moreOpen[fid]} onClick={() => toggleMore(fid)} />}
           </Section>
         )
       })}
     </div>
+  )
+}
+
+/** The quiet last row of a section with `more` params: "3 more" / "Fewer". */
+export function MoreRow({ count, open, onClick }: { count: number; open: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-expanded={open}
+      onClick={onClick}
+      className="flex h-row items-center gap-1 px-pad text-left text-ui text-fg-faint outline-none no-select hover:text-fg focus-visible:text-signal-text"
+    >
+      <ChevronDown size={12} strokeWidth={1.75} className={cn('shrink-0 transition-transform duration-150', open && 'rotate-180')} />
+      {open ? 'Fewer' : `${count} more`}
+    </button>
+  )
+}
+
+/**
+ * The toolbar home for view and document preferences: every `place: 'settings'` folder (or the folders you
+ * name), in a popover behind one button. The button carries the changed dot when a setting is off its default.
+ *   <SettingsMenu params={params} />
+ */
+export function SettingsMenu({ params, folders, label = 'View settings', icon: Icon = Settings2 }: {
+  params: AnyParams; folders?: string[]; label?: string; icon?: React.ComponentType<{ size?: number; strokeWidth?: number }>
+}) {
+  const schema = params.schema as Schema
+  const ids = folders ?? Object.keys(schema).filter((k) => schema[k].place === 'settings')
+  const changed = useParamState(params, (s) => {
+    const v = s.values as Record<string, unknown>, d = s.defaults as Record<string, unknown>
+    return ids.some((k) => schema[k] && (!schema[k].when || schema[k].when!(v)) && layoutFolder(schema[k], v, d).changed)
+  })
+  if (!ids.length) return null
+  return (
+    <Popover.Root>
+      <Tip label={label}>
+        <Popover.Trigger
+          aria-label={changed ? `${label}, changed from default` : label}
+          className="relative flex size-icon items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover data-[popup-open]:text-fg"
+        >
+          <Icon size={15} strokeWidth={1.5} />
+          {changed && <span aria-hidden className="absolute top-1 right-1 size-1 rounded-full bg-signal" />}
+        </Popover.Trigger>
+      </Tip>
+      <Popover.Portal>
+        <Popover.Positioner side="bottom" align="end" sideOffset={6} className="z-[160]">
+          <Popover.Popup className="pop max-h-[min(70vh,560px)] w-[var(--inspector-w)] overflow-y-auto py-1 outline-none">
+            <Inspector params={params} folders={ids} id="settings" />
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
   )
 }
 
@@ -114,13 +177,18 @@ function useLabelFit(labels: unknown[]) {
  */
 export function Section({
   title, hint, open: openProp, defaultOpen = true, onToggle, onReset, changed, children, first, actions, collapsible = true, persistKey,
+  enabled, onEnabledChange, enabledLabel,
 }: {
   title: ReactNode; hint?: string; open?: boolean; defaultOpen?: boolean; onToggle?: (solo: boolean) => void; onReset?: () => void
   changed?: boolean; children: ReactNode; first?: boolean; actions?: ReactNode; collapsible?: boolean; persistKey?: string
+  /** an optional feature's on/off switch in the header. Off = the section stays closed (Blender's panel checkbox). */
+  enabled?: boolean; onEnabledChange?: (on: boolean) => void; enabledLabel?: string
 }) {
   const [own, setOwn] = useState<boolean>(() => (persistKey ? LS.get(`studio:section:${persistKey}`) ?? defaultOpen : defaultOpen))
   const controlled = openProp !== undefined
-  const open = !collapsible || (controlled ? openProp : own)
+  const off = enabled === false
+  collapsible = collapsible && !off
+  const open = !off && (!collapsible || (controlled ? openProp : own))
   const toggle = (solo: boolean) => {
     if (!collapsible) return
     if (onToggle) onToggle(solo)
@@ -133,14 +201,14 @@ export function Section({
           type="button"
           aria-expanded={collapsible ? open : undefined}
           onClick={(e) => toggle(e.altKey)}
-          className={cn('flex h-full min-w-0 flex-1 items-center gap-1 text-left text-ui font-[550] text-fg outline-none no-select rounded-[4px] focus-visible:text-signal-text focus-visible:ring-2 focus-visible:ring-signal', !collapsible && 'cursor-default')}
+          className={cn('flex h-full min-w-0 flex-1 items-center gap-1 text-left text-ui font-[550] text-fg outline-none no-select rounded-[4px] focus-visible:text-signal-text focus-visible:ring-2 focus-visible:ring-signal', !collapsible && 'cursor-default', off && 'text-fg-faint')}
         >
           <Tip label={hint} side="left"><span className="truncate">{title}</span></Tip>
           {changed && <span className="size-1 shrink-0 rounded-full bg-signal" aria-label="changed" />}
           {collapsible && <ChevronRight size={12} strokeWidth={1.75} className={cn('ml-0.5 shrink-0 text-fg-faint transition-transform duration-150', open && 'rotate-90')} />}
         </button>
         {actions}
-        {onReset && (
+        {onReset && !off && (
           <Tip label="Reset section">
             <button type="button" aria-label={`Reset ${typeof title === 'string' ? title.toLowerCase() : 'section'}`} onClick={onReset}
               className="flex size-icon-sm items-center justify-center rounded-control text-fg-faint opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/section:opacity-100 focus-visible:opacity-100">
@@ -148,6 +216,7 @@ export function Section({
             </button>
           </Tip>
         )}
+        {onEnabledChange && <Switch size="sm" checked={!off} onChange={onEnabledChange} label={`${enabledLabel ?? (typeof title === 'string' ? title : 'Section')}`} />}
       </div>
       {open && <div className="flex flex-col gap-px pb-1">{children}</div>}
     </section>

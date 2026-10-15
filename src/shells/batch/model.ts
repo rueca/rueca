@@ -34,8 +34,8 @@ export const schema = defineSchema({
     ], { label: 'Background' }),
     ctaStyle: p.select('pill', ['pill', 'outline', 'link'], { label: 'Button' }),
     decor: p.boolean(true, { label: 'Wax seals', hint: 'Seals drawn in hairline, scattered around the product.' }),
-    grain: p.number(0, { min: 0, max: 1, step: 0.05, label: 'Grain', hint: 'Print-like noise over the whole asset.' }),
-    seed: p.seed(11, { hint: 'Scatter of the decorative seals.' }),
+    grain: p.number(0, { min: 0, max: 1, step: 0.05, more: true, label: 'Grain', hint: 'Print-like noise over the whole asset.' }),
+    seed: p.seed(11, { more: true, hint: 'Scatter of the decorative seals.', when: (v) => v.decor }),
   }),
   brand: folder('Brand', {
     brandName: p.text('agalla', { label: 'Name', hint: 'Wordmark text, used in the logo.', disabled: locked }),

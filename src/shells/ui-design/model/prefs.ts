@@ -6,7 +6,7 @@ export const prefsSchema = defineSchema({
   snapping: folder('Snapping', {
     snapObjects: p.boolean(true, { label: 'Objects', hint: 'Edges and centres snap to siblings and the parent frame while moving or resizing.' }),
     snapPixels: p.boolean(true, { label: 'Pixels', hint: 'Round positions and sizes to whole pixels.' }),
-    snapDistance: p.number(6, { min: 2, max: 16, step: 1, unit: 'px', label: 'Distance', hint: 'How close (in screen pixels) an edge must come before it snaps.' }),
+    snapDistance: p.number(6, { min: 2, max: 16, step: 1, unit: 'px', label: 'Distance', hint: 'How close (in screen pixels) an edge must come before it snaps.', when: (v) => v.snapObjects }),
   }),
   nudge: folder('Nudge', {
     nudgeSmall: p.number(1, { min: 0.5, max: 8, step: 0.5, display: 'field', label: 'Small', hint: 'Arrow keys move the selection by this much.' }),

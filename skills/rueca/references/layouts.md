@@ -61,6 +61,28 @@ Copy the structure of the closest example shell rather than inventing one:
 - Fills, effects and materials are **stacks**: `+` in the header; each row swatch,
   value, opacity, blend, eye, remove; drag to reorder.
 - Rive-style **inputs** (Trigger / Boolean / Number) to expose prototype state.
+
+### What shows at rest
+
+Every control gets one home on screen, plus ⌘K. The author picks it in the schema; never reorder by usage.
+
+| Home | What goes there | How |
+|---|---|---|
+| In view | What the presets vary and what gets tuned every session. About 8–12 rows; the resting inspector fits a 13-inch laptop without scrolling. | Open sections, the core rows first |
+| "N more" | The tail of a section: same topic, rarely touched | `more: true` on the param |
+| Off until wanted | An optional feature (vignette, grain, delay, shadows) | `folder(…, { toggle: 'key' })`: a switch in the header |
+| Settings | View and document preferences: grid, snap, nudge, fps, units, export scale | `folder(…, { place: 'settings' })` + `<SettingsMenu>` in the toolbar |
+| ⌘K only | Rare commands, and controls kept for the few who need them | A palette command |
+
+- **Rank by evidence.** A param the presets change belongs in view. A param no preset touches, sitting at its
+  default, is a "more" candidate. Send to agent notes (`.rueca/notes/`) show what people actually tune.
+- **Sections in order of use.** The section people open first comes first: dither puts Effect before Adjust.
+- **Child under parent.** A row that only matters when another is on gets `when`, so it hides until then.
+- **Never nest values people glance at, two-option choices or colour.** Figma moved all three behind icons in
+  UI3 and moved them back after complaints.
+- **Two levels at most:** section → popover. Never a popover inside "more" inside a collapsed section.
+- **Hidden state stays visible.** A changed value under "more" stays in view; a collapsed section with a changed
+  value shows the dot; a popover's trigger shows its value, never an icon alone.
 - Affinity **Studios**: mode presets that swap the panel set (Design / Animate / Tune).
 
 ## Timeline

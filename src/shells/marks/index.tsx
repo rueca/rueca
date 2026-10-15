@@ -100,7 +100,7 @@ export default function MarksShell() {
     <Studio
       toolbar={
         <Toolbar
-          start={<Brand name="Marks" doc={`${s.name || 'Untitled'} — mark exploration`} mark={<Mark />} />}
+          start={<Brand name="Marks" doc={s.name || 'Untitled'} mark={<Mark />} />}
           center={inFocus ? (
             <Cluster>
               <Button size="md" onClick={() => focus(null)}><ArrowLeft size={14} strokeWidth={1.5} />Variants</Button>
