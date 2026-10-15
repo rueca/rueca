@@ -17,7 +17,7 @@ import { IMAGE_LABEL, clipBox, drawComp, frameUnit, hitTest, imagesReady, onImag
 import { ClipInspector, thumbURL } from './ClipInspector'
 import { TrackTimeline, type TimelineClip } from '@kit/timeline/TrackTimeline'
 import {
-  addClip, addTrack, clock, commitComp, deleteClips, duplicateClips, frameMs, getComp, history, loadComp, params, patchTrack, removeEmptyTracks, setComp,
+  addClip, addTrack, clock, doc, commitComp, deleteClips, duplicateClips, frameMs, getComp, history, loadComp, params, patchTrack, removeEmptyTracks, setComp,
   settleClips, snapFrame, splitAt, ui, updateClip, updateClips, useComp, useUI, type V,
 } from './store'
 
@@ -391,7 +391,7 @@ export default function VideoShell() {
           }
           end={
             <>
-              <Cluster><ParamActions params={params} history={history} presets={false} /></Cluster>
+              <Cluster><ParamActions params={params} history={history} doc={doc} clock={clock} presets={false} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />
             </>
           }

@@ -5,18 +5,19 @@
        <CanvasSurface … />
        <NoteLayer params={params} clock={clock} />     // pins, composer, threads
      </Artboard>
-     <ParamActions params={params} clock={clock} />    // gains the Comment button (C)
+     <ParamActions params={params} clock={clock} />    // the Comment button (C)
 
    In comment mode, click the artboard to pin a comment to that point, or click
-   a knob's row in the Inspector to pin it to that param. The note carries the
-   snapshot (values, link, steps, playhead) and a thumbnail with the point
-   ringed. The agent's reply shows on the pin as soon as it resolves the note
-   (the folder is polled), with a toast.
+   a knob's row in the Inspector to pin it to that param (keyboard: Enter on the
+   artboard target drops a pin in its middle; Enter on a focused knob pins to it).
+   The note carries the snapshot (values, link, steps, playhead) and a
+   thumbnail with the point ringed. The agent's reply shows on the pin as soon
+   as it resolves the note (the folder is polled), with a toast.
 
    Everything renders nothing until the dev server's notes route answers
    (ruecaNotes()), so a static build never shows it.
 --------------------------------------------------------------------------- */
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
@@ -29,79 +30,124 @@ import { humanize } from '../core/schema'
 import { useHotkeys } from '../core/hotkeys'
 import { clamp, cn } from '../core/cn'
 import {
-  captureImage, captureSnapshot, deleteNote, findNotesEndpoint, isSnapshotState, refreshNotes, restoreSnapshot, sendNote, watchNotes,
+  captureImage, captureSnapshot, deleteNote, findNotesEndpoint, refreshNotes, restoreSnapshot, sendNote, snapshotStatus, watchNotes,
   type NoteAnchor, type StudioNote,
 } from '../core/notes'
 import { useZoom } from '../stage/Stage'
+import { useSafeArea } from '../layout/Studio'
 import { Button, IconButton } from '../ui/button'
 import { toast } from './toast'
 
-/** `t`: the playhead when the spot was picked (the clock pauses there while you write); `resume`: it was playing */
-interface Draft { anchor: NoteAnchor; t?: number; resume?: boolean }
+/** `layer`: the NoteLayer that owns it; `t`: the playhead when the spot was picked (the clock pauses there while you
+    write); `resume`: it was playing; `sending`: on its way (a second Enter must not send it twice); `text`: what's typed
+    so far — kept here, not in the composer, so moving the comment to another knob never loses it */
+interface Draft { layer: string; anchor: NoteAnchor; t?: number; resume?: boolean; sending?: boolean; text?: string }
 interface NotesUI {
   /** comment mode: the next click on the artboard or a knob row starts a comment */
   commenting: boolean
-  /** mounted NoteLayers: the Comment button only shows when there is somewhere to pin */
-  layers: number
+  /** tool ids with a NoteLayer mounted (a count each): the Comment button shows only with somewhere to pin, and only
+      their replies get a toast with Show */
+  tools: Record<string, number>
+  /** tool ids with any notes UI mounted (buttons too): replies for other tools are not announced here */
+  watching: Record<string, number>
   open: string | null
   draft: Draft | null
 }
-export const notesUI = createStore<NotesUI>(() => ({ commenting: false, layers: 0, open: null, draft: null }))
+export const notesUI = createStore<NotesUI>(() => ({ commenting: false, tools: {}, watching: {}, open: null, draft: null }))
 const useUI = <T,>(pick: (s: NotesUI) => T) => useStore(notesUI, pick)
+const bump = (key: 'tools' | 'watching', id: string, by: number) => notesUI.setState((s) => {
+  const next = { ...s[key], [id]: (s[key][id] ?? 0) + by }
+  if (next[id] <= 0) delete next[id]
+  return { [key]: next } as Partial<NotesUI>
+})
 
-/** True once the dev server's notes route answers (ruecaNotes()); false on a static build. */
+/** True once the dev server's notes route answers (ruecaNotes()); false on a static build. Re-checks after a failure. */
 export function useNotesEndpoint() {
   const [ok, setOk] = useState(false)
-  useEffect(() => { let live = true; findNotesEndpoint().then((u) => { if (live) setOk(!!u) }); return () => { live = false } }, [])
+  useEffect(() => {
+    let live = true
+    let timer: ReturnType<typeof setTimeout>
+    const check = () => findNotesEndpoint().then((u) => {
+      if (!live) return
+      setOk(!!u)
+      // the dev server may still be starting: look again in a while (production never probes, so this stays quiet)
+      if (!u && !(import.meta as { env?: { PROD?: boolean } }).env?.PROD) timer = setTimeout(check, 6000)
+    })
+    check()
+    return () => { live = false; clearTimeout(timer) }
+  }, [])
   return ok
 }
 
-/* One watcher for the whole page turns the agent's replies into toasts, however many components show notes. */
-let repliesWatched = false
+/* One watcher for the page turns the agent's replies into toasts, however many components show notes. It runs while
+   any notes UI is mounted, and only announces notes for the tools on screen. */
+let stopReplies: (() => void) | null = null
 function watchReplies() {
-  if (repliesWatched) return
-  repliesWatched = true
-  let seen: Map<string, string> | null = null
-  watchNotes((notes) => {
-    const before = seen
-    seen = new Map(notes.map((n) => [n.id, n.status]))
-    if (!before) return
+  if (stopReplies) return
+  // resolved notes already toasted (or resolved before the page looked): a note that vanishes for a poll (a
+  // half-written file) and comes back resolved is still announced once, and so is one created and resolved
+  // between two polls
+  let announced: Set<string> | null = null
+  stopReplies = watchNotes((notes) => {
+    if (!announced) { announced = new Set(notes.filter((n) => n.status === 'resolved').map((n) => n.id)); return }
+    const { watching, tools } = notesUI.getState()
     for (const n of notes) {
-      if (n.status !== 'resolved' || before.get(n.id) !== 'open') continue
-      const description = n.resolution?.text && n.resolution.text.length > 160 ? `${n.resolution.text.slice(0, 157)}…` : n.resolution?.text
-      if (n.kind === 'comment') toast('The agent replied', { description, timeout: 8000, action: { label: 'Show', onClick: () => notesUI.setState({ open: n.id, draft: null }) } })
-      else toast('The agent applied your values', { description, timeout: 8000 })
+      if (n.status !== 'resolved' || announced.has(n.id)) continue
+      announced.add(n.id)
+      if (!watching[n.snapshot.tool]) continue
+      const text = n.resolution?.text ?? ''
+      const description = text.length > 160 ? `${text.slice(0, 157)}…` : text || undefined
+      if (n.kind === 'comment') {
+        toast('The agent replied', {
+          description, timeout: 8000,
+          // Show only where the pin is on screen; it opens the thread without dropping a comment being written
+          ...(tools[n.snapshot.tool] ? { action: { label: 'Show', onClick: () => notesUI.setState({ open: n.id }) } } : {}),
+        })
+      } else {
+        toast('The agent applied your values', { description, timeout: 8000 })
+        // a values note has no thread to clear it from: once it's announced, it has done its job
+        deleteNote(n.id).then(refreshNotes, () => {})
+      }
     }
   })
 }
 
-/** Every note in .rueca/notes/, kept live. Empty without the notes route. */
-export function useNotes(): StudioNote[] {
+/** Every note in .rueca/notes/, kept live. Empty without the notes route. Pass the tool id to have its replies announced. */
+export function useNotes(tool?: string): StudioNote[] {
   const available = useNotesEndpoint()
   const [notes, setNotes] = useState<StudioNote[]>([])
   useEffect(() => {
     if (!available) return
+    if (tool) bump('watching', tool, 1)
     watchReplies()
-    return watchNotes(setNotes)
-  }, [available])
+    const off = watchNotes(setNotes)
+    return () => {
+      off()
+      if (tool) bump('watching', tool, -1)
+      // nothing on screen shows notes any more: stop the page-wide watcher, and with it the poll
+      if (!Object.keys(notesUI.getState().watching).length && stopReplies) { stopReplies(); stopReplies = null }
+    }
+  }, [available, tool])
   return notes
 }
 
 /** Toolbar toggle for comment mode (C). Shows only with the notes route and a NoteLayer to pin into. */
 export function CommentButton({ params, hotkey = 'c' }: { params?: AnyParams; hotkey?: string | false }) {
   const available = useNotesEndpoint()
-  const layers = useUI((s) => s.layers)
+  const layers = useUI((s) => Object.keys(s.tools).length)
   const commenting = useUI((s) => s.commenting)
-  const notes = useNotes()
+  const notes = useNotes(params?.id)
   const on = available && layers > 0
   const waiting = notes.filter((n) => n.kind === 'comment' && n.status === 'open' && (!params || n.snapshot.tool === params.id)).length
   const toggle = () => notesUI.setState((s) => ({ commenting: !s.commenting, draft: null, open: null }))
-  useHotkeys(on && hotkey ? { [hotkey]: { run: toggle, label: 'Comment', group: 'Tools' } } : {}, [on, hotkey], { priority: 0 })
+  // a held key repeats: only the first press toggles
+  useHotkeys(on && hotkey ? { [hotkey]: { run: (e) => { if (!e.repeat) toggle() }, label: 'Comment', group: 'Tools' } } : {}, [on, hotkey], { priority: 0 })
   if (!on) return null
+  const label = `${commenting ? 'Stop commenting' : 'Comment'}${waiting ? ` (${waiting} waiting for the agent)` : ''}`
   return (
-    <IconButton icon={MessageSquarePlus} label={commenting ? 'Stop commenting' : 'Comment'} shortcut={hotkey || undefined} active={commenting} onClick={toggle} className="relative">
+    <IconButton icon={MessageSquarePlus} label={label} shortcut={hotkey || undefined} active={commenting} onClick={toggle} className="relative">
       {waiting > 0 && (
-        <span aria-label={`${waiting} waiting for the agent`} className="absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-signal-strong px-0.5 text-[9.5px] leading-none font-semibold text-signal-fg tabular">
+        <span aria-hidden className="absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-signal-strong px-0.5 text-ui-sm leading-none font-semibold text-signal-fg tabular">
           {waiting}
         </span>
       )}
@@ -110,6 +156,17 @@ export function CommentButton({ params, hotkey = 'c' }: { params?: AnyParams; ho
 }
 
 const paramLabel = (params: AnyParams, key: string) => (params.defs[key] as { label?: string } | undefined)?.label ?? humanize(key)
+const PIN = 28
+const CARD = { w: 272, h: 220 }
+
+/** The part of the window the stage really shows: the studio root minus what its floating panels cover. */
+function useStageRect(anchor: HTMLElement | null) {
+  const safe = useSafeArea()
+  return () => {
+    const root = (anchor?.closest('.studio') as HTMLElement | null)?.getBoundingClientRect() ?? { left: 0, top: 0, right: innerWidth, bottom: innerHeight }
+    return { left: root.left + safe.left, top: root.top + safe.top, right: root.right - safe.right, bottom: root.bottom - safe.bottom }
+  }
+}
 
 /** Pins, composer and threads for one artboard. Put it inside the <Artboard>, next to the surface. */
 export function NoteLayer({ params, history, clock, doc, describeAt }: {
@@ -120,43 +177,80 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
   /** names what is under a pin (x, y as 0–1 of the artboard), e.g. 'layer:hero' — goes into the note's anchor */
   describeAt?: (x: number, y: number) => string | undefined
 }) {
+  const id = useId()
   const ref = useRef<HTMLSpanElement>(null)
   const [el, setEl] = useState<{ art: HTMLElement; host: HTMLElement } | null>(null)
   useLayoutEffect(() => {
     const me = ref.current!
     const art = (me.closest('[data-studio-artifact]') as HTMLElement | null) ?? me.parentElement!
-    // pins render beside the artboard's clipping box, so a thread near an edge isn't cut off
-    setEl({ art, host: (art.hasAttribute('data-studio-artifact') && art.parentElement) || art })
-    notesUI.setState((s) => ({ layers: s.layers + 1 }))
-    return () => notesUI.setState((s) => ({ layers: s.layers - 1, commenting: s.layers > 1 && s.commenting, draft: null, open: null }))
+    // pins render beside the artboard's clipping box, so a thread near an edge isn't cut off — but only when that
+    // box is an Artboard's own, sized the same (in a ViewportFrame the parent is wider, so pins stay inside)
+    const parent = art.parentElement
+    setEl({ art, host: parent?.hasAttribute('data-studio-artboard') ? parent : art })
   }, [])
+  useEffect(() => {
+    bump('tools', params.id, 1)
+    return () => {
+      bump('tools', params.id, -1)
+      notesUI.setState((s) => ({ commenting: Object.keys(s.tools).length > 0 && s.commenting, ...(s.draft?.layer === id ? { draft: null } : {}), open: null }))
+    }
+  }, [params.id, id])
 
   const zoom = useZoom()
-  const all = useNotes()
+  const all = useNotes(params.id)
   const notes = all.filter((n) => n.kind === 'comment' && n.snapshot.tool === params.id)
   const commenting = useUI((s) => s.commenting)
-  const draft = useUI((s) => s.draft)
+  const draft = useUI((s) => (s.draft?.layer === id ? s.draft : null))
   const open = useUI((s) => s.open)
   useParamState(params, (s) => s.committed)   // pins from another state fade: re-check on every commit
-  const num = (id: string) => notes.findIndex((n) => n.id === id) + 1
+  const num = (nid: string) => notes.findIndex((n) => n.id === nid) + 1
+  const status = (n: StudioNote) => snapshotStatus(n.snapshot, params)
+  const stageRect = useStageRect(el?.art ?? null)
+
+  // focus goes back where it was when a comment ends
+  const returnTo = useRef<HTMLElement | null>(null)
 
   useHotkeys(commenting || draft || open ? { esc: { run: () => notesUI.setState({ commenting: false, draft: null, open: null }), label: 'Close comment', group: 'Tools' } } : {}, [commenting, !!draft, !!open], { priority: 5 })
 
-  // However a comment ends (sent, Esc, a click away), a clock that was playing plays on.
-  useEffect(() => notesUI.subscribe((s, prev) => { if (prev.draft?.resume && !s.draft) clock?.play() }), [clock])
+  // However a comment ends (sent, Esc, a click away), a clock that was playing plays on, and focus goes back.
+  useEffect(() => notesUI.subscribe((s, prev) => {
+    if (prev.draft?.layer === id && !s.draft) {
+      if (prev.draft.resume) clock?.play()
+      if (returnTo.current?.isConnected) returnTo.current.focus()
+      returnTo.current = null
+    }
+  }), [clock, id])
 
-  // A click outside any pin, thread or composer closes them.
+  // A click outside any pin, thread or composer closes them. A knob row while commenting is not "outside": it
+  // moves the comment to that knob and keeps what you typed.
   useEffect(() => {
     if (!open && !draft) return
-    const down = (e: PointerEvent) => { if (!(e.target as Element).closest?.('[data-note-ui]')) notesUI.setState({ open: null, draft: null }) }
+    const down = (e: PointerEvent) => {
+      const t = e.target as Element
+      if (t.closest?.('[data-note-ui]')) return
+      if (notesUI.getState().commenting && t.closest?.('[data-param]')) return
+      notesUI.setState({ open: null, draft: null })
+    }
     document.addEventListener('pointerdown', down, true)
     return () => document.removeEventListener('pointerdown', down, true)
   }, [open, draft])
 
-  // Comment mode: a click on an Inspector row pins the comment to that knob instead of changing it.
+  /** Start a comment at an anchor: freeze the frame being commented on. */
+  const begin = (anchor: NoteAnchor) => {
+    const prev = notesUI.getState().draft
+    const mine = prev?.layer === id ? prev : null
+    if (mine?.sending) return
+    if (!mine) returnTo.current = document.activeElement as HTMLElement | null
+    const resume = mine ? mine.resume : !!clock?.getState().playing
+    clock?.pause()
+    notesUI.setState({ draft: { layer: id, anchor, t: mine?.t ?? clock?.time(), resume, text: mine?.text ?? '' }, open: null })
+  }
+
+  // Comment mode: a click (or Enter / Space) on an Inspector row pins the comment to that knob instead of changing it.
   useEffect(() => {
     if (!commenting) return
     const rowOf = (e: Event) => {
+      if (e.defaultPrevented) return null   // another NoteLayer took it
       const row = (e.target as Element).closest?.('[data-param]') as HTMLElement | null
       return row && row.dataset.param && row.dataset.param in params.defs ? row : null
     }
@@ -167,85 +261,132 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
       e.preventDefault(); e.stopPropagation()
       begin({ on: 'param', key: row.dataset.param! })
     }
+    const key = (e: KeyboardEvent) => {
+      if ((e.key !== 'Enter' && e.key !== ' ') || e.repeat) return
+      const row = rowOf(e)
+      if (!row) return
+      e.preventDefault(); e.stopPropagation()
+      begin({ on: 'param', key: row.dataset.param! })
+    }
     document.addEventListener('pointerdown', down, true)
     document.addEventListener('click', click, true)
-    return () => { document.removeEventListener('pointerdown', down, true); document.removeEventListener('click', click, true) }
-  }, [commenting, params, clock])   // eslint-disable-line react-hooks/exhaustive-deps
+    document.addEventListener('keydown', key, true)
+    return () => {
+      document.removeEventListener('pointerdown', down, true)
+      document.removeEventListener('click', click, true)
+      document.removeEventListener('keydown', key, true)
+    }
+  }, [commenting, params, clock, id])   // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Knob comments sit beside their rows: follow them as panels scroll and resize.
+  // Space held = the stage's pan, not a pin.
+  const space = useRef(false)
+  useEffect(() => {
+    if (!commenting) return
+    const kd = (e: KeyboardEvent) => { if (e.code === 'Space') space.current = true }
+    const ku = (e: KeyboardEvent) => { if (e.code === 'Space') space.current = false }
+    window.addEventListener('keydown', kd, true); window.addEventListener('keyup', ku, true)
+    return () => { window.removeEventListener('keydown', kd, true); window.removeEventListener('keyup', ku, true); space.current = false }
+  }, [commenting])
+
+  // Knob comments sit beside their rows: follow them as panels scroll and resize, and hide them when the row is
+  // scrolled out of its panel (or not rendered: a collapsed section, a hidden param).
   const paramKeys = [...new Set([...notes, ...(draft ? [{ anchor: draft.anchor }] : [])].flatMap((n) => (n.anchor?.on === 'param' ? [n.anchor.key] : [])))]
   const [rows, setRows] = useState<Record<string, { left: number; top: number }>>({})
   const keysId = paramKeys.join('|')
   useEffect(() => {
     if (!paramKeys.length) { setRows({}); return }
+    let raf = 0
     const measure = () => {
+      raf = 0
       const next: Record<string, { left: number; top: number }> = {}
       for (const k of paramKeys) {
-        const r = document.querySelector(`[data-param="${CSS.escape(k)}"]`)?.getBoundingClientRect()
-        if (r && r.height) next[k] = { left: Math.round(r.left), top: Math.round(r.top + r.height / 2) }
+        const row = document.querySelector(`[data-param="${CSS.escape(k)}"]`)
+        const r = row?.getBoundingClientRect()
+        if (!row || !r || !r.height) continue
+        const mid = r.top + r.height / 2
+        let visible = true
+        for (let p = row.parentElement; p && visible; p = p.parentElement) {
+          const cs = getComputedStyle(p)
+          if (cs.overflowY !== 'visible') { const b = p.getBoundingClientRect(); visible = mid >= b.top && mid <= b.bottom }
+        }
+        if (visible) next[k] = { left: Math.round(r.left), top: Math.round(mid) }
       }
       setRows((prev) => (JSON.stringify(prev) === JSON.stringify(next) ? prev : next))
     }
+    const soon = () => { if (!raf) raf = requestAnimationFrame(measure) }
     measure()
-    const id = setInterval(measure, 250)
-    return () => clearInterval(id)
+    document.addEventListener('scroll', soon, true)
+    window.addEventListener('resize', soon)
+    const id2 = setInterval(soon, 500)   // panels that move without scrolling (a section opening)
+    return () => { cancelAnimationFrame(raf); document.removeEventListener('scroll', soon, true); window.removeEventListener('resize', soon); clearInterval(id2) }
   }, [keysId])   // eslint-disable-line react-hooks/exhaustive-deps
 
-  /** Start a comment at an anchor: freeze the frame being commented on. */
-  const begin = (anchor: NoteAnchor) => {
-    const prev = notesUI.getState().draft
-    const resume = prev ? prev.resume : !!clock?.getState().playing
-    clock?.pause()
-    notesUI.setState({ draft: { anchor, t: prev?.t ?? clock?.time(), resume }, open: null })
-  }
-
-  const place = (e: React.PointerEvent) => {
-    e.preventDefault(); e.stopPropagation()
-    const r = el!.art.getBoundingClientRect()
-    const x = clamp((e.clientX - r.left) / r.width, 0, 1), y = clamp((e.clientY - r.top) / r.height, 0, 1)
+  const placeAt = (x: number, y: number) => {
     const target = describeAt?.(x, y)
     begin({ on: 'artboard', x, y, ...(target ? { target } : {}) })
+  }
+  const place = (e: React.PointerEvent) => {
+    // only a plain primary press pins: middle, right and Space-drag stay the stage's pan
+    if (e.button !== 0 || space.current) return
+    e.preventDefault(); e.stopPropagation()
+    const r = el!.art.getBoundingClientRect()
+    placeAt(clamp((e.clientX - r.left) / r.width, 0, 1), clamp((e.clientY - r.top) / r.height, 0, 1))
   }
 
   const post = async (text: string) => {
     const d = notesUI.getState().draft
-    if (!d || !el) return
-    // capture while the frame is still frozen; clearing the draft lets the clock run again
-    const snapshot = captureSnapshot({ params, history, clock, doc, view: { width: el.art.offsetWidth, height: el.art.offsetHeight } })
-    if (d.t !== undefined) snapshot.t = Math.round(d.t)
-    const image = await captureImage(el.art, { anchor: d.anchor.on === 'artboard' ? d.anchor : undefined })
-    notesUI.setState({ draft: null, commenting: false })
+    if (!d || d.layer !== id || d.sending || !el) return
+    notesUI.setState({ draft: { ...d, sending: true } })
     try {
+      // capture while the frame is still frozen; clearing the draft lets the clock run again
+      const snapshot = captureSnapshot({ params, history, clock, doc, view: { width: el.art.offsetWidth, height: el.art.offsetHeight } })
+      if (d.t !== undefined) snapshot.t = Math.round(d.t)
+      const image = await captureImage(el.art, { anchor: d.anchor.on === 'artboard' ? d.anchor : undefined })
       const note = await sendNote({ kind: 'comment', text, anchor: d.anchor, snapshot, image })
+      notesUI.setState({ draft: null, commenting: false, open: note.id })
       refreshNotes()
-      notesUI.setState({ open: note.id })
       toast('Comment sent to the agent', { type: 'success', description: 'Ask it to check the notes.' })
     } catch (err) {
+      // keep the composer and what was typed: nothing is lost to a failed send
+      const cur = notesUI.getState().draft
+      if (cur?.layer === id) notesUI.setState({ draft: { ...cur, sending: false } })
       toast('Could not send', { type: 'error', description: (err as Error).message })
     }
   }
 
-  const thread = (n: StudioNote, style?: CSSProperties, className?: string) => (
-    <Thread n={n} num={num(n.id)} params={params} clock={clock} stale={!isSnapshotState(n.snapshot, params)} style={style} className={className} />
-  )
+  /** Which way a card opens from its pin, so it stays on the visible stage (not under a panel, the timeline or the toolbar). */
+  const sides = (left: number, top: number) => {
+    const s = stageRect()
+    return { left: left + PIN + 8 + CARD.w > s.right && left - CARD.w - 8 > s.left, up: top + CARD.h > s.bottom && top - CARD.h > s.top }
+  }
+  const cardClass = ({ left, up }: { left: boolean; up: boolean }) => cn('absolute', left ? 'right-9' : 'left-9', up ? 'bottom-0' : '-top-7')
+
+  // A pin on a tiny artboard (zoomed far out, a phone) would bury it: draw pins smaller there.
+  const pinScale = el && el.art.offsetWidth * zoom < 200 ? 0.6 : 1
 
   return (
     <>
       <span ref={ref} hidden />
       {el && createPortal(
         <div className="pointer-events-none absolute inset-0" style={{ zIndex: 5 }}>
-          {commenting && <div data-note-ui="" aria-label="Click to place a comment" className="pointer-events-auto absolute inset-0 cursor-crosshair" onPointerDown={place} />}
+          {commenting && (
+            <div data-note-ui="" role="button" tabIndex={0} aria-label="Place a comment on the artboard (Enter for its middle)"
+              className="pointer-events-auto absolute inset-0 cursor-crosshair outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--signal)]"
+              onPointerDown={place}
+              onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); placeAt(0.5, 0.5) } }} />
+          )}
           {notes.map((n) => n.anchor?.on === 'artboard' && (
-            <At key={n.id} x={n.anchor.x} y={n.anchor.y} zoom={zoom} z={open === n.id ? 3 : 1}>
-              <Pin n={n} num={num(n.id)} open={open === n.id} stale={!isSnapshotState(n.snapshot, params)} />
-              {open === n.id && thread(n, undefined, 'absolute -top-7 left-9')}
-            </At>
+            <PinAt key={n.id} x={n.anchor.x} y={n.anchor.y} zoom={zoom} scale={pinScale} z={open === n.id ? 3 : 1} sides={sides}
+              render={(side) => (
+                <>
+                  <Pin n={n} num={num(n.id)} open={open === n.id} stale={status(n) === 'different'} />
+                  {open === n.id && <Thread n={n} num={num(n.id)} params={params} clock={clock} status={status(n)} className={cardClass(side)} />}
+                </>
+              )} />
           ))}
           {draft?.anchor.on === 'artboard' && (
-            <At x={draft.anchor.x} y={draft.anchor.y} zoom={zoom} z={4}>
-              <DraftPin />
-              <Composer onPost={post} className="absolute -top-7 left-9" />
-            </At>
+            <PinAt x={draft.anchor.x} y={draft.anchor.y} zoom={zoom} scale={pinScale} z={4} sides={sides}
+              render={(side) => (<><DraftPin /><Composer draft={draft} onPost={post} className={cardClass(side)} /></>)} />
           )}
         </div>,
         el.host,
@@ -255,17 +396,20 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
           {notes.map((n) => {
             const at = n.anchor?.on === 'param' ? rows[n.anchor.key] : undefined
             if (!at) return null
+            const side = sides(at.left - 34, at.top - PIN / 2)
+            // z under the palette and dialogs (150+), above the panels
             return (
-              <div key={n.id} className="fixed" style={{ left: at.left - 34, top: at.top + 13, zIndex: open === n.id ? 152 : 150 }}>
-                <Pin n={n} num={num(n.id)} open={open === n.id} stale={!isSnapshotState(n.snapshot, params)} />
-                {open === n.id && thread(n, undefined, 'absolute right-9 -top-7')}
+              <div key={n.id} className="fixed" style={{ left: at.left - 34, top: at.top + 13, zIndex: open === n.id ? 142 : 140 }}>
+                <Pin n={n} num={num(n.id)} open={open === n.id} stale={status(n) === 'different'} />
+                {open === n.id && <Thread n={n} num={num(n.id)} params={params} clock={clock} status={status(n)} className={cardClass({ left: true, up: side.up })} />}
               </div>
             )
           })}
           {draft?.anchor.on === 'param' && rows[draft.anchor.key] && (
-            <div className="fixed" style={{ left: rows[draft.anchor.key].left - 34, top: rows[draft.anchor.key].top + 13, zIndex: 153 }}>
+            <div className="fixed" style={{ left: rows[draft.anchor.key].left - 34, top: rows[draft.anchor.key].top + 13, zIndex: 143 }}>
               <DraftPin />
-              <Composer onPost={post} label={paramLabel(params, draft.anchor.key)} className="absolute right-9 -top-7" />
+              <Composer draft={draft} onPost={post} label={paramLabel(params, draft.anchor.key)}
+                className={cardClass({ left: true, up: sides(rows[draft.anchor.key].left, rows[draft.anchor.key].top).up })} />
             </div>
           )}
         </div>,
@@ -275,22 +419,40 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
   )
 }
 
-/** A zero-size box at a point on the artboard, kept at screen size whatever the zoom. Its children hang from it. */
-function At({ x, y, zoom, z, children }: { x: number; y: number; zoom: number; z: number; children: React.ReactNode }) {
-  return <div className="absolute" style={{ left: `${x * 100}%`, top: `${y * 100}%`, transform: `scale(${1 / zoom})`, transformOrigin: '0 0', zIndex: z }}>{children}</div>
+/** A zero-size box at a point on the artboard, kept at screen size whatever the zoom. Its card opens toward the room. */
+function PinAt({ x, y, zoom, scale, z, sides, render }: {
+  x: number; y: number; zoom: number; scale: number; z: number
+  sides: (left: number, top: number) => { left: boolean; up: boolean }
+  render: (side: { left: boolean; up: boolean }) => ReactNode
+}) {
+  const box = useRef<HTMLDivElement>(null)
+  const [side, setSide] = useState({ left: false, up: false })
+  useLayoutEffect(() => {
+    const r = box.current?.getBoundingClientRect()
+    if (!r) return
+    const next = sides(r.left, r.top)
+    setSide((s) => (s.left === next.left && s.up === next.up ? s : next))
+  })
+  return (
+    <div ref={box} className="absolute" style={{ left: `${x * 100}%`, top: `${y * 100}%`, transform: `scale(${scale / zoom})`, transformOrigin: '0 0', zIndex: z }}>
+      {render(side)}
+    </div>
+  )
 }
 
-const pinShape = 'absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-[11px] font-semibold tabular shadow-[0_0_0_2px_var(--panel),var(--shadow-cluster)]'
+const pinShape = 'absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-ui font-semibold tabular shadow-[0_0_0_2px_var(--panel),var(--shadow-cluster)]'
 
 function Pin({ n, num, open, stale }: { n: StudioNote; num: number; open: boolean; stale: boolean }) {
   const resolved = n.status === 'resolved'
   return (
-    <button type="button" data-note-ui=""
+    <button type="button" data-note-ui="" aria-expanded={open}
       aria-label={`Comment ${num}${resolved ? ', the agent replied' : ', waiting for the agent'}${stale ? ', made in another state' : ''}`}
-      onClick={(e) => { e.stopPropagation(); notesUI.setState((s) => ({ open: s.open === n.id ? null : n.id, draft: null })) }}
+      onClick={(e) => { e.stopPropagation(); notesUI.setState((s) => ({ open: s.open === n.id ? null : n.id })) }}
       className={cn(pinShape, 'pointer-events-auto outline-none transition-[transform,opacity] hover:scale-110 focus-visible:ring-2 focus-visible:ring-signal',
-        resolved ? 'bg-panel text-fg' : 'bg-signal-strong text-signal-fg', stale && !open && 'opacity-55', open && 'ring-2 ring-signal')}>
-      {resolved ? <Check size={12} strokeWidth={2.5} /> : num}
+        // answered pins invert (dark on a light board, light on a dark one) and keep their number
+        resolved ? 'bg-fg text-panel' : 'bg-signal-strong text-signal-fg', stale && !open && 'opacity-55', open && 'ring-2 ring-signal')}>
+      {num}
+      {resolved && <span aria-hidden className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-panel text-fg shadow-[var(--shadow-cluster)]"><Check size={9} strokeWidth={3} /></span>}
     </button>
   )
 }
@@ -301,32 +463,33 @@ function DraftPin() {
 
 const ago = (iso: string) => {
   const s = (Date.now() - Date.parse(iso)) / 1000
-  if (!Number.isFinite(s) || s < 60) return 'just now'
+  if (!Number.isFinite(s)) return ''
+  if (s < 60) return 'just now'
   if (s < 3600) return `${Math.floor(s / 60)}m ago`
   if (s < 86400) return `${Math.floor(s / 3600)}h ago`
   return `${Math.floor(s / 86400)}d ago`
 }
 
-function Thread({ n, num, params, clock, stale, style, className }: {
-  n: StudioNote; num: number; params: AnyParams; clock?: { seek(t: number): void; pause(): void }; stale: boolean; style?: CSSProperties; className?: string
+function Thread({ n, num, params, clock, status, className }: {
+  n: StudioNote; num: number; params: AnyParams; clock?: { seek(t: number): void; pause(): void }; status: 'same' | 'different' | 'other-version'; className?: string
 }) {
   const clear = async () => {
     try { await deleteNote(n.id); notesUI.setState({ open: null }); refreshNotes() } catch (e) { toast('Could not clear', { type: 'error', description: (e as Error).message }) }
   }
+  const title = `Comment ${num}${n.anchor?.on === 'param' ? ` · ${paramLabel(params, n.anchor.key)}` : ''}`
   return (
-    <div data-note-ui="" className={cn('pop pointer-events-auto w-[272px] overflow-hidden text-ui', className)} style={style} onPointerDown={(e) => e.stopPropagation()}>
-      <div className="flex h-9 items-center gap-0.5 border-b border-line pr-1.5 pl-3">
-        <span className="min-w-0 flex-1 truncate font-medium text-fg-muted">
-          Comment {num}{n.anchor?.on === 'param' ? ` · ${paramLabel(params, n.anchor.key)}` : ''}
-        </span>
-        {stale && <IconButton icon={RotateCcw} size="icon-sm" label="Show the state it was made in" onClick={() => restoreSnapshot(n.snapshot, { params, clock })} />}
+    <div data-note-ui="" role="dialog" aria-label={title} className={cn('pop pointer-events-auto w-[272px] overflow-hidden text-ui', className)} onPointerDown={(e) => e.stopPropagation()}>
+      <div className="flex h-9 items-center gap-0.5 pr-1.5 pl-3">
+        <span className="min-w-0 flex-1 truncate font-medium text-fg-muted">{title}</span>
+        {status === 'different' && <IconButton icon={RotateCcw} size="icon-sm" label="Show the state it was made in" onClick={() => restoreSnapshot(n.snapshot, { params, clock })} />}
         <IconButton icon={Trash2} size="icon-sm" label="Clear comment" onClick={clear} />
       </div>
       <div className="max-h-[280px] overflow-y-auto">
         <Message who="You" at={n.snapshot.at} text={n.text ?? ''} />
-        {n.resolution
-          ? <Message who="Agent" at={n.resolution.at} text={n.resolution.text} />
+        {n.status === 'resolved'
+          ? <Message who="Agent" at={n.resolution?.at ?? ''} text={n.resolution?.text || 'Marked this done.'} />
           : <p className="px-3 pb-3 text-fg-faint">Waiting for the agent. Ask it to check the notes.</p>}
+        {status === 'other-version' && <p className="px-3 pb-3 text-fg-faint">Made with an earlier version of this tool, so its state can’t be shown.</p>}
       </div>
     </div>
   )
@@ -334,30 +497,37 @@ function Thread({ n, num, params, clock, stale, style, className }: {
 
 function Message({ who, at, text }: { who: string; at: string; text: string }) {
   return (
-    <div className="px-3 py-2.5">
+    <div className="px-3 py-2">
       <div className="flex items-baseline gap-1.5"><span className="font-medium text-fg">{who}</span><span className="text-fg-faint">{ago(at)}</span></div>
-      <p className="mt-0.5 leading-relaxed whitespace-pre-wrap text-fg/90">{text}</p>
+      <p className="mt-0.5 leading-relaxed whitespace-pre-wrap text-fg/90 [overflow-wrap:anywhere]">{text}</p>
     </div>
   )
 }
 
-function Composer({ onPost, label, className }: { onPost: (text: string) => void; label?: string; className?: string }) {
-  const [text, setText] = useState('')
-  const post = () => { if (text.trim()) onPost(text.trim()) }
+const MAX_TEXT = 5000
+
+function Composer({ draft, onPost, label, className, style }: { draft: Draft; onPost: (text: string) => void; label?: string; className?: string; style?: CSSProperties }) {
+  const text = draft.text ?? ''
+  const sending = !!draft.sending
+  const setText = (t: string) => notesUI.setState((s) => (s.draft ? { draft: { ...s.draft, text: t } } : {}))
+  const post = () => { if (text.trim() && !sending) onPost(text.trim()) }
   return (
-    <div data-note-ui="" className={cn('pop pointer-events-auto flex w-[272px] flex-col gap-1.5 p-2', className)} onPointerDown={(e) => e.stopPropagation()}>
+    <div data-note-ui="" className={cn('pop pointer-events-auto flex w-[272px] flex-col gap-1.5 p-2', className)} style={style} onPointerDown={(e) => e.stopPropagation()}>
       {label && <span className="px-1 text-fg-muted">On {label}</span>}
       <div className="flex items-end gap-1.5">
-        <textarea autoFocus rows={1} value={text} placeholder="What should change?" aria-label="Comment"
-          onChange={(e) => { setText(e.target.value); e.target.style.height = '0px'; e.target.style.height = `${Math.min(140, e.target.scrollHeight)}px` }}
+        <textarea autoFocus rows={1} value={text} maxLength={MAX_TEXT} readOnly={sending} placeholder="What should change?" aria-label={label ? `Comment on ${label}` : 'Comment'}
+          ref={(t) => { if (t) { t.style.height = '0px'; t.style.height = `${Math.min(140, t.scrollHeight)}px` } }}
+          onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => {
             e.stopPropagation()
-            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); post() }
+            // Enter while an input method is composing (Japanese, Chinese…) confirms the text, it doesn't send
+            if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); post() }
             if (e.key === 'Escape') notesUI.setState({ draft: null })
           }}
           className="min-h-control flex-1 resize-none rounded-control bg-control px-2 py-1.5 text-ui leading-snug text-fg outline-none placeholder:text-fg-faint focus:shadow-[inset_0_0_0_1px_var(--signal)]" />
-        <Button size="icon-sm" variant={text.trim() ? 'primary' : 'ghost'} aria-label="Send to agent" disabled={!text.trim()} onClick={post}><Send size={12} strokeWidth={1.75} /></Button>
+        <Button size="icon-sm" variant={text.trim() ? 'primary' : 'ghost'} aria-label="Send comment" disabled={!text.trim() || sending} onClick={post}><Send size={12} strokeWidth={1.75} /></Button>
       </div>
+      {text.length > MAX_TEXT - 500 && <span className="px-1 text-fg-faint tabular">{MAX_TEXT - text.length} characters left</span>}
     </div>
   )
 }

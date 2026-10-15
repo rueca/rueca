@@ -303,12 +303,13 @@ stops ticks while paused too (default true for artifacts with their own life).
   action as its own icon. `shareMenuItems` drops "Copy link" for a store with `url: false` (`params.linkable`) · `HistoryButtons` · `PresetMenu` ·
   `CompareButton` · `ThemeToggle` · `SendToAgentButton params history? clock? doc?` · `shareMenuItems(params)` (link, JSON, **copy as agent prompt**).
 - Notes to the agent: **Send to agent** writes a note to `.rueca/notes/<id>.json` through the dev server, and renders nothing
-  until the route answers (so it never shows on a static build). Route: `ruecaNotes()` from `notes-server/vite` in `vite.config.ts`, or
-  `createNotesHandler({ dir? })` from `notes-server/handler` for any Node server. Add `.rueca/` to `.gitignore`.
+  until the route answers (so it never shows on a static build). Route: `ruecaNotes()` from `rueca/notes-server/vite` (installed at the project root) in `vite.config.ts`, or
+  `createNotesHandler({ dir?, allowedHosts? })` from `rueca/notes-server/handler` for any Node server (before any body parser). Add `.rueca/` to `.gitignore`.
   Core, framework-agnostic: `captureSnapshot({ params, history?, clock?, doc? })` → `{ tool, schema, url, changed: { key: { value, default, label, hint } }, steps, t, doc, view }` ·
   `sendNote({ kind: 'values' | 'comment', text?, anchor?, snapshot, image? })` · `listNotes()` · `deleteNote(id)` · `findNotesEndpoint()` · `formatNotePrompt(note)` (the clipboard version) ·
   `watchNotes(fn)` (one shared poll; returns unsubscribe) · `refreshNotes()` · `captureImage(artboardEl, { anchor? })` (JPEG data URL: DOM plus canvases, anchor ringed) ·
-  `restoreSnapshot(snapshot, { params, clock? })` (one undo step; the playhead paused at `t`) · `isSnapshotState(snapshot, params)`.
+  `restoreSnapshot(snapshot, { params, clock? })` (one undo step, the playhead paused at `t`; refuses another schema version) ·
+  `snapshotStatus(snapshot, params)` → `'same' | 'different' | 'other-version'` · `isSnapshotState(snapshot, params)` · `normalizeNote(raw)` (a note file as the tool can safely show it, or null).
 - Comments: `<NoteLayer params history? clock? doc? describeAt? />` inside an `<Artboard>` — comment mode (`C`, or `CommentButton`, which `ParamActions`
   includes) pins a comment to an artboard point, or to a knob by clicking its Inspector row (rows carry `data-param`). The clock pauses while you write.
   Pins fade when the tool is in another state, and their thread can restore it. Replies arrive live (`useNotes()`) with a toast. Pins keep screen size via `useZoom()`.
