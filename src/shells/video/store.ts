@@ -12,22 +12,25 @@ import { WIRE } from '@/demo/wire'
 import { ASPECTS, demoComp, newClip, uid, type Aspect, type Clip, type ClipKind, type Comp, type Track } from './comp'
 
 export const schema = defineSchema({
-  composition: folder('Composition', {
+  // the toolbar's aspect switcher is this folder's home, so <SettingsMenu> leaves it out
+  frame: folder('Frame', {
     aspect: p.select('9:16', [
       { value: '9:16', label: '9:16', icon: Smartphone, hint: 'Story / Reel · 1080 × 1920' },
       { value: '4:5', label: '4:5', icon: RectangleVertical, hint: 'Portrait feed · 1080 × 1350' },
       { value: '1:1', label: '1:1', icon: Square, hint: 'Square · 1080 × 1080' },
       { value: '16:9', label: '16:9', icon: RectangleHorizontal, hint: 'Landscape · 1920 × 1080' },
     ], { label: 'Aspect', hint: 'Every clip is laid out relative to the frame, so switching aspect re-lays the whole video.' }),
+  }, { place: 'settings' }),
+  composition: folder('Composition', {
     fps: p.select('30', [{ value: '24', label: '24' }, { value: '30', label: '30' }, { value: '60', label: '60' }], { label: 'Frame rate', hint: 'Frames per second for stepping, snapping and MP4 export.' }),
     duration: p.number(8000, { min: 1000, max: 60000, step: 100, fmt: (v) => `${(v / 1000).toFixed(1)}s`, label: 'Duration', hint: 'Length of the composition.' }),
     matte: p.color(WIRE.paper, { alpha: false, label: 'Matte', hint: 'Shown wherever no clip covers the frame.' }),
-  }),
+  }, { place: 'settings' }),
   view: folder('View', {
     safeArea: p.boolean(true, { label: 'Safe areas', hint: 'Shade the zones that platform UI (captions, buttons, profile) covers.' }),
     snap: p.boolean(true, { label: 'Snapping', hint: 'Clips snap to the playhead and to each other’s edges.' }),
     quality: p.select('0.5', [{ value: '0.5', label: 'Half' }, { value: '1', label: 'Full' }], { label: 'Preview', hint: 'Preview resolution. Export is always full resolution.' }),
-  }),
+  }, { place: 'settings' }),
 })
 
 export const params = createParams(schema, { id: 'video', version: 3 }) // v3: paper matte (wire style)

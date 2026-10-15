@@ -147,8 +147,10 @@ export default function DitherLab() {
                   { label: `PNG 4× · ${size.w * 4} × ${size.h * 4}`, icon: ImageIcon, onClick: () => exportPNG(4) },
                   { type: 'separator' },
                   { label: 'SVG (halftone circles)', icon: Shapes, shortcut: 'shift+mod+e', disabled: v.effect !== 'halftone', onClick: exportSVG },
-                  { label: 'Copy ASCII text', icon: Copy, shortcut: 'shift+mod+c', disabled: v.effect !== 'ascii', onClick: copyASCII },
-                  { label: 'Download ASCII .txt', icon: FileText, disabled: v.effect !== 'ascii', onClick: downloadTXT },
+                  ...(v.effect === 'ascii' ? [
+                    { label: 'Copy ASCII text', icon: Copy, shortcut: 'shift+mod+c', onClick: copyASCII },
+                    { label: 'Download ASCII .txt', icon: FileText, onClick: downloadTXT },
+                  ] : []),
                   { type: 'separator' },
                   { type: 'submenu', label: 'Share settings', icon: Braces, items: shareMenuItems(params) } as MenuItem,
                 ]} />
@@ -186,8 +188,10 @@ export default function DitherLab() {
       }
       right={
         <Panel header={<PanelHeader title="Process"><Badge tone="default">{effectLabel(v.effect)}</Badge></PanelHeader>}>
-          <Inspector params={params} folders={['adjust', 'effect']} />
+          {/* the effect decides which sliders exist, the palette is the look, adjust is the tail */}
+          <Inspector params={params} folders={['effect']} />
           <PaletteSection extract={extract} />
+          <div className="border-t border-line"><Inspector params={params} folders={['adjust']} /></div>
         </Panel>
       }
     >
@@ -233,7 +237,7 @@ function PaletteSection({ extract }: { extract: () => void }) {
     <div className="border-t border-line">
       <Section title="Palette" hint="Every effect quantises to these colours. Darkest is the ink, lightest the paper." changed={changed}
         onReset={changed ? () => params.reset(['palette', 'paletteName']) : undefined}
-        actions={<IconButton icon={Pipette} label="Extract palette from image" size="icon-sm" onClick={extract} />} first>
+        actions={<IconButton icon={Pipette} label="Extract palette from image" size="icon-sm" onClick={extract} />}>
         <div className="px-pad pb-2">
           <PalettePicker value={name} options={PALETTES} onChange={(n, colors) => params.patch({ palette: colors, paletteName: n })} />
         </div>
@@ -355,6 +359,7 @@ function ViewDock() {
   const split = useStore(view, (s) => s.split)
   const peek = useStore(view, (s) => s.peek)
   const grid = useStore(view, (s) => s.grid)
+  const ascii = useValues(params, (v) => v.effect) === 'ascii'
   return (
     <div className="cluster absolute bottom-3 left-1/2 z-10 flex h-bar -translate-x-1/2 items-center gap-0.5 rounded-[12px] px-1" role="toolbar" aria-label="View">
       <IconButton icon={Columns2} label={split ? 'Hide split' : 'Before / after split'} shortcut="y" tipSide="top" active={split} onClick={() => view.setState({ split: !split })} />
@@ -365,7 +370,7 @@ function ViewDock() {
         onKeyUp={() => view.setState({ peek: false })} />
       <Divider vertical />
       <IconButton icon={Grid3x3} label={grid ? 'Hide pixel grid' : 'Show pixel grid (at high zoom)'} shortcut="shift+g" tipSide="top" active={grid} onClick={() => view.setState({ grid: !grid })} />
-      <IconButton icon={Type} label="Copy ASCII text" shortcut="shift+mod+c" tipSide="top" onClick={copyASCII} disabled={useValues(params, (v) => v.effect) !== 'ascii'} />
+      {ascii && <IconButton icon={Type} label="Copy ASCII text" shortcut="shift+mod+c" tipSide="top" onClick={copyASCII} />}
     </div>
   )
 }

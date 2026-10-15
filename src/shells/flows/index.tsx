@@ -5,7 +5,7 @@ import {
   Upload, Map as MapIcon, Maximize2, RotateCcw, Share2, ClipboardCopy, Link,
 } from 'lucide-react'
 import {
-  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Tip, HistoryButtons, useValues, useDoc, toast, copyText,
+  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Tip, HistoryButtons, SettingsMenu, useValues, useDoc, toast, copyText,
   type Command, type MenuItem,
 } from '@kit'
 import { FlowCanvas, startWalkthrough } from './canvas/FlowCanvas'
@@ -93,6 +93,7 @@ export default function FlowsShell() {
                   <HistoryButtons history={history} />
                   <Divider vertical />
                   <PresetMenu params={params} />
+                  <SettingsMenu params={params} label="Canvas settings" />
                   <ThemeToggle />
                 </Cluster>
                 <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />

@@ -4,7 +4,7 @@ import {
   Download, Image as ImageIcon, FileSpreadsheet, ClipboardCopy, Braces, Upload, Plus, Columns3, Tag, X, Maximize2, RotateCcw, Trash2, Copy, UserRound, Rows3, ChevronDown,
 } from 'lucide-react'
 import {
-  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Stage, HistoryButtons, useHotkeys, useValues, useDoc, toast,
+  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, SettingsMenu, CommandPalette, Stage, HistoryButtons, useHotkeys, useValues, useDoc, toast,
   type Command, type MenuItem,
 } from '@kit'
 import { JourneyMap } from './map/JourneyMap'
@@ -123,6 +123,7 @@ export default function JourneyShell() {
                 <HistoryButtons history={history} />
                 <Divider vertical />
                 <PresetMenu params={params} />
+                <SettingsMenu params={params} folders={['view', 'curve']} label="Map settings" />
                 <ThemeToggle />
               </Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />

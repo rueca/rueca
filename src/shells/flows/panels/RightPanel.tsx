@@ -2,21 +2,20 @@
    selected (Spline convention), and the comments list. */
 import type { ReactNode } from 'react'
 import {
-  ArrowRight, Copy, Trash2, Play, MessageCircle, Plus, ArrowLeftRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical,
+  ArrowRight, Copy, Trash2, MessageCircle, Plus, ArrowLeftRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical,
   AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal, AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, Frame, Square, Diamond, StickyNote, CircleDot,
 } from 'lucide-react'
 import {
-  Panel, PanelHeader, PanelTabs, Section, Row, TextInput, Segmented, Select, Switch, ScrubValue, Button, IconButton, Inspector, Tiles, Empty, Tip, cn,
+  Panel, PanelHeader, PanelTabs, Section, Row, TextInput, Segmented, Select, Switch, ScrubValue, Button, IconButton, Tiles, Empty, cn,
 } from '@kit'
 import { Wireframe } from '../wireframes'
 import { StatusDot, STATUS } from '../canvas/nodes'
 import { TRIGGER_ICON } from '../canvas/edges'
 import { Avatar, ago } from '../canvas/comments'
-import { startWalkthrough } from '../canvas/FlowCanvas'
 import { happyPath } from '../layout'
 import { makeEdge, PEOPLE, SECTION_HUES, STICKY, stickyOf, TEMPLATES, TRIGGERS, templateLabel, uid, type FlowEdge, type FlowNode, type Status, type StickyColor, type Template, type Trigger, type EdgeStyle } from '../model'
 import {
-  params, doc, ui, useUI, useFlow, select, updateNodeData, updateEdgeData, setNodes, setEdges, editFlow, deleteSelection, duplicate, addScreen, sizeOf, commentPos, viewport,
+  doc, ui, useUI, useFlow, select, updateNodeData, updateEdgeData, setNodes, setEdges, editFlow, deleteSelection, duplicate, addScreen, sizeOf, commentPos, viewport,
 } from '../store'
 
 const KIND_ICON = { screen: Square, decision: Diamond, terminal: CircleDot, note: StickyNote, section: Frame }
@@ -331,15 +330,9 @@ function DocInspector() {
             {(['shipped', 'ready', 'draft'] as Status[]).map((s) => <span key={s} className="flex items-center gap-1.5 tabular"><StatusDot status={s} decorative />{STATUS[s].label} {counts[s]}</span>)}
           </div>
         </div>
-        <div className="flex items-center gap-2 px-pad pt-3">
-          <div className="min-w-0 flex-1 text-ui text-fg-muted">Happy path · <span className="tabular text-fg">{steps}</span> steps</div>
-          <Tip label="Walk through the happy path" shortcut="p"><Button size="sm" variant="default" onClick={startWalkthrough} disabled={steps < 2}><Play size={12} strokeWidth={1.5} />Walkthrough</Button></Tip>
-        </div>
+        <div className="px-pad pt-3 text-ui text-fg-muted">Happy path · <span className="tabular text-fg">{steps}</span> steps</div>
         <div className="px-pad pt-1 text-ui text-fg-faint">Edited {ago(flow.updated)} · {PEOPLE[flow.owner]?.name ?? 'You'}</div>
       </Section>
-      <div className="border-t border-line">
-        <Inspector params={params} />
-      </div>
     </div>
   )
 }

@@ -2,18 +2,18 @@
    with nothing selected, the composition settings from the schema. */
 import { Popover } from '@base-ui/react/popover'
 import {
-  AlignCenter, AlignHorizontalJustifyCenter, AlignLeft, AlignRight, AlignVerticalJustifyCenter, Circle, CircleDashed, Copy, Image as ImageIcon,
-  Scissors, Settings2, Shapes, Square, Trash2, Type,
+  AlignCenter, AlignHorizontalJustifyCenter, AlignLeft, AlignRight, AlignVerticalJustifyCenter, Circle, CircleDashed, Copy,
+  Scissors, Settings2, Shapes, Square, Trash2,
 } from 'lucide-react'
 import {
-  AngleDial, Badge, Button, ColorField, CurveEditor, CurveGlyph, IconButton, Inspector, Row, ScrubValue, SeedField, Section, Segmented, Select, Slider,
+  AngleDial, Badge, Button, ColorField, CurveEditor, CurveGlyph, IconButton, Row, ScrubValue, SeedField, Section, Segmented, Select, Slider,
   Switch, TextInput, cn, toast, type ScrubProps,
 } from '@kit'
 import { ASPECTS, EASE, PRESETS, type Aspect, type Clip, type FontKey, type ImageGen, type Motion } from './comp'
 import { WIRE, wireImage } from '@/demo/wire'
 import { CAMPANA } from '@/demo/clients'
 import { FONTS, IMAGE_LABEL, proceduralImage } from './render'
-import { addClip, commitComp, deleteClips, duplicateClips, getComp, history, params, rebaseDesign, splitAt, ui, updateClip, useComp, useUI } from './store'
+import { commitComp, deleteClips, duplicateClips, getComp, history, params, rebaseDesign, splitAt, ui, updateClip, useComp, useUI } from './store'
 
 const sec = (v: number) => `${(v / 1000).toFixed(2)}s`
 /** A ScrubValue that shows and accepts percent: typing 50 means 50%, not 50×.
@@ -34,8 +34,7 @@ export function ClipInspector() {
   const design = comp.design ?? '9:16'
   return (
     <div className="flex flex-col">
-      <Inspector params={params} folders={['composition', 'view']} />
-      <Section title="Re-layout" hint="Positions are relative to the frame; sizes are exact in the design frame and scale to fit the others.">
+      <Section title="Re-layout" first hint="Positions are relative to the frame; sizes are exact in the design frame and scale to fit the others.">
         <Row label="Design frame"><span className="flex-1 tabular text-ui text-fg">{design} · {ASPECTS[design].w} × {ASPECTS[design].h}</span></Row>
         {design !== aspect ? (
           <div className="flex flex-col gap-1.5 px-pad pt-1">
@@ -44,14 +43,7 @@ export function ClipInspector() {
           </div>
         ) : <p className="px-pad pt-0.5 text-ui leading-relaxed text-fg-faint">Switch aspect in the toolbar (1–4) to see the re-layout.</p>}
       </Section>
-      <Section title="Add clip">
-        <div className="grid grid-cols-2 gap-1.5 px-pad pb-1">
-          {([['text', Type, 'Text'], ['shape', Shapes, 'Shape'], ['image', ImageIcon, 'Image'], ['progress', CircleDashed, 'Progress']] as const).map(([k, Icon, l]) => (
-            <Button key={k} size="md" variant="default" onClick={() => addClip(k)}><Icon size={14} strokeWidth={1.5} />{l}</Button>
-          ))}
-        </div>
-        <p className="px-pad pt-1 text-ui leading-relaxed text-fg-faint">Clips land at the playhead on the first free track. ⇧T adds text.</p>
-      </Section>
+      <p className="px-pad pt-2 pb-3 text-ui leading-relaxed text-fg-faint">Select a clip to edit it. Clips from the library land at the playhead; ⇧T adds text.</p>
     </div>
   )
 }

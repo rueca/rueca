@@ -16,23 +16,23 @@ export const schema = defineSchema({
     grid: p.number(16, { min: 8, max: 48, step: 4, unit: 'px', label: 'Grid size', when: (v) => v.snap }),
     thumbnails: p.boolean(true, { label: 'Wireframes', hint: 'Draw the wireframe thumbnail inside each screen node.' }),
     minimap: p.boolean(true, { label: 'Minimap' }),
-  }),
+  }, { place: 'settings' }),
   connections: folder('Connections', {
     edgeStyle: p.select('smooth', [{ value: 'smooth', label: 'Step' }, { value: 'bezier', label: 'Curve' }, { value: 'straight', label: 'Straight' }], { label: 'Style', hint: 'Default route for connections without their own style.' }),
     edgeLabels: p.boolean(true, { label: 'Labels', hint: 'Show trigger + label pills on connections.' }),
     smartHandles: p.boolean(true, { label: 'Smart sides', hint: 'Re-pick the side a connection leaves from when you move a node.' }),
-  }),
+  }, { place: 'settings' }),
   layout: folder('Auto layout', {
     direction: p.select('LR', [{ value: 'LR', label: 'Across' }, { value: 'TB', label: 'Down' }], { hint: 'Main reading direction of the tidy-up.' }),
     rankGap: p.number(88, { min: 40, max: 240, step: 4, unit: 'px', label: 'Column gap' }),
     nodeGap: p.number(56, { min: 24, max: 160, step: 4, unit: 'px', label: 'Row gap' }),
     tidy: p.action('Tidy up', () => tidy(), { hint: 'Lay the flow out again (⇧L).' }),
-  }, { collapsed: true }),
+  }, { collapsed: true, place: 'settings' }),
   walkthrough: folder('Walkthrough', {
     follow: p.boolean(true, { label: 'Camera follows' }),
     dim: p.boolean(true, { label: 'Dim others', hint: 'Fade everything that is not on the current step.' }),
     autoplay: p.number(0, { min: 0, max: 8, step: 0.5, unit: 's', hint: '0 = step manually with ← →.' }),
-  }, { collapsed: true }),
+  }, { collapsed: true, place: 'settings' }),
 })
 export const params = createParams(schema, {
   id: 'flows',

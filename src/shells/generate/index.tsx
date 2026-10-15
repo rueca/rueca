@@ -74,7 +74,7 @@ export default function GenerateShell() {
           center={<QueueStatus />}
           end={
             <>
-              <Cluster><ParamActions params={params} history={history} /></Cluster>
+              <Cluster><ParamActions params={params} history={history} share={false} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>}
                 items={[
                   { type: 'label', label: 'Selection' },
