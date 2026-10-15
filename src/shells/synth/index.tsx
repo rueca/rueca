@@ -130,8 +130,6 @@ export default function SynthShell() {
 
   return (
     <Studio
-      leftWidth={256}
-      rightWidth={300}
       toolbar={
         <Toolbar
           start={<Brand name="Synth" doc="Plate no. 4" mark={Mark} />}
@@ -143,22 +141,22 @@ export default function SynthShell() {
                 <div className="flex items-center gap-1 pl-1">
                   <ScrubValue boxed value={v.bpm} min={60} max={180} step={1} defaultValue={122} label="Tempo" changed={params.isChanged('bpm')}
                     onChange={(n, f) => params.setValue('bpm', n, { commit: f })} className="w-[46px]" align="left" />
-                  <span className="text-[11px] text-fg-faint">BPM</span>
+                  <span className="text-ui text-fg-faint">BPM</span>
                 </div>
               </Tip>
               <Tip label="Swing — delays off-beat 16ths">
                 <div className="flex items-center gap-1 pl-1">
                   <ScrubValue boxed value={v.swing} min={0} max={100} step={1} unit="%" defaultValue={22} label="Swing" changed={params.isChanged('swing')}
                     onChange={(n, f) => params.setValue('swing', n, { commit: f })} className="w-[46px]" align="left" />
-                  <span className="text-[11px] text-fg-faint">Swing</span>
+                  <span className="text-ui text-fg-faint">Swing</span>
                 </div>
               </Tip>
               <Divider vertical />
-              <div className="flex h-7 min-w-[64px] items-center gap-1.5 rounded-[6px] px-2 tabular text-[12px]" aria-live="off">
+              <div className="flex h-icon min-w-[64px] items-center gap-1.5 rounded-[6px] px-2 tabular text-ui" aria-live="off">
                 <span className={cn('size-1.5 rounded-full', playing ? 'bg-rec' : started ? 'bg-ok' : 'bg-line-strong')} />
                 <span className={playing ? 'text-fg' : 'text-fg-faint'}>{bar}</span>
               </div>
-              <Tip label="Loop length"><span className="flex items-center gap-1 pr-1.5 text-[11px] text-fg-faint tabular"><Repeat size={12} strokeWidth={1.5} />{(loopMs / 1000).toFixed(2)}s</span></Tip>
+              <Tip label="Loop length"><span className="flex items-center gap-1 pr-1.5 text-ui text-fg-faint tabular"><Repeat size={12} strokeWidth={1.5} />{(loopMs / 1000).toFixed(2)}s</span></Tip>
             </Cluster>
           }
           end={
@@ -178,7 +176,7 @@ export default function SynthShell() {
           overlay={
             <>
               <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
-                <div className="cluster flex h-8 w-[168px] items-center px-1">
+                <div className="cluster flex h-bar w-[168px] items-center px-1">
                   <Segmented size="sm" value={v.visual} onChange={(s) => params.setValue('visual', s)} options={[{ value: 'plate', label: 'Plate' }, { value: 'harmonograph', label: 'Pendulum' }]} label="Visual" />
                 </div>
               </div>
@@ -187,8 +185,8 @@ export default function SynthShell() {
                 <div className="absolute inset-0 z-20 flex items-center justify-center bg-scrim">
                   <div className="pop flex w-[300px] flex-col items-center gap-3 px-6 py-6 text-center">
                     <div className="flex size-10 items-center justify-center rounded-full bg-signal-soft text-signal"><Volume2 size={18} strokeWidth={1.5} /></div>
-                    <div className="text-[13px] font-semibold text-fg">Click to start audio</div>
-                    <p className="text-[11.5px] leading-relaxed text-fg-muted">Browsers keep sound off until you interact. You can edit the pattern and knobs first — nothing plays until you press Play.</p>
+                    <div className="text-title font-semibold text-fg">Click to start audio</div>
+                    <p className="text-ui leading-relaxed text-fg-muted">Browsers keep sound off until you interact. You can edit the pattern and knobs first — nothing plays until you press Play.</p>
                     <div className="flex gap-2">
                       <Button variant="primary" size="lg" onClick={startAudio} autoFocus><Power size={14} strokeWidth={1.75} />Start audio</Button>
                       <Button variant="default" size="lg" onClick={() => engine.play()}><Play size={14} strokeWidth={1.75} />Play</Button>
@@ -197,7 +195,7 @@ export default function SynthShell() {
                 </div>
               )}
               {started && !playing && (
-                <button type="button" onClick={() => engine.play()} className="cluster absolute bottom-3 left-1/2 z-10 flex h-8 -translate-x-1/2 items-center gap-1.5 px-3 text-[12px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
+                <button type="button" onClick={() => engine.play()} className="cluster absolute bottom-3 left-1/2 z-10 flex h-bar -translate-x-1/2 items-center gap-1.5 px-pad text-ui text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
                   <Play size={13} strokeWidth={1.5} />Press Space to play
                 </button>
               )}

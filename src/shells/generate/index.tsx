@@ -68,8 +68,6 @@ export default function GenerateShell() {
 
   return (
     <Studio
-      leftWidth={252}
-      rightWidth={304}
       toolbar={
         <Toolbar
           start={<Brand name="Generate" doc={title} mark={mark} />}

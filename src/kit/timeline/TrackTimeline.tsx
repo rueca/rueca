@@ -39,6 +39,7 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { Eye, EyeOff, Lock, LockOpen, Maximize2, ZoomIn, ZoomOut } from 'lucide-react'
 import { clamp, cn } from '../core/cn'
+import { useDensityPx } from '../core/density'
 import type { Clock } from '../core/clock'
 import { IconButton } from '../ui/button'
 import { Slider } from '../ui/slider'
@@ -85,17 +86,22 @@ export interface TrackTimelineProps {
   /** extra controls before the zoom cluster */
   headerExtra?: ReactNode
   empty?: ReactNode
-  /** height of the scrolling tracks area (px) */
+  /** height of the scrolling tracks area (px); default fits the ruler and six tracks */
   height?: number
+  /** track-name column (px); default two inspector label columns */
   headerWidth?: number
+  /** track height (px); default a timeline lane plus room for the clip's inset */
   rowHeight?: number
   className?: string
 }
 
-const RULER = 26
-
 export function TrackTimeline(props: TrackTimelineProps) {
-  const { clock, duration, fps, tracks, clips, snap = true, follow = true, toolbar, empty, height = 236, headerWidth: HEAD_W = 164, rowHeight: ROW = 36, className } = props
+  const { clock, duration, fps, tracks, clips, snap = true, follow = true, toolbar, empty, className } = props
+  // sizes follow the density tokens (32px tracks, a 24px ruler by default; 36 and 28 in comfortable)
+  const RULER = useDensityPx('--d-ruler', 28), lane = useDensityPx('--d-lane', 24), label = useDensityPx('--d-label', 84)
+  const ROW = props.rowHeight ?? lane + 12
+  const HEAD_W = props.headerWidth ?? label * 2
+  const height = props.height ?? RULER + 6 * ROW
   const scroller = useRef<HTMLDivElement>(null)
   const [vw, setVw] = useState(800)
   useLayoutEffect(() => {
@@ -277,7 +283,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
 
   return (
     <div className={cn('panel flex flex-col overflow-hidden', className)}>
-      <div className="flex h-10 flex-none items-center gap-1 px-2">
+      <div className="flex h-header flex-none items-center gap-1 px-2">
         {toolbar}
         <div className="flex-1" />
         {props.headerExtra}
@@ -290,7 +296,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
         <div className="relative" style={{ width: HEAD_W + contentW, minHeight: '100%' }}>
           {/* ruler */}
           <div className="sticky top-0 z-20 flex border-b border-line bg-panel" style={{ height: RULER }}>
-            <div className="sticky left-0 z-30 flex flex-none items-center border-r border-line bg-panel px-3 text-[11px] text-fg-faint" style={{ width: HEAD_W }}>
+            <div className="sticky left-0 z-30 flex flex-none items-center border-r border-line bg-panel px-pad text-ui text-fg-faint" style={{ width: HEAD_W }}>
               {tracks.length} {tracks.length === 1 ? 'track' : 'tracks'} · {clips.length} {clips.length === 1 ? 'clip' : 'clips'}
             </div>
             <div className="relative flex-none" style={{ width: contentW }}>
@@ -311,29 +317,29 @@ export function TrackTimeline(props: TrackTimelineProps) {
             className="relative outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--signal)]">
             {tracks.map((tr) => (
               <div key={tr.id} className="flex border-b border-line" style={{ height: ROW }}>
-                <div className={cn('group/track sticky left-0 z-[18] flex flex-none items-center gap-1 border-r border-line bg-panel pr-1 pl-3', tr.muted && 'text-fg-faint')} style={{ width: HEAD_W }}>
+                <div className={cn('group/track sticky left-0 z-[18] flex flex-none items-center gap-1 border-r border-line bg-panel pr-1 pl-pad', tr.muted && 'text-fg-faint')} style={{ width: HEAD_W }}>
                   {renaming === tr.id ? (
                     <input autoFocus defaultValue={tr.name} aria-label="Track name" onFocus={(e) => e.currentTarget.select()}
                       onBlur={(e) => { props.onTrackRename?.(tr.id, e.target.value || tr.name); setRenaming(null) }}
                       onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setRenaming(null) }}
-                      className="h-6 min-w-0 flex-1 rounded-[4px] bg-control px-1.5 text-[11.5px] text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
+                      className="h-control min-w-0 flex-1 rounded-control bg-control px-1.5 text-ui text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
                   ) : (
                     <button type="button" tabIndex={props.onTrackRename ? 0 : -1}
                       onDoubleClick={() => props.onTrackRename && setRenaming(tr.id)}
                       onKeyDown={(e) => { if (props.onTrackRename && (e.key === 'Enter' || e.key === 'F2')) { e.preventDefault(); e.stopPropagation(); setRenaming(tr.id) } }}
                       title={props.onTrackRename ? 'Double-click or Enter to rename' : undefined}
-                      className={cn('min-w-0 flex-1 truncate rounded-[4px] text-left text-[11.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal', tr.muted ? 'text-fg-faint' : 'text-fg')}>
+                      className={cn('min-w-0 flex-1 truncate rounded-control text-left text-ui outline-none focus-visible:ring-2 focus-visible:ring-signal', tr.muted ? 'text-fg-faint' : 'text-fg')}>
                       {tr.name}
                     </button>
                   )}
                   {props.onTrackToggle && (
                     <>
                       <button type="button" aria-label={tr.muted ? `Show ${tr.name}` : `Hide ${tr.name}`} aria-pressed={tr.muted} onClick={() => props.onTrackToggle!(tr.id, 'muted')}
-                        className={cn('flex size-6 items-center justify-center rounded-[5px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.muted && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
+                        className={cn('flex size-icon items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.muted && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
                         {tr.muted ? <EyeOff size={13} strokeWidth={1.5} /> : <Eye size={13} strokeWidth={1.5} />}
                       </button>
                       <button type="button" aria-label={tr.locked ? `Unlock ${tr.name}` : `Lock ${tr.name}`} aria-pressed={tr.locked} onClick={() => props.onTrackToggle!(tr.id, 'locked')}
-                        className={cn('flex size-6 items-center justify-center rounded-[5px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.locked && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
+                        className={cn('flex size-icon items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.locked && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
                         {tr.locked ? <Lock size={13} strokeWidth={1.5} /> : <LockOpen size={13} strokeWidth={1.5} />}
                       </button>
                     </>
@@ -362,8 +368,8 @@ export function TrackTimeline(props: TrackTimelineProps) {
                         {!!c.rampOut && <div className="pointer-events-none absolute top-0 right-0 bottom-0" style={{ width: Math.min(w, X(c.rampOut)), background: `linear-gradient(to top left, ${c.color} 0 49%, transparent 51%)`, opacity: 0.14 }} />}
                         <div className="relative flex h-full min-w-0 items-center gap-1.5 px-2">
                           {Icon && w > 34 && <Icon size={12} strokeWidth={1.75} className="shrink-0 text-fg/80" />}
-                          {w > 52 && <span className="truncate text-[11px] font-medium text-fg">{c.label}</span>}
-                          {c.detail && w > 140 && <span className="truncate text-[10.5px] text-fg-muted">{c.detail}</span>}
+                          {w > 52 && <span className="truncate text-ui font-medium text-fg">{c.label}</span>}
+                          {c.detail && w > 140 && <span className="truncate text-ui-sm text-fg-muted">{c.detail}</span>}
                         </div>
                         {!tr.locked && (
                           <>

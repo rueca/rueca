@@ -43,12 +43,12 @@ export class ErrorBoundary extends Component<Props, State> {
       <div role="alert" className="flex h-full min-h-[120px] w-full items-center justify-center p-4">
         <div className={compact ? 'flex flex-col items-center gap-2 text-center' : 'pop flex max-w-[340px] flex-col items-center gap-3 p-5 text-center'}>
           <AlertTriangle size={18} strokeWidth={1.5} className="text-rec" />
-          <div className="text-[12.5px] font-medium text-fg">{label} hit an error</div>
-          <div className="max-w-[280px] text-[11.5px] leading-relaxed text-fg-muted">{this.state.error.message || 'Something went wrong.'}</div>
+          <div className="text-title font-medium text-fg">{label} hit an error</div>
+          <div className="max-w-[280px] text-ui leading-relaxed text-fg-muted">{this.state.error.message || 'Something went wrong.'}</div>
           <div className="flex flex-wrap justify-center gap-1.5">
-            <button type="button" onClick={this.reset} className="h-7 rounded-[6px] bg-active px-2.5 text-[12px] font-medium text-fg hover:brightness-110">Try again</button>
-            <button type="button" onClick={() => { clearSavedSettings(this.props.resetPrefix); location.reload() }} className="h-7 rounded-[6px] px-2.5 text-[12px] text-fg-muted hover:bg-hover hover:text-fg">Reset saved settings</button>
-            <button type="button" onClick={() => location.reload()} className="h-7 rounded-[6px] px-2.5 text-[12px] text-fg-muted hover:bg-hover hover:text-fg">Reload</button>
+            <button type="button" onClick={this.reset} className="h-icon rounded-control bg-active px-2.5 text-ui font-medium text-fg hover:brightness-110">Try again</button>
+            <button type="button" onClick={() => { clearSavedSettings(this.props.resetPrefix); location.reload() }} className="h-icon rounded-control px-2.5 text-ui text-fg-muted hover:bg-hover hover:text-fg">Reset saved settings</button>
+            <button type="button" onClick={() => location.reload()} className="h-icon rounded-control px-2.5 text-ui text-fg-muted hover:bg-hover hover:text-fg">Reload</button>
           </div>
         </div>
       </div>

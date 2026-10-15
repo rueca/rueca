@@ -13,7 +13,7 @@ export function QueueStatus() {
   const pct = run ? (run.status === 'running' ? run.step / run.total : run.status === 'finishing' ? 1 : 0) : 0
   return (
     <Popover.Root>
-      <Popover.Trigger className={cn('cluster flex h-9 min-w-[200px] items-center gap-2.5 px-3 text-[12px] outline-none focus-visible:ring-2 focus-visible:ring-signal', run ? 'text-fg' : 'text-fg-muted')}>
+      <Popover.Trigger className={cn('cluster flex h-bar min-w-[200px] items-center gap-2.5 px-pad text-ui outline-none focus-visible:ring-2 focus-visible:ring-signal', run ? 'text-fg' : 'text-fg-muted')}>
         {run ? (
           <>
             <span className="size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" />
@@ -29,15 +29,15 @@ export function QueueStatus() {
         <Popover.Positioner side="bottom" sideOffset={8} className="z-[100]">
           <Popover.Popup className="pop w-[320px] p-1.5 outline-none">
             <div className="flex items-center justify-between px-2 pt-1 pb-1.5">
-              <span className="text-[12px] font-medium text-fg">Queue</span>
+              <span className="text-title font-medium text-fg">Queue</span>
               {jobs.length > 1 && <Button size="sm" variant="ghost" onClick={cancelAll}>Cancel all</Button>}
             </div>
-            {!jobs.length && <div className="px-2 pb-2 text-[11.5px] text-fg-muted">Nothing running. Runs execute one at a time; switching model costs a cold load.</div>}
+            {!jobs.length && <div className="px-2 pb-2 text-ui text-fg-muted">Nothing running. Runs execute one at a time; switching model costs a cold load.</div>}
             {jobs.map((j) => (
               <div key={j.id} className="flex items-center gap-2 rounded-[7px] px-2 py-1.5 hover:bg-hover">
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-[12px] text-fg">{j.items[0].prompt}</div>
-                  <div className="tabular text-[11px] text-fg-faint">
+                  <div className="truncate text-ui text-fg">{j.items[0].prompt}</div>
+                  <div className="tabular text-ui text-fg-faint">
                     {j.kind === 'upscale' ? 'Upscale 2×' : `${j.items.length} × ${modelOf(j.items[0].model).name}`} · {j.status === 'running' ? `${j.step}/${j.total}` : j.status}
                   </div>
                 </div>

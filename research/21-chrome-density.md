@@ -143,11 +143,46 @@ Motion gains the most because its timeline is now token-sized. Dither, ui-design
 - they pin their panel widths (`rightWidth={300}`)
 - they build their own headers and rows
 
-**Phase 2:**
-- Remove the 14 pinned panel widths.
-- Move the hand-built shell panels onto `PanelHeader`/`Section`/`Row`: flows, journey, batch, marks, generate, animate, ui-design.
-- Tokenise TrackTimeline and the remaining kit parts: data-grid, stack, palette, dialog, toast, jobs, variant-grid.
-- Then drop the legacy class selectors in `.studio-touch`.
+**Phase 2 is built (2026-10-15).** The tokens now reach every shell.
+
+What changed:
+- **Panel widths.** All 16 shells stopped pinning `leftWidth`/`rightWidth`, so they get the density's 224/256 (240/280 comfortable). None needed a pinned width back. Where content broke at the new width, the content changed:
+  - flows' Status and Route style rows stack
+  - the journey severity segment reads "Med" (with "Medium" as its tip)
+  - photo's navigator zoom reads Fit / 1:2 / 1:1 / 2:1, as in Lightroom
+  - component-lab's contrast rows put the label inline
+  - the envelope's A/D/S/R fields go two by two
+  - EffectStack's hover-only trash takes no room at rest, so shader's layer names fit at 224
+- **Shell panels on kit parts.** Hand-built headers and groups became `PanelHeader` or `Section`: the synth sequencer header, animate's state-machine groups, component-lab's Props bar, the generate Sessions heading, and ui-design's design and page headers. The rest of the chrome moved from literals to the token names: list rows `h-row`, fields `h-control`, icon buttons `size-icon`, HUD clusters `h-bar`, padding `px-pad`, all UI text `text-ui` / `text-ui-sm` / `text-title`. Artwork keeps its sizes: journey cards, flow nodes, node views, gallery tiles, specimens and sequencer cells.
+- **Kit parts on the tokens.**
+  - TrackTimeline: tracks are a lane plus 12 (32 default, 36 comfortable), the ruler is `--d-ruler`, the name column is two label columns, and the default height fits six tracks.
+  - EffectStack rows are `--row` + 2, the old 30 at comfortable.
+  - data-grid, palette, quick-add, dialog, toast, jobs, error-boundary, variant-grid, code-block, preset-grid, special, easing, charts, oklch, key-button, layout-fields, tooltip, the history list and the stage overlays.
+- **Touch.** `.studio-touch` is variables only. The `.h-6` / `.size-6` / `.text-[11px]` selectors are gone. The client view (`#/present?client`, 375×812) still measures 36px controls, 44px section headers, 14px labels and 16px inputs, and its portaled select items are 36px.
+- **Fix.** The shader shell no longer clears `data-density` when it mounts. Opening the gradient studio used to reset any chosen density to the default.
+
+Chrome coverage at 1440×900. Method: the union of every `.panel` and `.cluster` island, docked panels and the docked toolbar, sampled on a 2px grid. A `.panel` inside `<main>` is skipped, because there it frames the artwork (synth, component-lab). This counts slightly differently from the phase-1 table above: motion, untouched in phase 2, reads 37.9% against phase 1's 38.5%.
+
+| Shell | Default, after phase 1 | **Default, after phase 2** | Comfortable | Compact |
+|---|---|---|---|---|
+| dither | 32.9% | **30.9%** | 34.3% | 27.7% |
+| ui-design | 39.6% | **37.3%** | 40.4% | 34.9% |
+| animate | 47.0% | **44.5%** | 49.5% | 41.7% |
+| video | 54.0% | **51.1%** | 54.8% | 48.4% |
+| synth | 56.3% | **52.2%** | 54.0% | 50.8% |
+| photo | 52.0% | **46.9%** | 49.5% | 44.9% |
+| journey | 41.7% | **36.7%** | 39.6% | 34.4% |
+| component-lab | 33.6% | **27.7%** | 31.6% | 24.5% |
+| shader | 22.4% | **16.9%** | 20.3% | 14.9% |
+| flows | 34.5% | **30.6%** | 35.0% | 28.1% |
+| batch | 44.6% | **42.4%** | 44.0% | 40.5% |
+| nodes | 23.5% | **20.3%** | 24.6% | 18.0% |
+| scene | 24.6% | **22.2%** | 26.9% | 19.6% |
+| type | 26.7% | **24.7%** | 28.7% | 22.1% |
+| marks | 17.3% | **15.2%** | 18.6% | 13.4% |
+| generate | 14.0% | **12.2%** | 14.2% | 11.1% |
+
+What's left on the timeline shells is mostly the bottom band: video's 248px timeline, synth's sequencer, and photo's 135px looks strip, whose tiles are fixed-size previews. Labels longer than the 72px label column still truncate in schema rows ("Column wi…", "Node previ…", "Headline …" with its changed dot). That's the phase-1 column width, not something a shell can fix.
 
 ## Still open
 

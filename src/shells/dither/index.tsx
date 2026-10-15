@@ -124,7 +124,6 @@ export default function DitherLab() {
 
   return (
     <Studio
-      leftWidth={248}
       toolbar={
         <Toolbar
           start={<Brand name="Dither lab" doc={img.name} mark={Mark} />}
@@ -159,9 +158,9 @@ export default function DitherLab() {
       }
       left={
         <Panel header={<PanelHeader title="Image" />}>
-          <div className="flex flex-col gap-2 px-3 pt-3 pb-3">
+          <div className="flex flex-col gap-2 px-pad pt-3 pb-3">
             <ImageDrop value={img.url} onChange={(url) => (url ? take(dataURLBlob(url), 'Untitled image') : loadSample())} />
-            <div className="flex items-center justify-between gap-2 text-[11.5px]">
+            <div className="flex items-center justify-between gap-2 text-ui">
               <span className="min-w-0 truncate text-fg-muted" title={img.name}>{img.sample ? 'Sample photo' : img.name}</span>
               <span className="shrink-0 tabular text-fg-faint">{img.w} × {img.h}</span>
             </div>
@@ -176,7 +175,7 @@ export default function DitherLab() {
                 onPreview={(n) => view.setState({ preview: n })}
                 onRemove={(n) => params.deletePreset(n)}
               />
-              <div className="px-3 pb-1">
+              <div className="px-pad pb-1">
                 <Button size="sm" variant="ghost" className="w-full" onClick={async () => { const name = await promptText({ title: 'Name this look', label: 'Name', defaultValue: `Look ${presets.filter((p) => !p.builtin).length + 1}`, confirmLabel: 'Save look' }); if (name) toast(`Saved “${params.savePreset(name)}”`, { type: 'success' }) }}>
                   Save current as look…
                 </Button>
@@ -199,7 +198,7 @@ export default function DitherLab() {
         </Stage>
         {intake.over && (
           <div className="pointer-events-none absolute inset-2 z-20 flex items-center justify-center rounded-[var(--radius-panel)] bg-signal-soft shadow-[inset_0_0_0_2px_var(--signal)]">
-            <div className="pop flex items-center gap-2 px-3 py-2 text-[12px] font-medium text-fg"><ImageUp size={14} strokeWidth={1.5} className="text-signal" />Drop to dither this image</div>
+            <div className="pop flex items-center gap-2 px-pad py-2 text-ui font-medium text-fg"><ImageUp size={14} strokeWidth={1.5} className="text-signal" />Drop to dither this image</div>
           </div>
         )}
       </div>
@@ -235,11 +234,11 @@ function PaletteSection({ extract }: { extract: () => void }) {
       <Section title="Palette" hint="Every effect quantises to these colours. Darkest is the ink, lightest the paper." changed={changed}
         onReset={changed ? () => params.reset(['palette', 'paletteName']) : undefined}
         actions={<IconButton icon={Pipette} label="Extract palette from image" size="icon-sm" onClick={extract} />} first>
-        <div className="px-3 pb-2">
+        <div className="px-pad pb-2">
           <PalettePicker value={name} options={PALETTES} onChange={(n, colors) => params.patch({ palette: colors, paletteName: n })} />
         </div>
         <Row label="Colours" hint="Click a swatch to edit, + to add (up to 16). Editing makes it a custom palette." stacked changed={changed}
-          trailing={<span className="text-[11px] text-fg-faint">{PALETTES.some((p) => p.name === name) ? `${palette.length}` : `${name} · ${palette.length}`}</span>}>
+          trailing={<span className="text-ui text-fg-faint">{PALETTES.some((p) => p.name === name) ? `${palette.length}` : `${name} · ${palette.length}`}</span>}>
           <PaletteField value={palette} max={16} onChange={(c, final) => params.patch({ palette: c, paletteName: PALETTES.some((p) => p.name === name && equal(p.colors, c)) ? name : 'Custom' }, { commit: final })} />
         </Row>
       </Section>
@@ -334,7 +333,7 @@ function StatusPill() {
     : `${r.cols} × ${r.rows} chars`
   return (
     // narrow stages: the effect name gives way first, then the size — each with an ellipsis, never a hard clip (break-it F10)
-    <div className="cluster absolute bottom-3 left-3 z-10 flex h-8 max-w-[calc(50%-96px)] min-w-0 items-center gap-2 overflow-hidden px-2.5 text-[11.5px] no-select" aria-live="polite">
+    <div className="cluster absolute bottom-3 left-3 z-10 flex h-button-lg max-w-[calc(50%-96px)] min-w-0 items-center gap-2 overflow-hidden px-pad text-ui no-select" aria-live="polite">
       {error ? <span className="size-1.5 shrink-0 rounded-full bg-rec" />
         : busy ? <span className="size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" />
         : <span className="size-1.5 shrink-0 rounded-full bg-ok" />}
@@ -357,7 +356,7 @@ function ViewDock() {
   const peek = useStore(view, (s) => s.peek)
   const grid = useStore(view, (s) => s.grid)
   return (
-    <div className="cluster absolute bottom-3 left-1/2 z-10 flex h-10 -translate-x-1/2 items-center gap-0.5 rounded-[12px] px-1" role="toolbar" aria-label="View">
+    <div className="cluster absolute bottom-3 left-1/2 z-10 flex h-bar -translate-x-1/2 items-center gap-0.5 rounded-[12px] px-1" role="toolbar" aria-label="View">
       <IconButton icon={Columns2} label={split ? 'Hide split' : 'Before / after split'} shortcut="y" tipSide="top" active={split} onClick={() => view.setState({ split: !split })} />
       <IconButton icon={Eye} label="Hold to see the original" shortcut="\\" tipSide="top" active={peek}
         onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); view.setState({ peek: true }) }}

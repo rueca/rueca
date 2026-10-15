@@ -45,7 +45,7 @@ export function VariantAction({ label, shortcut, onClick, icon: Icon, on, childr
   return (
     <Tip label={label} shortcut={shortcut}>
       <button type="button" aria-label={label} aria-pressed={on} onClick={(e) => { e.stopPropagation(); onClick() }} onDoubleClick={(e) => e.stopPropagation()}
-        className={cn('flex size-7 items-center justify-center rounded-[7px] bg-overlay/90 text-fg-muted shadow-[var(--shadow-segment)] outline-none backdrop-blur-sm',
+        className={cn('flex size-icon items-center justify-center rounded-[7px] bg-overlay/90 text-fg-muted shadow-[var(--shadow-segment)] outline-none backdrop-blur-sm',
           'hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', on && 'text-signal-text hover:text-signal-text')}>
         {Icon ? <Icon size={13} strokeWidth={1.5} /> : children}
       </button>
@@ -122,8 +122,8 @@ export function VariantGrid({
                 style={{ background: it.background }}>
                 <div className="absolute inset-0 [&>svg]:size-full" data-studio-artifact>{render(it.id)}</div>
                 <div className="pointer-events-none absolute top-2 left-2 flex gap-1">
-                  {it.locked && <span className="flex size-6 items-center justify-center rounded-[6px] bg-overlay/90 text-fg shadow-[var(--shadow-segment)]"><Lock size={12} strokeWidth={1.75} /></span>}
-                  {it.fav && <span className="flex size-6 items-center justify-center rounded-[6px] bg-overlay/90 text-key shadow-[var(--shadow-segment)]"><Star size={12} strokeWidth={1.75} fill="currentColor" /></span>}
+                  {it.locked && <span className="flex size-icon items-center justify-center rounded-[6px] bg-overlay/90 text-fg shadow-[var(--shadow-segment)]"><Lock size={12} strokeWidth={1.75} /></span>}
+                  {it.fav && <span className="flex size-icon items-center justify-center rounded-[6px] bg-overlay/90 text-key shadow-[var(--shadow-segment)]"><Star size={12} strokeWidth={1.75} fill="currentColor" /></span>}
                 </div>
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-100 group-focus-within/card:opacity-100 group-hover/card:opacity-100">
                   {onLock && <VariantAction label={it.locked ? 'Unlock' : 'Keep (lock)'} shortcut={shortcuts.lock} on={it.locked} icon={it.locked ? Lock : LockOpen} onClick={() => onLock(it.id)} />}
@@ -138,7 +138,7 @@ export function VariantGrid({
                   <VariantAction label="Open" shortcut={shortcuts.open ?? 'enter'} icon={Maximize2} onClick={() => onOpen(it.id)} />
                 </div>
               </div>
-              <div className="flex min-w-0 items-center justify-between gap-2 px-0.5 text-[11.5px]">
+              <div className="flex min-w-0 items-center justify-between gap-2 px-0.5 text-ui">
                 <span className={cn('truncate', active ? 'text-fg' : 'text-fg-muted')}>{it.label}</span>
                 {it.sub && <span className="shrink-0 tabular text-fg-faint">{it.sub}</span>}
               </div>

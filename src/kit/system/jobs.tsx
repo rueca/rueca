@@ -106,7 +106,7 @@ export function JobQueue({ jobs, onOpen, openLabel = 'Download', openIcon: OpenI
     <ul ref={list} className={cn('flex flex-col', className)} aria-label="Jobs">
       {jobs.map((j) => (
         <li key={j.id} data-job={j.id} aria-label={`${j.label}: ${STATUS_TEXT[j.status]}`}
-          className={cn('group/job relative flex h-10 shrink-0 items-center gap-2.5 rounded-[6px] px-2', j.status === 'running' && 'bg-hover')}>
+          className={cn('group/job relative flex min-h-row shrink-0 items-center gap-2.5 rounded-control px-2 py-0.5', j.status === 'running' && 'bg-hover')}>
           <div className="flex h-7 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[4px] bg-control shadow-[inset_0_0_0_1px_var(--line)]">
             {j.thumb ? (
               <img src={j.thumb} alt="" className="max-h-full max-w-full object-contain" style={{ aspectRatio: j.aspect }} />
@@ -115,14 +115,14 @@ export function JobQueue({ jobs, onOpen, openLabel = 'Download', openIcon: OpenI
             ) : null}
           </div>
           <div className="min-w-0 flex-1">
-            <div className={cn('truncate text-[12px]', j.status === 'queued' || j.status === 'cancelled' ? 'text-fg-muted' : 'text-fg', j.status === 'cancelled' && 'line-through')}>{j.label}</div>
-            {j.detail && <div className="truncate text-[11px] text-fg-faint">{j.detail}</div>}
+            <div className={cn('truncate text-ui', j.status === 'queued' || j.status === 'cancelled' ? 'text-fg-muted' : 'text-fg', j.status === 'cancelled' && 'line-through')}>{j.label}</div>
+            {j.detail && <div className="truncate text-ui text-fg-faint">{j.detail}</div>}
           </div>
-          <div className="flex shrink-0 items-center gap-1 text-[11px] tabular text-fg-faint">
+          <div className="flex shrink-0 items-center gap-1 text-ui tabular text-fg-faint">
             {j.status === 'done' && j.meta && <span className={cn(onOpen && 'group-hover/job:hidden group-focus-within/job:hidden')}>{j.meta}</span>}
             {j.status === 'done' && onOpen && (
               <button type="button" aria-label={`${openLabel} ${j.label}`} onClick={() => onOpen(j)}
-                className="flex size-6 items-center justify-center rounded-[5px] text-fg-muted opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/job:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal">
+                className="flex size-icon items-center justify-center rounded-control text-fg-muted opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/job:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal">
                 <OpenIcon size={13} strokeWidth={1.5} />
               </button>
             )}

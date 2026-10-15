@@ -55,7 +55,7 @@ export function OverrideRows({
               trailing={
                 <Tip label={over ? 'Revert to template' : undefined}>
                   <button type="button" aria-label={`Revert ${label} to template`} disabled={!over} onClick={() => onReset(k)}
-                    className={cn('flex size-5 shrink-0 items-center justify-center rounded-[4px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal',
+                    className={cn('flex size-icon-sm shrink-0 items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal',
                       !over && 'invisible')}>
                     <RotateCcw size={11} strokeWidth={1.75} />
                   </button>

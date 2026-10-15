@@ -11,7 +11,7 @@
 import { useRef, useState } from 'react'
 import { useStore } from 'zustand'
 import { ArrowLeft, ArrowRight, Dices, Eraser, Sparkles, ListMusic, ChevronDown } from 'lucide-react'
-import { Menu, IconButton, Button, Divider, Tip, cn, useValues, toast } from '@kit'
+import { Menu, IconButton, Button, Divider, PanelHeader, Tip, cn, useValues, toast } from '@kit'
 import { params, patternOf, setPattern, audible, type V } from './params'
 import { PATTERNS, STEPS, TRACKS, clearTrack, humanise, noteName, randomHats, setNote, setStep, shiftPattern, type TrackId } from './pattern'
 import { engine, engineState } from './engine'
@@ -30,10 +30,7 @@ export function SequencerHeader() {
   const pat = patternOf(v)
   const current = Object.entries(PATTERNS).find(([, p]) => JSON.stringify(p.p) === JSON.stringify(pat))
   return (
-    <div className="flex h-10 items-center gap-1 border-b border-line pr-2 pl-3">
-      <div className="text-[12px] font-semibold text-fg">Sequencer</div>
-      <span className="ml-1 text-[11px] text-fg-faint tabular">1 bar · 16 steps</span>
-      <div className="flex-1" />
+    <PanelHeader title={<>Sequencer<span className="ml-1.5 text-ui font-normal text-fg-faint tabular">1 bar · 16 steps</span></>}>
       <Menu
         align="end"
         side="top"
@@ -55,7 +52,7 @@ export function SequencerHeader() {
       <IconButton icon={Dices} label="New hat groove" shortcut="h" tipSide="top" onClick={() => setPattern(randomHats(patternOf(params.values() as V)))} />
       <IconButton icon={Sparkles} label="Humanise velocities" tipSide="top" onClick={() => setPattern(humanise(patternOf(params.values() as V)))} />
       <IconButton icon={Eraser} label="Clear pattern" tipSide="top" onClick={() => { setPattern(clearTrack(patternOf(params.values() as V))); toast('Pattern cleared', { action: { label: 'Undo', onClick: () => params.undo() } }) }} />
-    </div>
+    </PanelHeader>
   )
 }
 
@@ -167,13 +164,13 @@ export function Sequencer() {
   return (
     // Each track is a group of toggle buttons (aria-pressed); arrow keys move between steps. Not role="grid": gridcell + aria-pressed
     // is invalid ARIA (break-it A20).
-    <div className="flex flex-col gap-1 px-3 pt-2 pb-3" role="group" aria-label="Step sequencer — arrow keys move between steps">
+    <div className="flex flex-col gap-1 px-pad pt-2 pb-3" role="group" aria-label="Step sequencer — arrow keys move between steps">
       {/* step LEDs — the playhead */}
       <div className="flex items-end gap-2" aria-hidden>
-        <div className="w-[148px] shrink-0 text-[10.5px] text-fg-faint">{started ? (step >= 0 ? `Step ${step + 1}` : 'Stopped') : 'Audio off'}</div>
+        <div className="w-[148px] shrink-0 text-ui-sm text-fg-faint">{started ? (step >= 0 ? `Step ${step + 1}` : 'Stopped') : 'Audio off'}</div>
         {cellsFor((i) => (
           <div key={i} className="flex min-w-0 flex-1 flex-col items-center gap-1">
-            <span className={cn('tabular text-[10px]', i === step ? 'text-fg' : i % 4 === 0 ? 'text-fg-muted' : 'text-fg-faint')}>{i + 1}</span>
+            <span className={cn('tabular text-ui-sm', i === step ? 'text-fg' : i % 4 === 0 ? 'text-fg-muted' : 'text-fg-faint')}>{i + 1}</span>
             <span className={cn('h-[3px] w-full rounded-full', i === step ? 'bg-rec' : i % 4 === 0 ? 'bg-line-strong' : 'bg-line')} />
           </div>
         ))}
@@ -189,18 +186,18 @@ export function Sequencer() {
               <span className="size-2 shrink-0 rounded-full" style={{ background: t.color, opacity: on ? 1 : 0.35 }} aria-hidden />
               <Tip label={`Audition ${t.name.toLowerCase()}`} side="top">
                 <button type="button" onClick={() => (started ? engine.audition(t.id, 0.85, pat.notes.find((_, i) => pat.bass[i]) ?? 36) : toast('Start audio first', { description: 'Click the stage or press Space.' }))}
-                  className={cn('min-w-0 flex-1 truncate rounded-[5px] px-1 text-left text-[12px] font-medium outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', on ? 'text-fg' : 'text-fg-faint')}>
+                  className={cn('min-w-0 flex-1 truncate rounded-control px-1 text-left text-ui font-medium outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', on ? 'text-fg' : 'text-fg-faint')}>
                   {t.name}
                 </button>
               </Tip>
               <Tip label={`Mute ${t.name.toLowerCase()}`} shortcut={String(r + 1)} side="top">
                 <button type="button" aria-pressed={muted} aria-label={`Mute ${t.name}`} onClick={() => params.setValue(`${t.id}Mute` as never, !muted as never)}
-                  className={cn('flex size-6 items-center justify-center rounded-[5px] text-[10.5px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-signal',
+                  className={cn('flex size-icon items-center justify-center rounded-control text-ui-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-signal',
                     muted ? 'bg-key/20 text-key' : 'bg-control text-fg-faint hover:text-fg')}>M</button>
               </Tip>
               <Tip label={`Solo ${t.name.toLowerCase()}`} shortcut={`shift+${r + 1}`} side="top">
                 <button type="button" aria-pressed={solo} aria-label={`Solo ${t.name}`} onClick={() => params.setValue(`${t.id}Solo` as never, !solo as never)}
-                  className={cn('flex size-6 items-center justify-center rounded-[5px] text-[10.5px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-signal',
+                  className={cn('flex size-icon items-center justify-center rounded-control text-ui-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-signal',
                     solo ? 'bg-signal-soft text-signal' : 'bg-control text-fg-faint hover:text-fg')}>S</button>
               </Tip>
             </div>
@@ -242,7 +239,7 @@ export function Sequencer() {
 
       {/* bass notes */}
       <div role="group" aria-label="Bass notes" className="flex items-center gap-2">
-        <div className="flex w-[148px] shrink-0 items-center gap-1.5 pl-3.5 text-[11px] text-fg-muted" aria-hidden>
+        <div className="flex w-[148px] shrink-0 items-center gap-1.5 pl-3.5 text-ui text-fg-muted" aria-hidden>
           Bass notes
           <span className="text-fg-faint">· drag</span>
         </div>

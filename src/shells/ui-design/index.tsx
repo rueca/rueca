@@ -148,8 +148,6 @@ export default function CanvasShell() {
   return (
     <Studio
       layout="docked"
-      leftWidth={240}
-      rightWidth={276}
       toolbar={
         <Toolbar
           start={

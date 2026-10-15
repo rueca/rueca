@@ -3,7 +3,7 @@
    preferences rendered straight from their schema by the kit Inspector. */
 import { useRef } from 'react'
 import { RotateCcw, ImageDown, FileDown, FileUp, RefreshCw, Palette } from 'lucide-react'
-import { Section, Row, ColorField, IconButton, Button, Inspector, Tip, Swatch, Badge } from '@kit'
+import { PanelHeader, Section, Row, ColorField, IconButton, Button, Inspector, Tip, Swatch, Badge } from '@kit'
 import * as S from '../model/store'
 import { prefs } from '../model/prefs'
 import { walk } from '../model/tree'
@@ -29,11 +29,11 @@ export function DocumentPanel() {
 
   return (
     <div className="flex flex-col">
-      <div className="flex h-10 items-center gap-2 border-b border-line px-3">
-        <span className="min-w-0 flex-1 truncate text-[12px] font-medium">{pg.name}</span>
+      <PanelHeader className="gap-2">
+        <span className="min-w-0 flex-1 truncate text-title font-medium">{pg.name}</span>
         <Badge>{frames} frames</Badge>
         <Badge>{layers} layers</Badge>
-      </div>
+      </PanelHeader>
       <Section title="Page" first>
         <Row label="Background" trailing={pg.bg ? <IconButton icon={RotateCcw} size="icon-sm" label="Follow the studio theme" onClick={() => S.setPage({ bg: '' })} /> : undefined}>
           <ColorField value={pg.bg || themeBg} alpha={false} changed={!!pg.bg} onChange={(c, f) => S.setPage({ bg: c.slice(0, 7) }, { commit: f })} />
@@ -53,7 +53,7 @@ export function DocumentPanel() {
         )}
       </Section>
       <Section title="Export">
-        <div className="flex flex-wrap gap-1 px-3 pb-1.5">
+        <div className="flex flex-wrap gap-1 px-pad pb-1.5">
           {([{ s: '1', f: 'png' }, { s: '2', f: 'png' }, { s: '3', f: 'png' }, { s: '2', f: 'jpg' }, { s: '2', f: 'webp' }] as const).map((p) => {
             const on = v.exportScale === p.s && v.exportFormat === p.f
             return (
@@ -63,23 +63,23 @@ export function DocumentPanel() {
             )
           })}
         </div>
-        <div className="px-3">
+        <div className="px-pad">
           <Button variant="default" size="md" className="w-full" onClick={exportFrames} disabled={!frames}><ImageDown size={14} strokeWidth={1.5} />Export {frames} frame{frames === 1 ? '' : 's'}</Button>
         </div>
       </Section>
       <Section title="Document">
-        <Row label="Components"><span className="flex-1 text-right tabular text-[11.5px] text-fg-muted">{comps} on this page</span></Row>
-        <div className="grid grid-cols-2 gap-1.5 px-3 pt-1">
+        <Row label="Components"><span className="flex-1 text-right tabular text-ui text-fg-muted">{comps} on this page</span></Row>
+        <div className="grid grid-cols-2 gap-1.5 px-pad pt-1">
           <Button variant="default" size="md" onClick={downloadDocument}><FileDown size={14} strokeWidth={1.5} />Save .json</Button>
           <Button variant="default" size="md" onClick={() => file.current?.click()}><FileUp size={14} strokeWidth={1.5} />Open…</Button>
           <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) openDocument(f); e.target.value = '' }} />
         </div>
-        <div className="px-3 pt-1.5">
+        <div className="px-pad pt-1.5">
           <Button variant="ghost" size="md" className="w-full" onClick={() => S.resetDocument()}><RefreshCw size={13} strokeWidth={1.5} />Reset to demo file</Button>
         </div>
       </Section>
       <div className="border-t border-line"><Inspector params={prefs} /></div>
-      <div className="flex items-center gap-1.5 px-3 py-3 text-[11px] text-fg-faint"><Palette size={12} strokeWidth={1.5} />Select a layer to edit it. Hold ⌥ over a layer to measure.</div>
+      <div className="flex items-center gap-1.5 px-pad py-3 text-ui text-fg-faint"><Palette size={12} strokeWidth={1.5} />Select a layer to edit it. Hold ⌥ over a layer to measure.</div>
     </div>
   )
 }

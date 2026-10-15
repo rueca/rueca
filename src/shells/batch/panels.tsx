@@ -61,7 +61,7 @@ export function SizesPanel({ openCustom }: { openCustom: () => void }) {
           <Menu align="end" trigger={<IconButton icon={Plus} label="Add size" size="icon-sm" />} items={addSizeItems(openCustom)} />
         </PanelHeader>
       }
-      footer={<div className="px-3 py-2 text-[11px] text-fg-faint">{sizes.filter((s) => s.visible !== false).length} of {sizes.length} on stage · drag to reorder</div>}
+      footer={<div className="px-pad py-2 text-ui text-fg-faint">{sizes.filter((s) => s.visible !== false).length} of {sizes.length} on stage · drag to reorder</div>}
     >
       {sizes.length ? (
         <LayerTree
@@ -95,7 +95,7 @@ function TemplateInspector() {
   const withOverrides = d.sizes.filter((s) => overrideCount(d, s.id) > 0)
   return (
     <>
-      <div className="px-3 pt-3 pb-1 text-[11.5px] leading-relaxed text-fg-muted">
+      <div className="px-pad pt-3 pb-1 text-ui leading-relaxed text-fg-muted">
         Template — every size inherits these. Select a size to override it.
       </div>
       <Inspector params={params} folders={['template', 'look']} />
@@ -107,13 +107,13 @@ function TemplateInspector() {
               className="group/ov mx-1.5 flex min-h-8 items-center gap-2 rounded-[6px] px-1.5 py-1 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
               <span className="size-1.5 shrink-0 rounded-full bg-signal" />
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[12px] text-fg">{s.name}</span>
-                <span className="block truncate text-[11px] text-fg-faint">{keys.map((k) => (params.defs[k] as { label?: string })?.label ?? k).join(', ')}</span>
+                <span className="block truncate text-ui text-fg">{s.name}</span>
+                <span className="block truncate text-ui text-fg-faint">{keys.map((k) => (params.defs[k] as { label?: string })?.label ?? k).join(', ')}</span>
               </span>
               <Badge>{keys.length}</Badge>
             </button>
           )
-        }) : <div className="px-3 pb-1 text-[11.5px] text-fg-faint">No size overrides the template.</div>}
+        }) : <div className="px-pad pb-1 text-ui text-fg-faint">No size overrides the template.</div>}
       </Section>
     </>
   )
@@ -144,14 +144,14 @@ function SizeInspector({ size, issues }: { size: SizeSpec; issues: string[] }) {
         <Row label="Size" hint={custom ? undefined : 'Platform sizes are fixed. Add a custom size to change dimensions.'}>
           {custom
             ? <SizeFields value={{ w: size.w, h: size.h }} min={16} max={8000} onChange={(s, f) => patchSize(size.id, { w: Math.round(s.w), h: Math.round(s.h) }, f)} />
-            : <span className="tabular text-[11.5px] text-fg">{size.w} × {size.h} px</span>}
+            : <span className="tabular text-ui text-fg">{size.w} × {size.h} px</span>}
         </Row>
         <Row label="Safe area" hint="Insets kept clear of platform UI. Toggle the overlay with S.">
-          <span className="tabular text-[11.5px] text-fg-muted">{[size.safe.t, size.safe.r, size.safe.b, size.safe.l].join(' · ')} px</span>
+          <span className="tabular text-ui text-fg-muted">{[size.safe.t, size.safe.r, size.safe.b, size.safe.l].join(' · ')} px</span>
         </Row>
         <Row label="Layout used" hint="The rule this size resolves to with the current values.">
-          <span className="text-[11.5px] text-fg capitalize">{mode}</span>
-          {eff.layout === 'auto' && <span className="text-[11.5px] text-fg-faint">(auto)</span>}
+          <span className="text-ui text-fg capitalize">{mode}</span>
+          {eff.layout === 'auto' && <span className="text-ui text-fg-faint">(auto)</span>}
         </Row>
       </Section>
       <Section
@@ -160,7 +160,7 @@ function SizeInspector({ size, issues }: { size: SizeSpec; issues: string[] }) {
         onReset={n && !size.locked ? () => clearOverride(size.id) : undefined}
         actions={<Badge tone={n ? 'accent' : 'default'}>{n}</Badge>}
       >
-        {size.locked && <div className="px-3 pb-1 text-[11.5px] text-fg-muted">Size is locked. Unlock it to change overrides.</div>}
+        {size.locked && <div className="px-pad pb-1 text-ui text-fg-muted">Size is locked. Unlock it to change overrides.</div>}
         <OverrideRows
           params={params}
           keys={[...OVERRIDABLE]}
@@ -170,7 +170,7 @@ function SizeInspector({ size, issues }: { size: SizeSpec; issues: string[] }) {
           onReset={(k) => clearOverride(size.id, k)}
         />
         {n > 0 && !size.locked && (
-          <div className="px-3 pt-2">
+          <div className="px-pad pt-2">
             <Button variant="outline" size="md" className="w-full" onClick={() => promoteOverrides(size.id)}>
               <ArrowUpFromLine size={13} strokeWidth={1.5} />Push overrides to template
             </Button>
@@ -179,8 +179,8 @@ function SizeInspector({ size, issues }: { size: SizeSpec; issues: string[] }) {
       </Section>
       <Section title="Checks" changed={issues.length > 0}>
         {issues.length ? issues.map((i) => (
-          <div key={i} className="flex min-h-7 items-center gap-2 px-3 text-[11.5px] text-fg"><TriangleAlert size={12} strokeWidth={1.75} className="shrink-0 text-key" />{i}</div>
-        )) : <div className="flex min-h-7 items-center gap-2 px-3 text-[11.5px] text-fg-muted"><Check size={12} strokeWidth={2} className="text-ok" />Copy and product fit this row.</div>}
+          <div key={i} className="flex min-h-row items-center gap-2 px-pad text-ui text-fg"><TriangleAlert size={12} strokeWidth={1.75} className="shrink-0 text-key" />{i}</div>
+        )) : <div className="flex min-h-row items-center gap-2 px-pad text-ui text-fg-muted"><Check size={12} strokeWidth={2} className="text-ok" />Copy and product fit this row.</div>}
       </Section>
       <div className="border-t border-line p-2">
         <Button variant="danger" size="md" className="w-full" onClick={() => removeSize(size.id)}><Trash2 size={13} strokeWidth={1.5} />Remove size</Button>
@@ -202,21 +202,21 @@ export function BrandTab() {
           className="flex w-full items-center gap-2.5 rounded-[8px] bg-control px-2.5 py-2 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal">
           <span className={locked ? 'text-signal' : 'text-fg-faint'}>{locked ? <Lock size={14} strokeWidth={1.5} /> : <LockOpen size={14} strokeWidth={1.5} />}</span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[12px] font-medium text-fg">{locked ? 'Brand locked' : 'Brand unlocked'}</span>
-            <span className="block text-[11px] text-fg-muted">{locked ? 'Logo, colours and type are read-only.' : 'Lock before handing over to keep the brand fixed.'}</span>
+            <span className="block text-ui font-medium text-fg">{locked ? 'Brand locked' : 'Brand unlocked'}</span>
+            <span className="block text-ui text-fg-muted">{locked ? 'Logo, colours and type are read-only.' : 'Lock before handing over to keep the brand fixed.'}</span>
           </span>
           <Switch checked={locked} label="Lock brand" onChange={(b) => params.setValue('brandLocked', b)} />
         </button>
       </div>
       <Inspector params={params} folders={['brand']} />
       <Section title="Palette in use">
-        <div className="flex flex-wrap gap-1 px-3 pb-1">
+        <div className="flex flex-wrap gap-1 px-pad pb-1">
           <Tip label="Paper"><span><Swatch color={v.paper} size={20} /></span></Tip>
           <Tip label="Ink"><span><Swatch color={v.ink} size={20} /></span></Tip>
           <span className="mx-1 w-px self-stretch bg-line" />
           {rows.map((r, i) => <Tip key={i} label={`${r.name} · ${r.color}`}><button type="button" onClick={() => setRow(i)} className="rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-signal"><Swatch color={r.color} size={20} /></button></Tip>)}
         </div>
-        <div className="px-3 pt-1 text-[11px] text-fg-faint">Row colours come from the data table.</div>
+        <div className="px-pad pt-1 text-ui text-fg-faint">Row colours come from the data table.</div>
       </Section>
     </>
   )
@@ -253,18 +253,18 @@ export function ExportTab() {
       </Section>
       <Section title="Sizes" actions={<Button size="sm" onClick={() => setExportSettings({ sizeIds: null })}>Visible</Button>}>
         {sizes.map((z) => (
-          <label key={z.id} className="flex h-7 cursor-default items-center gap-2 px-3 text-[12px] hover:bg-hover">
+          <label key={z.id} className="flex h-row cursor-default items-center gap-2 px-pad text-ui hover:bg-hover">
             <Checkbox checked={chosen(z.id)} onChange={() => toggleSize(z.id)} label={z.name} />
             <span className="min-w-0 flex-1 truncate text-fg">{z.name}</span>
-            <span className="tabular text-[11px] text-fg-faint">{z.w}×{z.h}</span>
+            <span className="tabular text-ui text-fg-faint">{z.w}×{z.h}</span>
           </label>
         ))}
       </Section>
       </div>
-      <div className="flex flex-none flex-col gap-2 border-t border-line p-3">
+      <div className="flex flex-none flex-col gap-2 border-t border-line p-pad">
         {running ? (
           <>
-            <div className="flex items-center justify-between text-[11.5px]">
+            <div className="flex items-center justify-between text-ui">
               <span className="text-fg tabular">Rendering {run.done + 1 > total ? total : run.done + 1} of {total}</span>
               <span className="text-fg-faint tabular">{fmtBytes(st.bytes)}</span>
             </div>
@@ -273,7 +273,7 @@ export function ExportTab() {
           </>
         ) : run.status === 'done' || run.status === 'cancelled' ? (
           <>
-            <div className="flex items-center justify-between text-[11.5px]">
+            <div className="flex items-center justify-between text-ui">
               <span className="text-fg tabular">{run.done} of {total} rendered{run.status === 'cancelled' ? ' — cancelled' : ''}{run.failed ? ` · ${run.failed} failed` : ''}</span>
               <span className="text-fg-faint tabular">{(run.elapsed / 1000).toFixed(1)}s</span>
             </div>
@@ -286,7 +286,7 @@ export function ExportTab() {
           </>
         ) : (
           <>
-            <div className="text-[11.5px] text-fg-muted tabular">{planned.length} image{planned.length === 1 ? '' : 's'} · {s.format.toUpperCase()} at {s.scale}× · {s.pack === 'zip' ? 'one zip' : 'separate files'}</div>
+            <div className="text-ui text-fg-muted tabular">{planned.length} image{planned.length === 1 ? '' : 's'} · {s.format.toUpperCase()} at {s.scale}× · {s.pack === 'zip' ? 'one zip' : 'separate files'}</div>
             <Button variant="primary" size="lg" className="w-full" disabled={!planned.length} onClick={() => void runExport()}>
               <Download size={14} strokeWidth={1.75} />Render {planned.length} image{planned.length === 1 ? '' : 's'}
             </Button>
@@ -340,7 +340,7 @@ export function DataPanel({ rowIssues, openPaste }: { rowIssues: (i: number) => 
         onAddRow={() => addRow(rows.length - 1)}
         onRemoveRow={removeRow}
         rowIssues={rowIssues}
-        empty={<div className="px-3 py-4 text-[11.5px] text-fg-muted">No rows. Paste from a spreadsheet (⌘V) or add one.</div>}
+        empty={<div className="px-pad py-4 text-ui text-fg-muted">No rows. Paste from a spreadsheet (⌘V) or add one.</div>}
       />
       </div>
     </Panel>
@@ -361,7 +361,7 @@ export function PasteDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       onSubmit={() => parsed.length && done('replace')}
       footer={
         <>
-          <span className="mr-auto text-[11.5px] text-fg-muted tabular">{parsed.length ? `${parsed.length} row${parsed.length === 1 ? '' : 's'}${header ? ' · header detected' : ''}` : 'Waiting for data'}</span>
+          <span className="mr-auto text-ui text-fg-muted tabular">{parsed.length ? `${parsed.length} row${parsed.length === 1 ? '' : 's'}${header ? ' · header detected' : ''}` : 'Waiting for data'}</span>
           <Button size="md" variant="default" disabled={!parsed.length} onClick={() => done('append')}>Append</Button>
           <Button size="md" variant="primary" disabled={!parsed.length} onClick={() => done('replace')}>Replace rows</Button>
         </>
@@ -383,7 +383,7 @@ export function CustomSizeDialog({ open, onOpenChange }: { open: boolean; onOpen
       <div className="-mx-3 flex flex-col">
         <Row label="Name"><TextInput value={name} onChange={setName} label="Name" /></Row>
         <Row label="Size"><SizeFields value={dim} min={16} max={8000} onChange={(s) => setDim({ w: Math.round(s.w), h: Math.round(s.h) })} /></Row>
-        <Row label="Aspect"><span className="tabular text-[11.5px] text-fg-muted">{(dim.w / dim.h).toFixed(2)} · {dim.w / dim.h < 0.82 ? 'stack' : dim.w / dim.h > 1.3 ? 'split' : 'hero'} layout</span></Row>
+        <Row label="Aspect"><span className="tabular text-ui text-fg-muted">{(dim.w / dim.h).toFixed(2)} · {dim.w / dim.h < 0.82 ? 'stack' : dim.w / dim.h > 1.3 ? 'split' : 'hero'} layout</span></Row>
       </div>
     </Dialog>
   )

@@ -15,7 +15,7 @@ import { BLENDS, CATEGORIES, LAYER_TYPES, type BlendMode, type Layer, type Layer
 import {
   addLayer, clock, duplicateLayer, getLayers, lookOf, moveBy, moveLayer, params, perf, randomise, removeLayer, ui, updateLayer, type Look,
 } from './state'
-import { ShaderStage, live, LEFT_W, RIGHT_W } from './ShaderStage'
+import { ShaderStage, live } from './ShaderStage'
 import { copyShader, downloadShader, exportLoop, exportStill, renderThumb, sizeFor } from './output'
 
 /* stable getters so the transport's Monitor never restarts its loop */
@@ -126,8 +126,6 @@ export default function GradientStudio() {
   return (
     <Studio
       layout="overlay"
-      leftWidth={LEFT_W}
-      rightWidth={RIGHT_W}
       toolbar={
         <Toolbar
           start={<Brand name="Gradient studio" doc={activeLook?.name ?? 'Untitled look'} mark={Mark} />}
@@ -237,7 +235,7 @@ function LayerInspector({ layer }: { layer: Layer }) {
       <Section title="Layer" hint={def.hint} first>
         <Row label="Blend" hint={domain ? 'A distortion has no blend mode — it bends everything below it.' : 'How this layer combines with everything below it.'} changed={layer.blend !== def.blend} onReset={() => set({ blend: def.blend })}>
           {domain
-            ? <span className="text-[11.5px] text-fg-faint">Distorts layers below</span>
+            ? <span className="text-ui text-fg-faint">Distorts layers below</span>
             : <Select value={layer.blend} options={BLENDS} onChange={(b) => set({ blend: b as BlendMode })} label="Blend mode" />}
         </Row>
         <Row label={domain ? 'Mix' : 'Opacity'} hint={domain ? 'Blend between straight and fully warped coordinates.' : 'Number keys set it: 1 = 10%, 0 = 100%.'} changed={layer.opacity !== def.opacity} onReset={() => set({ opacity: def.opacity })}>
@@ -305,8 +303,13 @@ const useClientView = () => {
   const read = () => /[?&]client\b/.test(location.hash)
   const [on, setOn] = useState(read)
   useEffect(() => { const f = () => setOn(read()); addEventListener('hashchange', f); return () => removeEventListener('hashchange', f) }, [])
-  // bigger touch targets, as in the Client demo
-  useEffect(() => { document.documentElement.dataset.density = on ? 'comfortable' : ''; return () => { document.documentElement.dataset.density = '' } }, [on])
+  // bigger touch targets, as in the Client demo; the editor keeps whatever density was set
+  useEffect(() => {
+    if (!on) return
+    const root = document.documentElement, prev = root.dataset.density
+    root.dataset.density = 'comfortable'
+    return () => { if (prev) root.dataset.density = prev; else delete root.dataset.density }
+  }, [on])
   return on
 }
 
@@ -345,9 +348,9 @@ function Transport() {
   const quality = useValues(params, (v) => v.quality)
   return (
     <div className="pointer-events-none flex justify-center">
-      <div className="cluster pointer-events-auto flex h-10 items-center gap-1 px-1.5">
+      <div className="cluster pointer-events-auto flex h-bar items-center gap-1 px-1.5">
         <IconButton icon={playing ? Pause : Play} label={playing ? 'Pause' : 'Play'} shortcut="space" tipSide="top" onClick={() => clock.toggle()} />
-        <span className="w-[86px] text-center tabular text-[11.5px] text-fg">{fmtTime(t)}<span className="text-fg-faint"> / {fmtTime(duration)}</span></span>
+        <span className="w-[86px] text-center tabular text-ui text-fg">{fmtTime(t)}<span className="text-fg-faint"> / {fmtTime(duration)}</span></span>
         <div className="w-[150px] px-1">
           <Slider value={duration ? t / duration : 0} min={0} max={1} step={0.001} label="Loop position" onChange={(n) => clock.seek(n * duration)} />
         </div>

@@ -77,8 +77,6 @@ export default function FlowsShell() {
   return (
     <ReactFlowProvider>
       <Studio
-        leftWidth={248}
-        rightWidth={300}
         toolbar={
           <Toolbar
             start={<Brand name="Flows" doc={flow.name} mark={Mark} />}

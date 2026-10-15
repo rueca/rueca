@@ -95,11 +95,11 @@ export function InputsList({ inputs, onInput, onFire, fired }: { inputs: SMInput
       {inputs.map((i) => {
         const Icon = ICON[i.type]
         return (
-          <div key={i.id} className="flex h-[var(--row)] items-center gap-2 px-3">
+          <div key={i.id} className="flex h-row items-center gap-2 px-pad">
             <Tip label={i.type === 'trigger' ? 'Trigger — fires once' : i.type === 'boolean' ? 'Boolean — on or off' : 'Number'} side="left">
-              <span className={cn('flex size-5 shrink-0 items-center justify-center rounded-[5px] bg-hover', fired === i.id ? 'text-key' : 'text-fg-muted')}><Icon size={12} strokeWidth={1.75} /></span>
+              <span className={cn('flex size-icon-sm shrink-0 items-center justify-center rounded-control bg-hover', fired === i.id ? 'text-key' : 'text-fg-muted')}><Icon size={12} strokeWidth={1.75} /></span>
             </Tip>
-            <span className="min-w-0 flex-1 truncate font-mono text-[11px] text-fg">{i.name}</span>
+            <span className="min-w-0 flex-1 truncate font-mono text-ui text-fg">{i.name}</span>
             {i.type === 'trigger' && <Button size="sm" variant="default" onClick={() => onFire(i.id)}>Fire</Button>}
             {i.type === 'boolean' && <Switch size="sm" checked={!!i.value} onChange={(b) => onInput(i.id, b, true)} label={i.name} />}
             {i.type === 'number' && <ScrubValue boxed value={Number(i.value)} step={1} className="w-[64px]" label={i.name} onChange={(v, f) => onInput(i.id, v, f)} />}
@@ -114,10 +114,10 @@ export function TransitionsList({ transitions, names, onMix }: { transitions: SM
   return (
     <div className="flex flex-col">
       {transitions.map((t) => (
-        <div key={t.id} className="flex min-h-[var(--row)] items-center gap-2 px-3 py-0.5">
+        <div key={t.id} className="flex min-h-row items-center gap-2 px-pad py-0.5">
           <div className="min-w-0 flex-1">
-            <div className="truncate text-[11.5px] text-fg">{names[t.from] ?? t.from} <span className="text-fg-faint">→</span> {names[t.to] ?? t.to}</div>
-            <div className="truncate font-mono text-[10.5px] text-fg-faint">{t.label}</div>
+            <div className="truncate text-ui text-fg">{names[t.from] ?? t.from} <span className="text-fg-faint">→</span> {names[t.to] ?? t.to}</div>
+            <div className="truncate font-mono text-ui-sm text-fg-faint">{t.label}</div>
           </div>
           <Tip label="Mix — how long the two animations blend" side="left">
             <span className="inline-flex"><ScrubValue boxed value={t.mix} min={0} max={2000} step={10} unit="ms" className="w-[60px]" label="Mix" onChange={(v, f) => onMix?.(t.id, v, f)} /></span>

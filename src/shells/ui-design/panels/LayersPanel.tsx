@@ -73,8 +73,8 @@ export function LayersPanel() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex-none border-b border-line">
-        <div className="flex h-10 items-center gap-1 pr-2 pl-3">
-          <button type="button" aria-expanded={pagesOpen} onClick={() => setPagesOpen(!pagesOpen)} className="flex flex-1 items-center gap-1 text-left text-[11.5px] font-medium outline-none focus-visible:text-signal">
+        <div className="flex h-header items-center gap-1 pr-2 pl-pad">
+          <button type="button" aria-expanded={pagesOpen} onClick={() => setPagesOpen(!pagesOpen)} className="flex flex-1 items-center gap-1 text-left text-ui font-medium outline-none focus-visible:text-signal">
             Pages
             <ChevronRight size={12} strokeWidth={1.75} className={cn('text-fg-faint transition-transform', pagesOpen && 'rotate-90')} />
           </button>
@@ -86,18 +86,18 @@ export function LayersPanel() {
               <div key={p.id} role="button" tabIndex={0} aria-current={p.id === pageId}
                 onClick={() => S.gotoPage(p.id)} onDoubleClick={() => setRenaming(p.id)}
                 onKeyDown={(e) => { if (e.key === 'Enter') setRenaming(p.id) }}
-                className={cn('group/page mx-1.5 flex h-7 items-center gap-2 rounded-[6px] pr-1 pl-2 text-[12px] outline-none focus-visible:ring-2 focus-visible:ring-signal', p.id === pageId ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
+                className={cn('group/page mx-1.5 flex h-row items-center gap-2 rounded-[6px] pr-1 pl-2 text-ui outline-none focus-visible:ring-2 focus-visible:ring-signal', p.id === pageId ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
                 {p.id === pageId ? <Check size={12} strokeWidth={2} className="shrink-0 text-fg" /> : <FileText size={12} strokeWidth={1.5} className="shrink-0 text-fg-faint" />}
                 {renaming === p.id ? (
                   <input autoFocus defaultValue={p.name} onClick={(e) => e.stopPropagation()}
                     onBlur={(e) => { S.renamePage(p.id, e.target.value || p.name); setRenaming(null) }}
                     onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setRenaming(null) }}
-                    className="h-5 min-w-0 flex-1 rounded-[4px] bg-control px-1 text-[12px] text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
+                    className="h-control-sm min-w-0 flex-1 rounded-[4px] bg-control px-1 text-ui text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
                 ) : <span className="min-w-0 flex-1 truncate">{p.name}</span>}
-                <span className="text-[10.5px] text-fg-faint tabular group-hover/page:hidden">{p.nodes.length || ''}</span>
+                <span className="text-ui-sm text-fg-faint tabular group-hover/page:hidden">{p.nodes.length || ''}</span>
                 {doc.pages.length > 1 && (
                   <div className="hidden group-hover/page:flex group-focus-within/page:flex" onClick={(e) => e.stopPropagation()}>
-                    <Menu align="end" trigger={<button type="button" aria-label="Page options" className="flex size-5 items-center justify-center rounded-[4px] text-fg-faint hover:text-fg">⋯</button>}
+                    <Menu align="end" trigger={<button type="button" aria-label="Page options" className="flex size-icon-sm items-center justify-center rounded-[4px] text-fg-faint hover:text-fg">⋯</button>}
                       items={[{ label: 'Rename', onClick: () => setRenaming(p.id) }, { type: 'separator' }, { label: 'Delete page', icon: Trash2, danger: true, onClick: () => S.deletePage(p.id) }]} />
                   </div>
                 )}
@@ -106,7 +106,7 @@ export function LayersPanel() {
           </div>
         )}
       </div>
-      <div className="flex h-9 flex-none items-center pr-2 pl-3 text-[11.5px] font-medium">Layers</div>
+      <div className="flex h-section flex-none items-center pr-2 pl-pad text-ui font-medium">Layers</div>
       <div className="min-h-0 flex-1 overflow-y-auto">
         {items.length ? (
           <LayerTree
@@ -125,7 +125,7 @@ export function LayersPanel() {
             onExpandedChange={setExpanded}
             onHover={S.setHover}
           />
-        ) : <div className="px-3 py-2 text-[11.5px] text-fg-faint">No layers on this page.</div>}
+        ) : <div className="px-pad py-2 text-ui text-fg-faint">No layers on this page.</div>}
       </div>
     </div>
   )

@@ -46,7 +46,7 @@ export function Composer() {
       {remix && (
         <div className="flex items-center gap-2 rounded-[8px] bg-signal-soft py-1 pr-1 pl-1">
           <span className="size-6 overflow-hidden rounded-[5px] bg-well">{remixPix && <img src={remixPix.url} alt="" className="h-full w-full object-cover" />}</span>
-          <span className="flex-1 text-[11.5px] text-fg">Remixing <span className="text-fg-muted">#{remix.id.slice(-4)} · seed {remix.params.seed} locked — edit the prompt and generate</span></span>
+          <span className="flex-1 text-ui text-fg">Remixing <span className="text-fg-muted">#{remix.id.slice(-4)} · seed {remix.params.seed} locked — edit the prompt and generate</span></span>
           <Button size="icon-sm" variant="ghost" aria-label="Stop remixing" onClick={() => ui.setState({ remixOf: null })}><X size={13} strokeWidth={1.5} /></Button>
         </div>
       )}
@@ -85,7 +85,7 @@ export function Composer() {
       <div className="flex flex-wrap items-center gap-1.5">
         <div className="w-[112px] @[560px]:w-[150px]"><Select value={v.model} onChange={setModel} label="Model" options={MODELS.map((x) => ({ value: x.id, label: x.name, hint: x.blurb }))} /></div>
         <Menu side="top" trigger={
-          <Button size="sm" variant="default" className="h-6 gap-1 px-2" aria-label={`Aspect ratio ${a.id}`}>
+          <Button size="sm" variant="default" className="h-control gap-1 px-2" aria-label={`Aspect ratio ${a.id}`}>
             {(() => { const I = aspectIcon(a.w, a.h); return <I size={13} /> })()}
             <span className="tabular">{a.id}</span><ChevronDown size={11} className="text-fg-faint" />
           </Button>}
@@ -97,7 +97,7 @@ export function Composer() {
         </Tip>
         <Tip label="Enhance prompt"><Button size="icon-sm" variant="ghost" aria-label="Enhance prompt" disabled={!t.prompt.trim()} onClick={enhance}><Wand2 size={14} strokeWidth={1.5} /></Button></Tip>
         <button type="button" onClick={() => ui.setState({ tab: 'create' })} aria-label={`Settings: ${v.steps} steps, CFG ${v.guidance}, seed ${v.lockSeed ? 'locked' : 'random'}`}
-          className="hidden h-6 min-w-0 items-center gap-1.5 rounded-[5px] px-1.5 text-[11.5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal @[460px]:flex">
+          className="hidden h-control min-w-0 items-center gap-1.5 rounded-[5px] px-1.5 text-ui text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal @[460px]:flex">
           <SlidersHorizontal size={13} strokeWidth={1.5} className="shrink-0" />
           <span className="hidden tabular truncate @[700px]:inline">{v.steps} steps · CFG {v.guidance}</span>
           {v.lockSeed ? <Lock size={11} strokeWidth={1.75} className="shrink-0" /> : <Shuffle size={11} strokeWidth={1.75} className="shrink-0" />}

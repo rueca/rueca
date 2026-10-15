@@ -143,7 +143,7 @@ export function QuadField({
   const toggle = (
     <Tip label={split ? 'Use one value' : 'Independent values'}>
       <button type="button" aria-pressed={split} aria-label={split ? 'Use one value' : 'Independent values'} onClick={() => setSplit(!split)}
-        className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', split ? 'bg-active text-fg' : 'text-fg-faint')}>
+        className={cn('flex size-icon shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', split ? 'bg-active text-fg' : 'text-fg-faint')}>
         {toggleIcon ?? <Scan size={12} strokeWidth={1.5} />}
       </button>
     </Tip>

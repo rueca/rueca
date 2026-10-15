@@ -12,7 +12,7 @@ import {
   RotateCcw, ArrowDownToLine, Maximize2, Component, ImageDown, CodeXml, ChevronDown, Square, Type, Hash, Circle, Shapes, Combine, Columns3, Rows3, Group,
   PanelLeft, PanelTop,
 } from 'lucide-react'
-import { Section, Row, ScrubValue, Segmented, Select, Checkbox, IconButton, Button, Tip, Menu, ColorField, Badge, cn, type MenuItem } from '@kit'
+import { PanelHeader, Section, Row, ScrubValue, Segmented, Select, Checkbox, IconButton, Button, Tip, Menu, ColorField, Badge, cn, type MenuItem } from '@kit'
 import * as S from '../model/store'
 import { common, numField, setAll, MIXED } from './fields'
 import { EffectStack } from '@kit/ui/stack'
@@ -145,15 +145,15 @@ function Header({ nodes }: { nodes: Node[] }) {
   const Icon = single ? typeIcon(single) : Shapes
   const isTop = single && !locate(S.nodesOf(), single.id)?.parent && single.type === 'frame'
   return (
-    <div className="flex h-10 items-center gap-2 border-b border-line px-3">
+    <PanelHeader className="gap-2">
       <Icon size={14} strokeWidth={1.5} className={single?.component ? 'text-signal' : 'text-fg-faint'} />
-      <span className="min-w-0 flex-1 truncate text-[12px] font-medium">{single ? typeName(single) : `${nodes.length} layers`}</span>
+      <span className="min-w-0 flex-1 truncate text-title font-medium">{single ? typeName(single) : `${nodes.length} layers`}</span>
       {single?.component && <Badge tone="accent">Main</Badge>}
       {isTop && (
         <Menu align="end" trigger={<Button size="sm" variant="ghost" className="gap-1">Presets<ChevronDown size={11} /></Button>}
           items={[{ type: 'label', label: 'Frame size' }, ...DEVICES.map((d) => ({ label: `${d.label}  ·  ${d.w} × ${d.h}`, checked: single!.w === d.w && single!.h === d.h, onClick: () => S.patchNode(single!.id, { w: d.w, h: d.h, sizingW: 'fixed', sizingH: 'fixed' }) }))]} />
       )}
-    </div>
+    </PanelHeader>
   )
 }
 
@@ -184,7 +184,7 @@ function SizeRow({ nodes, W, H, anyAuto }: { nodes: Node[]; W: NF; H: NF; anyAut
         }}
         fmt={tag(s) ? () => tag(s)! : undefined} className="flex-1 pr-5" />
       <Menu align="end" items={sizingMenu(axis, s)} trigger={
-        <button type="button" aria-label={`${axis === 'w' ? 'Horizontal' : 'Vertical'} resizing`} className="absolute top-0 right-0 flex h-6 w-5 items-center justify-center rounded-r-[5px] text-fg-faint outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+        <button type="button" aria-label={`${axis === 'w' ? 'Horizontal' : 'Vertical'} resizing`} className="absolute top-0 right-0 flex h-control w-5 items-center justify-center rounded-r-[5px] text-fg-faint outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
           <ChevronDown size={11} strokeWidth={1.75} />
         </button>} />
     </div>
@@ -195,7 +195,7 @@ function SizeRow({ nodes, W, H, anyAuto }: { nodes: Node[]; W: NF; H: NF; anyAut
       {field('h', H, sizingH)}
       <Tip label={lock ? 'Unlock aspect ratio' : 'Lock aspect ratio'}>
         <button type="button" aria-pressed={lock} onClick={() => setLock(!lock)}
-          className={cn('flex size-6 shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
+          className={cn('flex size-control shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
           {lock ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
         </button>
       </Tip>
@@ -220,17 +220,17 @@ function AutoLayoutRows({ n }: { n: Node }) {
           </Tip>
         </div>
       </Row>
-      <div className="flex gap-2 px-3 py-1">
+      <div className="flex gap-2 px-pad py-1">
         <AlignGrid x={L.alignX} y={L.alignY} dir={L.dir} between={L.between} onChange={(x, y) => set({ alignX: x, alignY: y })} />
         <div className="flex min-w-0 flex-1 flex-col gap-1">
           <ScrubValue boxed align="left" prefix={L.dir === 'row' ? <PanelLeft size={10} strokeWidth={1.75} className="rotate-90" /> : <PanelTop size={10} strokeWidth={1.75} />} label="Gap"
             value={L.gap} min={0} max={400} mixed={L.between} fmt={L.between ? () => 'Auto' : undefined} onChange={(v, f) => set({ gap: v, between: false }, f)} className="w-full" />
-          <div className="text-[10.5px] leading-tight text-fg-faint">Gap between items{L.between ? ' — distributed' : ''}</div>
+          <div className="text-ui-sm leading-tight text-fg-faint">Gap between items{L.between ? ' — distributed' : ''}</div>
         </div>
       </div>
       <Row label="Padding">
         <QuadField mode="pairs" value={L.pad} onChange={(v, f) => set({ pad: v }, f)} max={400}
-          prefix={[<span key="h" className="text-[10.5px]">↔</span>, <span key="v" className="text-[10.5px]">↕</span>]} labels={['T', 'R', 'B', 'L']} />
+          prefix={[<span key="h" className="text-ui-sm">↔</span>, <span key="v" className="text-ui-sm">↕</span>]} labels={['T', 'R', 'B', 'L']} />
       </Row>
     </>
   )
@@ -243,7 +243,7 @@ function RadiusRow({ nodes }: { nodes: Node[] }) {
     <Row label="Radius">
       <QuadField mode="single" value={value as Quad} mixed={r === MIXED} max={999}
         onChange={(v, f) => setAll(nodes, () => ({ radius: v }), f)}
-        prefix={<span className="text-[10.5px]">◜</span>} labels={['↖', '↗', '↘', '↙']} names={CORNER_NAMES} />
+        prefix={<span className="text-ui-sm">◜</span>} labels={['↖', '↗', '↘', '↙']} names={CORNER_NAMES} />
     </Row>
   )
 }
@@ -304,14 +304,14 @@ function EffectsSection({ nodes, open }: { nodes: Node[]; open: { open: boolean;
           <>
             <Popover.Root>
               <Tip label="Effect settings">
-                <Popover.Trigger aria-label="Effect settings" className="flex size-6 shrink-0 items-center justify-center rounded-[5px] bg-control text-fg-muted outline-none hover:text-fg data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)] focus-visible:ring-2 focus-visible:ring-signal">
+                <Popover.Trigger aria-label="Effect settings" className="flex size-control shrink-0 items-center justify-center rounded-[5px] bg-control text-fg-muted outline-none hover:text-fg data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)] focus-visible:ring-2 focus-visible:ring-signal">
                   <Sun size={13} strokeWidth={1.5} />
                 </Popover.Trigger>
               </Tip>
               <Popover.Portal>
                 <Popover.Positioner side="left" align="start" sideOffset={12} collisionPadding={12} className="z-[100]">
                   <Popover.Popup className="pop w-[240px] p-1 outline-none">
-                    <div className="px-2 pt-1.5 pb-1 text-[11.5px] font-medium">{FX_LABEL[e.kind]}</div>
+                    <div className="px-2 pt-1.5 pb-1 text-ui font-medium">{FX_LABEL[e.kind]}</div>
                     {e.kind.includes('shadow') && (
                       <>
                         <Row label="Offset">
@@ -379,7 +379,7 @@ function TextSection({ nodes, open }: { nodes: Node[]; open: { open: boolean; on
         </div>
       </Row>
       {nodes.length === 1 && (
-        <div className="px-3 pt-1 text-[10.5px] text-fg-faint tabular">
+        <div className="px-pad pt-1 text-ui-sm text-fg-faint tabular">
           {nodes[0].text!.content.length} characters · {wrapText(nodes[0].text!, nodes[0].text!.resize === 'auto-width' ? Infinity : L.get(nodes[0].id)?.w ?? 100).lines.length} lines
         </div>
       )}
@@ -405,7 +405,7 @@ function ExportSection({ open }: { open: { open: boolean; onToggle: () => void }
         <div className="flex-1"><Select value={v.exportScale} label="Export scale" onChange={(s) => prefs.patch({ exportScale: s, exportSuffix: s === '1' ? '' : `@${s}x` })} options={[{ value: '1', label: '1×' }, { value: '2', label: '2×' }, { value: '3', label: '3×' }, { value: '4', label: '4×' }]} /></div>
         <div className="flex-1"><Select value={v.exportFormat} label="Export format" onChange={(f) => prefs.setValue('exportFormat', f)} options={[{ value: 'png', label: 'PNG' }, { value: 'jpg', label: 'JPG' }, { value: 'webp', label: 'WebP' }]} /></div>
       </Row>
-      <div className="flex gap-1.5 px-3 pt-1">
+      <div className="flex gap-1.5 px-pad pt-1">
         <Button variant="default" size="md" className="flex-1" onClick={exportSelection}><ImageDown size={14} strokeWidth={1.5} />Export</Button>
         <Button variant="default" size="md" className="flex-1" onClick={copyCSS}><CodeXml size={14} strokeWidth={1.5} />Copy CSS</Button>
       </div>
