@@ -22,8 +22,8 @@ note and act on it. That way nobody retypes values, or what they saw, into the c
    `doc` for document state (a layer list, a timeline), or edits to it never reach you. A custom
    toolbar without `ParamActions` needs `<CommentButton params={params} />` and `<SendToAgentButton …/>`.
 4. For comments, also put `<NoteLayer params={params} clock={clock} />` inside the `<Artboard>`, next
-   to the surface. It draws the pins, the composer and the threads; the Comment button only shows
-   once a NoteLayer is mounted. Give it `describeAt={(x, y) => 'layer:hero'}` when the tool can name
+   to the surface. It draws the pins, the composer and the threads; the Comment button (and the list of
+   all comments beside it) only shows once a NoteLayer is mounted. Give it `describeAt={(x, y) => 'layer:hero'}` when the tool can name
    what's under a point (a layer, a node). That name goes into the comment's anchor.
 
 Another Node server (express, a bare `http` server): `createNotesHandler()` from

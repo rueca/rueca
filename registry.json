@@ -633,6 +633,7 @@
       "title": "Notes",
       "description": "Notes — part of the Rueca kit.",
       "dependencies": [
+        "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0",
         "zustand@^5.0.15"
       ],
@@ -641,7 +642,8 @@
         "https://rueca.dev/r/core.json",
         "https://rueca.dev/r/stage.json",
         "https://rueca.dev/r/studio-layout.json",
-        "https://rueca.dev/r/toast.json"
+        "https://rueca.dev/r/toast.json",
+        "https://rueca.dev/r/tooltip.json"
       ],
       "files": [
         {

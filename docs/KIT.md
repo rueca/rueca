@@ -309,6 +309,7 @@ stops ticks while paused too (default true for artifacts with their own life).
 - Comments: `<NoteLayer params history? clock? doc? describeAt? />` inside an `<Artboard>` — comment mode (`C`, or `CommentButton`, which `ParamActions`
   includes) pins a comment to an artboard point, to a spot on the stage around it (`on: 'canvas'`, artboard units outside 0–1;
   the Stage carries `data-studio-stage`), or to a knob by clicking its Inspector row (rows carry `data-param`). The clock pauses while you write.
+  `CommentsList params` (also in `ParamActions`, beside Comment) lists every comment with its reply, so one on a collapsed knob is never lost.
   Pins fade when the tool is in another state, and their thread can restore it. Replies arrive live (`useNotes()`) with a toast. Pins keep screen size via `useZoom()`.
 - `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound.
 - `toast(title, opts)` works anywhere (it mounts a single toaster if none is rendered) and returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
