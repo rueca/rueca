@@ -1,0 +1,16 @@
+{
+  "description": "Rueca: tell the agent about open notes the tool has sent (.rueca/notes/), so nobody has to type \"check the notes\".",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/skills/rueca/scripts/open-notes.mjs\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
