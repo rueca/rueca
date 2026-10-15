@@ -77,20 +77,24 @@ const validLayers = (v: unknown) => Array.isArray(v) && v.every((l) =>
   !!(l as Layer).params && typeof (l as Layer).params === 'object')
 
 export const schema = defineSchema({
+  // the look's own settings stay in the inspector; presets vary both
   canvas: folder('Canvas', {
-    aspect: p.select('free', [{ value: 'free', label: 'Fill' }, { value: '16:9', label: '16:9' }, { value: '1:1', label: '1:1' }, { value: '9:16', label: '9:16' }], { hint: 'Fill uses the whole window. Fixed ratios frame the artwork for export.' }),
     bg: p.color('#181411', { alpha: false, label: 'Background', hint: 'What shows beneath the bottom layer.' }),
-  }),
-  time: folder('Time', {
-    speed: p.number(1, { min: 0, max: 3, step: 0.05, unit: '×', hint: 'Playback rate. Video exports keep the loop seamless at any speed.' }),
-    loop: p.number(10, { min: 2, max: 30, step: 0.5, unit: 's', label: 'Loop length', hint: 'All motion repeats exactly once per loop, so recordings tile.' }),
     seed: p.seed(4127, { hint: 'Reshuffles point positions and noise. R randomises colours too.' }),
   }),
+  document: folder('Document', {
+    aspect: p.select('free', [{ value: 'free', label: 'Fill' }, { value: '16:9', label: '16:9' }, { value: '1:1', label: '1:1' }, { value: '9:16', label: '9:16' }], { hint: 'Fill uses the whole window. Fixed ratios frame the artwork for export.' }),
+    loop: p.number(10, { min: 2, max: 30, step: 0.5, unit: 's', label: 'Loop length', hint: 'All motion repeats exactly once per loop, so recordings tile.' }),
+  }, { place: 'settings' }),
+  // the transport is home to speed, resolution and the frame rate, so <SettingsMenu> leaves these out
+  time: folder('Time', {
+    speed: p.number(1, { min: 0, max: 3, step: 0.05, unit: '×', hint: 'Playback rate. Video exports keep the loop seamless at any speed.' }),
+  }, { place: 'settings' }),
   render: folder('Render', {
     quality: p.select('auto', [{ value: 'auto', label: 'Auto' }, { value: '0.5', label: '50%' }, { value: '0.75', label: '75%' }, { value: '1', label: '100%' }], { label: 'Resolution', hint: 'Auto lowers the drawing resolution when the frame rate drops, and raises it again when there is headroom.' }),
     fps: p.monitor(() => perf.fps, { label: 'Frame rate', graph: true, min: 0, max: 75, fmt: (v) => `${Math.round(v)} fps` }),
     drawing: p.monitor(() => perf.res, { label: 'Drawing at' }),
-  }, { collapsed: true }),
+  }, { collapsed: true, place: 'settings' }),
   // never rendered as a row; the layers panel edits it. Shared, so a link carries the whole look.
   stack: folder('Stack', { layers: p.data<Layer[]>(LOOKS[0].values.layers, { label: 'Layers', share: true, validate: validLayers }) }),
 })

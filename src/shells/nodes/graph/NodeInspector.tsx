@@ -116,11 +116,10 @@ function DocSettings() {
       <div className="flex gap-2.5 px-pad pt-3 pb-3">
         <MousePointerClick size={15} strokeWidth={1.5} className="mt-0.5 shrink-0 text-fg-faint" />
         <div className="min-w-0">
-          <div className="text-ui leading-snug text-fg-muted">Select a node to edit it. With nothing selected, these settings apply to the whole document.</div>
+          <div className="text-ui leading-snug text-fg-muted">Select a node to edit it. Preview, graph and export settings are in the toolbar.</div>
           <div className="mt-1.5 tabular text-ui text-fg-faint">{counts} · last cook {lastMs < 10 ? lastMs.toFixed(1) : Math.round(lastMs)} ms{inline ? ' · main thread' : ' · worker'}</div>
         </div>
       </div>
-      <div className="border-t border-line"><Inspector params={doc} folders={['preview', 'graph', 'export']} /></div>
     </div>
   )
 }

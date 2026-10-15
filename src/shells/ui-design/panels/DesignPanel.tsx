@@ -47,9 +47,19 @@ export function typeIcon(n: Node) {
 }
 export const typeName = (n: Node) => (n.component ? 'Component' : n.type === 'frame' ? (n.group ? 'Group' : 'Frame') : n.type === 'rect' ? (n.fills.some((f) => f.kind === 'image') ? 'Image' : 'Rectangle') : n.type === 'boolean' ? `Boolean · ${n.bool}` : n.type[0].toUpperCase() + n.type.slice(1))
 
+/** Effects and Export start closed; what you open or close is remembered. */
+const SECTIONS_KEY = 'ui-design:sections'
+const DEFAULT_CLOSED: Record<string, boolean> = { fx: true, export: true }
 function useSections() {
-  const [closed, setClosed] = useState<Record<string, boolean>>({})
-  return (id: string) => ({ open: !closed[id], onToggle: () => setClosed((c) => ({ ...c, [id]: !c[id] })) })
+  const [closed, setClosed] = useState<Record<string, boolean>>(() => {
+    try { return { ...DEFAULT_CLOSED, ...JSON.parse(localStorage.getItem(SECTIONS_KEY) ?? '{}') } } catch { return DEFAULT_CLOSED }
+  })
+  const toggle = (id: string) => setClosed((c) => {
+    const next = { ...c, [id]: !c[id] }
+    try { localStorage.setItem(SECTIONS_KEY, JSON.stringify(next)) } catch { /* private mode */ }
+    return next
+  })
+  return (id: string) => ({ open: !closed[id], onToggle: () => toggle(id) })
 }
 
 export function DesignPanel() {
@@ -292,9 +302,13 @@ function EffectsSection({ nodes, open }: { nodes: Node[]; open: { open: boolean;
   const mixed = fx === MIXED
   const list = mixed ? [] : nodes[0].effects
   const set = (next: Effect[], final: boolean) => setAll(nodes, () => ({ effects: next.map((e) => ({ ...e })) }), final)
-  const add = (kind: Effect['kind']) => set([...list, kind.includes('shadow') ? { ...shadow(4, 12, 0.15), kind } : { id: uid('e'), kind, visible: true, x: 0, y: 0, blur: 8, spread: 0, color: '#000000', opacity: 1 }], true)
+  const add = (kind: Effect['kind']) => {
+    set([...list, kind.includes('shadow') ? { ...shadow(4, 12, 0.15), kind } : { id: uid('e'), kind, visible: true, x: 0, y: 0, blur: 8, spread: 0, color: '#000000', opacity: 1 }], true)
+    if (!open.open) open.onToggle() // show what was just added
+  }
   return (
-    <Section title="Effects" {...open}
+    // collapsed by default: the dot says the selection carries effects
+    <Section title="Effects" {...open} changed={nodes.some((n) => n.effects.length > 0)}
       actions={<Menu align="end" trigger={<IconButton icon={Plus} size="icon-sm" label="Add effect" />} items={(Object.keys(FX_LABEL) as Effect['kind'][]).map((k) => ({ label: FX_LABEL[k], onClick: () => add(k) }))} />}>
       {/* an effect's `opacity` is its shadow colour's (edited in the popover) — carried as `alpha` so the stack shows no opacity field */}
       <EffectStack order="bottom-first" label="Effects" removeIcon="minus" contextMenu={false}

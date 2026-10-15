@@ -2,11 +2,10 @@ import '@fontsource-variable/newsreader'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from 'zustand'
 import {
-  Braces, Circle, CircleDashed, Clapperboard, Download, FileUp, Film, Image as ImageIcon, Magnet, Minus, Pause, Play, Plus, RectangleHorizontal,
-  RectangleVertical, RotateCcw, Scissors, Shapes, SkipBack, SkipForward, Smartphone, Square, StepBack, StepForward, Trash2, Type, CopyPlus,
+  Braces, Circle, CircleDashed, Clapperboard, Download, FileUp, Film, Image as ImageIcon, Magnet, Minus, Pause, Play, Plus, RectangleHorizontal, RectangleVertical, RotateCcw, Scissors, Shapes, SkipBack, SkipForward, Smartphone, Square, StepBack, StepForward, Rows3, Trash2, Type, CopyPlus,
 } from 'lucide-react'
 import {
-  Artboard, Brand, Button, CanvasSurface, Cluster, CommandPalette, Empty, IconButton, Menu, Panel, PanelHeader, ParamActions, Section, Segmented, Stage,
+  Artboard, Brand, Button, CanvasSurface, Cluster, CommandPalette, Empty, IconButton, Menu, Panel, PanelHeader, ParamActions, Section, Segmented, SettingsMenu, Stage,
   Studio, Toolbar, cn, download, exportJSON, fmtTime, recordFrames, shareMenuItems, toast, useCamera, useClock, useClockTime, useHotkeys, useValues,
   type Command, type MenuItem, type SurfaceHandle,
   useStudio,
@@ -17,7 +16,7 @@ import { IMAGE_LABEL, clipBox, drawComp, frameUnit, hitTest, imagesReady, onImag
 import { ClipInspector, thumbURL } from './ClipInspector'
 import { TrackTimeline, type TimelineClip } from '@kit/timeline/TrackTimeline'
 import {
-  addClip, addTrack, clock, commitComp, deleteClips, duplicateClips, frameMs, getComp, history, loadComp, params, patchTrack, removeEmptyTracks, setComp,
+  addClip, addTrack, clock, doc, commitComp, deleteClips, duplicateClips, frameMs, getComp, history, loadComp, params, patchTrack, removeEmptyTracks, setComp,
   settleClips, snapFrame, splitAt, ui, updateClip, updateClips, useComp, useUI, type V,
 } from './store'
 
@@ -111,14 +110,9 @@ function Transport() {
       </div>
       <div className="mx-1 h-4 w-px bg-line" />
       <IconButton icon={Scissors} label="Split at playhead" shortcut="mod+b" tipSide="top" disabled={!sel.length} onClick={() => { const n = splitAt(ui.getState().sel); if (!n) toast('Put the playhead inside a selected clip to split') }} />
-      <Menu side="top" trigger={<IconButton icon={Plus} label="Add clip" tipSide="top" />}
+      {/* clips are added from the library; this menu only manages tracks */}
+      <Menu side="top" trigger={<IconButton icon={Rows3} label="Tracks" tipSide="top" />}
         items={[
-          { label: 'Text', icon: Type, shortcut: 'shift+t', onClick: () => addClip('text') },
-          { label: 'Shape', icon: Shapes, onClick: () => addClip('shape') },
-          { label: 'Image', icon: ImageIcon, onClick: () => addClip('image') },
-          { label: 'Progress bar', icon: Minus, onClick: () => addClip('progress') },
-          { label: 'Background', icon: Square, onClick: () => addClip('bg') },
-          { type: 'separator' },
           { label: 'New track', icon: Plus, onClick: addTrack },
           { label: 'Remove empty tracks', onClick: () => { const n = removeEmptyTracks(); toast(n ? `Removed ${n} empty tracks` : 'No empty tracks') } },
         ]} />
@@ -391,7 +385,7 @@ export default function VideoShell() {
           }
           end={
             <>
-              <Cluster><ParamActions params={params} history={history} presets={false} /></Cluster>
+              <Cluster><SettingsMenu params={params} folders={['composition', 'view']} label="Composition settings" /><ParamActions params={params} history={history} doc={doc} clock={clock} presets={false} compare={false} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />
             </>
           }

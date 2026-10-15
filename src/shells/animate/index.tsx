@@ -19,7 +19,7 @@ import { LiveScene } from './SceneView'
 import { AnimInspector } from './AnimInspector'
 import { InputsList, StateMachineGraph, TransitionsList } from './local/StateMachinePanel'
 import {
-  addAnim, addKeysAtPlayhead, animTime, clock, commitPending, copyKeys, currentAnim, deleteAnim, deleteKeys, editProps, findKey, getDoc,
+  addAnim, addKeysAtPlayhead, animTime, clock, doc as docStore, commitPending, copyKeys, currentAnim, deleteAnim, deleteKeys, editProps, findKey, getDoc,
   history, moveKeys, nudgeKeys, params, pasteKeys, patchObject, reorderObject, runtime, seek, setDoc, setEase, toAnimTime, toggleKey, ui, updateAnim,
   useDoc, useUI,
 } from './store'
@@ -451,7 +451,8 @@ export default function AnimateShell() {
           }
           end={
             <>
-              <Cluster><ParamActions params={params} history={history} presets={false} /></Cluster>
+              {/* params here are view prefs, not the animation: A/B and share would act on the wrong thing */}
+              <Cluster><ParamActions params={params} history={history} doc={docStore} clock={clock} presets={false} compare={false} share={false} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />
             </>
           }

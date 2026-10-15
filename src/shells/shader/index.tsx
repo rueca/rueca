@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Slider, ScrubValue, Select, Menu, Button, IconButton,
-  Divider, Empty, Monitor, ParamActions, CommandPalette, useValues, useHotkeys, useClock, useClockTime, shareMenuItems, equal, toast, fmtTime,
+  Divider, Empty, Monitor, ParamActions, SettingsMenu, CommandPalette, useValues, useHotkeys, useClock, useClockTime, shareMenuItems, equal, toast, fmtTime,
   createItemParams, bindItem, cn, type Command,
 } from '@kit'
 import { EffectStack, StackAddMenu, type StackAddGroup } from '@kit/ui/stack'
@@ -137,7 +137,7 @@ export default function GradientStudio() {
           }
           end={
             <>
-              <Cluster><ParamActions params={params} presets={false} /></Cluster>
+              <Cluster><SettingsMenu params={params} folders={['document']} label="Document settings" /><ParamActions params={params} presets={false} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>}
                 items={[
                   { type: 'label', label: 'Still — rendered at size, not upscaled' },
@@ -199,7 +199,7 @@ export default function GradientStudio() {
         }>
           {sel && <LayerInspector key={sel.type} layer={sel} />}
           <div className={sel ? 'border-t border-line' : undefined}>
-            <Inspector params={params} folders={['canvas', 'time', 'render']} />
+            <Inspector params={params} folders={['canvas']} />
           </div>
         </Panel>
       }

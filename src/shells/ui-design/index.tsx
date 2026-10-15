@@ -19,13 +19,11 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Brand, Cluster, Panel, PanelHeader, PanelTabs, ToolDock, CommandPalette, IconButton, Button, Menu, Divider,
-  HistoryButtons, ThemeToggle, useHotkeys, useTheme, toast, type Command, type HotkeyHandler,
+  HistoryButtons, SettingsMenu, ThemeToggle, useHotkeys, useTheme, toast, type Command, type HotkeyHandler,
 } from '@kit'
-import { useStore } from 'zustand'
 import * as S from './model/store'
 import { prefs } from './model/prefs'
 import { bumpFontEpoch } from './model/layout'
-import { camera } from './canvas/camera'
 import { Canvas } from './canvas/Canvas'
 import { LayersPanel } from './panels/LayersPanel'
 import { DesignPanel } from './panels/DesignPanel'
@@ -57,7 +55,6 @@ export default function CanvasShell() {
   const selection = S.useDesign((s) => s.selection)
   const doc = S.useDesign((s) => s.doc)
   const pageId = S.useDesign((s) => s.pageId)
-  const zoom = useStore(camera, (c) => c.zoom)
   const { theme, toggle } = useTheme()
   const [presenting, setPresenting] = useState(false)
   const hasSel = selection.length > 0
@@ -170,6 +167,7 @@ export default function CanvasShell() {
               <Cluster>
                 <HistoryButtons history={S.history} />
                 <Divider vertical />
+                <SettingsMenu params={prefs} folders={['snapping', 'nudge', 'view', 'exporting']} label="Canvas settings" />
                 <ThemeToggle hotkey={false} />
                 <IconButton icon={Play} label="Present" shortcut="alt+mod+enter" onClick={() => setPresenting(true)} />
               </Cluster>
@@ -191,13 +189,6 @@ export default function CanvasShell() {
         <Panel header={
           <PanelHeader>
             <PanelTabs value={tab} onChange={(t) => S.design.setState({ tab: t })} tabs={[{ value: 'design', label: 'Design' }, { value: 'prototype', label: 'Prototype' }]} />
-            <Menu align="end" trigger={<Button size="sm" variant="ghost" className="tabular">{Math.round(zoom * 100)}%</Button>} items={[
-              { label: 'Zoom to fit page', onClick: A.zoomToFitPage },
-              { label: 'Zoom to selection', shortcut: 'shift+2', onClick: A.zoomToSelection, disabled: !hasSel },
-              { label: 'Zoom in', shortcut: 'mod+=', onClick: () => A.zoomBy(2) },
-              { label: 'Zoom out', shortcut: 'mod+-', onClick: () => A.zoomBy(0.5) },
-              { label: 'Zoom to 100%', shortcut: 'shift+0', onClick: () => camera.zoomTo(1) },
-            ]} />
           </PanelHeader>
         }>
           {tab === 'design' ? (hasSel ? <DesignPanel /> : <DocumentPanel />) : <PrototypePanel onPresent={() => setPresenting(true)} />}
