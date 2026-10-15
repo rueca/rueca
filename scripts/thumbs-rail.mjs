@@ -27,6 +27,8 @@ mkdirSync('public/thumbs/grid', { recursive: true })
 // 1.5× (2160×1350): the centred rail card shows up to ~1960 device pixels wide on a retina screen
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1.5 })
 const page = await ctx.newPage()
+// the dev server's notes route shows "Send to agent", a dev-only button the public site never has: hide it
+await ctx.route('**/__rueca/notes', (r) => r.abort())
 
 await page.goto(BASE + '/#/shells')
 await page.waitForTimeout(800)
