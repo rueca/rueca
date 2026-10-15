@@ -3,8 +3,12 @@
    The notes route, for any Node server: the tool POSTs a note, this writes it
    to .rueca/notes/<id>.json, where the agent reads it (and marks it resolved).
 
-     GET  /__rueca/notes   → every note, oldest first
-     POST /__rueca/notes   → { kind, text?, anchor?, snapshot } → the stored note
+     GET    /__rueca/notes          → every note, oldest first
+     POST   /__rueca/notes          → { kind, text?, anchor?, snapshot, image? } → the stored note
+     DELETE /__rueca/notes?id=<id>  → clears one note (and its image)
+
+   `image` is a data URL (png / jpeg / webp): it is written next to the note as
+   <id>.<ext> and the note keeps only the file name.
 
    Vite: use ruecaNotes() from ./vite. Anything else (express, a bare http
    server): `if (await handle(req, res)) return` before your own routes.
@@ -14,7 +18,7 @@
    write files into the repo through localhost. File names are made here,
    never taken from the request, and bodies are capped.
 --------------------------------------------------------------------------- */
-import { mkdir, readdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { randomBytes } from 'node:crypto'
 import { isAbsolute, join } from 'node:path'
 import type { IncomingMessage, ServerResponse } from 'node:http'
@@ -26,7 +30,7 @@ export interface NotesHandlerOptions {
   root?: string
   /** where notes are written, relative to root (default .rueca/notes) */
   dir?: string
-  /** largest accepted body in bytes (default 256 KB) */
+  /** largest accepted body in bytes, image included (default 4 MB) */
   maxBytes?: number
 }
 
@@ -49,6 +53,10 @@ export function isSameOrigin(req: IncomingMessage): boolean {
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
+const IMAGE = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/]+={0,2})$/
+const EXT: Record<string, string> = { png: 'png', jpeg: 'jpg', webp: 'webp' }
+/** the shape every note id has (made by newId): the only thing DELETE will touch */
+export const NOTE_ID = /^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-[0-9a-f]{4}$/
 const unit = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 1
 
 /** The note's shape, checked before anything touches the disk. Returns an error message, or null. */
@@ -64,6 +72,7 @@ export function checkNote(b: unknown): string | null {
       (a.on === 'param' && typeof a.key === 'string' && a.key.length > 0 && a.key.length <= 100))
     if (!ok) return 'anchor is not a valid artboard point or param'
   }
+  if (b.image !== undefined && !(typeof b.image === 'string' && IMAGE.test(b.image))) return 'image must be a base64 png, jpeg or webp data URL'
   const s = b.snapshot
   if (!isObj(s) || s.$v !== 1 || typeof s.tool !== 'string' || !isObj(s.changed)) return 'snapshot is missing or not format 1'
   return null
@@ -88,7 +97,7 @@ function readBody(req: IncomingMessage, max: number): Promise<string | null> {
 export function createNotesHandler(opts: NotesHandlerOptions = {}) {
   const root = opts.root ?? process.cwd()
   const dir = isAbsolute(opts.dir ?? '') ? opts.dir! : join(root, opts.dir ?? '.rueca/notes')
-  const max = opts.maxBytes ?? 256 * 1024
+  const max = opts.maxBytes ?? 4 * 1024 * 1024
 
   const list = async () => {
     let files: string[]
@@ -105,7 +114,15 @@ export function createNotesHandler(opts: NotesHandlerOptions = {}) {
     if (path !== NOTES_ROUTE) return false
     if (!isSameOrigin(req)) { send(res, 403, { error: 'Notes only accept requests from the page’s own origin' }); return true }
     if (req.method === 'GET') { send(res, 200, await list()); return true }
-    if (req.method !== 'POST') { res.setHeader('allow', 'GET, POST'); send(res, 405, { error: 'Use GET or POST' }); return true }
+    if (req.method === 'DELETE') {
+      const id = new URL(req.url ?? '', 'http://x').searchParams.get('id') ?? ''
+      if (!NOTE_ID.test(id)) { send(res, 400, { error: 'Not a note id' }); return true }
+      try { await readFile(join(dir, `${id}.json`)) } catch { send(res, 404, { error: 'No such note' }); return true }
+      await Promise.all([`${id}.json`, ...Object.values(EXT).map((e) => `${id}.${e}`)].map((f) => rm(join(dir, f), { force: true })))
+      send(res, 200, { id })
+      return true
+    }
+    if (req.method !== 'POST') { res.setHeader('allow', 'GET, POST, DELETE'); send(res, 405, { error: 'Use GET, POST or DELETE' }); return true }
 
     const raw = await readBody(req, max)
     if (raw === null) { send(res, 413, { error: `Note is larger than ${Math.round(max / 1024)} KB` }); return true }
@@ -115,15 +132,23 @@ export function createNotesHandler(opts: NotesHandlerOptions = {}) {
     if (problem) { send(res, 400, { error: problem }); return true }
 
     const b = body as Record<string, unknown>
+    const id = newId()
+    await mkdir(dir, { recursive: true })
+    let image: string | undefined
+    if (typeof b.image === 'string') {
+      const [, type, data] = b.image.match(IMAGE)!
+      image = `${id}.${EXT[type]}`
+      await writeFile(join(dir, image), Buffer.from(data, 'base64'))
+    }
     const note = {
-      id: newId(),
+      id,
       kind: b.kind,
       ...(typeof b.text === 'string' && b.text.trim() ? { text: b.text.trim() } : {}),
       ...(b.anchor ? { anchor: b.anchor } : {}),
+      ...(image ? { image } : {}),
       status: 'open',
       snapshot: b.snapshot,
     }
-    await mkdir(dir, { recursive: true })
     // write then rename, so an agent reading the folder never sees half a file
     const file = join(dir, `${note.id}.json`)
     await writeFile(`${file}.tmp`, JSON.stringify(note, null, 2) + '\n')

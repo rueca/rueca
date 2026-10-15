@@ -7,18 +7,20 @@
      const history = createHistory([params, doc])
      <ParamActions params={params} history={history} />
 
-   "Send to agent" appears only when the dev server has the notes route
-   (ruecaNotes()); pass `clock` / `doc` so the note carries the playhead and doc.
+   "Send to agent" and "Comment" appear only when the dev server has the notes
+   route (ruecaNotes()); pass `clock` / `doc` so notes carry the playhead and doc.
+   Comment also needs a <NoteLayer> inside the artboard (./notes.tsx).
 
    Kit hotkeys here register at priority 0, so a shell binding the same key
    (T for a Text tool, \ for before/after) wins without configuration.
 --------------------------------------------------------------------------- */
 import { Bookmark, Moon, Redo2, Sun, Undo2, Link, Braces, SplitSquareHorizontal, Trash2, Plus, Download, ChevronDown, Bot, Smartphone, Send } from 'lucide-react'
-import { useEffect, useState, type ReactElement } from 'react'
+import { useState, type ReactElement } from 'react'
 import { useStore } from 'zustand'
 import type { AnyParams } from '../core/params'
 import type { DocStore } from '../core/doc'
-import { captureSnapshot, findNotesEndpoint, formatNotePrompt, sendNote } from '../core/notes'
+import { captureSnapshot, formatNotePrompt, refreshNotes, sendNote } from '../core/notes'
+import { CommentButton, useNotesEndpoint } from './notes'
 import { useCanUndo, type HistoryLike } from '../core/history'
 import { copyText, exportJSON } from '../core/io'
 import { useHotkeys } from '../core/hotkeys'
@@ -134,13 +136,6 @@ export function shareMenuItems(params: AnyParams): MenuItem[] {
   ]
 }
 
-/** True once the dev server's notes route answers (ruecaNotes()); false on a static build. */
-export function useNotesEndpoint() {
-  const [ok, setOk] = useState(false)
-  useEffect(() => { let live = true; findNotesEndpoint().then((u) => { if (live) setOk(!!u) }); return () => { live = false } }, [])
-  return ok
-}
-
 /** Writes the changed values to .rueca/notes/ for the agent to bake in. Renders nothing without the notes route. */
 export function SendToAgentButton({ params, history, clock, doc }: { params: AnyParams; history?: HistoryLike; clock?: { time(): number }; doc?: DocStore<any> }) {
   const available = useNotesEndpoint()
@@ -153,6 +148,7 @@ export function SendToAgentButton({ params, history, clock, doc }: { params: Any
     setBusy(true)
     try {
       await sendNote({ kind: 'values', snapshot })
+      refreshNotes()
       toast(n ? `Sent ${n} ${n === 1 ? 'value' : 'values'} to the agent` : 'Sent to the agent', { type: 'success', description: 'Ask it to check the notes.' })
     } catch (e) {
       toast('Could not send', { type: 'error', description: (e as Error).message })
@@ -180,6 +176,7 @@ export function ParamActions({
       {compare && <CompareButton params={params} hotkey={typeof compare === 'object' ? compare.hotkey : '\\'} />}
       <Divider vertical />
       {presets && <PresetMenu params={params} />}
+      {agent && <CommentButton params={params} />}
       {agent && <SendToAgentButton params={params} history={history} clock={clock} doc={doc} />}
       {share && <Menu align="end" trigger={<IconButton icon={Link} label="Share & copy" />} items={shareMenuItems(params)} />}
       {theme && <ThemeToggle hotkey={typeof theme === 'object' ? theme.hotkey : 't'} />}

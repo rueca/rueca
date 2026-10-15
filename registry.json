@@ -34,6 +34,7 @@
         "https://rueca.dev/r/layers.json",
         "https://rueca.dev/r/layout-fields.json",
         "https://rueca.dev/r/masonry.json",
+        "https://rueca.dev/r/notes.json",
         "https://rueca.dev/r/notes-server.json",
         "https://rueca.dev/r/oklch.json",
         "https://rueca.dev/r/palette.json",
@@ -80,6 +81,7 @@
         "https://rueca.dev/r/controls.json",
         "https://rueca.dev/r/core.json",
         "https://rueca.dev/r/dialog.json",
+        "https://rueca.dev/r/notes.json",
         "https://rueca.dev/r/toast.json"
       ],
       "files": [
@@ -601,6 +603,29 @@
           "path": "src/kit/ui/masonry.tsx",
           "type": "registry:component",
           "target": "@components/studio/ui/masonry.tsx"
+        }
+      ]
+    },
+    {
+      "name": "notes",
+      "type": "registry:component",
+      "title": "Notes",
+      "description": "Notes — part of the Rueca kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0",
+        "zustand@^5.0.15"
+      ],
+      "registryDependencies": [
+        "https://rueca.dev/r/button.json",
+        "https://rueca.dev/r/core.json",
+        "https://rueca.dev/r/stage.json",
+        "https://rueca.dev/r/toast.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/system/notes.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/system/notes.tsx"
         }
       ]
     },

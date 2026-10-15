@@ -277,7 +277,12 @@ stops ticks while paused too (default true for artifacts with their own life).
   until the route answers (so it never shows on a static build). Route: `ruecaNotes()` from `notes-server/vite` in `vite.config.ts`, or
   `createNotesHandler({ dir? })` from `notes-server/handler` for any Node server. Add `.rueca/` to `.gitignore`.
   Core, framework-agnostic: `captureSnapshot({ params, history?, clock?, doc? })` → `{ tool, schema, url, changed: { key: { value, default, label, hint } }, steps, t, doc, view }` ·
-  `sendNote({ kind: 'values' | 'comment', text?, anchor?, snapshot })` · `listNotes()` · `findNotesEndpoint()` · `formatNotePrompt(note)` (the clipboard version).
+  `sendNote({ kind: 'values' | 'comment', text?, anchor?, snapshot, image? })` · `listNotes()` · `deleteNote(id)` · `findNotesEndpoint()` · `formatNotePrompt(note)` (the clipboard version) ·
+  `watchNotes(fn)` (one shared poll; returns unsubscribe) · `refreshNotes()` · `captureImage(artboardEl, { anchor? })` (JPEG data URL: DOM plus canvases, anchor ringed) ·
+  `restoreSnapshot(snapshot, { params, clock? })` (one undo step; the playhead paused at `t`) · `isSnapshotState(snapshot, params)`.
+- Comments: `<NoteLayer params history? clock? doc? describeAt? />` inside an `<Artboard>` — comment mode (`C`, or `CommentButton`, which `ParamActions`
+  includes) pins a comment to an artboard point, or to a knob by clicking its Inspector row (rows carry `data-param`). The clock pauses while you write.
+  Pins fade when the tool is in another state, and their thread can restore it. Replies arrive live (`useNotes()`) with a toast. Pins keep screen size via `useZoom()`.
 - `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound.
 - `toast(title, opts)` works anywhere (it mounts a single toaster if none is rendered) and returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
   `toast.promise(p, { loading, success, error })` · `toast.progress(title, { onCancel })` → `{ set(p), done(msg), fail(msg) }`.
