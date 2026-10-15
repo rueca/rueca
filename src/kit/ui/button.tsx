@@ -18,11 +18,11 @@ export const buttonVariants = cva(
         danger: 'text-rec hover:bg-hover',
       },
       size: {
-        sm: 'h-6 px-2 text-[11.5px] rounded-[5px]',
-        md: 'h-7 px-2.5 text-[12px] rounded-control',
-        lg: 'h-8 px-3 text-[12.5px] rounded-[8px]',
-        icon: 'size-7 rounded-control',
-        'icon-sm': 'size-6 rounded-[5px]',
+        sm: 'h-control px-2 text-ui rounded-control',
+        md: 'h-icon px-2.5 text-ui rounded-control',
+        lg: 'h-button-lg px-3 text-title rounded-[calc(var(--radius-control)+2px)]',
+        icon: 'size-icon rounded-control',
+        'icon-sm': 'size-icon-sm rounded-control',
       },
     },
     defaultVariants: { variant: 'ghost', size: 'md' },
@@ -54,7 +54,7 @@ IconButton.displayName = 'IconButton'
 
 export function Kbd({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <kbd className={cn('inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] bg-hover px-1 font-ui text-[10.5px] font-medium text-fg-muted', className)}>
+    <kbd className={cn('inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-[4px] bg-hover px-1 font-ui text-ui-sm font-medium text-fg-muted', className)}>
       {children}
     </kbd>
   )

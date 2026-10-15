@@ -236,12 +236,12 @@ export function PaintField<T extends Paint>({
     <div className={cn('flex min-w-0 flex-1 items-center gap-1', className)}>
       <Popover.Root>
         <Popover.Trigger aria-label={`${label}: ${KIND_LABEL[value.kind]} ${chip}`}
-          className={cn('flex h-6 min-w-0 flex-1 items-center gap-2 rounded-[5px] bg-control pr-2 pl-1 text-left outline-none',
+          className={cn('flex h-control min-w-0 flex-1 items-center gap-2 rounded-control bg-control pr-2 pl-1 text-left outline-none',
             'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]')}>
           <span className="checker relative size-4 shrink-0 overflow-hidden rounded-[4px] shadow-[inset_0_0_0_1px_var(--line-strong)]">
             <span className="absolute inset-0" style={{ background: paintCSS(value, imageURL), opacity: value.opacity }} />
           </span>
-          <span className={cn('min-w-0 flex-1 truncate text-[11px] text-fg', value.kind === 'solid' && 'tabular uppercase')}>{chip}</span>
+          <span className={cn('min-w-0 flex-1 truncate text-ui text-fg', value.kind === 'solid' && 'tabular uppercase')}>{chip}</span>
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Positioner side="left" align="start" sideOffset={12} collisionPadding={12} className="z-[160]">

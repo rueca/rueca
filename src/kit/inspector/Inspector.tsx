@@ -106,12 +106,12 @@ export function Section({
   }
   return (
     <section className={cn('group/section', !first && 'border-t border-line')}>
-      <div data-section-header className="flex h-8 items-center gap-1 pr-2 pl-3">
+      <div data-section-header className="flex h-section items-center gap-1 pr-2 pl-pad">
         <button
           type="button"
           aria-expanded={collapsible ? open : undefined}
           onClick={(e) => toggle(e.altKey)}
-          className={cn('flex h-full min-w-0 flex-1 items-center gap-1 text-left text-[11.5px] font-medium text-fg outline-none no-select rounded-[4px] focus-visible:text-signal-text focus-visible:ring-2 focus-visible:ring-signal', !collapsible && 'cursor-default')}
+          className={cn('flex h-full min-w-0 flex-1 items-center gap-1 text-left text-ui font-[550] text-fg outline-none no-select rounded-[4px] focus-visible:text-signal-text focus-visible:ring-2 focus-visible:ring-signal', !collapsible && 'cursor-default')}
         >
           <Tip label={hint} side="left"><span className="truncate">{title}</span></Tip>
           {changed && <span className="size-1 shrink-0 rounded-full bg-signal" aria-label="changed" />}
@@ -121,28 +121,29 @@ export function Section({
         {onReset && (
           <Tip label="Reset section">
             <button type="button" aria-label={`Reset ${typeof title === 'string' ? title.toLowerCase() : 'section'}`} onClick={onReset}
-              className="flex size-6 items-center justify-center rounded-[5px] text-fg-faint opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/section:opacity-100 focus-visible:opacity-100">
+              className="flex size-icon-sm items-center justify-center rounded-control text-fg-faint opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/section:opacity-100 focus-visible:opacity-100">
               <RotateCcw size={12} strokeWidth={1.75} />
             </button>
           </Tip>
         )}
       </div>
-      {open && <div className="flex flex-col gap-px pb-2.5">{children}</div>}
+      {open && <div className="flex flex-col gap-px pb-1">{children}</div>}
     </section>
   )
 }
 
 /** One lane. Use directly for hand-built rows that should match schema rows. */
 export function Row({
-  label, hint, changed, onReset, children, stacked, className, trailing, labelWidth = 84,
+  label, hint, changed, onReset, children, stacked, className, trailing, labelWidth,
 }: { label?: ReactNode; hint?: string; changed?: boolean; onReset?: () => void; children: ReactNode; stacked?: boolean; className?: string; trailing?: ReactNode; labelWidth?: number }) {
   const lab = label != null && (
     <Tip label={hint} side="left">
       <span
         data-row-label
         onDoubleClick={onReset}
-        className={cn('flex min-w-0 items-center gap-1 truncate text-[11.5px] no-select', changed ? 'text-fg' : 'text-fg-muted', stacked ? 'h-6' : 'shrink-0')}
-        style={stacked ? undefined : { width: labelWidth }}
+        // labels sit a step under their values: read once, while the values are read on every scrub
+        className={cn('flex min-w-0 items-center gap-1 truncate text-ui font-[450] no-select', changed ? 'text-fg' : 'text-fg-faint', stacked ? 'h-control' : 'w-label shrink-0')}
+        style={stacked || labelWidth == null ? undefined : { width: labelWidth }}
       >
         <span className="truncate">{label}</span>
         {/* changed-from-default: a dot as well as brighter text (WCAG 1.4.1, break-it A14) */}
@@ -152,13 +153,13 @@ export function Row({
   )
   if (stacked)
     return (
-      <div className={cn('flex flex-col gap-1 px-3 py-1', className)}>
+      <div className={cn('flex flex-col gap-1 px-pad py-1', className)}>
         <div className="flex items-center justify-between">{lab}{trailing}</div>
         {children}
       </div>
     )
   return (
-    <div className={cn('flex min-h-[var(--row)] items-center gap-2 px-3', className)}>
+    <div className={cn('flex min-h-row items-center gap-2 px-pad', className)}>
       {lab}
       <div className="flex min-w-0 flex-1 items-center gap-1.5">{children}</div>
       {trailing}
@@ -189,7 +190,7 @@ export function ParamRow({ k, def, params, values: valuesProp, defaults: default
 
   if (def.type === 'action')
     return (
-      <div className="px-3 py-1">
+      <div className="px-pad py-1">
         <Button variant={def.variant === 'primary' ? 'primary' : 'default'} size="md" className="w-full" onClick={() => def.onClick(single ? params.getState().values : values)}>
           {def.icon && <def.icon size={14} strokeWidth={1.5} />}
           {def.label}
@@ -215,9 +216,9 @@ export function ParamRow({ k, def, params, values: valuesProp, defaults: default
     return (
       <Row {...common}>
         <Popover.Root>
-          <Popover.Trigger className="flex h-6 w-full min-w-0 items-center gap-2 rounded-[5px] bg-control px-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-signal hover:shadow-[inset_0_0_0_1px_var(--line-strong)] data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
+          <Popover.Trigger className="flex h-control w-full min-w-0 items-center gap-2 rounded-control bg-control px-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-signal hover:shadow-[inset_0_0_0_1px_var(--line-strong)] data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
             <CurveGlyph value={v as [number, number, number, number]} className="text-signal" />
-            <span className={cn('truncate tabular text-[11px]', changed ? 'text-fg' : 'text-fg-faint')}>{(v as number[]).map((n) => n.toFixed(2)).join(', ')}</span>
+            <span className={cn('truncate tabular text-ui', changed ? 'text-fg' : 'text-fg-value')}>{(v as number[]).map((n) => n.toFixed(2)).join(', ')}</span>
           </Popover.Trigger>
           <Popover.Portal>
             <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[160]">

@@ -5,7 +5,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 78
+    "textSampled": 81
   },
   {
     "id": "motion",
@@ -13,7 +13,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 78
+    "textSampled": 81
   },
   {
     "id": "dropin",
@@ -37,7 +37,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 33
+    "textSampled": 39
   },
   {
     "id": "present",
@@ -45,7 +45,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 33
+    "textSampled": 39
   },
   {
     "id": "animate",
@@ -69,7 +69,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 115
+    "textSampled": 119
   },
   {
     "id": "ui-design",
@@ -77,7 +77,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 115
+    "textSampled": 119
   },
   {
     "id": "shader",
@@ -100,16 +100,29 @@
     "theme": "dark",
     "errors": [],
     "fails": [],
-    "lowText": [],
-    "textSampled": 106
+    "lowText": [
+      "2.03 \"Aa\"",
+      "2.03 \"Aa\"",
+      "2.03 \"Aa\""
+    ],
+    "textSampled": 130
   },
   {
     "id": "component-lab",
     "theme": "light",
     "errors": [],
     "fails": [],
-    "lowText": [],
-    "textSampled": 106
+    "lowText": [
+      "2.03 \"Aa\"",
+      "2.03 \"Aa\"",
+      "2.03 \"Aa\"",
+      "2.1 \"sRGB\"",
+      "2.1 \"AAA\"",
+      "2.1 \"AAA\"",
+      "2.1 \"AA\"",
+      "2.1 \"AA\""
+    ],
+    "textSampled": 130
   },
   {
     "id": "video",
@@ -117,7 +130,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 142
+    "textSampled": 144
   },
   {
     "id": "video",
@@ -125,7 +138,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 142
+    "textSampled": 144
   },
   {
     "id": "dither",
@@ -133,7 +146,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 84
+    "textSampled": 89
   },
   {
     "id": "dither",
@@ -141,7 +154,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 84
+    "textSampled": 89
   },
   {
     "id": "scene",
@@ -165,7 +178,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 159
+    "textSampled": 152
   },
   {
     "id": "batch",
@@ -173,7 +186,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 159
+    "textSampled": 152
   },
   {
     "id": "photo",
@@ -181,7 +194,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 86
+    "textSampled": 90
   },
   {
     "id": "photo",
@@ -189,7 +202,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 86
+    "textSampled": 90
   },
   {
     "id": "flows",
@@ -213,7 +226,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 105
+    "textSampled": 102
   },
   {
     "id": "nodes",
@@ -221,7 +234,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 105
+    "textSampled": 102
   },
   {
     "id": "type",
@@ -229,7 +242,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 99
+    "textSampled": 100
   },
   {
     "id": "type",
@@ -237,7 +250,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 99
+    "textSampled": 100
   },
   {
     "id": "generate",
@@ -261,15 +274,20 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 93
+    "textSampled": 98
   },
   {
     "id": "journey",
     "theme": "light",
     "errors": [],
     "fails": [],
-    "lowText": [],
-    "textSampled": 93
+    "lowText": [
+      "2.99 \"🙁\"",
+      "2.99 \"−1\"",
+      "2.13 \"😄\"",
+      "2.13 \"+1.5\""
+    ],
+    "textSampled": 98
   },
   {
     "id": "marks",
@@ -293,7 +311,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 152
+    "textSampled": 158
   },
   {
     "id": "synth",
@@ -301,6 +319,6 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 152
+    "textSampled": 158
   }
 ]

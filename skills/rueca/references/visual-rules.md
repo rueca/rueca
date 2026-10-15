@@ -111,8 +111,12 @@ accent sits near a semantic colour, "selected" reads as "recording" or "keyframe
   ```
 - Re-run the check when the prototype's palette changes. A rebrand inside the artboard
   can create a clash that wasn't there yesterday.
-- **Density is one knob:** `--row` (28px default; 24 compact, 32 comfortable),
-  `--gutter`, `--inspector-w`.
+- **Density is one knob:** `data-density` on `<html>` (default, `comfortable`, `compact`) retunes
+  every size. Build with the size names (`h-control`, `size-icon`, `h-section`, `px-pad`, `w-label`,
+  `text-ui`) and never literals, or a part ignores the knob. The table is in kit-api.md.
+- **The chrome stays quieter than the prototype:** labels dimmer than values, one text size (11px)
+  with weight for hierarchy, and signal blue only for focus, selection and the primary action. A
+  switch that's on and a slider's fill are neutral ink (`bg-ink`, `bg-fill`), never blue.
 
 ## 4. Modern tool vs Photoshop 2010
 

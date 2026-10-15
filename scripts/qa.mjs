@@ -51,9 +51,30 @@ const audit = () => {
   ].forEach(([n, a, b, min]) => { const r = ratio(a, b); if (r < min) fails.push(`${n} ${r}<${min}`) })
   // Text actually rendered in chrome: sample visible text nodes outside canvases/artboards.
   const lowText = []
-  // first OPAQUE background up the tree (translucent washes are skipped — an approximation)
-  // null = text sits on an image / gradient / canvas we can't measure — skip it rather than guess
-  const bgOf = (el) => { while (el) { const cs = getComputedStyle(el); if (cs.backgroundImage && cs.backgroundImage !== 'none') return null; if (el.tagName === 'IMG' || el.tagName === 'VIDEO') return null; const m = cs.backgroundColor && cs.backgroundColor.match(/[\d.]+/g)?.map(Number); if (m && (m[3] === undefined || m[3] >= 0.95)) return m; el = el.parentElement } return parse(V('--field')) }
+  // computed colours come as rgb(255 255 255 / .9) or, from color-mix(), color(srgb 1 1 1 / 0.9) in 0–1
+  const rgba = (c) => {
+    const m = c?.match(/[\d.]+/g)?.map(Number)
+    if (!m) return null
+    return c.startsWith('color(srgb') ? [m[0] * 255, m[1] * 255, m[2] * 255, m[3]] : m
+  }
+  // the background up the tree: translucent layers (washes, 90% glass panels) are composited over the first
+  // opaque one, or over --field. null = text sits on an image / gradient / canvas we can't measure — skip it
+  const bgOf = (el) => {
+    const layers = []
+    let base = null
+    while (el) {
+      const cs = getComputedStyle(el)
+      if (cs.backgroundImage && cs.backgroundImage !== 'none') return null
+      if (el.tagName === 'IMG' || el.tagName === 'VIDEO') return null
+      const m = rgba(cs.backgroundColor)
+      if (m && (m[3] === undefined || m[3] >= 0.95)) { base = m; break }
+      if (m && m[3] > 0) layers.push(m)
+      el = el.parentElement
+    }
+    base ??= parse(V('--field'))
+    for (const l of layers.reverse()) base = [0, 1, 2].map((i) => l[i] * l[3] + base[i] * (1 - l[3]))
+    return base
+  }
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
   let n, seen = 0
   while ((n = walker.nextNode()) && seen < 600) {

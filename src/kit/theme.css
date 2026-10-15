@@ -1,5 +1,6 @@
 @import "tailwindcss";
-@import "@fontsource-variable/inter";
+/* Official Inter 4 (rsms): the fontsource build has no stylistic sets, so cv05/cv08 would never render */
+@import "inter-ui/inter-variable-latin.css";
 
 /* ---------------------------------------------------------------------------
    Studio theme.
@@ -36,6 +37,13 @@
   --fg: #ffffff;
   --fg-muted: #a8a8a8;
   --fg-faint: #8a8a8a; /* #707070 was 2.9:1 on --control, #7a7a7a 2.94 on --active (selected rows) */
+  --fg-value: #dcdcdc; /* untouched values: brighter than their labels, a step under a changed value */
+
+  /* Neutral ink for ON states that aren't selection: a switch that's on, a slider's fill, a ticked box.
+     Signal blue is kept for focus, selection and the primary action, so the prototype stays the colour. */
+  --ink: rgba(255, 255, 255, 0.86);
+  --ink-fg: #1e1e1e;
+  --fill: rgba(255, 255, 255, 0.55);
 
   --line: rgba(255, 255, 255, 0.07);
   --line-strong: rgba(255, 255, 255, 0.13);
@@ -64,21 +72,67 @@
   --scrim: rgba(0, 0, 0, 0.55);
   --grid: rgba(255, 255, 255, 0.04);
 
-  /* depth. Panels carry a 1px top highlight — that reads as raised without a bevel. */
-  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --shadow-cluster: 0 2px 10px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  /* depth. A hairline and a tight shadow: a deep one darkens the prototype around every island.
+     Panels carry a 1px top highlight — that reads as raised without a bevel. */
+  --shadow-panel: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --shadow-cluster: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 1px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06);
   --shadow-segment: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-artboard: 0 24px 70px -16px rgba(0, 0, 0, 0.8);
   --artboard-ring: rgba(255, 255, 255, 0.06);
 
-  /* density — one knob for compact vs comfortable */
-  --row: 28px;
-  --radius-panel: 12px;
-  --radius-control: 6px;
-  --gutter: 12px;
-  --inspector-w: 280px;
+}
 
+/* ---------------------------------------------------------------------------
+   Density. Every size the chrome uses comes from here, so one attribute retunes
+   the whole kit: data-density="comfortable" | "compact" on <html> (default is
+   the tactical set below). Components read them as Tailwind names through
+   @theme inline: h-control, size-icon, h-section, px-pad, w-label, text-ui…
+   Touch (.studio-touch) overrides the same variables.
+--------------------------------------------------------------------------- */
+:root {
+  --row: 24px;           /* inspector row, list row */
+  --d-control: 22px;     /* field, select, slider, scrub, segmented */
+  --d-control-sm: 18px;
+  --d-icon: 24px;        /* icon button, md button, menu item, tab */
+  --d-icon-sm: 20px;
+  --d-button-lg: 28px;
+  --d-section: 26px;     /* inspector section header */
+  --d-header: 32px;      /* panel header, timeline transport */
+  --d-bar: 32px;         /* toolbar clusters */
+  --d-dock: 36px;        /* bottom tool dock */
+  --d-dock-button: 28px;
+  --d-pad: 10px;         /* a row's side padding */
+  --d-label: 72px;       /* the inspector's label column */
+  --d-lane: 20px;        /* timeline lane */
+  --d-ruler: 24px;
+  --gutter: 8px;         /* window edge and the gap between islands */
+  --inspector-w: 256px;
+  --sidebar-w: 224px;
+  --radius-panel: 10px;
+  --radius-cluster: 8px;
+  --radius-control: 5px;
+  --ui-text: 11px;       /* one size for labels, values and controls; hierarchy is weight */
+  --ui-text-sm: 10px;
+  --ui-text-title: 12px;
+  --ui-leading: 16px;
+}
+/* the pre-Oct-2026 sizes: roomier, for presenting on a big screen */
+:root[data-density="comfortable"] {
+  --row: 28px; --d-control: 24px; --d-control-sm: 20px; --d-icon: 28px; --d-icon-sm: 24px; --d-button-lg: 32px;
+  --d-section: 32px; --d-header: 40px; --d-bar: 36px; --d-dock: 40px; --d-dock-button: 32px;
+  --d-pad: 12px; --d-label: 84px; --d-lane: 24px; --d-ruler: 28px;
+  --gutter: 12px; --inspector-w: 280px; --sidebar-w: 240px;
+  --radius-panel: 12px; --radius-cluster: 10px; --radius-control: 6px;
+  --ui-text: 11.5px; --ui-text-sm: 10.5px; --ui-text-title: 12.5px; --ui-leading: 16px;
+}
+/* dense: below this the chrome starts to read as a debug panel */
+:root[data-density="compact"] {
+  --row: 22px; --d-control: 20px; --d-control-sm: 16px; --d-icon: 22px; --d-icon-sm: 18px; --d-button-lg: 26px;
+  --d-section: 24px; --d-header: 28px; --d-bar: 30px; --d-dock: 34px; --d-dock-button: 26px;
+  --d-pad: 8px; --d-label: 72px; --d-lane: 18px; --d-ruler: 22px; /* 68 truncated 'Stroke weight' */
+  --gutter: 6px; --inspector-w: 240px; --sidebar-w: 208px;
+  --radius-panel: 8px; --radius-cluster: 8px; --radius-control: 4px;
 }
 
 :root:is(.light, [data-studio-theme="light"]) {
@@ -95,6 +149,10 @@
   --fg: #1a1a1a;
   --fg-muted: #5e5e5e;
   --fg-faint: #737373; /* AA 4.5:1 on white (4.74), 4.35 on --control; #7e7e7e failed (break-it A7) */
+  --fg-value: #333333;
+  --ink: #1f1f1f;
+  --ink-fg: #ffffff;
+  --fill: rgba(0, 0, 0, 0.5);
 
   --line: rgba(0, 0, 0, 0.08);
   --line-strong: rgba(0, 0, 0, 0.16);
@@ -118,8 +176,8 @@
   --grid: rgba(0, 0, 0, 0.05);
 
   /* light shadows must be far softer or they read as dirt */
-  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.07);
-  --shadow-cluster: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-panel: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-cluster: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
   --shadow-segment: 0 1px 2px rgba(0, 0, 0, 0.14), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
   --shadow-artboard: 0 20px 60px -18px rgba(0, 0, 0, 0.3);
@@ -143,6 +201,10 @@
     --fg: #1a1a1a;
     --fg-muted: #5e5e5e;
     --fg-faint: #737373; /* AA 4.5:1 on white (4.74), 4.35 on --control; #7e7e7e failed (break-it A7) */
+    --fg-value: #333333;
+    --ink: #1f1f1f;
+    --ink-fg: #ffffff;
+    --fill: rgba(0, 0, 0, 0.5);
 
     --line: rgba(0, 0, 0, 0.08);
     --line-strong: rgba(0, 0, 0, 0.16);
@@ -166,8 +228,8 @@
     --grid: rgba(0, 0, 0, 0.05);
 
     /* light shadows must be far softer or they read as dirt */
-    --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.07);
-    --shadow-cluster: 0 1px 2px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-panel: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-cluster: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.05);
     --shadow-pop: 0 10px 30px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
     --shadow-segment: 0 1px 2px rgba(0, 0, 0, 0.14), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
     --shadow-artboard: 0 20px 60px -18px rgba(0, 0, 0, 0.3);
@@ -176,12 +238,10 @@
   }
 }
 
-:root[data-density="compact"] { --row: 24px; --gutter: 8px; --inspector-w: 256px; }
-:root[data-density="comfortable"] { --row: 32px; --gutter: 14px; --inspector-w: 300px; }
-
 @theme inline {
-  --font-ui: "Inter Variable", Inter, ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace;
+  --font-ui: InterVariable, "Inter Variable", Inter, ui-sans-serif, system-ui, "Helvetica Neue", Arial, sans-serif;
+  /* ui-monospace doesn't resolve in Chrome, so the stack names fonts that exist */
+  --font-mono: "SF Mono", SFMono-Regular, "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
   /* the artboard's own faces — override per project, never fold into --font-ui */
   --font-artboard: var(--artboard-font, var(--font-ui));
 
@@ -197,6 +257,10 @@
   --color-fg: var(--fg);
   --color-fg-muted: var(--fg-muted);
   --color-fg-faint: var(--fg-faint);
+  --color-fg-value: var(--fg-value);
+  --color-ink: var(--ink);
+  --color-ink-fg: var(--ink-fg);
+  --color-fill: var(--fill);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
   --color-hover: var(--hover);
@@ -217,6 +281,31 @@
 
   --radius-panel: var(--radius-panel);
   --radius-control: var(--radius-control);
+  --radius-cluster: var(--radius-cluster);
+
+  /* density → utilities: h-control, size-icon, h-section, h-header, px-pad, w-label, h-lane… */
+  --spacing-row: var(--row);
+  --spacing-control: var(--d-control);
+  --spacing-control-sm: var(--d-control-sm);
+  --spacing-icon: var(--d-icon);
+  --spacing-icon-sm: var(--d-icon-sm);
+  --spacing-button-lg: var(--d-button-lg);
+  --spacing-section: var(--d-section);
+  --spacing-header: var(--d-header);
+  --spacing-bar: var(--d-bar);
+  --spacing-dock: var(--d-dock);
+  --spacing-dock-button: var(--d-dock-button);
+  --spacing-pad: var(--d-pad);
+  --spacing-label: var(--d-label);
+  --spacing-lane: var(--d-lane);
+  --spacing-ruler: var(--d-ruler);
+  --spacing-gutter: var(--gutter);
+  --text-ui: var(--ui-text);
+  --text-ui--line-height: var(--ui-leading);
+  --text-ui-sm: var(--ui-text-sm);
+  --text-ui-sm--line-height: 14px;
+  --text-title: var(--ui-text-title);
+  --text-title--line-height: var(--ui-leading);
 }
 
 @layer base {
@@ -226,11 +315,11 @@
   :where(.studio, .pop) {
     color-scheme: dark;
     font-family: var(--font-ui);
-    font-feature-settings: "cv11", "ss01"; /* Inter: single-storey a, open digits */
+    font-feature-settings: "cv05", "cv08"; /* Inter 4: l with a tail, I with serifs, so I/l/1 never collide */
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
-  :where(.studio) { color: var(--fg); font-size: 12px; line-height: 1.4; }
+  :where(.studio) { color: var(--fg); font-size: var(--ui-text); line-height: var(--ui-leading); }
   :root:is(.light, [data-studio-theme="light"]) :where(.studio, .pop) { color-scheme: light; }
   @media (prefers-color-scheme: light) { :root:not(.dark, [data-studio-theme="dark"]) :where(.studio, .pop) { color-scheme: light; } }
   :where(.studio) button { cursor: default; }
@@ -261,8 +350,22 @@
 }
 
 @utility tabular { font-variant-numeric: tabular-nums; }
-@utility panel { background: var(--panel); box-shadow: var(--shadow-panel); border-radius: var(--radius-panel); }
-@utility cluster { background: var(--panel); box-shadow: var(--shadow-cluster); border-radius: 10px; }
+/* Islands are a touch translucent (never under 85%, or a busy prototype bleeds through the text), so they sit
+   IN the work rather than on top of it. Solid again under prefers-reduced-transparency, below. */
+@utility panel {
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow: var(--shadow-panel);
+  border-radius: var(--radius-panel);
+}
+@utility cluster {
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow: var(--shadow-cluster);
+  border-radius: var(--radius-cluster);
+}
 @utility pop { background: var(--overlay); box-shadow: var(--shadow-pop); border-radius: 10px; }
 @utility no-select { user-select: none; -webkit-user-select: none; }
 @utility checker {
@@ -282,8 +385,14 @@
 
 /* Touch density — the client view (<ClientView> sets .studio-touch). Finger-sized rows, controls and slider
    thumbs; text inputs at 16px so iOS Safari doesn't zoom the page when one is focused; no tap highlight or
-   callout. Unlayered on purpose so it beats the controls' utility sizes. */
-.studio-touch { --row: 48px; -webkit-tap-highlight-color: transparent; }
+   callout. Kit parts size from the density variables, so touch is mostly a variable override; the class
+   selectors after it catch shells that still write literal sizes. Unlayered so it beats utility sizes. */
+.studio-touch, :root[data-studio-client] .pop {
+  --row: 48px; --d-control: 36px; --d-control-sm: 32px; --d-icon: 36px; --d-icon-sm: 36px; --d-button-lg: 40px;
+  --d-section: 44px; --d-header: 44px; --d-pad: 12px;
+  --ui-text: 14px; --ui-text-sm: 12px; --ui-text-title: 15px; --ui-leading: 20px;
+}
+.studio-touch { -webkit-tap-highlight-color: transparent; }
 .studio-touch :is(.h-6) { height: 36px; }
 .studio-touch :is(.text-\[11px\], .text-\[11\.5px\], .text-\[12px\]) { font-size: 14px; }
 
@@ -298,7 +407,6 @@
   .studio-touch [data-studio-thumb] { pointer-events: auto; }
   .studio-touch [data-studio-thumb]::after { content: ""; position: absolute; inset: -10px; }
 }
-.studio-touch [data-section-header] { height: 44px; }
 /* popups (colour picker, selects) are portaled out of the client view: while one is shown, size them for touch too */
 :root[data-studio-client] .pop :is(.h-6) { height: 36px; }
 :root[data-studio-client] .pop :is(.text-\[11px\], .text-\[11\.5px\]) { font-size: 14px; }
@@ -308,3 +416,8 @@
 /* labels get room at 14px instead of the desktop 84px column */
 .studio-touch [data-row-label] { width: auto !important; min-width: 96px; max-width: 46%; flex-shrink: 0; }
 .studio-touch :where(button, [role="slider"], [role="spinbutton"]) { -webkit-touch-callout: none; }
+
+/* Islands go solid when the OS asks for less transparency. */
+@media (prefers-reduced-transparency: reduce) {
+  :where(.studio, .pop) :is(.panel, .cluster) { background: var(--panel); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}

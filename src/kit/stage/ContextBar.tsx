@@ -95,7 +95,7 @@ export function ContextBar({ anchor, actions, children, gap = 34, inset = {}, la
       data-chrome
       onPointerDown={(e) => e.stopPropagation()}
       onKeyDown={onKeyDown}
-      className={cn('cluster pointer-events-auto absolute flex h-9 items-center gap-0.5 px-1 transition-opacity duration-150', className)}
+      className={cn('cluster pointer-events-auto absolute flex h-bar items-center gap-0.5 px-1 transition-opacity duration-150', className)}
       style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, opacity: pos ? 1 : 0 }}
     >
       {tidy(actions).map((a, i) => {

@@ -12,6 +12,6 @@ body {
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "cv11", "ss01";
+  font-feature-settings: "cv05", "cv08";
 }
 button { cursor: default; }

@@ -72,7 +72,7 @@ export interface KeyButtonProps {
 export function KeyButton({ state, onToggle, onPrev, onNext, shortcut, labels, property, disabled, className }: KeyButtonProps) {
   const label = labels?.[state] ?? KEY_LABELS[state]
   const aria = property ? `${label}: ${property}` : label
-  const nav = 'flex h-6 w-6 items-center justify-center rounded-[4px] text-fg-faint outline-none hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal'
+  const nav = 'flex size-icon-sm items-center justify-center rounded-[4px] text-fg-faint outline-none hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal'
   const reveal = 'opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100'
   return (
     <div className={cn('flex shrink-0 items-center', disabled && 'pointer-events-none opacity-30', className)}>

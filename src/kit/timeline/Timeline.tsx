@@ -24,6 +24,7 @@ import { useHotkeys } from '../core/hotkeys'
 import { IconButton } from '../ui/button'
 import { Menu } from '../ui/controls'
 import { useStudio } from '../layout/Studio'
+import { useDensityPx } from '../core/density'
 
 export interface Key { t: number; ease?: string; value?: string | number; selected?: boolean }
 export interface Lane {
@@ -98,22 +99,22 @@ export function Timeline({
   return (
     <div className={cn('flex flex-col overflow-hidden', docked ? '' : 'panel', className)}>
       {/* transport */}
-      <div className="flex h-10 flex-none items-center gap-1 px-2">
+      <div className="flex h-header flex-none items-center gap-1 px-2">
         <IconButton icon={SkipBack} label="Go to start" shortcut="home" tipSide="top" onClick={() => clock.seek(region?.[0] ?? 0)} />
         <IconButton icon={StepBack} label="Previous frame" shortcut="," tipSide="top" onClick={() => clock.step(-1)} />
         <IconButton icon={playing ? Pause : Play} label={playing ? 'Pause' : 'Play'} shortcut="space" tipSide="top" onClick={() => clock.toggle()} variant="default" />
         <IconButton icon={StepForward} label="Next frame" shortcut="." tipSide="top" onClick={() => clock.step(1)} />
         <button type="button" onClick={() => setTimeMode(timeMode === 'seconds' ? 'frames' : timeMode === 'frames' ? 'timecode' : 'seconds')}
-          className="ml-1 flex h-7 items-baseline gap-1 rounded-[6px] px-2 tabular text-[12px] text-fg hover:bg-hover" title="Click to change units">
+          className="ml-1 flex h-icon items-center gap-1 rounded-control px-2 tabular text-ui text-fg hover:bg-hover" title="Click to change units">
           {fmtTime(t, timeMode, fps)}
-          <span className="text-[11px] text-fg-faint">/ {fmtTime(duration, timeMode, fps)}</span>
+          <span className="text-fg-faint">/ {fmtTime(duration, timeMode, fps)}</span>
         </button>
         <div className="flex-1" />
         {extra}
         <IconButton icon={ModeIcon} label={`${modeLabel}. Click for ${nextMode === 'pingpong' ? 'ping-pong' : nextMode}`} tipSide="top" active={mode !== 'once'} onClick={() => clock.setState({ mode: nextMode })} />
         <Menu
           side="top" align="end"
-          trigger={<button type="button" className={cn('flex h-7 items-center gap-1 rounded-[6px] px-1.5 tabular text-[11.5px] hover:bg-hover', rate !== 1 ? 'text-signal-text' : 'text-fg-muted')}><Gauge size={13} strokeWidth={1.5} />{rate}×</button>}
+          trigger={<button type="button" className={cn('flex h-icon items-center gap-1 rounded-control px-1.5 tabular text-ui hover:bg-hover', rate !== 1 ? 'text-signal-text' : 'text-fg-muted')}><Gauge size={13} strokeWidth={1.5} />{rate}×</button>}
           items={[0.1, 0.25, 0.5, 1, 2].map((r) => ({ label: `${r}×`, checked: r === rate, onClick: () => clock.setRate(r), shortcut: r === 0.25 ? 's' : undefined }))}
         />
         {collapsible && (
@@ -134,6 +135,8 @@ function TrackArea({
   clock: Clock; lanes: Lane[]; view: [number, number]; setView: (v: [number, number]) => void; duration: number; region: [number, number] | null; fps: number; t: number; allKeys: number[]; onKeyClick?: (l: Lane, k: Key) => void; height?: number
 }) {
   const area = useRef<HTMLDivElement>(null)
+  const lane = useDensityPx('--d-lane', 24)
+  const ruler = useDensityPx('--d-ruler', 28)
   const [w, setW] = useState(600)
   useEffect(() => {
     const ro = new ResizeObserver(([e]) => setW(e.contentRect.width))
@@ -197,12 +200,12 @@ function TrackArea({
 
   const playX = X(t)
   return (
-    <div className="flex min-h-0 overflow-y-auto overflow-x-hidden border-t border-line" style={{ maxHeight: height ?? 240, height: 28 + lanes.length * 24 + 8 }} onWheel={onWheel}>
+    <div className="flex min-h-0 overflow-y-auto overflow-x-hidden border-t border-line" style={{ maxHeight: height ?? 240, height: ruler + lanes.length * lane + 8 }} onWheel={onWheel}>
       {/* names */}
       <div className="flex-none overflow-hidden border-r border-line" style={{ width: LABEL_W }}>
-        <div className="h-7" />
+        <div className="h-ruler" />
         {lanes.map((l) => (
-          <div key={l.id} className="flex h-6 items-center gap-1.5 pr-2 text-[11.5px] text-fg-muted" style={{ paddingLeft: 12 + (l.depth ?? 0) * 12 }}>
+          <div key={l.id} className="flex h-lane items-center gap-1.5 pr-2 text-ui text-fg-muted" style={{ paddingLeft: 12 + (l.depth ?? 0) * 12 }}>
             <span className="size-1.5 shrink-0 rounded-full" style={{ background: l.color ?? 'var(--lane)' }} />
             <span className="truncate">{l.label}</span>
           </div>
@@ -210,26 +213,26 @@ function TrackArea({
       </div>
       {/* tracks */}
       <div ref={area} className="relative min-w-0 flex-1 overflow-hidden">
-        <div className="absolute inset-x-0 top-0 h-7 cursor-ew-resize border-b border-line" onPointerDown={onRulerDown} onPointerMove={onRulerMove} onPointerUp={onRulerUp}
+        <div className="absolute inset-x-0 top-0 h-ruler cursor-ew-resize border-b border-line" onPointerDown={onRulerDown} onPointerMove={onRulerMove} onPointerUp={onRulerUp}
           onDoubleClick={() => clock.setState({ region: null })}>
           {ticks.map((m) => {
             const major = m % labelStep === 0
             return (
               <div key={m} className="pointer-events-none absolute bottom-0" style={{ left: X(m) }}>
                 <div className={cn('w-px', major ? 'h-2 bg-line-strong' : 'h-1 bg-line')} />
-                {major && <div className="absolute bottom-2.5 left-1 tabular text-[10px] text-fg-muted">{m >= 1000 ? `${m / 1000}s` : `${m}ms`}</div>}
+                {major && <div className="absolute bottom-2.5 left-1 tabular text-ui-sm text-fg-muted">{m >= 1000 ? `${m / 1000}s` : `${m}ms`}</div>}
               </div>
             )
           })}
           {region && <div className="pointer-events-none absolute top-0 bottom-0 bg-signal/15 shadow-[inset_1px_0_var(--signal),inset_-1px_0_var(--signal)]" style={{ left: X(region[0]), width: X(region[1]) - X(region[0]) }} />}
         </div>
-        <div className="absolute inset-x-0 top-7 bottom-0">
+        <div className="absolute inset-x-0 top-ruler bottom-0">
           {lanes.map((l, i) => {
             const active = l.kind !== 'keys' && l.kind !== 'markers' && t >= (l.start ?? 0) && t <= (l.end ?? 0)
             return (
-              <div key={l.id} className="absolute inset-x-0 h-6" style={{ top: i * 24 }}>
+              <div key={l.id} className="absolute inset-x-0 h-lane" style={{ top: i * lane }}>
                 {(l.kind ?? 'bar') === 'bar' && (
-                  <div className="absolute top-[7px] h-2.5 rounded-full transition-opacity"
+                  <div className="absolute top-1/2 h-2.5 -translate-y-1/2 rounded-full transition-opacity"
                     style={{ left: X(l.start ?? 0), width: Math.max(4, X(l.end ?? 0) - X(l.start ?? 0)), background: l.color ?? 'var(--signal)', opacity: active ? 1 : 0.38 }} />
                 )}
                 {l.kind === 'keys' && l.keys && (
@@ -237,20 +240,20 @@ function TrackArea({
                     {l.keys.slice(1).map((k, j) => {
                       const a = l.keys![j]
                       const hold = a.value !== undefined && a.value === k.value
-                      return <div key={j} className={cn('absolute top-[11px] h-0.5', hold ? 'border-t border-dashed border-fg-faint' : 'bg-line-strong')} style={{ left: X(a.t), width: X(k.t) - X(a.t) }} />
+                      return <div key={j} className={cn('absolute top-1/2 h-0.5 -translate-y-1/2', hold ? 'border-t border-dashed border-fg-faint' : 'bg-line-strong')} style={{ left: X(a.t), width: X(k.t) - X(a.t) }} />
                     })}
                     {l.keys.map((k, j) => (
                       <button key={j} type="button" aria-label={`Key at ${fmtTime(k.t)}`} onClick={() => { clock.pause(); clock.seek(k.t); onKeyClick?.(l, k) }}
-                        className={cn('absolute top-[7px] size-[9px] -translate-x-1/2 rotate-45 rounded-[1.5px] after:absolute after:-inset-[7px] after:content-[""] outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-1 focus-visible:ring-offset-panel',
+                        className={cn('absolute top-1/2 size-[9px] -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-[1.5px] after:absolute after:-inset-[7px] after:content-[""] outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-1 focus-visible:ring-offset-panel',
                           k.selected ? 'bg-signal' : 'bg-fg/80 hover:bg-fg', Math.abs(k.t - t) < 1 && 'ring-2 ring-signal/60')}
                         style={{ left: X(k.t) }} />
                     ))}
                   </>
                 )}
                 {l.kind === 'markers' && l.keys?.map((k, j) => (
-                  <div key={j} className="absolute top-1 flex -translate-x-px items-center gap-1" style={{ left: X(k.t) }}>
+                  <div key={j} className="absolute top-1/2 flex -translate-x-px -translate-y-1/2 items-center gap-1" style={{ left: X(k.t) }}>
                     <div className="h-4 w-0.5 rounded-full" style={{ background: l.color ?? 'var(--key)' }} />
-                    {k.value !== undefined && <span className="text-[10px] text-fg-muted">{k.value}</span>}
+                    {k.value !== undefined && <span className="text-ui-sm text-fg-muted">{k.value}</span>}
                   </div>
                 ))}
               </div>

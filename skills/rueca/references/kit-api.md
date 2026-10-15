@@ -35,13 +35,36 @@ Import everything from `@kit`. A complete worked example: the Motion study shell
 Surfaces: `bg-field` (window) · `bg-panel` (islands) · `bg-overlay` (menus) · `bg-well`
 (recessed, segmented background) · `bg-track` (slider groove) · `bg-raised` (pill in a well) ·
 `bg-active` (toggled control on a panel) · `bg-control` (field fill) · `bg-hover` · `bg-press`.
-Text: `text-fg` · `text-fg-muted` · `text-fg-faint`. Lines: `border-line` · `border-line-strong`.
-Accent: `bg-signal` (fills) · `bg-signal-strong` (surfaces carrying text) · `text-signal-fg` ·
-`bg-signal-soft` (selection wash). Semantic: `key` (keyframed, amber) · `rec` (playhead/record/
+Text: `text-fg` · `text-fg-value` (untouched values) · `text-fg-muted` · `text-fg-faint` (row labels).
+Lines: `border-line` · `border-line-strong`. Neutral ink for ON states that aren't selection: `bg-ink` /
+`text-ink-fg` (a switch that's on, a ticked box) · `bg-fill` (a slider's fill).
+Accent, for focus, selection and the primary action only: `bg-signal` · `bg-signal-strong` (surfaces
+carrying text) · `text-signal-fg` · `bg-signal-soft` (selection wash). Semantic: `key` (keyframed, amber) · `rec` (playhead/record/
 error) · `ok`. Lanes: `bg-lane`. Utilities: `panel` `cluster` `pop` `tabular` `no-select`
 `checker`. Categorical (identity, never state): `cat-1`…`cat-8` (ports, lanes, tags). Over
-images: `bg-scrim`. CSS vars: `--row` (28px lane), `--gutter`, `--inspector-w`, and in islands and
-overlay layouts `--safe-top/right/bottom/left` (what the panels cover).
+images: `bg-scrim`. In islands and overlay layouts, `--safe-top/right/bottom/left` (what the panels cover).
+
+### Density (sizes)
+Every chrome size is a token, so `data-density` on `<html>` retunes the kit: default (tactical),
+`"comfortable"` (the roomier pre-Oct-2026 sizes) and `"compact"`; `.studio-touch` overrides the same
+variables for phones. Use the names, never literals, so a part follows the density:
+
+| Utility | Default / comfortable / compact | For |
+|---|---|---|
+| `h-row` `min-h-row` (`--row`) | 24 / 28 / 22 | inspector rows, layer rows |
+| `h-control` · `h-control-sm` | 22 / 24 / 20 · 18 / 20 / 16 | fields, selects, sliders, scrub, segmented |
+| `size-icon` `h-icon` · `size-icon-sm` | 24 / 28 / 22 · 20 / 24 / 18 | icon buttons, md buttons, menu items, tabs |
+| `h-button-lg` | 28 / 32 / 26 | large buttons, the zoom cluster |
+| `h-section` · `h-header` · `h-bar` | 26 · 32 · 32 (comfortable 32 · 40 · 36) | section headers · panel headers, transport · toolbar clusters |
+| `h-dock` · `size-dock-button` | 36 · 28 | the bottom tool dock |
+| `px-pad` · `w-label` | 10 · 72 (comfortable 12 · 84; compact 8 · 72) | row side padding · inspector label column |
+| `h-lane` · `h-ruler` | 20 · 24 (comfortable 24 · 28) | timeline lanes and ruler |
+| `text-ui` · `text-ui-sm` · `text-title` | 11 · 10 · 12 px (comfortable 11.5 · 10.5 · 12.5) | all UI text · rulers, hints · panel titles, Brand |
+| `rounded-panel` `rounded-control` `rounded-cluster` | 10 · 5 · 8 | radii |
+
+Widths: `--inspector-w` (256), `--sidebar-w` (224), `--gutter` (8). Hierarchy is weight, not half-pixel
+sizes: labels 450, section titles 550, panel titles 600. In JS (timelines, canvas rows) read a token with
+`useDensityPx('--d-lane', 24)` from `core/density`; it re-reads when the density changes.
 Token names are namespaced so they never collide with shadcn (`muted`, `accent`, `input` mean
 something else there): ours are `fg-muted`, `signal`, `control`; font is `font-ui`.
 
@@ -196,7 +219,7 @@ stops ticks while paused too (default true for artifacts with their own life).
   left={<Panel header={<PanelHeader title="Layers" />}>…</Panel>}
   right={<Panel header={<PanelHeader><PanelTabs …/></PanelHeader>}><Inspector params={params} /></Panel>}
   bottom={<Timeline clock={clock} lanes={lanes} />}
-  leftWidth={240} rightWidth={280}>     // an Inspector on the LEFT needs leftWidth={280} (size fields need the room)
+  leftWidth={…} rightWidth={…}>        // optional: default to --sidebar-w / --inspector-w, so leave them unset unless a panel needs more
   <Stage>…</Stage>   or   <Stage fill>…</Stage>
 </Studio>
 ```

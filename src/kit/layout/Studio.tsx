@@ -29,7 +29,7 @@ const StudioCtx = createContext<{ present: boolean; setPresent: (b: boolean) => 
 export const useStudio = () => useContext(StudioCtx)
 
 export function Studio({
-  toolbar, left, right, bottom, children, layout = 'islands', className, leftWidth = 240, rightWidth,
+  toolbar, left, right, bottom, children, layout = 'islands', className, leftWidth, rightWidth,
 }: {
   toolbar?: ReactNode; left?: ReactNode; right?: ReactNode; bottom?: ReactNode
   children: ReactNode; layout?: Layout; className?: string; leftWidth?: number; rightWidth?: number
@@ -46,7 +46,9 @@ export function Studio({
   }, [present], { priority: 0 })
   // Leaving present mode must always work, whatever the shell binds to Esc (break-it F1).
   useHotkeys({ esc: { run: () => setPresent(false), when: () => present } }, [present], { priority: 100 })
+  // widths come from the density tokens unless a shell pins one
   const rw = rightWidth ? `${rightWidth}px` : 'var(--inspector-w)'
+  const lw = leftWidth ? `${leftWidth}px` : 'var(--sidebar-w)'
   // Each region gets its own boundary: a crash in the artwork leaves the panels usable and vice versa.
   const guard = (node: ReactNode, label: string) => node && <ErrorBoundary label={label} compact>{node}</ErrorBoundary>
   toolbar = guard(toolbar, 'The toolbar')
@@ -62,7 +64,7 @@ export function Studio({
           <div className="pointer-events-none absolute inset-0 z-10 flex flex-col gap-[var(--gutter)] p-[var(--gutter)]">
             {toolbar && <div data-safe="top" className="flex-none [&_header>div>*]:pointer-events-auto [&>*:not(header)]:pointer-events-auto">{toolbar}</div>}
             <div className="flex min-h-0 flex-1 gap-[var(--gutter)]">
-              {left && <aside aria-label="Left panel" data-safe="left" className="flex min-h-0 flex-none flex-col [&>*]:pointer-events-auto" style={{ width: leftWidth }}>{left}</aside>}
+              {left && <aside aria-label="Left panel" data-safe="left" className="flex min-h-0 flex-none flex-col [&>*]:pointer-events-auto" style={{ width: lw }}>{left}</aside>}
               <div className="flex-1" />
               {right && <aside aria-label="Right panel" data-safe="right" className="flex min-h-0 flex-none flex-col [&>*]:pointer-events-auto" style={{ width: rw }}>{right}</aside>}
             </div>
@@ -74,9 +76,9 @@ export function Studio({
       </SafeAreaRoot>
     ) : layout === 'docked' ? (
       <div className="flex h-full flex-col">
-        {toolbar && !present && <div className="flex-none border-b border-line bg-panel px-2 py-1.5">{toolbar}</div>}
+        {toolbar && !present && <div className="flex-none border-b border-line bg-panel px-2 py-1">{toolbar}</div>}
         <div className="flex min-h-0 flex-1">
-          {left && !present && <aside aria-label="Left panel" className="flex min-h-0 flex-none flex-col border-r border-line bg-panel" style={{ width: leftWidth }}>{left}</aside>}
+          {left && !present && <aside aria-label="Left panel" className="flex min-h-0 flex-none flex-col border-r border-line bg-panel" style={{ width: lw }}>{left}</aside>}
           <main className="relative min-w-0 flex-1">{children}</main>
           {right && !present && <aside aria-label="Right panel" className="flex min-h-0 flex-none flex-col border-l border-line bg-panel" style={{ width: rw }}>{right}</aside>}
         </div>
@@ -91,7 +93,7 @@ export function Studio({
           <div className="pointer-events-none absolute inset-0 z-10 flex flex-col gap-[var(--gutter)] p-[var(--gutter)]">
             {toolbar && <div data-safe="top" className="flex-none [&_header>div>*]:pointer-events-auto [&>*:not(header)]:pointer-events-auto">{toolbar}</div>}
             <div className="flex min-h-0 flex-1 gap-[var(--gutter)]">
-              {left && <aside aria-label="Left panel" data-safe="left" className="flex min-h-0 flex-none flex-col [&>*]:pointer-events-auto" style={{ width: leftWidth }}>{left}</aside>}
+              {left && <aside aria-label="Left panel" data-safe="left" className="flex min-h-0 flex-none flex-col [&>*]:pointer-events-auto" style={{ width: lw }}>{left}</aside>}
               <div className="flex-1" />
               {right && <aside aria-label="Right panel" data-safe="right" className="flex min-h-0 flex-none flex-col [&>*]:pointer-events-auto" style={{ width: rw }}>{right}</aside>}
             </div>
@@ -109,7 +111,7 @@ export function Studio({
           {shell}
           {present && (
             <button type="button" onClick={() => setPresent(false)}
-              className="cluster fixed right-3 bottom-3 z-50 h-7 px-2.5 text-[11.5px] text-fg-muted opacity-30 transition-opacity hover:opacity-100 focus-visible:opacity-100">
+              className="cluster fixed right-3 bottom-3 z-50 h-icon px-2.5 text-ui text-fg-muted opacity-30 transition-opacity hover:opacity-100 focus-visible:opacity-100">
               Show interface · Esc
             </button>
           )}
@@ -135,8 +137,8 @@ export function Panel({ children, className, header, footer, scroll = true }: { 
 /* Panel header with a title or tabs. */
 export function PanelHeader({ title, children, className }: { title?: ReactNode; children?: ReactNode; className?: string }) {
   return (
-    <div className={cn('flex h-10 items-center gap-1 border-b border-line pr-2 pl-3', className)}>
-      {title && <div className="min-w-0 flex-1 truncate text-[12px] font-semibold text-fg">{title}</div>}
+    <div className={cn('flex h-header items-center gap-1 border-b border-line pr-2 pl-pad', className)}>
+      {title && <div className="min-w-0 flex-1 truncate text-title font-semibold text-fg">{title}</div>}
       {children}
     </div>
   )
@@ -164,7 +166,7 @@ export function PanelTabs<T extends string>({ value, onChange, tabs, controls }:
       {tabs.map((t) => (
         <button key={t.value} role="tab" type="button" data-tab={t.value} aria-selected={value === t.value} aria-controls={controls}
           tabIndex={value === t.value ? 0 : -1} onClick={() => onChange(t.value)}
-          className={cn('h-7 rounded-[6px] px-2 text-[12px] font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
+          className={cn('h-icon rounded-control px-2 text-ui font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
             value === t.value ? 'bg-active text-fg' : 'text-fg-muted hover:text-fg')}>
           {t.label}
         </button>
@@ -178,8 +180,8 @@ export function Empty({ icon: Icon, title, hint, action, compact }: { icon?: Rea
   return (
     <div className={cn('flex flex-col items-center justify-center gap-2 text-center', compact ? 'px-4 py-5' : 'px-6 py-10')}>
       {Icon && <div className="text-fg-faint"><Icon size={20} strokeWidth={1.5} /></div>}
-      <div className="text-[12px] font-medium text-fg">{title}</div>
-      {hint && <div className="max-w-[220px] text-[11.5px] leading-relaxed text-fg-muted">{hint}</div>}
+      <div className="text-title font-medium text-fg">{title}</div>
+      {hint && <div className="max-w-[220px] text-ui leading-relaxed text-fg-muted">{hint}</div>}
       {action}
     </div>
   )

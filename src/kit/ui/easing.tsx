@@ -98,7 +98,7 @@ export function EasingEditor({ value, onChange, span, presets = EASE_PRESETS, cu
             const on = sameEase(p.ease, value)
             return (
               <button key={p.name} type="button" aria-pressed={on} onClick={() => set(p.ease, true)}
-                className={cn('flex h-6 items-center gap-1 rounded-[5px] pr-1.5 pl-1 text-[11px] outline-none focus-visible:ring-2 focus-visible:ring-signal',
+                className={cn('flex h-control items-center gap-1 rounded-control pr-1.5 pl-1 text-ui outline-none focus-visible:ring-2 focus-visible:ring-signal',
                   on ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
                 <EaseGlyph ease={p.ease} className="size-3.5" />
                 {p.name}
@@ -122,10 +122,10 @@ export function EasingEditor({ value, onChange, span, presets = EASE_PRESETS, cu
           <svg viewBox="0 0 100 64" preserveAspectRatio="none" aria-hidden className="h-16 w-full rounded-[6px] bg-control">
             <polyline points="0,52 98,52 98,16 100,16" fill="none" stroke="var(--signal)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
           </svg>
-          <p className="text-[11.5px] leading-relaxed text-fg-muted">The value stays put, then jumps when the next key is reached. Use it for colour swaps and visibility.</p>
+          <p className="text-ui leading-relaxed text-fg-muted">The value stays put, then jumps when the next key is reached. Use it for colour swaps and visibility.</p>
         </div>
       )}
-      {footer && <div className="border-t border-line pt-2 text-[11px] text-fg-faint">{footer}</div>}
+      {footer && <div className="border-t border-line pt-2 text-ui text-fg-faint">{footer}</div>}
     </div>
   )
 }
@@ -172,13 +172,13 @@ export function SpringField({ value, onChange, span, presets = SPRINGS, defaultP
       {!physics && (
         <div className="flex flex-col gap-0.5">
           <div className="flex h-7 items-center gap-2">
-            <span className="w-[58px] shrink-0 text-[11.5px] text-fg-muted">Duration</span>
+            <span className="w-[58px] shrink-0 text-ui text-fg-muted">Duration</span>
             <Slider value={Math.min(2000, value.duration)} min={50} max={2000} step={10} label="Duration" onChange={(d, f) => onChange({ ...value, duration: d }, f)} />
             <ScrubValue value={value.duration} min={50} max={4000} step={10} unit="ms" className="w-[56px] shrink-0" label="Duration"
               onChange={(d, f) => onChange({ ...value, duration: d }, f)} defaultValue={500} />
           </div>
           <div className="flex h-7 items-center gap-2">
-            <span className="w-[58px] shrink-0 text-[11.5px] text-fg-muted">Bounce</span>
+            <span className="w-[58px] shrink-0 text-ui text-fg-muted">Bounce</span>
             <Slider value={value.bounce} min={-0.5} max={0.9} step={0.01} origin={0} label="Bounce" onChange={(b, f) => onChange({ ...value, bounce: b }, f)} />
             {/* edited in percent so typing 30 means 30% */}
             <ScrubValue value={Math.round(value.bounce * 100)} min={-50} max={90} step={1} unit="%" className="w-[56px] shrink-0" label="Bounce"
@@ -194,7 +194,7 @@ export function SpringField({ value, onChange, span, presets = SPRINGS, defaultP
           </button>
         ))}
         <div className="flex-1" />
-        <label className="flex items-center gap-1.5 text-[11px] text-fg-muted">
+        <label className="flex items-center gap-1.5 text-ui text-fg-muted">
           Physics
           <Switch size="sm" checked={physics} onChange={setPhysics} label="Edit as stiffness, damping and mass" />
         </label>
