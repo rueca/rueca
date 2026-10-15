@@ -155,6 +155,12 @@ export function CommentButton({ params, hotkey = 'c' }: { params?: AnyParams; ho
   )
 }
 
+/* The comment-mode cursor, after Figma's: the comment bubble (a circle with its bottom-left corner left square, the
+   same shape as the pins), dark with a white edge so it reads on any artwork. The hotspot is that square corner, so
+   the pin lands exactly where the tip was. */
+const BUBBLE = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 9 9H3z" fill="#1e1e1e" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>`
+export const COMMENT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(BUBBLE)}") 3 21, crosshair`
+
 const paramLabel = (params: AnyParams, key: string) => (params.defs[key] as { label?: string } | undefined)?.label ?? humanize(key)
 const PIN = 28
 const CARD = { w: 272, h: 220 }
@@ -278,6 +284,16 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
     }
   }, [commenting, params, clock, id])   // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The knob rows take the comment cursor too while commenting: a click there pins, it doesn't change the value.
+  useEffect(() => {
+    if (!commenting) return
+    const style = document.createElement('style')
+    style.dataset.noteCursor = ''
+    style.textContent = `[data-param], [data-param] * { cursor: ${COMMENT_CURSOR} !important }`
+    document.head.appendChild(style)
+    return () => style.remove()
+  }, [commenting])
+
   // Space held = the stage's pan, not a pin.
   const space = useRef(false)
   useEffect(() => {
@@ -371,7 +387,8 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
         <div className="pointer-events-none absolute inset-0" style={{ zIndex: 5 }}>
           {commenting && (
             <div data-note-ui="" role="button" tabIndex={0} aria-label="Place a comment on the artboard (Enter for its middle)"
-              className="pointer-events-auto absolute inset-0 cursor-crosshair outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--signal)]"
+              className="pointer-events-auto absolute inset-0 outline-none focus-visible:shadow-[inset_0_0_0_2px_var(--signal)]"
+              style={{ cursor: COMMENT_CURSOR }}
               onPointerDown={place}
               onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); placeAt(0.5, 0.5) } }} />
           )}
