@@ -3,10 +3,14 @@ import { Download } from 'lucide-react'
 import { Section, Row, Slider, ScrubValue, Inspector, Button, Badge, Tip, useValues, equal, exportJSON, download, cn } from '@kit'
 import { tokens, contrastReport, grade, tokensCSS, tokensDTCG, tokensTailwind, hexOf } from '../tokens'
 import { OklchField } from '@kit/ui/oklch'
+import { wcagContrast } from 'culori'
 import { WIRE } from '@/demo/wire'
 import { CodeBlock } from '@kit/ui/code-block'
 import { useUI, setUI } from '../ui'
 import { jsxFor, STORES } from '../props'
+
+// the tile's label: whichever of ink or paper reads better on the accent (lightness alone put paper on a mid blue, 2:1)
+const onAccent = (hex: string) => (wcagContrast(hex, WIRE.paper) >= wcagContrast(hex, WIRE.ink) ? WIRE.paper : WIRE.ink)
 
 export function TokensPanel() {
   const t = useValues(tokens)
@@ -25,7 +29,7 @@ export function TokensPanel() {
             <button key={p.name} type="button" onClick={() => tokens.applyPreset(p.name)}
               className={cn('group flex h-12 items-center gap-2 rounded-[8px] px-2 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-signal-soft shadow-[inset_0_0_0_1px_var(--signal)]' : 'bg-control hover:bg-hover')}>
               <span className="flex size-7 shrink-0 items-center justify-center text-[11px] font-semibold"
-                style={{ background: hexOf(v.accentL, v.accentC, v.accentH), borderRadius: Math.min(14, v.radius), boxShadow: v.shadow === 'hard' ? '2px 2px 0 0 currentColor' : undefined, color: v.accentL > 0.75 ? WIRE.ink : WIRE.paper }}>Aa</span>
+                style={{ background: hexOf(v.accentL, v.accentC, v.accentH), borderRadius: Math.min(14, v.radius), boxShadow: v.shadow === 'hard' ? '2px 2px 0 0 currentColor' : undefined, color: onAccent(hexOf(v.accentL, v.accentC, v.accentH)) }}>Aa</span>
               <span className="flex min-w-0 flex-col">
                 <span className="truncate text-ui font-medium text-fg">{p.name}</span>
                 <span className="truncate text-ui-sm text-fg-faint">{v.radius}px · {v.density}</span>
@@ -47,7 +51,8 @@ export function TokensPanel() {
       <Section title={`Contrast · ${theme}`}>
         {report.map((r) => (
           <Row key={r.label}>
-            <span className="flex size-icon-sm shrink-0 items-center justify-center rounded-[4px] text-ui-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)]" style={{ background: r.bg, color: r.fg }}>Aa</span>
+            {/* a specimen of the pair as it really is: a failing pair must look like it fails (QA skips data-artifact) */}
+            <span data-artifact className="flex size-icon-sm shrink-0 items-center justify-center rounded-[4px] text-ui-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)]" style={{ background: r.bg, color: r.fg }}>Aa</span>
             <span className="min-w-0 flex-1 truncate text-ui font-[450] text-fg-faint">{r.label}</span>
             <span className="shrink-0 text-right tabular text-ui text-fg">{r.ratio.toFixed(2)}:1</span>
             <Tip label={r.ratio >= 4.5 ? 'Passes WCAG AA for body text' : r.ratio >= 3 ? 'Passes AA for large text and UI only' : 'Fails WCAG AA'}>

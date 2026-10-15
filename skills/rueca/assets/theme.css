@@ -63,6 +63,10 @@
   --key: #f5b400;      /* keyframed / animated field */
   --rec: #ff4d4d;
   --ok: #3ccf8e;
+  /* the same three as TEXT on their own 15% wash (badges): ≥4.5:1. In dark the fills already pass */
+  --key-text: #f5b400;
+  --rec-text: #ff6b6b;
+  --ok-text: #3ccf8e;
 
   --lane: #474747;     /* idle timeline lane */
   /* categorical — node ports, lanes, tags, series. Distinct in hue AND lightness,
@@ -169,6 +173,9 @@
   --key: #c98a00;
   --rec: #e5383b;
   --ok: #1fa971;
+  --key-text: #8a5d00;
+  --rec-text: #b8282b;
+  --ok-text: #0b7247;
 
   --lane: #c6c6c6;
   --cat-1: #2f6fe0; --cat-2: #c26a00; --cat-3: #12965c; --cat-4: #b43fb0;
@@ -221,6 +228,9 @@
     --key: #c98a00;
     --rec: #e5383b;
     --ok: #1fa971;
+    --key-text: #8a5d00;
+    --rec-text: #b8282b;
+    --ok-text: #0b7247;
 
     --lane: #c6c6c6;
     --cat-1: #2f6fe0; --cat-2: #c26a00; --cat-3: #12965c; --cat-4: #b43fb0;
@@ -275,6 +285,9 @@
   --color-key: var(--key);
   --color-rec: var(--rec);
   --color-ok: var(--ok);
+  --color-key-text: var(--key-text);
+  --color-rec-text: var(--rec-text);
+  --color-ok-text: var(--ok-text);
   --color-lane: var(--lane);
   --color-cat-1: var(--cat-1); --color-cat-2: var(--cat-2); --color-cat-3: var(--cat-3); --color-cat-4: var(--cat-4);
   --color-cat-5: var(--cat-5); --color-cat-6: var(--cat-6); --color-cat-7: var(--cat-7); --color-cat-8: var(--cat-8);
