@@ -32,10 +32,10 @@ function Lightbox() {
   const p = rec.params
   return (
     <div className="absolute inset-0 z-30 flex flex-col overflow-hidden rounded-[var(--radius-panel)] bg-field" role="dialog" aria-label="Image viewer">
-      <div className="flex h-12 flex-none items-center gap-2 px-3">
+      <div className="flex h-12 flex-none items-center gap-2 px-pad">
         <div className="min-w-0 flex-1">
-          <div className="truncate text-[12.5px] text-fg">{p.prompt}</div>
-          <div className="tabular text-[11px] text-fg-faint">{idx + 1} / {list.length} · {modelOf(p.model).name} · seed {p.seed} · {p.w * (p.upscale ?? 1)} × {p.h * (p.upscale ?? 1)}</div>
+          <div className="truncate text-title text-fg">{p.prompt}</div>
+          <div className="tabular text-ui text-fg-faint">{idx + 1} / {list.length} · {modelOf(p.model).name} · seed {p.seed} · {p.w * (p.upscale ?? 1)} × {p.h * (p.upscale ?? 1)}</div>
         </div>
         <IconButton icon={Heart} label="Favourite" shortcut="f" active={!!rec.favourite} onClick={() => toggleFavourite([rec.id])} />
         <IconButton icon={Sparkles} label="Variations" shortcut="v" onClick={() => variations(rec)} />
@@ -47,9 +47,9 @@ function Lightbox() {
       <div className="relative flex min-h-0 flex-1 items-center justify-center p-4 pt-0" onClick={(e) => e.target === e.currentTarget && close()}>
         <Big rec={rec} className="rounded-[6px] shadow-[var(--shadow-artboard)]" />
         <button type="button" aria-label="Previous image" disabled={idx <= 0} onClick={() => step(-1)}
-          className="cluster absolute top-1/2 left-4 flex size-9 -translate-y-1/2 items-center justify-center text-fg-muted outline-none hover:text-fg disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-signal"><ChevronLeft size={16} strokeWidth={1.5} /></button>
+          className="cluster absolute top-1/2 left-4 flex size-bar -translate-y-1/2 items-center justify-center text-fg-muted outline-none hover:text-fg disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-signal"><ChevronLeft size={16} strokeWidth={1.5} /></button>
         <button type="button" aria-label="Next image" disabled={idx >= list.length - 1} onClick={() => step(1)}
-          className="cluster absolute top-1/2 right-4 flex size-9 -translate-y-1/2 items-center justify-center text-fg-muted outline-none hover:text-fg disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-signal"><ChevronRight size={16} strokeWidth={1.5} /></button>
+          className="cluster absolute top-1/2 right-4 flex size-bar -translate-y-1/2 items-center justify-center text-fg-muted outline-none hover:text-fg disabled:opacity-30 focus-visible:ring-2 focus-visible:ring-signal"><ChevronRight size={16} strokeWidth={1.5} /></button>
       </div>
     </div>
   )
@@ -67,8 +67,8 @@ function Compare({ a, b, mode }: { a: string; b: string; mode: 'wipe' | 'side' }
   const ratio = Math.max(A.params.w / A.params.h, B.params.w / B.params.h)
   return (
     <div className="absolute inset-0 z-30 flex flex-col overflow-hidden rounded-[var(--radius-panel)] bg-field" role="dialog" aria-label="Compare images">
-      <div className="flex h-12 flex-none items-center gap-2 px-3">
-        <span className="text-[13px] font-semibold text-fg">Compare</span>
+      <div className="flex h-12 flex-none items-center gap-2 px-pad">
+        <span className="text-title font-semibold text-fg">Compare</span>
         <div className="w-[170px]"><Segmented size="sm" value={mode} onChange={(m) => ui.setState({ overlay: { type: 'compare', a, b, mode: m as 'wipe' | 'side' } })} label="Compare mode"
           options={[{ value: 'wipe', label: 'Wipe' }, { value: 'side', label: 'Side by side' }]} /></div>
         <IconButton icon={ArrowLeftRight} label="Swap A and B" onClick={() => ui.setState({ overlay: { type: 'compare', a: b, b: a, mode } })} />
@@ -88,7 +88,7 @@ function Compare({ a, b, mode }: { a: string; b: string; mode: 'wipe' | 'side' }
             {[A, B].map((r, i) => (
               <figure key={r.id} className="flex min-h-0 flex-col items-center justify-center gap-2">
                 <div className="flex min-h-0 flex-1 items-center justify-center"><Big rec={r} className="rounded-[6px] shadow-[var(--shadow-artboard)]" /></div>
-                <figcaption className="tabular text-[11.5px] text-fg-muted"><span className="text-fg">{i ? 'B' : 'A'}</span> · {label(r)} · {r.params.steps} steps · CFG {r.params.guidance}</figcaption>
+                <figcaption className="tabular text-ui text-fg-muted"><span className="text-fg">{i ? 'B' : 'A'}</span> · {label(r)} · {r.params.steps} steps · CFG {r.params.guidance}</figcaption>
               </figure>
             ))}
           </div>

@@ -102,17 +102,17 @@ export function QuickAdd({
       onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Escape') { e.preventDefault(); onClose() } }}
     >
       <Cmdk loop label={label} className="flex flex-col">
-        <div className="flex h-9 items-center gap-2 border-b border-line px-3">
+        <div className="flex h-header items-center gap-2 border-b border-line px-pad">
           <Search size={14} strokeWidth={1.5} className="shrink-0 text-fg-faint" />
-          <Cmdk.Input ref={input} placeholder={placeholder} className="h-full min-w-0 flex-1 bg-transparent text-[12.5px] text-fg outline-none placeholder:text-fg-faint" />
+          <Cmdk.Input ref={input} placeholder={placeholder} className="h-full min-w-0 flex-1 bg-transparent text-title text-fg outline-none placeholder:text-fg-faint" />
           <Kbd>esc</Kbd>
         </div>
-        {context && <div className="border-b border-line px-3 py-1.5 text-[11px] text-fg-muted">{context}</div>}
+        {context && <div className="border-b border-line px-pad py-1.5 text-ui text-fg-muted">{context}</div>}
         <Cmdk.List className="max-h-[300px] overflow-y-auto p-1">
-          <Cmdk.Empty className="px-3 py-5 text-center text-[11.5px] text-fg-muted">{empty}</Cmdk.Empty>
+          <Cmdk.Empty className="px-pad py-5 text-center text-ui text-fg-muted">{empty}</Cmdk.Empty>
           {groups.map((g) => (
             <Cmdk.Group key={g || '_'} heading={g || undefined}
-              className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-1.5 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:text-fg-muted">
+              className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:pt-1.5 [&_[cmdk-group-heading]]:pb-1 [&_[cmdk-group-heading]]:text-ui [&_[cmdk-group-heading]]:text-fg-muted">
               {items.filter((i) => (i.group ?? '') === g).map((i) => {
                 const Icon = i.icon
                 return (
@@ -121,17 +121,17 @@ export function QuickAdd({
                     value={`${i.label} ${i.group ?? ''} ${i.keywords?.join(' ') ?? ''} ${i.id}`}
                     disabled={i.disabled}
                     onSelect={() => { onPick(i.id); onClose() }}
-                    className={cn('flex h-8 cursor-default items-center gap-2 rounded-[6px] px-1.5 text-[12px] text-fg outline-none data-[disabled=true]:opacity-40',
+                    className={cn('flex h-button-lg cursor-default items-center gap-2 rounded-control px-1.5 text-ui text-fg outline-none data-[disabled=true]:opacity-40',
                       'data-[selected=true]:bg-signal-strong data-[selected=true]:text-signal-fg')}
                   >
                     {(Icon || i.tint) && (
-                      <span className="flex size-5 shrink-0 items-center justify-center rounded-[5px]"
+                      <span className="flex size-icon-sm shrink-0 items-center justify-center rounded-control"
                         style={i.tint ? { background: `color-mix(in srgb, ${i.tint} 18%, transparent)`, color: i.tint } : undefined}>
                         {Icon && <Icon size={13} strokeWidth={1.5} />}
                       </span>
                     )}
                     <span className="min-w-0 flex-1 truncate">{i.label}</span>
-                    {i.hint && <span className="shrink-0 truncate text-[11px] opacity-70">{i.hint}</span>}
+                    {i.hint && <span className="shrink-0 truncate text-ui opacity-70">{i.hint}</span>}
                     {i.meta && <span className="flex shrink-0 items-center gap-1 opacity-80">{i.meta}</span>}
                   </Cmdk.Item>
                 )

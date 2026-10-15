@@ -98,8 +98,6 @@ export default function MarksShell() {
 
   return (
     <Studio
-      leftWidth={232}
-      rightWidth={300}
       toolbar={
         <Toolbar
           start={<Brand name="Marks" doc={s.name || 'Untitled'} mark={<Mark />} />}
@@ -108,7 +106,7 @@ export default function MarksShell() {
               <Button size="md" onClick={() => focus(null)}><ArrowLeft size={14} strokeWidth={1.5} />Variants</Button>
               <Divider vertical />
               <IconButton icon={ChevronLeft} label="Previous variant" shortcut="arrowleft" onClick={() => step(-1)} />
-              <span className="min-w-[120px] px-1 text-center text-[12px] text-fg">{curMark ? markLabel(curMark) : ''}</span>
+              <span className="min-w-[120px] px-1 text-center text-ui text-fg">{curMark ? markLabel(curMark) : ''}</span>
               <IconButton icon={ChevronRight} label="Next variant" shortcut="arrowright" onClick={() => step(1)} />
               <Divider vertical />
               <IconButton icon={Columns2} label={compare ? 'Stop comparing' : 'Compare side by side'} shortcut="c" active={!!compare} onClick={toggleCompare} />
@@ -138,7 +136,7 @@ export default function MarksShell() {
       }
       left={<FavouritesPanel />}
       right={
-        <Panel header={<PanelHeader title={inFocus ? 'Mark' : 'Brand'}>{inFocus && <span className="text-[11px] text-fg-faint">{FAMILY[d.marks[focusId!].family].name}</span>}</PanelHeader>}>
+        <Panel header={<PanelHeader title={inFocus ? 'Mark' : 'Brand'}>{inFocus && <span className="text-ui text-fg-faint">{FAMILY[d.marks[focusId!].family].name}</span>}</PanelHeader>}>
           {inFocus ? <MarkPanel /> : <SettingsPanel />}
         </Panel>
       }

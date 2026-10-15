@@ -36,21 +36,21 @@ export function ClipInspector() {
     <div className="flex flex-col">
       <Inspector params={params} folders={['composition', 'view']} />
       <Section title="Re-layout" hint="Positions are relative to the frame; sizes are exact in the design frame and scale to fit the others.">
-        <Row label="Design frame"><span className="flex-1 tabular text-[11.5px] text-fg">{design} · {ASPECTS[design].w} × {ASPECTS[design].h}</span></Row>
+        <Row label="Design frame"><span className="flex-1 tabular text-ui text-fg">{design} · {ASPECTS[design].w} × {ASPECTS[design].h}</span></Row>
         {design !== aspect ? (
-          <div className="flex flex-col gap-1.5 px-3 pt-1">
-            <p className="text-[11px] leading-relaxed text-fg-muted">You are viewing {aspect}. Sizes are scaled from {design} so nothing collides.</p>
+          <div className="flex flex-col gap-1.5 px-pad pt-1">
+            <p className="text-ui leading-relaxed text-fg-muted">You are viewing {aspect}. Sizes are scaled from {design} so nothing collides.</p>
             <Button size="sm" variant="default" onClick={() => { rebaseDesign(aspect); toast(`${aspect} is now the design frame`, { action: { label: 'Undo', onClick: () => history.undo() } }) }}>Design for {aspect} from here</Button>
           </div>
-        ) : <p className="px-3 pt-0.5 text-[11px] leading-relaxed text-fg-faint">Switch aspect in the toolbar (1–4) to see the re-layout.</p>}
+        ) : <p className="px-pad pt-0.5 text-ui leading-relaxed text-fg-faint">Switch aspect in the toolbar (1–4) to see the re-layout.</p>}
       </Section>
       <Section title="Add clip">
-        <div className="grid grid-cols-2 gap-1.5 px-3 pb-1">
+        <div className="grid grid-cols-2 gap-1.5 px-pad pb-1">
           {([['text', Type, 'Text'], ['shape', Shapes, 'Shape'], ['image', ImageIcon, 'Image'], ['progress', CircleDashed, 'Progress']] as const).map(([k, Icon, l]) => (
             <Button key={k} size="md" variant="default" onClick={() => addClip(k)}><Icon size={14} strokeWidth={1.5} />{l}</Button>
           ))}
         </div>
-        <p className="px-3 pt-1 text-[11px] leading-relaxed text-fg-faint">Clips land at the playhead on the first free track. ⇧T adds text.</p>
+        <p className="px-pad pt-1 text-ui leading-relaxed text-fg-faint">Clips land at the playhead on the first free track. ⇧T adds text.</p>
       </Section>
     </div>
   )
@@ -59,7 +59,7 @@ export function ClipInspector() {
 function MultiSection({ ids }: { ids: string[] }) {
   return (
     <Section title={`${ids.length} clips`} first actions={<IconButton size="icon-sm" icon={Trash2} label="Delete" shortcut="backspace" onClick={() => deleteClips(ids)} />}>
-      <div className="flex flex-col gap-1.5 px-3 pb-1">
+      <div className="flex flex-col gap-1.5 px-pad pb-1">
         <Button size="md" variant="default" onClick={() => duplicateClips(ids)}><Copy size={14} strokeWidth={1.5} />Duplicate</Button>
         <Button size="md" variant="default" onClick={() => splitAt(ids)}><Scissors size={14} strokeWidth={1.5} />Split at playhead</Button>
       </div>
@@ -79,12 +79,11 @@ function MotionRows({ c, which }: { c: Clip; which: 'enter' | 'exit' }) {
       </Row>
       {m.preset !== 'none' && (
         <Row label="" className="-mt-0.5">
-          <span className="w-[84px] shrink-0" />
           <ScrubValue boxed align="left" value={m.dur} min={0} max={Math.max(100, c.dur)} step={10} fmt={sec} className="w-[64px]" label="Duration" onChange={(v, f) => set({ dur: v }, f)} />
           <Popover.Root>
-            <Popover.Trigger aria-label="Easing" className="flex h-6 min-w-0 flex-1 items-center gap-1.5 rounded-[5px] bg-control px-1.5 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
+            <Popover.Trigger aria-label="Easing" className="flex h-control min-w-0 flex-1 items-center gap-1.5 rounded-control bg-control px-1.5 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
               <CurveGlyph value={m.ease} className="text-signal" />
-              <span className="truncate text-[11px] text-fg">{Object.entries(EASE).find(([, v]) => v.join() === m.ease.join())?.[0] ?? 'Custom'}</span>
+              <span className="truncate text-ui text-fg">{Object.entries(EASE).find(([, v]) => v.join() === m.ease.join())?.[0] ?? 'Custom'}</span>
             </Popover.Trigger>
             <Popover.Portal>
               <Popover.Positioner side="left" align="start" sideOffset={12} collisionPadding={12} className="z-[100]">
@@ -115,7 +114,7 @@ function ClipSections({ c }: { c: Clip }) {
           <IconButton size="icon-sm" icon={Trash2} label="Delete" shortcut="backspace" onClick={() => deleteClips([c.id])} />
         </div>
       }>
-        {locked && <p className="px-3 pb-1 text-[11px] text-key">This track is locked. Unlock it in the timeline to edit.</p>}
+        {locked && <p className="px-pad pb-1 text-ui text-key">This track is locked. Unlock it in the timeline to edit.</p>}
         <Row label="Name"><TextInput value={c.name} label="Clip name" onChange={(s) => set({ name: s }, false)} onCommit={() => commitComp('Rename clip')} /></Row>
         <Row label="Start" hint="Where the clip begins.">
           <ScrubValue boxed align="left" value={c.start} min={0} max={duration - 100} step={10} fmt={sec} className="flex-1" label="Start" onChange={(v, f) => set({ start: Math.min(v, duration - c.dur) }, f)} />
@@ -182,10 +181,10 @@ function ClipSections({ c }: { c: Clip }) {
 
       {c.kind === 'image' && (
         <Section title="Image">
-          <div className="grid grid-cols-4 gap-1.5 px-3 pb-1.5">
+          <div className="grid grid-cols-4 gap-1.5 px-pad pb-1.5">
             {(['aurora', 'sunset', 'mesh', 'app'] as ImageGen[]).map((g) => (
               <button key={g} type="button" aria-pressed={c.image === g} onClick={() => set({ image: g })}
-                className={cn('flex flex-col items-center gap-1 rounded-[7px] p-1 text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal', c.image === g ? 'bg-signal-soft text-signal' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
+                className={cn('flex flex-col items-center gap-1 rounded-[7px] p-1 text-ui-sm outline-none focus-visible:ring-2 focus-visible:ring-signal', c.image === g ? 'bg-signal-soft text-signal' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
                 <Thumb gen={g} seed={c.seed ?? 1} />
                 {IMAGE_LABEL[g]}
               </button>
@@ -259,7 +258,7 @@ function ClipSections({ c }: { c: Clip }) {
           <MotionRows c={c} which="exit" />
         </Section>
       )}
-      <div className="flex gap-1.5 border-t border-line px-3 py-2.5">
+      <div className="flex gap-1.5 border-t border-line px-pad py-2.5">
         <Button size="sm" variant="default" className="flex-1" onClick={() => splitAt([c.id])}><Scissors size={13} strokeWidth={1.5} />Split</Button>
         <Button size="sm" variant="default" className="flex-1" onClick={() => ui.setState({ sel: [] })}><Settings2 size={13} strokeWidth={1.5} />Composition</Button>
       </div>

@@ -127,7 +127,7 @@ export function Histogram({
           aria-label={`${which === 'shadows' ? 'Shadow' : 'Highlight'} clipping${t.on ? `, ${t.pct.toFixed(1)}%` : ', none'}`}
           disabled={!onClip}
           onClick={() => onClip?.(which)}
-          className={cn('absolute top-1 flex size-5 items-center justify-center rounded-[4px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal disabled:pointer-events-none', which === 'shadows' ? 'left-1' : 'right-1', on && 'bg-active')}
+          className={cn('absolute top-1 flex size-icon-sm items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal disabled:pointer-events-none', which === 'shadows' ? 'left-1' : 'right-1', on && 'bg-active')}
         >
           <svg width="10" height="8" viewBox="0 0 10 8" style={{ transform: which === 'shadows' ? 'scaleX(-1)' : undefined }} aria-hidden>
             <path d="M1 7 L9 7 L9 1 Z" fill={t.on ? t.color : 'none'} stroke={t.on ? t.color : 'var(--fg-faint)'} strokeWidth="1.2" strokeLinejoin="round" />
@@ -314,7 +314,7 @@ export function ToneCurve({
           />
         ))}
       </div>
-      <div className="flex items-center gap-1.5 text-[11px] text-fg-faint">
+      <div className="flex items-center gap-1.5 text-ui text-fg-faint">
         <span>Input</span>
         <ScrubValue boxed align="left" value={Math.round(cur[0] * 255)} min={0} max={255} step={1} label="Input" className="flex-1"
           disabled={s === 0 || s === pts.length - 1} onChange={(n, f) => move(s, n / 255, cur[1], f)} />

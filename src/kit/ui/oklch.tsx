@@ -165,7 +165,7 @@ export function OklchField({ value, onChange, maxC = 0.37, preview = true, class
   )
   const row = (letter: string, rail: React.ReactNode, field: React.ReactNode) => (
     <div className="flex items-center gap-2">
-      <span aria-hidden className="w-3 text-[10.5px] text-fg-faint">{letter}</span>
+      <span aria-hidden className="w-3 text-ui-sm text-fg-faint">{letter}</span>
       {rail}
       {field}
     </div>
@@ -178,8 +178,8 @@ export function OklchField({ value, onChange, maxC = 0.37, preview = true, class
             <div className="absolute inset-0" style={{ background: css }} />
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="truncate font-mono text-[11px] text-fg select-text">{css}</span>
-            <span className="flex items-center gap-1.5 text-[11px] text-fg-faint">
+            <span className="truncate font-mono text-ui text-fg select-text">{css}</span>
+            <span className="flex items-center gap-1.5 text-ui text-fg-faint">
               <span className="tabular uppercase select-text">{oklchToHex(value)}</span>
               {badge}
             </span>

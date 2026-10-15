@@ -57,31 +57,31 @@ function LibraryPanel() {
     <Panel header={<PanelHeader title="Library" />}>
       {LIB.map((g, gi) => (
         <Section key={g.group} title={g.group} first={gi === 0}>
-          <div className="grid grid-cols-2 gap-1.5 px-3">
+          <div className="grid grid-cols-2 gap-1.5 px-pad">
             {g.items.map((it) => (
               <button key={it.label} type="button" onClick={() => { addClip(it.kind, it.patch); toast(`Added ${it.label.toLowerCase()} at ${fmtTime(clock.time())}`) }}
                 className="group/lib flex h-14 flex-col items-center justify-center gap-1 rounded-[8px] bg-control text-fg-muted outline-none transition-colors hover:text-fg hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal">
                 <span className="flex h-5 items-center text-fg">{it.preview}</span>
-                <span className="text-[11px]">{it.label}</span>
+                <span className="text-ui">{it.label}</span>
               </button>
             ))}
           </div>
         </Section>
       ))}
       <Section title="Images">
-        <div className="grid grid-cols-2 gap-1.5 px-3">
+        <div className="grid grid-cols-2 gap-1.5 px-pad">
           {IMAGES.map(([gen, label]) => (
             <button key={gen} type="button" onClick={() => { addClip('image', { name: label, image: gen, seed: Math.floor(Math.random() * 9999), ...(gen === 'app' ? { w: 0.72, h: 1.28, radius: 0.06 } : {}) }); toast(`Added ${label} image`) }}
               className="group/lib relative h-16 overflow-hidden rounded-[8px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
               <img src={thumbURL(gen, 7)} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover/lib:scale-105" />
-              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 pt-3 pb-1 text-left text-[11px] text-white">{label}</span>
+              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 pt-3 pb-1 text-left text-ui text-white">{label}</span>
             </button>
           ))}
         </div>
-        <p className="px-3 pt-2 text-[11px] leading-relaxed text-fg-faint">Generated on the device — reroll with the seed.</p>
+        <p className="px-pad pt-2 text-ui leading-relaxed text-fg-faint">Generated on the device — reroll with the seed.</p>
       </Section>
       <Section title="Overlays">
-        <div className="flex flex-col gap-1 px-3 pb-1">
+        <div className="flex flex-col gap-1 px-pad pb-1">
           <Button size="md" variant="default" className="justify-start" onClick={() => addClip('progress')}><Minus size={14} strokeWidth={1.5} />Progress bar</Button>
           <Button size="md" variant="default" className="justify-start" onClick={() => addClip('bg')}><Square size={14} strokeWidth={1.5} />Gradient background</Button>
         </div>
@@ -105,9 +105,9 @@ function Transport() {
       <IconButton icon={playing ? Pause : Play} label={playing ? 'Pause' : 'Play'} shortcut="space" tipSide="top" variant="default" onClick={() => clock.toggle()} />
       <IconButton icon={StepForward} label="Next frame" shortcut="." tipSide="top" onClick={() => clock.step(1)} />
       <IconButton icon={SkipForward} label="Go to end" shortcut="end" tipSide="top" onClick={() => clock.seek(duration)} />
-      <div className="ml-1 flex h-7 items-baseline gap-1 rounded-[6px] px-2 tabular text-[12px] text-fg">
-        {fmtTime(t, 'timecode', fps)}<span className="text-[11px] text-fg-faint">/ {fmtTime(duration, 'timecode', fps)}</span>
-        <span className="ml-1 text-[10.5px] text-fg-faint">{fps} fps</span>
+      <div className="ml-1 flex h-icon items-baseline gap-1 rounded-[6px] px-2 tabular text-ui text-fg">
+        {fmtTime(t, 'timecode', fps)}<span className="text-ui text-fg-faint">/ {fmtTime(duration, 'timecode', fps)}</span>
+        <span className="ml-1 text-ui-sm text-fg-faint">{fps} fps</span>
       </div>
       <div className="mx-1 h-4 w-px bg-line" />
       <IconButton icon={Scissors} label="Split at playhead" shortcut="mod+b" tipSide="top" disabled={!sel.length} onClick={() => { const n = splitAt(ui.getState().sel); if (!n) toast('Put the playhead inside a selected clip to split') }} />
@@ -195,7 +195,7 @@ function CanvasOverlay({ W, H }: { W: number; H: number }) {
       {guides.y && !present && <div className="pointer-events-none absolute right-0 left-0" style={{ top: H / 2 - lw / 2, height: lw, background: 'var(--rec)' }} />}
       {c && b && !present && (
         <div className="pointer-events-none absolute" style={{ left: b.cx - b.w / 2, top: b.cy - b.h / 2, width: b.w, height: b.h, transform: `rotate(${b.rotation}deg)`, outline: `${lw}px ${live ? 'solid' : 'dashed'} var(--signal)` }}>
-          <div className="absolute bottom-full left-0 flex origin-bottom-left items-center gap-1 rounded-[4px] bg-signal-strong px-1.5 py-0.5 text-[11px] whitespace-nowrap text-signal-fg" style={{ transform: `scale(${1 / zoom}) translateY(-4px)` }}>
+          <div className="absolute bottom-full left-0 flex origin-bottom-left items-center gap-1 rounded-[4px] bg-signal-strong px-1.5 py-0.5 text-ui whitespace-nowrap text-signal-fg" style={{ transform: `scale(${1 / zoom}) translateY(-4px)` }}>
             {c.name}{!live && <span className="opacity-70">· not at playhead</span>}
           </div>
           {live && [[0, 0], [1, 0], [0, 1], [1, 1]].map(([x, y], i) => (
@@ -216,7 +216,7 @@ function SafeAreas({ aspect, W, H, zoom }: { aspect: Aspect; W: number; H: numbe
     <>
       {zones.map((z) => (
         <div key={z.l} className="pointer-events-none absolute flex items-start justify-start" style={{ left: z.x * W, top: z.y * H, width: z.w * W, height: z.h * H, background: 'repeating-linear-gradient(135deg, rgba(255,77,77,0.10) 0 10px, transparent 10px 22px)', boxShadow: `inset 0 0 0 ${1 / zoom}px rgba(255,77,77,0.35)` }}>
-          <span className="m-1 origin-top-left rounded-[3px] bg-black/50 px-1 py-0.5 text-[10px] whitespace-nowrap text-white/80" style={{ transform: `scale(${1 / zoom})` }}>{z.l}</span>
+          <span className="m-1 origin-top-left rounded-[3px] bg-black/50 px-1 py-0.5 text-ui-sm whitespace-nowrap text-white/80" style={{ transform: `scale(${1 / zoom})` }}>{z.l}</span>
         </div>
       ))}
     </>
@@ -375,7 +375,6 @@ export default function VideoShell() {
 
   return (
     <Studio
-      leftWidth={232}
       toolbar={
         <Toolbar
           start={<Brand name="Cut" mark={
@@ -387,7 +386,7 @@ export default function VideoShell() {
                 <Segmented label="Aspect" value={v.aspect} onChange={(a) => setAspect(a as Aspect)}
                   options={(Object.keys(ASPECTS) as Aspect[]).map((a) => ({ value: a, label: a, icon: ASPECT_ICON[a], hint: `${ASPECTS[a].label} · ${ASPECTS[a].w} × ${ASPECTS[a].h}` }))} />
               </div>
-              <span className="tabular text-[11.5px] text-fg-faint">{W} × {H}</span>
+              <span className="tabular text-ui text-fg-faint">{W} × {H}</span>
             </Cluster>
           }
           end={
@@ -419,7 +418,6 @@ export default function VideoShell() {
           onTrackToggle={(id, prop) => { const tr = comp.tracks.find((x) => x.id === id)!; patchTrack(id, { [prop]: !tr[prop] }) }}
           onTrackRename={(id, name) => patchTrack(id, { name })}
           onClipDoubleClick={(id) => { const c = comp.clips.find((x) => x.id === id); if (c) { clock.pause(); clock.seek(snapFrame(c.start + Math.min(c.dur / 2, c.enter.dur + 100))) } }}
-          height={244}
           empty={<Empty icon={Clapperboard} title="Nothing on the timeline" hint="Add a clip from the library, or press ⇧T for text." />}
         />
       }

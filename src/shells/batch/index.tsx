@@ -114,8 +114,6 @@ export default function BatchShell() {
 
   return (
     <Studio
-      leftWidth={248}
-      rightWidth={296}
       toolbar={
         <Toolbar
           start={<Brand name="Batch" mark={<Mark />} />}

@@ -37,7 +37,7 @@ export function GridView({ columns }: { columns: React.MutableRefObject<number> 
   return (
     <div className="h-full overflow-y-auto">
       <div className="mx-auto max-w-[1280px] px-6 pt-5 pb-10">
-        <div className="mb-4 flex items-center gap-2 text-[11.5px] text-fg-muted">
+        <div className="mb-4 flex items-center gap-2 text-ui text-fg-muted">
           <span className="whitespace-nowrap text-fg">{d.grid.length} variants</span>
           <span className="text-fg-faint">·</span>
           <span className="whitespace-nowrap">{kept} kept</span>
@@ -162,7 +162,7 @@ export function BottomPanel() {
             onFav={(mid) => favMutation(mutations.find((x) => x.id === mid)!)}
             render={(mid) => <MarkArt m={mutations.find((x) => x.id === mid)!} {...c} />}
           />
-          <div className="mt-2 text-[11px] text-fg-faint">Click to apply to the focused mark (undoable) · lock keeps it in the grid · star saves it to favourites</div>
+          <div className="mt-2 text-ui text-fg-faint">Click to apply to the focused mark (undoable) · lock keeps it in the grid · star saves it to favourites</div>
         </div>
       ) : (
         <Empty icon={Sparkles} title="Variations around this mark" hint="Nudges every parameter a little — how far is set by Variation in the brand settings."
@@ -183,7 +183,7 @@ export function FavouritesPanel() {
   const favs = d.favs.filter((id) => d.marks[id])
   return (
     <Panel header={<PanelHeader title={<span>Favourites <span className="font-normal text-fg-faint">{favs.length || ''}</span></span>} />}
-      footer={<div className="px-3 py-2 text-[11px] text-fg-faint">Favourites survive rerolls. Alt-click to compare.</div>}>
+      footer={<div className="px-pad py-2 text-ui text-fg-faint">Favourites survive rerolls. Alt-click to compare.</div>}>
       {favs.length ? (
         <div className="grid grid-cols-2 gap-2 p-2">
           {favs.map((id) => {
@@ -199,11 +199,11 @@ export function FavouritesPanel() {
                   <MarkArt m={m} {...c} />
                 </button>
                 <div className="flex items-center gap-1">
-                  <span className="min-w-0 flex-1 truncate text-[11px] text-fg-muted">{markLabel(m)}</span>
+                  <span className="min-w-0 flex-1 truncate text-ui text-fg-muted">{markLabel(m)}</span>
                   {focusId && focusId !== id && (
-                    <Tip label="Compare with focused"><button type="button" aria-label="Compare" onClick={() => compareWith(id)} className="flex size-5 items-center justify-center rounded-[4px] text-fg-faint opacity-0 outline-none hover:text-fg group-hover/fav:opacity-100 focus-visible:opacity-100"><Columns2 size={11} strokeWidth={1.5} /></button></Tip>
+                    <Tip label="Compare with focused"><button type="button" aria-label="Compare" onClick={() => compareWith(id)} className="flex size-icon-sm items-center justify-center rounded-[4px] text-fg-faint opacity-0 outline-none hover:text-fg group-hover/fav:opacity-100 focus-visible:opacity-100"><Columns2 size={11} strokeWidth={1.5} /></button></Tip>
                   )}
-                  <Tip label="Remove from favourites"><button type="button" aria-label="Unfavourite" onClick={() => toggleFav(id)} className="flex size-5 items-center justify-center rounded-[4px] text-key opacity-70 outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-signal"><Star size={11} strokeWidth={1.5} fill="currentColor" /></button></Tip>
+                  <Tip label="Remove from favourites"><button type="button" aria-label="Unfavourite" onClick={() => toggleFav(id)} className="flex size-icon-sm items-center justify-center rounded-[4px] text-key opacity-70 outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-signal"><Star size={11} strokeWidth={1.5} fill="currentColor" /></button></Tip>
                 </div>
               </div>
             )
@@ -221,7 +221,7 @@ export function FavouritesPanel() {
 export function SettingsPanel() {
   return (
     <>
-      <div className="px-3 pt-3 pb-1 text-[11.5px] leading-relaxed text-fg-muted">Brand settings, shared by every variant. Open a variant to tune its shape.</div>
+      <div className="px-pad pt-3 pb-1 text-ui leading-relaxed text-fg-muted">Brand settings, shared by every variant. Open a variant to tune its shape.</div>
       <Inspector params={settings} />
     </>
   )
@@ -247,11 +247,11 @@ export function MarkPanel() {
   const diffs = B && b!.family === m.family ? Object.keys(A).filter((k) => JSON.stringify(A[k]) !== JSON.stringify(B[k])) : []
   return (
     <>
-      <div className="flex items-start gap-2.5 border-b border-line px-3 py-3">
-        <div className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-control text-fg-muted"><Icon size={15} strokeWidth={1.5} /></div>
+      <div className="flex items-start gap-2.5 border-b border-line px-pad py-3">
+        <div className="flex size-button-lg shrink-0 items-center justify-center rounded-[8px] bg-control text-fg-muted"><Icon size={15} strokeWidth={1.5} /></div>
         <div className="min-w-0 flex-1">
-          <div className="text-[12.5px] font-medium text-fg">{fam.name} <span className="font-normal tabular text-fg-faint">#{String(m.v.seed)}</span></div>
-          <div className="text-[11px] leading-snug text-fg-muted">{fam.blurb}</div>
+          <div className="text-title font-medium text-fg">{fam.name} <span className="font-normal tabular text-fg-faint">#{String(m.v.seed)}</span></div>
+          <div className="text-ui leading-snug text-fg-muted">{fam.blurb}</div>
         </div>
       </div>
       <div className="flex items-center gap-0.5 border-b border-line px-1.5 py-1.5">
@@ -270,26 +270,26 @@ export function MarkPanel() {
       </div>
       {b && (
         <Section title="Compare" first actions={<Badge tone="key">B</Badge>}>
-          <div className="flex items-center gap-1.5 px-3 pb-1.5 text-[11.5px] text-fg-muted">
+          <div className="flex items-center gap-1.5 px-pad pb-1.5 text-ui text-fg-muted">
             <span className="min-w-0 flex-1 truncate">A {markLabel(m)} · B {markLabel(b)}</span>
             <Button size="sm" onClick={swapCompare}><ArrowLeftRight size={12} strokeWidth={1.5} />Swap</Button>
           </div>
           {b.family !== m.family ? (
-            <div className="px-3 pb-1 text-[11.5px] leading-relaxed text-fg-muted">Different families. “Use B” replaces A’s family and shape with B’s.</div>
+            <div className="px-pad pb-1 text-ui leading-relaxed text-fg-muted">Different families. “Use B” replaces A’s family and shape with B’s.</div>
           ) : diffs.length ? diffs.map((k) => (
             <Row key={k} label={(fam.params.defs[k] as { label?: string })?.label ?? humanize(k)}
               trailing={<Button size="sm" onClick={() => adoptFromCompare(k)}>Use B</Button>}>
-              <span className="flex min-w-0 flex-1 items-center gap-1.5 tabular text-[11px]">
+              <span className="flex min-w-0 flex-1 items-center gap-1.5 tabular text-ui">
                 <span className="truncate text-fg">{fmt(A[k])}</span><span className="text-fg-faint">→</span><span className="truncate text-key">{fmt(B![k])}</span>
               </span>
             </Row>
-          )) : <div className="px-3 pb-1 text-[11.5px] text-fg-muted">Identical parameters.</div>}
-          <div className="px-3 pt-1.5"><Button variant="outline" size="md" className="w-full" onClick={() => adoptFromCompare()}>Use all of B</Button></div>
+          )) : <div className="px-pad pb-1 text-ui text-fg-muted">Identical parameters.</div>}
+          <div className="px-pad pt-1.5"><Button variant="outline" size="md" className="w-full" onClick={() => adoptFromCompare()}>Use all of B</Button></div>
         </Section>
       )}
       <Inspector params={fam.params} />
       <Section title="Export">
-        <div className="grid grid-cols-2 gap-1.5 px-3 pb-1">
+        <div className="grid grid-cols-2 gap-1.5 px-pad pb-1">
           <Button variant="default" size="md" onClick={() => exportMarkSVG(m.id)}><Download size={13} strokeWidth={1.5} />SVG</Button>
           <Button variant="default" size="md" onClick={() => void exportPNGSet(m.id)}><ImageIcon size={13} strokeWidth={1.5} />PNG set</Button>
           <Button variant="default" size="md" onClick={() => exportLockup('light', m.id)}>Lockup light</Button>
@@ -297,7 +297,7 @@ export function MarkPanel() {
           <Button variant="default" size="md" onClick={() => exportParams(m.id)}><FileJson size={13} strokeWidth={1.5} />Params</Button>
           <Button variant="default" size="md" onClick={() => void copyMarkSVG(m.id)}><Copy size={13} strokeWidth={1.5} />Copy SVG</Button>
         </div>
-        <div className="px-3 pt-1.5 text-[11px] leading-relaxed text-fg-faint">PNG set: {ICON_SIZES.map((i) => `${i.size}`).join(', ')} px, zipped with SVGs and params.</div>
+        <div className="px-pad pt-1.5 text-ui leading-relaxed text-fg-faint">PNG set: {ICON_SIZES.map((i) => `${i.size}`).join(', ')} px, zipped with SVGs and params.</div>
       </Section>
     </>
   )

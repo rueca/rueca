@@ -171,13 +171,13 @@ export function SpringField({ value, onChange, span, presets = SPRINGS, defaultP
         : <SpringGraph value={value} span={win} />}
       {!physics && (
         <div className="flex flex-col gap-0.5">
-          <div className="flex h-7 items-center gap-2">
+          <div className="flex h-row items-center gap-2">
             <span className="w-[58px] shrink-0 text-ui text-fg-muted">Duration</span>
             <Slider value={Math.min(2000, value.duration)} min={50} max={2000} step={10} label="Duration" onChange={(d, f) => onChange({ ...value, duration: d }, f)} />
             <ScrubValue value={value.duration} min={50} max={4000} step={10} unit="ms" className="w-[56px] shrink-0" label="Duration"
               onChange={(d, f) => onChange({ ...value, duration: d }, f)} defaultValue={500} />
           </div>
-          <div className="flex h-7 items-center gap-2">
+          <div className="flex h-row items-center gap-2">
             <span className="w-[58px] shrink-0 text-ui text-fg-muted">Bounce</span>
             <Slider value={value.bounce} min={-0.5} max={0.9} step={0.01} origin={0} label="Bounce" onChange={(b, f) => onChange({ ...value, bounce: b }, f)} />
             {/* edited in percent so typing 30 means 30% */}
@@ -189,7 +189,7 @@ export function SpringField({ value, onChange, span, presets = SPRINGS, defaultP
       <div className="flex items-center gap-1">
         {Object.entries(presets).map(([n, p]) => (
           <button key={n} type="button" aria-pressed={presetName === n} onClick={() => onChange(p, true)}
-            className={cn('h-5 rounded-[5px] px-1.5 text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal', presetName === n ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
+            className={cn('h-icon-sm rounded-control px-1.5 text-ui-sm outline-none focus-visible:ring-2 focus-visible:ring-signal', presetName === n ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
             {n}
           </button>
         ))}

@@ -110,13 +110,13 @@ export function ViewportFrame({
           </div>
         )}
         <ScrubValue boxed value={width} min={min} max={max} step={1} unit="px" label={`${label} width`} onChange={(v, f) => onWidth(v, f)} className="w-[76px]" />
-        {scale < 1 && <Tip label="The frame is wider than the stage and is shown scaled down"><span className="tabular text-[11px] text-fg-faint">{Math.round(scale * 100)}%</span></Tip>}
+        {scale < 1 && <Tip label="The frame is wider than the stage and is shown scaled down"><span className="tabular text-ui text-fg-faint">{Math.round(scale * 100)}%</span></Tip>}
         {toolbar}
       </div>}
       <div ref={stage} className="relative min-h-0 flex-1 overflow-auto">
         <div className="flex min-h-full items-start justify-center px-6 pt-6 pb-16">
           <div className="relative" style={{ width: width * scale }}>
-            <div className="relative mb-2 h-5 tabular text-[10.5px] text-fg-faint no-select">
+            <div className="relative mb-2 h-5 tabular text-ui-sm text-fg-faint no-select">
               <div className="absolute inset-x-0 top-2.5 h-px bg-line" />
               {presets.filter((p) => p.width < width).flatMap((p) => [-1, 1].map((side) => (
                 <Tip key={p.label + side} label={`${p.label} · ${p.width}px`}>

@@ -93,8 +93,6 @@ export default function JourneyShell() {
   return (
     <Studio
       layout="docked"
-      leftWidth={256}
-      rightWidth={300}
       toolbar={
         <Toolbar
           start={<Brand name="Journey" doc={title} mark={Mark} />}

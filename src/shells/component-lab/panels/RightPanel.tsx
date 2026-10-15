@@ -17,7 +17,7 @@ export function TokensPanel() {
   const accentChanged = !equal([t.accentL, t.accentC, t.accentH], [defaults.accentL, defaults.accentC, defaults.accentH])
   return (
     <div className="flex flex-col">
-      <div className="grid grid-cols-2 gap-1.5 p-3">
+      <div className="grid grid-cols-2 gap-1.5 p-pad">
         {presets.map((p) => {
           const v = { ...defaults, ...p.values }
           const on = equal(v, t)
@@ -27,15 +27,15 @@ export function TokensPanel() {
               <span className="flex size-7 shrink-0 items-center justify-center text-[11px] font-semibold"
                 style={{ background: hexOf(v.accentL, v.accentC, v.accentH), borderRadius: Math.min(14, v.radius), boxShadow: v.shadow === 'hard' ? '2px 2px 0 0 currentColor' : undefined, color: v.accentL > 0.75 ? WIRE.ink : WIRE.paper }}>Aa</span>
               <span className="flex min-w-0 flex-col">
-                <span className="truncate text-[11.5px] font-medium text-fg">{p.name}</span>
-                <span className="truncate text-[10.5px] text-fg-faint">{v.radius}px · {v.density}</span>
+                <span className="truncate text-ui font-medium text-fg">{p.name}</span>
+                <span className="truncate text-ui-sm text-fg-faint">{v.radius}px · {v.density}</span>
               </span>
             </button>
           )
         })}
       </div>
       <Section title="Accent" changed={accentChanged} onReset={accentChanged ? () => tokens.reset(['accentL', 'accentC', 'accentH']) : undefined}>
-        <div className="px-3 pb-1">
+        <div className="px-pad pb-1">
           <OklchField value={{ l: t.accentL, c: t.accentC, h: t.accentH }} onChange={(v, f) => tokens.patch({ accentL: v.l, accentC: v.c, accentH: v.h }, { commit: f })} />
         </div>
         <Row label="Neutral tint" hint={tokens.defs.neutralTint.hint} changed={t.neutralTint !== defaults.neutralTint} onReset={() => tokens.reset(['neutralTint'])}>
@@ -46,9 +46,10 @@ export function TokensPanel() {
       <div className="border-t border-line"><Inspector params={tokens} folders={['shape', 'type', 'density']} /></div>
       <Section title={`Contrast · ${theme}`}>
         {report.map((r) => (
-          <Row key={r.label} label={r.label}>
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-[4px] text-[10px] font-semibold shadow-[inset_0_0_0_1px_var(--line)]" style={{ background: r.bg, color: r.fg }}>Aa</span>
-            <span className="flex-1 text-right tabular text-[11.5px] text-fg">{r.ratio.toFixed(2)}:1</span>
+          <Row key={r.label}>
+            <span className="flex size-icon-sm shrink-0 items-center justify-center rounded-[4px] text-ui-sm font-semibold shadow-[inset_0_0_0_1px_var(--line)]" style={{ background: r.bg, color: r.fg }}>Aa</span>
+            <span className="min-w-0 flex-1 truncate text-ui font-[450] text-fg-faint">{r.label}</span>
+            <span className="shrink-0 text-right tabular text-ui text-fg">{r.ratio.toFixed(2)}:1</span>
             <Tip label={r.ratio >= 4.5 ? 'Passes WCAG AA for body text' : r.ratio >= 3 ? 'Passes AA for large text and UI only' : 'Fails WCAG AA'}>
               <span><Badge tone={r.ratio >= 4.5 ? 'ok' : r.ratio >= 3 ? 'key' : 'rec'}>{grade(r.ratio)}</Badge></span>
             </Tip>
@@ -68,7 +69,7 @@ export function CodePanel() {
   const css = tokensCSS(t)
   const downloadTokens = () => codeTab === 'json' ? exportJSON(tokensDTCG(t), 'tokens.json') : download(new Blob([codeTab === 'css' ? css : tokensTailwind(t)], { type: 'text/css' }), codeTab === 'css' ? 'tokens.css' : 'theme.css')
   return (
-    <div className="flex flex-col gap-3 p-3">
+    <div className="flex flex-col gap-3 p-pad">
       <CodeBlock code={jsxFor(comp)} lang="jsx" title={`${file} · current props`} />
       <CodeBlock
         tab={codeTab}

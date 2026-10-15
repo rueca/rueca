@@ -373,8 +373,6 @@ export default function DevelopShell() {
   return (
     <Studio
       layout="docked"
-      leftWidth={264}
-      rightWidth={308}
       toolbar={
         <Toolbar
           start={<Brand name="Develop" doc={s.file} mark={mark} />}
@@ -406,15 +404,16 @@ export default function DevelopShell() {
       left={
         <Panel>
           <Section title="Navigator" persistKey="photo:navigator" first>
-            <Navigator camera={cam} content={out} image={nav} />
+            <Navigator camera={cam} content={out} image={nav} zoomPresets={false} className="px-pad pb-1" />
+            <NavigatorZoom />
           </Section>
           <Section title="History" persistKey="photo:history" actions={<HistoryCount />}>
             <HistoryList history={history} openLabel="Open" className="px-1.5" />
           </Section>
           <Section title="Photo" persistKey="photo:photo">
-            <div className="flex flex-col gap-2 px-3">
+            <div className="flex flex-col gap-2 px-pad">
               <ImageDrop value={null} onChange={(url) => url && openURL(url, 'Pasted photo')} compact />
-              <div className="flex items-center justify-between text-[11.5px]">
+              <div className="flex items-center justify-between text-ui">
                 <span className="truncate text-fg-muted">{s.file}</span>
                 <span className="tabular text-fg-faint">{W} × {H}</span>
               </div>
@@ -422,7 +421,7 @@ export default function DevelopShell() {
                 <Button size="md" variant="default" className="flex-1" onClick={intake.open}><ImageUp size={13} strokeWidth={1.5} />Open…</Button>
                 <Button size="md" variant="default" className="flex-1" onClick={() => openSample(true)}><Images size={13} strokeWidth={1.5} />Sample</Button>
               </div>
-              <p className="text-[11px] leading-relaxed text-fg-faint">Drop or paste a photo anywhere. Edits never touch the pixels — every setting is re-applied live from the original.</p>
+              <p className="text-ui leading-relaxed text-fg-faint">Drop or paste a photo anywhere. Edits never touch the pixels — every setting is re-applied live from the original.</p>
             </div>
           </Section>
         </Panel>
@@ -445,7 +444,7 @@ export default function DevelopShell() {
             onRemove={(id) => ui.setState((x) => ({ userLooks: x.userLooks.filter((l) => l.id !== id) }))}
           />
           <button type="button" onClick={saveLook}
-            className="mt-[28px] mr-3 flex shrink-0 flex-col items-center justify-center gap-1 rounded-[8px] text-[11.5px] text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"
+            className="mt-[28px] mr-3 flex shrink-0 flex-col items-center justify-center gap-1 rounded-[8px] text-ui text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"
             style={{ width: 120, height: 80, boxShadow: 'inset 0 0 0 1px var(--line-strong)' }}>
             <Plus size={16} strokeWidth={1.5} />Save look
           </button>
@@ -482,7 +481,7 @@ export default function DevelopShell() {
             <Empty icon={X} title="The develop engine couldn’t start" hint={`It needs WebGL2. ${failed}`} />
           </div>
         )}
-        {intake.over && <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-[12px] bg-signal-soft text-[13px] font-medium text-signal shadow-[inset_0_0_0_2px_var(--signal)]">Drop to open</div>}
+        {intake.over && <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-[12px] bg-signal-soft text-title font-medium text-signal shadow-[inset_0_0_0_2px_var(--signal)]">Drop to open</div>}
       </div>
       <CommandPalette
         commands={commands}
@@ -500,9 +499,23 @@ export default function DevelopShell() {
   )
 }
 
+/* Lightroom's ratios: "100%" and "200%" truncated in the sidebar */
+const NAV_ZOOM = [{ value: 'fit', label: 'Fit' }, { value: '0.5', label: '1:2', hint: '50%' }, { value: '1', label: '1:1', hint: '100%' }, { value: '2', label: '2:1', hint: '200%' }]
+function NavigatorZoom() {
+  const zoom = useStore(cam, (c) => c.zoom)
+  const preset = NAV_ZOOM.find((o) => o.value !== 'fit' && Math.abs(zoom - Number(o.value)) < 0.005)
+  return (
+    <div className="flex items-center gap-2 px-pad pt-1 pb-1">
+      <Segmented size="sm" label="Zoom" value={preset?.value ?? 'fit'} options={NAV_ZOOM}
+        onChange={(z) => { if (z === 'fit') { cam.untouch(); cam.fit() } else { cam.touch(); cam.zoomTo(Number(z)) } }} />
+      <span className="w-10 shrink-0 text-right text-ui tabular text-fg-faint">{Math.round(zoom * 100)}%</span>
+    </div>
+  )
+}
+
 function HistoryCount() {
   const n = useStore(history, (h) => h.past.length + 1)
-  return <span className="pr-1 text-[11px] tabular text-fg-faint">{n}</span>
+  return <span className="pr-1 text-ui tabular text-fg-faint">{n}</span>
 }
 
 /* ===== stage overlay: crop bar + status chips ===== */
@@ -510,11 +523,11 @@ function StageOverlay() {
   const s = useStore(ui)
   const d = s.cropping
   const preview = s.preview ? lookById(s.preview)?.name : null
-  const chip = 'cluster absolute top-3 left-1/2 flex h-8 -translate-x-1/2 items-center gap-2 px-3 text-[12px]'
+  const chip = 'cluster absolute top-3 left-1/2 flex h-bar -translate-x-1/2 items-center gap-2 px-pad text-ui'
   if (d)
     return (
-      <div className="cluster absolute top-3 left-1/2 flex h-10 max-w-[calc(100%-24px)] -translate-x-1/2 items-center gap-1.5 overflow-x-auto px-2">
-        <span className="shrink-0 pl-1 text-[11.5px] text-fg-muted">Aspect</span>
+      <div className="cluster absolute top-3 left-1/2 flex h-bar max-w-[calc(100%-24px)] -translate-x-1/2 items-center gap-1.5 overflow-x-auto px-2">
+        <span className="shrink-0 pl-1 text-ui text-fg-muted">Aspect</span>
         <div className="w-[268px] shrink-0">
           <Segmented size="sm" label="Aspect" value={presetOf(d.aspect)} onChange={setAspect} options={ASPECTS.map((a) => ({ value: a.value, label: a.label }))} />
         </div>
@@ -522,7 +535,7 @@ function StageOverlay() {
         <ScrubValue boxed prefix="W" value={Math.round(d.crop.w * s.imageSize.w)} onChange={(x) => setCropSize('w', x)} min={16} max={s.imageSize.w} step={1} unit="px" label="Crop width" className="w-[78px] shrink-0" />
         <ScrubValue boxed prefix="H" value={Math.round(d.crop.h * s.imageSize.h)} onChange={(x) => setCropSize('h', x)} min={16} max={s.imageSize.h} step={1} unit="px" label="Crop height" className="w-[78px] shrink-0" />
         <Divider vertical />
-        <span className="shrink-0 text-[11.5px] text-fg-muted">Straighten</span>
+        <span className="shrink-0 text-ui text-fg-muted">Straighten</span>
         <div className="w-[112px] shrink-0"><GradientSlider value={d.angle} onChange={(a) => setAngle(a)} min={-45} max={45} step={0.1} origin={0} label="Straighten" /></div>
         <ScrubValue value={d.angle} onChange={(a) => setAngle(a)} min={-45} max={45} step={0.1} unit="°" defaultValue={0} label="Straighten angle" className="w-[50px] shrink-0" />
         <Divider vertical />
@@ -541,13 +554,13 @@ function HistogramCard({ out, active }: { out: { w: number; h: number }; active:
   const bins = useStore(stats, (x) => x.bins)
   const clip = useStore(ui, (x) => x.clip)
   return (
-    <div className="border-b border-line p-3">
+    <div className="border-b border-line p-pad">
       <Histogram
         bins={bins}
         clip={clip}
         onClip={(which) => ui.setState((x) => ({ clip: { ...x.clip, [which]: !x.clip[which] } }))}
         footer={
-          <div className="flex items-center gap-2 text-[11px]">
+          <div className="flex items-center gap-2 text-ui">
             <span className="tabular text-fg-muted">{out.w} × {out.h}</span>
             <span className="text-fg-faint">·</span>
             <span className="text-fg-faint">sRGB</span>
@@ -567,7 +580,7 @@ const HSL_KEYS = BANDS.flatMap((b) => ['h', 's', 'l'].map((c) => `hsl_${b.id}_${
 const VIG_KEYS = ['vignette', 'vigMid', 'vigFeather']
 const GRAIN_KEYS = ['grain', 'grainSize']
 const SHARP_KEYS = ['sharpen', 'sharpRadius']
-const sub = (t: string) => <div className="px-3 pt-2 pb-0.5 text-[11px] text-fg-faint no-select">{t}</div>
+const sub = (t: string) => <div className="px-pad pt-2 pb-0.5 text-ui text-fg-faint no-select">{t}</div>
 
 function Adjustments({ v }: { v: V }) {
   const s = useStore(ui)
@@ -597,14 +610,14 @@ function Adjustments({ v }: { v: V }) {
         <Slide k="saturation" track={TRACK.sat} />
       </Section>
       <Section title="Tone curve" persistKey="photo:curve" changed={changedOf(v, CURVE_KEYS)} onReset={changedOf(v, CURVE_KEYS) ? resetKeys('Tone curve', CURVE_KEYS) : undefined}>
-        <div className="flex flex-col gap-2 px-3">
+        <div className="flex flex-col gap-2 px-pad">
           <Segmented size="sm" label="Curve channel" value={ch} onChange={(c) => ui.setState({ curveChannel: c as typeof ch })}
             options={[{ value: 'RGB', label: 'RGB' }, { value: 'R', label: 'Red' }, { value: 'G', label: 'Green' }, { value: 'B', label: 'Blue' }]} />
           <ToneCurve value={pts} onChange={(p, final) => params.setValue(ck, p, { commit: final, label: curveStep })} color={ccolor} histogram={chist} label={`${ch} tone curve`} />
           <div className="flex gap-1">
             {([['Linear', [[0, 0], [1, 1]]], ['Medium', [[0, 0], [0.25, 0.21], [0.75, 0.8], [1, 1]]], ['Strong', [[0, 0], [0.25, 0.17], [0.75, 0.85], [1, 1]]]] as [string, CurvePoint[]][]).map(([n, p]) => (
               <button key={n} type="button" onClick={() => curvePreset(p, n)}
-                className={cn('h-5 flex-1 rounded-[5px] text-[10.5px] outline-none focus-visible:ring-2 focus-visible:ring-signal', JSON.stringify(p) === JSON.stringify(pts) ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted hover:text-fg')}>
+                className={cn('h-control-sm flex-1 rounded-[5px] text-ui-sm outline-none focus-visible:ring-2 focus-visible:ring-signal', JSON.stringify(p) === JSON.stringify(pts) ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted hover:text-fg')}>
                 {n === 'Linear' ? n : `${n} contrast`}
               </button>
             ))}
@@ -612,7 +625,7 @@ function Adjustments({ v }: { v: V }) {
         </div>
       </Section>
       <Section title="Colour mixer" persistKey="photo:mixer" changed={changedOf(v, HSL_KEYS)} onReset={changedOf(v, HSL_KEYS) ? resetKeys('Colour mixer', HSL_KEYS) : undefined}>
-        <div className="px-3 pb-1">
+        <div className="px-pad pb-1">
           <Segmented size="sm" label="Mixer mode" value={s.hslMode} onChange={(m) => ui.setState({ hslMode: m as 'h' | 's' | 'l' })}
             options={[{ value: 'h', label: 'Hue' }, { value: 's', label: 'Saturation' }, { value: 'l', label: 'Luminance' }]} />
         </div>
@@ -646,10 +659,10 @@ function CropSummary({ v }: { v: V }) {
   const changed = changedOf(v, keys)
   return (
     <Section title="Crop & straighten" persistKey="photo:crop" changed={changed} onReset={changed ? resetKeys('Crop', keys) : undefined}>
-      <Row label="Aspect"><span className="flex-1 text-right text-[11.5px] text-fg tabular">{ASPECTS.find((a) => a.value === v.aspect)?.label ?? v.aspect}</span></Row>
-      <Row label="Straighten"><span className="flex-1 text-right text-[11.5px] text-fg tabular">{v.angle > 0 ? '+' : ''}{Number(v.angle).toFixed(1)}°</span></Row>
-      <Row label="Output"><span className="flex-1 text-right text-[11.5px] text-fg tabular">{Math.round(crop.w * size.w)} × {Math.round(crop.h * size.h)}</span></Row>
-      <div className="px-3 pt-1.5">
+      <Row label="Aspect"><span className="flex-1 text-right text-ui text-fg tabular">{ASPECTS.find((a) => a.value === v.aspect)?.label ?? v.aspect}</span></Row>
+      <Row label="Straighten"><span className="flex-1 text-right text-ui text-fg tabular">{v.angle > 0 ? '+' : ''}{Number(v.angle).toFixed(1)}°</span></Row>
+      <Row label="Output"><span className="flex-1 text-right text-ui text-fg tabular">{Math.round(crop.w * size.w)} × {Math.round(crop.h * size.h)}</span></Row>
+      <div className="px-pad pt-1.5">
         <Button size="md" variant="default" className="w-full" onClick={enterCrop}><Crop size={13} strokeWidth={1.5} />Edit crop <Kbd>C</Kbd></Button>
       </div>
     </Section>
@@ -683,18 +696,18 @@ function ExportPopover({ open, onOpenChange, out, disabled }: { open: boolean; o
               </Row>
             )}
             <Row label="Long edge"><Segmented size="sm" label="Size" value={size} onChange={setSize} options={[{ value: 'full', label: 'Full' }, { value: '2048', label: '2048' }, { value: '1080', label: '1080' }]} /></Row>
-            <Row label="Pixels"><span className="flex-1 text-right text-[11.5px] tabular text-fg">{dims}</span></Row>
+            <Row label="Pixels"><span className="flex-1 text-right text-ui tabular text-fg">{dims}</span></Row>
             <Row label="File name"><TextInput value={name} placeholder={file.replace(/\.[a-z0-9]+$/i, '')} onChange={setName} label="File name" /></Row>
-            <div className="px-3 pt-2">
+            <div className="px-pad pt-2">
               <Button variant="primary" size="md" className="w-full" onClick={() => { onOpenChange(false); exportImage({ format, quality, long, name: base }) }}>
                 Export {format === 'jpeg' ? 'JPG' : 'PNG'} · {dims}
               </Button>
             </div>
-            <div className="mx-3 my-2.5 h-px bg-line" />
+            <div className="mx-pad my-2.5 h-px bg-line" />
             <Row label="Look as LUT" hint="A 3D lookup table of the global colour and tone settings, for Resolve, Premiere, OBS or a camera monitor.">
               <Segmented size="sm" label="LUT size" value={lut} onChange={setLut} options={[{ value: '17', label: '17³' }, { value: '33', label: '33³' }, { value: '65', label: '65³' }]} />
             </Row>
-            <div className="px-3 pt-1.5">
+            <div className="px-pad pt-1.5">
               <Button variant="default" size="md" className="w-full" onClick={() => { onOpenChange(false); exportCube(Number(lut)) }}><Palette size={13} strokeWidth={1.5} />Export .cube</Button>
             </div>
           </Popover.Popup>

@@ -79,7 +79,7 @@ export function Matrix() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className={cn('flex flex-none items-center justify-center gap-2 px-4 pt-3 pb-2', present && 'invisible')}>
-        <span className="text-[11.5px] text-fg-muted tabular">{m.variants.length} variants × {m.states.length} states{zoom < 1 ? ` · ${Math.round(zoom * 100)}%` : ''}</span>
+        <span className="text-ui text-fg-muted tabular">{m.variants.length} variants × {m.states.length} states{zoom < 1 ? ` · ${Math.round(zoom * 100)}%` : ''}</span>
         <div className="w-[120px]">
           <Segmented size="sm" iconOnly value={both ? 'both' : theme} label="Matrix theme"
             onChange={(t) => (t === 'both' ? setUI({ matrixThemes: 'both' }) : setUI({ matrixThemes: 'one', previewTheme: t as Theme }))}
@@ -90,7 +90,7 @@ export function Matrix() {
         <div className={cn('flex w-max min-w-full gap-8 px-8 pt-4 pb-16', both ? 'flex-col items-center' : 'justify-center')} style={{ zoom }}>
           {(both ? (['light', 'dark'] as Theme[]) : [theme]).map((t) => (
             <div key={t} className="flex flex-col gap-2">
-              {both && <div className="text-[11.5px] font-medium text-fg-muted">{t === 'light' ? 'Light' : 'Dark'}</div>}
+              {both && <div className="text-ui font-medium text-fg-muted">{t === 'light' ? 'Light' : 'Dark'}</div>}
               <Grid comp={comp} theme={t} />
             </div>
           ))}

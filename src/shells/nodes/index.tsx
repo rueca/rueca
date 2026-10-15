@@ -112,8 +112,6 @@ export default function NodesShell() {
   return (
     <ReactFlowProvider>
       <Studio
-        leftWidth={232}
-        rightWidth={296}
         toolbar={
           <Toolbar
             start={<Brand name="Nodes" mark={mark} doc={<InlineText value={name} onCommit={(n) => { graph.setState({ name: n }); commit() }} label="Rename graph" className="block truncate" />} />}

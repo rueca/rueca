@@ -115,6 +115,7 @@ export interface EffectStackProps<T extends StackItem> {
   grip?: boolean
   /** right-click menu (default true) */
   contextMenu?: boolean
+  /** minimum row height (px); default the density's row plus 2 */
   rowHeight?: number
   className?: string
 }
@@ -124,7 +125,7 @@ const INTERACTIVE = 'button,input,textarea,select,a[href],[role="spinbutton"],[r
 export function EffectStack<T extends StackItem>({
   items, order = 'top-first', selected = null, onSelect, onChange, onToggle, onOpacity, onBlend, onMove, onRemove, onDuplicate, onRename,
   blendOptions = [], renderRow, renderDetails, expanded: expandedProp, defaultExpanded = [], onExpandedChange, mixed, mixedHint = 'Mixed. Add one to replace them all',
-  empty, label = 'Layers', removeIcon = 'trash', grip, contextMenu = true, rowHeight = 30, className,
+  empty, label = 'Layers', removeIcon = 'trash', grip, contextMenu = true, rowHeight, className,
 }: EffectStackProps<T>) {
   const [drag, setDrag] = useState<{ id: string; to: number } | null>(null)
   const [editing, setEditing] = useState<string | null>(null)
@@ -206,7 +207,7 @@ export function EffectStack<T extends StackItem>({
     }
   }
 
-  if (mixed) return <div className={cn('px-3 py-1.5 text-[11.5px] text-fg-faint', className)}>{mixedHint}</div>
+  if (mixed) return <div className={cn('px-pad py-1.5 text-ui text-fg-faint', className)}>{mixedHint}</div>
   if (!items.length) return <>{empty}</>
 
   const showGrip = grip ?? !!renderRow
@@ -251,26 +252,26 @@ export function EffectStack<T extends StackItem>({
                 else if ((k === 'Delete' || k === 'Backspace') && remove) { done(); remove(it.id); focusRow(display[i + 1]?.id ?? display[i - 1]?.id) }
               }}
               className={cn(
-                'group/row relative mx-1.5 flex shrink-0 items-center gap-1.5 rounded-[6px] pr-1 text-[12px] outline-none no-select',
-                showGrip || renderDetails ? 'pl-0.5' : 'pl-2',
+                'group/row relative mx-1.5 flex shrink-0 items-center gap-1 rounded-control pr-1 text-ui outline-none no-select',
+                showGrip || renderDetails ? 'pl-0.5' : 'pl-1.5',
                 sel ? 'bg-signal-soft text-fg' : 'text-fg hover:bg-hover',
                 hidden && 'text-fg-faint',
                 drag?.id === it.id && 'opacity-40',
                 'focus-visible:ring-2 focus-visible:ring-signal',
               )}
-              style={{ minHeight: rowHeight }}
+              style={{ minHeight: rowHeight ?? 'calc(var(--row) + 2px)' }}
             >
               <div role="gridcell" className="contents">
               {showGrip && (
                 <span aria-hidden onPointerDown={(e) => { e.stopPropagation(); startDrag(e, it.id, true) }}
-                  className={cn('flex h-6 w-3 shrink-0 cursor-grab items-center justify-center text-fg-faint opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100', (!canMove || display.length < 2) && 'invisible')}>
+                  className={cn('flex h-control w-3 shrink-0 cursor-grab items-center justify-center text-fg-faint opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100', (!canMove || display.length < 2) && 'invisible')}>
                   <GripVertical size={12} strokeWidth={1.5} />
                 </span>
               )}
               {renderDetails && (
                 <button type="button" tabIndex={-1} aria-label={open ? `Collapse ${name}` : `Expand ${name}`}
                   onClick={(e) => { e.stopPropagation(); setExpanded(open ? expanded.filter((x) => x !== it.id) : [...expanded, it.id]) }}
-                  className="flex size-5 shrink-0 items-center justify-center rounded-[4px] text-fg-faint outline-none hover:text-fg">
+                  className="flex size-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none hover:text-fg">
                   <ChevronRight size={11} strokeWidth={2} className={cn('transition-transform duration-150', open && 'rotate-90')} />
                 </button>
               )}
@@ -291,7 +292,7 @@ export function EffectStack<T extends StackItem>({
                   onPointerDown={(e) => e.stopPropagation()}
                   onBlur={(e) => { rename?.(it.id, e.target.value.trim() || name); setEditing(null); focusRow(it.id) }}
                   onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') { setEditing(null); focusRow(it.id) } }}
-                  className="h-5 min-w-0 flex-1 rounded-[4px] bg-control px-1 text-[12px] text-fg shadow-[inset_0_0_0_1px_var(--signal)] outline-none"
+                  className="h-control-sm min-w-0 flex-1 rounded-control bg-control px-1 text-ui text-fg shadow-[inset_0_0_0_1px_var(--signal)] outline-none"
                 />
               ) : renderRow ? (
                 <div className={cn('flex min-w-0 flex-1 items-center gap-1.5', hidden && 'opacity-50')}>{renderRow(it, c)}</div>
@@ -299,22 +300,32 @@ export function EffectStack<T extends StackItem>({
                 <span className={cn('min-w-0 flex-1 truncate', hidden && 'line-through decoration-[var(--line-strong)]')}>{name}</span>
               )}
 
+              {/* the hover-revealed trash takes no room at rest, so narrow panels keep the name; it sits before the
+                  values so nothing under the pointer moves when it appears */}
+              {remove && removeIcon === 'trash' && (
+                <Tip label="Remove">
+                  <button type="button" aria-label={`Remove ${name}`} onClick={(e) => { e.stopPropagation(); remove(it.id) }}
+                    className="hidden size-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none group-focus-within/row:flex group-hover/row:flex hover:bg-hover hover:text-rec focus-visible:ring-2 focus-visible:ring-signal">
+                    <Trash2 size={13} strokeWidth={1.5} />
+                  </button>
+                </Tip>
+              )}
               <div className="flex shrink-0 items-center">
                 {it.blend !== undefined && setBlend && blendOptions.length > 0 ? (
                   <Menu
                     align="end"
                     trigger={
                       <button type="button" aria-label={`Blend mode: ${blendLabel}`}
-                        className="h-5 max-w-[72px] truncate rounded-[4px] px-1 text-[11px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover data-[popup-open]:text-fg">
+                        className="h-control-sm max-w-[72px] truncate rounded-control px-0.5 text-ui text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover data-[popup-open]:text-fg">
                         {blendLabel}
                       </button>
                     }
                     items={[{ type: 'label', label: 'Blend mode' }, ...blendOptions.map((b) => ({ label: b.label, checked: b.value === it.blend, onClick: () => setBlend(it.id, b.value) }))]}
                   />
                 ) : it.blend !== undefined ? (
-                  <span className="max-w-[72px] truncate px-1 text-[11px] text-fg-faint">{blendLabel}</span>
+                  <span className="max-w-[72px] truncate px-0.5 text-ui text-fg-faint">{blendLabel}</span>
                 ) : it.meta != null ? (
-                  <span className="max-w-[72px] truncate px-1 text-[11px] text-fg-faint">{it.meta}</span>
+                  <span className="max-w-[72px] truncate px-0.5 text-ui text-fg-faint">{it.meta}</span>
                 ) : null}
                 {it.opacity !== undefined && setOpacity && (
                   <ScrubValue value={Math.round(it.opacity * 100)} min={0} max={100} step={1} unit="%" label={`${name || 'Item'} opacity`} changed={it.opacity < 1}
@@ -324,17 +335,16 @@ export function EffectStack<T extends StackItem>({
                   <Tip label={hidden ? 'Show' : 'Hide'}>
                     <button type="button" aria-label={hidden ? `Show ${name}` : `Hide ${name}`} aria-pressed={hidden}
                       onClick={(e) => { e.stopPropagation(); toggle(it.id) }}
-                      className={cn('flex size-6 items-center justify-center rounded-[5px] outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', hidden ? 'text-fg-muted' : 'text-fg-faint')}>
+                      className={cn('flex size-icon-sm items-center justify-center rounded-control outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', hidden ? 'text-fg-muted' : 'text-fg-faint')}>
                       {hidden ? <EyeOff size={13} strokeWidth={1.5} /> : <Eye size={13} strokeWidth={1.5} />}
                     </button>
                   </Tip>
                 )}
-                {remove && (
+                {remove && removeIcon === 'minus' && (
                   <Tip label="Remove">
                     <button type="button" aria-label={`Remove ${name}`} onClick={(e) => { e.stopPropagation(); remove(it.id) }}
-                      className={cn('flex size-6 items-center justify-center rounded-[5px] text-fg-faint outline-none hover:bg-hover focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal',
-                        removeIcon === 'minus' ? 'hover:text-fg' : 'opacity-0 group-focus-within/row:opacity-100 group-hover/row:opacity-100 hover:text-rec')}>
-                      {removeIcon === 'minus' ? <Minus size={13} strokeWidth={1.5} /> : <Trash2 size={13} strokeWidth={1.5} />}
+                      className="flex size-icon-sm items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+                      <Minus size={13} strokeWidth={1.5} />
                     </button>
                   </Tip>
                 )}
@@ -395,10 +405,10 @@ function InsertLine({ bottom }: { bottom?: boolean }) {
 function CtxItem({ icon: I, label, hint, onClick, danger, disabled }: { icon: Icon; label: string; hint?: string; onClick: () => void; danger?: boolean; disabled?: boolean }) {
   return (
     <ContextMenu.Item disabled={disabled} onClick={onClick}
-      className={cn('group/item flex h-7 cursor-default items-center gap-2 rounded-[5px] px-2 text-[12px] outline-none select-none data-[disabled]:opacity-40 data-[highlighted]:bg-signal-strong data-[highlighted]:text-signal-fg', danger ? 'text-rec' : 'text-fg')}>
+      className={cn('group/item flex h-icon cursor-default items-center gap-2 rounded-control px-2 text-ui outline-none select-none data-[disabled]:opacity-40 data-[highlighted]:bg-signal-strong data-[highlighted]:text-signal-fg', danger ? 'text-rec' : 'text-fg')}>
       <span className="flex w-4 justify-center text-fg-muted group-data-[highlighted]/item:text-signal-fg"><I size={14} strokeWidth={1.5} /></span>
       <span className="flex-1">{label}</span>
-      {hint && <span className="text-[11px] text-fg-faint group-data-[highlighted]/item:text-signal-fg/70">{hint}</span>}
+      {hint && <span className="text-ui text-fg-faint group-data-[highlighted]/item:text-signal-fg/70">{hint}</span>}
     </ContextMenu.Item>
   )
 }
