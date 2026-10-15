@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { useStore } from 'zustand'
 import {
-  ArrowLeft, ChevronLeft, ChevronRight, Columns2, Copy, Dices, Download, FileJson, Image as ImageIcon, LayoutGrid, Lock, LockOpen, Shuffle, Sparkles, Star,
-  ArrowLeftRight, RotateCcw, Hash, Ruler, Eraser,
+  ArrowLeft, ChevronLeft, ChevronRight, Columns2, Copy, Dices, Download, FileJson, Image as ImageIcon, LayoutGrid, Lock, LockOpen, Shuffle, Star,
+  ArrowLeftRight, RotateCcw, Hash, Ruler, Grid2x2Plus, PenTool, StarOff,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Button, IconButton, Menu, Divider, Segmented, PresetMenu, ThemeToggle, CommandPalette, Kbd,
@@ -47,7 +47,7 @@ export default function MarksShell() {
 
   const exportItems = [
     { type: 'label' as const, label: curMark ? `Export ${markLabel(curMark)}` : 'Export' },
-    { label: 'SVG', icon: Download, shortcut: 'mod+e', onClick: () => exportMarkSVG() },
+    { label: 'SVG', icon: PenTool, shortcut: 'mod+e', onClick: () => exportMarkSVG() },
     { label: 'PNG icon set (zip)', icon: ImageIcon, hint: '32 · 180 · 512 · 1024', shortcut: 'shift+mod+e', onClick: () => void exportPNGSet() },
     { label: 'Light lockup (SVG)', onClick: () => exportLockup('light') },
     { label: 'Dark lockup (SVG)', onClick: () => exportLockup('dark') },
@@ -80,18 +80,18 @@ export default function MarksShell() {
     ]),
     { id: 'lock', label: 'Keep / unlock', group: 'Variant', shortcut: 'l', icon: Lock, run: () => toggleLock() },
     { id: 'fav', label: 'Favourite / unfavourite', group: 'Variant', shortcut: 'f', icon: Star, run: () => toggleFav() },
-    { id: 'more', label: 'More like this', group: 'Variant', shortcut: 'm', icon: Sparkles, run: () => moreLikeThis() },
+    { id: 'more', label: 'More like this', group: 'Variant', shortcut: 'm', icon: Grid2x2Plus, run: () => moreLikeThis() },
     { id: 'seed', label: 'New seed (same params)', group: 'Variant', shortcut: 'r', icon: Hash, run: () => newSeed() },
     { id: 'shuffle', label: 'Shuffle params (same family)', group: 'Variant', shortcut: 'shift+r', icon: Shuffle, run: () => rerollParams() },
     ...FAMILIES.map((f, i) => ({ id: `fam-${f.id}`, label: `Only ${f.name.toLowerCase()} marks`, group: 'Families', shortcut: String(i + 1), icon: f.icon, run: () => setFamily(f.id) })),
     { id: 'fam-all', label: 'All families', group: 'Families', shortcut: '0', icon: LayoutGrid, run: () => setFamily('all') },
-    { id: 'svg', label: 'Export SVG', group: 'Export', shortcut: 'mod+e', icon: Download, run: () => exportMarkSVG() },
+    { id: 'svg', label: 'Export SVG', group: 'Export', shortcut: 'mod+e', icon: PenTool, run: () => exportMarkSVG() },
     { id: 'png', label: 'Export PNG icon set (32, 180, 512, 1024)', group: 'Export', shortcut: 'shift+mod+e', icon: ImageIcon, run: () => void exportPNGSet() },
     { id: 'lockup-l', label: 'Export light lockup', group: 'Export', run: () => exportLockup('light') },
     { id: 'lockup-d', label: 'Export dark lockup', group: 'Export', run: () => exportLockup('dark') },
     { id: 'json', label: 'Export params JSON', group: 'Export', icon: FileJson, run: () => exportParams() },
     { id: 'copy', label: 'Copy SVG', group: 'Export', shortcut: 'shift+mod+c', icon: Copy, run: () => void copyMarkSVG() },
-    { id: 'clear-favs', label: 'Clear favourites', group: 'Document', icon: Eraser, run: clearFavs },
+    { id: 'clear-favs', label: 'Clear favourites', group: 'Document', icon: StarOff, run: clearFavs },
     { id: 'demo', label: 'Restore demo variants', group: 'Document', icon: RotateCcw, run: () => { focus(null); resetDemoDoc() } },
     ...settings.getState().presets.map((p) => ({ id: `palette-${p.name}`, label: `Brand: ${p.name}`, group: 'Document', run: () => settings.applyPreset(p.name) })),
   ]
@@ -110,7 +110,7 @@ export default function MarksShell() {
               <IconButton icon={ChevronRight} label="Next variant" shortcut="arrowright" onClick={() => step(1)} />
               <Divider vertical />
               <IconButton icon={Columns2} label={compare ? 'Stop comparing' : 'Compare side by side'} shortcut="c" active={!!compare} onClick={toggleCompare} />
-              <IconButton icon={Sparkles} label="More like this" shortcut="m" onClick={() => moreLikeThis()} />
+              <IconButton icon={Grid2x2Plus} label="More like this" shortcut="m" onClick={() => moreLikeThis()} />
               <IconButton icon={Star} label="Favourite" shortcut="f" active={!!focusId && d.favs.includes(focusId)} onClick={() => toggleFav()} />
             </Cluster>
           ) : (

@@ -1,7 +1,7 @@
 /* Right panel: the selected node's schema in the kit Inspector; document settings when nothing is selected. */
 import { useLayoutEffect } from 'react'
 import { useStore } from 'zustand'
-import { Copy, Eye, EyeOff, MoreHorizontal, Trash2, ScanEye, MousePointerClick } from 'lucide-react'
+import { MoreHorizontal, Trash2, ScanEye, MousePointerClick, PowerOff, Power, CopyPlus } from 'lucide-react'
 import { Inspector, Panel, PanelHeader, IconButton, Menu, Badge, Section, Row, Button, Select, useValues } from '@kit'
 import { InlineText } from '@kit/ui/inline-text'
 import { specOf } from '../engine/spec'
@@ -49,11 +49,11 @@ function One({ id }: { id: string }) {
           <InlineText value={node.data.title} onCommit={(t) => updateData([id], () => ({ title: t }))} className="block truncate text-title font-semibold text-fg" label="Rename node" />
           <div className="mt-0.5 text-ui leading-snug text-fg-muted">{def.description}</div>
         </div>
-        <IconButton icon={node.data.bypass ? EyeOff : Eye} label={node.data.bypass ? 'Enable node' : 'Bypass node'} shortcut="b" active={!!node.data.bypass} size="icon-sm" onClick={() => updateData([id], (d) => ({ bypass: !d.bypass }))} />
+        <IconButton icon={node.data.bypass ? PowerOff : Power} label={node.data.bypass ? 'Enable node' : 'Bypass node'} shortcut="b" active={!!node.data.bypass} size="icon-sm" onClick={() => updateData([id], (d) => ({ bypass: !d.bypass }))} />
         <Menu align="end" trigger={<IconButton icon={MoreHorizontal} label="More" size="icon-sm" />}
           items={[
             { label: previewOf === 'selection' ? 'Preview the output' : 'Preview this node', icon: ScanEye, shortcut: 'p', onClick: () => doc.setValue('previewOf', previewOf === 'selection' ? 'output' : 'selection') },
-            { label: 'Duplicate', icon: Copy, shortcut: 'mod+d', onClick: () => duplicate([id]) },
+            { label: 'Duplicate', icon: CopyPlus, shortcut: 'mod+d', onClick: () => duplicate([id]) },
             { type: 'separator' },
             { label: 'Delete', icon: Trash2, danger: true, shortcut: 'backspace', onClick: () => removeNodes([id]) },
           ]} />
@@ -99,8 +99,8 @@ function Many({ ids }: { ids: string[] }) {
   return (
     <div className="flex flex-col gap-1.5 p-pad">
       <p className="pb-1 text-ui leading-relaxed text-fg-muted">Select a single node to edit its parameters.</p>
-      <Button variant="default" onClick={() => updateData(ids, () => ({ bypass: !allBypassed }))}>{allBypassed ? <Eye size={14} strokeWidth={1.5} /> : <EyeOff size={14} strokeWidth={1.5} />}{allBypassed ? 'Enable all' : 'Bypass all'}</Button>
-      <Button variant="default" onClick={() => duplicate(ids)}><Copy size={14} strokeWidth={1.5} />Duplicate</Button>
+      <Button variant="default" onClick={() => updateData(ids, () => ({ bypass: !allBypassed }))}>{allBypassed ? <Power size={14} strokeWidth={1.5} /> : <PowerOff size={14} strokeWidth={1.5} />}{allBypassed ? 'Enable all' : 'Bypass all'}</Button>
+      <Button variant="default" onClick={() => duplicate(ids)}><CopyPlus size={14} strokeWidth={1.5} />Duplicate</Button>
       <Button variant="danger" onClick={() => removeNodes(ids)}><Trash2 size={14} strokeWidth={1.5} />Delete {ids.length} nodes</Button>
       <Button variant="ghost" onClick={() => select([])}>Clear selection</Button>
     </div>

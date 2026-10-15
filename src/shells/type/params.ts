@@ -1,5 +1,5 @@
 /* The type playground's state: one schema, split across three modes by folder. */
-import { AlignCenter, AlignJustify, AlignLeft, AlignRight, ArrowDownToLine, Bold, Droplets, Maximize2, RotateCw, Waves } from 'lucide-react'
+import { AlignCenter, AlignJustify, AlignLeft, AlignRight, ArrowDownToLine, Bold, Maximize2, RotateCw, Waves, Droplet } from 'lucide-react'
 import { defineSchema, folder, p, createParams, createClock, EASINGS } from '@kit'
 import { FAMILIES } from './fonts'
 import { contrastRatio, wcagGrade } from '@kit'
@@ -80,7 +80,7 @@ export const schema = defineSchema({
       { value: 'cascade', icon: ArrowDownToLine, hint: 'Cascade — letters drop in' },
       { value: 'rotate', icon: RotateCw, hint: 'Rotate — letters spin up' },
       { value: 'scale', icon: Maximize2, hint: 'Scale — letters pop' },
-      { value: 'blur', icon: Droplets, hint: 'Blur in — focus pull' },
+      { value: 'blur', icon: Droplet, hint: 'Blur in — focus pull' },
       { value: 'weight', icon: Bold, hint: 'Weight — animates the wght axis per letter' },
     ], { display: 'tiles', label: 'Effect' }),
     ksize: p.number(220, { min: 40, max: 400, step: 1, unit: 'px', label: 'Size' }),

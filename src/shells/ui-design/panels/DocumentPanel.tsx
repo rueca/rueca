@@ -2,7 +2,7 @@
    background, page colours, export presets. Studio preferences (snapping, nudge,
    view, export defaults) live in the toolbar's <SettingsMenu>. */
 import { useRef } from 'react'
-import { RotateCcw, ImageDown, FileDown, FileUp, RefreshCw, Palette } from 'lucide-react'
+import { RotateCcw, ImageDown, FileDown, FileUp, MousePointerClick } from 'lucide-react'
 import { PanelHeader, Section, Row, ColorField, IconButton, Button, Tip, Swatch, Badge } from '@kit'
 import * as S from '../model/store'
 import { prefs } from '../model/prefs'
@@ -75,10 +75,10 @@ export function DocumentPanel() {
           <input ref={file} type="file" accept="application/json,.json" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) openDocument(f); e.target.value = '' }} />
         </div>
         <div className="px-pad pt-1.5">
-          <Button variant="ghost" size="md" className="w-full" onClick={() => S.resetDocument()}><RefreshCw size={13} strokeWidth={1.5} />Reset to demo file</Button>
+          <Button variant="ghost" size="md" className="w-full" onClick={() => S.resetDocument()}><RotateCcw size={13} strokeWidth={1.5} />Reset to demo file</Button>
         </div>
       </Section>
-      <div className="flex items-center gap-1.5 px-pad py-3 text-ui text-fg-faint"><Palette size={12} strokeWidth={1.5} />Select a layer to edit it. Hold ⌥ over a layer to measure.</div>
+      <div className="flex items-center gap-1.5 px-pad py-3 text-ui text-fg-faint"><MousePointerClick size={12} strokeWidth={1.5} />Select a layer to edit it. Hold ⌥ over a layer to measure.</div>
     </div>
   )
 }

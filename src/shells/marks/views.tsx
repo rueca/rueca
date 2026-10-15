@@ -1,7 +1,7 @@
 /* Marks — the two stage views (variants grid, focus), the bottom panel (ladder / more like this) and side panels. */
 import { memo, useMemo } from 'react'
 import { useStore } from 'zustand'
-import { ArrowLeftRight, Columns2, Download, FileJson, Image as ImageIcon, Sparkles, Star, X, RotateCcw, Copy, Lock, LockOpen } from 'lucide-react'
+import { ArrowLeftRight, Columns2, FileJson, Image as ImageIcon, Star, X, RotateCcw, Copy, Lock, LockOpen, Grid2x2Plus, PenTool } from 'lucide-react'
 import {
   Stage, Artboard, Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Button, IconButton, Menu, Badge, Empty, Tip, createCamera, useValues, useDoc, cn, humanize,
 } from '@kit'
@@ -53,7 +53,7 @@ export function GridView({ columns }: { columns: React.MutableRefObject<number> 
           onFav={toggleFav}
           onColumns={(n) => { columns.current = n }}
           shortcuts={{ lock: 'l', fav: 'f' }}
-          actions={(id) => <VariantAction label="More like this" shortcut="m" icon={Sparkles} onClick={() => moreLikeThis(id)} />}
+          actions={(id) => <VariantAction label="More like this" shortcut="m" icon={Grid2x2Plus} onClick={() => moreLikeThis(id)} />}
           render={(id) => <MarkArt m={d.marks[id]} {...c} />}
         />
       </div>
@@ -136,7 +136,7 @@ export function BottomPanel() {
     <Panel className="h-[356px]" header={
       <PanelHeader>
         <PanelTabs value={tab} onChange={(t) => ui.setState({ bottom: t })} tabs={[{ value: 'ladder', label: 'Size ladder' }, { value: 'more', label: `More like this${mutations.length ? ` · ${mutations.length}` : ''}` }]} />
-        {tab === 'more' && <Button size="sm" onClick={() => moreLikeThis(m.id)}><Sparkles size={12} strokeWidth={1.5} />{mutations.length ? 'Regenerate' : 'Generate'}</Button>}
+        {tab === 'more' && <Button size="sm" onClick={() => moreLikeThis(m.id)}><Grid2x2Plus size={12} strokeWidth={1.5} />{mutations.length ? 'Regenerate' : 'Generate'}</Button>}
         <IconButton icon={X} label="Hide panel" size="icon-sm" onClick={() => ui.setState({ ladder: false })} />
       </PanelHeader>
     }>
@@ -165,8 +165,8 @@ export function BottomPanel() {
           <div className="mt-2 text-ui text-fg-faint">Click to apply to the focused mark (undoable) · lock keeps it in the grid · star saves it to favourites</div>
         </div>
       ) : (
-        <Empty icon={Sparkles} title="Variations around this mark" hint="Nudges every parameter a little — how far is set by Variation in the brand settings."
-          action={<Button variant="default" className="mt-2" onClick={() => moreLikeThis(m.id)}><Sparkles size={13} strokeWidth={1.5} />More like this</Button>} />
+        <Empty icon={Grid2x2Plus} title="Variations around this mark" hint="Nudges every parameter a little — how far is set by Variation in the brand settings."
+          action={<Button variant="default" className="mt-2" onClick={() => moreLikeThis(m.id)}><Grid2x2Plus size={13} strokeWidth={1.5} />More like this</Button>} />
       )}
     </Panel>
   )
@@ -257,7 +257,7 @@ export function MarkPanel() {
       <div className="flex items-center gap-0.5 border-b border-line px-1.5 py-1.5">
         <IconButton icon={Star} label={fav ? 'Unfavourite' : 'Favourite'} shortcut="f" size="icon-sm" active={fav} onClick={() => toggleFav(m.id)} />
         <IconButton icon={m.locked ? Lock : LockOpen} label={m.locked ? 'Kept in grid. Unlock' : 'Keep in grid (lock)'} shortcut="l" size="icon-sm" active={!!m.locked} onClick={() => toggleLock(m.id)} />
-        <IconButton icon={Sparkles} label="More like this" shortcut="m" size="icon-sm" onClick={() => moreLikeThis(m.id)} />
+        <IconButton icon={Grid2x2Plus} label="More like this" shortcut="m" size="icon-sm" onClick={() => moreLikeThis(m.id)} />
         <Menu trigger={<IconButton icon={Columns2} label="Compare with…" size="icon-sm" active={!!b} />} items={[
           { label: b ? 'Stop comparing' : 'Compare with last viewed', shortcut: 'c', icon: Columns2, onClick: toggleCompare },
           { type: 'separator' },
@@ -290,7 +290,7 @@ export function MarkPanel() {
       <Inspector params={fam.params} />
       <Section title="Export">
         <div className="grid grid-cols-2 gap-1.5 px-pad pb-1">
-          <Button variant="default" size="md" onClick={() => exportMarkSVG(m.id)}><Download size={13} strokeWidth={1.5} />SVG</Button>
+          <Button variant="default" size="md" onClick={() => exportMarkSVG(m.id)}><PenTool size={13} strokeWidth={1.5} />SVG</Button>
           <Button variant="default" size="md" onClick={() => void exportPNGSet(m.id)}><ImageIcon size={13} strokeWidth={1.5} />PNG set</Button>
           <Button variant="default" size="md" onClick={() => exportLockup('light', m.id)}>Lockup light</Button>
           <Button variant="default" size="md" onClick={() => exportLockup('dark', m.id)}>Lockup dark</Button>

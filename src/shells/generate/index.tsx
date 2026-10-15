@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import {
-  Download, Image as ImageIcon, Braces, FolderOpen, Sparkles, Heart, Trash2, Maximize2, Wand2, Columns2, Expand, ChevronLeft, ChevronRight,
-  Plus, CornerUpLeft, Copy, PenLine, Rows3, BoxSelect, X, Settings2,
+  Download, Image as ImageIcon, Braces, FolderOpen, Sparkles, Heart, Trash2, Wand2, Columns2, Expand, ChevronLeft, ChevronRight, Plus, CornerUpLeft,
+  Copy, PenLine, Rows3, BoxSelect, X, Settings2, ImageUpscale, Grid2x2Plus,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Brand, Cluster, Button, Menu, ParamActions, CommandPalette, toast, type Command,
@@ -46,9 +46,9 @@ export default function GenerateShell() {
     { id: 'group', label: 'Toggle grouping by prompt', group: 'Browse', shortcut: 'g', icon: Rows3, run: () => gallery.setState((s) => ({ groupBy: s.groupBy === 'prompt' ? 'none' : 'prompt' })) },
     { id: 'favs', label: 'Show favourites only', group: 'Browse', shortcut: 'shift+f', icon: Heart, run: () => gallery.setState((s) => ({ favOnly: !s.favOnly })) },
     { id: 'fav', label: 'Favourite', group: 'Image', shortcut: 'f', icon: Heart, run: () => { const s = gallery.getState(); if (s.selection.length) toggleFavourite(s.selection) } },
-    { id: 'var', label: 'Variations', group: 'Image', shortcut: 'v', icon: Sparkles, run: need((r) => variations(r)) },
-    { id: 'var-strong', label: 'Strong variations', group: 'Image', shortcut: 'shift+v', icon: Sparkles, run: need((r) => variations(r, 0.7)) },
-    { id: 'up', label: 'Upscale 2×', group: 'Image', shortcut: 'u', icon: Maximize2, run: need(upscale) },
+    { id: 'var', label: 'Variations', group: 'Image', shortcut: 'v', icon: Grid2x2Plus, run: need((r) => variations(r)) },
+    { id: 'var-strong', label: 'Strong variations', group: 'Image', shortcut: 'shift+v', icon: Grid2x2Plus, run: need((r) => variations(r, 0.7)) },
+    { id: 'up', label: 'Upscale 2×', group: 'Image', shortcut: 'u', icon: ImageUpscale, run: need(upscale) },
     { id: 'remix', label: 'Remix', group: 'Image', shortcut: 'r', icon: Wand2, run: need((r) => { ui.setState({ overlay: null }); remix(r) }) },
     { id: 'compare', label: 'Compare two images', group: 'Image', shortcut: 'c', icon: Columns2, run: compare },
     { id: 'reuse', label: 'Reuse prompt', group: 'Image', icon: CornerUpLeft, run: need(reusePrompt) },

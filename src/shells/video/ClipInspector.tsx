@@ -2,8 +2,7 @@
    with nothing selected, the composition settings from the schema. */
 import { Popover } from '@base-ui/react/popover'
 import {
-  AlignCenter, AlignHorizontalJustifyCenter, AlignLeft, AlignRight, AlignVerticalJustifyCenter, Circle, CircleDashed, Copy,
-  Scissors, Settings2, Shapes, Square, Trash2,
+  AlignCenter, AlignHorizontalJustifyCenter, AlignLeft, AlignRight, AlignVerticalJustifyCenter, Circle, CircleDashed, Scissors, Settings2, Shapes, Square, Trash2, CopyPlus,
 } from 'lucide-react'
 import {
   AngleDial, Badge, Button, ColorField, CurveEditor, CurveGlyph, IconButton, Row, ScrubValue, SeedField, Section, Segmented, Select, Slider,
@@ -52,7 +51,7 @@ function MultiSection({ ids }: { ids: string[] }) {
   return (
     <Section title={`${ids.length} clips`} first actions={<IconButton size="icon-sm" icon={Trash2} label="Delete" shortcut="backspace" onClick={() => deleteClips(ids)} />}>
       <div className="flex flex-col gap-1.5 px-pad pb-1">
-        <Button size="md" variant="default" onClick={() => duplicateClips(ids)}><Copy size={14} strokeWidth={1.5} />Duplicate</Button>
+        <Button size="md" variant="default" onClick={() => duplicateClips(ids)}><CopyPlus size={14} strokeWidth={1.5} />Duplicate</Button>
         <Button size="md" variant="default" onClick={() => splitAt(ids)}><Scissors size={14} strokeWidth={1.5} />Split at playhead</Button>
       </div>
     </Section>
@@ -102,7 +101,7 @@ function ClipSections({ c }: { c: Clip }) {
       <Section title="Clip" first actions={
         <div className="flex items-center">
           <Badge>{KIND_LABEL[c.kind]}</Badge>
-          <IconButton size="icon-sm" icon={Copy} label="Duplicate" shortcut="mod+d" onClick={() => duplicateClips([c.id])} />
+          <IconButton size="icon-sm" icon={CopyPlus} label="Duplicate" shortcut="mod+d" onClick={() => duplicateClips([c.id])} />
           <IconButton size="icon-sm" icon={Trash2} label="Delete" shortcut="backspace" onClick={() => deleteClips([c.id])} />
         </div>
       }>

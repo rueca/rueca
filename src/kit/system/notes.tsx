@@ -21,7 +21,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties
 import { createPortal } from 'react-dom'
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { Check, MessageSquarePlus, RotateCcw, Send, Trash2 } from 'lucide-react'
+import { Check, MessageCirclePlus, Send, Trash2, History } from 'lucide-react'
 import { useParamState, type AnyParams } from '../core/params'
 import type { HistoryLike } from '../core/history'
 import type { DocStore } from '../core/doc'
@@ -145,7 +145,7 @@ export function CommentButton({ params, hotkey = 'c' }: { params?: AnyParams; ho
   if (!on) return null
   const label = `${commenting ? 'Stop commenting' : 'Comment'}${waiting ? ` (${waiting} waiting for the agent)` : ''}`
   return (
-    <IconButton icon={MessageSquarePlus} label={label} shortcut={hotkey || undefined} active={commenting} onClick={toggle} className="relative">
+    <IconButton icon={MessageCirclePlus} label={label} shortcut={hotkey || undefined} active={commenting} onClick={toggle} className="relative">
       {waiting > 0 && (
         <span aria-hidden className="absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-signal-strong px-0.5 text-ui-sm leading-none font-semibold text-signal-fg tabular">
           {waiting}
@@ -481,7 +481,7 @@ function Thread({ n, num, params, clock, status, className }: {
     <div data-note-ui="" role="dialog" aria-label={title} className={cn('pop pointer-events-auto w-[272px] overflow-hidden text-ui', className)} onPointerDown={(e) => e.stopPropagation()}>
       <div className="flex h-9 items-center gap-0.5 pr-1.5 pl-3">
         <span className="min-w-0 flex-1 truncate font-medium text-fg-muted">{title}</span>
-        {status === 'different' && <IconButton icon={RotateCcw} size="icon-sm" label="Show the state it was made in" onClick={() => restoreSnapshot(n.snapshot, { params, clock })} />}
+        {status === 'different' && <IconButton icon={History} size="icon-sm" label="Show the state it was made in" onClick={() => restoreSnapshot(n.snapshot, { params, clock })} />}
         <IconButton icon={Trash2} size="icon-sm" label="Clear comment" onClick={clear} />
       </div>
       <div className="max-h-[280px] overflow-y-auto">

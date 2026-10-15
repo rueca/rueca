@@ -2,8 +2,7 @@
    selected (Spline convention), and the comments list. */
 import type { ReactNode } from 'react'
 import {
-  ArrowRight, Copy, Trash2, MessageCircle, Plus, ArrowLeftRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical,
-  AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal, AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, Frame, Square, Diamond, StickyNote, CircleDot,
+  ArrowRight, Trash2, MessageCircle, Plus, ArrowLeftRight, AlignStartVertical, AlignCenterVertical, AlignEndVertical, AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal, AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, Frame, Square, Diamond, StickyNote, CircleDot, CopyPlus,
 } from 'lucide-react'
 import {
   Panel, PanelHeader, PanelTabs, Section, Row, TextInput, Segmented, Select, Switch, ScrubValue, Button, IconButton, Tiles, Empty, cn,
@@ -70,7 +69,7 @@ function NodeInspector({ node }: { node: FlowNode }) {
           <div className="truncate text-title font-semibold">{d.name || 'Untitled'}</div>
           <div className="text-ui text-fg-faint">{node.type === 'screen' ? templateLabel(d.template) : node.type === 'terminal' ? (d.role === 'end' ? 'End point' : 'Start point') : node.type === 'decision' ? 'Decision' : node.type === 'note' ? 'Sticky note' : 'Section'}</div>
         </div>
-        <IconButton icon={Copy} label="Duplicate" shortcut="mod+d" size="icon-sm" onClick={duplicate} />
+        <IconButton icon={CopyPlus} label="Duplicate" shortcut="mod+d" size="icon-sm" onClick={duplicate} />
         <IconButton icon={Trash2} label="Delete" shortcut="backspace" size="icon-sm" onClick={deleteSelection} />
       </div>
 
@@ -278,7 +277,7 @@ function MultiInspector({ nodes, edges }: { nodes: FlowNode[]; edges: FlowEdge[]
         </Section>
       )}
       <div className="flex gap-1.5 px-pad pt-2 pb-3">
-        <Button size="md" variant="default" className="flex-1" onClick={duplicate} disabled={!nodes.length}><Copy size={13} strokeWidth={1.5} />Duplicate</Button>
+        <Button size="md" variant="default" className="flex-1" onClick={duplicate} disabled={!nodes.length}><CopyPlus size={13} strokeWidth={1.5} />Duplicate</Button>
         <Button size="md" variant="danger" className="flex-1" onClick={deleteSelection}><Trash2 size={13} strokeWidth={1.5} />Delete</Button>
       </div>
     </div>

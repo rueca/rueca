@@ -2,8 +2,7 @@ import '@fontsource-variable/newsreader'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from 'zustand'
 import {
-  Braces, Circle, CircleDashed, Clapperboard, Copy, Download, FileUp, Film, Image as ImageIcon, Magnet, Minus, Pause, Play, Plus, RectangleHorizontal,
-  RectangleVertical, RotateCcw, Scissors, Shapes, SkipBack, SkipForward, Smartphone, Square, StepBack, StepForward, Rows3, Trash2, Type,
+  Braces, Circle, CircleDashed, Clapperboard, Download, FileUp, Film, Image as ImageIcon, Magnet, Minus, Pause, Play, Plus, RectangleHorizontal, RectangleVertical, RotateCcw, Scissors, Shapes, SkipBack, SkipForward, Smartphone, Square, StepBack, StepForward, Rows3, Trash2, Type, CopyPlus,
 } from 'lucide-react'
 import {
   Artboard, Brand, Button, CanvasSurface, Cluster, CommandPalette, Empty, IconButton, Menu, Panel, PanelHeader, ParamActions, Section, Segmented, SettingsMenu, Stage,
@@ -350,7 +349,7 @@ export default function VideoShell() {
     { id: 'add-image', label: 'Add image', group: 'Clips', icon: ImageIcon, run: () => addClip('image') },
     { id: 'add-progress', label: 'Add progress bar', group: 'Clips', icon: Minus, run: () => addClip('progress') },
     { id: 'split', label: 'Split at playhead', group: 'Clips', shortcut: 'mod+b', icon: Scissors, run: () => { const n = splitAt(ui.getState().sel); if (!n) toast('Select a clip under the playhead to split') } },
-    { id: 'dup', label: 'Duplicate selection', group: 'Clips', shortcut: 'mod+d', icon: Copy, run: () => duplicateClips(ui.getState().sel) },
+    { id: 'dup', label: 'Duplicate selection', group: 'Clips', shortcut: 'mod+d', icon: CopyPlus, run: () => duplicateClips(ui.getState().sel) },
     { id: 'del', label: 'Delete selection', group: 'Clips', shortcut: 'backspace,delete', icon: Trash2, run: () => { const n = deleteClips(ui.getState().sel); if (n) toast(`Deleted ${n} ${n === 1 ? 'clip' : 'clips'}`, { action: { label: 'Undo', onClick: () => history.undo() } }) } },
     { id: 'all', label: 'Select all clips', group: 'Clips', shortcut: 'mod+a', run: () => ui.setState({ sel: getComp().clips.map((c) => c.id) }) },
     { id: 'track', label: 'New track', group: 'Clips', icon: Plus, run: addTrack },

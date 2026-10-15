@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useStore } from 'zustand'
 import {
-  Box, Braces, Camera, Circle, CircleDot, Cylinder, Disc, Download, Focus, Grid3x3, Image as ImageIcon, ImageDown, Lightbulb,
-  MousePointer2, Move3d, Orbit, Package, Plus, Rotate3d, Scale3d, SquareDashed, Spotlight, Sun, Video, X, Eye, EyeOff, ChevronDown, FileBox,
+  Box, Braces, Camera, Circle, CircleDot, Cylinder, Disc, Download, Focus, Grid3x3, Image as ImageIcon, ImageDown, Lightbulb, MousePointer2, Move3d,
+  Orbit, Plus, Rotate3d, Scale3d, SquareDashed, Spotlight, Sun, Video, X, Eye, EyeOff, ChevronDown, FileBox, Speaker,
 } from 'lucide-react'
 import { Vec3Fields,
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Inspector, SettingsMenu, Section, Row, Stage, MountSurface, ParamActions, Menu,
@@ -25,7 +25,7 @@ const viewport: { current: Viewport | null } = { current: null }
 const engine = () => viewport.current?.handle ?? null
 
 
-const MESH_ICON: Record<string, typeof Box> = { speaker: Package, body: Cylinder, cap: Circle, ring: CircleDot, base: Disc, pedestal: Cylinder, floor: SquareDashed, camera: Video }
+const MESH_ICON: Record<string, typeof Box> = { speaker: Speaker, body: Cylinder, cap: Circle, ring: CircleDot, base: Disc, pedestal: Cylinder, floor: SquareDashed, camera: Video }
 const LIGHT_ICON = { directional: Sun, spot: Spotlight, point: Lightbulb }
 const iconOf = (id: string, v: V) => (OBJ[id].kind === 'light' ? LIGHT_ICON[v[`${id}_ltype`] as keyof typeof LIGHT_ICON] : MESH_ICON[id]) ?? Box
 const kindLabel = (id: string, v: V) => {

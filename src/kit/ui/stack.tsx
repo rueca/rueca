@@ -43,7 +43,7 @@
 --------------------------------------------------------------------------- */
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
 import { ContextMenu } from '@base-ui/react/context-menu'
-import { ArrowDown, ArrowUp, ChevronRight, Copy, Eye, EyeOff, GripVertical, Minus, PenLine, Plus, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, ChevronRight, Eye, EyeOff, GripVertical, Minus, PenLine, Plus, Trash2, CopyPlus } from 'lucide-react'
 import { cn } from '../core/cn'
 import { ScrubValue } from './scrub'
 import { Tip } from './tooltip'
@@ -372,7 +372,7 @@ export function EffectStack<T extends StackItem>({
             {ctxItem && (
               <>
                 {rename && <CtxItem icon={PenLine} label="Rename" hint="↵" onClick={() => setEditing(ctxItem.id)} />}
-                {onDuplicate && <CtxItem icon={Copy} label="Duplicate" onClick={() => onDuplicate(ctxItem.id)} />}
+                {onDuplicate && <CtxItem icon={CopyPlus} label="Duplicate" onClick={() => onDuplicate(ctxItem.id)} />}
                 {ctxItem.visible !== undefined && toggle && <CtxItem icon={ctxItem.visible ? EyeOff : Eye} label={ctxItem.visible ? 'Hide' : 'Show'} onClick={() => toggle(ctxItem.id)} />}
                 {canMove && (
                   <>

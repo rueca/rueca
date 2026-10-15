@@ -8,7 +8,7 @@
 --------------------------------------------------------------------------- */
 import '@fontsource-variable/ibm-plex-sans'
 import '@fontsource-variable/newsreader'
-import { Download, Braces, FileCode2, Wind, Code, Undo2, Redo2, Eye, Grid3x3, Sun, Moon, Smartphone, Tablet, Monitor, RotateCcw } from 'lucide-react'
+import { Download, Braces, FileCode2, Wind, Code, Undo2, Redo2, Eye, Grid3x3, Sun, Moon, Smartphone, Tablet, Monitor, RotateCcw, Link } from 'lucide-react'
 import {
   Studio, Toolbar, Brand, Cluster, Panel, PanelHeader, PanelTabs, Stage, CommandPalette, IconButton, Button, Menu, Divider, Segmented,
   CompareButton, PresetMenu, ThemeToggle, HistoryButtons, createHistory, shareMenuItems, useHotkeys, copyText, toast, download, exportJSON, type Command,
@@ -90,7 +90,7 @@ export default function ComponentLab() {
                 <CompareButton params={tokens} />
                 <Divider vertical />
                 <PresetMenu params={tokens} />
-                <Menu align="end" trigger={<IconButton icon={Braces} label="Share tokens" />} items={shareMenuItems(tokens)} />
+                <Menu align="end" trigger={<IconButton icon={Link} label="Share tokens" />} items={shareMenuItems(tokens)} />
                 <ThemeToggle />
               </Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>}
