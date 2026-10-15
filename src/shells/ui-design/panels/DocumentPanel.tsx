@@ -1,9 +1,9 @@
-/* Empty selection → page and document settings (Spline's rule: never a blank
-   inspector). Page background, page colours, export presets, and the studio
-   preferences rendered straight from their schema by the kit Inspector. */
+/* Empty selection → the page and the document (never a blank inspector): page
+   background, page colours, export presets. Studio preferences (snapping, nudge,
+   view, export defaults) live in the toolbar's <SettingsMenu>. */
 import { useRef } from 'react'
 import { RotateCcw, ImageDown, FileDown, FileUp, RefreshCw, Palette } from 'lucide-react'
-import { PanelHeader, Section, Row, ColorField, IconButton, Button, Inspector, Tip, Swatch, Badge } from '@kit'
+import { PanelHeader, Section, Row, ColorField, IconButton, Button, Tip, Swatch, Badge } from '@kit'
 import * as S from '../model/store'
 import { prefs } from '../model/prefs'
 import { walk } from '../model/tree'
@@ -78,7 +78,6 @@ export function DocumentPanel() {
           <Button variant="ghost" size="md" className="w-full" onClick={() => S.resetDocument()}><RefreshCw size={13} strokeWidth={1.5} />Reset to demo file</Button>
         </div>
       </Section>
-      <div className="border-t border-line"><Inspector params={prefs} /></div>
       <div className="flex items-center gap-1.5 px-pad py-3 text-ui text-fg-faint"><Palette size={12} strokeWidth={1.5} />Select a layer to edit it. Hold ⌥ over a layer to measure.</div>
     </div>
   )

@@ -8,7 +8,7 @@ import {
   Image, ScanEye, Map as MapIcon, FilePlus2, LayoutGrid, Trash2, BoxSelect, ClipboardCopy,
 } from 'lucide-react'
 import {
-  Studio, Toolbar, Brand, Cluster, Button, IconButton, Menu, Segmented, Divider, ThemeToggle, CommandPalette, HistoryButtons,
+  Studio, Toolbar, Brand, Cluster, Button, IconButton, Menu, Segmented, Divider, ThemeToggle, CommandPalette, HistoryButtons, SettingsMenu,
   toast, exportCanvasPNG, exportJSON, copyText, useHotkeys, useValues, type Command,
 } from '@kit'
 import { SplitPane } from '@kit/layout/SplitPane'
@@ -131,6 +131,7 @@ export default function NodesShell() {
                 <Cluster>
                   <HistoryButtons history={graphHistory} />
                   <Divider vertical />
+                  <SettingsMenu params={doc} label="Document settings" />
                   <ThemeToggle />
                 </Cluster>
                 <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>}

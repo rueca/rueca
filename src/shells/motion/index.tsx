@@ -1,10 +1,10 @@
 import '@fontsource-variable/newsreader'
 import '@fontsource-variable/ibm-plex-sans'
 import { useMemo, useRef } from 'react'
-import { Download, Film, Image as ImageIcon, RotateCcw, Smartphone, Braces } from 'lucide-react'
+import { Download, Film, Image as ImageIcon, RotateCcw, Braces } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Stage, Artboard, CanvasSurface, Timeline,
-  ParamActions, NoteLayer, Menu, Button, IconButton, CommandPalette, useValues, exportCanvasPNG, recordCanvas, recordFrames, exportJSON, toast,
+  ParamActions, NoteLayer, Menu, Button, CommandPalette, useValues, exportCanvasPNG, recordCanvas, recordFrames, exportJSON, toast,
   type SurfaceHandle, type Lane, type Command, shareMenuItems,
 } from '@kit'
 import { params, clock, beats, draw, totalMs, type V } from './artifact'
@@ -74,7 +74,6 @@ export default function MotionShell() {
       toolbar={
         <Toolbar
           start={<Brand name="Ripple" mark={<svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>} />}
-          center={<Cluster><Button size="md" variant="ghost"><Smartphone size={14} strokeWidth={1.5} />iPhone 15</Button><IconButton icon={RotateCcw} label="Replay" shortcut="r" onClick={() => clock.replay()} /></Cluster>}
           end={
             <>
               <Cluster><ParamActions params={params} clock={clock} /></Cluster>

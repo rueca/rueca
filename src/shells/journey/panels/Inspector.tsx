@@ -1,12 +1,12 @@
 /* Right panel: the selected card or stage; the map document when nothing is selected. */
 import { ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Copy, Trash2, Plus, Tag, X } from 'lucide-react'
 import {
-  Panel, PanelHeader, Section, Row, TextInput, Select, Segmented, Slider, ScrubValue, IconButton, Button, Inspector, Checkbox, Badge, useDoc, cn,
+  Panel, PanelHeader, Section, Row, TextInput, Select, Segmented, Slider, ScrubValue, IconButton, Button, Checkbox, Badge, useDoc, cn,
 } from '@kit'
 import { ChipInput } from '@kit/ui/chip-input'
 import { CHANNELS, LANES, TEAMS, emoji, fmtEmotion, laneOf, type Card, type Channel, type LaneId, type Persona, type Stage } from '../model'
 import {
-  params, doc, ui, useUI, usePersona, updateCard, updateStage, deleteSelection, duplicateCard, nudgeCard, moveCard, cellCards, toggleLink, allTags, addCard, moveStage, editPersona,
+  doc, ui, useUI, usePersona, updateCard, updateStage, deleteSelection, duplicateCard, nudgeCard, moveCard, cellCards, toggleLink, allTags, addCard, moveStage, editPersona,
 } from '../store'
 
 export function JourneyInspector() {
@@ -219,7 +219,6 @@ function MapInspector({ p }: { p: Persona }) {
           ))}
         </div>
       </Section>
-      <div className="border-t border-line"><Inspector params={params} /></div>
     </div>
   )
 }

@@ -2,7 +2,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
-import { Section, Row, Button, PresetMenu, useValues, useParamState, cn } from '@kit'
+import { Section, MoreRow, Row, Button, PresetMenu, useValues, useParamState, cn } from '@kit'
 import { EnvelopeEditor } from '@kit/ui/envelope'
 import { ChevronDown, Bookmark } from 'lucide-react'
 import { params, type V } from './params'
@@ -20,6 +20,18 @@ const SECTION_KEYS = {
   mixer: [...TRACKS.flatMap((t) => [`${t.id}Lvl`, `${t.id}Dly`, `${t.id}Rev`]), 'volume'],
 } as const
 
+/** The sound's core starts open; effects and drums are a click away. */
+const DEFAULT_OPEN: Record<string, boolean> = { osc: true, env: true, filter: true, fx: false, drums: false, mixer: true }
+const isOpenByDefault = (id: string) => DEFAULT_OPEN[id] ?? true
+const SENDS = TRACKS.flatMap((t) => [`${t.id}Dly`, `${t.id}Rev`])
+const SENDS_KEY = 'studio:synth:sends'
+const sendsStore = createStore<boolean>(() => { try { return localStorage.getItem(SENDS_KEY) === '1' } catch { return false } })
+function toggleSends() {
+  const next = !sendsStore.getState()
+  sendsStore.setState(next, true)
+  try { localStorage.setItem(SENDS_KEY, next ? '1' : '0') } catch { /* noop */ }
+}
+
 const OPEN_KEY = 'studio:synth:sections'
 /** Section open state, shared by both panels and persisted. Alt-click a header to solo it. */
 const openStore = createStore<Record<string, boolean>>(() => {
@@ -27,13 +39,13 @@ const openStore = createStore<Record<string, boolean>>(() => {
 })
 function toggleSection(id: string, solo: boolean) {
   const open = openStore.getState()
-  const next = solo ? Object.fromEntries(Object.keys(SECTION_KEYS).map((k) => [k, k === id])) : { ...open, [id]: !(open[id] ?? true) }
+  const next = solo ? Object.fromEntries(Object.keys(SECTION_KEYS).map((k) => [k, k === id])) : { ...open, [id]: !(open[id] ?? isOpenByDefault(id)) }
   openStore.setState(next, true)
   try { localStorage.setItem(OPEN_KEY, JSON.stringify(next)) } catch { /* noop */ }
 }
 
 function KSection({ id, title, children, first, actions, hint }: { id: keyof typeof SECTION_KEYS; title: string; children: ReactNode; first?: boolean; actions?: ReactNode; hint?: string }) {
-  const isOpen = useStore(openStore, (o) => o[id] ?? true)
+  const isOpen = useStore(openStore, (o) => o[id] ?? isOpenByDefault(id))
   const keys = SECTION_KEYS[id] as readonly string[]
   const changed = useParamState(params, (s) => keys.some((k) => JSON.stringify((s.values as Record<string, unknown>)[k]) !== JSON.stringify((s.defaults as Record<string, unknown>)[k])))
   return (
@@ -194,9 +206,9 @@ export function MonitorPanel() {
     <div className="flex flex-col">
       <div className="flex flex-col gap-1.5 px-pad pt-3 pb-2">
         <div className="flex items-center justify-between text-ui text-fg-muted"><span>Oscilloscope</span><span className="text-fg-faint">{started ? 'master' : 'no signal'}</span></div>
-        <canvas ref={scope} className="h-[84px] w-full rounded-[6px] bg-control" aria-label="Oscilloscope" role="img" />
+        <canvas ref={scope} className="h-[48px] w-full rounded-[6px] bg-control" aria-label="Oscilloscope" role="img" />
         <div className="mt-1 flex items-center justify-between text-ui text-fg-muted"><span>Spectrum</span><span className="text-fg-faint">20 Hz – 20 kHz</span></div>
-        <canvas ref={spec} className="h-[84px] w-full rounded-[6px] bg-control" aria-label="Spectrum analyser" role="img" />
+        <canvas ref={spec} className="h-[48px] w-full rounded-[6px] bg-control" aria-label="Spectrum analyser" role="img" />
         <div className="mt-1 flex items-center gap-2">
           <span className="w-10 text-ui text-fg-muted">Level</span>
           <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-track">
@@ -204,27 +216,42 @@ export function MonitorPanel() {
           </div>
         </div>
       </div>
-      <KSection id="mixer" title="Mixer" hint="Level and post-fader sends per track. Mute and solo sit on the sequencer rows.">
-        <div className="grid grid-cols-[52px_1fr_1fr_1fr] items-end gap-x-1 px-2 pb-1 text-center text-ui-sm text-fg-faint">
-          <span />
-          <span>Level</span><span>Delay</span><span>Reverb</span>
-        </div>
-        {TRACKS.map((t) => (
-          <div key={t.id} className="grid grid-cols-[52px_1fr_1fr_1fr] items-center gap-x-1 px-2 py-1">
-            <span className="flex min-w-0 items-center gap-1.5 pl-1 text-ui text-fg">
-              <span className="size-2 shrink-0 rounded-full" style={{ background: t.color }} aria-hidden />
-              <span className="truncate">{t.name}</span>
-            </span>
-            <PKnob k={`${t.id}Lvl`} size="sm" hideLabel label={`${t.name} level`} />
-            <PKnob k={`${t.id}Dly`} size="sm" hideLabel label={`${t.name} delay send`} />
-            <PKnob k={`${t.id}Rev`} size="sm" hideLabel label={`${t.name} reverb send`} />
-          </div>
-        ))}
-        <div className="mt-1 flex items-center gap-3 border-t border-line px-pad pt-3">
-          <PKnob k="volume" />
-          <p className="text-ui leading-relaxed text-fg-faint">Master runs through a gentle bus compressor before the analysers and the WAV bounce.</p>
-        </div>
+      <KSection id="mixer" title="Mixer" hint="Level per track and the master. Sends to delay and reverb sit under the levels. Mute and solo are on the sequencer rows.">
+        <Grid cols={5}>
+          {TRACKS.map((t) => <PKnob key={t.id} k={`${t.id}Lvl`} size="sm" label={t.name} />)}
+          <PKnob k="volume" size="sm" />
+        </Grid>
+        <MixerSends />
       </KSection>
     </div>
+  )
+}
+
+/** Per-track sends: under "8 more" until opened; a changed send keeps the table in view. */
+function MixerSends() {
+  const open = useStore(sendsStore)
+  const changed = useParamState(params, (st) => SENDS.some((k) => (st.values as Record<string, unknown>)[k] !== (st.defaults as Record<string, unknown>)[k]))
+  const shown = open || changed
+  return (
+    <>
+      {shown && (
+        <>
+          <div className="grid grid-cols-[52px_1fr_1fr] items-end gap-x-1 px-2 pt-1 pb-1 text-center text-ui-sm text-fg-faint">
+            <span /><span>Delay</span><span>Reverb</span>
+          </div>
+          {TRACKS.map((t) => (
+            <div key={t.id} className="grid grid-cols-[52px_1fr_1fr] items-center gap-x-1 px-2 py-1">
+              <span className="flex min-w-0 items-center gap-1.5 pl-1 text-ui text-fg">
+                <span className="size-2 shrink-0 rounded-full" style={{ background: t.color }} aria-hidden />
+                <span className="truncate">{t.name}</span>
+              </span>
+              <PKnob k={`${t.id}Dly`} size="sm" hideLabel label={`${t.name} delay send`} />
+              <PKnob k={`${t.id}Rev`} size="sm" hideLabel label={`${t.name} reverb send`} />
+            </div>
+          ))}
+        </>
+      )}
+      {!(changed && !open) && <MoreRow count={SENDS.length} open={open} onClick={toggleSends} />}
+    </>
   )
 }

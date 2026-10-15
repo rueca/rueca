@@ -451,7 +451,8 @@ export default function AnimateShell() {
           }
           end={
             <>
-              <Cluster><ParamActions params={params} history={history} doc={docStore} clock={clock} presets={false} /></Cluster>
+              {/* params here are view prefs, not the animation: A/B and share would act on the wrong thing */}
+              <Cluster><ParamActions params={params} history={history} doc={docStore} clock={clock} presets={false} compare={false} share={false} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />
             </>
           }
