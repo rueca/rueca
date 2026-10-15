@@ -4,7 +4,7 @@ import { useMemo, useRef } from 'react'
 import { Download, Film, Image as ImageIcon, RotateCcw, Smartphone, Braces } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Stage, Artboard, CanvasSurface, Timeline,
-  ParamActions, Menu, Button, IconButton, CommandPalette, useValues, exportCanvasPNG, recordCanvas, recordFrames, exportJSON, toast,
+  ParamActions, NoteLayer, Menu, Button, IconButton, CommandPalette, useValues, exportCanvasPNG, recordCanvas, recordFrames, exportJSON, toast,
   type SurfaceHandle, type Lane, type Command, shareMenuItems,
 } from '@kit'
 import { params, clock, beats, draw, totalMs, type V } from './artifact'
@@ -96,6 +96,7 @@ export default function MotionShell() {
       <Stage contentSize={{ w: DEVICE.w, h: DEVICE.h }}>
         <Artboard width={DEVICE.w} height={DEVICE.h} label="iPhone 15" background={v.bg} className="rounded-[44px]">
           <CanvasSurface ref={surface} params={params} clock={clock} draw={(ctx, f) => draw(ctx, f.v as V, f.t, f.w, f.h)} />
+          <NoteLayer params={params} clock={clock} />
         </Artboard>
       </Stage>
       <CommandPalette commands={commands} />

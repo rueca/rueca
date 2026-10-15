@@ -230,4 +230,10 @@ Changes from the plan:
   `SKILL.md` has Send to agent in the starter's list (set up by default) and a row in the
   references table. `architecture.md`'s hand-off list swaps the never-built "Save defaults to
   source" for Send to agent. `docs/KIT.md` documents the API.
-- Comments: next.
+- **Comments: done (2026-10-15).** `NoteLayer` (pins, composer, threads), `CommentButton` in
+  `ParamActions` (C), knob anchors via `data-param` on Inspector rows, thumbnails (`captureImage`: DOM
+  plus canvases, the spot ringed), the clock paused at the moment being commented on, faded pins with
+  "show the state it was made in", clearing from the thread, live replies (one shared poll, toasts).
+  The route gained images and DELETE. Dogfooded on the motion shell.
+- Not built yet: the notes panel (a list of all comments), the standalone server for static pages
+  (Candil), Next.js.

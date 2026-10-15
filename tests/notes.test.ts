@@ -68,3 +68,25 @@ describe('formatNotePrompt', () => {
     expect(text).toContain('- (no changes from defaults)')
   })
 })
+
+describe('watchNotes', () => {
+  it('runs one poll loop however many watchers and refreshes pile up', async () => {
+    const { watchNotes, refreshNotes } = await import('@kit/core/notes')
+    let inFlight = 0, peak = 0, calls = 0
+    const real = globalThis.fetch
+    globalThis.fetch = (async () => {
+      calls++; inFlight++; peak = Math.max(peak, inFlight)
+      await new Promise((r) => setTimeout(r, 20))
+      inFlight--
+      return new Response('[]', { headers: { 'x-rueca-notes': '1', 'content-type': 'application/json' } })
+    }) as typeof fetch
+    try {
+      const offs = [watchNotes(() => {}, { interval: 10_000 }), watchNotes(() => {}), watchNotes(() => {})]
+      for (let i = 0; i < 10; i++) refreshNotes()
+      await new Promise((r) => setTimeout(r, 150))
+      expect(peak).toBe(1)
+      expect(calls).toBeLessThanOrEqual(4)   // the endpoint probe, the first poll, one queued refresh
+      offs.forEach((off) => off())
+    } finally { globalThis.fetch = real }
+  })
+})

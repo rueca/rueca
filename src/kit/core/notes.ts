@@ -9,7 +9,8 @@
    defaults (with label, default and hint), the share link that reopens the
    exact state, the history steps in order, the playhead and the view.
    A 'values' note is a snapshot and nothing else: "these are the ones, bake
-   them in". The dev server writes the file (ruecaNotes() in
+   them in". A 'comment' adds what you noticed, where (an artboard point or a
+   knob) and a thumbnail. The dev server writes the file (ruecaNotes() in
    notes-server/vite.ts); with no endpoint, formatNotePrompt() is the
    clipboard fallback.
 
@@ -18,7 +19,8 @@
 import type { AnyParams } from './params'
 import type { HistoryLike } from './history'
 import type { DocStore } from './doc'
-import { humanize } from './schema'
+import { equal, humanize } from './schema'
+import { snapshotElement } from './snapshot'
 import { currentTheme } from './theme'
 
 export interface SnapshotChange {
@@ -62,6 +64,8 @@ export interface StudioNote {
   text?: string
   anchor?: NoteAnchor
   snapshot: StudioSnapshot
+  /** thumbnail file name beside the note (<id>.jpg), when one was taken */
+  image?: string
   status: 'open' | 'resolved'
   /** written by the agent when it has acted on the note */
   resolution?: { text: string; at: string }
@@ -72,6 +76,8 @@ export interface NoteInput {
   text?: string
   anchor?: NoteAnchor
   snapshot: StudioSnapshot
+  /** a data URL (captureImage); stored beside the note as a file */
+  image?: string
 }
 
 export interface CaptureSources {
@@ -170,4 +176,117 @@ export function sendNote(input: NoteInput): Promise<StudioNote> {
 
 export function listNotes(): Promise<StudioNote[]> {
   return call<StudioNote[]>()
+}
+
+export function deleteNote(id: string): Promise<{ id: string }> {
+  return findNotesEndpoint().then((url) => {
+    if (!url) throw new Error('No notes endpoint. Add ruecaNotes() to the dev server.')
+    return fetch(`${url}?id=${encodeURIComponent(id)}`, { method: 'DELETE' }).then(async (r) => {
+      const body = await r.json().catch(() => null)
+      if (!r.ok) throw new Error(body?.error ?? `Notes endpoint answered ${r.status}`)
+      return body
+    })
+  })
+}
+
+/* ── live updates ──────────────────────────────────────────────────────── */
+
+const watchers = new Set<(notes: StudioNote[]) => void>()
+let latest: StudioNote[] | null = null
+let latestKey = ''
+let timer: ReturnType<typeof setTimeout> | undefined
+let pollMs = 2500
+// ONE loop, however many watchers and refreshes: a refresh during a fetch queues one more round instead of a second loop
+let running = false
+let again = false
+
+async function poll(): Promise<void> {
+  if (running) { again = true; return }
+  clearTimeout(timer)
+  timer = undefined
+  if (!watchers.size) return
+  running = true
+  try {
+    if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+      const notes = await listNotes()
+      const key = JSON.stringify(notes)
+      if (key !== latestKey) { latestKey = key; latest = notes; watchers.forEach((fn) => fn(notes)) }
+    }
+  } catch { /* no endpoint or a hiccup: try again next round */ } finally { running = false }
+  if (again) { again = false; return poll() }
+  if (watchers.size) timer = setTimeout(poll, pollMs)
+}
+
+/** Calls `fn` with every note now and whenever any changes (the agent resolving one, a new one from another tab).
+    One shared poll of the dev server, paused while the tab is hidden. Returns unsubscribe. */
+export function watchNotes(fn: (notes: StudioNote[]) => void, opts: { interval?: number } = {}): () => void {
+  if (opts.interval) pollMs = opts.interval
+  watchers.add(fn)
+  if (latest) fn(latest)
+  if (!timer && !running) poll()
+  return () => { watchers.delete(fn) }
+}
+
+/** Ask the poll to run now (after sending or clearing a note). */
+export function refreshNotes() {
+  poll()
+}
+
+/* ── a note's state ────────────────────────────────────────────────────── */
+
+/** The values a snapshot describes: every shareable default, with the snapshot's changes on top. */
+function snapshotValues(snapshot: StudioSnapshot, params: AnyParams) {
+  const defaults = params.getState().defaults as Record<string, unknown>
+  const out: Record<string, unknown> = {}
+  for (const k of Object.keys(defaults)) if ((params.defs[k] as { share?: boolean } | undefined)?.share !== false) out[k] = defaults[k]
+  for (const [k, c] of Object.entries(snapshot.changed)) out[k] = c.value
+  return out
+}
+
+/** True when the tool shows the same values the snapshot was taken with. */
+export function isSnapshotState(snapshot: StudioSnapshot, params: AnyParams) {
+  const now = params.toJSON({ changedOnly: true, shareable: true }) as Record<string, unknown>
+  const then = Object.fromEntries(Object.entries(snapshot.changed).map(([k, c]) => [k, c.value]))
+  return equal(Object.keys(now).sort(), Object.keys(then).sort()) && Object.keys(now).every((k) => equal(now[k], then[k]))
+}
+
+/** Put the tool back in the note's state: its values as one undo step, the playhead paused where it was. */
+export function restoreSnapshot(snapshot: StudioSnapshot, src: { params: AnyParams; clock?: { seek(t: number): void; pause(): void } }) {
+  src.params.replace(snapshotValues(snapshot, src.params) as never, { label: 'Open comment' })
+  if (src.clock && snapshot.t !== undefined) { src.clock.seek(snapshot.t); src.clock.pause() }
+}
+
+/* ── thumbnail ─────────────────────────────────────────────────────────── */
+
+/**
+ * A JPEG of the artboard as a data URL: its DOM (snapshotElement) with every <canvas> drawn on top
+ * where it sits, plus a ring at the anchor so the agent sees where the comment points. Never throws:
+ * whatever can't be drawn (cross-origin frames, a WebGL buffer already cleared) is left blank.
+ */
+export async function captureImage(el: HTMLElement, opts: { maxWidth?: number; anchor?: { x: number; y: number } } = {}): Promise<string | undefined> {
+  const w = el.offsetWidth, h = el.offsetHeight
+  if (!w || !h) return undefined
+  const scale = Math.min(1, (opts.maxWidth ?? 800) / w)
+  const W = Math.round(w * scale), H = Math.round(h * scale)
+  const out = document.createElement('canvas')
+  out.width = W; out.height = H
+  const ctx = out.getContext('2d')
+  if (!ctx) return undefined
+  ctx.fillStyle = getComputedStyle(el).backgroundColor || '#fff'
+  ctx.fillRect(0, 0, W, H)
+  try { ctx.drawImage(await snapshotElement(el, { width: w, height: h, scale }), 0, 0, W, H) } catch { /* DOM part unavailable */ }
+  // canvases are skipped by snapshotElement: place each where it is on screen (the stage may be zoomed)
+  const box = el.getBoundingClientRect()
+  const k = W / box.width
+  for (const c of Array.from(el.querySelectorAll('canvas'))) {
+    const r = c.getBoundingClientRect()
+    try { ctx.drawImage(c, (r.left - box.left) * k, (r.top - box.top) * k, r.width * k, r.height * k) } catch { /* tainted */ }
+  }
+  if (opts.anchor) {
+    const x = opts.anchor.x * W, y = opts.anchor.y * H, R = Math.max(10, W / 40)
+    ctx.lineWidth = Math.max(3, W / 200)
+    ctx.strokeStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x, y, R + ctx.lineWidth, 0, Math.PI * 2); ctx.stroke()
+    ctx.strokeStyle = '#ff3b30'; ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.stroke()
+  }
+  try { return out.toDataURL('image/jpeg', 0.85) } catch { return undefined }
 }

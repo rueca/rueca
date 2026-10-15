@@ -134,8 +134,10 @@ export function Section({
 
 /** One lane. Use directly for hand-built rows that should match schema rows. */
 export function Row({
-  label, hint, changed, onReset, children, stacked, className, trailing, labelWidth,
-}: { label?: ReactNode; hint?: string; changed?: boolean; onReset?: () => void; children: ReactNode; stacked?: boolean; className?: string; trailing?: ReactNode; labelWidth?: number }) {
+  label, hint, changed, onReset, children, stacked, className, trailing, labelWidth, param,
+}: { label?: ReactNode; hint?: string; changed?: boolean; onReset?: () => void; children: ReactNode; stacked?: boolean; className?: string; trailing?: ReactNode; labelWidth?: number
+  /** the param key this row edits (data-param): comments anchor to it */
+  param?: string }) {
   const lab = label != null && (
     <Tip label={hint} side="left">
       <span
@@ -153,13 +155,13 @@ export function Row({
   )
   if (stacked)
     return (
-      <div className={cn('flex flex-col gap-1 px-pad py-1', className)}>
+      <div data-param={param} className={cn('flex flex-col gap-1 px-pad py-1', className)}>
         <div className="flex items-center justify-between">{lab}{trailing}</div>
         {children}
       </div>
     )
   return (
-    <div className={cn('flex min-h-row items-center gap-2 px-pad', className)}>
+    <div data-param={param} className={cn('flex min-h-row items-center gap-2 px-pad', className)}>
       {lab}
       <div className="flex min-w-0 flex-1 items-center gap-1.5">{children}</div>
       {trailing}
@@ -206,7 +208,7 @@ export function ParamRow({ k, def, params, values: valuesProp, defaults: default
   const set = (nv: unknown, final = true) => params.setValue(k, nv as never, { commit: final })
   const reset = () => params.reset([k])
   const disabled = single ? (typeof d.disabled === 'function' ? single.off : d.disabled) : typeof d.disabled === 'function' ? d.disabled(values) : d.disabled
-  const common = { label, hint: d.hint, changed, onReset: reset, trailing }
+  const common = { label, hint: d.hint, changed, onReset: reset, trailing, param: k }
 
   const control = <ParamControl def={d} value={v} onChange={set} changed={changed} defaultValue={defaults[k]} label={label} />
   const stacked = ['curve', 'spring', 'gradient', 'image', 'multi'].includes(d.type) || (d.type === 'vec2' && d.display !== 'fields') || (d.type === 'text' && d.multiline) || (d.type === 'select' && d.display === 'tiles')

@@ -39,6 +39,8 @@ export const createCamera = (): CameraStore =>
 const CamCtx = createContext<CameraStore | null>(null)
 const NO_CAMERA = createCamera()
 export const useCamera = () => useContext(CamCtx)!
+/** The stage's zoom (1 outside a Stage): divide by it to keep overlays at screen size. */
+export const useZoom = () => useStore(useContext(CamCtx) ?? NO_CAMERA, (s) => s.zoom)
 
 export function Stage({
   children, fill, camera: external, contentSize, className, background, grid, minZoom = 0.05, maxZoom = 64, fitMaxZoom = 1, padding = 48, onBackgroundPointerDown, hud = true, overlay, hotkeys = true,
