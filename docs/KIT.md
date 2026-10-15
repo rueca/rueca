@@ -66,6 +66,15 @@ People choose a density in ⌘K (View → Density: Default / Comfortable / Compa
 per browser (`studio:density`) and `<Studio>` restores it on mount, unless something already set the
 attribute. In code: `setDensity('compact')`, `useDensity()`, `currentDensity()`. The inspector's label
 column fits its longest label (from 72px up to 42% of the row), so long labels don't truncate.
+
+### Presence
+How much room the chrome takes while people work, on top of ⌘\ (hide all). Each is a per-browser
+choice (`studio:presence`) in ⌘K → View, or `setPresence({ … })` / `usePresence()` from `core/presence`:
+- **Fade panels while dragging:** a drag that starts on the stage sends the islands to 35% until release.
+- **Dim panels at rest:** islands rest at 55% and return when the pointer is near or focus is inside.
+- **Minimise panels (⇧\):** floating panels fold to their headers and the timeline to its transport;
+  a panel without a header steps out. Clicking a folded header or the timeline chevron unfolds them.
+All three change opacity or fold whole panels, so nothing moves under the pointer.
 Token names are namespaced so they never collide with shadcn (`muted`, `accent`, `input` mean
 something else there): ours are `fg-muted`, `signal`, `control`; font is `font-ui`.
 

@@ -14,6 +14,7 @@ import { Check, Search } from 'lucide-react'
 import { useHotkeys, useHotkeyRegistry, prettyCombo } from '../core/hotkeys'
 import { Kbd } from '../ui/button'
 import { useDensity, type Density } from '../core/density'
+import { usePresence } from '../core/presence'
 
 export interface Command { id: string; label: string; group?: string; shortcut?: string; icon?: ComponentType<{ size?: number; strokeWidth?: number }>; run: () => void; keywords?: string[] }
 
@@ -38,10 +39,15 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
   const registry = useHotkeyRegistry()
   // every palette gets the kit's density choice (remembered per browser, see core/density)
   const { density, setDensity } = useDensity()
+  const presence = usePresence()
   const all: Command[] = [...commands, ...(['default', 'comfortable', 'compact'] as Density[]).map((d) => ({
     id: `density-${d}`, label: `Density: ${d[0].toUpperCase()}${d.slice(1)}`, group: 'View',
     icon: density === d ? Check : undefined, keywords: ['size', 'spacing', 'compact', 'roomy'], run: () => setDensity(d),
-  }))]
+  })),
+  { id: 'presence-fade', label: 'Fade panels while dragging', group: 'View', icon: presence.fade ? Check : undefined, keywords: ['presence', 'focus', 'hide'], run: () => presence.set({ fade: !presence.fade }) },
+  { id: 'presence-dim', label: 'Dim panels at rest', group: 'View', icon: presence.dim ? Check : undefined, keywords: ['presence', 'focus', 'quiet'], run: () => presence.set({ dim: !presence.dim }) },
+  { id: 'presence-min', label: 'Minimise panels', group: 'View', shortcut: 'shift+\\', /* bound by <Studio>, shown here */ icon: presence.minimised ? Check : undefined, keywords: ['presence', 'collapse', 'fold'], run: () => presence.set({ minimised: !presence.minimised }) },
+  ]
   const groups = [...new Set(all.map((c) => c.group ?? 'Actions'))]
 
   return (

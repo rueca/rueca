@@ -427,6 +427,17 @@
 .studio-touch [data-row-label] { width: auto !important; min-width: 96px; max-width: 46%; flex-shrink: 0; }
 .studio-touch :where(button, [role="slider"], [role="spinbutton"]) { -webkit-touch-callout: none; }
 
+/* Presence (core/presence). The chrome steps back while you work:
+   fade — while a drag that started on the stage is in progress, islands drop to 35%
+   dim  — islands rest at 55% and come back the moment the pointer is near or focus is inside
+   Opacity only: nothing moves, so the layout never jumps under the pointer. */
+.studio :is([data-safe], aside, section[aria-label="Bottom panel"]) { transition: opacity 160ms ease; }
+.studio[data-presence-fade][data-busy] :is([data-safe], aside, section[aria-label="Bottom panel"]) { opacity: 0.35; }
+.studio[data-presence-dim]:not([data-busy]) :is([data-safe], aside, section[aria-label="Bottom panel"]):not(:hover, :focus-within) {
+  opacity: 0.55;
+  transition: opacity 400ms ease 900ms; /* leave slowly, so a pass across the stage doesn't flicker it */
+}
+
 /* Islands go solid when the OS asks for less transparency. */
 @media (prefers-reduced-transparency: reduce) {
   :where(.studio, .pop) :is(.panel, .cluster) { background: var(--panel); -webkit-backdrop-filter: none; backdrop-filter: none; }

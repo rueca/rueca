@@ -303,6 +303,11 @@
           "target": "@components/studio/core/params.ts"
         },
         {
+          "path": "src/kit/core/presence.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/presence.ts"
+        },
+        {
           "path": "src/kit/core/schema.ts",
           "type": "registry:lib",
           "target": "@components/studio/core/schema.ts"

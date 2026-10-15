@@ -25,6 +25,7 @@ import { IconButton } from '../ui/button'
 import { Menu } from '../ui/controls'
 import { useStudio } from '../layout/Studio'
 import { useDensityPx } from '../core/density'
+import { setPresence } from '../core/presence'
 
 export interface Key { t: number; ease?: string; value?: string | number; selected?: boolean }
 export interface Lane {
@@ -60,7 +61,7 @@ export function Timeline({
 }) {
   const [open, setOpen] = useState(defaultOpen)
   const [timeMode, setTimeMode] = useState(tmInit)
-  const { layout } = useStudio()
+  const { layout, minimised } = useStudio()
   const playing = useClock(clock, (s) => s.playing)
   const duration = useClock(clock, (s) => s.duration)
   const mode = useClock(clock, (s) => s.mode)
@@ -118,11 +119,12 @@ export function Timeline({
           items={[0.1, 0.25, 0.5, 1, 2].map((r) => ({ label: `${r}×`, checked: r === rate, onClick: () => clock.setRate(r), shortcut: r === 0.25 ? 's' : undefined }))}
         />
         {collapsible && (
-          <IconButton icon={ChevronDown} label={open ? 'Collapse timeline' : 'Expand timeline'} tipSide="top" onClick={() => setOpen(!open)}
-            className={cn('transition-transform', !open && 'rotate-180')} />
+          <IconButton icon={ChevronDown} label={open && !minimised ? 'Collapse timeline' : 'Expand timeline'} tipSide="top"
+            onClick={() => (minimised ? setPresence({ minimised: false }) : setOpen(!open))}
+            className={cn('transition-transform', !(open && !minimised) && 'rotate-180')} />
         )}
       </div>
-      {open && (
+      {open && !minimised && (
         <TrackArea clock={clock} lanes={lanes} view={view} setView={setView} duration={duration} region={region} fps={fps} t={t} allKeys={allKeys} onKeyClick={onKeyClick} height={height} />
       )}
     </div>

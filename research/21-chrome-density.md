@@ -194,10 +194,12 @@ What's left on the timeline shells is mostly the bottom band: video's 248px time
 ## Still open
 
 1. **Fields.** B's faint wash is built. Bare values until hover (C) is still an option.
-2. **Presence levels:**
-   - ⌘\ hides all chrome (Figma).
-   - ⇧\ minimises: panels collapse to pills, and the inspector shows only while something is selected.
-   - Idle islands fade to about 35% while you drag or scrub on the canvas.
+2. **Presence levels: built as options to try** (branch `claude/presence-levels`), each a ⌘K → View toggle:
+   - **Fade panels while dragging:** islands drop to 35% during a stage drag.
+   - **Dim panels at rest:** 55%, back on hover or focus.
+   - **Minimise panels (⇧\\):** panels fold to their headers and the timeline to its transport. On motion the phone goes from 61% to 86% zoom.
+
+   Rafael picks which, if any, become defaults. The inspector showing only while something is selected needs a selection API in the kit first.
 
 ## Sources
 

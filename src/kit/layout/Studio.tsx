@@ -24,9 +24,10 @@ import { TipProvider } from '../ui/tooltip'
 import { Toaster } from '../system/toast'
 import { ErrorBoundary } from '../system/error-boundary'
 import { restoreDensity } from '../core/density'
+import { setPresence, usePresence } from '../core/presence'
 
 type Layout = 'islands' | 'overlay' | 'docked'
-const StudioCtx = createContext<{ present: boolean; setPresent: (b: boolean) => void; layout: Layout }>({ present: false, setPresent: () => {}, layout: 'islands' })
+const StudioCtx = createContext<{ present: boolean; setPresent: (b: boolean) => void; layout: Layout; minimised: boolean }>({ present: false, setPresent: () => {}, layout: 'islands', minimised: false })
 export const useStudio = () => useContext(StudioCtx)
 
 export function Studio({
@@ -43,9 +44,22 @@ export function Studio({
     if (import.meta.env?.DEV && rootRef.current && rootRef.current.clientHeight === 0)
       console.warn('[studio] <Studio> is 0px tall. It fills its parent — give the page a height: html, body, #root { height: 100%; margin: 0 }')
   }, [])
+  // presence (core/presence): fade while dragging, dim at rest, ⇧\ folds panels to their headers
+  const presence = usePresence()
+  const [busy, setBusy] = useState(false)
+  const minimised = presence.minimised && !present
   useHotkeys({
     'mod+\\': { run: () => setPresent((p) => !p), label: 'Hide interface', group: 'View' },
-  }, [present], { priority: 0 })
+    'shift+\\': { run: () => presence.set({ minimised: !presence.minimised }), label: 'Minimise panels', group: 'View' },
+  }, [present, presence.minimised], { priority: 0 })
+  // a drag that starts on the stage (not a click) sends the islands back until the pointer lifts
+  const onStageDown = (e: React.PointerEvent) => {
+    if (!presence.fade || e.button !== 0) return
+    const x0 = e.clientX, y0 = e.clientY
+    const move = (ev: PointerEvent) => { if (Math.hypot(ev.clientX - x0, ev.clientY - y0) > 3) { setBusy(true); removeEventListener('pointermove', move) } }
+    const up = () => { setBusy(false); removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up) }
+    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up)
+  }
   // Leaving present mode must always work, whatever the shell binds to Esc (break-it F1).
   useHotkeys({ esc: { run: () => setPresent(false), when: () => present } }, [present], { priority: 100 })
   // widths come from the density tokens unless a shell pins one
@@ -74,14 +88,14 @@ export function Studio({
             {bottom && <section aria-label="Bottom panel" data-safe="bottom" className="flex flex-none justify-center [&>*]:pointer-events-auto">{bottom}</section>}
           </div>
         )}
-        <main className="absolute inset-0 z-0">{children}</main>
+        <main className="absolute inset-0 z-0" onPointerDownCapture={onStageDown}>{children}</main>
       </SafeAreaRoot>
     ) : layout === 'docked' ? (
       <div className="flex h-full flex-col">
         {toolbar && !present && <div className="flex-none border-b border-line bg-panel px-2 py-1">{toolbar}</div>}
         <div className="flex min-h-0 flex-1">
           {left && !present && <aside aria-label="Left panel" className="flex min-h-0 flex-none flex-col border-r border-line bg-panel" style={{ width: lw }}>{left}</aside>}
-          <main className="relative min-w-0 flex-1">{children}</main>
+          <main className="relative min-w-0 flex-1" onPointerDownCapture={onStageDown}>{children}</main>
           {right && !present && <aside aria-label="Right panel" className="flex min-h-0 flex-none flex-col border-l border-line bg-panel" style={{ width: rw }}>{right}</aside>}
         </div>
         {bottom && !present && <section aria-label="Bottom panel" className="flex-none border-t border-line bg-panel">{bottom}</section>}
@@ -102,14 +116,16 @@ export function Studio({
             {bottom && <section aria-label="Bottom panel" data-safe="bottom" className="pointer-events-auto flex-none">{bottom}</section>}
           </div>
         )}
-        <main data-studio-main="" className="absolute z-0" style={present ? { inset: 0 } : SAFE_INSET}>{children}</main>
+        <main data-studio-main="" className="absolute z-0" style={present ? { inset: 0 } : SAFE_INSET} onPointerDownCapture={onStageDown}>{children}</main>
       </SafeAreaRoot>
     )
 
   return (
-    <StudioCtx.Provider value={{ present, setPresent, layout }}>
+    <StudioCtx.Provider value={{ present, setPresent, layout, minimised }}>
       <TipProvider>
-        <div ref={rootRef} className={cn('studio h-full w-full overflow-hidden bg-field text-fg no-select', className)}>
+        <div ref={rootRef} className={cn('studio h-full w-full overflow-hidden bg-field text-fg no-select', className)}
+          data-presence-fade={presence.fade || undefined} data-presence-dim={presence.dim || undefined}
+          data-busy={busy || undefined} data-minimised={minimised || undefined}>
           {shell}
           {present && (
             <button type="button" onClick={() => setPresent(false)}
@@ -126,7 +142,11 @@ export function Studio({
 
 /* A floating island. In `docked` layout it renders flat. */
 export function Panel({ children, className, header, footer, scroll = true }: { children: ReactNode; className?: string; header?: ReactNode; footer?: ReactNode; scroll?: boolean }) {
-  const { layout } = useStudio()
+  const { layout, minimised } = useStudio()
+  // minimised (⇧\): a floating panel folds to its header; one without a header steps out entirely
+  // clicking the folded header unfolds everything again
+  if (minimised && layout !== 'docked')
+    return header ? <div className={cn('panel flex-none overflow-hidden', className, 'h-auto')} title="Show panels (⇧\\)" onClick={() => setPresence({ minimised: false })}>{header}</div> : null
   return (
     <div className={cn('flex min-h-0 flex-col overflow-hidden', layout === 'docked' ? 'h-full' : 'panel max-h-full', className)}>
       {header && <div className="flex-none">{header}</div>}
