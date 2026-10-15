@@ -311,7 +311,8 @@ stops ticks while paused too (default true for artifacts with their own life).
   `restoreSnapshot(snapshot, { params, clock? })` (one undo step, the playhead paused at `t`; refuses another schema version) ·
   `snapshotStatus(snapshot, params)` → `'same' | 'different' | 'other-version'` · `isSnapshotState(snapshot, params)` · `normalizeNote(raw)` (a note file as the tool can safely show it, or null).
 - Comments: `<NoteLayer params history? clock? doc? describeAt? />` inside an `<Artboard>` — comment mode (`C`, or `CommentButton`, which `ParamActions`
-  includes) pins a comment to an artboard point, or to a knob by clicking its Inspector row (rows carry `data-param`). The clock pauses while you write.
+  includes) pins a comment to an artboard point, to a spot on the stage around it (`on: 'canvas'`, artboard units outside 0–1;
+  the Stage carries `data-studio-stage`), or to a knob by clicking its Inspector row (rows carry `data-param`). The clock pauses while you write.
   Pins fade when the tool is in another state, and their thread can restore it. Replies arrive live (`useNotes()`) with a toast. Pins keep screen size via `useZoom()`.
 - `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound.
 - `toast(title, opts)` works anywhere (it mounts a single toaster if none is rendered) and returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·

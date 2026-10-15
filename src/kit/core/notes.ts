@@ -54,8 +54,11 @@ export interface StudioSnapshot {
   view: { width: number; height: number; theme: 'light' | 'dark' }
 }
 
+/** Where a comment points. x, y are in artboard units (0–1 across it): 'artboard' is a point on it, 'canvas' a point
+    on the stage around it (so outside 0–1, e.g. x: -0.2 is a fifth of its width to its left), 'param' a knob. */
 export type NoteAnchor =
   | { on: 'artboard'; x: number; y: number; target?: string }
+  | { on: 'canvas'; x: number; y: number }
   | { on: 'param'; key: string }
 
 export type NoteKind = 'values' | 'comment'
@@ -191,6 +194,9 @@ export function sendNote(input: NoteInput): Promise<StudioNote> {
   return call<StudioNote>('', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(input) })
 }
 
+/** how far around the artboard a canvas comment can sit, in artboard widths / heights */
+export const CANVAS_REACH = 50
+
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
 
 /**
@@ -209,6 +215,7 @@ export function normalizeNote(n: unknown): StudioNote | null {
   const a = n.anchor
   const anchor = isObj(a) && a.on === 'param' && typeof a.key === 'string' ? { on: 'param' as const, key: a.key }
     : isObj(a) && a.on === 'artboard' && typeof a.x === 'number' && typeof a.y === 'number' ? { on: 'artboard' as const, x: Math.min(1, Math.max(0, a.x)), y: Math.min(1, Math.max(0, a.y)), ...(typeof a.target === 'string' ? { target: a.target } : {}) }
+    : isObj(a) && a.on === 'canvas' && Number.isFinite(a.x) && Number.isFinite(a.y) ? { on: 'canvas' as const, x: Math.min(CANVAS_REACH, Math.max(-CANVAS_REACH, a.x as number)), y: Math.min(CANVAS_REACH, Math.max(-CANVAS_REACH, a.y as number)) }
     : undefined
   return {
     ...(n as unknown as StudioNote),
@@ -422,10 +429,29 @@ export async function captureImage(el: HTMLElement, opts: { maxWidth?: number; a
   }
   for (const { src, copy } of copies) place(src, copy)
   if (opts.anchor) {
-    const x = opts.anchor.x * W, y = opts.anchor.y * H, R = Math.max(10, W / 40)
-    ctx.lineWidth = Math.max(3, W / 200)
-    ctx.strokeStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x, y, R + ctx.lineWidth, 0, Math.PI * 2); ctx.stroke()
-    ctx.strokeStyle = '#ff3b30'; ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.stroke()
+    const R = Math.max(10, W / 40)
+    const lw = Math.max(3, W / 200)
+    const ring = (x: number, y: number) => {
+      ctx.lineWidth = lw
+      ctx.strokeStyle = '#ffffff'; ctx.beginPath(); ctx.arc(x, y, R + lw, 0, Math.PI * 2); ctx.stroke()
+      ctx.strokeStyle = '#ff3b30'; ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.stroke()
+    }
+    const { x, y } = opts.anchor
+    if (x >= 0 && x <= 1 && y >= 0 && y <= 1) ring(x * W, y * H)
+    else {
+      // a comment on the canvas beside the artboard: ring the nearest edge and point out toward the spot
+      const m = R + lw * 2
+      const ex = Math.min(W - m, Math.max(m, x * W)), ey = Math.min(H - m, Math.max(m, y * H))
+      ring(ex, ey)
+      const a = Math.atan2(y * H - ey, x * W - ex)
+      const tip = { x: ex + Math.cos(a) * (R + lw), y: ey + Math.sin(a) * (R + lw) }
+      ctx.fillStyle = '#ff3b30'
+      ctx.beginPath()
+      ctx.moveTo(tip.x + Math.cos(a) * R * 0.9, tip.y + Math.sin(a) * R * 0.9)
+      ctx.lineTo(tip.x + Math.cos(a + 2.2) * R * 0.6, tip.y + Math.sin(a + 2.2) * R * 0.6)
+      ctx.lineTo(tip.x + Math.cos(a - 2.2) * R * 0.6, tip.y + Math.sin(a - 2.2) * R * 0.6)
+      ctx.closePath(); ctx.fill()
+    }
   }
   try { return out.toDataURL('image/jpeg', 0.85) } catch { return undefined }
 }

@@ -170,6 +170,15 @@ describe('notes handler', () => {
     await handle(req({}), g.r)
     expect(g.json().map((n: { id: string }) => n.id)).toEqual([a.json().id])
   })
+  it('takes comments on the canvas around the artboard, within reach', async () => {
+    const a = res()
+    await handle(post({ kind: 'comment', text: 'left of it', anchor: { on: 'canvas', x: -0.3, y: 0.5, extra: 1 }, snapshot }), a.r)
+    expect(a.out.status).toBe(201)
+    expect(a.json().anchor).toEqual({ on: 'canvas', x: -0.3, y: 0.5 })
+    const b = res()
+    await handle(post({ kind: 'comment', text: 'far away', anchor: { on: 'canvas', x: 999, y: 0 }, snapshot }), b.r)
+    expect(b.out.status).toBe(400)
+  })
   it('stores only the anchor fields the format defines', async () => {
     const a = res()
     await handle(post({ kind: 'comment', text: 'x', anchor: { on: 'artboard', x: 0.1, y: 0.2, extra: 'y'.repeat(1000) }, snapshot }), a.r)

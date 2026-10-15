@@ -100,6 +100,8 @@ describe('normalizeNote', () => {
     expect(normalizeNote({ id: 'a', kind: 'comment', status: 'resolved', snapshot: snap, resolution: 'Done: slowed it' })?.resolution).toEqual({ text: 'Done: slowed it', at: '' })
     expect(normalizeNote({ id: 'a', kind: 'comment', status: 'resolved', snapshot: snap, resolution: { text: { summary: 'x' }, at: 'now' } })?.resolution?.text).toBe('{"summary":"x"}')
     expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', snapshot: snap, resolution: { text: 'forgot status' } })?.status).toBe('resolved')
+    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', snapshot: snap, anchor: { on: 'canvas', x: -0.25, y: 1.4 } })?.anchor).toEqual({ on: 'canvas', x: -0.25, y: 1.4 })
+    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', snapshot: snap, anchor: { on: 'artboard', x: 1.4, y: 0.5 } })?.anchor).toEqual({ on: 'artboard', x: 1, y: 0.5 })
   })
 })
 
