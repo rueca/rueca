@@ -271,8 +271,13 @@ stops ticks while paused too (default true for artifacts with their own life).
   `{ kind: 'markers', keys }`; `depth` indents. Derive lanes from the render maths.
 - `LayerTree items selected onSelect onToggle onMove onRename toggles defaultCollapsed expanded onHover` +
   `updateTree` / `moveInTree` / `findInTree`. Items: `container` (droppable when empty), `toggles`, `meta`, `thumb`.
-- `ParamActions params history? presets compare theme share` (each part switchable; `compare={{ hotkey: false }}`) · `HistoryButtons` · `PresetMenu` ·
-  `CompareButton` · `ThemeToggle` · `shareMenuItems(params)` (link, JSON, **copy as agent prompt**).
+- `ParamActions params history? clock? doc? presets compare agent theme share` (each part switchable; `compare={{ hotkey: false }}`) · `HistoryButtons` · `PresetMenu` ·
+  `CompareButton` · `ThemeToggle` · `SendToAgentButton params history? clock? doc?` · `shareMenuItems(params)` (link, JSON, **copy as agent prompt**).
+- Notes to the agent: **Send to agent** writes a note to `.rueca/notes/<id>.json` through the dev server, and renders nothing
+  until the route answers (so it never shows on a static build). Route: `ruecaNotes()` from `notes-server/vite` in `vite.config.ts`, or
+  `createNotesHandler({ dir? })` from `notes-server/handler` for any Node server. Add `.rueca/` to `.gitignore`.
+  Core, framework-agnostic: `captureSnapshot({ params, history?, clock?, doc? })` → `{ tool, schema, url, changed: { key: { value, default, label, hint } }, steps, t, doc, view }` ·
+  `sendNote({ kind: 'values' | 'comment', text?, anchor?, snapshot })` · `listNotes()` · `findNotesEndpoint()` · `formatNotePrompt(note)` (the clipboard version).
 - `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound.
 - `toast(title, opts)` works anywhere (it mounts a single toaster if none is rendered) and returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
   `toast.promise(p, { loading, success, error })` · `toast.progress(title, { onCancel })` → `{ set(p), done(msg), fail(msg) }`.

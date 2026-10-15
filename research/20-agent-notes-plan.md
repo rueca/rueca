@@ -172,10 +172,14 @@ API notes go there.
    Vite plugin wired into this repo's `vite.config.ts`, "Send values" in the toolbar and share menu,
    the clipboard fallback. Unit tests (vitest + happy-dom) for capture, prompt formatting and the
    handler (file naming, size cap, Origin check). Dogfood on one shell here.
-2. **Comments.** Pins, composer, param anchors, thumbnails, restore, live resolution over the
-   websocket, the notes panel. The standalone server for the mini-tools; try it on Candil.
-3. **Agent side and docs.** `references/notes.md`, the `SKILL.md` lines, KIT.md, registry items,
-   and a QA pass per `references/qa.md` (both themes, phone width).
+2. **Agent side and docs, then comments.** First the docs, which phase 1 shipped without:
+   `references/notes.md`, the `SKILL.md` lines and KIT.md, covering values notes. Until then only
+   a session that already knows about `.rueca/notes/` will read them. Then comments: pins,
+   composer, param anchors, thumbnails, restore, live resolution over the websocket, the notes
+   panel. The docs grow to cover comments as they land. The standalone server for the mini-tools;
+   try it on Candil.
+3. **Polish.** Registry items for the comment UI, and a QA pass per `references/qa.md` (both
+   themes, phone width).
 4. **Later.** A Claude Code hook in the plugin that tells the agent "3 open notes" on every prompt,
    so Rafael doesn't have to say "check the notes". After that, a live channel so notes arrive while
    he's still in the shell. Next.js adapter.
@@ -217,4 +221,13 @@ Changes from the plan:
 - The registry lists `vite` as a dependency of `notes-server` (sync puts every import into
   `dependencies`). It's only a type import and Vite projects already have it. It belongs in
   `devDependencies` once sync learns about type-only imports.
-- Not built yet: the agent-side reference in the skill and the KIT.md docs (phase 3).
+- Not built yet: the agent-side reference in the skill and the KIT.md docs. Moved to the start of phase 2.
+
+## Phase 2 status
+
+- **Agent side and docs: done (2026-10-15).** `skills/rueca/references/notes.md` covers setup, when
+  to read notes, the file format, how to act on a values note and a comment, and how to resolve one.
+  `SKILL.md` has Send to agent in the starter's list (set up by default) and a row in the
+  references table. `architecture.md`'s hand-off list swaps the never-built "Save defaults to
+  source" for Send to agent. `docs/KIT.md` documents the API.
+- Comments: next.
