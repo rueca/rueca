@@ -52,9 +52,9 @@ Copy the structure of the closest example shell rather than inventing one:
 
 ## Inspector
 
-- 28px rows, 24px controls, ~80px label column, 11px tabular values. Labels visible
+- 24px rows, 22px controls, 72px label column, 11px tabular values (the default density). Labels visible
   (keep `aria-label` if hidden).
-- Sections 32px high, collapsible, collapse state persisted, hover-revealed reset;
+- Sections 26px high, collapsible, collapse state persisted, hover-revealed reset;
   Alt-click solo-opens.
 - Row context menu: Reset · Copy / paste value · Add key · Copy as CSS. Double-click
   label = reset. A dot or full contrast marks changed values.
@@ -76,7 +76,7 @@ Copy the structure of the closest example shell rather than inventing one:
 
 ## Layers
 
-28px rows, 12px indent, type icon, thumbnail on checker, eye / lock on hover (kept
+24px rows (`--row`), 12px indent, type icon, thumbnail on checker, eye / lock on hover (kept
 visible when active), 2px accent insertion line on drag, effects as child rows,
 Alt-click eye = solo, Alt-chevron = expand all.
 

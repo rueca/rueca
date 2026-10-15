@@ -48,6 +48,7 @@ import { ChevronRight } from 'lucide-react'
 import { clamp, cn } from '../core/cn'
 import type { Clock } from '../core/clock'
 import { PlayheadCap, PlayheadLine, RulerTicks, rulerTicks, snapTime, toFrame, usePlayhead } from './ruler'
+import { useDensityPx } from '../core/density'
 
 export interface TimelineKey {
   id: string
@@ -110,13 +111,12 @@ export interface KeyTimelineProps {
   className?: string
 }
 
-const ROW = 24
-
 export function KeyTimeline(props: KeyTimelineProps) {
   const {
     clock, mapTime = (t: number) => t, duration, fps, lanes, snap = true, toolbar, autoKey, empty, blocked, height = 248, labelWidth = 232, className,
   } = props
   const track = useRef<HTMLDivElement>(null)
+  const ROW = useDensityPx('--d-lane', 24)
   const [W, setW] = useState(600)
   useLayoutEffect(() => {
     const ro = new ResizeObserver(([e]) => setW(Math.max(1, e.contentRect.width)))
@@ -348,11 +348,11 @@ export function KeyTimeline(props: KeyTimelineProps) {
 
   return (
     <div ref={root} className={cn('panel flex flex-col overflow-hidden', autoKey && 'outline outline-[1.5px] -outline-offset-[1.5px] outline-rec', className)}>
-      {toolbar && <div className="flex h-10 flex-none items-center gap-1 px-2">{toolbar}</div>}
+      {toolbar && <div className="flex h-header flex-none items-center gap-1 px-2">{toolbar}</div>}
 
       {/* ruler */}
-      <div className="flex h-7 flex-none border-t border-line">
-        <div className="flex flex-none items-center border-r border-line px-3 text-[11px] text-fg-faint" style={{ width: labelWidth }}>
+      <div className="flex h-ruler flex-none border-t border-line">
+        <div className="flex flex-none items-center border-r border-line px-pad text-ui text-fg-faint" style={{ width: labelWidth }}>
           {props.summary ?? (
             <button type="button" onClick={fit} className="truncate rounded-[4px] px-1 outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal" title="Zoom to fit (⌘wheel zooms)">
               {propCount} animated {propCount === 1 ? 'property' : 'properties'}
@@ -384,17 +384,17 @@ export function KeyTimeline(props: KeyTimelineProps) {
             <div className="flex-none border-r border-line" style={{ width: labelWidth }}>
               {lanes.map((l) => (
                 <div key={l.id}
-                  className={cn('group/row flex items-center gap-1 pr-1 text-[11.5px] no-select', l.kind === 'group' ? 'text-fg' : 'text-fg-muted', l.highlight && 'bg-signal-soft')}
+                  className={cn('group/row flex items-center gap-1 pr-1 text-ui no-select', l.kind === 'group' ? 'text-fg' : 'text-fg-muted', l.highlight && 'bg-signal-soft')}
                   style={{ height: ROW, paddingLeft: 6 + (l.depth ?? 0) * 12 }}>
                   {l.kind === 'group' ? (
                     <button type="button" aria-label={`${l.open ? 'Collapse' : 'Expand'} ${l.label}`} aria-expanded={!!l.open} onClick={() => props.onToggleLane?.(l.id)}
-                      className="flex h-6 w-4 shrink-0 items-center justify-center rounded-[3px] text-fg-faint outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+                      className="flex h-full w-4 shrink-0 items-center justify-center rounded-[3px] text-fg-faint outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
                       <ChevronRight size={11} strokeWidth={2} className={cn('transition-transform', l.open && 'rotate-90')} />
                     </button>
                   ) : <span className="w-4 shrink-0" />}
                   {l.icon && <l.icon size={13} strokeWidth={1.5} className={cn('shrink-0', l.highlight ? 'text-signal' : 'text-fg-faint')} />}
-                  <button type="button" onClick={() => props.onLaneClick?.(l.id)} className={cn('h-6 min-w-0 flex-1 truncate text-left outline-none focus-visible:underline', l.kind === 'group' && 'font-medium')}>{l.label}</button>
-                  {l.value !== undefined && <span className="shrink-0 tabular text-[11px] text-fg-faint">{l.value}</span>}
+                  <button type="button" onClick={() => props.onLaneClick?.(l.id)} className={cn('h-full min-w-0 flex-1 truncate text-left outline-none focus-visible:underline', l.kind === 'group' && 'font-medium')}>{l.label}</button>
+                  {l.value !== undefined && <span className="shrink-0 tabular text-ui text-fg-faint">{l.value}</span>}
                   {l.trailing}
                 </div>
               ))}

@@ -1,5 +1,17 @@
 import { clsx, type ClassValue } from 'clsx'
-import { twMerge } from 'tailwind-merge'
+import { extendTailwindMerge } from 'tailwind-merge'
+
+/* The kit's density names (theme.css) must be known to tailwind-merge, or `cn('h-control', 'h-8')` keeps both
+   and `cn('text-ui', 'text-fg')` drops one of them as a clashing colour. */
+const twMerge = extendTailwindMerge({
+  extend: {
+    theme: {
+      spacing: ['row', 'control', 'control-sm', 'icon', 'icon-sm', 'button-lg', 'section', 'header', 'bar', 'dock', 'dock-button', 'pad', 'label', 'lane', 'ruler', 'gutter'],
+      text: ['ui', 'ui-sm', 'title'],
+      radius: ['panel', 'control', 'cluster'],
+    },
+  },
+})
 
 export const cn = (...inputs: ClassValue[]) => twMerge(clsx(inputs))
 

@@ -196,7 +196,7 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
       )}
       <div className="flex items-center gap-2">
         {'EyeDropper' in window && (
-          <button type="button" aria-label="Pick from screen" onClick={pick} className="flex size-7 shrink-0 items-center justify-center rounded-[6px] text-fg-muted hover:bg-hover hover:text-fg">
+          <button type="button" aria-label="Pick from screen" onClick={pick} className="flex size-icon shrink-0 items-center justify-center rounded-control text-fg-muted hover:bg-hover hover:text-fg">
             <Pipette size={14} strokeWidth={1.5} />
           </button>
         )}
@@ -223,12 +223,12 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
           onChange={(e) => setText(e.target.value)}
           onBlur={applyText}
           onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') applyText() }}
-          className="h-6 w-full min-w-0 rounded-[5px] bg-control px-2 tabular text-[11px] text-fg uppercase outline-none focus:shadow-[inset_0_0_0_1px_var(--signal)]"
+          className="h-control w-full min-w-0 rounded-control bg-control px-2 tabular text-ui text-fg uppercase outline-none focus:shadow-[inset_0_0_0_1px_var(--signal)]"
         />
       </div>
       {(swatches?.length || recent.length > 0) && (
         <div className="flex flex-col gap-1.5">
-          <div className="text-[11px] text-fg-faint">{swatches?.length ? 'Swatches' : 'Recent'}</div>
+          <div className="text-ui text-fg-faint">{swatches?.length ? 'Swatches' : 'Recent'}</div>
           <div className="grid grid-cols-8 gap-1.5">
             {(swatches?.length ? swatches : recent).slice(0, 16).map((c) => (
               <button key={c} type="button" aria-label={c} onClick={() => emit(hexToHsva(c), true)}
@@ -257,13 +257,13 @@ export function ColorField({ value, onChange, alpha = true, swatches, changed, t
     <Popover.Root>
       <Popover.Trigger
         className={cn(
-          'flex h-6 w-full min-w-0 items-center gap-2 rounded-[5px] bg-control pr-2 pl-1 text-left outline-none',
+          'flex h-control w-full min-w-0 items-center gap-2 rounded-control bg-control pr-2 pl-1 text-left outline-none',
           'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]',
         )}
       >
         <Swatch color={value} />
-        <span className={cn('flex-1 truncate tabular text-[11px] uppercase', changed === false ? 'text-fg-muted' : 'text-fg')}>{formatColor(value, 'hex')}</span>
-        {alpha && <span className="tabular text-[11px] text-fg-muted">{Math.round(a * 100)}%</span>}
+        <span className={cn('flex-1 truncate tabular text-ui uppercase', changed === false ? 'text-fg-value' : 'text-fg')}>{formatColor(value, 'hex')}</span>
+        {alpha && <span className="tabular text-ui text-fg-muted">{Math.round(a * 100)}%</span>}
         {trailing}
       </Popover.Trigger>
       <Popover.Portal>

@@ -25,7 +25,8 @@ export function Segmented<T extends string = string>({
       role="radiogroup"
       value={[value]}
       onValueChange={(v) => v[0] && onChange(v[0] as T)}
-      className={cn('flex w-full min-w-0 gap-0.5 rounded-[7px] bg-well p-[2px]', className)}
+      // no well: a hairline holds the options and the chosen one is a quiet pill
+      className={cn('flex w-full min-w-0 gap-0.5 rounded-[calc(var(--radius-control)+1px)] p-px shadow-[inset_0_0_0_1px_var(--line)]', className)}
     >
       {opts.map((o) => {
         const Icon = o.icon
@@ -39,9 +40,9 @@ export function Segmented<T extends string = string>({
             aria-checked={value === o.value}
             aria-pressed={undefined}
             className={cn(
-              'flex min-w-0 flex-1 items-center justify-center gap-1 rounded-[5px] px-1 font-medium text-fg-muted outline-none no-select transition-colors duration-100',
-              size === 'sm' ? 'h-5 text-[11px]' : 'h-6 text-[11.5px]',
-              'hover:text-fg data-[pressed]:bg-raised data-[pressed]:text-fg data-[pressed]:shadow-[var(--shadow-segment)]',
+              'flex min-w-0 flex-1 items-center justify-center gap-1 rounded-control px-1 font-medium text-fg-muted outline-none no-select transition-colors duration-100',
+              size === 'sm' ? 'h-control-sm text-ui' : 'h-control text-ui',
+              'hover:text-fg data-[pressed]:bg-active data-[pressed]:text-fg',
               'focus-visible:ring-2 focus-visible:ring-signal',
             )}
           >
@@ -86,7 +87,7 @@ export function Tiles({
               ) : Icon ? (
                 <Icon size={15} strokeWidth={1.5} />
               ) : (
-                <span className="text-[11px] font-medium">{labelOf(o)}</span>
+                <span className="text-ui font-medium">{labelOf(o)}</span>
               )}
             </Toggle>
           </Tip>
@@ -105,14 +106,15 @@ export function Switch({ checked, onChange, label, size = 'md' }: { checked: boo
       className={cn(
         'relative inline-flex shrink-0 items-center rounded-full bg-track p-[2px] outline-none transition-colors duration-150 shadow-[inset_0_0_0_1px_var(--line-strong)] data-[checked]:shadow-none',
         "after:absolute after:-inset-y-[4px] after:-inset-x-[2px] after:content-['']", // ≥24px hit area, same look
-        'data-[checked]:bg-signal focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-1 focus-visible:ring-offset-panel',
-        size === 'sm' ? 'h-4 w-[26px]' : 'h-[18px] w-[30px]',
+        // on is ink, not signal: blue stays for focus and selection, so a panel of switches doesn't outshout the prototype
+        'data-[checked]:bg-ink focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-1 focus-visible:ring-offset-panel',
+        size === 'sm' ? 'h-[14px] w-[22px]' : 'h-4 w-[26px]',
       )}
     >
       <BaseSwitch.Thumb
         className={cn(
-          'block rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,.35)] transition-transform duration-150',
-          size === 'sm' ? 'size-3 data-[checked]:translate-x-[10px]' : 'size-[14px] data-[checked]:translate-x-[12px]',
+          'block rounded-full bg-white shadow-[0_1px_2px_rgba(0,0,0,.35)] transition-transform duration-150 data-[checked]:bg-ink-fg data-[checked]:shadow-none',
+          size === 'sm' ? 'size-2.5 data-[checked]:translate-x-[8px]' : 'size-3 data-[checked]:translate-x-[10px]',
         )}
       />
     </BaseSwitch.Root>
@@ -129,7 +131,7 @@ export function Checkbox({ checked, onChange, label }: { checked: boolean; onCha
       onClick={() => onChange(!checked)}
       className={cn(
         'flex size-[14px] shrink-0 items-center justify-center rounded-[4px] outline-none transition-colors',
-        checked ? 'bg-signal text-white' : 'shadow-[inset_0_0_0_1px_var(--line-strong)] hover:bg-hover',
+        checked ? 'bg-ink text-ink-fg' : 'shadow-[inset_0_0_0_1px_var(--line-strong)] hover:bg-hover',
         'focus-visible:ring-2 focus-visible:ring-signal',
       )}
     >
@@ -149,7 +151,7 @@ export function Select<T extends string = string>({
       <BaseSelect.Trigger
         aria-label={label}
         className={cn(
-          'flex h-6 w-full min-w-0 items-center justify-between gap-1 rounded-[5px] bg-control pr-1 pl-2 text-[11.5px] text-fg outline-none',
+          'flex h-control w-full min-w-0 items-center justify-between gap-1 rounded-control bg-control pr-1 pl-2 text-ui text-fg outline-none',
           'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]',
           className,
         )}
@@ -168,7 +170,7 @@ export function Select<T extends string = string>({
               <BaseSelect.Item
                 key={o.value}
                 value={o.value}
-                className="flex h-7 cursor-default items-center gap-2 rounded-[5px] pr-6 pl-2 text-[12px] text-fg outline-none select-none data-[highlighted]:bg-signal-strong data-[highlighted]:text-signal-fg"
+                className="flex h-icon cursor-default items-center gap-2 rounded-control pr-6 pl-2 text-ui text-fg outline-none select-none data-[highlighted]:bg-signal-strong data-[highlighted]:text-signal-fg"
               >
                 <span className="flex w-3 justify-center"><BaseSelect.ItemIndicator><Check size={12} strokeWidth={2} /></BaseSelect.ItemIndicator></span>
                 {o.swatch && <span className="size-3 rounded-full" style={{ background: o.swatch }} />}
@@ -200,10 +202,10 @@ export function TextInput({
     el.addEventListener('blur', () => { window.removeEventListener('pointerdown', early, true); settle(el.value); start.current = null }, { once: true })
   }
   const cls = cn(
-    'w-full min-w-0 rounded-[5px] bg-control px-2 text-[11.5px] text-fg outline-none placeholder:text-fg-faint',
+    'w-full min-w-0 rounded-control bg-control px-2 text-ui text-fg outline-none placeholder:text-fg-faint',
     'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus:shadow-[inset_0_0_0_1px_var(--signal)]',
-    mono && 'font-mono text-[11px]',
-    multiline ? 'resize-none py-1.5 leading-relaxed' : 'h-6',
+    mono && 'font-mono',
+    multiline ? 'resize-none py-1.5 leading-relaxed' : 'h-control',
     className,
   )
   return multiline ? (
@@ -228,7 +230,7 @@ function MenuItems({ items }: { items: MenuItem[] }) {
     <>
       {items.map((it, i) => {
         if (it.type === 'separator') return <BaseMenu.Separator key={i} className="mx-2 my-1 h-px bg-line" />
-        if (it.type === 'label') return <div key={i} className="px-2 pt-1.5 pb-1 text-[11px] text-fg-faint">{it.label}</div>
+        if (it.type === 'label') return <div key={i} className="px-2 pt-1.5 pb-1 text-ui text-fg-faint">{it.label}</div>
         if (it.type === 'submenu') {
           const Icon = it.icon
           return (
@@ -248,15 +250,15 @@ function MenuItems({ items }: { items: MenuItem[] }) {
         }
         const Icon = it.icon
         return (
-          <BaseMenu.Item key={i} disabled={it.disabled} onClick={it.onClick} className={cn(itemCls, it.danger && 'text-rec', it.hint && 'h-auto min-h-7 py-1.5')}>
+          <BaseMenu.Item key={i} disabled={it.disabled} onClick={it.onClick} className={cn(itemCls, it.danger && 'text-rec', it.hint && 'h-auto min-h-icon py-1.5')}>
             <span className="flex w-4 justify-center self-start pt-px text-fg-muted group-data-[highlighted]/item:text-signal-fg">
               {it.checked ? <Check size={13} strokeWidth={2} /> : Icon ? <Icon size={14} strokeWidth={1.5} /> : null}
             </span>
             <span className="flex min-w-0 flex-1 flex-col">
               <span>{it.label}</span>
-              {it.hint && <span className="text-[11px] leading-snug text-fg-faint group-data-[highlighted]/item:text-signal-fg/75">{it.hint}</span>}
+              {it.hint && <span className="text-ui leading-snug text-fg-faint group-data-[highlighted]/item:text-signal-fg/75">{it.hint}</span>}
             </span>
-            {it.shortcut && <span className="text-[11px] text-fg-faint group-data-[highlighted]/item:text-signal-fg/70">{prettyCombo(it.shortcut)}</span>}
+            {it.shortcut && <span className="text-ui text-fg-faint group-data-[highlighted]/item:text-signal-fg/70">{prettyCombo(it.shortcut)}</span>}
           </BaseMenu.Item>
         )
       })}
@@ -265,7 +267,7 @@ function MenuItems({ items }: { items: MenuItem[] }) {
 }
 
 const itemCls =
-  'group/item flex h-7 cursor-default items-center gap-2 rounded-[5px] px-2 text-[12px] text-fg outline-none select-none data-[highlighted]:bg-signal-strong data-[highlighted]:text-signal-fg data-[disabled]:opacity-40 data-[popup-open]:bg-hover'
+  'group/item flex h-icon cursor-default items-center gap-2 rounded-control px-2 text-ui text-fg outline-none select-none data-[highlighted]:bg-signal-strong data-[highlighted]:text-signal-fg data-[disabled]:opacity-40 data-[popup-open]:bg-hover'
 const popupCls =
   'pop min-w-[200px] p-1 outline-none origin-[var(--transform-origin)] transition-[opacity,transform] duration-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0'
 
@@ -294,5 +296,5 @@ export function Badge({ children, tone = 'default', className }: { children: Rea
     rec: 'bg-rec/15 text-rec',
     ok: 'bg-ok/15 text-ok',
   }
-  return <span className={cn('inline-flex h-[18px] items-center gap-1 rounded-[5px] px-1.5 text-[10.5px] font-medium tabular', tones[tone], className)}>{children}</span>
+  return <span className={cn('inline-flex h-[18px] items-center gap-1 rounded-[5px] px-1.5 text-ui-sm font-medium tabular', tones[tone], className)}>{children}</span>
 }

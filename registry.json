@@ -253,6 +253,11 @@
           "target": "@components/studio/core/cn.ts"
         },
         {
+          "path": "src/kit/core/density.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/density.ts"
+        },
+        {
           "path": "src/kit/core/doc.ts",
           "type": "registry:lib",
           "target": "@components/studio/core/doc.ts"
@@ -940,7 +945,7 @@
       "description": "Contrast-audited dark + light tokens via @theme inline. Import it in your main CSS; names are namespaced, so order does not matter.",
       "extends": "none",
       "dependencies": [
-        "@fontsource-variable/inter@^5.3.0",
+        "inter-ui@^4.1.1",
         "tailwindcss@^4.3.3"
       ],
       "registryDependencies": [],

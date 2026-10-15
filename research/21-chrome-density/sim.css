@@ -1,0 +1,76 @@
+/* Simulation of the density proposal over the live kit. Overrides literal classes, so it's a preview, not the
+   implementation. html[data-sim="b"] = Tactical (recommended), html[data-sim="c"] = Instrument (denser). */
+
+@font-face { font-family: "InterSim"; src: url(__FONT__) format("woff2"); font-weight: 100 900; font-display: block; }
+
+html[data-sim="b"] {
+  --row: 24px; --gutter: 8px; --inspector-w: 256px; --radius-panel: 10px; --radius-control: 5px;
+  --s-ctl: 22px; --s-ctl-sm: 18px; --s-icon: 24px; --s-icon-sm: 20px; --s-sec: 26px; --s-hdr: 32px; --s-bar: 32px;
+  --s-pad: 10px; --s-label: 72px; --s-right: 256px; --s-left: 224px; --s-sec-pb: 4px; --s-r-ctl: 5px;
+}
+html[data-sim="c"] {
+  --row: 22px; --gutter: 6px; --inspector-w: 240px; --radius-panel: 8px; --radius-control: 4px;
+  --s-ctl: 20px; --s-ctl-sm: 16px; --s-icon: 22px; --s-icon-sm: 18px; --s-sec: 24px; --s-hdr: 28px; --s-bar: 30px;
+  --s-pad: 8px; --s-label: 68px; --s-right: 240px; --s-left: 208px; --s-sec-pb: 2px; --s-r-ctl: 4px;
+}
+
+/* ---------- type: official Inter 4, features that actually render, 11px, labels 450 ---------- */
+html[data-sim] :where(.studio, .pop) :not([data-studio-artifact], [data-studio-artifact] *) {
+  font-family: "InterSim", "Inter Variable", system-ui, sans-serif !important;
+  font-feature-settings: "cv05", "cv08" !important;
+}
+html[data-sim] :where(.studio, .pop) :is(.text-\[11\.5px\], .text-\[12px\]):not([data-studio-artifact] *) { font-size: 11px !important; line-height: 16px !important; }
+html[data-sim] :where(.studio, .pop) :is(.text-\[12\.5px\]):not([data-studio-artifact] *) { font-size: 12px !important; }
+html[data-sim] :where(.studio, .pop) .tabular { font-feature-settings: "cv05", "cv08", "tnum" !important; }
+html[data-sim] .studio [data-row-label] { font-weight: 450; width: var(--s-label) !important; }
+
+/* ---------- geometry ---------- */
+html[data-sim] .studio [data-section-header] { height: var(--s-sec) !important; padding-left: var(--s-pad) !important; }
+html[data-sim] .studio section.group\/section > div.pb-2\.5 { padding-bottom: var(--s-sec-pb) !important; }
+html[data-sim] .studio :is(.h-10):not([data-studio-artifact] *) { height: var(--s-hdr) !important; }
+html[data-sim] .studio :is(.h-9):not([data-studio-artifact] *) { height: var(--s-bar) !important; }
+html[data-sim] .studio :is(.h-8):not([data-studio-artifact] *) { height: calc(var(--s-bar) - 4px) !important; }
+html[data-sim] :where(.studio, .pop) :is(.h-7):not([data-studio-artifact] *) { height: var(--s-icon) !important; }
+html[data-sim] :where(.studio, .pop) :is(.h-6):not([data-studio-artifact] *) { height: var(--s-ctl) !important; }
+html[data-sim] :where(.studio, .pop) :is(.h-5):not([data-studio-artifact] *) { height: var(--s-ctl-sm) !important; }
+html[data-sim] :where(.studio, .pop) :is(.size-7):not([data-studio-artifact] *) { width: var(--s-icon) !important; height: var(--s-icon) !important; }
+html[data-sim] :where(.studio, .pop) :is(.size-6):not([data-studio-artifact] *) { width: var(--s-icon-sm) !important; height: var(--s-icon-sm) !important; }
+html[data-sim] .studio :is(.px-3):not([data-studio-artifact] *) { padding-left: var(--s-pad) !important; padding-right: var(--s-pad) !important; }
+html[data-sim] .studio :is(.pl-3):not([data-studio-artifact] *) { padding-left: var(--s-pad) !important; }
+html[data-sim] .studio aside[aria-label="Right panel"] { width: var(--s-right) !important; }
+html[data-sim] .studio aside[aria-label="Left panel"] { width: var(--s-left) !important; }
+html[data-sim] :where(.studio, .pop) :is(.rounded-\[5px\], .rounded-\[6px\], .rounded-\[7px\], .rounded-control):not([data-studio-artifact] *) { border-radius: var(--s-r-ctl) !important; }
+html[data-sim] .studio :is(.cluster) { border-radius: 8px !important; }
+html[data-sim] .studio [role="radiogroup"] { padding: 1px !important; }
+html[data-sim] .studio [role="switch"]:not(.h-4) { height: 16px !important; width: 26px !important; }
+html[data-sim] .studio [role="switch"]:not(.h-4) > * { width: 12px !important; height: 12px !important; }
+html[data-sim] .studio [role="switch"]:not(.h-4) > [data-checked] { translate: 10px 0 !important; }
+
+/* ---------- ink: less paint, blue for state only ---------- */
+/* panels: lighter material, tight shadow, hairline */
+html[data-sim] .studio :is(.panel, .cluster):not([data-studio-artifact] *) {
+  background: color-mix(in srgb, var(--panel) 90%, transparent) !important;
+  backdrop-filter: blur(24px) saturate(1.4);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 2px 8px rgba(0, 0, 0, 0.25) !important;
+}
+/* labels dim, values bright */
+html[data-sim] .studio [data-row-label].text-fg-muted { color: var(--fg-faint) !important; }
+html[data-sim] .studio .group\/scrub.text-fg-muted { color: color-mix(in srgb, var(--fg) 86%, var(--panel)) !important; }
+/* sliders: hairline track, neutral fill */
+html[data-sim] .studio .group\/slider [class*="h-[3px]"] { height: 2px !important; }
+html[data-sim] .studio .group\/slider .bg-signal,
+html[data-sim] .studio [data-studio-slider-control] .bg-signal { background: color-mix(in srgb, var(--fg) 55%, transparent) !important; }
+/* switches and checkboxes: on = ink, not blue */
+html[data-sim] .studio [role="switch"][data-checked] { background: color-mix(in srgb, var(--fg) 85%, transparent) !important; }
+html[data-sim] .studio [role="switch"][data-checked] > * { background: var(--panel) !important; box-shadow: none !important; }
+html[data-sim] .studio [role="checkbox"][aria-checked="true"].bg-signal { background: color-mix(in srgb, var(--fg) 85%, transparent) !important; color: var(--panel) !important; }
+/* segmented: no well, quiet pill */
+html[data-sim] .studio [role="radiogroup"].bg-well { background: transparent !important; box-shadow: inset 0 0 0 1px var(--line) !important; }
+html[data-sim] .studio [role="radiogroup"] [data-pressed] { background: rgba(255, 255, 255, 0.09) !important; box-shadow: none !important; }
+
+/* B: fields keep a faint fill.  C: fields are bare readouts until hovered. */
+html[data-sim="b"] .studio .bg-control:not([data-studio-artifact] *) { background: rgba(255, 255, 255, 0.045) !important; }
+html[data-sim="c"] .studio .bg-control:not([data-studio-artifact] *) { background: transparent !important; box-shadow: inset 0 -1px 0 var(--line) !important; border-radius: 0 !important; }
+html[data-sim="c"] .studio .bg-control:not([data-studio-artifact] *):hover { background: var(--hover) !important; }
+/* C: section titles as small tracked caps */
+html[data-sim="c"] .studio [data-section-header] button { text-transform: uppercase; font-size: 10px !important; letter-spacing: 0.08em; font-weight: 550 !important; color: var(--fg-muted) !important; }

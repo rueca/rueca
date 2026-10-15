@@ -1,5 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+// the shells' artwork sets type in "Inter Variable" (fontsource); the kit chrome brings its own Inter 4
+import '@fontsource-variable/inter'
 import '@kit/theme.css'
 import './app.css'
 import { App } from './gallery/App'

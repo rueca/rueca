@@ -54,10 +54,10 @@ export function GradientSlider({
   return (
     <Base.Root value={value} min={min} max={max} step={step} disabled={disabled}
       onValueChange={(v) => onChange(v as number, false)} onValueCommitted={(v) => onChange(v as number, true)}
-      className={cn('group/slider relative flex h-6 w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}>
-      <Base.Control className="flex h-6 w-full cursor-default items-center">
-        <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[3px] bg-track')} style={track ? { background: track } : undefined}>
-          {!track && <div className="absolute inset-y-0 rounded-full bg-signal" style={{ left: `${Math.min(from, at)}%`, width: `${Math.abs(at - from)}%` }} />}
+      className={cn('group/slider relative flex h-control w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}>
+      <Base.Control className="flex h-control w-full cursor-default items-center">
+        <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[2px] bg-track')} style={track ? { background: track } : undefined}>
+          {!track && <div className="absolute inset-y-0 rounded-full bg-fill" style={{ left: `${Math.min(from, at)}%`, width: `${Math.abs(at - from)}%` }} />}
           <Base.Thumb
             aria-label={label}
             className={cn(

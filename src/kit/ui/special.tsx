@@ -273,7 +273,7 @@ export function SpringEditor({ value, onChange }: { value: { stiffness: number; 
         <line x1={0} x2={100} y1={30} y2={30} stroke="var(--line-strong)" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
         <polyline points={pts.join(' ')} fill="none" stroke="var(--signal)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
       </svg>
-      <div className="flex justify-between gap-2 tabular text-[11px] text-fg-muted">
+      <div className="flex justify-between gap-2 tabular text-ui text-fg-muted">
         <span>{feel} · ζ {st.zeta.toFixed(2)}</span>
         <span>{st.overshoot > 0.005 ? `+${Math.round(st.overshoot * 100)}% · ` : ''}settles {st.settle.toFixed(2)} s</span>
       </div>
@@ -299,7 +299,7 @@ export function GradientEditor({ value, onChange, angle = true }: { value: { ang
     <div className="flex w-full flex-col gap-2">
       <div
         ref={bar}
-        className="checker relative h-6 rounded-[6px]"
+        className="checker relative h-control rounded-control"
         onPointerDown={(e) => {
           if (e.target !== bar.current && (e.target as HTMLElement).dataset.fill === undefined) return
           const r = bar.current!.getBoundingClientRect()
@@ -344,10 +344,10 @@ export function GradientEditor({ value, onChange, angle = true }: { value: { ang
       </div>
       <div className="flex items-center gap-1.5">
         <Popover.Root>
-          <Popover.Trigger className="flex h-6 flex-1 items-center gap-2 rounded-[5px] bg-control pr-2 pl-1 outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)]">
+          <Popover.Trigger className="flex h-control flex-1 items-center gap-2 rounded-control bg-control pr-2 pl-1 outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)]">
             <Swatch color={cur.color} />
-            <span className="tabular text-[11px] uppercase text-fg">{cur.color.replace('#', '').slice(0, 6)}</span>
-            <span className="ml-auto tabular text-[11px] text-fg-faint">{Math.round(hexToRgba(cur.color)[3] * 100)}%</span>
+            <span className="tabular text-ui uppercase text-fg">{cur.color.replace('#', '').slice(0, 6)}</span>
+            <span className="ml-auto tabular text-ui text-fg-faint">{Math.round(hexToRgba(cur.color)[3] * 100)}%</span>
           </Popover.Trigger>
           <Popover.Portal>
             <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[160]">
@@ -441,7 +441,7 @@ export function ImageDrop({ value, onChange, accept = 'image/*', compact }: { va
       ) : (
         <div className="flex flex-col items-center gap-1 text-fg-faint">
           <ImagePlus size={16} strokeWidth={1.5} />
-          {!compact && <span className="text-[11px]">Drop, paste or click</span>}
+          {!compact && <span className="text-ui">Drop, paste or click</span>}
         </div>
       )}
     </div>
@@ -484,8 +484,8 @@ export function Monitor({ get, graph, min, max, fmt }: { get: () => number | str
   }, [graph, min, max])
   return (
     <div className="flex w-full items-center gap-2">
-      {graph && <canvas ref={canvas} className="h-6 min-w-0 flex-1 rounded-[4px] bg-control" />}
-      <span className={cn('tabular text-[11px] text-fg', graph ? 'w-12 text-right' : 'flex-1 text-right')}>{text}</span>
+      {graph && <canvas ref={canvas} className="h-control min-w-0 flex-1 rounded-[4px] bg-control" />}
+      <span className={cn('tabular text-ui text-fg', graph ? 'w-12 text-right' : 'flex-1 text-right')}>{text}</span>
     </div>
   )
 }

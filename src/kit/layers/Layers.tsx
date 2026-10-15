@@ -34,7 +34,7 @@ export interface LayerItem {
 type Drop = { id: string; where: 'before' | 'after' | 'inside' } | null
 
 export function LayerTree({
-  items, selected = [], onSelect, onToggle, onMove, onRename, className, rowHeight = 28,
+  items, selected = [], onSelect, onToggle, onMove, onRename, className, rowHeight,
   toggles = ['locked', 'visible'], defaultCollapsed = false, expanded, onExpandedChange, onHover,
 }: {
   items: LayerItem[]
@@ -146,14 +146,14 @@ export function LayerTree({
               if (e.key === 'Enter' && onRename) { handled(); setEditing(item.id) }
             }}
             className={cn(
-              'group/row relative mx-1.5 flex shrink-0 items-center gap-1 rounded-[6px] pr-1 text-[12px] outline-none no-select',
+              'group/row relative mx-1.5 flex shrink-0 items-center gap-1 rounded-control pr-1 text-ui outline-none no-select',
               sel ? 'bg-signal-soft text-fg' : 'text-fg hover:bg-hover',
               (hidden || hiddenParent) && 'text-fg-faint',
               drag === item.id && 'opacity-40',
               drop?.id === item.id && drop.where === 'inside' && 'shadow-[inset_0_0_0_1.5px_var(--signal)]',
               'focus-visible:ring-2 focus-visible:ring-signal',
             )}
-            style={{ height: rowHeight, paddingLeft: 4 + depth * 12 }}
+            style={{ height: rowHeight ?? 'var(--row)', paddingLeft: 4 + depth * 12 }}
           >
             {drop?.id === item.id && drop.where !== 'inside' && (
               <div className={cn('pointer-events-none absolute right-1 h-0.5 rounded-full bg-signal', drop.where === 'before' ? '-top-px' : '-bottom-px')} style={{ left: 4 + depth * 12 }} />
@@ -176,7 +176,7 @@ export function LayerTree({
               <InlineText bare focusable={false} editing={editing === item.id} onEditingChange={(b) => { setEditing(b ? item.id : null); if (!b) requestAnimationFrame(() => rootRef.current?.querySelector<HTMLElement>(`[data-row-id="${item.id}"]`)?.focus()) }}
                 value={item.name} onCommit={(v) => onRename?.(item.id, v)} label="Rename layer" className="min-w-0 flex-1 truncate" />
             </span>
-            {item.meta && <span className="shrink-0 text-[11px] text-fg-faint group-hover/row:hidden">{item.meta}</span>}
+            {item.meta && <span className="shrink-0 text-ui text-fg-faint group-hover/row:hidden">{item.meta}</span>}
             {onToggle && rowToggles.length > 0 && (
               // Overlaid on hover so names keep their full width when toggles are hidden;
               // toggles that are ON (locked, hidden) stay visible in flow.
@@ -195,7 +195,7 @@ export function LayerTree({
 function RowToggle({ on, label, onClick, icon: Icon }: { on?: boolean; label: string; onClick: () => void; icon: ComponentType<{ size?: number; strokeWidth?: number }> }) {
   return (
     <button type="button" aria-label={label} aria-pressed={on} onClick={(e) => { e.stopPropagation(); onClick() }}
-      className={cn('flex size-6 items-center justify-center rounded-[5px] text-fg-faint outline-none hover:text-fg focus-visible:flex',
+      className={cn('flex size-icon-sm items-center justify-center rounded-control text-fg-faint outline-none hover:text-fg focus-visible:flex',
         on ? 'flex' : 'hidden group-hover/row:flex group-focus-within/row:flex')}>
       <Icon size={13} strokeWidth={1.5} />
     </button>

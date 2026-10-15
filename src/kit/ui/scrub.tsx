@@ -259,18 +259,18 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
       onBlur={settleNudge}
       {...rest}
       className={cn(
-        'group/scrub relative flex h-6 min-w-0 touch-pan-y items-center gap-1 rounded-[5px] tabular text-[11px] outline-none no-select',
+        'group/scrub relative flex h-control min-w-0 touch-pan-y items-center gap-1 rounded-control tabular text-ui outline-none no-select',
         'cursor-ew-resize focus-visible:ring-2 focus-visible:ring-signal',
         boxed ? 'bg-control px-1.5 hover:shadow-[inset_0_0_0_1px_var(--line-strong)]' : 'px-1 hover:bg-hover',
         'data-[scrubbing]:bg-active',
-        // untouched values read muted, not faint — they are real text (WCAG 1.4.3, break-it A7)
-        changed === false ? 'text-fg-muted' : 'text-fg',
+        // untouched values read a step under changed ones, and above their labels (WCAG 1.4.3, break-it A7)
+        changed === false ? 'text-fg-value' : 'text-fg',
         mixed && 'text-fg-faint italic',
         disabled && 'pointer-events-none opacity-40',
         className,
       )}
     >
-      {prefix != null && <span className="flex min-w-3 shrink-0 justify-center text-[10.5px] text-fg-faint">{prefix}</span>}
+      {prefix != null && <span className="flex min-w-3 shrink-0 justify-center text-ui-sm text-fg-faint">{prefix}</span>}
       {editing ? (
         <input
           ref={input}

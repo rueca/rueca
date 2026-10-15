@@ -30,15 +30,15 @@ export function Slider({
       disabled={disabled}
       onValueChange={(v) => onChange(v, false)}
       onValueCommitted={(v) => onChange(v, true)}
-      className={cn('group/slider relative flex h-6 w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}
+      className={cn('group/slider relative flex h-control w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}
     >
-      <Base.Control data-studio-slider-control className="flex h-6 w-full cursor-default touch-pan-y items-center">
-        <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[3px] bg-track shadow-[0_0_0_0.5px_var(--line-strong)]')} style={track ? { background: track } : undefined}>
+      <Base.Control data-studio-slider-control className="flex h-control w-full cursor-default touch-pan-y items-center">
+        <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[2px] bg-track shadow-[0_0_0_0.5px_var(--line-strong)]')} style={track ? { background: track } : undefined}>
           {track ? null : fillFrom === null ? (
-            <Base.Indicator className="rounded-full bg-signal" />
+            <Base.Indicator className="rounded-full bg-fill" />
           ) : (
             <div
-              className="absolute inset-y-0 rounded-full bg-signal"
+              className="absolute inset-y-0 rounded-full bg-fill"
               style={{ left: `${Math.min(fillFrom, at)}%`, width: `${Math.abs(at - fillFrom)}%` }}
             />
           )}

@@ -251,15 +251,15 @@ export function ZoomPill({
     '=': { run: () => set(go(1)), label: steps ? 'Zoom in (next step)' : 'Zoom in', group: 'View' },
     '-': { run: () => set(go(-1)), label: steps ? 'Zoom out (next step)' : 'Zoom out', group: 'View' },
   } : {}, [keys, zoom, steps], { priority: 0 })
-  const btn = 'flex size-6 items-center justify-center rounded-[5px] text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal'
+  const btn = 'flex size-icon-sm items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal'
   const pct = Math.round(zoom * 100)
   return (
-    <div style={style} className={cn('cluster flex h-8 items-center gap-0.5 px-1', floating && 'absolute right-3 bottom-3 z-10', className)}>
+    <div style={style} className={cn('cluster flex h-button-lg items-center gap-0.5 px-1', floating && 'absolute right-3 bottom-3 z-10', className)}>
       <button type="button" aria-label="Zoom out" onClick={() => set(go(-1))} className={btn}><Minus size={13} strokeWidth={1.5} /></button>
       <Menu
         side="top"
         align="end"
-        trigger={<button type="button" aria-label={`Zoom level ${pct}%`} className="h-6 min-w-[46px] rounded-[5px] px-1 tabular text-[11.5px] text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">{pct}%</button>}
+        trigger={<button type="button" aria-label={`Zoom level ${pct}%`} className="h-icon-sm min-w-[46px] rounded-control px-1 tabular text-ui text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">{pct}%</button>}
         items={[
           { label: 'Zoom to fit', shortcut: fitShortcut || undefined, onClick: fit },
           ...(extra ?? []),
@@ -281,7 +281,7 @@ export function Artboard({
       {label && (
         <div
           onPointerDown={onSelect}
-          className={cn('absolute bottom-full left-0 flex origin-bottom-left items-center gap-1.5 overflow-hidden pb-1.5 text-[11px] whitespace-nowrap no-select', selected ? 'text-signal-text' : 'text-fg-faint')}
+          className={cn('absolute bottom-full left-0 flex origin-bottom-left items-center gap-1.5 overflow-hidden pb-1.5 text-ui whitespace-nowrap no-select', selected ? 'text-signal-text' : 'text-fg-faint')}
           // never wider than the board on screen, so neighbouring boards' labels can't overlap (cleanup L5)
           style={{ transform: `scale(${1 / zoom})`, maxWidth: Math.max(48, width * zoom) }}
         >
