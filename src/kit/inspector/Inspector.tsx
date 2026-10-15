@@ -21,8 +21,9 @@ import { useDensityPx } from '../core/density'
 import { useParamState, type AnyParams } from '../core/params'
 import { equal, humanize, isValueDef, layoutFolder, type Folder, type ParamDef, type Schema, type ValueDef, type NumberDef } from '../core/schema'
 import { Tip } from '../ui/tooltip'
-import { ScrubValue } from '../ui/scrub'
+import { ScrubValue, evaluate } from '../ui/scrub'
 import { Slider } from '../ui/slider'
+import { DetentSlider, normDetents } from '../ui/detent'
 import { Knob } from '../ui/knob'
 import { Segmented, Select, Switch, Checkbox, TextInput, Tiles, normOptions } from '../ui/controls'
 import { ColorField } from '../ui/color'
@@ -304,6 +305,20 @@ export function ParamRow({ k, def, params, values: valuesProp, defaults: default
   const control = <ParamControl def={d} value={v} onChange={set} changed={changed} defaultValue={defaults[k]} label={label} />
   const stacked = ['curve', 'spring', 'gradient', 'image', 'multi'].includes(d.type) || (d.type === 'vec2' && d.display !== 'fields') || (d.type === 'text' && d.multiline) || (d.type === 'select' && d.display === 'tiles')
 
+  if (d.type === 'number' && hasDetents(d)) {
+    // the track takes the full width (its stop names need it); the typed value sits on the label line
+    const step = d.step ?? inferStep(d.min, d.max)
+    const stops = normDetents(d.detents!)
+    const parse = d.parse ?? ((s: string) => stops.find((x) => x.label?.toLowerCase() === s.trim().toLowerCase())?.value ?? evaluate(s, v as number))
+    const scrub = <ScrubValue value={v as number} onChange={(n, f) => set(n, f)} min={d.min} max={d.max} step={step} unit={d.unit} fmt={d.fmt} parse={parse}
+      defaultValue={defaults[k] as number} changed={changed} label={label} className="w-[56px] shrink-0" />
+    return (
+      <div className={cn(disabled && 'pointer-events-none opacity-40')}>
+        <Row {...common} stacked trailing={<div className="flex items-center gap-1">{scrub}{trailing}</div>}>{control}</Row>
+      </div>
+    )
+  }
+
   if (d.type === 'curve') {
     // Collapsed: glyph + numbers; the editor lives in a popover so it never pushes rows around.
     return (
@@ -338,6 +353,9 @@ export function fitsSegmented(options: ReturnType<typeof normOptions>) {
   return chars + options.length * 2 <= 22
 }
 
+/** A number def drawn as a detent track: it has stops and no other display asked for. */
+const hasDetents = (d: NumberDef) => !!d.detents?.length && (d.display ?? 'slider') === 'slider'
+
 /** Step when a def doesn't say: integers for wide ranges, ~1/100 of a narrow one (0..1 → 0.01). */
 export function inferStep(min?: number, max?: number) {
   if (min === undefined || max === undefined) return 1
@@ -359,6 +377,8 @@ export function ParamControl({ def: d, value: v, onChange: set, changed, default
       const show = (n: number) => (d.fmt ? d.fmt(n) : `${n}${d.unit ?? ''}`)
       const hasRange = d.min !== undefined && d.max !== undefined
       const display = d.display ?? (hasRange ? 'slider' : 'field')
+      if (hasDetents(d))
+        return <DetentSlider value={v} onChange={(n, f) => set(n, f)} stops={d.detents!} snap={d.snap} step={step} label={label} format={show} />
       const scrub = (
         <ScrubValue value={v} onChange={(n, f) => set(n, f)} min={d.min} max={d.max} step={step} unit={d.unit} fmt={d.fmt} parse={d.parse} soft={d.soft}
           defaultValue={dflt} changed={changed} label={label} boxed={display !== 'slider'} className={display === 'slider' ? 'w-[56px] shrink-0' : 'flex-1'} />

@@ -58,6 +58,12 @@ export interface NumberDef extends Base<number> {
   soft?: [number, number]
   /** paint the slider track (a CSS gradient) — Temp, Tint, Hue rows */
   track?: string
+  /** named stops, evenly spaced on the track whatever their values: an elevation ladder
+      `[{ value: -3, label: 'Inset' }, { value: 0, label: 'Flat' }, …, { value: 40, label: 'Modal' }]`.
+      The thumb snaps near each one. min / max default to the first and last stop. */
+  detents?: ({ value: number; label?: string } | number)[]
+  /** with detents: near = snap within reach of a stop, values between pass (default); only = the stops alone */
+  snap?: 'near' | 'only'
 }
 export interface RangeDef extends Base<[number, number]> { type: 'range'; min: number; max: number; step?: number; unit?: string; fmt?: (v: number) => string }
 export interface AngleDef extends Base<number> { type: 'angle' }
@@ -112,9 +118,16 @@ export interface Folder<P extends Record<string, ParamDef> = Record<string, Para
 
 type Opt<D> = Omit<D, 'type' | 'value'>
 
+const detentValues = (d: NumberDef['detents']) => (d ?? []).map((x) => (typeof x === 'number' ? x : x.value)).filter(Number.isFinite)
+/** min / max from the first and last stop, for `p.number(…, { detents })` */
+const detentBounds = (d: NumberDef['detents']): { min?: number; max?: number } => {
+  const vs = detentValues(d)
+  return vs.length ? { min: Math.min(...vs), max: Math.max(...vs) } : {}
+}
+
 /* --- builders: terse and typed. Agents (and people) write these. --- */
 export const p = {
-  number: (value: number, o: Opt<NumberDef> = {}): NumberDef => ({ type: 'number', value, ...o }),
+  number: (value: number, o: Opt<NumberDef> = {}): NumberDef => ({ type: 'number', value, ...detentBounds(o.detents), ...o }),
   range: (value: [number, number], o: Opt<RangeDef>): RangeDef => ({ type: 'range', value, ...o }),
   angle: (value: number, o: Opt<AngleDef> = {}): AngleDef => ({ type: 'angle', value, ...o }),
   vec2: (value: { x: number; y: number }, o: Opt<Vec2Def> = {}): Vec2Def => ({ type: 'vec2', value, ...o }),
@@ -283,7 +296,13 @@ export function coerce(def: ParamDef, value: unknown): { ok: true; value: unknow
     case 'number': case 'angle': case 'seed': {
       let n = num(value)
       if (n === undefined) return bad('expected a number')
-      if (def.type === 'number') { if (def.min !== undefined) n = Math.max(def.min, n); if (def.max !== undefined) n = Math.min(def.max, n) }
+      if (def.type === 'number') {
+        if (def.min !== undefined) n = Math.max(def.min, n)
+        if (def.max !== undefined) n = Math.min(def.max, n)
+        // snap: 'only' allows the stops alone, so anything else lands on the nearest one
+        const stops = def.snap === 'only' ? detentValues(def.detents) : []
+        if (stops.length) n = stops.reduce((a, b) => (Math.abs(b - n!) < Math.abs(a - n!) ? b : a))
+      }
       if (def.type === 'seed') n = Math.round(n)
       return { ok: true, value: n }
     }

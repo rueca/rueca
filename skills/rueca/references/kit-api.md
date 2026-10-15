@@ -128,7 +128,10 @@ Number `step` defaults from the range when omitted (0–1 → 0.01, 0–10 → 0
 More defs: `p.data<Layer[]>([], { validate })` — a hidden, typed document value (a layer stack, clips, pattern
 steps): undoable and persisted, never rendered as a row. `p.image()` defaults to persist/share
 off (a photo would blow the storage quota). Numbers take `scale: 'log'`, `soft: [lo, hi]` (drag
-range; typing can exceed it), `parse` (typed text → number, e.g. percent), `display: 'knob'`.
+range; typing can exceed it), `parse` (typed text → number, e.g. percent), `display: 'knob'`,
+and `detents` (named stops, e.g. an elevation ladder `[{ value: -3, label: 'Inset' }, …,
+{ value: 40, label: 'Modal' }]`: drawn as a track with the stops evenly spaced and named, snapping
+near each one; `snap: 'only'` allows the stops alone; min / max come from the ends).
 
 ```ts
 export const params = createParams(schema, {
@@ -284,7 +287,7 @@ stops ticks while paused too (default true for artifacts with their own life).
 - Hand-built panels that must match: `Section title (open+onToggle | defaultOpen persistKey) onReset changed actions collapsible`,
   `Row label hint changed onReset stacked trailing labelWidth`, `ParamRow k params` (one schema row),
   `ParamControl def value onChange` (just the control).
-- Controls: `ScrubValue` (drag/type/expr number) · `Slider` · `Segmented` · `Tiles` · `Switch` ·
+- Controls: `ScrubValue` (drag/type/expr number) · `Slider` · `DetentSlider` (named magnetic stops) · `Segmented` · `Tiles` · `Switch` ·
   `Checkbox` · `Select` · `TextInput` · `Menu` (items: item/separator/label/submenu) · `ColorField`
   / `ColorPanel` / `Swatch` · `AngleDial` · `XYPad` · `Vec3Fields` (`lockable` = uniform scale lock, `unit`, `defaultValue`) · `SizeFields` · `SeedField` ·
   `CurveEditor` / `CurveGlyph` · `SpringEditor` · `GradientEditor` · `PaletteField` · `ImageDrop` ·
