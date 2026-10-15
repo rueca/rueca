@@ -21,7 +21,8 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties
 import { createPortal } from 'react-dom'
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { Check, MessageCirclePlus, Send, Trash2, History } from 'lucide-react'
+import { Check, MessageCirclePlus, MessagesSquare, Send, Trash2, History } from 'lucide-react'
+import { Popover } from '@base-ui/react/popover'
 import { useParamState, type AnyParams } from '../core/params'
 import type { HistoryLike } from '../core/history'
 import type { DocStore } from '../core/doc'
@@ -37,6 +38,8 @@ import { useZoom } from '../stage/Stage'
 import { useSafeArea } from '../layout/Studio'
 import { Button, IconButton } from '../ui/button'
 import { toast } from './toast'
+import { Tip } from '../ui/tooltip'
+import { revealInScroller } from '../core/scroll'
 
 /** `layer`: the NoteLayer that owns it; `t`: the playhead when the spot was picked (the clock pauses there while you
     write); `resume`: it was playing; `sending`: on its way (a second Enter must not send it twice); `text`: what's typed
@@ -160,6 +163,92 @@ export function CommentButton({ params, hotkey = 'c' }: { params?: AnyParams; ho
    the pin lands exactly where the tip was. */
 const BUBBLE = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 1 9 9H3z" fill="#1e1e1e" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>`
 export const COMMENT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(BUBBLE)}") 3 21, crosshair`
+
+/**
+ * Every comment on this tool as a list, beside the Comment button. A pin only shows while its spot is on screen
+ * (a knob's row in a collapsed section has none), so the list is where nothing gets lost: each row opens to the
+ * full comment and the agent's reply, shows its pin, or clears it.
+ */
+export function CommentsList({ params }: { params: AnyParams }) {
+  const available = useNotesEndpoint()
+  const layers = useUI((s) => Object.keys(s.tools).length)
+  const notes = useNotes(params.id).filter((n) => n.kind === 'comment' && n.snapshot.tool === params.id)
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [open, setOpen] = useState(false)
+  if (!available || !layers) return null
+  const waiting = notes.filter((n) => n.status === 'open').length
+  const label = notes.length ? `All comments (${notes.length}${waiting ? `, ${waiting} waiting` : ''})` : 'All comments'
+  const where = (n: StudioNote) => {
+    const a = n.anchor
+    if (!a) return 'On the tool'
+    if (a.on === 'param') return `On ${paramLabel(params, a.key)}`
+    if (a.on === 'canvas') return 'Beside the artboard'
+    return a.target ? `On ${a.target}` : 'On the artboard'
+  }
+  const show = (n: StudioNote) => {
+    // a knob's pin needs its row on screen: bring it into view first (when its section is open)
+    if (n.anchor?.on === 'param') revealInScroller(document.querySelector(`[data-param="${CSS.escape(n.anchor.key)}"]`))
+    notesUI.setState({ open: n.id })
+    setOpen(false)
+  }
+  const clear = async (n: StudioNote) => {
+    try { await deleteNote(n.id); refreshNotes(); if (expanded === n.id) setExpanded(null) } catch (e) { toast('Could not clear', { type: 'error', description: (e as Error).message }) }
+  }
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Tip label={label}>
+        <Popover.Trigger aria-label={label}
+          className="relative flex size-icon items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover data-[popup-open]:text-fg">
+          <MessagesSquare size={14} strokeWidth={1.5} />
+        </Popover.Trigger>
+      </Tip>
+      <Popover.Portal>
+        <Popover.Positioner side="bottom" align="end" sideOffset={6} className="z-[160]">
+          <Popover.Popup data-note-ui="" className="pop flex max-h-[min(70vh,560px)] w-[320px] flex-col overflow-hidden text-ui outline-none">
+            <div className="flex h-9 shrink-0 items-center justify-between px-3">
+              <span className="font-medium text-fg">Comments</span>
+              {notes.length > 0 && <span className="text-fg-faint tabular">{waiting ? `${waiting} waiting` : 'All answered'}</span>}
+            </div>
+            {!notes.length && <p className="px-3 pb-3 text-fg-faint">No comments yet. Press C, then click the artboard, the canvas around it or a knob.</p>}
+            <ol className="min-h-0 overflow-y-auto pb-1">
+              {notes.map((n, i) => {
+                const resolved = n.status === 'resolved'
+                const isOpen = expanded === n.id
+                return (
+                  <li key={n.id}>
+                    <button type="button" aria-expanded={isOpen} onClick={() => setExpanded(isOpen ? null : n.id)}
+                      className="flex w-full items-start gap-2.5 px-3 py-2 text-left outline-none hover:bg-hover focus-visible:bg-hover">
+                      <span aria-hidden className={cn('mt-px flex size-5 shrink-0 items-center justify-center rounded-full rounded-bl-[2px] text-ui-sm font-semibold tabular',
+                        resolved ? 'bg-fg text-panel' : 'bg-signal-strong text-signal-fg')}>{i + 1}</span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-baseline gap-1.5">
+                          <span className="min-w-0 flex-1 truncate text-fg-muted">{where(n)}</span>
+                          <span className="shrink-0 text-fg-faint">{resolved ? 'Replied' : 'Waiting'} · {ago(n.snapshot.at)}</span>
+                        </span>
+                        <span className={cn('mt-0.5 block text-fg [overflow-wrap:anywhere]', !isOpen && 'line-clamp-2')}>{n.text}</span>
+                      </span>
+                    </button>
+                    {isOpen && (
+                      <div className="pb-2 pl-[42px] pr-3">
+                        {resolved
+                          ? <p className="leading-relaxed whitespace-pre-wrap text-fg/90 [overflow-wrap:anywhere]"><span className="font-medium text-fg">Agent</span> <span className="text-fg-faint">{ago(n.resolution?.at ?? '')}</span><br />{n.resolution?.text || 'Marked this done.'}</p>
+                          : <p className="text-fg-faint">Waiting for the agent.</p>}
+                        <div className="mt-1.5 flex gap-1">
+                          <Button size="sm" variant="default" onClick={() => show(n)}>Show pin</Button>
+                          <Button size="sm" variant="ghost" onClick={() => clear(n)}><Trash2 size={12} strokeWidth={1.75} />Clear</Button>
+                        </div>
+                      </div>
+                    )}
+                  </li>
+                )
+              })}
+            </ol>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
+  )
+}
 
 const paramLabel = (params: AnyParams, key: string) => (params.defs[key] as { label?: string } | undefined)?.label ?? humanize(key)
 const PIN = 28
