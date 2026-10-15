@@ -46,6 +46,10 @@ you read rides along in every later turn.
      hand-build the same harness (theme.css + visual rules).
 3. **Write the schema first** — one line per knob, each with a `hint`. It drives the
    inspector, defaults, reset, the changed cue, presets, undo, share link and agent export.
+   Then rank it. What the presets vary and what gets tuned every session stays in view, about 8–12
+   rows. A section's rarely touched tail gets `more: true`; an optional feature becomes a folder with
+   `toggle`; grid, snap, fps and units go in a `place: 'settings'` folder. Rules: `references/layouts.md`
+   § What shows at rest.
 4. **Build the artifact as a pure function of `(values, t)`**, drawn by a surface the clock
    ticks — never by React re-renders or a hand-written rAF loop. A component that times itself
    and that you mustn't rewrite (motion/react, CSS transitions, a Lottie): feed it the values as
@@ -106,9 +110,11 @@ export function Tool() {
 
 What the starter already gives you, so don't rebuild it: `createParams` = undo/redo (⌘Z / ⇧⌘Z),
 persistence across reloads and `#p=` share links; `ParamActions` = undo buttons, named presets
-(save / apply / delete), A/B compare (`\`), copy link, theme toggle, and **Send to agent** plus **Comment** once
-`ruecaNotes()` is in `vite.config.ts` and `<NoteLayer>` is in the artboard (set both up by default: `references/notes.md`); `Inspector` = every control,
-scrubbable, with reset and the changed cue. Expensive params: `p.number(…, { live: false })` and apply them
+(save / apply / delete), and **Send to agent** plus **Comment** once `ruecaNotes()` is in `vite.config.ts`
+and `<NoteLayer>` is in the artboard (set both up by default: `references/notes.md`), with A/B compare (`\`),
+copy link and the theme toggle in its "…" menu; `Inspector` = the schema's rows, scrubbable, with reset, the
+changed cue and "N more" for `more` rows; `SettingsMenu` = the toolbar button for `place: 'settings'` folders.
+Expensive params: `p.number(…, { live: false })` and apply them
 in `params.onCommit((v, meta) => …)` — that fires on pointer-up, not every drag frame.
 
 Other surfaces, same contract: `WebGLSurface` (`setup(gl)` → `draw(gl, frame, state)`),

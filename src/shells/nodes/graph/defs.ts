@@ -40,7 +40,7 @@ const defs: NodeDef[] = [
         scale: p.number(4, { min: 0.5, max: 32, step: 0.1, hint: 'How many features fit across the image.' }),
         octaves: p.number(5, { min: 1, max: 8, step: 1, hint: 'Layers of detail. Each one costs another pass.' }),
         roughness: p.number(0.5, { min: 0, max: 1, step: 0.01, hint: 'How much each finer octave contributes (persistence).' }),
-        lacunarity: p.number(2, { min: 1.2, max: 3.5, step: 0.05, label: 'Lacunarity', hint: 'Frequency step between octaves.' }),
+        lacunarity: p.number(2, { min: 1.2, max: 3.5, step: 0.05, more: true, label: 'Lacunarity', hint: 'Frequency step between octaves.' }),
         seed: p.seed(7),
       }),
       shaping: folder('Shaping', {
@@ -58,7 +58,7 @@ const defs: NodeDef[] = [
       gradient: folder('Gradient', {
         kind: p.select('linear', [{ value: 'linear', icon: MoveRight, hint: 'Linear' }, { value: 'radial', icon: CircleDot, hint: 'Radial' }, { value: 'conic', icon: RotateCw, hint: 'Conic' }, { value: 'diamond', icon: Diamond, hint: 'Diamond' }], { label: 'Type' }),
         grad: p.gradient({ angle: 90, stops: [{ pos: 0, color: '#0b1026' }, { pos: 1, color: '#f6c28b' }] }, { label: 'Stops', hint: 'The angle applies to linear and conic types.' }),
-        center: p.vec2({ x: 0, y: 0 }, { min: -0.5, max: 0.5, step: 0.01, display: 'fields', hint: 'Origin for radial, conic and diamond.' }),
+        center: p.vec2({ x: 0, y: 0 }, { min: -0.5, max: 0.5, step: 0.01, display: 'fields', hint: 'Origin for radial, conic and diamond.', when: (v) => v.kind !== 'linear' }),
         spread: p.number(1, { min: 0.1, max: 3, step: 0.01, hint: 'Stretches the ramp.' }),
         repeat: p.number(1, { min: 1, max: 12, step: 1, hint: 'Tile the ramp into bands.' }),
       }),
@@ -105,7 +105,7 @@ const defs: NodeDef[] = [
       blur: folder('Blur', {
         radius: p.number(2, { min: 0, max: 20, step: 0.1, unit: '%', hint: 'Percent of the image width, so it looks the same at every resolution.' }),
         direction: p.select('both', [{ value: 'both', label: 'Both' }, { value: 'horizontal', label: 'Horiz.' }, { value: 'vertical', label: 'Vert.' }]),
-        quality: p.number(3, { min: 1, max: 4, step: 1, hint: 'Box-blur passes. 3 is close to a true gaussian.' }),
+        quality: p.number(3, { min: 1, max: 4, step: 1, more: true, hint: 'Box-blur passes. 3 is close to a true gaussian.' }),
       }),
     }),
   },

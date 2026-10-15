@@ -139,8 +139,9 @@ micro-caps with wide tracking, uniform always-on rows, zero radius, no depth.
 - **Toolbar as 2–3 detached pill clusters.** Secondary actions are bare low-opacity
   glyphs; only the ONE primary action gets a filled container.
 - **Hover reveals** reset icons, slider thumbs, eye/lock, value-chip backgrounds. A
-  column of 20 always-on controls reads as noise; with hidden thumbs it reads as
-  data. **Everything hover-only must also show on `:focus-visible` / `focus-within`.**
+  column of always-on thumbs reads as noise; with hidden thumbs it reads as data.
+  Hiding thumbs doesn't fix a long column: 20 rows at rest is too many (`layouts.md`
+  § What shows at rest). **Everything hover-only must also show on `:focus-visible` / `focus-within`.**
 - **Style the native scrollbar.** Browsers paint it light on dark UI — a bright slab
   against the canvas. Thin, translucent, inset with
   `border: 3px solid transparent; background-clip: content-box`.
@@ -190,8 +191,10 @@ while dragging. Keep labels short enough not to truncate at the label column wid
   WCAG 2.5.7. Targets ≥ 24px (2.5.8).
 - **Interaction ownership:** an operation lives on the canvas *or* the panel, not
   mirrored confusingly on both (exception: a numeric field shadowing a canvas handle).
-- **Empty selection → document / scene settings** in the inspector, never a blank
-  panel.
+- **One home per control.** An action sits in the toolbar, the inspector, the context bar or
+  the transport, in one of them, and in ⌘K. Three "Add clip" buttons cost three times the attention.
+- **Empty selection → the document's content** in the inspector: its look, size, duration or
+  title, never a blank panel. View preferences (grid, snap, nudge, fps) go in `<SettingsMenu>`.
 - **Colour:** OKLCH first-class with a P3 badge; hex/RGB/HSL alternatives; eyedropper.
 - **Springs default to Duration + Bounce**, physics (stiffness/damping/mass) as an
   advanced toggle.

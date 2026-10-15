@@ -7,7 +7,7 @@ import {
   MousePointer2, Move3d, Orbit, Package, Plus, Rotate3d, Scale3d, SquareDashed, Spotlight, Sun, Video, X, Eye, EyeOff, ChevronDown, FileBox,
 } from 'lucide-react'
 import { Vec3Fields,
-  Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Stage, MountSurface, ParamActions, Menu,
+  Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Inspector, SettingsMenu, Section, Row, Stage, MountSurface, ParamActions, Menu,
   Button, IconButton, CommandPalette, ToolDock, LayerTree, Badge, Swatch, Divider, Kbd, Tip, toast, download, copyText, stamp,
   useParamState, useSafeArea, useStudio, equal, shareMenuItems, cn, type Command, type LayerItem, type MenuItem,
 } from '@kit'
@@ -183,7 +183,7 @@ export default function SceneShell() {
           }
           end={
             <>
-              <Cluster><ParamActions params={params} /></Cluster>
+              <Cluster><SettingsMenu params={params} /><ParamActions params={params} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />
             </>
           }
@@ -424,7 +424,7 @@ function SceneSettings({ v, cw }: { v: V; cw: string | null }) {
           {cw ? 'Colourways change materials and background only — transforms and lights stay put.' : 'Custom colours. Pick a colourway to snap back to a defined variant.'}
         </p>
       </Section>
-      <div className="border-t border-line"><Inspector params={params} folders={['look', 'env', 'render', 'viewport']} /></div>
+      <div className="border-t border-line"><Inspector params={params} folders={['look', 'env', 'render']} /></div>
       <Section title="Selection">
         <p className="px-3 text-[11.5px] leading-relaxed text-fg-muted">
           Click the product to select it, click again to select a part. <Kbd>W</Kbd> <Kbd>E</Kbd> <Kbd>R</Kbd> switch the gizmo; <Kbd>F</Kbd> frames it. {v.turntable ? 'Turntable is on.' : ''}

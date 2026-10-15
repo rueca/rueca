@@ -56,6 +56,8 @@ export interface ParamStore<S extends Schema, V extends Values = SchemaValues<S>
   id: string
   /** the schema version (ParamOptions.version, default 1) — what share links carry as $v */
   version: number
+  /** false when the store doesn't read `#p=` links (ParamOptions.url: false), so "Copy link" can't apply */
+  linkable: boolean
   /** current values (non-reactive) */
   values(): V
   setValue<K extends keyof V>(key: K, value: V[K], opts?: { commit?: boolean; label?: string }): void
@@ -465,6 +467,7 @@ export function createParams<S extends Schema>(schema: S, opts: ParamOptions<Sch
       return `${base}${sep}p=${b64.enc(JSON.stringify({ $v: opts.version ?? 1, ...changed }))}`
     },
     isChanged: (key: keyof V) => !equal(store.getState().values[key], defaults[key]),
+    linkable: opts.url !== false,
   }) as unknown as ParamStore<S>
 
   // A new link pasted into an open tab (hash-only navigation) applies at once, as one undoable step (ST3).

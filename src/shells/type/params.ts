@@ -45,8 +45,8 @@ export const schema = defineSchema({
     wght: p.number(400, { min: 100, max: 900, step: 1, label: 'Weight', hint: 'wght axis. Newsreader runs 200–800 and Inter 100–900; static faces snap to the nearest weight.' }),
     autoOpsz: p.boolean(false, { label: 'Auto optical', hint: 'Tie optical size to font size, the way font-optical-sizing: auto does.', when: (v) => !!FAMILIES[v.family]?.axes.opsz }),
     opsz: p.number(72, { min: 6, max: 72, step: 0.5, label: 'Optical size', hint: 'opsz axis. Display cuts tighten spacing and sharpen hairlines; text cuts open up for small sizes. Newsreader runs 6–72, Inter 14–32 (clamped).', when: (v) => !!FAMILIES[v.family]?.axes.opsz && !v.autoOpsz }),
-    width: p.number(100, { min: 70, max: 130, step: 1, unit: '%', label: 'Width', hint: 'Simulated — none of these faces has a wdth axis, so this scales horizontally.' }),
-    slant: p.number(0, { min: 0, max: 15, step: 0.5, unit: '°', label: 'Slant', hint: 'Simulated oblique by skewing. Use Italic for a true italic.' }),
+    width: p.number(100, { min: 70, max: 130, step: 1, unit: '%', more: true, label: 'Width', hint: 'Simulated — none of these faces has a wdth axis, so this scales horizontally.' }),
+    slant: p.number(0, { min: 0, max: 15, step: 0.5, unit: '°', more: true, label: 'Slant', hint: 'Simulated oblique by skewing. Use Italic for a true italic.' }),
     italic: p.boolean(false, { label: 'Italic', hint: 'True italic where the family ships one (Newsreader, Inter, Georgia); synthesised otherwise.' }),
   }),
   setting: folder('Typesetting', {
@@ -138,7 +138,7 @@ export const schema = defineSchema({
     fluidRatio: p.select('augFourth', ratioOptions, { display: 'dropdown', label: 'Max ratio', when: (v) => v.fluidOn }),
     viewports: p.range([360, 1440], { min: 320, max: 1920, step: 10, fmt: (n) => String(n), label: 'Viewports', hint: 'Min and max viewport widths in px.', when: (v) => v.fluidOn }),
     previewVw: p.number(1200, { min: 320, max: 1920, step: 10, unit: 'px', label: 'Preview at', hint: 'Artboard width — sizes resolve at this viewport.', when: (v) => v.fluidOn }),
-  }, { collapsed: true }),
+  }, { collapsed: true, toggle: 'fluidOn' }),
   sample: folder('Preview', {
     sampleText: p.text('Cast in bronze and rung once before it leaves the foundry.', { label: 'Sample' }),
   }, { collapsed: true }),

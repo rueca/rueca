@@ -94,11 +94,22 @@ export const schema = defineSchema({
     go:     p.action('Randomise', (v) => …),                        // button row, not a value
     fps:    p.monitor(() => stats.fps, { graph: true }),            // live readout, not a value
   }),
-  more: folder('Advanced', { … }, { collapsed: true }),
+  vignette: folder('Vignette', {                                   // an optional feature: its switch sits in the header,
+    vignette: p.boolean(false),                                     // and while it's off the section stays one closed line
+    amount:   p.number(0.4, { min: 0, max: 1 }),
+    feather:  p.number(0.5, { min: 0, max: 1, more: true }),        // a detail: waits under "1 more" until opened or changed
+  }, { toggle: 'vignette' }),
+  view: folder('View', { grid: p.boolean(true), snap: p.boolean(true) }, { place: 'settings' }),  // → <SettingsMenu>, not the inspector
+  output: folder('Output', { … }, { collapsed: true }),
 })
 ```
 
+Folders take `collapsed`, `hint`, `when` (hide the whole section), `toggle: '<boolean key in the folder>'`
+(an optional feature's on/off in the header) and `place: 'settings'` (view and document preferences: grid, snap,
+fps, units — they render in `<SettingsMenu>` in the toolbar, not in the inspector).
+
 Every def accepts `label`, `hint`, `when: (v) => boolean` (conditional row), `disabled`,
+`more: true` (a detail of its section: kept under the section's "N more" row; a changed value always stays in view),
 `live: false` (marks it expensive — the kit doesn't hold it back; do the heavy work in `params.onCommit`), `publish: true` (shows in the client view),
 `persist: false` (keep out of localStorage), `share: false` (keep out of links/JSON).
 Keys are **flat across folders** (`v.count`).
@@ -249,6 +260,11 @@ stops ticks while paused too (default true for artifacts with their own life).
 ## 6. Components
 
 - `Inspector params folders? keys? published? id?` — schema → sections + rows (folders render in the order given).
+  It renders `more` rows behind a `MoreRow` ("3 more" / "Fewer"), a folder's `toggle` as a header switch, and skips
+  `place: 'settings'` folders unless `folders` names them. The header's changed dot counts only rows in effect
+  (not ones `when` or an off toggle hides). `layoutFolder(folder, values, defaults)` is the same logic, pure.
+- `SettingsMenu params folders? label? icon?` — the toolbar home for `place: 'settings'` folders: one button, a
+  popover inspector, and the changed dot on the button when a setting is off its default.
 - `ClientView params title? subtitle? actions? onDownload? onExit?` + `useClientMode({ narrow?, hotkey? })` →
   `{ client, forced, setClient }` + `clientLink(params)` — the client's phone view: art full-bleed above (beside, on
   wide/landscape screens) a sheet of `publish: true` knobs at touch size (48px rows, 16px inputs so iOS doesn't zoom,
@@ -267,7 +283,10 @@ stops ticks while paused too (default true for artifacts with their own life).
   `{ kind: 'markers', keys }`; `depth` indents. Derive lanes from the render maths.
 - `LayerTree items selected onSelect onToggle onMove onRename toggles defaultCollapsed expanded onHover` +
   `updateTree` / `moveInTree` / `findInTree`. Items: `container` (droppable when empty), `toggles`, `meta`, `thumb`.
-- `ParamActions params history? clock? doc? presets compare agent theme share` (each part switchable; `compare={{ hotkey: false }}`) · `HistoryButtons` · `PresetMenu` ·
+- `ParamActions params history? clock? doc? presets compare agent theme share inline?` (each part switchable; `compare={{ hotkey: false }}`).
+  At rest: undo, redo, presets, and Send to agent while the notes route is up. A/B shows only while an A is stored;
+  compare, theme and the share and copy actions sit in one "…" menu, hotkeys (\, T) still live. `inline` = every
+  action as its own icon. `shareMenuItems` drops "Copy link" for a store with `url: false` (`params.linkable`) · `HistoryButtons` · `PresetMenu` ·
   `CompareButton` · `ThemeToggle` · `SendToAgentButton params history? clock? doc?` · `shareMenuItems(params)` (link, JSON, **copy as agent prompt**).
 - Notes to the agent: **Send to agent** writes a note to `.rueca/notes/<id>.json` through the dev server, and renders nothing
   until the route answers (so it never shows on a static build). Route: `ruecaNotes()` from `notes-server/vite` in `vite.config.ts`, or

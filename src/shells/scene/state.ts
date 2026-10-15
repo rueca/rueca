@@ -76,7 +76,7 @@ function light(id: string, l: Lite): Folder {
     [`${id}_ltype`]: p.select(l.type, [{ value: 'directional', label: 'Directional' }, { value: 'spot', label: 'Spot' }, { value: 'point', label: 'Point' }], { label: 'Type', display: 'dropdown' }),
     [`${id}_intensity`]: p.number(l.intensity, { min: 0, max: 10, step: 0.05, label: 'Intensity', hint: 'Brightness at the subject. Spot and point lights are compensated for distance, so switching type keeps the exposure.' }),
     [`${id}_lcolor`]: p.color(l.color, { alpha: false, label: 'Colour' }),
-    [`${id}_shadow`]: p.boolean(l.shadow, { label: 'Cast shadow' }),
+    [`${id}_shadow`]: p.boolean(l.shadow, { label: 'Cast shadow', when: (v: V) => v.shadows }),
     [`${id}_angle`]: p.number(l.angle ?? 32, { min: 5, max: 80, step: 1, unit: '°', label: 'Cone', when: (v: V) => v[`${id}_ltype`] === 'spot' }),
     [`${id}_penumbra`]: p.number(0.65, { min: 0, max: 1, step: 0.01, label: 'Edge softness', when: (v: V) => v[`${id}_ltype`] === 'spot' }),
   })
@@ -92,7 +92,7 @@ const schema = defineSchema({
   floor: folder('Shadow catcher', {
     floor_visible: p.boolean(true, { label: 'Visible' }),
     floor_locked: p.boolean(true, { label: 'Locked' }),
-    floor_opacity: p.number(0.32, { min: 0, max: 1, step: 0.01, label: 'Shadow', hint: 'Opacity of the shadow on the invisible ground plane.' }),
+    floor_opacity: p.number(0.32, { min: 0, max: 1, step: 0.01, label: 'Shadow', when: (v: V) => v.shadows, hint: 'Opacity of the shadow on the invisible ground plane.' }),
   }),
   key_xf: xf('key', v3(3.2, 4.8, 2.6)), key_light: light('key', { type: 'spot', color: '#fff3e2', intensity: 3.2, shadow: true, angle: 30 }),
   rim_xf: xf('rim', v3(-3.4, 3.4, -3.2)), rim_light: light('rim', { type: 'spot', color: '#d9e6ff', intensity: 2.2, shadow: false, angle: 34 }),
@@ -111,13 +111,13 @@ const schema = defineSchema({
     exposure: p.number(1, { min: 0.1, max: 3, step: 0.01, label: 'Exposure' }),
     shadows: p.boolean(true, { label: 'Shadows' }),
     shadowSoft: p.number(5, { min: 0, max: 16, step: 0.5, label: 'Softness', when: (v: V) => v.shadows }),
-    glow: p.number(0, { min: 0, max: 2, step: 0.01, label: 'Glow', hint: 'Bloom on emissive and very bright pixels.' }),
+    glow: p.number(0, { min: 0, max: 2, step: 0.01, more: true, label: 'Glow', hint: 'Bloom on emissive and very bright pixels.' }),
   }),
   viewport: folder('Viewport', {
     grid: p.boolean(false, { label: 'Grid floor' }),
     turntable: p.boolean(false, { label: 'Turntable', hint: 'Slowly orbit the camera — for presenting.' }),
     spin: p.number(1.2, { min: 0.1, max: 6, step: 0.1, label: 'Speed', when: (v: V) => v.turntable }),
-  }),
+  }, { place: 'settings' }),
   camera: folder('Lens', {
     projection: p.select('perspective', [{ value: 'perspective', label: 'Perspective' }, { value: 'orthographic', label: 'Orthographic' }], { label: 'Projection', display: 'segmented' }),
     fov: p.number(30, { min: 12, max: 75, step: 1, unit: '°', label: 'Field of view', when: (v: V) => v.projection === 'perspective', hint: 'Narrow lenses flatten the product, like a long portrait lens.' }),
