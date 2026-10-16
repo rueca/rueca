@@ -273,7 +273,7 @@ function ColorCell({ value, onChange, disabled }: { value: string; onChange: (v:
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="top" align="start" sideOffset={8} collisionPadding={12} className="z-[160]">
-          <Popover.Popup className="pop outline-none"><ColorPanel value={valid ? value : '#888888'} alpha={false} onChange={onChange} /></Popover.Popup>
+          <Popover.Popup aria-label="Colour" className="pop outline-none"><ColorPanel value={valid ? value : '#888888'} alpha={false} onChange={onChange} /></Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
     </Popover.Root>

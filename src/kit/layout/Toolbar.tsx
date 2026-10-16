@@ -9,11 +9,12 @@
      />
 --------------------------------------------------------------------------- */
 import { forwardRef, type ButtonHTMLAttributes, type ComponentType, type ReactNode } from 'react'
-import { LayoutGrid } from 'lucide-react'
+import { Command, Keyboard, LayoutGrid } from 'lucide-react'
 import { cn } from '../core/cn'
 import { useStudio } from './Studio'
 import { Menu, type MenuItem } from '../ui/controls'
 import { Tip } from '../ui/tooltip'
+import { openPalette, usePaletteAvailable } from '../system/palette'
 
 export function Toolbar({ start, center, end, className }: { start?: ReactNode; center?: ReactNode; end?: ReactNode; className?: string }) {
   return (
@@ -44,9 +45,15 @@ export function Brand({ name, doc, mark, href = '#/', menu = [] }: {
   menu?: MenuItem[]
 }) {
   const { layout } = useStudio()
+  const palette = usePaletteAvailable()
   const items: MenuItem[] = [
     { type: 'label', label: name },
     ...(href ? [{ label: 'All tools', icon: LayoutGrid, onClick: () => { location.href = href } } as MenuItem] : []),
+    // the palette and the shortcut sheet are otherwise only reachable by knowing ⌘K and ?
+    ...(palette ? [
+      { label: 'Command palette', icon: Command, shortcut: 'mod+k', onClick: () => openPalette('palette') } as MenuItem,
+      { label: 'Keyboard shortcuts', icon: Keyboard, shortcut: '?', onClick: () => openPalette('sheet') } as MenuItem,
+    ] : []),
     ...(menu.length ? [{ type: 'separator' } as MenuItem, ...menu] : []),
   ]
   return (

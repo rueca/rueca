@@ -8,7 +8,8 @@
 
    `value` may be null (current values match no variant → nothing pressed).
    `onPreview` fires on hover/focus with the option (or null on leave) so the
-   artifact can show it before committing. Arrow keys move between tiles.
+   artifact can show it before committing. A radio group (APG): one tab stop, and
+   the arrows (Home / End) move to a tile AND choose it, like the kit Segmented.
 --------------------------------------------------------------------------- */
 import { useRef } from 'react'
 import { Tip, cn } from '@kit'
@@ -32,12 +33,18 @@ export function SwatchTiles({
   label?: string
 }) {
   const refs = useRef<(HTMLButtonElement | null)[]>([])
+  const checked = options.findIndex((o) => o.value === value)
+  const tabStop = checked >= 0 ? checked : 0 // nothing chosen: the first tile is the way in
   const onKey = (e: React.KeyboardEvent, i: number) => {
-    const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0
-    if (!d) return
+    const n = options.length
+    const next = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? (i + 1) % n
+      : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? (i - 1 + n) % n
+      : e.key === 'Home' ? 0 : e.key === 'End' ? n - 1 : -1
+    if (next < 0) return
     e.preventDefault()
     e.stopPropagation()
-    refs.current[(i + d + options.length) % options.length]?.focus()
+    refs.current[next]?.focus()
+    if (options[next].value !== value) onChange(options[next].value)
   }
   if (size === 'sm')
     return (
@@ -49,6 +56,7 @@ export function SwatchTiles({
               type="button"
               role="radio"
               aria-checked={value === o.value}
+              tabIndex={i === tabStop ? 0 : -1}
               aria-label={o.label}
               onClick={() => onChange(o.value)}
               onPointerEnter={() => onPreview?.(o.value)}
@@ -75,6 +83,7 @@ export function SwatchTiles({
             type="button"
             role="radio"
             aria-checked={value === o.value}
+            tabIndex={i === tabStop ? 0 : -1}
             onClick={() => onChange(o.value)}
             onPointerEnter={() => onPreview?.(o.value)}
             onFocus={() => onPreview?.(o.value)}

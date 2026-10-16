@@ -170,7 +170,7 @@ export function EnvelopeEditor({
         role="slider" tabIndex={0} aria-label={name} aria-valuetext={text}
         aria-valuenow={live.current[k]} aria-valuemin={min[k]} aria-valuemax={max[k]}
         onKeyDown={key(k)} onPointerDown={down(k)} onDoubleClick={reset(k)}
-        className="cursor-grab fill-[var(--panel)] stroke-[var(--signal)] outline-none transition-[r] [stroke-width:2] hover:fill-[var(--signal)] focus-visible:fill-[var(--signal)]"
+        className="cursor-grab fill-[var(--panel)] stroke-[var(--fill)] outline-none transition-[r] [stroke-width:2] hover:fill-[var(--ink)] focus-visible:fill-[var(--signal)]"
       />
     </g>
   )
@@ -181,8 +181,8 @@ export function EnvelopeEditor({
         onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
         {[0.25, 0.5, 0.75].map((g) => <line key={g} x1={PAD} x2={W - PAD} y1={yOf(g)} y2={yOf(g)} stroke="var(--line)" />)}
         {[slotX.d, slotX.hold, slotX.r].map((x) => <line key={x} x1={x} x2={x} y1={PAD} y2={H - PAD} stroke="var(--line)" strokeDasharray="2 3" />)}
-        <path d={`${path} L${pR[0]},${yOf(0)} L${p0[0]},${yOf(0)} Z`} fill="var(--signal-soft)" />
-        <path d={path} fill="none" stroke="var(--signal)" strokeWidth={1.75} strokeLinejoin="round" />
+        <path d={`${path} L${pR[0]},${yOf(0)} L${p0[0]},${yOf(0)} Z`} fill="var(--hover)" />
+        <path d={path} fill="none" stroke="var(--fill)" strokeWidth={1.75} strokeLinejoin="round" />
         {/* sustain segment: drag vertically */}
         <line x1={pD[0]} x2={pS[0]} y1={pS[1]} y2={pS[1]} stroke="transparent" strokeWidth={12} className="cursor-ns-resize" onPointerDown={down('s')} />
         <circle ref={dot} r={3.5} fill="var(--rec)" style={{ opacity: 0 }} />

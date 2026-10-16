@@ -209,7 +209,7 @@ export default function TypeShell() {
           return (
             <button key={p.name} type="button" aria-label={p.name} title={`${p.name} · ${contrastRatio(p.fg, p.bg).toFixed(1)}:1 ${wcagGrade(contrastRatio(p.fg, p.bg))}`}
               aria-pressed={on} onClick={() => params.patch({ fg: p.fg, bg: p.bg })}
-              className={cn('flex aspect-square items-center justify-center rounded-[7px] text-[13px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-signal',
+              className={cn('flex aspect-square items-center justify-center rounded-[calc(var(--radius-control)+2px)] text-[13px] font-semibold outline-none focus-visible:ring-2 focus-visible:ring-signal',
                 on ? 'shadow-[0_0_0_1.5px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line-strong)]')}
               style={{ background: p.bg, color: p.fg, fontFamily: `"${SPECIMEN_FAMILY}", sans-serif` }}>
               Aa

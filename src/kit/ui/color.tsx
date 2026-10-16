@@ -271,7 +271,7 @@ export function ColorField({ value, onChange, alpha = true, swatches, changed, t
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner side="left" align="start" sideOffset={12} collisionPadding={12} className="z-[160]">
-          <Popover.Popup className="pop origin-[var(--transform-origin)] outline-none transition-[opacity,transform] duration-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
+          <Popover.Popup aria-label="Colour" className="pop origin-[var(--transform-origin)] outline-none transition-[opacity,transform] duration-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
             <ColorPanel value={value} onChange={onChange} alpha={alpha} swatches={swatches} />
           </Popover.Popup>
         </Popover.Positioner>

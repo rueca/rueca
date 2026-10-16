@@ -45,8 +45,8 @@ export function AngleDial({ value, onChange, size = 24, changed }: { value: numb
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2">
       <div {...drag} role="presentation" className="relative shrink-0 cursor-grab rounded-full bg-control shadow-[inset_0_0_0_1px_var(--line-strong)] active:cursor-grabbing" style={{ width: size, height: size }}>
-        <div className="absolute top-1/2 left-1/2 h-px origin-left bg-signal" style={{ width: size / 2 - 3, transform: `rotate(${value}deg)` }} />
-        <div className="absolute size-1.5 -translate-1/2 rounded-full bg-signal" style={{ left: size / 2 + Math.cos(rad) * (size / 2 - 4), top: size / 2 + Math.sin(rad) * (size / 2 - 4) }} />
+        <div className="absolute top-1/2 left-1/2 h-px origin-left bg-fg-muted" style={{ width: size / 2 - 3, transform: `rotate(${value}deg)` }} />
+        <div className="absolute size-1.5 -translate-1/2 rounded-full bg-ink" style={{ left: size / 2 + Math.cos(rad) * (size / 2 - 4), top: size / 2 + Math.sin(rad) * (size / 2 - 4) }} />
       </div>
       <ScrubValue value={value} onChange={(v, f) => onChange(((v % 360) + 360) % 360, f)} step={1} unit="°" boxed className="flex-1" changed={changed} label="Angle" />
     </div>
@@ -72,9 +72,9 @@ export function XYPad({
         <div {...drag} className="relative aspect-[2/1] w-full cursor-crosshair overflow-hidden rounded-control bg-control shadow-[inset_0_0_0_1px_var(--line)]">
           <div className="absolute top-1/2 left-0 h-px w-full bg-line" />
           <div className="absolute top-0 left-1/2 h-full w-px bg-line" />
-          <div className="absolute h-px w-full bg-signal/25" style={{ top: `${py}%` }} />
-          <div className="absolute h-full w-px bg-signal/25" style={{ left: `${px}%` }} />
-          <div className="absolute size-2.5 -translate-1/2 rounded-full bg-signal shadow-[0_0_0_2px_var(--panel)]" style={{ left: `${px}%`, top: `${py}%` }} />
+          <div className="absolute h-px w-full bg-fg/15" style={{ top: `${py}%` }} />
+          <div className="absolute h-full w-px bg-fg/15" style={{ left: `${px}%` }} />
+          <div className="absolute size-2.5 -translate-1/2 rounded-full bg-ink shadow-[0_0_0_2px_var(--panel)]" style={{ left: `${px}%`, top: `${py}%` }} />
         </div>
       )}
       <div className="grid grid-cols-2 gap-1.5">
@@ -353,7 +353,7 @@ export function GradientEditor({ value, onChange, angle = true }: { value: { ang
           </Popover.Trigger>
           <Popover.Portal>
             <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[160]">
-              <Popover.Popup className="pop outline-none"><ColorPanel value={cur.color} onChange={(c, f) => setStop(sel, { color: c }, f)} /></Popover.Popup>
+              <Popover.Popup aria-label="Stop colour" className="pop outline-none"><ColorPanel value={cur.color} onChange={(c, f) => setStop(sel, { color: c }, f)} /></Popover.Popup>
             </Popover.Positioner>
           </Popover.Portal>
         </Popover.Root>
@@ -389,7 +389,7 @@ export function PaletteField({ value, onChange, max = 8, min = 1 }: { value: str
           </div>
           <Popover.Portal>
             <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[160]">
-              <Popover.Popup className="pop outline-none">
+              <Popover.Popup aria-label="Palette colour" className="pop outline-none">
                 <ColorPanel value={c} onChange={(nc, f) => onChange(value.map((x, j) => (j === i ? nc : x)), f)} />
                 {value.length > min && (
                   <div className="border-t border-line px-pad py-2">

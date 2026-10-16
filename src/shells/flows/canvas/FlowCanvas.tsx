@@ -2,7 +2,7 @@
    Selection + measured sizes live in the UI store, so undo never steals focus. */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ReactFlow, Background, BackgroundVariant, MiniMap, ConnectionMode, SelectionMode, ViewportPortal, applyNodeChanges, useReactFlow, useViewport, useNodesInitialized,
+  ReactFlow, Background, BackgroundVariant, MiniMap, ConnectionMode, SelectionMode, ViewportPortal, applyNodeChanges, useReactFlow, useViewport, useNodesInitialized, useKeyPress,
   type NodeChange, type EdgeChange, type Connection, type OnConnectStart, type FinalConnectionState,
 } from '@xyflow/react'
 import '@xyflow/react/dist/base.css'
@@ -63,6 +63,8 @@ export function FlowCanvas() {
   const sel = useUI((s) => s.sel)
   const measured = useUI((s) => s.measured)
   const tool = useUI((s) => s.tool)
+  // Space held = the hand tool, from anywhere (a node included): see `hand` below. useKeyPress ignores Space typed in a field.
+  const spaceHeld = useKeyPress('Space')
   const walk = useUI((s) => s.walk)
   const animating = useUI((s) => s.animating)
   const rf = useReactFlow<FlowNode, FlowEdge>()
@@ -271,6 +273,7 @@ export function FlowCanvas() {
 
   const empty = flow.nodes.length === 0
   const interactive = walk === null
+  const hand = tool === 'hand' || (spaceHeld && interactive)
   // ⌘\ present mode hides the canvas HUD too (dock, zoom, minimap, pins); the walkthrough keeps its own HUD (break-it F3)
   const hud = interactive && !present
 
@@ -297,17 +300,17 @@ export function FlowCanvas() {
         deleteKeyCode={null}
         selectionKeyCode={null}
         multiSelectionKeyCode="Shift"
-        selectionOnDrag={tool === 'select' && interactive}
+        selectionOnDrag={tool === 'select' && interactive && !hand}
         selectionMode={SelectionMode.Partial}
-        panOnDrag={tool === 'hand' || !interactive ? true : [1, 2]}
+        panOnDrag={hand || !interactive ? true : [1, 2]}
         panOnScroll
         zoomOnScroll={false}
         zoomOnPinch
         zoomOnDoubleClick={false}
-        nodesDraggable={tool === 'select' && interactive}
-        nodesConnectable={tool === 'select' && interactive}
-        elementsSelectable={tool !== 'hand' && interactive}
-        edgesReconnectable={tool === 'select' && interactive}
+        nodesDraggable={tool === 'select' && interactive && !hand}
+        nodesConnectable={tool === 'select' && interactive && !hand}
+        elementsSelectable={!hand && interactive}
+        edgesReconnectable={tool === 'select' && interactive && !hand}
         // 22 edge tab stops before the nodes made Tab useless; edges are reached from the inspector's Connections list (break-it A9)
         edgesFocusable={false}
         elevateNodesOnSelect={false}

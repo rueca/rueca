@@ -223,7 +223,7 @@ export function JourneyMap({ mapRef }: { mapRef: React.RefObject<HTMLDivElement 
                   <div key={`${lane.id}-${s.id}`} data-cell={`${lane.id}|${s.id}`}
                     onPointerDown={(e) => { if (e.target === e.currentTarget) ui.setState({ sel: null, editing: null }) }}
                     onDoubleClick={(e) => { if (e.target === e.currentTarget) addCard(lane.id, s.id) }}
-                    className={cn('group/cell relative flex min-h-[76px] flex-col border-t border-l border-line p-2', compact ? 'gap-1.5' : 'gap-2',
+                    className={cn('group/cell relative flex min-h-[76px] flex-col border-t border-l border-line p-2 pb-3.5', compact ? 'gap-1.5' : 'gap-2',
                       li % 2 === 1 && 'bg-[color-mix(in_srgb,var(--fg)_1.5%,transparent)]', selStage === s.id && 'bg-[color-mix(in_srgb,var(--signal)_5%,transparent)]', dropHere >= 0 && 'bg-[color-mix(in_srgb,var(--signal)_8%,transparent)]')}>
                     {visible.map((c, i) => (
                       <Slot key={c.id} bar={dropHere === i}>
@@ -235,9 +235,13 @@ export function JourneyMap({ mapRef }: { mapRef: React.RefObject<HTMLDivElement 
                       </Slot>
                     ))}
                     {dropHere === visible.length && <DropBar />}
+                    {/* The button reaches across the gap above and the cell's bottom padding (it takes the same 24px of layout as
+                        the visible pill), so at the fit-to-window zoom (~0.55) it is still a 24px target. */}
                     <button type="button" data-export="skip" aria-label={`Add ${lane.label.toLowerCase()} card to ${s.name}`} onClick={() => addCard(lane.id, s.id)}
-                      className="flex h-6 items-center justify-center gap-1 rounded-[6px] text-[11px] text-fg-faint opacity-0 outline-none transition-opacity group-hover/cell:opacity-100 hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal">
-                      <Plus size={12} strokeWidth={1.5} />Add
+                      className={cn('group/add flex -mb-3.5 items-center outline-none', compact ? '-mt-1.5 h-[45px]' : '-mt-2 h-[46px]')}>
+                      <span className="flex h-6 w-full items-center justify-center gap-1 rounded-[6px] text-[11px] text-fg-faint opacity-0 transition-opacity group-hover/cell:opacity-100 group-hover/add:bg-hover group-hover/add:text-fg group-focus-visible/add:opacity-100 group-focus-visible/add:ring-2 group-focus-visible/add:ring-signal">
+                        <Plus size={12} strokeWidth={1.5} />Add
+                      </span>
                     </button>
                   </div>
                 )

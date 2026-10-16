@@ -50,9 +50,10 @@ utility and cannot be themed at runtime.
 @theme inline { --color-panel: var(--panel); --color-fg: var(--fg); }
 ```
 
-- **Shadows are tokens too.** Light-theme shadows must be far softer or they read as
-  dirt. Dark `0 8px 32px rgba(0,0,0,.45)`; light
-  `0 1px 2px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.07)`.
+- **Shadows are tokens too:** a hairline and a tight shadow, because a deep one darkens the
+  prototype around every island. Dark `--shadow-panel` is
+  `0 0 0 1px rgba(255,255,255,.06), 0 2px 8px rgba(0,0,0,.25)` plus a 1px inset top highlight.
+  Light shadows must be far softer or they read as dirt: `0 0 0 1px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.06)`.
 - **Theme is a class on `<html>`**, defaults to the OS preference, persists to
   `localStorage`. Resolve it in a tiny inline script in `<head>` before first paint.
   Never hardcode `class="dark"` in `index.html` — the first paint fights the stored
@@ -93,15 +94,24 @@ accent sits near a semantic colour, "selected" reads as "recording" or "keyframe
   | cyan | 222° | `#00a5cb` / `#007590` | `#008eaf` / `#006e89` |
 
   Override in the project's own CSS, after the theme import. Never edit the kit's
-  theme file. `:root:root` outranks the theme's own `:root` rules, and the media block
-  covers pages that follow the OS theme:
+  theme file. A registry install declares the tokens on the kit's own roots
+  (`.studio`, `.pop`, `[data-studio]`) and themes from `<html data-studio-theme>`, while this repo keeps
+  them on `:root` with `.light` / `.dark` classes, so each rule names both. `:root:root` outranks the
+  theme's own rules, and the media block covers pages that follow the OS theme
+  (`scripts/accent-check.mjs` prints an equivalent block for the fallback it picks):
   ```css
-  :root:root       { --signal: #d561c8; --signal-strong: #9e3a93; --signal-soft: rgb(213 97 200 / .16); }
-  :root:root.light { --signal: #be4bb1; --signal-strong: #97338d; --signal-soft: rgb(190 75 177 / .12); }
+  :root:root, :root:root :where(.studio, .pop, [data-studio]) {
+    --signal: #d561c8; --signal-strong: #9e3a93; --signal-soft: rgb(213 97 200 / .16); }
+  :root:root:is(.light, [data-studio-theme="light"]),
+  :root:root:is(.light, [data-studio-theme="light"]) :where(.studio, .pop, [data-studio]) {
+    --signal: #be4bb1; --signal-strong: #97338d; --signal-soft: rgb(190 75 177 / .12); }
   @media (prefers-color-scheme: light) {
-    :root:root:not(.dark) { --signal: #be4bb1; --signal-strong: #97338d; --signal-soft: rgb(190 75 177 / .12); }
+    :root:root:not(.dark, [data-studio-theme="dark"]),
+    :root:root:not(.dark, [data-studio-theme="dark"]) :where(.studio, .pop, [data-studio]) {
+      --signal: #be4bb1; --signal-strong: #97338d; --signal-soft: rgb(190 75 177 / .12); }
   }
   ```
+  The same selector overrides a density token (`--gutter`, `--row`…) when a project needs one.
 - **One accent per project, not per theme.** If dark and light disagree, pick one
   fallback for both.
 - **If nothing clears 35°** (a full-spectrum prototype), keep blue and make selection
@@ -111,19 +121,31 @@ accent sits near a semantic colour, "selected" reads as "recording" or "keyframe
   ```
 - Re-run the check when the prototype's palette changes. A rebrand inside the artboard
   can create a clash that wasn't there yesterday.
+
+### Density and ink
+
 - **Density is one knob:** `data-density` on `<html>` (default, `comfortable`, `compact`) retunes
-  every size. Build with the size names (`h-control`, `size-icon`, `h-section`, `px-pad`, `w-label`,
-  `text-ui`) and never literals, or a part ignores the knob. The table is in kit-api.md.
+  every size. Build with the size names (`h-row`, `h-control`, `size-icon`, `h-section`, `h-bar`,
+  `px-pad`, `p-gutter`, `text-ui`, `rounded-control`…) and never literals (`h-6`, `px-3`,
+  `text-[11px]`), or a part ignores the knob. The table is in kit-api.md. Merge classes with the kit's
+  `cn`: shadcn's drops `text-ui` next to a colour.
 - **The chrome stays quieter than the prototype:** labels dimmer than values, one text size (11px)
   with weight for hierarchy, and signal blue only for focus, selection and the primary action. A
-  switch that's on and a slider's fill are neutral ink (`bg-ink`, `bg-fill`), never blue.
+  switch that's on, a ticked box and a slider's or knob's fill are neutral ink (`bg-ink`, `bg-fill`,
+  `var(--fill)`), never blue. Accent-coloured text uses `text-signal-text`; semantic text on its own
+  wash uses `text-ok-text`, `text-key-text` or `text-rec-text`.
+- **Panels are a touch translucent:** 94% of the panel colour, with a hairline and a tight shadow, so
+  they sit in the work rather than on top of it. Below 94% a bright or saturated prototype pulls labels
+  under 4.5:1. No backdrop blur: at 94% it barely shows, and over a live stage (WebGL, video) it doubles
+  the GPU's work. Solid under `prefers-reduced-transparency`.
 
 ## 4. Modern tool vs Photoshop 2010
 
 The dated version: flat grey panels, a hard 1px border on every edge, uppercase
 micro-caps with wide tracking, uniform always-on rows, zero radius, no depth.
 
-- **Radius and shadow replace borders.** Panels 12px radius + soft shadow. Where a
+- **Radius and shadow replace borders.** Panels `rounded-panel` (8px at the default density)
+  with a hairline and a tight shadow. Where a
   boundary is genuinely needed inside a panel: 1px at 6–8% — never a solid grey
   rule, never on all four edges.
 - **Separate surfaces with a luminance step** (~5% field → panel), not a line. A 1px
@@ -132,10 +154,11 @@ micro-caps with wide tracking, uniform always-on rows, zero radius, no depth.
   editors may dock flush (Figma UI3 dropped floating panels for its main editor —
   offer both, see `layouts.md`). The canvas is allowed to be mostly nothing.
 - **Sentence case, never micro-caps.** The single biggest fix.
-- **Hierarchy via opacity tiers at one type size** (~100% / 63% / 45%), not by mixing
-  weights and sizes.
-- **One accent, only on state** — filled slider, selection, focus, primary button.
-  Nothing decorative is accented. The playhead is `rec`, never the accent.
+- **Hierarchy at one type size, by weight and ink tier.** Weights 450 (labels), 550 (section
+  titles), 600 (panel titles); ink tiers `fg-faint` (labels), `fg-value` (untouched values), `fg`
+  (changed values, titles). Never by mixing sizes.
+- **Blue only for focus, selection and the primary action.** Fills (switches, ticks, sliders,
+  knobs) are neutral ink. Nothing decorative is accented. The playhead is `rec`, never the accent.
 - **Toolbar as 2–3 detached pill clusters.** Secondary actions are bare low-opacity
   glyphs; only the ONE primary action gets a filled container.
 - **Hover reveals** reset icons, slider thumbs, eye/lock, value-chip backgrounds. A
@@ -156,9 +179,9 @@ padding, the vertical gap ends up larger than the horizontal one and reads as a
 mistake. Put the gutter on the shell; every island is flush.
 
 ```tsx
-<div className="flex h-full flex-col gap-3 p-3">   {/* the only gutter */}
-  <Toolbar />                                      {/* h-9, no padding */}
-  <div className="flex min-h-0 flex-1 gap-3"><main className="flex-1" /><Inspector /></div>
+<div className="flex h-full flex-col gap-gutter p-gutter">   {/* the only gutter */}
+  <Toolbar />                                                {/* h-bar, no padding */}
+  <div className="flex min-h-0 flex-1 gap-gutter"><main className="flex-1" /><Inspector /></div>
   <Timeline />
 </div>
 ```
@@ -167,17 +190,22 @@ Verify: `aside.top - header.bottom` must equal `aside.left - main.right`.
 
 ### Type scale — smaller than product UI
 
+One size for the working text, hierarchy by weight and ink (default density; comfortable
+adds half a pixel). Line height 16px.
+
 ```
-section heads   11–11.5px / medium / sentence case / no tracking
-labels          11.5px / muted tier
-numeric values  11px / tabular-nums
-buttons         12px / medium
-title           13–16px
+section titles  11px / 550 / sentence case / no tracking     text-ui font-[550]
+labels          11px / 450 / fg-faint                         (Row does this)
+values          11px / tabular-nums / fg-value, fg + dot once changed
+buttons         11px / medium (lg buttons 12px)               text-ui
+panel titles    12px / 600                                     text-title font-semibold
+small text      10px: rulers, hints, badges                    text-ui-sm
 ```
 
-Always `font-variant-numeric: tabular-nums` on live numbers, or the inspector jitters
-while dragging. Keep labels short enough not to truncate at the label column width
-(~80px), and check truncation explicitly.
+Font: Inter 4 (rsms's files, the `inter-ui` npm package) with `cv05` / `cv08`, so I, l and 1
+never collide. Always `font-variant-numeric: tabular-nums` on live numbers, or the inspector
+jitters while dragging. The label column fits the longest visible label in its panel (72px up to
+42% of the row), so long labels only truncate past that cap; check truncation explicitly.
 
 ## 5. Controls
 
@@ -188,7 +216,7 @@ while dragging. Keep labels short enough not to truncate at the label column wid
   or 5+ options → dropdown, or icon-only segments with tooltips.
 - **Display option strings capitalised** (`'solid'` → "Solid"), keep raw values.
 - **Every drag has a non-drag alternative** (typed field, stepper, menu item) —
-  WCAG 2.5.7. Targets ≥ 24px (2.5.8).
+  WCAG 2.5.7. Targets ≥ 24px (2.5.8): controls are 22px, but keep a 24px row pitch or hit area.
 - **Interaction ownership:** an operation lives on the canvas *or* the panel, not
   mirrored confusingly on both (exception: a numeric field shadowing a canvas handle).
 - **One home per control.** An action sits in the toolbar, the inspector, the context bar or

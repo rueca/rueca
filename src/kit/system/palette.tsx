@@ -9,11 +9,21 @@
 --------------------------------------------------------------------------- */
 import { Command as Cmdk } from 'cmdk'
 import { Dialog } from '@base-ui/react/dialog'
-import { useRef, useState, type ComponentType } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from 'react'
 import { Check, Search } from 'lucide-react'
 import { useHotkeys, useHotkeyRegistry, prettyCombo } from '../core/hotkeys'
 import { Kbd } from '../ui/button'
 import { useDensity, type Density } from '../core/density'
+import { toast } from './toast'
+
+/* Other chrome (the Brand menu) can open the palette or the shortcut sheet, when a palette is mounted. */
+let mounted = 0
+const mountSubs = new Set<() => void>()
+const subscribeMounted = (cb: () => void) => { mountSubs.add(cb); return () => { mountSubs.delete(cb) } }
+/** Is a <CommandPalette> on the page? (so menus only offer "Command palette" when it exists) */
+export const usePaletteAvailable = () => useSyncExternalStore(subscribeMounted, () => mounted > 0, () => false)
+/** Open the command palette ('palette') or the keyboard-shortcut sheet ('sheet'). */
+export const openPalette = (what: 'palette' | 'sheet' = 'palette') => window.dispatchEvent(new CustomEvent('studio:palette', { detail: what }))
 
 export interface Command { id: string; label: string; group?: string; shortcut?: string; icon?: ComponentType<{ size?: number; strokeWidth?: number }>; run: () => void; keywords?: string[] }
 
@@ -27,6 +37,12 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
     return next
   })
   const [sheet, setSheet] = useState(false)
+  useEffect(() => {
+    mounted++; mountSubs.forEach((f) => f())
+    const on = (e: Event) => { if ((e as CustomEvent).detail === 'sheet') setSheet(true); else setOpen(true) }
+    window.addEventListener('studio:palette', on)
+    return () => { mounted--; mountSubs.forEach((f) => f()); window.removeEventListener('studio:palette', on) }
+  }, [])
   // Commands carry their shortcuts: bound here at shell priority, labelled for the ? sheet.
   const bound = Object.fromEntries(commands.filter((c) => c.shortcut).map((c) => [c.shortcut!, { run: () => c.run(), label: c.label, group: c.group }]))
   const sig = commands.map((c) => `${c.id}:${c.shortcut ?? ''}`).join('|')
@@ -40,7 +56,8 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
   const { density, setDensity } = useDensity()
   const all: Command[] = [...commands, ...(['default', 'comfortable', 'compact'] as Density[]).map((d) => ({
     id: `density-${d}`, label: `Density: ${d[0].toUpperCase()}${d.slice(1)}`, group: 'View',
-    icon: density === d ? Check : undefined, keywords: ['size', 'spacing', 'compact', 'roomy'], run: () => setDensity(d),
+    icon: density === d ? Check : undefined, keywords: ['size', 'spacing', 'compact', 'roomy', 'dense', 'smaller', 'bigger', 'text size', 'ui size', 'scale', 'zoom interface'],
+    run: () => { setDensity(d); toast(`Density: ${d[0].toUpperCase()}${d.slice(1)}`) },
   }))]
   const groups = [...new Set(all.map((c) => c.group ?? 'Actions'))]
 
@@ -49,7 +66,8 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
       <Dialog.Root open={open} onOpenChange={setOpen}>
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-[150] bg-black/30 transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
-          <Dialog.Popup finalFocus={returnTo} className="pop fixed top-[14vh] left-1/2 z-[151] w-[560px] max-w-[calc(100vw-32px)] -translate-x-1/2 overflow-hidden outline-none transition-[opacity,transform] duration-150 data-[ending-style]:opacity-0 data-[starting-style]:scale-[.98] data-[starting-style]:opacity-0">
+          {/* back to where focus was; with nothing focused before, don't jump to the first toolbar button */}
+          <Dialog.Popup finalFocus={returnTo.current && returnTo.current !== document.body ? returnTo : false} className="pop fixed top-[14vh] left-1/2 z-[151] w-[560px] max-w-[calc(100vw-32px)] -translate-x-1/2 overflow-hidden outline-none transition-[opacity,transform] duration-150 data-[ending-style]:opacity-0 data-[starting-style]:scale-[.98] data-[starting-style]:opacity-0">
             <Dialog.Title className="sr-only">Command palette</Dialog.Title>
             <Cmdk loop label="Commands" className="flex flex-col"
               // exact / prefix matches on the label outrank fuzzy keyword hits ("css" → Export CSS, not "Back 10 frames")
@@ -77,10 +95,11 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
                       const Icon = c.icon
                       return (
                         <Cmdk.Item key={c.id} value={`${c.label}`} keywords={c.keywords} onSelect={() => { setOpen(false); setTimeout(c.run, 0) }}
+                          aria-keyshortcuts={c.shortcut}
                           className="flex h-button-lg cursor-default items-center gap-2.5 rounded-control px-2 text-ui text-fg data-[selected=true]:bg-signal-strong data-[selected=true]:text-signal-fg">
                           <span className="flex w-4 justify-center opacity-70">{Icon && <Icon size={14} strokeWidth={1.5} />}</span>
-                          <span className="flex-1">{c.label}</span>
-                          {c.shortcut && <span className="text-ui opacity-60">{prettyCombo(c.shortcut)}</span>}
+                          <span className="flex-1">{c.label}{c.icon === Check && <span className="sr-only"> (current)</span>}</span>
+                          {c.shortcut && <span aria-hidden className="text-ui opacity-60">{prettyCombo(c.shortcut)}</span>}
                         </Cmdk.Item>
                       )
                     })}

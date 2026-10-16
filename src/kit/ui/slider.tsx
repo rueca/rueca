@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
+import { useSettle } from '../core/settle'
 import { Slider as Base } from '@base-ui/react/slider'
 import { cn } from '../core/cn'
 
@@ -21,8 +22,7 @@ export function Slider({
 }) {
   const range = Array.isArray(value)
   const keyed = useRef(false)
-  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  useEffect(() => () => clearTimeout(timer.current), [])
+  const settle = useSettle(value, onChange)
   const fillFrom = !range && origin !== undefined ? ((origin - min) / (max - min)) * 100 : null
   const at = !range ? ((value - min) / (max - min)) * 100 : 0
   return (
@@ -34,13 +34,10 @@ export function Slider({
       disabled={disabled}
       onValueChange={(v) => onChange(v, false)}
       // keyboard steps commit once the keys stop (500ms), so five arrow presses are one undo step, as in scrub fields
-      onValueCommitted={(v) => {
-        if (!keyed.current) { onChange(v, true); return }
-        clearTimeout(timer.current)
-        timer.current = setTimeout(() => onChange(v, true), 500)
-      }}
+      onValueCommitted={(v) => { if (keyed.current) settle.defer(v); else onChange(v, true) }}
       onKeyDownCapture={() => { keyed.current = true }}
-      onPointerDownCapture={() => { keyed.current = false; clearTimeout(timer.current) }}
+      onPointerDownCapture={() => { keyed.current = false; settle.flush() }}
+      onBlurCapture={() => settle.flush()}
       className={cn('group/slider relative flex h-control w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}
     >
       <Base.Control data-studio-slider-control className="flex h-control w-full cursor-default touch-pan-y items-center">

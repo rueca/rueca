@@ -25,6 +25,25 @@ export function Player({ onClose }: { onClose: () => void }) {
   const curEl = useRef<HTMLDivElement>(null)
   const prevEl = useRef<HTMLDivElement>(null)
   const [scale, setScale] = useState(1)
+  const dialog = useRef<HTMLDivElement>(null)
+  const [opener] = useState(() => document.activeElement as HTMLElement | null)
+
+  // Modal: the app behind goes inert, focus starts on Close, and returns to what opened it (the Present button).
+  // Every sibling on the path from the dialog up to <body> goes inert, so the dialog stays inside the kit's root (tokens).
+  useEffect(() => {
+    const made: HTMLElement[] = []
+    for (let el: HTMLElement | null = dialog.current; el && el !== document.body; el = el.parentElement) {
+      for (const sib of el.parentElement?.children ?? []) {
+        if (sib !== el && sib instanceof HTMLElement && !sib.inert) { sib.inert = true; made.push(sib) }
+      }
+    }
+    dialog.current?.querySelector<HTMLElement>('[aria-label="Close preview"]')?.focus()
+    return () => {
+      made.forEach((m) => { m.inert = false })
+      const back = opener && opener !== document.body && opener.isConnected ? opener : document.querySelector<HTMLElement>('button[aria-label="Present"]')
+      back?.focus()
+    }
+  }, [])
 
   const frame = frames.find((f) => f.id === nav.cur.id)
   const fb = frame ? L.get(frame.id)! : { x: 0, y: 0, w: 390, h: 844 }
@@ -89,7 +108,9 @@ export function Player({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="fixed inset-0 z-[160] flex flex-col bg-field" role="dialog" aria-label="Prototype preview">
+    <div ref={dialog} className="fixed inset-0 z-[160] flex flex-col bg-field" role="dialog" aria-modal="true" aria-label="Prototype preview"
+      // Esc closes even while a focused button's tooltip is open (the tooltip would swallow the first press)
+      onKeyDownCapture={(e) => { if (e.key === 'Escape' && !e.defaultPrevented) { e.preventDefault(); e.stopPropagation(); onClose() } }}>
       <div className="flex h-12 flex-none items-center gap-2 border-b border-line bg-panel px-pad">
         <IconButton icon={ArrowLeft} label="Back" shortcut="arrowleft" disabled={stack.length < 2} onClick={() => back()} />
         <IconButton icon={RotateCcw} label="Restart" shortcut="r" onClick={restart} />

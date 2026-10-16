@@ -13,6 +13,7 @@
    can hold back expensive work until the drag ends.
 --------------------------------------------------------------------------- */
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState, type HTMLAttributes, type ReactNode } from 'react'
+import { useSettle } from '../core/settle'
 import { clamp, cn, roundTo, decimalsOf } from '../core/cn'
 
 const coarse = () => typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches
@@ -98,10 +99,8 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
   const commitNum = (v: number, final: boolean) => { if (Number.isFinite(v)) onChange(clamp(roundTo(v, step), min, max), final) }
   // A run of arrow-key nudges is one undo step, like a drag: live while keys repeat, committed 500 ms after the
   // last press or on blur (t5 judge: 15 presses were 15 undo steps).
-  const nudged = useRef<number | null>(null)
-  const nudgeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  const settleNudge = () => { clearTimeout(nudgeTimer.current); const n = nudged.current; nudged.current = null; if (n !== null) commitNum(n, true) }
-  useEffect(() => () => clearTimeout(nudgeTimer.current), [])
+  const settle = useSettle(value, commitNum)
+  const settleNudge = () => settle.flush()
 
   const display = mixed ? 'Mixed' : fmt ? fmt(value) : `${value.toFixed(decimalsOf(step))}${unit ?? ''}`
 
@@ -152,6 +151,13 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
     return () => { window.removeEventListener('keydown', onKey, true); document.removeEventListener('pointerlockchange', onLock) }
   })
 
+  // requestPointerLock is async: on a quick flick the lock can arrive after the release. Never keep it then.
+  useEffect(() => {
+    const onLock = () => { if (document.pointerLockElement === el.current && drag.current.id === -1) document.exitPointerLock() }
+    document.addEventListener('pointerlockchange', onLock)
+    return () => document.removeEventListener('pointerlockchange', onLock)
+  }, [])
+
   // Wheel while focused → step. Non-passive so the panel doesn't scroll instead (break-it V10).
   useEffect(() => {
     const node = el.current
@@ -163,11 +169,7 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
       const d = (e.deltaY < 0 ? 1 : -1) * step * mult
       if (mixed && onDelta) { onDelta(d, true); return }
       // a burst of wheel ticks is one undo step, like the arrow keys
-      const n = clamp(roundTo((nudged.current ?? live.current) + d, step), min, max)
-      nudged.current = n
-      commitNum(n, false)
-      clearTimeout(nudgeTimer.current)
-      nudgeTimer.current = setTimeout(settleNudge, 500)
+      settle.step(clamp(roundTo((settle.current ?? live.current) + d, step), min, max))
     }
     node.addEventListener('wheel', onWheel, { passive: false })
     return () => node.removeEventListener('wheel', onWheel)
@@ -232,11 +234,7 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
       e.preventDefault()
       // Mixed: nudge each selected item by a step instead of collapsing them to one value (break-it V2)
       if (mixed && onDelta) { onDelta(dir * step * mult, true); return }
-      const n = clamp(roundTo((nudged.current ?? value) + dir * step * mult, step), min, max)
-      nudged.current = n
-      commitNum(n, false)
-      clearTimeout(nudgeTimer.current)
-      nudgeTimer.current = setTimeout(settleNudge, 500)
+      settle.step(clamp(roundTo((settle.current ?? value) + dir * step * mult, step), min, max))
     }
     if (e.key === 'ArrowUp' || e.key === 'ArrowRight') nudge(1)
     if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') nudge(-1)

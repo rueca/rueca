@@ -113,10 +113,10 @@ export function BatchStage({ camera, issues }: { camera: CameraStore; issues: Re
               <Artboard key={s.id} x={p.x} y={p.y} width={s.w} height={s.h} background={eff.paper} selected={selected === s.id} onSelect={() => selectSize(s.id)}
                 label={
                   <span className="flex items-center gap-1.5">
-                    <span className={selected === s.id ? 'text-signal' : 'text-fg-muted'}>{s.name}</span>
-                    {n > 0 && <span className="text-signal">{n} override{n > 1 ? 's' : ''}</span>}
+                    <span className={selected === s.id ? 'text-signal-text' : 'text-fg-muted'}>{s.name}</span>
+                    {n > 0 && <span className="text-signal-text">{n} override{n > 1 ? 's' : ''}</span>}
                     {iss.length > 0 && (
-                      <Tip label={iss.join(' · ')}><span className="flex items-center gap-0.5 text-key"><TriangleAlert size={11} strokeWidth={1.75} />{iss.length}</span></Tip>
+                      <Tip label={iss.join(' · ')}><span className="flex items-center gap-0.5 text-key-text"><TriangleAlert size={11} strokeWidth={1.75} />{iss.length}</span></Tip>
                     )}
                   </span>
                 }>

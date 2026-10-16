@@ -13,7 +13,8 @@ const toProps = (title: string, o: ToastOpts) => ({
   title,
   description: o.description,
   type: o.type,
-  timeout: o.timeout ?? (o.type === 'loading' ? 0 : 2600),
+  // a toast with an action (Undo) stays long enough to reach it (WCAG 2.2.1)
+  timeout: o.timeout ?? (o.type === 'loading' ? 0 : o.action ? 6000 : 2600),
   actionProps: o.action ? { children: o.action.label, onClick: o.action.onClick } : undefined,
 })
 
@@ -107,10 +108,11 @@ function List() {
     <Toast.Root
       key={t.id}
       toast={t}
-      // the newest toast paints on top of the stack (z by index), and the ones folded behind it show no text
-      className="pop absolute bottom-0 z-[calc(100-var(--toast-index))] flex w-max max-w-[340px] items-center gap-3 data-[behind]:not-data-[expanded]:*:opacity-0 py-2 pr-2 pl-3.5 text-ui text-fg transition-[transform,opacity] duration-200 [transform:translateY(calc(var(--toast-index)*-8px))_scale(calc(1-var(--toast-index)*0.05))] data-[ending-style]:opacity-0 data-[starting-style]:translate-y-3 data-[starting-style]:opacity-0 data-[expanded]:[transform:translateY(calc(var(--toast-offset-y)*-1))]"
+      // the newest toast paints on top of the stack (z by index)
+      className="pop absolute bottom-0 z-[calc(100-var(--toast-index))] flex w-max max-w-[340px] items-center gap-3 py-2 pr-2 pl-3.5 text-ui text-fg transition-[transform,opacity] duration-200 [transform:translateY(calc(var(--toast-index)*-8px))_scale(calc(1-var(--toast-index)*0.05))] data-[ending-style]:opacity-0 data-[starting-style]:translate-y-3 data-[starting-style]:opacity-0 data-[expanded]:[transform:translateY(calc(var(--toast-offset-y)*-1))]"
     >
-      <Toast.Content className="flex min-w-0 items-center gap-2">
+      {/* Base UI marks the CONTENT of a toast folded behind the front one: hide its text until the stack expands */}
+      <Toast.Content className="flex min-w-0 items-center gap-2 transition-opacity duration-150 data-[behind]:not-data-[expanded]:opacity-0">
         {t.type === 'success' && <span className="size-1.5 shrink-0 rounded-full bg-ok" />}
         {t.type === 'error' && <span className="size-1.5 shrink-0 rounded-full bg-rec" />}
         {t.type === 'loading' && <span className="size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" />}

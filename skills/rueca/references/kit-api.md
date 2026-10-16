@@ -14,15 +14,19 @@ Import everything from `@kit`. A complete worked example: the Motion study shell
 - **Never hardcode a colour in chrome.** Use the tokens (Tailwind utilities below). The only
   legal home for a hex value is the artifact (inside the artboard / canvas) and `theme.css`.
 - **Neutral chrome, brand inside the artboard.** Artboard text uses `font-artboard`.
-- **Sentence case**, never uppercase micro-caps. Section heads 11.5px medium.
-- **Hierarchy by opacity tier** (`text-fg` / `text-fg-muted` / `text-fg-faint`) at ~one size, not by
-  mixing sizes and weights. Live numbers always `tabular`.
-- **One accent, only on state** (filled slider, selection, focus, primary button). The
-  playhead is `bg-rec` (red/orange) — never the accent.
-- **Radius + shadow, not borders.** Islands use the `panel` utility; toolbar groups `cluster`;
-  popovers `pop`. A boundary inside a panel is `border-line` (6–8%), never a solid grey rule.
+- **Sentence case**, never uppercase micro-caps. Section titles 11px at weight 550 (`text-ui font-[550]`);
+  panel titles 12px at 600 (`text-title font-semibold`).
+- **One text size, hierarchy by weight and ink.** All UI text is `text-ui` (11px); labels are
+  `text-fg-faint` at weight 450, untouched values `text-fg-value`, changed values `text-fg` plus the
+  changed dot. Labels stay dimmer than values. Live numbers always `tabular`.
+- **Blue (`signal`) only for focus, selection and the primary action.** A switch that's on, a ticked box
+  and slider / knob fills are neutral ink (`bg-ink`, `bg-fill`, `var(--fill)`), never blue. Accent-coloured
+  text uses `text-signal-text`. The playhead is `bg-rec` (red/orange), never the accent.
+- **Radius + shadow, not borders.** Islands use the `panel` utility (94% opaque so the work shows faintly
+  through, no backdrop blur, a hairline and a tight shadow; solid under `prefers-reduced-transparency`); toolbar groups `cluster`; popovers `pop`. A
+  boundary inside a panel is `border-line` (6–8%), never a solid grey rule.
 - **Icons**: lucide-react. 14px at stroke 1.5 for toolbar and row icons; 12–13px (stroke 1.5–1.75)
-  inside dense 24px controls (chevrons, steppers, close ×); 16px in the tool dock. Never larger in chrome.
+  inside controls (chevrons, steppers, close ×); 16px in the tool dock. Never larger in chrome.
 - **Hover reveals** secondary affordances (reset, eye/lock, thumbs). But everything hover-only
   must also appear on `:focus-visible` / `focus-within`.
 - **Every drag has a non-drag alternative** (typed field, stepper, menu item) — WCAG 2.5.7.
@@ -40,7 +44,8 @@ Lines: `border-line` · `border-line-strong`. Neutral ink for ON states that are
 `text-ink-fg` (a switch that's on, a ticked box) · `bg-fill` (a slider's fill).
 Semantic text on its own wash (badges): `text-key-text` · `text-rec-text` · `text-ok-text` (≥4.5:1 in both themes).
 Accent, for focus, selection and the primary action only: `bg-signal` · `bg-signal-strong` (surfaces
-carrying text) · `text-signal-fg` · `bg-signal-soft` (selection wash). Semantic: `key` (keyframed, amber) · `rec` (playhead/record/
+carrying text) · `text-signal-fg` · `bg-signal-soft` (selection wash) · `text-signal-text` (accent-coloured
+text, ≥4.5:1 on the panel, a field and the selection wash). Semantic: `key` (keyframed, amber) · `rec` (playhead/record/
 error) · `ok`. Lanes: `bg-lane`. Utilities: `panel` `cluster` `pop` `tabular` `no-select`
 `checker`. Categorical (identity, never state): `cat-1`…`cat-8` (ports, lanes, tags). Over
 images: `bg-scrim`. In islands and overlay layouts, `--safe-top/right/bottom/left` (what the panels cover).
@@ -53,27 +58,47 @@ variables for phones. Use the names, never literals, so a part follows the densi
 | Utility | Default / comfortable / compact | For |
 |---|---|---|
 | `h-row` `min-h-row` (`--row`) | 24 / 28 / 22 | inspector rows, layer rows |
-| `h-control` · `h-control-sm` | 22 / 24 / 20 · 18 / 20 / 16 | fields, selects, sliders, scrub, segmented |
+| `h-control` · `h-control-sm` | 22 / 24 / 20 · 20 / 20 / 18 | fields, selects, sliders, scrub, segmented |
 | `size-icon` `h-icon` · `size-icon-sm` | 24 / 28 / 22 · 20 / 24 / 18 | icon buttons, md buttons, menu items, tabs |
 | `h-button-lg` | 28 / 32 / 26 | large buttons, the zoom cluster |
-| `h-section` · `h-header` · `h-bar` | 26 · 32 · 32 (comfortable 32 · 40 · 36) | section headers · panel headers, transport · toolbar clusters |
-| `h-dock` · `size-dock-button` | 36 · 28 | the bottom tool dock |
-| `px-pad` · `w-label` | 10 · 72 (comfortable 12 · 84; compact 8 · 72) | row side padding · inspector label column |
-| `h-lane` · `h-ruler` | 20 · 24 (comfortable 24 · 28) | timeline lanes and ruler |
-| `text-ui` · `text-ui-sm` · `text-title` | 11 · 10 · 12 px (comfortable 11.5 · 10.5 · 12.5) | all UI text · rulers, hints · panel titles, Brand |
-| `rounded-panel` `rounded-cluster` `rounded-pop` `rounded-control` | 8 · 6 · 8 · 4 (comfortable 12 · 10 · 10 · 6; compact 6 · 5 · 6 · 3) | panels · toolbar clusters · menus and popovers · controls |
+| `h-section` · `h-header` · `h-bar` | 26 · 32 · 32 / 32 · 40 · 36 / 24 · 28 · 30 | section headers · panel headers, transport · toolbar clusters |
+| `h-dock` · `size-dock-button` | 36 · 28 / 40 · 32 / 34 · 26 | the bottom tool dock |
+| `px-pad` · `w-label` | 10 · 72 / 12 · 84 / 8 · 72 | row side padding · the label column's minimum |
+| `h-lane` · `h-ruler` | 20 · 24 / 24 · 28 / 18 · 22 | timeline lanes and ruler |
+| `p-gutter` `gap-gutter` (`--gutter`) | 8 / 12 / 6 | window edge and the gap between islands |
+| `--inspector-w` · `--sidebar-w` | 256 · 224 / 280 · 240 / 240 · 208 | `<Studio>`'s right and left panels (unless `rightWidth` / `leftWidth` pin one) |
+| `text-ui` · `text-ui-sm` · `text-title` | 11 · 10 · 12 px (comfortable 11.5 · 10.5 · 12.5); line height 16 | all UI text · rulers, hints · panel titles, Brand |
+| `rounded-panel` `rounded-cluster` `rounded-pop` `rounded-control` | 8 · 6 · 8 · 4 / 12 · 10 · 10 · 6 / 6 · 5 · 6 · 3 | panels · toolbar clusters · menus and popovers · controls |
 
-Widths: `--inspector-w` (256), `--sidebar-w` (224), `--gutter` (8). Hierarchy is weight, not half-pixel
-sizes: labels 450, section titles 550, panel titles 600. In JS (timelines, canvas rows) read a token with
-`useDensityPx('--d-lane', 24)` from `core/density`; it re-reads when the density changes.
-People choose a density in ⌘K (View → Density: Default / Comfortable / Compact). The choice is remembered
-per browser (`studio:density`) and `<Studio>` restores it on mount, unless something already set the
-attribute. In code: `setDensity('compact')`, `useDensity()`, `currentDensity()`. The inspector's label
-column fits the longest label on screen (from 72px up to 42% of the row). Every `<Row>` with a text label reports
-to the nearest `<LabelScope>`; `<Panel>` is one, so hand-built rows and any `<Inspector>`s in a panel share one
-column, and an `<Inspector>` outside a panel is its own. Hidden rows (a `when` that's false) don't count.
+Hierarchy is weight, not half-pixel sizes: labels 450, section titles 550, panel titles 600. In JS (timelines,
+canvas rows) read a token with `useDensityPx('--d-lane', 20)` (the fallback is the default density's value);
+it reads from the kit's root, so it works in a registry install too, and re-reads when the density changes.
+`densityPx(name, fallback)` is the one-off read.
+
+People choose a density in ⌘K (View → Density: Default / Comfortable / Compact) and in the Density submenu of
+`ParamActions`' "…" (More actions) menu, beside the theme item. The ⌘K commands need a `<CommandPalette>` in the tool, which adds the
+View commands itself (`<CommandPalette commands={[]} />` is enough). The choice is remembered per browser
+(`localStorage` `studio:density`) and `<Studio>` restores it on mount (`restoreDensity()`), unless something
+already set the attribute. In code: `setDensity('compact')`, `useDensity()`, `currentDensity()`.
+
+**The label column.** It fits the longest visible label (from 72px up to 42% of the row). Every `<Row>` with a
+text label reports to the nearest `<LabelScope>`; `<Panel>` is one, so hand-built rows and any `<Inspector>`s
+in a panel share one column, and an `<Inspector>` outside a panel is its own. Hidden rows (a `when` that's
+false) don't count. A `labelWidth` opts a `Row` out of the shared column. `w-label` on its own is only the 72px
+minimum, so build label + control rows with `<Row>`, not a hand-made `w-label` span. For a custom scope:
+`<LabelScope>`, `useLabelScope()`, `useReportLabel(text)`, `measureLabel(text, size)`.
+
+**Keyboard and wheel steps.** `useSettle(value, onChange)` makes a burst of arrow-key or wheel steps one undo
+step, like a drag: `settle.step(next)` sends it live and commits 500ms after the burst (or on `settle.flush()`
+at blur).
+
+**Font.** Inter 4 (rsms's files, from the `inter-ui` npm package) with `cv05` / `cv08`, so I, l and 1 never
+collide; values use `tabular-nums`.
+
 Token names are namespaced so they never collide with shadcn (`muted`, `accent`, `input` mean
 something else there): ours are `fg-muted`, `signal`, `control`; font is `font-ui`.
+Merge classes in chrome with the kit's `cn` (exported from `@kit`): it knows the density names, where a plain
+tailwind-merge `cn` (shadcn's `@/lib/utils`) treats `text-ui` as a colour and drops it next to `text-fg`.
 
 ## 2. State: schema → params store
 
@@ -259,6 +284,9 @@ stops ticks while paused too (default true for artifacts with their own life).
   Studio root) and `.pop` popups only — the kit never restyles a host app's `<body>`. Using kit
   controls outside `<Studio>`? Put `className="studio"` on their container. With no `.dark`/`.light`
   class on `<html>`, tokens follow the OS theme.
+- Overriding a token (the accent, a density size) from the app's own CSS: a registry install declares the tokens
+  on the kit's roots, not on `:root`, so target both, after the theme import:
+  `:root:root, :root:root :where(.studio, .pop, [data-studio]) { --gutter: 10px; }`.
 - Toolbar: `<Brand name doc? mark? href? menu?>`: the mark is a button with the tool name as its tooltip, opening
   a menu ("All tools" → `href`, then `menu` items); pass a plain glyph as `mark`. Pass `doc` only for live state
   (the open file, an editable title, the active look), never a fixed caption.
@@ -287,7 +315,8 @@ stops ticks while paused too (default true for artifacts with their own life).
   thumb-only sliders, 44px reach), undo/redo, Download, "Send to designer" (share sheet on touch, else copy). On a phone
   or from a `&client` link it is forced (no way into the designer view). Marks `<html data-studio-client>` while shown.
 - Hand-built panels that must match: `Section title (open+onToggle | defaultOpen persistKey) onReset changed actions collapsible`,
-  `Row label hint changed onReset stacked trailing labelWidth`, `ParamRow k params` (one schema row),
+  `Row label hint changed onReset stacked trailing labelWidth param` (`param` = the key it edits, set as `data-param`
+  so comments can anchor to it; `labelWidth` opts the row out of the panel's shared label column), `ParamRow k params` (one schema row),
   `ParamControl def value onChange` (just the control).
 - Controls: `ScrubValue` (drag/type/expr number) · `Slider` · `DetentSlider` (named magnetic stops) · `Segmented` · `Tiles` · `Switch` ·
   `Checkbox` · `Select` · `TextInput` · `Menu` (items: item/separator/label/submenu) · `ColorField`
@@ -322,7 +351,8 @@ stops ticks while paused too (default true for artifacts with their own life).
   Pins say whose turn it is: hollow while the agent's, blue for an unread reply (read state is per browser), ink once read; done ones leave the board
   unless "Show done on the board" is on. Pins fade when the tool is in another state, and their thread can restore it.
   Replies arrive live (`useNotes()`) with a toast. Pins keep screen size via `useZoom()`.
-- `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound.
+- `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound. It adds the
+  View → Density commands itself, so every tool should render one (`commands={[]}` is fine).
 - `toast(title, opts)` works anywhere (it mounts a single toaster if none is rendered) and returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
   `toast.promise(p, { loading, success, error })` · `toast.progress(title, { onCancel })` → `{ set(p), done(msg), fail(msg) }`.
 - Colour maths: `luminance(hex)`, `contrastRatio(a, b)` (WCAG 2.x), `wcagGrade(ratio)` → 'AAA' | 'AA' | 'AA large' | 'Fail', `readableOn(hex)` (darken until white text passes).

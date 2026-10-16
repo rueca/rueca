@@ -28,7 +28,7 @@ export function CommentPins({ sc }: { sc: (b: Box) => Box }) {
               onPointerDown={(e) => { e.stopPropagation(); S.design.setState({ openComment: open === c.id ? null : c.id }) }}
               // keyboard (Enter / Space) opens the thread too — pointerdown alone left it mouse-only
               onClick={(e) => { if (e.detail === 0) S.design.setState({ openComment: open === c.id ? null : c.id }) }}
-              className={cn('pointer-events-auto absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-[10.5px] font-semibold shadow-[var(--shadow-cluster)] transition-transform hover:scale-110',
+              className={cn('pointer-events-auto absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-ui-sm font-semibold shadow-[var(--shadow-cluster)] transition-transform hover:scale-110',
                 open === c.id ? 'bg-signal-strong text-signal-fg' : 'bg-panel text-fg')}>
               <span aria-hidden>{initials(c.author)}</span>
             </button>
