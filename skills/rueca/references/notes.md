@@ -18,7 +18,9 @@ note and act on it. That way nobody retypes values, or what they saw, into the c
 2. Add `.rueca/` to `.gitignore`. Notes are local working state.
 3. `<ParamActions params={params} clock={clock} doc={doc} />` shows Send to agent and the Comment
    button (`C`) by themselves once the route answers. On a static build they stay hidden, and "Copy as
-   agent prompt" in the share menu covers that case. Pass `clock` so notes carry the playhead, and
+   agent prompt" in the share menu covers that case. In dev, a 404 for `/__rueca/notes` in the browser
+   console is expected while the route isn't installed: that's the tool checking for it. Pass `clock` so
+   notes carry the playhead, and
    `doc` for document state (a layer list, a timeline), or edits to it never reach you. A custom
    toolbar without `ParamActions` needs `<CommentButton params={params} />` and `<SendToAgentButton …/>`.
 4. For comments, also put `<NoteLayer params={params} clock={clock} />` inside the `<Artboard>`, next

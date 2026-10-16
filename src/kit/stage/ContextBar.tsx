@@ -25,7 +25,7 @@
    Each action is an IconButton (tooltip + aria-label + shortcut hint).
    (Promoted from shells/ui-design/local/SelectionBar.tsx.)
 --------------------------------------------------------------------------- */
-import { useLayoutEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
+import { useLayoutEffect, useRef, type ComponentType, type ReactNode } from 'react'
 import { cn } from '../core/cn'
 import { IconButton } from '../ui/button'
 import { Menu, type MenuItem } from '../ui/controls'
@@ -60,9 +60,10 @@ function tidy(list: ContextBarProps['actions']) {
   return out
 }
 
+const HIDDEN = { left: -9999, top: -9999, opacity: 0 } // until the first layout pass places it
+
 export function ContextBar({ anchor, actions, children, gap = 34, inset = {}, label = 'Selection actions', className }: ContextBarProps) {
   const el = useRef<HTMLDivElement>(null)
-  const [pos, setPos] = useState<{ left: number; top: number } | null>(null)
   const { top: it = 8, right: ir = 8, bottom: ib = 8, left: il = 8 } = inset
   useLayoutEffect(() => {
     const node = el.current
@@ -74,7 +75,8 @@ export function ContextBar({ anchor, actions, children, gap = 34, inset = {}, la
     if (top + h > H - ib) top = anchor.y - h - Math.max(8, gap - 4)
     if (top < it) top = Math.min(H - h - ib, Math.max(it, anchor.y + 8))
     const left = Math.min(W - w - ir, Math.max(il, anchor.x + anchor.w / 2 - w / 2))
-    setPos((p) => (p && p.left === left && p.top === top ? p : { left, top }))
+    // placed straight on the node: a state update here re-rendered the bar (and its buttons) on every camera move
+    node.style.left = `${left}px`; node.style.top = `${top}px`; node.style.opacity = '1'
   })
   const onKeyDown = (e: React.KeyboardEvent) => {
     const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End']
@@ -96,7 +98,7 @@ export function ContextBar({ anchor, actions, children, gap = 34, inset = {}, la
       onPointerDown={(e) => e.stopPropagation()}
       onKeyDown={onKeyDown}
       className={cn('cluster pointer-events-auto absolute flex h-bar items-center gap-0.5 px-1 transition-opacity duration-150', className)}
-      style={{ left: pos?.left ?? -9999, top: pos?.top ?? -9999, opacity: pos ? 1 : 0 }}
+      style={HIDDEN}
     >
       {tidy(actions).map((a, i) => {
         if (a.type === 'divider') return <ContextBarDivider key={`d${i}`} />

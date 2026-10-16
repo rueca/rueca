@@ -53,6 +53,13 @@ printf '\n@import "./components/studio/theme.css";\nhtml, body, #root { height: 
 - **Light / dark:** the tool has its own theme on `<html data-studio-theme="light|dark">`, separate from
   the app's (its `.dark` class is never read or set). With no attribute it follows the OS; the kit's
   toggle remembers the choice (`studio:theme`).
+- **Overriding a token** (the accent, a density size): the tokens sit on the kit's roots, not `:root`, so
+  an app rule on `:root` never reaches them. In the app's CSS, after the theme import, target
+  `:root:root, :root:root :where(.studio, .pop, [data-studio]) { --gutter: 10px; }`. The accent needs a
+  light-theme block as well: `visual-rules.md` has the recipe, and `scripts/accent-check.mjs` prints it.
+- **Use the kit's `cn` in tool chrome**, `import { cn } from '@/components/studio'` (or `…/studio/core/cn`
+  after a partial install), not shadcn's `cn` from `@/lib/utils`. Shadcn's doesn't know the density names
+  and drops `text-ui` when a colour class sits next to it.
 - **Give the page a height.** `<Studio>` fills its parent, and Vite's template sets no height, so
   without `html, body, #root { height: 100%; margin: 0 }` the tool renders 0 px tall (a blank page,
   no errors). The kit warns about this in dev.

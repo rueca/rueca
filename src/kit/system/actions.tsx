@@ -14,7 +14,7 @@
    Kit hotkeys here register at priority 0, so a shell binding the same key
    (T for a Text tool, \ for before/after) wins without configuration.
 --------------------------------------------------------------------------- */
-import { Bookmark, Ellipsis, Moon, Redo2, Sun, Undo2, Link, Braces, SplitSquareHorizontal, Trash2, Plus, Download, ChevronDown, Bot, Smartphone, Send } from 'lucide-react'
+import { Bookmark, Ellipsis, Rows3, Moon, Redo2, Sun, Undo2, Link, Braces, SplitSquareHorizontal, Trash2, Plus, Download, ChevronDown, Bot, Smartphone, Send } from 'lucide-react'
 import { useState, type ReactElement } from 'react'
 import { useStore } from 'zustand'
 import type { AnyParams } from '../core/params'
@@ -25,6 +25,7 @@ import { useCanUndo, type HistoryLike } from '../core/history'
 import { copyText, exportJSON } from '../core/io'
 import { useHotkeys } from '../core/hotkeys'
 import { useTheme } from '../core/theme'
+import { useDensity, type Density } from '../core/density'
 import { cn } from '../core/cn'
 import { Button, IconButton } from '../ui/button'
 import { Menu, Divider, type MenuItem } from '../ui/controls'
@@ -102,9 +103,9 @@ export function PresetMenu({ params, trigger, title = 'Presets' }: { params: Any
     <Menu
       trigger={trigger ?? (
         <Button size="md" className="max-w-[160px] gap-1 px-2">
-          <Bookmark size={13} strokeWidth={1.5} />
+          <Bookmark size={14} strokeWidth={1.5} />
           <span className="truncate">{active?.name ?? 'Custom'}</span>
-          <ChevronDown size={12} className="text-fg-faint" />
+          <ChevronDown size={12} strokeWidth={1.75} className="text-fg-faint" />
         </Button>
       )}
       items={items}
@@ -210,6 +211,7 @@ function ParamActionsMenu({ params, history, clock, doc, presets, compare, agent
   const stored = useStore(params, (s) => !!s.compare)
   const send = useSendToAgent({ params, history, clock, doc })
   const { theme: mode, toggle: toggleTheme } = useTheme()
+  const { density, setDensity } = useDensity()
   const compareKey = compare ? (typeof compare === 'object' ? compare.hotkey : '\\') : false
   const themeKey = theme ? (typeof theme === 'object' ? theme.hotkey : 't') : false
   const runCompare = () => { const r = params.toggleCompare(); toast(r === 'stored' ? 'Stored A. Tweak, then swap to compare' : 'Swapped A ↔ B') }
@@ -222,6 +224,10 @@ function ParamActionsMenu({ params, history, clock, doc, presets, compare, agent
     ...(compare ? [{ label: stored ? 'Swap A / B' : 'Store A for comparison', icon: SplitSquareHorizontal, shortcut: compareKey || undefined, onClick: runCompare } as MenuItem] : []),
     ...(compare && stored ? [{ label: 'Clear comparison', onClick: () => params.clearCompare() } as MenuItem] : []),
     ...(theme ? [{ label: mode === 'dark' ? 'Light theme' : 'Dark theme', icon: mode === 'dark' ? Sun : Moon, shortcut: themeKey || undefined, onClick: toggleTheme } as MenuItem] : []),
+    // the interface's size lives next to its theme, not only in ⌘K (it was undiscoverable there alone)
+    ...(theme ? [{ type: 'submenu', label: 'Density', icon: Rows3, items: (['default', 'comfortable', 'compact'] as Density[]).map((d) => ({
+      label: d[0].toUpperCase() + d.slice(1), checked: density === d, onClick: () => setDensity(d),
+    })) } as MenuItem] : []),
     ...(share ? [{ type: 'separator' } as MenuItem, ...shareMenuItems(params)] : []),
   ]
   if (items[0] && 'type' in items[0] && items[0].type === 'separator') items.shift()

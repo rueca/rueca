@@ -48,6 +48,13 @@ const TOOLS: { value: Tool; label: string; icon: typeof Square; shortcut: string
 
 /** keys typed into the layer tree belong to the tree */
 const inTree = () => !!(document.activeElement as HTMLElement | null)?.closest?.('[role=tree]')
+/** Esc from an inspector field changes the selection, which can unmount that field and drop focus to <body>:
+ *  hand focus to the selected layer row first (or the tree's tab stop) so keyboard users stay in the document. */
+const focusOutOfInspector = () => {
+  if (!(document.activeElement as HTMLElement | null)?.closest?.('[data-inspector]')) return
+  const row = document.querySelector<HTMLElement>('[role=tree] [role=treeitem][aria-selected="true"]') ?? document.querySelector<HTMLElement>('[role=tree] [tabindex="0"]')
+  row?.focus({ preventScroll: false })
+}
 
 export default function CanvasShell() {
   const tool = S.useDesign((s) => s.tool)
@@ -87,7 +94,7 @@ export default function CanvasShell() {
         const s = S.get()
         if (s.openComment) return S.design.setState({ openComment: null })
         if (s.tool !== 'move') return S.setTool('move')
-        if (s.selection.length) S.selectParent()
+        if (s.selection.length) { focusOutOfInspector(); S.selectParent() }
       },
     },
     enter: {
@@ -196,7 +203,9 @@ export default function CanvasShell() {
             <PanelTabs value={tab} onChange={(t) => S.design.setState({ tab: t })} tabs={[{ value: 'design', label: 'Design' }, { value: 'prototype', label: 'Prototype' }]} />
           </PanelHeader>
         }>
-          {tab === 'design' ? (hasSel ? <DesignPanel /> : <DocumentPanel />) : <PrototypePanel onPresent={() => setPresenting(true)} />}
+          <div data-inspector className="contents">
+            {tab === 'design' ? (hasSel ? <DesignPanel /> : <DocumentPanel />) : <PrototypePanel onPresent={() => setPresenting(true)} />}
+          </div>
         </Panel>
       }
     >

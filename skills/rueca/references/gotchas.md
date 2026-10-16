@@ -24,7 +24,8 @@ Check here before debugging.
 | Artifact starts mid-scroll on reload | Browsers restore a scroller's offset *asynchronously* after load. `history.scrollRestoration = 'manual'` and pin `scrollTop = 0`. |
 | A thin bar renders at 0px | Column-flex child; content overflowed and `flex-shrink` ate it. Use `flex: 0 0 <h>`. |
 | Icon buttons squeezed on phones | Fixed-size items in a flex row need `shrink-0`. |
-| Segmented labels truncate | 3+ options in a 280px inspector. Auto-switch to a dropdown when total label length is long, or go icon-only with tooltips. |
+| Segmented labels truncate | 3+ options in a 256px inspector (240 compact). Auto-switch to a dropdown when total label length is long, or go icon-only with tooltips. |
+| Segmented options are uneven widths | Intended: options size to their labels and share what's left, so "Stacked" doesn't truncate beside "Auto". Don't force equal widths. |
 | Vertical gutter bigger than horizontal | Two owners both adding margin. One gutter on the shell, flush islands. |
 | Canvas camera won't pan over an iframe artboard | Iframes swallow wheel / pointer. Hand vs Interact mode with a transparent shield. |
 | Page scrolls sideways at 375px | A grid with `minmax(340px, 1fr)` plus padding. Use `minmax(min(340px, 100%), 1fr)`. |
@@ -40,6 +41,8 @@ Check here before debugging.
 | Theme flashes on load | `class="dark"` hardcoded in HTML, or theme resolved after first paint. Resolve in an inline `<head>` script. |
 | Brand font vanished from the artboard | Artboard text reads `--font-ui`; chrome font change propagated. Give the artboard its own token. |
 | Faint text fails contrast on fields | Checked against the panel only. Also check against `--control`. |
+| `text-ui` (or `text-ui-sm`, `text-title`) vanishes next to a text colour, and the text falls back to the app's size | Merged with shadcn's `cn` from `@/lib/utils`: plain tailwind-merge doesn't know the density names, reads `text-ui` as a colour and drops it beside `text-fg`. Import the kit's `cn` (exported from the kit) in chrome. |
+| An override of `--signal` or a density token does nothing after a registry install | The registry theme declares tokens on the kit's roots, not `:root`. Target `:root:root, :root:root :where(.studio, .pop, [data-studio]) { … }`, after the theme import (`visual-rules.md` has the accent recipe for both themes). |
 
 ## Rendering and effects
 

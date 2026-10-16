@@ -36,15 +36,29 @@ export function Studio({
   toolbar?: ReactNode; left?: ReactNode; right?: ReactNode; bottom?: ReactNode
   children: ReactNode; layout?: Layout; className?: string; leftWidth?: number; rightWidth?: number
 }) {
-  const [present, setPresentRaw] = useState(false)
-  // leaving present mode puts focus back where it was, not on <body>
-  const returnTo = useRef<HTMLElement | null>(null)
-  const setPresent = (v: boolean | ((p: boolean) => boolean)) => setPresentRaw((p) => {
-    const next = typeof v === 'function' ? v(p) : v
-    if (next && !p) returnTo.current = document.activeElement as HTMLElement | null
-    if (!next && p) { const el = returnTo.current; requestAnimationFrame(() => { if (el?.isConnected) el.focus() }) }
-    return next
-  })
+  const [present, setPresent] = useState(false)
+  // Hiding the interface unmounts the panels, so the element that had focus is gone by the time it comes back:
+  // remember how to find it again (its param row and name) and restore it once the panels have remounted.
+  const returnTo = useRef<{ el: HTMLElement | null; param?: string; label?: string } | null>(null)
+  useLayoutEffect(() => {
+    if (present) {
+      const el = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null
+      returnTo.current = { el, param: el?.closest<HTMLElement>('[data-param]')?.dataset.param, label: el?.getAttribute('aria-label') ?? undefined }
+      return
+    }
+    const r = returnTo.current
+    returnTo.current = null
+    if (!r) return
+    requestAnimationFrame(() => {
+      const root = rootRef.current
+      const esc = (v: string) => (typeof CSS !== 'undefined' ? CSS.escape(v) : v)
+      const again = r.el?.isConnected ? r.el
+        : (r.param && r.label && root?.querySelector<HTMLElement>(`[data-param="${esc(r.param)}"] [aria-label="${esc(r.label)}"]`))
+          || (r.label && root?.querySelector<HTMLElement>(`[aria-label="${esc(r.label)}"]`))
+          || root?.querySelector<HTMLElement>('main [tabindex], main')
+      again?.focus({ preventScroll: true })
+    })
+  }, [present])
   const rootRef = useRef<HTMLDivElement>(null)
   // The #1 install trap: <Studio> fills its parent, and a fresh Vite page has no height → a blank page, no error.
   useLayoutEffect(restoreDensity, []) // the saved density (⌘K → Density), before first paint
@@ -122,7 +136,7 @@ export function Studio({
           {shell}
           {present && (
             <button type="button" onClick={() => setPresent(false)}
-              className="cluster fixed right-3 bottom-3 z-50 h-icon px-2.5 text-ui text-fg-muted opacity-30 transition-opacity hover:opacity-100 focus-visible:opacity-100">
+              className="cluster fixed right-3 bottom-3 z-50 h-icon px-2.5 text-ui text-fg-muted opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100">
               Show interface · Esc
             </button>
           )}

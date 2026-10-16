@@ -316,6 +316,11 @@
           "target": "@components/studio/core/scroll.ts"
         },
         {
+          "path": "src/kit/core/settle.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/settle.ts"
+        },
+        {
           "path": "src/kit/core/snapshot.ts",
           "type": "registry:lib",
           "target": "@components/studio/core/snapshot.ts"
@@ -710,7 +715,8 @@
       ],
       "registryDependencies": [
         "https://rueca.dev/r/button.json",
-        "https://rueca.dev/r/core.json"
+        "https://rueca.dev/r/core.json",
+        "https://rueca.dev/r/toast.json"
       ],
       "files": [
         {
@@ -965,6 +971,7 @@
         "https://rueca.dev/r/core.json",
         "https://rueca.dev/r/error-boundary.json",
         "https://rueca.dev/r/inspector.json",
+        "https://rueca.dev/r/palette.json",
         "https://rueca.dev/r/toast.json",
         "https://rueca.dev/r/tooltip.json"
       ],

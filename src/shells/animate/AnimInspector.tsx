@@ -71,7 +71,7 @@ function ObjectSections({ o, first }: { o: Obj; first: boolean }) {
     const control = d.type === 'color'
       ? <ColorField value={String(v)} onChange={(c, f) => editProp(o.id, p, c, f)} />
       : <NumField d={d} value={Number(v)} boxed align="left" label={d.label} prefix={d.short}
-          className={cn('flex-1', st !== 'none' && animate && 'text-signal', st === 'edited' && 'text-key')}
+          className={cn('flex-1', st !== 'none' && animate && 'text-signal-text', st === 'edited' && 'text-key-text')}
           onChange={(n, f) => editProp(o.id, p, n, f)} />
     return (
       <Row key={p} label={d.label} className={cn('group/row', st === 'edited' && animate && 'bg-key/10')}

@@ -27,6 +27,8 @@
    Accessibility: role="slider" with aria-label from the row label.
    (Promoted from shells/photo/local/ParamSlider.tsx.)
 --------------------------------------------------------------------------- */
+import { useRef } from 'react'
+import { useSettle } from '../core/settle'
 import { Slider as Base } from '@base-ui/react/slider'
 import { cn } from '../core/cn'
 import { useParamState, type AnyParams } from '../core/params'
@@ -51,9 +53,16 @@ export function GradientSlider({
   const o = origin ?? (min < 0 && max > 0 ? 0 : min)
   const at = ((Math.min(max, Math.max(min, value)) - min) / (max - min)) * 100
   const from = ((o - min) / (max - min)) * 100
+  // keyboard steps settle into one undo step, as on <Slider>
+  const keyed = useRef(false)
+  const settle = useSettle(value, onChange)
   return (
     <Base.Root value={value} min={min} max={max} step={step} disabled={disabled}
-      onValueChange={(v) => onChange(v as number, false)} onValueCommitted={(v) => onChange(v as number, true)}
+      onValueChange={(v) => onChange(v as number, false)}
+      onValueCommitted={(v) => { if (keyed.current) settle.defer(v as number); else onChange(v as number, true) }}
+      onKeyDownCapture={() => { keyed.current = true }}
+      onPointerDownCapture={() => { keyed.current = false; settle.flush() }}
+      onBlurCapture={() => settle.flush()}
       className={cn('group/slider relative flex h-control w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}>
       <Base.Control className="flex h-control w-full cursor-default items-center">
         <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[2px] bg-track shadow-[0_0_0_0.5px_var(--line-strong)]')} style={track ? { background: track } : undefined}>
@@ -115,7 +124,7 @@ export function ParamSlider({
     <Row label={name} hint={def.hint} changed={changed} className={cn(disabled && 'pointer-events-none opacity-40', className)}
       onReset={() => (stepLabel ? params.setValue(k, dflt, { label: `Reset ${name.toLowerCase()}` }) : params.reset([k]))}>
       <GradientSlider value={v} onChange={set} min={def.soft?.[0] ?? min} max={def.soft?.[1] ?? max} step={step} track={track} label={name} disabled={disabled} />
-      <ScrubValue value={v} onChange={set} min={min} max={max} step={step} defaultValue={dflt} changed={changed} label={name} parse={def.parse}
+      <ScrubValue value={v} onChange={set} min={min} max={max} step={step} defaultValue={dflt} changed={changed} label={`${name} value`} parse={def.parse}
         fmt={fmt} unit={def.unit} className="shrink-0" style={{ width: valueWidth }} />
     </Row>
   )

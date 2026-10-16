@@ -2,12 +2,12 @@ import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { useStore } from 'zustand'
 import {
   ArrowDown, ArrowUp, ChevronUp, Code, Dices, Download, Eye, Film, FileCode, Gauge, Image as ImageIcon, Layers2, Pause, Play, Plus, RotateCcw,
-  SkipBack, StepBack, StepForward, Trash2, CopyPlus, Link,
+  SkipBack, StepBack, StepForward, Trash2, CopyPlus, Link, PencilRuler,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Slider, ScrubValue, Select, Menu, Button, IconButton,
   Divider, Empty, Monitor, ParamActions, SettingsMenu, CommandPalette, useValues, useHotkeys, useClock, useClockTime, shareMenuItems, equal, toast, fmtTime,
-  createItemParams, bindItem, cn, type Command, NoteLayer,
+  createItemParams, bindItem, cn, useClientMode, type Command, NoteLayer,
 } from '@kit'
 import { EffectStack, StackAddMenu, type StackAddGroup } from '@kit/ui/stack'
 import { PresetGrid } from '@kit/ui/preset-grid'
@@ -41,7 +41,8 @@ const useSelected = () => {
 }
 
 export default function GradientStudio() {
-  const client = useClientView()
+  // #/shader?client, a phone-width window, or ⌘⇧P / ⌘K → Client view (the palette command below owns the shortcut)
+  const { client, forced, setClient } = useClientMode({ hotkey: false })
   const layers = useLayers()
   const sel = useSelected()
   const presets = useStore(params, (s) => s.presets)
@@ -82,6 +83,7 @@ export default function GradientStudio() {
   }))
 
   const commands: Command[] = [
+    { id: 'client', label: client ? 'Designer view' : 'Client view', group: 'View', shortcut: 'mod+shift+p', icon: Eye, run: () => setClient((c) => !c) },
     { id: 'play', label: 'Play / pause', group: 'Playback', shortcut: 'space', icon: Play, run: () => clock.toggle() },
     { id: 'restart', label: 'Restart loop', group: 'Playback', shortcut: 'home', icon: SkipBack, run: () => clock.replay() },
     { id: 'prev', label: 'Previous frame', group: 'Playback', shortcut: ',', icon: StepBack, run: () => clock.step(-1) },
@@ -115,11 +117,14 @@ export default function GradientStudio() {
   // and Download, the same pattern as the Client demo. The landing's phone hero shows this.
   if (client) return (
     <Studio layout="overlay">
+      <ClientMark />
       <Stage fill>
         <ShaderStage />
       </Stage>
       <ClientSheet presets={presets} active={activeLook?.name} onApply={applyLook} onShuffle={randomise}
+        onExit={forced ? undefined : () => setClient(false)}
         onSave={() => exportStill(sizes.x2.w, sizes.x2.h).then(() => toast('Saved to downloads', { type: 'success' }))} />
+      <CommandPalette commands={commands.filter((c) => c.id === 'client' || c.group === 'Look' || c.group === 'Playback')} />
     </Studio>
   )
 
@@ -306,30 +311,36 @@ function Looks({ presets, active, onApply, onSave, bare }: { presets: { name: st
 }
 
 /* ---------- client view ---------- */
-const useClientView = () => {
-  const read = () => /[?&]client\b/.test(location.hash)
-  const [on, setOn] = useState(read)
-  useEffect(() => { const f = () => setOn(read()); addEventListener('hashchange', f); return () => removeEventListener('hashchange', f) }, [])
-  // finger-sized controls come from the sheet's .studio-touch (the kit's touch density), not from
-  // retuning the whole page's data-density
-  return on
+/** Mark <html> the way the kit's <ClientView> does: the gallery's "Best on a desktop" notice stands down. */
+function ClientMark() {
+  useEffect(() => {
+    const html = document.documentElement
+    html.setAttribute('data-studio-client', '')
+    return () => html.removeAttribute('data-studio-client')
+  }, [])
+  return null
 }
 
-function ClientSheet({ presets, active, onApply, onShuffle, onSave }: {
+function ClientSheet({ presets, active, onApply, onShuffle, onSave, onExit }: {
   presets: { name: string; values: any; builtin?: boolean }[]; active?: string; onApply: (n: string) => void; onShuffle: () => void; onSave: () => void
+  /** "Back to designer view" — left out on a phone, where the client view is the only view */
+  onExit?: () => void
 }) {
   const [open, setOpen] = useState(true)
   return (
     // studio-touch: the kit's touch density (48px rows, 36px controls, 14px text) for this sheet only
     <div className="studio-touch pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
       <div className={cn('panel pointer-events-auto flex w-full max-w-[420px] flex-col overflow-hidden transition-[max-height] duration-300', open ? 'max-h-[62vh]' : 'max-h-14')}>
-        <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex h-14 flex-none items-center gap-3 px-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal">
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-title font-semibold">Make it yours</div>
-            <div className="truncate text-ui-sm text-fg-muted">Pick a look, shuffle, download</div>
-          </div>
-          <ChevronUp size={18} strokeWidth={1.5} className={cn('text-fg-faint transition-transform', open && 'rotate-180')} />
-        </button>
+        <div className="flex h-14 flex-none items-center pr-2">
+          <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex h-full min-w-0 flex-1 items-center gap-3 px-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal">
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-title font-semibold">Make it yours</div>
+              <div className="truncate text-ui-sm text-fg-muted">Pick a look, shuffle, download</div>
+            </div>
+            <ChevronUp size={18} strokeWidth={1.5} className={cn('text-fg-faint transition-transform', open && 'rotate-180')} />
+          </button>
+          {onExit && <IconButton icon={PencilRuler} label="Back to designer view" size="icon" className="size-11 shrink-0" onClick={onExit} tipSide="top" />}
+        </div>
         <div className="min-h-0 overflow-y-auto">
           <Looks presets={presets} active={active} onApply={onApply} bare />
         </div>

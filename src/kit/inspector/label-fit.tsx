@@ -31,7 +31,11 @@ export function LabelScope({ children, className, style }: { children: ReactNode
 let fontsReady = typeof document === 'undefined' || !document.fonts
 const fontSubs = new Set<() => void>()
 if (!fontsReady) document.fonts.ready.then(() => { fontsReady = true; fontSubs.forEach((f) => f()) })
-const useFontsReady = () => useSyncExternalStore((cb) => { fontSubs.add(cb); return () => { fontSubs.delete(cb) } }, () => fontsReady, () => true)
+// module-level subscribe: an inline one made every Row unsubscribe and resubscribe on every render (perf QA)
+const subscribeFonts = (cb: () => void) => { fontSubs.add(cb); return () => { fontSubs.delete(cb) } }
+const getFontsReady = () => fontsReady
+const getFontsReadyServer = () => true
+const useFontsReady = () => useSyncExternalStore(subscribeFonts, getFontsReady, getFontsReadyServer)
 
 let ctx: CanvasRenderingContext2D | null = null
 /** A label's width at the UI text size and label weight, plus room for the changed dot. */

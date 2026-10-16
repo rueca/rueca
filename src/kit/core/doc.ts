@@ -21,6 +21,7 @@
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import { useStore } from 'zustand'
 import { storageWarned, type CommitMeta } from './params'
+import { equal } from './schema'
 
 export interface DocState<D> {
   doc: D
@@ -133,7 +134,8 @@ export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> 
 
   const commit = (label?: string) => {
     const s = store.getState()
-    if (!s.dirty || s.doc === s.committed) { if (s.dirty) store.setState({ dirty: false }); return }
+    // a change that ends where it started (a drop that snapped back, a revert) is no undo step (QA: video clip drop)
+    if (!s.dirty || s.doc === s.committed || equal(s.doc, s.committed)) { if (s.dirty) store.setState({ dirty: false, doc: s.committed }); return }
     store.setState({ committed: s.doc, past: [...s.past, { doc: s.committed, label }].slice(-limit), future: [], dirty: false })
     saveSoon(s.doc)
     emit(s.doc, { label, kind: 'edit' })

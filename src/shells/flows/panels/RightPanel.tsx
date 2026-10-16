@@ -172,9 +172,9 @@ function EdgeInspector({ edge }: { edge: FlowEdge }) {
         <IconButton icon={Trash2} label="Delete" shortcut="backspace" size="icon-sm" onClick={deleteSelection} />
       </div>
       <div className="mx-pad my-1.5 flex items-center gap-1.5 rounded-cluster bg-well p-1.5 text-ui">
-        <button type="button" className="min-w-0 flex-1 truncate rounded-control bg-raised px-2 py-1 text-left shadow-[var(--shadow-segment)] hover:text-signal" onClick={() => src && select([src.id])}>{src?.data.name ?? '—'}</button>
+        <button type="button" className="min-w-0 flex-1 truncate rounded-control bg-raised px-2 py-1 text-left shadow-[var(--shadow-segment)] hover:text-signal-text" onClick={() => src && select([src.id])}>{src?.data.name ?? '—'}</button>
         <ArrowRight size={12} className="shrink-0 text-fg-faint" />
-        <button type="button" className="min-w-0 flex-1 truncate rounded-control bg-raised px-2 py-1 text-left shadow-[var(--shadow-segment)] hover:text-signal" onClick={() => tgt && select([tgt.id])}>{tgt?.data.name ?? '—'}</button>
+        <button type="button" className="min-w-0 flex-1 truncate rounded-control bg-raised px-2 py-1 text-left shadow-[var(--shadow-segment)] hover:text-signal-text" onClick={() => tgt && select([tgt.id])}>{tgt?.data.name ?? '—'}</button>
       </div>
       <Section title="Interaction" first>
         <Row label="Trigger" hint="What the user does (or what happens) to move along this connection.">
@@ -289,7 +289,7 @@ function Stat({ label, value, children }: { label: string; value: ReactNode; chi
   return (
     <div className="flex flex-col gap-0.5 rounded-cluster bg-well px-2.5 py-2">
       <span className="text-ui text-fg-muted">{label}</span>
-      <span className="text-[15px] font-semibold tabular">{value}</span>
+      <span className="text-title font-semibold tabular">{value}</span>
       {children}
     </div>
   )

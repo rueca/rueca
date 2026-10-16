@@ -46,13 +46,14 @@ Copy the structure of the closest example shell rather than inventing one:
   reflows. Artboard: deep shadow, 1px ~5% ring, label above top-left.
 - No dot grid on a motion artboard (it competes); a faint grid is fine on infinite
   canvases.
-- Bottom-centre floating tool dock (40px). A selection-aware context bar (Affinity)
+- Bottom-centre floating tool dock (36px, `h-dock`; buttons `size-dock-button`). A selection-aware context bar (Affinity)
   with 3–6 actions.
 - `⌘\` hides all chrome (present mode).
 
 ## Inspector
 
-- 24px rows, 22px controls, 72px label column, 11px tabular values (the default density). Labels visible
+- 24px rows, 22px controls, 11px tabular values (the default density). The label column fits the
+  longest visible label in the panel, from 72px up to 42% of the row. Labels visible
   (keep `aria-label` if hidden).
 - Sections 26px high, collapsible, collapse state persisted, hover-revealed reset;
   Alt-click solo-opens.

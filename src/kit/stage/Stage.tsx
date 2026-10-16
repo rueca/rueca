@@ -184,6 +184,7 @@ export function Stage({
       touched.current = true
       const s = cam.getState()
       pan.current = { x: e.clientX, y: e.clientY, cx: s.x, cy: s.y }
+      setPanning(true)
       el.current!.setPointerCapture(e.pointerId)
     }
   }
@@ -195,14 +196,16 @@ export function Stage({
     if (!pan.current) return
     cam.setState({ x: pan.current.cx + e.clientX - pan.current.x, y: pan.current.cy + e.clientY - pan.current.y })
   }
-  const onPointerUp = () => { pan.current = null }
+  const [panning, setPanning] = useState(false)
+  // cancel / lost capture end a pan too, or the next press on the background would be swallowed
+  const onPointerUp = () => { pan.current = null; setPanning(false) }
 
   return (
     <CamCtx.Provider value={cam}>
       <div
         ref={el}
         data-studio-stage=""
-        className={cn(bleed ? 'absolute' : 'relative h-full w-full', 'overflow-hidden', fill ? '' : 'touch-none', space && (pan.current ? 'cursor-grabbing' : 'cursor-grab'), className)}
+        className={cn(bleed ? 'absolute' : 'relative h-full w-full', 'overflow-hidden', fill ? '' : 'touch-none', space && (panning ? 'cursor-grabbing' : 'cursor-grab'), className)}
         style={{
           ...(bleed ? BLEED : null),
           background,
@@ -213,7 +216,7 @@ export function Stage({
         onPointerDownCapture={onPointerDownCapture}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
+        onPointerUp={onPointerUp} onPointerCancel={onPointerUp} onLostPointerCapture={onPointerUp}
       >
         {fill ? <div data-studio-artifact="" className="absolute inset-0">{children}</div> : (
           <div ref={world} className="absolute top-0 left-0 origin-top-left will-change-transform" style={{ transform: `translate(${x}px, ${y}px) scale(${zoom})` }}>
@@ -289,13 +292,13 @@ export function Artboard({
       {label && (
         <div
           onPointerDown={onSelect}
-          className={cn('absolute bottom-full left-0 flex origin-bottom-left items-center gap-1.5 overflow-hidden pb-1.5 text-ui whitespace-nowrap no-select', selected ? 'text-signal-text' : 'text-fg-faint')}
+          className={cn('absolute bottom-full left-0 flex origin-bottom-left items-center gap-1.5 overflow-hidden pb-1.5 text-ui whitespace-nowrap no-select', selected ? 'text-signal-text' : 'text-fg-muted')}
           // never wider than the board on screen, so neighbouring boards' labels can't overlap (cleanup L5)
           style={{ transform: `scale(${1 / zoom})`, maxWidth: Math.max(48, width * zoom) }}
         >
           {/* inline so a label passed with an icon (<Icon/> Desktop) stays on one line */}
           <span className="flex min-w-0 items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap [&>svg]:shrink-0">{label}</span>
-          <span className="shrink-0 tabular opacity-60">{width} × {height}</span>
+          <span className="shrink-0 tabular text-fg-faint">{width} × {height}</span>
         </div>
       )}
       <div

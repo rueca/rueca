@@ -98,7 +98,7 @@ export interface TrackTimelineProps {
 export function TrackTimeline(props: TrackTimelineProps) {
   const { clock, duration, fps, tracks, clips, snap = true, follow = true, toolbar, empty, className } = props
   // sizes follow the density tokens (32px tracks, a 24px ruler by default; 36 and 28 in comfortable)
-  const RULER = useDensityPx('--d-ruler', 28), lane = useDensityPx('--d-lane', 24), label = useDensityPx('--d-label', 84)
+  const RULER = useDensityPx('--d-ruler', 24), lane = useDensityPx('--d-lane', 20), label = useDensityPx('--d-label', 72)
   const ROW = props.rowHeight ?? lane + 12
   const HEAD_W = props.headerWidth ?? label * 2
   const height = props.height ?? RULER + 6 * ROW + 1 // +1: the scroller's top border
@@ -187,11 +187,28 @@ export function TrackTimeline(props: TrackTimelineProps) {
     const selected = c.selected ? clips.filter((x) => x.selected) : [c]
     if (!c.selected) props.onSelect([c.id], 'replace')
     if (lockedTrack(c.track)) return
-    // Follow the drag on window, not with pointer capture on the clip: moving a clip to another track remounts it
-    // in that track's row, which drops the capture and used to strand the drag (the clip kept following the mouse)
-    const move = (ev: PointerEvent) => live.current.onMove(ev as unknown as React.PointerEvent)
-    const up = (ev: PointerEvent) => { removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); live.current.onUp(ev as unknown as React.PointerEvent) }
-    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up)
+    // Capture on the scroller, not the clip: moving a clip to another track remounts it in that track's row, which
+    // drops a capture held by the clip and used to strand the drag. The scroller never remounts, and capture (unlike
+    // window listeners) still gets the release over an iframe stage. A cancelled or lost pointer reverts the drag.
+    const host = scroller.current!
+    const id = e.pointerId
+    const move = (ev: PointerEvent) => { if (ev.pointerId === id) live.current.onMove(ev as unknown as React.PointerEvent) }
+    const end = (ev: PointerEvent) => {
+      if (ev.pointerId !== id) return
+      stopDrag.current?.()
+      if (ev.type === 'pointerup') live.current.onUp(ev as unknown as React.PointerEvent)
+      else live.current.onCancel()
+    }
+    stopDrag.current?.()
+    stopDrag.current = () => {
+      stopDrag.current = null
+      host.removeEventListener('pointermove', move); host.removeEventListener('pointerup', end)
+      host.removeEventListener('pointercancel', end); host.removeEventListener('lostpointercapture', end)
+      try { host.releasePointerCapture(id) } catch { /* already released */ }
+    }
+    host.addEventListener('pointermove', move); host.addEventListener('pointerup', end)
+    host.addEventListener('pointercancel', end); host.addEventListener('lostpointercapture', end)
+    host.setPointerCapture(id)
     const moving = mode === 'move' ? selected.filter((x) => !lockedTrack(x.track)) : [c]
     const orig: ClipOriginal = Object.fromEntries(moving.map((x) => [x.id, { start: x.start, dur: x.dur, track: x.track }]))
     const others = clips.filter((x) => !orig[x.id])
@@ -256,8 +273,22 @@ export function TrackTimeline(props: TrackTimelineProps) {
     if (d?.moved) props.onChange(compute(e, d), true, d.orig)
   }
 
-  const live = useRef({ onMove, onUp })
-  live.current = { onMove, onUp }
+  // a drag that's cut short (pointercancel, capture lost, Esc) puts the clips back without an undo step
+  const onCancel = () => {
+    const d = drag.current
+    drag.current = null
+    setGuide(null)
+    if (d?.moved) props.onChange(d.orig as unknown as Parameters<typeof props.onChange>[0], false, d.orig)
+  }
+  const live = useRef({ onMove, onUp, onCancel })
+  live.current = { onMove, onUp, onCancel }
+  const stopDrag = useRef<(() => void) | null>(null)
+  useEffect(() => () => stopDrag.current?.(), [])
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && drag.current) { e.preventDefault(); e.stopPropagation(); stopDrag.current?.(); live.current.onCancel() } }
+    addEventListener('keydown', onKey, true)
+    return () => removeEventListener('keydown', onKey, true)
+  }, [])
 
   /* ---------- keyboard on the clip area ---------- */
   const onAreaKey = (e: React.KeyboardEvent) => {

@@ -227,7 +227,7 @@ function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-0.5 rounded-cluster bg-well px-2.5 py-2">
       <span className="text-ui text-fg-faint">{label}</span>
-      <span className="text-[15px] font-semibold tabular">{value}</span>
+      <span className="text-title font-semibold tabular">{value}</span>
     </div>
   )
 }
