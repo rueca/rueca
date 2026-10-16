@@ -116,7 +116,7 @@ export function KeyTimeline(props: KeyTimelineProps) {
     clock, mapTime = (t: number) => t, duration, fps, lanes, snap = true, toolbar, autoKey, empty, blocked, height = 248, labelWidth = 232, className,
   } = props
   const track = useRef<HTMLDivElement>(null)
-  const ROW = useDensityPx('--d-lane', 24)
+  const ROW = useDensityPx('--d-lane', 20)
   const [W, setW] = useState(600)
   useLayoutEffect(() => {
     const ro = new ResizeObserver(([e]) => setW(Math.max(1, e.contentRect.width)))
@@ -398,7 +398,7 @@ export function KeyTimeline(props: KeyTimelineProps) {
                     </button>
                   ) : <span className="w-4 shrink-0" />}
                   {l.icon && <l.icon size={13} strokeWidth={1.5} className={cn('shrink-0', l.highlight ? 'text-signal' : 'text-fg-faint')} />}
-                  <button type="button" onClick={() => props.onLaneClick?.(l.id)} className={cn('h-full min-w-0 flex-1 truncate text-left outline-none focus-visible:underline', l.kind === 'group' && 'font-medium')}>{l.label}</button>
+                  <button type="button" onClick={() => props.onLaneClick?.(l.id)} className={cn('h-full min-w-0 flex-1 truncate rounded-control text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal', l.kind === 'group' && 'font-medium')}>{l.label}</button>
                   {l.value !== undefined && <span className="shrink-0 tabular text-ui text-fg-faint">{l.value}</span>}
                   {l.trailing}
                 </div>
@@ -424,9 +424,9 @@ export function KeyTimeline(props: KeyTimelineProps) {
                           props.onSegmentClick?.(l.id, a.id, rect)
                           if (props.segmentEditor) setSeg({ laneId: l.id, keyId: a.id, rect })
                         }}
-                        // a 10px band on the curve line, not the whole lane, so a marquee can start inside a property row
+                        // a 14px band on the curve line, not the whole lane, so a marquee can start inside a property row
                         className="group/seg pointer-events-auto absolute flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-signal"
-                        style={{ left: x0 + 6, width: Math.max(0, w - 12), top: (ROW - 10) / 2, height: 10 }}>
+                        style={{ left: x0 + 6, width: Math.max(0, w - 12), top: (ROW - 14) / 2, height: 14 }}>
                         <span className={cn('absolute inset-x-0 top-1/2 -translate-y-1/2',
                           a.out === 'hold' ? 'border-t border-dashed' : 'h-[2px] rounded-full',
                           active ? (a.out === 'hold' ? 'border-signal' : 'bg-signal') : a.out === 'hold' ? 'border-fg-faint group-hover/seg:border-fg' : 'bg-line-strong group-hover/seg:bg-fg/50')} />
@@ -444,7 +444,8 @@ export function KeyTimeline(props: KeyTimelineProps) {
                         aria-label={`${group ? `${l.label} keys` : 'Keyframe'} at ${(k.t / 1000).toFixed(2)}s`} aria-pressed={!!sel}
                         onPointerDown={(e) => onKeyDown(e, k)} onPointerMove={onKeyMove} onPointerUp={onKeyUp}
                         onDoubleClick={() => props.onSeek(k.t)}
-                        className="pointer-events-auto absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center outline-none active:cursor-grabbing"
+                        // a 16px box with a 24px reach: diamonds are small, but they shouldn't be hard to hit
+                        className="pointer-events-auto absolute top-1/2 flex size-4 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center outline-none after:absolute after:-inset-1 after:content-[''] active:cursor-grabbing"
                         style={{ left: X(k.t) }}>
                         <span className={cn('block rotate-45 rounded-[1.5px] transition-colors',
                           // selection is bigger AND ringed, not just blue (WCAG 1.4.1, break-it A14)

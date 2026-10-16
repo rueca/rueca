@@ -135,8 +135,8 @@ function TrackArea({
   clock: Clock; lanes: Lane[]; view: [number, number]; setView: (v: [number, number]) => void; duration: number; region: [number, number] | null; fps: number; t: number; allKeys: number[]; onKeyClick?: (l: Lane, k: Key) => void; height?: number
 }) {
   const area = useRef<HTMLDivElement>(null)
-  const lane = useDensityPx('--d-lane', 24)
-  const ruler = useDensityPx('--d-ruler', 28)
+  const lane = useDensityPx('--d-lane', 20)
+  const ruler = useDensityPx('--d-ruler', 24)
   const [w, setW] = useState(600)
   useEffect(() => {
     const ro = new ResizeObserver(([e]) => setW(e.contentRect.width))
@@ -234,7 +234,7 @@ function TrackArea({
               <div key={l.id} className="absolute inset-x-0 h-lane" style={{ top: i * lane }}>
                 {(l.kind ?? 'bar') === 'bar' && (
                   <div className="absolute top-1/2 h-2.5 -translate-y-1/2 rounded-full transition-opacity"
-                    style={{ left: X(l.start ?? 0), width: Math.max(4, X(l.end ?? 0) - X(l.start ?? 0)), background: l.color ?? 'var(--signal)', opacity: active ? 1 : 0.38 }} />
+                    style={{ left: X(l.start ?? 0), width: Math.max(4, X(l.end ?? 0) - X(l.start ?? 0)), background: l.color ?? 'var(--fill)' /* neutral by default: blue is for selection */, opacity: active ? 1 : 0.38 }} />
                 )}
                 {l.kind === 'keys' && l.keys && (
                   <>

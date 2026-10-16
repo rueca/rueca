@@ -9,11 +9,12 @@
      />
 --------------------------------------------------------------------------- */
 import { createContext, forwardRef, useContext, type ButtonHTMLAttributes, type ComponentType, type ReactNode } from 'react'
-import { LayoutGrid } from 'lucide-react'
+import { Command, Keyboard, LayoutGrid } from 'lucide-react'
 import { cn } from '../core/cn'
 import { useStudio } from './Studio'
 import { Menu, type MenuItem } from '../ui/controls'
 import { Tip } from '../ui/tooltip'
+import { openPalette, usePaletteAvailable } from '../system/palette'
 
 export function Toolbar({ start, center, end, className }: { start?: ReactNode; center?: ReactNode; end?: ReactNode; className?: string }) {
   return (
@@ -57,11 +58,17 @@ export function Brand({ name, doc, mark, href = '#/', menu = [] }: {
 }) {
   const { layout } = useStudio()
   const host = useContext(BrandOverrideContext)
+  const palette = usePaletteAvailable()
   const items: MenuItem[] = [
     { type: 'title', label: name },
     { type: 'separator' },
     ...(href ? [{ label: 'All tools', icon: LayoutGrid, onClick: () => { location.href = href } } as MenuItem] : []),
-    ...(menu.length ? [...(href ? [{ type: 'separator' } as MenuItem] : []), ...menu] : []),
+    // the palette and the shortcut sheet are otherwise only reachable by knowing ⌘K and ?
+    ...(palette ? [
+      { label: 'Command palette', icon: Command, shortcut: 'mod+k', onClick: () => openPalette('palette') } as MenuItem,
+      { label: 'Keyboard shortcuts', icon: Keyboard, shortcut: '?', onClick: () => openPalette('sheet') } as MenuItem,
+    ] : []),
+    ...(menu.length ? [{ type: 'separator' } as MenuItem, ...menu] : []),
   ]
   return (
     <div className={cn('flex h-bar min-w-0 items-center gap-1', doc ? 'pr-3 pl-1' : 'px-1', layout !== 'docked' && 'cluster')}>

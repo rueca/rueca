@@ -17,3 +17,7 @@ brand/moodboards/
 
 # notes the shell sends to the agent (snapshots of local tuning): local only
 .rueca/
+
+# Finder / iCloud conflict copies ("theme 2.css", "src 2")
+* 2.*
+* 2

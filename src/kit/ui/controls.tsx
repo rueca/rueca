@@ -90,7 +90,8 @@ export function Tiles({
               aria-label={labelOf(o)}
               className={cn(
                 aspect === 'square' ? 'aspect-square' : 'h-button-lg', 'flex min-h-0 flex-col items-center justify-center gap-1 rounded-[calc(var(--radius-control)+2px)] bg-control text-fg-muted outline-none transition-colors',
-                'hover:text-fg data-[pressed]:bg-signal-soft data-[pressed]:text-signal-text data-[pressed]:shadow-[inset_0_0_0_1px_var(--signal)]',
+                // pressed reads like the segmented pill (neutral), not blue: tiles at rest aren't a selection highlight
+                'hover:text-fg data-[pressed]:bg-active data-[pressed]:text-fg data-[pressed]:shadow-[inset_0_0_0_1px_var(--line-strong)]',
                 'focus-visible:ring-2 focus-visible:ring-signal',
               )}
             >
@@ -279,16 +280,16 @@ function MenuItems({ items }: { items: MenuItem[] }) {
         }
         const Icon = it.icon
         return (
-          <BaseMenu.Item key={i} disabled={it.disabled} onClick={it.onClick} className={cn(itemCls, it.danger && 'text-rec', it.hint && 'h-auto min-h-icon py-1.5')}>
+          <BaseMenu.Item key={i} disabled={it.disabled} onClick={it.onClick} aria-keyshortcuts={it.shortcut} className={cn(itemCls, it.danger && 'text-rec', it.hint && 'h-auto min-h-icon py-1.5')}>
             {/* centred on the row; an item with a hint pins it to the label's line instead */}
             <span className={cn('flex w-4 justify-center text-fg-muted group-data-[highlighted]/item:text-signal-fg', it.hint && 'self-start pt-px', it.danger && 'text-rec')}>
               {it.checked ? <Check size={13} strokeWidth={2} /> : Icon ? <Icon size={14} strokeWidth={1.5} /> : null}
             </span>
             <span className="flex min-w-0 flex-1 flex-col">
-              <span>{it.label}</span>
+              <span>{it.label}{it.checked && <span className="sr-only"> (current)</span>}</span>
               {it.hint && <span className="text-ui leading-snug text-fg-faint group-data-[highlighted]/item:text-signal-fg/75">{it.hint}</span>}
             </span>
-            {it.shortcut && <span className={cn('text-ui text-fg-faint group-data-[highlighted]/item:text-signal-fg/70', it.hint && 'self-start')}>{prettyCombo(it.shortcut)}</span>}
+            {it.shortcut && <span aria-hidden className={cn('text-ui text-fg-faint group-data-[highlighted]/item:text-signal-fg/70', it.hint && 'self-start')}>{prettyCombo(it.shortcut)}</span>}
           </BaseMenu.Item>
         )
       })}

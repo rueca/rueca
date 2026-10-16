@@ -128,6 +128,9 @@ function AnimationsPanel() {
   const inputs = useUI((s) => s.inputs)
   const fired = useUI((s) => s.fired)
   const [renaming, setRenaming] = useState<string | null>(null)
+  // Enter / Esc end a rename by unmounting the input; put focus back on that row's name so it doesn't drop to <body>.
+  const refocus = useRef(false)
+  const focusRow = (id: string) => requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-anim-row="${CSS.escape(id)}"] [data-row-main]`)?.focus())
   useEffect(() => { if (fired) { const id = setTimeout(() => ui.setState({ fired: null }), 400); return () => clearTimeout(id) } }, [fired])
   const names = Object.fromEntries([...doc.anims.map((a) => [a.id, a.name]), ['any', 'Any state']])
   const label = (c: { input: string; op: string; value?: boolean | number }) =>
@@ -146,15 +149,15 @@ function AnimationsPanel() {
             const on = a.id === animId && !preview
             return (
               // The row is a plain container: its name is the button, the ⋯ menu a sibling — no button inside a button (axe nested-interactive, break-it A20).
-              <div key={a.id}
+              <div key={a.id} data-anim-row={a.id}
                 onClick={() => { ui.setState({ animId: a.id, preview: false, keySel: [], pending: {} }); clock.pause(); seek(0) }}
                 onDoubleClick={() => setRenaming(a.id)}
                 className={cn('group/row mx-1.5 flex h-row cursor-default items-center gap-2 rounded-control pr-1 pl-2 text-ui has-[[data-row-main]:focus-visible]:ring-2 has-[[data-row-main]:focus-visible]:ring-signal', on ? 'bg-signal-soft' : 'hover:bg-hover')}>
                 <Film size={14} strokeWidth={1.5} className={on ? 'text-signal' : 'text-fg-faint'} />
                 {renaming === a.id ? (
                   <input autoFocus defaultValue={a.name} onClick={(e) => e.stopPropagation()}
-                    onBlur={(e) => { updateAnim({ name: e.target.value || a.name }, true, a.id); setRenaming(null) }}
-                    onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setRenaming(null) }}
+                    onBlur={(e) => { updateAnim({ name: e.target.value || a.name }, true, a.id); setRenaming(null); if (refocus.current) { refocus.current = false; focusRow(a.id) } }}
+                    onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') { refocus.current = true; (e.target as HTMLInputElement).blur() } if (e.key === 'Escape') { setRenaming(null); focusRow(a.id) } }}
                     className="h-control-sm min-w-0 flex-1 rounded-control bg-control px-1 text-ui text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
                 ) : (
                   <button type="button" data-row-main aria-current={on || undefined} title="Double-click or F2 to rename"
@@ -470,7 +473,7 @@ export default function AnimateShell() {
       }
       right={
         <Panel header={<PanelHeader title={sel ? objName : preview ? 'Preview' : mode === 'animate' ? anim.name : 'Document'}>
-          <span className={cn('rounded-control px-1.5 py-0.5 text-ui', mode === 'animate' && !preview ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted')}>{preview ? 'State machine' : mode === 'animate' ? 'Animate' : 'Design'}</span>
+          <span className={cn('rounded-control px-1.5 py-0.5 text-ui', mode === 'animate' && !preview ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted')}>{preview ? 'State machine' : mode === 'animate' ? 'Animate' : 'Design'}</span>
         </PanelHeader>}>
           <AnimInspector />
         </Panel>
@@ -501,7 +504,7 @@ export default function AnimateShell() {
           blocked={preview ? (
             <div className="flex flex-col items-center gap-2 text-center">
               <div className="text-ui font-medium text-fg">Previewing the state machine</div>
-              <div className="text-ui text-fg-muted">Hover and click the button on the artboard, or use the inputs. Now playing: <span className="text-signal">{doc.anims.find((a) => a.id === smState)?.name ?? '—'}</span></div>
+              <div className="text-ui text-fg-muted">Hover and click the button on the artboard, or use the inputs. Now playing: <span className="text-signal-text">{doc.anims.find((a) => a.id === smState)?.name ?? '—'}</span></div>
               <Button size="sm" variant="default" onClick={() => togglePreview(false)}>Back to editing</Button>
             </div>
           ) : undefined}

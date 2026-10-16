@@ -156,10 +156,10 @@ export function DetentSlider({
       <Base.Control data-studio-slider-control className="flex w-full cursor-default touch-pan-y flex-col">
         <div className="flex h-6 items-center">
           <Base.Track className="relative h-[3px] w-full rounded-full bg-track shadow-[0_0_0_0.5px_var(--line-strong)]">
-            <div className="absolute inset-y-0 rounded-full bg-signal" style={{ left: `${Math.min(from, at)}%`, width: `${Math.abs(at - from)}%` }} />
+            <div className="absolute inset-y-0 rounded-full bg-fill" style={{ left: `${Math.min(from, at)}%`, width: `${Math.abs(at - from)}%` }} />
             {list.map((_, i) => {
               const filled = pct(i) >= Math.min(from, at) - 1e-6 && pct(i) <= Math.max(from, at) + 1e-6
-              return <span key={i} aria-hidden className={cn('absolute top-1/2 h-[7px] w-px -translate-x-1/2 -translate-y-1/2', filled ? 'bg-signal' : 'bg-fg-faint')} style={{ left: `${pct(i)}%` }} />
+              return <span key={i} aria-hidden className={cn('absolute top-1/2 h-[7px] w-px -translate-x-1/2 -translate-y-1/2', filled ? 'bg-fill' : 'bg-fg-faint')} style={{ left: `${pct(i)}%` }} />
             })}
             <Base.Thumb
               data-studio-thumb

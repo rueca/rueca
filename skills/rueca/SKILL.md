@@ -66,7 +66,7 @@ you read rides along in every later turn.
 ```tsx
 import {
   Studio, Toolbar, Brand, Panel, PanelHeader, Inspector, ParamActions, Timeline, Stage, Artboard,
-  CanvasSurface, Button, createClock, createParams, defineSchema, folder, p, renderCanvasPNG,
+  CanvasSurface, Button, CommandPalette, createClock, createParams, defineSchema, folder, p, renderCanvasPNG,
   useHotkeys, useValues, toast,
 } from '@/components/studio'
 import { draw as art } from './art'          // the artifact: draw(ctx, t, w, h, values), pure
@@ -103,6 +103,7 @@ export function Tool() {
           <CanvasSurface params={params} clock={clock} draw={draw} />
         </Artboard>
       </Stage>
+      <CommandPalette commands={[]} />                 {/* ⌘K and ?; adds View → Density itself */}
     </Studio>
   )
 }
@@ -113,7 +114,9 @@ persistence across reloads and `#p=` share links; `ParamActions` = undo buttons,
 (save / apply / delete), and **Send to agent** plus **Comment** once `ruecaNotes()` is in `vite.config.ts`
 and `<NoteLayer>` is in the artboard (set both up by default: `references/notes.md`), with A/B compare (`\`),
 copy link and the theme toggle in its "…" menu; `Inspector` = the schema's rows, scrubbable, with reset, the
-changed cue and "N more" for `more` rows; `SettingsMenu` = the toolbar button for `place: 'settings'` folders.
+changed cue and "N more" for `more` rows; `SettingsMenu` = the toolbar button for `place: 'settings'` folders;
+`CommandPalette` = ⌘K and the `?` shortcut sheet, with View → Density (default / comfortable / compact,
+remembered per browser) added for you. Put your own commands in `commands`.
 Expensive params: `p.number(…, { live: false })` and apply them
 in `params.onCommit((v, meta) => …)` — that fires on pointer-up, not every drag frame.
 
@@ -141,9 +144,12 @@ so they undo, persist and share — never in `useState`.
 - **Four control surfaces** — well, track, raised, active — never conflated.
 - **Radius and shadow, not borders.** Sentence case, never micro-caps. Tabular numbers on
   anything live.
-- **One accent, only on state.** Playhead is red/orange, not the accent. The accent defaults to
-  system blue (`--signal`) and must not clash with the work: run `scripts/accent-check.mjs <url>`
-  before handoff.
+- **Sizes from the density names** (`h-row`, `h-control`, `size-icon`, `px-pad`, `text-ui`,
+  `rounded-control`…), never `h-6` / `px-3` / `text-[11px]`, or the part ignores the density setting.
+- **Blue only for focus, selection and the primary action; fills are neutral ink; labels dimmer than
+  values.** A switch that's on or a slider's fill is `bg-ink` / `bg-fill`, never blue. The playhead is
+  red/orange, not the accent. The accent defaults to system blue (`--signal`) and must not clash with
+  the work: run `scripts/accent-check.mjs <url>` before handoff.
 - **Every number is a scrubber** (drag, type, expressions) and every drag has a non-drag
   alternative — kit controls already do this; don't hand-build inputs.
 - **Derive the timeline from the same maths that draws the render**, never a hand-kept list.

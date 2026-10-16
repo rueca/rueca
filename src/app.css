@@ -1,5 +1,12 @@
 /* This app's page base — NOT part of the kit. A host app keeps its own; the kit only styles
    `.studio` and `.pop` surfaces (see kit/theme.css). */
+/* The shells' artwork sets type in "Inter Variable": the same Inter 4 files the kit loads for the chrome (same
+   URLs, so one download), not a second copy of Inter from fontsource. */
+@font-face { font-family: "Inter Variable"; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: url("inter-ui/variable-latin/InterVariable-subset.woff2?v=4.1") format("woff2"); }
+@font-face { font-family: "Inter Variable"; font-style: normal; font-weight: 100 900; font-display: swap;
+  src: url("inter-ui/variable/InterVariable.woff2?v=4.1") format("woff2"); unicode-range: U+0100-024F, U+0370-03FF, U+0400-04FF, U+1E00-1EFF; }
+
 html, body, #root { height: 100%; }
 html.dark { color-scheme: dark; }
 html.light { color-scheme: light; }

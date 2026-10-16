@@ -1,7 +1,7 @@
 /* Marks — actions shared by the grid, focus view, panels and the palette. Doc changes are undoable. */
 import { copyText, download, exportJSON, toast } from '@kit'
 import { FAMILY, mulberry32, mutateParams, sampleParams, type FamilyId } from './families'
-import { doc, history, settings, ui, newMark, uid, colorsOf, markLabel, type Doc, type Mark } from './model'
+import { doc, history, settings, ui, newMark, uid, colorsOf, markLabel, COUNT_STEP, type Doc, type Mark } from './model'
 import { lockupSVG, markSVG, svgToPNG } from './render'
 import { createZip } from '@kit'
 import { site } from '../../site.config'
@@ -53,7 +53,7 @@ export function fitCount() {
     const marks = { ...x.marks }
     const add = Array.from({ length: n - x.grid.length }, () => { const m = newMark(fams[Math.floor(r() * fams.length)], r, s.randomise); marks[m.id] = m; return m.id })
     return { ...x, marks, grid: [...x.grid, ...add] }
-  }, { label: 'Variant count' })
+  }, { label: COUNT_STEP })
 }
 
 export function toggleLock(id = cursorId()) {

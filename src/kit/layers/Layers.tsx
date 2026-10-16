@@ -141,7 +141,12 @@ export function LayerTree({
               if (e.key === 'ArrowDown') { handled(); focusRow(Math.min(flat.length - 1, i + 1)); return }
               if (e.key === 'ArrowUp') { handled(); focusRow(Math.max(0, i - 1)); return }
               if (e.key === 'ArrowRight' && hasKids) { handled(); setClosed({ ...closedOwn, [item.id]: false }); return }
-              if (e.key === 'ArrowLeft' && hasKids) { handled(); setClosed({ ...closedOwn, [item.id]: true }); return }
+              // APG tree: Left closes an open group, else goes to the parent; Home/End jump; F2 renames as Enter does
+              if (e.key === 'ArrowLeft' && hasKids && !closed[item.id]) { handled(); setClosed({ ...closedOwn, [item.id]: true }); return }
+              if (e.key === 'ArrowLeft' && depth > 0) { handled(); for (let j = i - 1; j >= 0; j--) if (flat[j].depth === depth - 1) { focusRow(j); break } return }
+              if (e.key === 'Home') { handled(); focusRow(0); return }
+              if (e.key === 'End') { handled(); focusRow(flat.length - 1); return }
+              if (e.key === 'F2' && onRename) { handled(); setEditing(item.id); return }
               if (e.key === ' ') { handled(); onSelect?.([item.id]); return }
               if (e.key === 'Enter' && onRename) { handled(); setEditing(item.id) }
             }}
@@ -164,7 +169,7 @@ export function LayerTree({
                 if (e.altKey) { const next: Record<string, boolean> = {}; const all = (l: LayerItem[]) => l.forEach((x) => { if (x.children?.length) { next[x.id] = !closed[item.id]; all(x.children) } }); all(items); setClosed(next) }
                 else setClosed({ ...closedOwn, [item.id]: !closed[item.id] })
               }}
-              className={cn('flex size-4 shrink-0 items-center justify-center text-fg-faint', !hasKids && 'invisible')}>
+              className={cn("relative flex size-4 shrink-0 items-center justify-center text-fg-faint after:absolute after:-inset-1 after:content-['']", !hasKids && 'invisible')}>
               <ChevronRight size={11} strokeWidth={2} className={cn('transition-transform', !closed[item.id] && 'rotate-90')} />
             </button>
             {/* thumbnails and type icons share one 20px slot, so every name starts at the same x */}
