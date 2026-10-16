@@ -1,6 +1,6 @@
 /* ---------------------------------------------------------------------------
    Blueprint: a hairline tracing of a shell's real layout, for the landing rail's
-   skeletons (src/landing/blueprints.json). Run in the page by thumbs-rail.mjs at
+   skeletons (public/thumbs/blueprints/<id>.json). Run in the page by thumbs-rail.mjs at
    the same 1440×900 the thumbnail is shot at, so the skeleton and the screenshot
    line up exactly through the wipe.
 

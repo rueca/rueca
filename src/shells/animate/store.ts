@@ -107,10 +107,6 @@ export function updateAnim(patch: Partial<Anim>, final = true, id = ui.getState(
   setDoc(mapAnim(getDoc(), id, (a) => ({ ...a, ...patch })), final)
 }
 
-export function setBase(obj: string, prop: PropKey, v: Val, final: boolean) {
-  const doc = getDoc()
-  setDoc({ ...doc, objects: doc.objects.map((o) => (o.id === obj ? { ...o, base: { ...o.base, [prop]: v } } : o)) }, final)
-}
 
 export function setKey(obj: string, prop: PropKey, t: number, v: Val, final: boolean) {
   const doc = getDoc()

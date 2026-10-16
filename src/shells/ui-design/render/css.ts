@@ -58,7 +58,7 @@ export function effectStyle(n: Node): React.CSSProperties {
     if (blur) out.filter = `blur(${blur.blur / 2}px)`
   }
   if (box.length) out.boxShadow = box.join(', ')
-  if (bg) { out.backdropFilter = `blur(${bg.blur / 2}px)`; (out as any).WebkitBackdropFilter = `blur(${bg.blur / 2}px)` }
+  if (bg) { out.backdropFilter = `blur(${bg.blur / 2}px)`; out.WebkitBackdropFilter = `blur(${bg.blur / 2}px)` }
   return out
 }
 

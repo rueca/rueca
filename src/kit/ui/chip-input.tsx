@@ -64,7 +64,7 @@ export function ChipInput({
       <div className={cn('flex min-h-control w-full flex-wrap items-center gap-1 rounded-control bg-control p-[2px]',
         focus ? 'shadow-[inset_0_0_0_1px_var(--signal)]' : 'hover:shadow-[inset_0_0_0_1px_var(--line-strong)]')}>
         {value.map((t) => (
-          <span key={t} className="flex h-[calc(var(--d-control)-4px)] max-w-full items-center gap-0.5 rounded-[4px] bg-active pr-0.5 pl-1.5 text-ui text-fg">
+          <span key={t} className="flex h-[calc(var(--d-control)-4px)] max-w-full items-center gap-0.5 rounded-control bg-active pr-0.5 pl-1.5 text-ui text-fg">
             <span className="truncate">{t}</span>
             <button type="button" aria-label={`Remove ${t}`} onClick={() => onChange(value.filter((x) => x !== t))}
               className="flex size-3.5 shrink-0 items-center justify-center rounded-[3px] text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
@@ -100,7 +100,7 @@ export function ChipInput({
         {open.map((s, i) => (
           <span key={s} id={optId(i)} role="option" aria-selected={i === active}
             onMouseDown={(e) => { e.preventDefault(); addMany([s]) }}
-            className={cn('flex h-[calc(var(--d-control)-4px)] cursor-default items-center rounded-[4px] px-1.5 text-ui shadow-[inset_0_0_0_1px_var(--line-strong)]',
+            className={cn('flex h-[calc(var(--d-control)-4px)] cursor-default items-center rounded-control px-1.5 text-ui shadow-[inset_0_0_0_1px_var(--line-strong)]',
               i === active ? 'bg-signal-soft text-fg shadow-[inset_0_0_0_1px_var(--signal)]' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
             {s}
           </span>

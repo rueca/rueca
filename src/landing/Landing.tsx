@@ -176,7 +176,7 @@ const SHEETS = 6
 
 /* Two navs: the bar at the top of the page scrolls away with it, and once the
    reader is past it a floating pill (80% of the body, blurred) drops in from above.
-   "The body" is Container's content column: 1120 minus its 32px gutters, so 1056 wide. */
+   "The body" is the 1120 content column minus its 32px gutters, so 1056 wide. */
 
 function InstallSection() {
   const [tab, setTab] = useState<string>(installs[0].id)

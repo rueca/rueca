@@ -359,7 +359,7 @@ export function KeyTimeline(props: KeyTimelineProps) {
       <div className="flex h-ruler flex-none border-t border-line">
         <div className="flex flex-none items-center border-r border-line px-pad text-ui text-fg-faint" style={{ width: labelWidth }}>
           {props.summary ?? (
-            <button type="button" onClick={fit} className="truncate rounded-[4px] px-1 outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal" title="Zoom to fit (⌘wheel zooms)">
+            <button type="button" onClick={fit} className="truncate rounded-control px-1 outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal" title="Zoom to fit (⌘wheel zooms)">
               {propCount} animated {propCount === 1 ? 'property' : 'properties'}
             </button>
           )}

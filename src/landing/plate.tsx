@@ -2,7 +2,7 @@
    Lámina técnica). Paper.design's exposed grid, redrawn in Rueca's pens: Nogal hairline
    rules, neutral crosshairs where they cross, ruler ticks in the margins, and a title strip
    that numbers every section like a drawing sheet. */
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { useRef, type CSSProperties, type ReactNode } from 'react'
 import { cn } from '@kit/core/cn'
 import { usePen } from './handwrite'
 import './plate.css'
@@ -87,28 +87,6 @@ export function TitleStrip({ n, label, of, aside }: { n: number; label: string; 
       {aside && <span className="strip hidden items-center px-5 text-fg-faint md:flex">{aside}</span>}
       <Field label="Sheet" className="hidden w-24 flex-none sm:flex sm:w-28"><Hand className="text-[23px]" delay={0.35}>{`${n} of ${of}`}</Hand></Field>
     </Row>
-  )
-}
-
-/** A dimension line in the measure pen: end ticks, arrows, and the measured width in the middle. */
-export function DimLine({ className }: { className?: string }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [w, setW] = useState(0)
-  useEffect(() => {
-    const el = ref.current!
-    const ro = new ResizeObserver(() => setW(Math.round(el.offsetWidth)))
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
-  const line = 'h-px flex-1 bg-[var(--measure)]'
-  return (
-    <div ref={ref} aria-hidden className={cn('items-center gap-2 text-[var(--measure)]', className)}>
-      <span className="h-3 w-px bg-[var(--measure)]" />
-      <span className="-mr-2 text-[9px] leading-none">◂</span><span className={line} />
-      <span className="strip text-[9.5px]">{w ? `${w} px` : ''}</span>
-      <span className={line} /><span className="-ml-2 text-[9px] leading-none">▸</span>
-      <span className="h-3 w-px bg-[var(--measure)]" />
-    </div>
   )
 }
 

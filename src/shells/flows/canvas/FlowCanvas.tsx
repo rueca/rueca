@@ -346,9 +346,9 @@ export function FlowCanvas() {
           <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 @max-[760px]:right-[120px] @max-[760px]:left-auto @max-[760px]:translate-x-0">
             <ToolDock value={tool} onChange={(t) => ui.setState({ tool: t, draft: null })} tools={TOOLS}>
               <Divider vertical className="mx-1 h-5" />
-              <IconButton icon={Square} label="Screen" shortcut="s" tipSide="top" className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" onClick={() => addScreen('home')} />
-              <IconButton icon={Diamond} label="Decision" shortcut="d" tipSide="top" className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" onClick={() => addNode('decision')} />
-              <IconButton icon={StickyNote} label="Sticky note" shortcut="n" tipSide="top" className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" onClick={() => addNode('note')} />
+              <IconButton icon={Square} label="Screen" shortcut="s" tipSide="top" size="dock" onClick={() => addScreen('home')} />
+              <IconButton icon={Diamond} label="Decision" shortcut="d" tipSide="top" size="dock" onClick={() => addNode('decision')} />
+              <IconButton icon={StickyNote} label="Sticky note" shortcut="n" tipSide="top" size="dock" onClick={() => addNode('note')} />
             </ToolDock>
           </div>
           <ZoomPill zoom={zoom} onZoom={(z) => rf.zoomTo(z, { duration: 200 })} onFit={() => viewport.fit?.()} />

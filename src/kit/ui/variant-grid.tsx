@@ -166,12 +166,12 @@ export function SizeLadder({ sizes, surfaces, render, extra, className }: {
       {surfaces.map((s, si) => (
         <figure key={s.label} data-studio-artifact aria-label={`${s.label}: ${sizes.join(', ')} px`}
           className="relative m-0 rounded-panel p-3 shadow-[inset_0_0_0_1px_var(--line)]" style={{ background: s.bg, color: s.fg }}>
-          <figcaption className="absolute top-2.5 left-3 text-[11px] opacity-60">{s.label}</figcaption>
+          <figcaption className="absolute top-2.5 left-3 text-ui opacity-60">{s.label}</figcaption>
           <div className="flex items-end gap-4">
             {sizes.map((z) => (
               <div key={z} className="flex flex-col items-center gap-1.5">
                 <div className="flex items-center justify-center" style={{ width: z, height: z }}>{render(z, si)}</div>
-                <span className="tabular text-[10.5px] opacity-55">{z}</span>
+                <span className="tabular text-ui-sm opacity-55">{z}</span>
               </div>
             ))}
             {extra?.(si)}

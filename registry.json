@@ -978,6 +978,11 @@
       ],
       "files": [
         {
+          "path": "src/kit/layout/brand-override.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/layout/brand-override.tsx"
+        },
+        {
           "path": "src/kit/layout/ClientView.tsx",
           "type": "registry:component",
           "target": "@components/studio/layout/ClientView.tsx"

@@ -87,7 +87,7 @@ export function Composer() {
       <div className="flex flex-wrap items-center gap-1.5 [--d-control:var(--d-icon)]">
         <div className="w-[112px] @[560px]:w-[150px]"><Select value={v.model} onChange={setModel} label="Model" options={MODELS.map((x) => ({ value: x.id, label: x.name, hint: x.blurb }))} /></div>
         <Menu side="top" trigger={
-          <Button size="sm" variant="default" className="h-control gap-1 px-2" aria-label={`Aspect ratio ${a.id}`}>
+          <Button size="sm" variant="default" className="gap-1 px-2" aria-label={`Aspect ratio ${a.id}`}>
             {(() => { const I = aspectIcon(a.w, a.h); return <I size={13} /> })()}
             <span className="tabular">{a.id}</span><ChevronDown size={11} className="text-fg-faint" />
           </Button>}

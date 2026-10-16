@@ -96,7 +96,7 @@ export function InlineText({
           if (!focusable || disabled) return
           if (e.key === 'Enter' || e.key === 'F2') { e.preventDefault(); e.stopPropagation(); setEditing(true) }
         }}
-        className={cn('min-w-0 rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-signal', className, empty && 'opacity-55')}
+        className={cn('min-w-0 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-signal', className, empty && 'opacity-55')}
       >
         {value || placeholder}
       </span>
@@ -111,7 +111,7 @@ export function InlineText({
     className: cn(
       'nodrag nopan nowheel min-w-0 outline-none select-text',
       multiline && 'resize-none',
-      bare ? 'w-full bg-transparent' : 'rounded-[4px] bg-control px-1 text-fg shadow-[inset_0_0_0_1px_var(--signal)]',
+      bare ? 'w-full bg-transparent' : 'rounded-control bg-control px-1 text-fg shadow-[inset_0_0_0_1px_var(--signal)]',
       className,
       inputClassName,
     ),

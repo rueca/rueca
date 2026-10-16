@@ -30,16 +30,10 @@ export const FONTS: Record<string, string> = {
 export interface DrawResult { issues: string[]; mode: 'stack' | 'hero' | 'split' }
 
 /* --- small maths --- */
-export { mulberry32 }
 const rgb = (hex: string): [number, number, number] => {
   const h = /^#?[0-9a-f]{6}/i.test(hex) ? hex.replace('#', '').slice(0, 6) : '888888'
   const n = parseInt(h, 16)
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
-}
-export const mix = (a: string, b: string, k: number) => {
-  const [r1, g1, b1] = rgb(a), [r2, g2, b2] = rgb(b)
-  const m = (x: number, y: number) => Math.round(x + (y - x) * k)
-  return `rgb(${m(r1, r2)},${m(g1, g2)},${m(b1, b2)})`
 }
 /** whichever of ink / paper reads better on bg */
 export const textOn = (bg: string, ink: string, paper: string) => (contrastRatio(bg, ink) >= contrastRatio(bg, paper) ? ink : paper)
@@ -64,7 +58,7 @@ function fit(ctx: CanvasRenderingContext2D, text: string, o: { size: number; min
   let size = o.size
   const set = (s: number) => {
     ctx.font = o.font(s)
-    ;(ctx as any).letterSpacing = `${((o.tracking ?? 0) / 100) * s}px`
+    ;ctx.letterSpacing = `${((o.tracking ?? 0) / 100) * s}px`
   }
   let lines: string[] = []
   for (let i = 0; i < 40; i++) {
@@ -93,12 +87,12 @@ function drawLines(ctx: CanvasRenderingContext2D, f: Fitted, x: number, y: numbe
   const height = f.lines.length ? (f.lines.length - 1) * f.lh + f.size * 1.02 : 0
   if (DRY) return height
   ctx.font = font(f.size)
-  ;(ctx as any).letterSpacing = `${(tracking / 100) * f.size}px`
+  ;ctx.letterSpacing = `${(tracking / 100) * f.size}px`
   ctx.fillStyle = color
   ctx.textAlign = align
   ctx.textBaseline = 'alphabetic'
   f.lines.forEach((l, i) => ctx.fillText(l, x, y + f.size * 0.8 + i * f.lh))
-  ;(ctx as any).letterSpacing = '0px'
+  ;ctx.letterSpacing = '0px'
   return height
 }
 
@@ -210,12 +204,12 @@ function drawLogo(ctx: CanvasRenderingContext2D, v: V, x: number, y: number, h: 
   }
   if (v.logoStyle !== 'mark') {
     ctx.font = `${v.displayFont === 'serif' ? 500 : 800} ${h * 1.05}px ${FONTS[v.displayFont] ?? FONTS.inter}`
-    ;(ctx as any).letterSpacing = `${-h * 0.03}px`
+    ;ctx.letterSpacing = `${-h * 0.03}px`
     ctx.fillStyle = color
     ctx.textAlign = 'left'
     ctx.textBaseline = 'alphabetic'
     ctx.fillText(v.brandName || 'agalla', cx, y + h * 0.86)
-    ;(ctx as any).letterSpacing = '0px'
+    ;ctx.letterSpacing = '0px'
   }
   ctx.restore()
 }

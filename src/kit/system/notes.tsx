@@ -326,7 +326,7 @@ export function CommentsList({ params }: { params: AnyParams }) {
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={6} className="z-[160]">
           <Popover.Popup data-note-ui="" className="pop flex max-h-[min(70vh,560px)] w-[320px] flex-col overflow-hidden text-ui outline-none">
-            <div className="flex h-9 shrink-0 items-center justify-between px-3">
+            <div className="flex h-header shrink-0 items-center justify-between px-pad">
               <span className="font-medium text-fg">Comments</span>
               {fresh > 0 && <span className="text-signal-text tabular">{fresh} new</span>}
             </div>
@@ -344,7 +344,7 @@ export function CommentsList({ params }: { params: AnyParams }) {
             </ol>
             {all.length > 0 && tab === 'open' && !yours.length && !waiting.length && <p className="px-3 pb-3 text-fg-faint">Nothing open. Done threads are in the Done tab.</p>}
             {tab === 'done' && (
-              <label className="flex h-9 shrink-0 items-center gap-2 border-t border-line px-3 text-fg-muted">
+              <label className="flex h-header shrink-0 items-center gap-2 border-t border-line px-pad text-fg-muted">
                 <span className="flex-1">Show done on the board</span>
                 <Switch size="sm" checked={showDone} onChange={(b) => notesUI.setState({ showDone: b })} label="Show done on the board" />
               </label>

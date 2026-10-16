@@ -10,18 +10,6 @@ import { Tip } from '@kit/ui/tooltip'
 import { site } from '@/site.config'
 import { LOCKUP } from './logo.generated'
 
-export function Container({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cn('mx-auto w-full max-w-[1120px] px-4 sm:px-8', className)}>{children}</div>
-}
-
-export function Section({ id, children, className }: { id?: string; children: ReactNode; className?: string }) {
-  return (
-    <section id={id} data-section={id} className={cn('scroll-mt-16 py-16 sm:py-20', className)}>
-      <Container>{children}</Container>
-    </section>
-  )
-}
-
 /** Section heading: a quiet kicker, a title, an optional lede. Sentence case throughout. */
 export function Heading({ kicker, title, lede, className }: { kicker?: string; title: ReactNode; lede?: ReactNode; className?: string }) {
   return (

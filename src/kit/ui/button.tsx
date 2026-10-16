@@ -24,6 +24,8 @@ export const buttonVariants = cva(
         icon: 'size-icon rounded-control',
         // square, the height of a field: for a button that sits beside an input, select or scrub value
         control: 'size-control rounded-control',
+        // an action inside <ToolDock>, the dock's own tool size (its icon draws at 16)
+        dock: 'size-dock-button rounded-[calc(var(--radius-cluster)-2px)]',
         // 20px to the eye, a 24px reach (WCAG 2.5.8) so neighbouring small buttons aren't fiddly
         'icon-sm': "relative size-icon-sm rounded-control after:absolute after:-inset-0.5 after:content-['']",
       },
@@ -48,7 +50,7 @@ export const IconButton = forwardRef<
 >(({ icon: Icon, label, shortcut, tipSide = 'bottom', size = 'icon', variant = 'ghost', children, ...rest }, ref) => (
   <Tip label={label} shortcut={shortcut} side={tipSide}>
     <Button ref={ref} size={size} variant={variant} aria-label={label} aria-pressed={rest.active === undefined ? undefined : rest.active} {...rest}>
-      <Icon size={14} strokeWidth={1.5} />
+      <Icon size={size === 'dock' ? 16 : 14} strokeWidth={1.5} />
       {children}
     </Button>
   </Tip>

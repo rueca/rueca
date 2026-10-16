@@ -162,8 +162,6 @@ export const isAnimated = (anim: Anim | undefined, obj: string, prop: PropKey) =
 export const keyAt = (keys: Key[] | undefined, t: number, tol = 0.5) => keys?.find((k) => Math.abs(k.t - t) <= tol)
 export const objHasKeys = (anim: Anim | undefined, obj: string) => !!anim && Object.keys(anim.tracks).some((k) => k.startsWith(obj + '.') && anim.tracks[k].length > 0)
 
-export const fmtSec = (ms: number) => `${(ms / 1000).toFixed(2)}s`
-
 /** Text bindings: `{name}` → the state-machine input of that name. */
 export const bindText = (s: string, inputs: SMInput[]) =>
   s.replace(/\{(\w+)\}/g, (_, n) => { const i = inputs.find((x) => x.name === n); return i ? String(typeof i.value === 'number' ? Math.round(i.value) : i.value) : `{${n}}` })

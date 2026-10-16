@@ -1,5 +1,5 @@
 /* Pure, immutable helpers over the node tree. No store, no React. */
-import { uid, type Node, type Page } from './types'
+import { uid, type Node } from './types'
 
 export function walk(nodes: Node[], fn: (n: Node, parent: Node | null, depth: number) => void | false, parent: Node | null = null, depth = 0) {
   for (const n of nodes) {
@@ -117,5 +117,4 @@ export function topMost(nodes: Node[], ids: string[]): string[] {
 }
 
 
-export const pageNodes = (p: Page) => p.nodes
 

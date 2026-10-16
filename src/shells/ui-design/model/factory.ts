@@ -3,7 +3,6 @@
 import { uid, type AutoLayout, type Effect, type Node, type Paint, type TextStyle } from './types'
 
 export const solid = (color: string, opacity = 1): Paint => ({ id: uid('p'), kind: 'solid', color, opacity, visible: true })
-export const linear = (stops: { pos: number; color: string }[], angle = 180, opacity = 1): Paint => ({ id: uid('p'), kind: 'linear', color: stops[0].color.slice(0, 7), opacity, visible: true, stops, angle })
 export const imageFill = (image: string): Paint => ({ id: uid('p'), kind: 'image', color: '#d9d9d9', opacity: 1, visible: true, image, fit: 'fill' })
 export const shadow = (y = 8, blur = 24, opacity = 0.12, color = '#000000', x = 0, spread = 0): Effect => ({ id: uid('e'), kind: 'drop-shadow', visible: true, x, y, blur, spread, color, opacity })
 

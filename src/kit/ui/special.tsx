@@ -487,7 +487,7 @@ export function Monitor({ get, graph, min, max, fmt }: { get: () => number | str
   }, [graph, min, max])
   return (
     <div className="flex w-full items-center gap-2">
-      {graph && <canvas ref={canvas} className="h-control min-w-0 flex-1 rounded-[4px] bg-control" />}
+      {graph && <canvas ref={canvas} className="h-control min-w-0 flex-1 rounded-control bg-control" />}
       <span className={cn('tabular text-ui text-fg pr-1', graph ? 'min-w-12 shrink-0 text-right' : 'flex-1 text-right')}>{text}</span>
     </div>
   )
