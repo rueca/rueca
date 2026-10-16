@@ -4,6 +4,7 @@
 
      node <skill>/scripts/accent-check.mjs http://localhost:5173/#/my-tool
      node <skill>/scripts/accent-check.mjs <url> --artboard "#preview"
+     node <skill>/scripts/accent-check.mjs <defaults url> <preset link> <preset link>…   # one accent for all
 
    The accent (--signal) draws selection outlines, handles and focus rings ON TOP
    of the work. If the prototype is built from the same hue, selection vanishes.
@@ -14,15 +15,19 @@
    states don't count), bucket the rendered pixels by OKLCH hue, and compare.
    Rendered pixels work the same for DOM, SVG, Canvas, WebGL and iframes.
 
+   Several URLs (the defaults plus a share link per preset) are checked
+   together, and the fallback it names is the one that clears all of them:
+   the accent is one per project, not one per look.
+
    Needs playwright-core in the project (npm i -D playwright-core) and an
    installed Chrome. Exit code 1 on a clash, so it can gate a QA run.
 --------------------------------------------------------------------------- */
 import { createRequire } from 'node:module'
 
 const args = process.argv.slice(2)
-const url = args.find((a) => !a.startsWith('--'))
 const flag = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : undefined }
-if (!url) { console.error('usage: accent-check.mjs <url> [--artboard <selector>]'); process.exit(2) }
+const urls = args.filter((a, i) => !a.startsWith('--') && args[i - 1] !== '--artboard')
+if (!urls.length) { console.error('usage: accent-check.mjs <url> [<url>…] [--artboard <selector>]'); process.exit(2) }
 
 // Resolve playwright-core from the project being checked, not from the skill folder.
 const require = createRequire(process.cwd() + '/')
@@ -45,9 +50,10 @@ const ACCENTS = {
 
 const browser = await chromium.launch({ channel: 'chrome' })
 let clashed = false, failed = false
-const picks = new Set()
+// each fallback's smallest clearance over every URL and theme: the pick has to work for all of them
+const worst = Object.fromEntries(Object.keys(ACCENTS).map((k) => [k, 360]))
 const reloaded = (e) => /context was destroyed|Cannot find context|navigation/i.test(e.message)
-for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attempt++) {
+for (const url of urls) for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attempt++) {
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, colorScheme: theme })
   try {
   const page = await ctx.newPage()
@@ -135,19 +141,15 @@ for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attem
       ...Object.entries(semantic).filter(([, k]) => dist(k, h) < MIN_HUE).map(([nm, k]) => `--${nm} (${Math.round(k)}°)`),
     ]
     const clearance = (h) => Math.min(360, ...palette.map(([k]) => dist(k, h)), ...Object.values(semantic).map((k) => dist(k, h)))
-    const ranked = Object.entries(ACCENTS).map(([name, a]) => [name, clearance(a.h)]).sort((a, b) => b[1] - a[1])
-    return { palette: palette.map(([k, s]) => `${k}° ${Math.round(s * 100)}%`), accent: Math.round(accent), clashes: near(accent), best: [ranked[0][0], Math.round(ranked[0][1])] }
+    const clear = Object.fromEntries(Object.entries(ACCENTS).map(([name, a]) => [name, Math.round(clearance(a.h))]))
+    return { palette: palette.map(([k, s]) => `${k}° ${Math.round(s * 100)}%`), accent: Math.round(accent), clashes: near(accent), clear }
   }, { b64: png.toString('base64'), MIN_HUE, MIN_SHARE, MIN_CHROMA, ACCENTS })
 
-  const head = `${theme.padEnd(5)} artboard ${found.label} · chromatic hues ${result.palette.join(', ') || 'none (greyscale)'} · accent ${result.accent}°`
+  for (const [name, c] of Object.entries(result.clear)) worst[name] = Math.min(worst[name], c)
+  const where = urls.length > 1 ? `${url}\n      ` : ''
+  const head = `${theme.padEnd(5)} ${where}artboard ${found.label} · chromatic hues ${result.palette.join(', ') || 'none (greyscale)'} · accent ${result.accent}°`
   if (!result.clashes.length) console.log(`${head}\n      PASS — the accent clears the artboard and the semantic colours`)
-  else {
-    clashed = true
-    const [name, clear] = result.best
-    console.log(`${head}\n      CLASH — too close to ${result.clashes.join(', ')}`)
-    if (clear >= MIN_HUE) { picks.add(name); console.log(`      → switch to ${name} (clears everything by ${clear}°)`) }
-    else console.log(`      → nothing clears ${MIN_HUE}°: keep blue and give selection a two-tone outline (visual-rules.md)`)
-  }
+  else { clashed = true; console.log(`${head}\n      CLASH — too close to ${result.clashes.join(', ')}`) }
     await ctx.close(); break
   } catch (e) {
     await ctx.close()
@@ -157,18 +159,20 @@ for (const theme of ['dark', 'light']) for (let attempt = 1; attempt <= 2; attem
 }
 await browser.close()
 
-// Print the override for the chosen fallback, both themes, ready to paste after the theme import.
-// If the themes disagree, both are printed: pick one — the accent must not change with the theme.
-if (picks.size) {
-  console.log('\nOverride — paste after the theme import:')
-  for (const [name, a] of Object.entries(ACCENTS)) if (picks.has(name)) {
-    const soft = (hex, al) => `rgb(${parseInt(hex.slice(1, 3), 16)} ${parseInt(hex.slice(3, 5), 16)} ${parseInt(hex.slice(5, 7), 16)} / ${al})`
-    // Wins in a registry install (tokens on .studio / .pop / [data-studio], theme on data-studio-theme) and in a site
-    // that keeps them on :root with .dark / .light classes. The media block covers the OS-follows case.
-    const dark = `--signal: ${a.dark[0]}; --signal-strong: ${a.dark[1]}; --signal-soft: ${soft(a.dark[0], 0.16)};`
-    const light = `--signal: ${a.light[0]}; --signal-strong: ${a.light[1]}; --signal-soft: ${soft(a.light[0], 0.12)};`
-    const K = ':where(.studio, .pop, [data-studio])'
-    console.log(`/* ${name} */\n:root:root, :root ${K} { ${dark} }\n:root:root.light, :root:is(.light, [data-studio-theme="light"]) ${K} { ${light} }\n@media (prefers-color-scheme: light) { :root:root:not(.dark), :root:not(.dark, [data-studio-theme="dark"]) ${K} { ${light} } }`)
-  }
+// One fallback for every URL and both themes, and its override ready to paste after the theme import.
+const [pick, clear] = Object.entries(worst).sort((a, b) => b[1] - a[1])[0]
+const all = urls.length > 1 ? 'every URL and both themes' : 'both themes'
+if (clashed && !failed && clear < MIN_HUE)
+  console.log(`\n→ nothing clears ${MIN_HUE}° in ${all}: keep blue and give selection a two-tone outline (qa.md § 2)`)
+if (clashed && !failed && clear >= MIN_HUE) {
+  console.log(`\n→ switch to ${pick} (clears ${all} by ${clear}°)\n\nOverride — paste after the theme import:`)
+  const a = ACCENTS[pick]
+  const soft = (hex, al) => `rgb(${parseInt(hex.slice(1, 3), 16)} ${parseInt(hex.slice(3, 5), 16)} ${parseInt(hex.slice(5, 7), 16)} / ${al})`
+  // Wins in a registry install (tokens on .studio / .pop / [data-studio], theme on data-studio-theme) and in a site
+  // that keeps them on :root with .dark / .light classes. The media block covers the OS-follows case.
+  const dark = `--signal: ${a.dark[0]}; --signal-strong: ${a.dark[1]}; --signal-soft: ${soft(a.dark[0], 0.16)};`
+  const light = `--signal: ${a.light[0]}; --signal-strong: ${a.light[1]}; --signal-soft: ${soft(a.light[0], 0.12)};`
+  const K = ':where(.studio, .pop, [data-studio])'
+  console.log(`/* ${pick} */\n:root:root, :root ${K} { ${dark} }\n:root:root.light, :root:is(.light, [data-studio-theme="light"]) ${K} { ${light} }\n@media (prefers-color-scheme: light) { :root:root:not(.dark), :root:not(.dark, [data-studio-theme="dark"]) ${K} { ${light} } }`)
 }
 process.exit(failed ? 2 : clashed ? 1 : 0)

@@ -253,7 +253,7 @@ stops ticks while paused too (default true for artifacts with their own life).
 
 ```tsx
 <CanvasSurface ref={h} params={params} clock={clock} draw={(ctx, { t, w, h, v, dt }) => …} deps={[docVersion]} />
-<WebGLSurface params={params} clock={clock} setup={(gl) => program} draw={(gl, f, program) => …} />
+<WebGLSurface params={params} clock={clock} setup={(gl) => program} draw={(gl, f, program) => …} dispose={(gl, program) => …} />
 <MountSurface ref={m} params={params} clock={clock} mount={(el, api) => { const engine = start(el, api.values()); api.params.subscribe((s) => engine.update(s.values)); return { engine, dispose: () => engine.stop() } }} />
 <FrameSurface src="/proto.html" params={params} cssVars apply={(doc, v) => …} />  // same-origin: writes into the page, no edits to it
 // cssVars={{ keys: ['accent', 'headlineSize'], suffix: { headlineSize: 'px' }, unitless: ['lineHeight'] }} — only those, with units
@@ -264,6 +264,16 @@ stops ticks while paused too (default true for artifacts with their own life).
 `h.current.canvas` gives the canvas for export; `m.current.handle` the object `mount` returned.
 **`api.values` is a function** — call `api.values()` for a snapshot; subscribe for changes.
 `v` in `draw` is typed from the schema. Without a clock, `animate` runs its own rAF.
+
+**WebGLSurface** gets a WebGL2 context (no WebGL1 fallback) with `preserveDrawingBuffer`, `antialias` and
+`premultipliedAlpha` on (change them with `attributes`). `setup(gl)` runs once per context and returns your
+programs and buffers; `draw(gl, f, state)` runs each tick with the same `f` as Canvas 2D:
+`{ t, dt, w, h, dpr, v, frame }`, `t` and `dt` in ms, `w` / `h` in css px. The viewport is already set to
+the drawing buffer, so pass `gl.drawingBufferWidth` / `gl.drawingBufferHeight` to the shader as its
+resolution, not `f.w`. For a sharp export, run the same pair off-screen:
+`renderWebGLPNG(setup, draw, { width, height, v: params.values(), t: clock.time(), scale: 2 })`.
+`setup` runs again there, because programs and textures belong to one context. It may be async, so load
+textures inside it.
 
 ## 5. Layout
 
@@ -368,7 +378,7 @@ stops ticks while paused too (default true for artifacts with their own life).
   `toast.promise(p, { loading, success, error })` · `toast.progress(title, { onCancel })` → `{ set(p), done(msg), fail(msg) }`.
 - Colour maths: `luminance(hex)`, `contrastRatio(a, b)` (WCAG 2.x), `wcagGrade(ratio)` → 'AAA' | 'AA' | 'AA large' | 'Fail', `readableOn(hex)` (darken until white text passes).
 - `revealInScroller(el)` — keep a selection visible by scrolling only its nearest scroll box (never `scrollIntoView`: it scrolls the host page too when the tool is embedded).
-- IO: `renderCanvasPNG(draw, { width, height, v, t, scale })` (re-renders your CanvasSurface `draw` off-screen at scale — use this for 2× / 4× exports) · `exportCanvasPNG(canvas, name, scale, { smoothing })` (upscales what's on screen — pixel art, WebGL) · `exportSVG(svg | string)` · `exportJSON(data)` ·
+- IO: `renderCanvasPNG(draw, { width, height, v, t, scale })` (re-renders your CanvasSurface `draw` off-screen at scale — use this for 2× / 4× exports) · `renderWebGLPNG(setup, draw, { width, height, v, t, scale, dispose?, attributes? })` (the same for a WebGLSurface's `setup` / `draw`) · `exportCanvasPNG(canvas, name, scale, { smoothing })` (upscales what's on screen — pixel art, or a three.js canvas you can't re-render) · `exportSVG(svg | string)` · `exportJSON(data)` ·
   `recordFrames({ canvas, draw(t, i), frames, fps, name, onProgress, signal })` (frame-accurate MP4/WebM, WebCodecs) ·
   `recordCanvas(canvas, ms)` (quick real-time fallback) · `createZip()` (STORE zip: `add(name, bytes)`, `await addBlob(name, blob)`, `toBlob()`) ·
   `snapshotElement(el, { width, height, scale, background, filter, hide })` (DOM → canvas) · `download` · `copyText` · `readFileAsDataURL`.

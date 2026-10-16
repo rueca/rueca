@@ -95,7 +95,7 @@ The contract is three things: a DOM element to own, the params, the clock.
 | Artifact | Surface |
 |---|---|
 | Canvas 2D | `CanvasSurface draw={(ctx, { t, w, h, v }) => …}` — DPR, resize, `deps` for non-param inputs |
-| Raw WebGL2 | `WebGLSurface setup={(gl) => state} draw={(gl, f, state) => …}` — `size` for adaptive resolution |
+| Raw WebGL2 | `WebGLSurface setup={(gl) => state} draw={(gl, f, state) => …}` — `size` for adaptive resolution, `renderWebGLPNG` to export |
 | vanilla three.js / p5 / anything imperative | `MountSurface mount={(el, api) => ({ engine, dispose })}` — the ref exposes `handle` |
 | React / DOM / SVG, still | render directly inside `<Artboard>` using `useValues(params)`: it re-renders only when a knob changes |
 | React / DOM / SVG, moving | the same structure from `useValues`, moved by the clock through refs: `useEffect(() => clock.onTick((t) => frame(ref.current, params.values(), t)), [])` with a pure `frame(el, v, t)`. Never re-render React per frame; `useClockTime` is for readouts |
@@ -127,8 +127,9 @@ design vs prototype) — built in: `const [interact, setInteract] = useInteractM
 - **Presets** with A/B compare (`\`).
 - **Export** — PNG at 1×/2×/4×, SVG when the artifact is vector, WebM/MP4 for motion
   (mediabunny, `recordFrames`), JSON for settings. Batch multi-size when the tool makes assets.
-  For Canvas 2D, re-render instead of upscaling: `renderCanvasPNG(draw, { width, height, v: params.values(),
-  t: clock.time(), scale: 2 })` reuses the surface's `draw`, so the 2× file is sharp. Don't hand-roll toBlob.
+  Re-render instead of upscaling: `renderCanvasPNG(draw, { width, height, v: params.values(),
+  t: clock.time(), scale: 2 })` reuses a Canvas surface's `draw`, and `renderWebGLPNG(setup, draw, { … })`
+  a WebGL surface's pair, so the 2× file is sharp. Don't hand-roll toBlob.
 
 ## Keyboard (defaults)
 

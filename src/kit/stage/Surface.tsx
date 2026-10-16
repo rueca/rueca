@@ -20,11 +20,12 @@ import type { Clock } from '../core/clock'
 import type { ParamStore } from '../core/params'
 import type { Schema, SchemaValues } from '../core/schema'
 import { cn } from '../core/cn'
-import { MAX_CANVAS_SIDE, MAX_PREVIEW_AREA } from '../core/io'
+import { MAX_CANVAS_SIDE, MAX_PREVIEW_AREA, type RenderFrame } from '../core/io'
 import { useHotkeys } from '../core/hotkeys'
 import { IconButton } from '../ui/button'
 
-export interface FrameInfo<V> { t: number; dt: number; w: number; h: number; dpr: number; v: V; frame: number }
+/** `t` and `dt` in ms, `w` / `h` the logical size in css px, `dpr` the pixels per css px, `frame` a counter. */
+export type FrameInfo<V> = RenderFrame<V>
 
 export interface SurfaceHandle { canvas: HTMLCanvasElement | null; el: HTMLElement | null; redraw: () => void; /** alias of redraw — call when non-param inputs change */ invalidate: () => void }
 
@@ -120,9 +121,12 @@ export function CanvasSurface<S extends Schema>(
 }
 
 /**
- * WebGL2. `setup(gl)` runs once per context and returns whatever you need
- * (programs, buffers); `draw(gl, frame, state)` runs per tick. The viewport is
- * set to the drawing buffer for you. preserveDrawingBuffer is on so PNG export works.
+ * WebGL2 (a `webgl2` context; there is no WebGL1 fallback). `setup(gl)` runs once per context and returns
+ * whatever you need (programs, buffers); `draw(gl, frame, state)` runs per tick with the same frame as
+ * CanvasSurface. The viewport is set to the drawing buffer for you: size shaders by
+ * `gl.drawingBufferWidth` / `Height` (`f.w × f.dpr` unless `size` changes it), not by `f.w`. preserveDrawingBuffer is on, so the
+ * canvas still holds the last frame after it ends (comment thumbnails, a quick copy). For a sharp export,
+ * re-render with renderWebGLPNG(setup, draw, …) rather than upscaling this canvas.
  */
 export function WebGLSurface<S extends Schema, State = unknown>(
   props: CanvasCommon<S> & {

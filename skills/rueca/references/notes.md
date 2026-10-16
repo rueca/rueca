@@ -48,7 +48,9 @@ route C):
   - `ruecaNotes.snapshot({ tool, values, defaults, labels?, hints?, t? })` builds a snapshot from the
     tool's own state
   - `ruecaNotes.send({ kind, text?, anchor?, snapshot, image? })` sends a note, and
-    `ruecaNotes.capture(el, anchor)` makes the thumbnail (call it in the frame you just drew)
+    `ruecaNotes.capture(el, anchor)` makes the thumbnail: the DOM, inline SVG, canvases and images inside
+    `el`. It returns a promise, and `send` takes that promise as `image` and waits for it. Call it in the
+    frame you just drew, so a WebGL canvas still holds its pixels
   - `ruecaNotes.watch(fn)` delivers every note as it changes (your replies are in `replies`);
     `ruecaNotes.reply(id, text)` answers a comment, `ruecaNotes.done(id)` / `ruecaNotes.reopen(id)` close
     and reopen it; `ruecaNotes.endpoint()` resolves to null when there's no server, so hide the buttons then

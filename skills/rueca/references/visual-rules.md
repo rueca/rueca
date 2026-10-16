@@ -84,18 +84,9 @@ accent sits near a semantic colour, "selected" reads as "recording" or "keyframe
   Greys can't clash (OKLCH chroma < 0.06 is ignored), so a monochrome prototype
   always keeps blue. That leaves accents between roughly 195° and 350°.
 - **Measure it, don't eyeball it:** `scripts/accent-check.mjs <url>` screenshots the
-  artboard alone, buckets its pixels by hue and names the fallback → `qa.md` §2.
-- **Fallbacks, pre-audited** (fill ≥ 3:1 on the panel, white label on `strong`
-  ≥ 4.5:1, both themes). Pick the one the check names:
-
-  | Accent | Hue | Dark: fill / strong | Light: fill / strong |
-  |---|---|---|---|
-  | blue (default) | 249° | `#0d99ff` / `#0a72c6` | `#0b84e0` / `#0a6fc0` |
-  | violet | 293° | `#9c78fd` / `#704ec0` | `#8862e5` / `#6a48b9` |
-  | magenta | 332° | `#d561c8` / `#9e3a93` | `#be4bb1` / `#97338d` |
-  | cyan | 222° | `#00a5cb` / `#007590` | `#008eaf` / `#006e89` |
-
-  Override in the project's own CSS, after the theme import. Never edit the kit's
+  artboard alone, buckets its pixels by hue and names the fallback. `qa.md` §2 says what to
+  check (the defaults and every preset) and lists the four pre-audited fallbacks.
+- **Overriding it:** in the project's own CSS, after the theme import. Never edit the kit's
   theme file. A registry install declares the tokens on the kit's own roots
   (`.studio`, `.pop`, `[data-studio]`) and themes from `<html data-studio-theme>`, while this repo keeps
   them on `:root` with `.light` / `.dark` classes, so each rule names both. `:root:root` outranks the
@@ -116,11 +107,8 @@ accent sits near a semantic colour, "selected" reads as "recording" or "keyframe
   The same selector overrides a density token (`--gutter`, `--row`…) when a project needs one.
 - **One accent per project, not per theme.** If dark and light disagree, pick one
   fallback for both.
-- **If nothing clears 35°** (a full-spectrum prototype), keep blue and make selection
-  shape-led rather than colour-led: a two-tone outline that reads on any background.
-  ```css
-  box-shadow: 0 0 0 1.5px var(--signal), 0 0 0 3px var(--field);
-  ```
+- **If nothing clears 35°** (a full-spectrum prototype, or colours the person picks), keep
+  blue and make selection shape-led rather than colour-led: the two-tone outline in `qa.md` §2.
 - Re-run the check when the prototype's palette changes. A rebrand inside the artboard
   can create a clash that wasn't there yesterday.
 
@@ -205,7 +193,8 @@ small text      10px: rulers, hints, badges                    text-ui-sm
 ```
 
 Font: Inter 4 (rsms's files, the `inter-ui` npm package) with `cv05` / `cv08`, so I, l and 1
-never collide. Always `font-variant-numeric: tabular-nums` on live numbers, or the inspector
+never collide. Set those two codes only when Inter is loaded. Without it, SF Pro reads them as a slashed
+zero and a serifed I (`install.md` § C). Always `font-variant-numeric: tabular-nums` on live numbers, or the inspector
 jitters while dragging. The label column fits the longest visible label in its panel (72px up to
 42% of the row), so long labels only truncate past that cap; check truncation explicitly.
 
@@ -231,3 +220,29 @@ jitters while dragging. The label column fits the longest visible label in its p
 - **Keyframe button:** hollow faint → hollow accent (animated) → solid accent (key at
   playhead). Shape + colour, never colour alone.
 - `prefers-reduced-motion` applies to the chrome, never to the artwork.
+
+### Control geometry
+
+These are the kit's control sizes at the default density. Use them for anything built by hand (the
+no-build route, a control the kit lacks), and write the variable rather than the pixel value so View →
+Density (comfortable, compact) still resizes it.
+
+| Part | Default density | Variable |
+|---|---|---|
+| Inspector row | 24px tall, 10px side padding, label column 72px (up to 42% of the row) | `--row`, `--d-pad`, `--d-label` |
+| Field, select, number scrubber | 22px tall, 4px radius, 11px text on `--control`, 8px side padding (6px on a number) | `--d-control`, `--radius-control`, `--ui-text` |
+| Slider | 22px hit row; 2px rail on `--track` with a 0.5px `--line-strong` ring; `--fill` fill; 12px white thumb | `--d-control` |
+| Segmented control | 22px; 1px inner padding, 2px between options, 5px radius, inset 1px `--line` ring; the selected option on `--active` with an inset 1px `--line-strong` ring; 13px icons | `--d-control` |
+| Switch | 26 × 16px (small 22 × 14), 2px padding; off `--track` with an inset 1px `--line-strong` ring, on `--ink`; 12px thumb (small 10px) | none |
+| Checkbox | 14px, 4px radius, inset 1px `--line-strong` ring; ticked `--ink` with a 10px check; 24px hit area | none |
+| Field inside a toolbar cluster | 24px, the icon buttons' height, so each bar has one height (the cluster sets `--d-control` to `--d-icon`) | `--d-control` |
+| Icon button, button, menu item, tab | 24px | `--d-icon` |
+| Button beside a field (stepper −/+) | 22px square, the field's height | `--d-control` |
+| Small icon button | 20px drawn, 24px hit area | `--d-icon-sm` |
+| Large button | 28px, 12px text | `--d-button-lg` |
+| Section header · panel header · toolbar cluster | 26px · 32px · 32px | `--d-section`, `--d-header`, `--d-bar` |
+| Timeline lane · ruler | 20px · 24px | `--d-lane`, `--d-ruler` |
+| Inspector · sidebar width | 256px · 224px | `--inspector-w`, `--sidebar-w` |
+| Gutter (window edge, between islands) | 8px | `--gutter` |
+| Radius: panel · popover · cluster · control | 8 · 8 · 6 · 4px | `--radius-panel`, `--radius-pop`, `--radius-cluster`, `--radius-control` |
+| Icons | 14px at 1.5 stroke (16px in a tool dock) | none |
