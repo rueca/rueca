@@ -4,6 +4,9 @@ Screenshots confirm layout. They do **not** confirm colour, contrast, timing or
 geometry. Run these after any restyle and before claiming it works. Then state plainly
 what you verified versus what you only looked at.
 
+**Always:** `npm run build` (§4), and when you can open the page, §1–§3 in both themes. Told not to
+run anything: § Static checks only, at the end.
+
 ## 1. Contrast audit, both themes
 
 Paste in the browser console (adjust token names if hand-built). It catches the whole
@@ -31,9 +34,10 @@ for (const theme of ['dark','light']) {
     ['ACTIVE PILL raised/well', g('--raised'),    g('--well'),           1.3],
     ['active/panel',            g('--active'),    panel,                 1.12],
     ['button label (WCAG AA)',  g('--signal-fg'), g('--signal-strong'),  4.5],
-    ['accent fill/panel',       g('--signal'),    panel,                 3],
-    ['fg-faint/panel',          g('--fg-faint'),  panel,                 3],
-    ['fg-faint/input',          g('--fg-faint'),  g('--control'),          3],
+    ['accent (focus, selection)/panel', g('--signal'), panel,         3],
+    ['label fg-faint/panel',    g('--fg-faint'),  panel,                 4.5],
+    ['label fg-faint/input',    g('--fg-faint'),  g('--control'),        4.5],
+    ['value fg-value/panel',    g('--fg-value'),  panel,                 4.5],
     ['fg-muted/panel',          g('--fg-muted'),  panel,                 4.5],
     ['fg/panel',                g('--fg'),        panel,                 7],
   ].forEach(([n,a,b,min]) => { const r = ratio(a,b); if (r < min) fails.push(`${theme}: ${n} ${r} < ${min}`) })
@@ -42,7 +46,7 @@ fails.length ? fails : 'ALL PASS (both themes)'
 ```
 
 Surface-to-surface minima are heuristics (WCAG doesn't govern them); the text ones are
-real WCAG AA. Enforce both. Also sample *rendered* chrome text against its first opaque
+real WCAG AA, and row labels are text, so `fg-faint` needs 4.5:1 too. Enforce both. Also sample *rendered* chrome text against its first opaque
 background — a token can pass while a component uses the wrong one.
 
 ## 2. Accent clash, both themes
@@ -104,21 +108,34 @@ stage background then dilutes the sample.
 
 ## 4. In the shell
 
+Written for zsh and bash alike (zsh is the macOS default): patterns are quoted, and `${b}` is braced
+because zsh reads `$b[` as an array subscript.
+
 ```bash
-# theme leaks — the theme file and the artifact are the only legal homes for a colour
-grep -rnoE "#[0-9a-fA-F]{3,8}\b|rgba?\(" src --include=*.tsx | grep -v -e artifact -e theme.css
+# prove it compiles AND bundles: the project's own build script, which type-checks first.
+# Not `npx tsc --noEmit`: on the Vite template the root tsconfig lists no files, only references, so
+# it checks nothing and passes. `tsc -b` (inside `npm run build`) follows the references.
+npm run build
 
-# dead modules: files nobody imports
-for f in $(find src -name "*.ts" -o -name "*.tsx"); do
-  b=$(basename "$f" | sed -E 's/\.tsx?$//'); [ "$b" = main ] || [ "$b" = index ] && continue
-  grep -rqE "/$b['\"]" src --include=*.ts --include=*.tsx || echo "DEAD $f"
+# theme leaks: a colour belongs in the artwork or the theme file, never in chrome.
+# Skipped: the kit, art modules (files or folders named art, artwork, artifact, shader, shaders),
+# schema colour defaults and an Artboard background (those are the artwork's colours).
+grep -rnE '#[0-9a-fA-F]{3,8}\b|rgba?\(' src --include='*.ts' --include='*.tsx' --include='*.css' \
+  | grep -vE '^src/components/studio/|theme\.css:|/(art|artwork|artifact|shaders?)(/|\.)' \
+  | grep -vE 'p\.(color|palette|gradient)\(|<Artboard[^>]*background='
+
+# dead modules: files nobody imports (entry files, index files, .d.ts and the kit skipped)
+find src \( -name '*.ts' -o -name '*.tsx' \) ! -name '*.d.ts' ! -path 'src/components/studio/*' | while read -r f; do
+  b=$(basename "$f" | sed -E 's/\.tsx?$//')
+  case "$b" in main|index) continue ;; esac
+  grep -rqE "/${b}(\.tsx?)?['\"]" src --include='*.ts' --include='*.tsx' || echo "DEAD $f"
 done
-
-# prove it compiles AND bundles — both, every time
-npx tsc --noEmit && npx vite build
 ```
 
-Unused dependencies: compare `package.json` against `grep -rhoE "from '[^'.][^']*'" src`.
+The tool in its own `tool.html`? Then the build checks it only once that page is in the build input
+(`install.md` § A tool entry of its own). Every line the colour grep prints is a colour in chrome:
+move it to a token. Unused dependencies: compare `package.json` against
+`grep -rhoE "from '[^'.][^']*'" src`.
 
 ## 5. Headless runs
 
@@ -143,3 +160,21 @@ note whether a preset changes it.
 - No control appears twice on screen (toolbar, inspector, context bar, transport).
 - View preferences sit in `<SettingsMenu>`, not in the resting inspector.
 - Every `more` row, off toggle and settings button shows the changed dot when something inside is off its default.
+
+## Static checks only
+
+When the person said not to run anything, or nothing can run (no shell, no browser), check what
+reading can prove and name the rest:
+
+- **Imports**: every import in the tool resolves to a file that exists, or that the kit install
+  will create (`@/components/studio`, `rueca/notes-server/`). List those in the handoff.
+- **The app is untouched**: `git diff --stat` (or your own list of edits) shows only the tool's
+  files, plus the steps in `install.md` § The kit, not installed yet.
+- **Read the source for the rules**: every param has a `hint`; colours only in the artwork (read the
+  §4 grep's pattern and apply it by eye); no live values in an effect's dependency array; no edited
+  lists in `useState`; `presetKeys` set when the schema holds an export size or a document.
+- **Then the handoff's `Not run:` line**, one per skipped check, each with the command that runs it:
+  ```
+  Not run (told not to run anything): npm run build · contrast audit (qa.md §1, both themes) ·
+  node <skill>/scripts/accent-check.mjs http://localhost:5273/tool.html · the comments check (§3)
+  ```

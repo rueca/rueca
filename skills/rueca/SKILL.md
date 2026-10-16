@@ -16,51 +16,68 @@ Spline, Paper, Affinity or Rive — and it stays **neutral**, so whatever is bei
 designed reads truthfully inside the artboard.
 
 **Read this file, then build.** It holds everything a typical tool needs. Open a
-reference only when its row in the table at the end says so — not up front. Each one
+reference when the table at the end says to, not up front. Each one
 you read rides along in every later turn.
 
 ## Workflow
 
 1. **Identify the artifact and its runtime** — Canvas 2D, WebGL/three.js, SVG, DOM/React,
    an existing page or app — and who uses the tool (the designer, or a client).
-2. **Pick the route.**
-   - React 19 + Tailwind v4 project, or a new one → the kit (Next.js too: render the tool
-     client-only, see install.md). Not installed yet? Install it:
-     `npx shadcn@latest add https://rueca.dev/r/studio.json -y` (lands in
-     `src/components/studio/`; import from `@/components/studio`; add
-     `@import "./components/studio/theme.css";` and `html, body, #root { height: 100% }` to the main CSS).
-     An existing app with no `components.json` (never `shadcn init` there — it rewrites the app's
-     CSS; install.md has a components.json to write instead), a new project, Next.js,
+2. **Pick the route by the project the tool lives in**, not by what you can run this session.
+   - **The kit**: a React 19 + Tailwind v4 project, or a new one (Next.js too: render the tool
+     client-only, see install.md). Install it with
+     `npx shadcn@latest add https://rueca.dev/r/studio.json -y`. It lands in `src/components/studio/`,
+     notes server included; import from `@/components/studio`. A new project: add
+     `@import "./components/studio/theme.css";` and `html, body, #root { height: 100% }` to the main CSS.
+     An existing app: give the tool its own page and CSS file instead (install.md § A tool entry of its
+     own), so the app's styles and build never change. With no `components.json`, never run `shadcn init`
+     (it rewrites the app's CSS; install.md has a components.json to write instead). A new project, Next.js,
      strict TypeScript or `shadcn init` trouble → `references/install.md`. After installing, run
-     the production build once (`npm run build`), not just the dev server. **Can't install right now** (no shell, told not to run
-     anything, registry unreachable)? Still write against the kit and put the install command in your handoff — never
-     hand-build what the kit already gives you (undo, presets, A/B, share links, persistence, the
-     inspector, scrubbers). Keep the user's app building meanwhile: put the tool in its own entry
-     (`tool.html` + `src/tool/`) that nothing else imports until the kit is installed.
-     A hand-rolled harness is the failure this skill exists to prevent.
-   - An existing page you must not rewrite, or an app on React 18 / Tailwind v3 / Vue / Svelte
-     (never run `shadcn init` in those) → a small separate harness app with `FrameSurface`. Same dev server (same origin)?
-     Drive it with `cssVars` / `apply={(doc, v) => …}` and leave the page untouched.
-     Otherwise add `assets/studio-bridge.js` to it.
-   - One HTML file, no build step, no npm → `references/install.md` §C: the one case where you
-     hand-build the same harness (theme.css + visual rules).
+     the production build once (`npm run build`), not just the dev server.
+   - **The kit, not installed yet** (no shell, told not to run anything, registry unreachable): still
+     write against the kit and put the install steps in your handoff. Never hand-build what the kit
+     already gives you (undo, presets, A/B, share links, persistence, the inspector, scrubbers). A
+     hand-rolled harness is the failure this skill exists to prevent. Keep the user's app building until
+     the kit lands. Put the tool in its own entry, keep that entry out of the build and the type-check,
+     and write the notes lines commented out. install.md has the steps and the handoff list.
+   - **Wrap the page**: an existing page you must not rewrite, or an app on React 18 / Tailwind v3 /
+     Vue / Svelte (never run `shadcn init` in those) → a harness with `FrameSurface` around it. When the
+     harness and the page share an origin, it drives the page through `cssVars` / `apply` with no edits
+     to it. A separate harness app on its own port doesn't share one, so serve the page through the
+     harness or add `assets/studio-bridge.js` to it: install.md §B has the three setups.
+   - **Hand-build**: only when the tool itself must be one HTML file with no build step (the person
+     opens or ships that file as is) → install.md §C, theme.css plus the visual rules. When the only
+     problem is that this session can't run npm, use "not installed yet" above.
 3. **Write the schema first** — one line per knob, each with a `hint`. It drives the
    inspector, defaults, reset, the changed cue, presets, undo, share link and agent export.
    Then rank it. What the presets vary and what gets tuned every session stays in view, about 8–12
    rows. A section's rarely touched tail gets `more: true`; an optional feature becomes a folder with
    `toggle`; grid, snap, fps and units go in a `place: 'settings'` folder. Rules: `references/layouts.md`
-   § What shows at rest.
+   § What shows at rest. Lists the person edits (layers, nodes, clips, rows) go in the schema as
+   `p.data<T>(…, { validate })`, or in `createDocStore` joined by `createHistory([params, doc])`, so they
+   undo, persist and share. Never keep them in `useState`. Set `presetKeys` so "Save preset" captures the look,
+   not the export size or the document. `label` renames a row (`p.number(4, { label: 'Blur (px)' })`),
+   and motion gets `p.spring({ stiffness, damping, mass })` or `p.curve([…])` rather than loose numbers.
 4. **Build the artifact as a pure function of `(values, t)`**, drawn by a surface the clock
-   ticks — never by React re-renders or a hand-written rAF loop. A component that times itself
-   and that you mustn't rewrite (motion/react, CSS transitions, a Lottie): feed it the values as
-   props, replay it by changing its React `key` (button + `R`, and after each commit), and skip
-   the timeline unless it exposes its time.
+   ticks — never by a hand-written rAF loop, and never by re-rendering React on every frame.
+   - Canvas, WebGL, three.js, p5: the surfaces below.
+   - **SVG or DOM that moves**: React renders the structure from `useValues` (it changes only when a
+     knob does), and the clock moves it through refs. Subscribe once, read values with
+     `params.values()`, and write attributes from a pure `frame(el, v, t)`:
+     `useEffect(() => clock.onTick((t) => frame(ref.current, params.values(), t)), [])`. It keeps ticking
+     while paused (the default `idle: true`), so knob changes still redraw. `useClockTime` is a
+     throttled readout for labels, never for drawing. SVG or DOM that only changes with the knobs needs no clock: render it with `useValues`.
+   - A component that times itself and that you mustn't rewrite (motion/react, CSS transitions, a
+     Lottie): feed it the values as props, replay it by changing its React `key` (button + `R`, and
+     after each commit), and skip the timeline unless it exposes its time.
 5. **Pick the layout** — `islands` (default: panels float over the canvas, which runs underneath), `docked` (Figma-like
    editors with layers + properties), `overlay` (full-bleed art, panels on top).
-6. **QA by measuring, not looking**: typecheck, production build, both themes, the accent
-   check → `references/qa.md` before you claim it works.
+6. **QA by measuring, not looking**: production build (`npm run build`, which type-checks), both
+   themes, the accent check → `references/qa.md` before you claim it works. Told not to run anything?
+   qa.md § Static checks only.
 7. **Hand off.** Say what you verified versus what you only looked at, and how to leave a comment
-   (`C`, then click the art or a knob).
+   (`C`, then click the art or a knob). Anything you didn't run goes on its own line, with the command
+   that runs it: `Not run: npm run build, accent check (told not to run anything)`.
 
 ## Starter (Canvas 2D; swap the surface for other runtimes)
 
@@ -95,7 +112,7 @@ export function Tool() {
   useHotkeys({ 'mod+e': { run: exportPNG, label: 'Export PNG', group: 'File' } }, [v.size.w, v.size.h])
   return (
     <Studio
-      toolbar={<Toolbar start={<Brand name="Rings" />} end={<><ParamActions params={params} /><Button variant="primary" onClick={exportPNG}>Export</Button></>} />}
+      toolbar={<Toolbar start={<Brand name="Rings" />} end={<><ParamActions params={params} clock={clock} /><Button variant="primary" onClick={exportPNG}>Export</Button></>} />}
       right={<Panel header={<PanelHeader title="Rings" />}><Inspector params={params} /></Panel>}
       bottom={<Timeline clock={clock} lanes={[]} />}   // lanes from the same maths as draw: { id, label, start, end } ms
     >
@@ -125,13 +142,14 @@ Set them up in every tool that runs on a dev server you control:
 
 | Route | Set up |
 |---|---|
-| Kit on Vite (the starter) | `npx shadcn@latest add https://rueca.dev/r/notes-server.json -y`, `ruecaNotes()` in `vite.config.ts`, `.rueca/` in `.gitignore`, and the `<NoteLayer>` above |
+| Kit on Vite (the starter) | `import { ruecaNotes } from './rueca/notes-server/vite.ts'` (keep the `.ts`) and `ruecaNotes()` in `vite.config.ts`, `.rueca/` in `.gitignore`, and the `<NoteLayer>` above. `studio.json` installs the server; after a partial install, add `notes-server.json` |
 | Harness app around an existing page | The same, in the harness app |
 | Another Node server | `createNotesHandler()`, mounted before your routes |
 | One HTML file, no build | `scripts/notes-server.mjs` beside the page and `assets/rueca-notes.js` in it; the page draws its own pins |
 | Next.js | No route yet. "Copy as agent prompt" in the share menu covers it; say so in the handoff |
 
-Details for each are in `references/notes.md`. A static build hides the buttons by itself, so there's
+Details for each are in `references/notes.md`. Kit not installed yet? Write those two lines commented
+out, because importing a missing file stops the dev server and the build. A static build hides the buttons by itself, so there's
 nothing to strip before shipping. Leave them out only when the person asks.
 
 Expensive params: `p.number(…, { live: false })` and apply them
@@ -150,9 +168,7 @@ with the art inside — never hand-build the sheet. It gives touch-size controls
 the share menu gains "Copy client link". Frame the art as it will export —
 `<Stage contentSize={size} padding={16} hud={false}><Artboard …>` (not `<Stage fill>`, which crops a 1080px
 artboard on a phone) — and draw in output units so the download looks like what the client tuned.
-`onDownload` takes a bare render (ClientView shows its own toast). Lists the user edits (layers,
-nodes, clips) live in `p.data<T>(…, { validate })` or `createDocStore` + `createHistory([params, doc])`
-so they undo, persist and share — never in `useState`.
+`onDownload` takes a bare render (ClientView shows its own toast).
 
 ## Non-negotiables
 
@@ -164,7 +180,8 @@ so they undo, persist and share — never in `useState`.
 - **Sizes from the density names** (`h-row`, `h-control`, `size-icon`, `px-pad`, `text-ui`,
   `rounded-control`…), never `h-6` / `px-3` / `text-[11px]`, or the part ignores the density setting.
 - **Blue only for focus, selection and the primary action; fills are neutral ink; labels dimmer than
-  values.** A switch that's on or a slider's fill is `bg-ink` / `bg-fill`, never blue. The playhead is
+  values.** A switch that's on or a slider's fill is `bg-ink` / `bg-fill`, never blue. Labels are
+  `text-fg-faint`, untouched values `text-fg-value`, changed values `text-fg`. The playhead is
   red/orange, not the accent. The accent defaults to system blue (`--signal`) and must not clash with
   the work: run `scripts/accent-check.mjs <url>` before handoff.
 - **Every number is a scrubber** (drag, type, expressions) and every drag has a non-drag
@@ -174,20 +191,27 @@ so they undo, persist and share — never in `useState`.
 - **Light theme must work.** Test both.
 - **Never put live values in a rAF effect's dependency array.**
 
-## References — read ONLY when
+## References
+
+Nearly every build reads these three, each at its step:
+
+| File | Read it |
+|---|---|
+| `references/install.md` | Step 2, unless the kit is already in the project: a new project, a tool entry beside an existing app, the kit not installed yet, wrapping a page, the no-build route, forks, updating |
+| `references/notes.md` | When you set up comments and Send to agent (every new tool); when the person says "check the notes"; when `.rueca/notes/` has notes waiting |
+| `references/qa.md` | Step 6, before you claim it works |
+
+Read the rest only when:
 
 | File | Read when |
 |---|---|
 | `references/kit-api.md` | You need a kit API the starter doesn't show (doc store, item params, palette ⌘K, toasts, hotkey details, layout props) |
-| `references/kit-components.md` | You need a specialist control: knob, layers tree, key/track timelines, data grid, curves, gradient, effect stack, node canvas theme |
+| `references/kit-components.md` | You need a specialist control: knob, layers tree, key/track timelines, data grid, curves, gradient, effect stack, node canvas theme, side-by-side breakpoints (`ViewportFrame`) |
 | `references/architecture.md` | Wiring something non-trivial: multi-store undo, expensive renders, video/frame export, batch output |
 | `references/layouts.md` | Choosing between layouts, or copying an example shell's structure (table of 19 with live links) |
-| `references/install.md` | Installing into a new or unusual project; forks; updating; the no-build route |
 | `references/visual-rules.md` | Hand-styling anything the kit doesn't cover, or something "looks off" |
-| `references/qa.md` | Before claiming it works |
 | `references/gotchas.md` | Something behaves strangely — not before |
 | `references/figma.md` | Content comes from Figma or the web |
-| `references/notes.md` | Setting up comments and Send to agent (every new tool), the person says "check the notes", or `.rueca/notes/` has notes waiting |
 
 `assets/theme.css` is the token set (only for the no-build route — the kit ships it).
 `assets/studio-bridge.js` lets the harness drive a page on another origin.

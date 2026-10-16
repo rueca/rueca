@@ -97,8 +97,12 @@ The contract is three things: a DOM element to own, the params, the clock.
 | Canvas 2D | `CanvasSurface draw={(ctx, { t, w, h, v }) => …}` — DPR, resize, `deps` for non-param inputs |
 | Raw WebGL2 | `WebGLSurface setup={(gl) => state} draw={(gl, f, state) => …}` — `size` for adaptive resolution |
 | vanilla three.js / p5 / anything imperative | `MountSurface mount={(el, api) => ({ engine, dispose })}` — the ref exposes `handle` |
-| React / DOM / SVG | render directly inside `<Artboard>` using `useValues(params)` |
-| An existing page, another framework, a built app | `FrameSurface src=…` + `studio-bridge.js` inside the page |
+| React / DOM / SVG, still | render directly inside `<Artboard>` using `useValues(params)`: it re-renders only when a knob changes |
+| React / DOM / SVG, moving | the same structure from `useValues`, moved by the clock through refs: `useEffect(() => clock.onTick((t) => frame(ref.current, params.values(), t)), [])` with a pure `frame(el, v, t)`. Never re-render React per frame; `useClockTime` is for readouts |
+| An existing page, another framework, a built app | `FrameSurface src=…`: same origin → `cssVars` / `apply`, no edits to the page; another origin → `studio-bridge.js` in the page (`install.md` §B) |
+
+A separate harness app on its own port is another origin, so `cssVars` and `apply` can't reach the
+page. Serve the page through the harness (a proxy, `install.md` §B) to keep the page unedited.
 
 The bridge protocol (postMessage):
 `parent → frame { type: 'studio:params', values }` ·

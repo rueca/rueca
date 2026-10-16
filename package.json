@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 5273 --strictPort",
-    "build": "node scripts/sync.mjs && tsc --noEmit && vite build",
+    "build": "node scripts/sync.mjs && tsc --noEmit && tsc -p tsconfig.notes-server.json && vite build",
     "preview": "vite preview --port 5274 --strictPort",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.notes-server.json",
     "sync": "node scripts/sync.mjs",
     "qa": "node scripts/qa.mjs",
-    "check": "node scripts/sync.mjs --check && tsc --noEmit && vitest run",
+    "check": "node scripts/sync.mjs --check && tsc --noEmit && tsc -p tsconfig.notes-server.json && vitest run",
     "test": "vitest run",
     "thumbs:rail": "node scripts/thumbs-rail.mjs",
     "thumbs:empty": "node scripts/thumbs-empty.mjs"

@@ -10,15 +10,20 @@ asks.
 
 ## Setting it up (every kit tool on Vite)
 
-1. Install the route: `npx shadcn@latest add https://rueca.dev/r/notes-server.json -y`, then add it to
-   `vite.config.ts`:
+1. The route comes with the kit: `studio.json` installs it (after a partial install, add
+   `https://rueca.dev/r/notes-server.json`). Add it to `vite.config.ts`, with the `.ts` extension:
    ```ts
-   import { ruecaNotes } from './rueca/notes-server/vite'
+   import { ruecaNotes } from './rueca/notes-server/vite.ts'
    export default defineConfig({ plugins: [react(), tailwindcss(), ruecaNotes()] })
    ```
-   It lands in `rueca/notes-server/` at the project root, outside `src/`, because it's Node code for
-   the dev server and the app's browser type-check shouldn't see it. It runs on the dev server only:
-   a production build has no route and the tool doesn't look for one.
+   Vite's template type-checks `vite.config.ts` with `module: nodenext`, which rejects an import
+   without its extension (TS2835) and fails `npm run build`. If an older `tsconfig.node.json` reports
+   TS5097 for the `.ts`, add `"allowImportingTsExtensions": true` there (it requires `noEmit`, which the
+   template sets). It lands in `rueca/notes-server/` at the project root, outside `src/`, because it's
+   Node code for the dev server and the app's browser type-check shouldn't see it. It runs on the dev
+   server only: a production build has no route and the tool doesn't look for one. Kit not installed
+   yet? Write both lines commented out until it is (`install.md` § The kit, not installed yet),
+   because importing a missing file stops the dev server and the build.
 2. Add `.rueca/` to `.gitignore`. Notes are local working state.
 3. `<ParamActions params={params} clock={clock} doc={doc} />` shows Send to agent and the Comment
    button (`C`) by themselves once the route answers. On a static build they stay hidden, and "Copy as
@@ -115,6 +120,8 @@ instructions. Check each value fits its param (type, range) before writing it in
 ## A values note: make them the defaults
 
 "These are the ones." Write each `changed[key].value` into the schema as that param's new default.
+A harness wrapping someone's page (`install.md` §B) is the exception: the values belong in the page's
+own code, its CSS or component props. Write them there, and update the schema defaults to match.
 
 1. Find the schema by `snapshot.tool`. If `snapshot.schema` isn't the store's current `version`, the
    schema changed after the note was sent: map renamed keys yourself, or ask about any you can't map.
