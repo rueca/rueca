@@ -35,7 +35,7 @@ export function DocumentPanel() {
         <Badge>{layers} layers</Badge>
       </PanelHeader>
       <Section title="Page" first>
-        <Row label="Background" trailing={pg.bg ? <IconButton icon={RotateCcw} size="icon-sm" label="Follow the studio theme" onClick={() => S.setPage({ bg: '' })} /> : undefined}>
+        <Row label="Background" trailing={pg.bg ? <IconButton icon={RotateCcw} size="control" label="Follow the studio theme" onClick={() => S.setPage({ bg: '' })} /> : undefined}>
           <ColorField value={pg.bg || themeBg} alpha={false} changed={!!pg.bg} onChange={(c, f) => S.setPage({ bg: c.slice(0, 7) }, { commit: f })} />
         </Row>
         {colours.size > 0 && (

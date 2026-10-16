@@ -353,7 +353,7 @@ export function KeyTimeline(props: KeyTimelineProps) {
 
   return (
     <div ref={root} className={cn('panel flex flex-col overflow-hidden', autoKey && 'outline outline-[1.5px] -outline-offset-[1.5px] outline-rec', className)}>
-      {toolbar && <div className="flex h-header flex-none items-center gap-1 px-2">{toolbar}</div>}
+      {toolbar && <div className="flex h-header flex-none items-center gap-1 px-2 [--d-control:var(--d-icon)]">{toolbar}</div>}
 
       {/* ruler */}
       <div className="flex h-ruler flex-none border-t border-line">

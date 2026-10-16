@@ -103,8 +103,8 @@ export function DesignPanel() {
         <Row label="Rotation">
           <ScrubValue boxed align="left" prefix="↻" label="Rotation" unit="°" step={0.1} {...R} className="flex-1" defaultValue={0} />
           <div className="flex flex-1 justify-end gap-0.5">
-            <IconButton icon={RotateCcwSquare} size="icon-sm" label="Rotate 90° left" onClick={() => setAll(nodes, (n) => ({ rotation: ((n.rotation + 90 + 180) % 360) - 180 }))} />
-            <IconButton icon={RotateCcw} size="icon-sm" label="Reset rotation" disabled={!nodes.some((n) => n.rotation)} onClick={() => setAll(nodes, () => ({ rotation: 0 }))} />
+            <IconButton icon={RotateCcwSquare} size="control" label="Rotate 90° left" onClick={() => setAll(nodes, (n) => ({ rotation: ((n.rotation + 90 + 180) % 360) - 180 }))} />
+            <IconButton icon={RotateCcw} size="control" label="Reset rotation" disabled={!nodes.some((n) => n.rotation)} onClick={() => setAll(nodes, () => ({ rotation: 0 }))} />
           </div>
         </Row>
       </Section>

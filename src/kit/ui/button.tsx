@@ -22,6 +22,8 @@ export const buttonVariants = cva(
         md: 'h-icon px-2.5 text-ui rounded-control',
         lg: 'h-button-lg px-3 text-title rounded-[calc(var(--radius-control)+2px)]',
         icon: 'size-icon rounded-control',
+        // square, the height of a field: for a button that sits beside an input, select or scrub value
+        control: 'size-control rounded-control',
         // 20px to the eye, a 24px reach (WCAG 2.5.8) so neighbouring small buttons aren't fiddly
         'icon-sm': "relative size-icon-sm rounded-control after:absolute after:-inset-0.5 after:content-['']",
       },

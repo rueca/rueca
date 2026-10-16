@@ -34,7 +34,7 @@ function usePointerDrag(onMove: (e: PointerEvent, rect: DOMRect, final: boolean)
 }
 
 /* --- Angle: a small dial + scrubbable degrees. Shift snaps to 15°. --- */
-export function AngleDial({ value, onChange, size = 24, changed }: { value: number; onChange: (v: number, final: boolean) => void; size?: number; changed?: boolean }) {
+export function AngleDial({ value, onChange, size, changed }: { value: number; onChange: (v: number, final: boolean) => void; size?: number; changed?: boolean }) {
   const drag = usePointerDrag((e, r, final) => {
     let a = (Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180) / Math.PI
     a = (a + 360) % 360
@@ -44,9 +44,10 @@ export function AngleDial({ value, onChange, size = 24, changed }: { value: numb
   const rad = (value * Math.PI) / 180
   return (
     <div className="flex min-w-0 flex-1 items-center gap-2">
-      <div {...drag} role="presentation" className="relative shrink-0 cursor-grab rounded-full bg-control shadow-[inset_0_0_0_1px_var(--line-strong)] active:cursor-grabbing" style={{ width: size, height: size }}>
-        <div className="absolute top-1/2 left-1/2 h-px origin-left bg-fg-muted" style={{ width: size / 2 - 3, transform: `rotate(${value}deg)` }} />
-        <div className="absolute size-1.5 -translate-1/2 rounded-full bg-ink" style={{ left: size / 2 + Math.cos(rad) * (size / 2 - 4), top: size / 2 + Math.sin(rad) * (size / 2 - 4) }} />
+      {/* the field's height unless sized, so it lines up with the degrees beside it */}
+      <div {...drag} role="presentation" className={cn('relative shrink-0 cursor-grab rounded-full bg-control shadow-[inset_0_0_0_1px_var(--line-strong)] active:cursor-grabbing', !size && 'size-control')} style={size ? { width: size, height: size } : undefined}>
+        <div className="absolute top-1/2 left-1/2 h-px w-[calc(50%-3px)] origin-left bg-fg-muted" style={{ transform: `rotate(${value}deg)` }} />
+        <div className="absolute size-1.5 -translate-1/2 rounded-full bg-ink" style={{ left: `calc(50% + ${Math.cos(rad).toFixed(4)} * (50% - 4px))`, top: `calc(50% + ${Math.sin(rad).toFixed(4)} * (50% - 4px))` }} />
       </div>
       <ScrubValue value={value} onChange={(v, f) => onChange(((v % 360) + 360) % 360, f)} step={1} unit="°" boxed className="flex-1" changed={changed} label="Angle" />
     </div>
@@ -122,7 +123,7 @@ export function Vec3Fields({
       {lockable && (
         <Tip label={locked ? 'Uniform. Click to scale axes independently' : 'Scale axes together'}>
           <button type="button" aria-pressed={locked} aria-label="Uniform scale" onClick={() => setLocked(!locked)}
-            className={cn('flex size-icon shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', locked ? 'text-signal' : 'text-fg-faint')}>
+            className={cn('flex size-control shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', locked ? 'text-signal' : 'text-fg-faint')}>
             {locked ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
           </button>
         </Tip>
@@ -160,7 +161,7 @@ export function SeedField({ value, onChange, changed, label = 'Seed' }: { value:
       <ScrubValue boxed align="left" prefix="#" value={value} min={0} max={99999} step={1} changed={changed} onChange={onChange} className="flex-1" label={label} />
       <Tip label="New seed">
         <button type="button" aria-label="Randomise seed" onClick={() => onChange(Math.floor(Math.random() * 99999), true)}
-          className="flex size-icon shrink-0 items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg active:scale-90 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
+          className="flex size-control shrink-0 items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg active:scale-90 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
           <Dices size={14} strokeWidth={1.5} />
         </button>
       </Tip>
@@ -377,8 +378,8 @@ export function PaletteField({ value, onChange, max = 8, min = 1 }: { value: str
           <div className="group/sw relative">
             <Popover.Trigger aria-label={`Colour ${i + 1}, ${c}${value.length > min ? '. Delete to remove' : ''}`}
               onKeyDown={(e) => { if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); e.stopPropagation(); if (value.length > min) remove(i) } }}
-              className="relative block size-6 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-signal">
-              <Swatch color={c} size={24} className="rounded-control" />
+              className="relative block size-icon rounded-control outline-none focus-visible:ring-2 focus-visible:ring-signal">
+              <Swatch color={c} className="block h-full! w-full! rounded-control" />
             </Popover.Trigger>
             {value.length > min && (
               <button type="button" tabIndex={-1} aria-hidden onClick={() => remove(i)}

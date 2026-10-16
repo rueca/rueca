@@ -27,9 +27,10 @@ export function Toolbar({ start, center, end, className }: { start?: ReactNode; 
   )
 }
 
+/* Fields inside a cluster (segmented, scrub values, selects) take the icon buttons' height, so a toolbar row is one height */
 export function Cluster({ children, className }: { children: ReactNode; className?: string }) {
   const { layout } = useStudio()
-  return <div className={cn('flex h-bar items-center gap-0.5 px-1', layout === 'docked' ? '' : 'cluster', className)}>{children}</div>
+  return <div className={cn('flex h-bar items-center gap-0.5 px-1 [--d-control:var(--d-icon)]', layout === 'docked' ? '' : 'cluster', className)}>{children}</div>
 }
 
 /**
