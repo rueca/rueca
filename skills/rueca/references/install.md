@@ -152,6 +152,10 @@ pure render, refs — so it can be upgraded to the kit later.
 Fonts: copy the `.woff2` into the project and `@font-face` it; serve over HTTP.
 Chrome blocks `@font-face` over `file://` and silently falls back.
 
+Comments and Send to agent still belong here. Run `scripts/notes-server.mjs` beside the page and add
+`assets/rueca-notes.js` to it. The page draws its own Comment button, pins and thread card, hidden while
+`ruecaNotes.endpoint()` resolves to null. The API and the format are in `notes.md`, under a page with no build.
+
 ## Ship it runnable
 
 Add a launch config so the person (and the preview pane) can start it:
