@@ -33,6 +33,9 @@ export const params = createParams(schema, {
     { name: 'Calm', values: { stagger: 70, duration: 2200, rings: 10 } },
     { name: 'Punchy', values: { stagger: 18, duration: 800, ease: EASINGS['Out back'], weight: 2 } },
     { name: 'Dense', values: { rings: 32, gap: 5, weight: 0.8 } },
+    // a second palette: fired clay, the rings warm and the crest brick red. It stays on a light ground, because the
+    // header, the sheet and the bell's engraving are dark ink (Rafael's comment, 2026-10-16)
+    { name: 'Arcilla', values: { bg: '#F4E4D8', ink: '#C4A797', glow: '#B23E1A' } },
   ],
 })
 export type V = ReturnType<typeof params.values>
@@ -136,8 +139,8 @@ function skeleton(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.textAlign = 'left'; ctx.fillStyle = W.ink; ctx.font = `400 22px ${SERIF}`
   ctx.fillText('The hand bell', pad, top + 40)
   ctx.textAlign = 'right'; ctx.fillStyle = W.muted; ctx.font = `500 13px ${SANS}`
-  ctx.fillText('Bronze, 18 cm tall', w - pad, top + 41)
-  const rows: [string, string, string, string][] = [['Brass', 'Polished, lacquered', '#C9A14A', '€68'], ['Nogal', 'Dark patina, waxed', '#5B4A32', '€74'], ['Achiote', 'Enamel, hand-fired', DYE.achiote, '€82']]
+  ctx.fillText('Bronze, 19 cm tall', w - pad, top + 41)
+  const rows: [string, string, string, string][] = [['Brass', 'Polished, lacquered', '#C9A14A', '€68'], ['Cacao', 'Dark patina, waxed', '#5B4A32', '€74'], ['Achiote', 'Enamel, hand-fired', DYE.achiote, '€82']]
   rows.forEach(([name, sub, dye, price], i) => {
     const y = top + 62 + i * 70
     ctx.fillStyle = dye; ctx.beginPath(); ctx.arc(pad + 26, y + 26, 22, 0, Math.PI * 2); ctx.fill()
