@@ -86,12 +86,12 @@
   --anatomy-paper:color-mix(in srgb, var(--fg) 2.5%, var(--sheet));--anatomy-face:color-mix(in srgb, var(--fg) 5%, var(--sheet));--anatomy-top:color-mix(in srgb, var(--fg) 5%, var(--sheet));--anatomy-lit-top:color-mix(in srgb, var(--fg) 6%, var(--sheet));--anatomy-lit-shade:color-mix(in srgb, var(--fg) 5%, var(--sheet));
   --anatomy-shade-0:color-mix(in srgb, var(--fg) 9%, var(--sheet));--anatomy-hi:var(--fg);--anatomy-mid:color-mix(in srgb, var(--fg) 62%, var(--sheet));--anatomy-lo:color-mix(in srgb, var(--fg) 38%, var(--sheet));--anatomy-faint:color-mix(in srgb, var(--fg) 20%, var(--sheet));
   --anatomy-lit:var(--fg);--anatomy-dot:var(--fg);--anatomy-weight:.6px;--rueca-hatch:color-mix(in srgb, var(--fg) 46%, var(--sheet));
-  --logo-card:#2E81AF;--logo-ink:#F3F1EB;--logo-pale:78%;
+  --logo-card:#6E1A3E;--logo-ink:#F7F5F4;--logo-pale:78%;
 }
 :root.light .site .rueca-iso{
   --anatomy-face:color-mix(in srgb, #fff 65%, var(--sheet));--anatomy-top:color-mix(in srgb, #fff 65%, var(--sheet));--anatomy-lit-top:color-mix(in srgb, #fff 65%, var(--sheet));
   --anatomy-shade-0:color-mix(in srgb, var(--fg) 8%, var(--sheet));--anatomy-mid:color-mix(in srgb, var(--fg) 54%, var(--sheet));--anatomy-lo:color-mix(in srgb, var(--fg) 32%, var(--sheet));--anatomy-faint:color-mix(in srgb, var(--fg) 16%, var(--sheet));--anatomy-weight:.55px;--rueca-hatch:color-mix(in srgb, var(--fg) 48%, var(--sheet));
-  --logo-card:#5DB4E8;--logo-ink:#181411;
+  --logo-card:#EFA6FF;--logo-ink:#171615;
 }
 .rueca-iso .iso-svg{width:100%;height:100%}
 
@@ -100,54 +100,54 @@
 .iso-shade[data-shade="2"]{fill:url(#kit-h2)}
 .iso-shade[data-shade="3"]{fill:none}
 .iso-solid[data-lit]>.iso-shade{fill:url(#kit-h2)}
-.rueca-achiote>.iso-fill,.rueca-achiote>.iso-top{fill:#E8582C!important}
+.rueca-achiote>.iso-fill,.rueca-achiote>.iso-top{fill:#F6571C!important}
 .rueca-achiote>.iso-shade[data-shade="0"]{fill:url(#kit-b0-achiote)!important}
 .rueca-achiote>.iso-shade[data-shade="1"]{fill:url(#kit-b1-achiote)!important}
 .rueca-achiote>.iso-shade[data-shade="2"]{fill:url(#kit-b2-achiote)!important}
-.rueca-achiote>.iso-shade[data-shade="3"]{fill:#E8582C!important}
-.rueca-cielo>.iso-fill,.rueca-cielo>.iso-top{fill:#5DB4E8!important}
+.rueca-achiote>.iso-shade[data-shade="3"]{fill:#F6571C!important}
+.rueca-cielo>.iso-fill,.rueca-cielo>.iso-top{fill:#5070F0!important}
 .rueca-cielo>.iso-shade[data-shade="0"]{fill:url(#kit-b0-cielo)!important}
 .rueca-cielo>.iso-shade[data-shade="1"]{fill:url(#kit-b1-cielo)!important}
 .rueca-cielo>.iso-shade[data-shade="2"]{fill:url(#kit-b2-cielo)!important}
-.rueca-cielo>.iso-shade[data-shade="3"]{fill:#5DB4E8!important}
-.rueca-gualda>.iso-fill,.rueca-gualda>.iso-top{fill:#F2C744!important}
+.rueca-cielo>.iso-shade[data-shade="3"]{fill:#5070F0!important}
+.rueca-gualda>.iso-fill,.rueca-gualda>.iso-top{fill:#FFD000!important}
 .rueca-gualda>.iso-shade[data-shade="0"]{fill:url(#kit-b0-gualda)!important}
 .rueca-gualda>.iso-shade[data-shade="1"]{fill:url(#kit-b1-gualda)!important}
 .rueca-gualda>.iso-shade[data-shade="2"]{fill:url(#kit-b2-gualda)!important}
-.rueca-gualda>.iso-shade[data-shade="3"]{fill:#F2C744!important}
-.rueca-hoja>.iso-fill,.rueca-hoja>.iso-top{fill:#2FA57C!important}
+.rueca-gualda>.iso-shade[data-shade="3"]{fill:#FFD000!important}
+.rueca-hoja>.iso-fill,.rueca-hoja>.iso-top{fill:#84C900!important}
 .rueca-hoja>.iso-shade[data-shade="0"]{fill:url(#kit-b0-hoja)!important}
 .rueca-hoja>.iso-shade[data-shade="1"]{fill:url(#kit-b1-hoja)!important}
 .rueca-hoja>.iso-shade[data-shade="2"]{fill:url(#kit-b2-hoja)!important}
-.rueca-hoja>.iso-shade[data-shade="3"]{fill:#2FA57C!important}
-.rueca-malva>.iso-fill,.rueca-malva>.iso-top{fill:#A88BF6!important}
+.rueca-hoja>.iso-shade[data-shade="3"]{fill:#84C900!important}
+.rueca-malva>.iso-fill,.rueca-malva>.iso-top{fill:#EFA6FF!important}
 .rueca-malva>.iso-shade[data-shade="0"]{fill:url(#kit-b0-malva)!important}
 .rueca-malva>.iso-shade[data-shade="1"]{fill:url(#kit-b1-malva)!important}
 .rueca-malva>.iso-shade[data-shade="2"]{fill:url(#kit-b2-malva)!important}
-.rueca-malva>.iso-shade[data-shade="3"]{fill:#A88BF6!important}
-.rueca-cochinilla>.iso-fill,.rueca-cochinilla>.iso-top{fill:#EE7A68!important}
+.rueca-malva>.iso-shade[data-shade="3"]{fill:#EFA6FF!important}
+.rueca-cochinilla>.iso-fill,.rueca-cochinilla>.iso-top{fill:#B0006A!important}
 .rueca-cochinilla>.iso-shade[data-shade="0"]{fill:url(#kit-b0-cochinilla)!important}
 .rueca-cochinilla>.iso-shade[data-shade="1"]{fill:url(#kit-b1-cochinilla)!important}
 .rueca-cochinilla>.iso-shade[data-shade="2"]{fill:url(#kit-b2-cochinilla)!important}
-.rueca-cochinilla>.iso-shade[data-shade="3"]{fill:#EE7A68!important}
-.rueca-bright>.iso-edge,.rueca-bright>.iso-crease,.rueca-bright>.iso-bevel{stroke:#181411!important}
-.rueca-bright{color:#181411}
+.rueca-cochinilla>.iso-shade[data-shade="3"]{fill:#B0006A!important}
+.rueca-bright>.iso-edge,.rueca-bright>.iso-crease,.rueca-bright>.iso-bevel{stroke:#171615!important}
+.rueca-bright{color:#171615}
 .rueca-glass>.iso-fill{fill:var(--anatomy-shade-0)}
 .rueca-hatch,.rueca-hatch-bright,.rueca-hatch-cast{fill:none;stroke-width:.45;stroke-linecap:butt}
 .rueca-hatch{stroke:var(--rueca-hatch)}
-.rueca-hatch-bright{stroke:#3a1408;stroke-opacity:.45}
+.rueca-hatch-bright{stroke:#171615;stroke-opacity:.45}
 .rueca-hatch-cast{stroke:var(--rueca-hatch);stroke-opacity:.7}
 .rueca-cast{fill:url(#kit-cast);stroke:none}
-.iso-line[data-tone="ink"]{stroke:#181411}
-.iso-face-text[data-tone="ink"]{fill:#181411}
+.iso-line[data-tone="ink"]{stroke:#171615}
+.iso-face-text[data-tone="ink"]{fill:#171615}
 @media (prefers-reduced-motion: reduce){.iso-svg *{transition:none!important}}
 @property --s1{syntax:'<number>';inherits:true;initial-value:0}
 @property --s2{syntax:'<number>';inherits:true;initial-value:0}
 @property --s3{syntax:'<number>';inherits:true;initial-value:0}
 .rueca-chat{fill:var(--anatomy-hi);font-family:var(--font-body,"IBM Plex Sans",system-ui,sans-serif);font-weight:450}
-.rueca-chat-ink{fill:#181411}
+.rueca-chat-ink{fill:#171615}
 .rueca-chat-strong{font-weight:550}
-/* the logo on its card: a deep Cielo with a white mark in dark, the light Cielo with an ink mark in light */
+/* the logo on its card: Mora (the plum) with a light mark in dark, Malva (lilac) with an ink mark in light */
 .rueca-logo-card>.iso-fill,.rueca-logo-card>.iso-top,.rueca-logo-card>.iso-shade[data-shade="3"]{fill:var(--logo-card)!important}
 .rueca-logo-card>.iso-shade[data-shade="0"]{fill:url(#kit-b0-logo)!important}
 .rueca-logo-card>.iso-shade[data-shade="1"]{fill:url(#kit-b1-logo)!important}
@@ -159,14 +159,14 @@
 /* the mark's strokes scale with the sheet (the kit pins every other stroke to screen pixels), so their dashes measure true */
 .iso-svg .rueca-mark-band,.iso-svg .rueca-mark-trace,.iso-svg .rueca-mark-edge{vector-effect:none}
 .rueca-mark-band{fill:none;stroke:var(--logo-ink);stroke-linejoin:round}
-.rueca-pale .iso-fill,.rueca-pale .iso-top{fill:color-mix(in srgb,#5DB4E8 30%,var(--anatomy-paper))!important}
-.rueca-pale .iso-shade{fill:color-mix(in srgb,#5DB4E8 22%,var(--anatomy-paper))!important}
+.rueca-pale .iso-fill,.rueca-pale .iso-top{fill:color-mix(in srgb,#5070F0 30%,var(--anatomy-paper))!important}
+.rueca-pale .iso-shade{fill:color-mix(in srgb,#5070F0 22%,var(--anatomy-paper))!important}
 .rueca-pale .iso-edge{stroke:var(--anatomy-mid)!important}
-.iso-line[data-tone="ink-faint"]{stroke:#181411;stroke-opacity:.2}
+.iso-line[data-tone="ink-faint"]{stroke:#171615;stroke-opacity:.2}
 .rueca-board>.iso-fill{fill:#fff;fill-opacity:.35}
-.rueca-board>.iso-edge{stroke:#181411}
-.iso-svg .rueca-note{fill:var(--ink-achiote,#b8381b);font-family:var(--font-hand,"La Belle Aurore",cursive)}
+.rueca-board>.iso-edge{stroke:#171615}
+.iso-svg .rueca-note{fill:var(--ink-achiote,#cd4000);font-family:var(--font-hand,"La Belle Aurore",cursive)}
 .iso-svg .pen-ink{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;vector-effect:none;stroke-dasharray:var(--len) var(--len);stroke-dashoffset:calc(var(--len) * (1 - clamp(0, (var(--pw, 1) - var(--a)) / var(--f), 1)))}
-.iso-svg .rueca-pen{fill:none;stroke:var(--ink-achiote,#b8381b);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.iso-svg .rueca-pen{fill:none;stroke:var(--ink-achiote,#cd4000);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .iso-svg .rueca-pen-m{display:none}
 @media (max-width:767px){.iso-svg .rueca-pen-d{display:none}.iso-svg .rueca-pen-m{display:inline}}

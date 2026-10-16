@@ -4,7 +4,7 @@ The one reference for anyone, human or agent, making something that looks like R
 
 **Status tags:** **[decided]** Rafael chose it. **[trial]** live, but may change. **[proposed]** waiting on Rafael. **[open]** not decided yet. If you build on something tagged proposed or open, say so in your hand-off.
 
-Last updated 2026-10-11. Owner: `brand/RUECA.md` and `brand/lamina/` belong to the Branding agent session. `BRAND.md`, `data.js`, `index.html` and `rueca.js` belong to the Rueca branding continuation session. If a foundation here changes something the landing page already uses (tokens, type), tell that session so `src/landing/landing.css` and the board stay in step.
+Last updated 2026-10-16 (palette: Mora). Owner: `brand/RUECA.md` and `brand/lamina/` belong to the Branding agent session. `BRAND.md`, `data.js`, `index.html` and `rueca.js` belong to the Rueca branding continuation session. If a foundation here changes something the landing page already uses (tokens, type), tell that session so `src/landing/landing.css` and the board stay in step.
 
 ---
 
@@ -18,7 +18,7 @@ Last updated 2026-10-11. Owner: `brand/RUECA.md` and `brand/lamina/` belong to t
 
 | Layer | Old | New |
 |---|---|---|
-| Colour | Lana paper, Nogal walnut ink, Rubia, engraved hatching | Flat, chalky brights in blocks (Achiote, Cielo, Malva…) |
+| Colour | Engraved hatching, Mora the deep plum | Near-neutral paper and ink, clean flat accents in blocks (Achiote, Malva, Cielo…) |
 | Type | Serif display (book face, light weights) | IBM Plex Sans (engineering-manual grotesque) · Geist Mono for commands |
 | Hand | La Belle Aurore red-pen notes | – (the hand belongs to neither; it's the person) |
 | Line | Engraved hatching, plate borders, lettered parts | Neutral measure-pen construction lines, dimension marks, part numbers |
@@ -29,32 +29,38 @@ Last updated 2026-10-11. Owner: `brand/RUECA.md` and `brand/lamina/` belong to t
 
 ## 2. Foundations
 
-### Colour [decided; ramps and surfaces live in code]
+### Colour: Mora [decided 2026-10-16; surfaces live in code]
 
-| Token | Hex (light) | Dark | Role |
+**Mora replaced the walnut-and-wool palette on 2026-10-16** (Rafael: the vintage tint read "too on the nose"; modernise it but keep it nostalgic). The ground went near-neutral, Achiote got cleaner, and the accents follow Stack Overflow's rebrand by Koto (`stackoverflow.design/brand/color`): orange, a deep plum as orange's shadow, lilac, yellow, blue-violet and lime. Exploration and the audit: this session's notes in `BRAND.md` → "Palette: Mora".
+
+| Token | Light | Dark | Role |
 |---|---|---|---|
-| **Lana** | `#F3F1EB` | ground in dark: `#151210` | Paper. It carries the layout. |
-| **Platino** | `#DCDAD5` | `#383430` | Chrome, quiet panels, the "Figma made in the 90s" nod |
-| **Nogal** | `#181411` | text in dark: `#F3F1EB` | Ink. All drawing, all text. |
-| **Rubia** | `#5E2219` | `#5E2219` | The deep colour. Use it instead of black for dark blocks. |
-| **Achiote** | `#E8582C` | `#F06A3E` | Lead bright: the CTA and the red pen |
-| Cochinilla | `#EE7A68` | `#F38B79` | Bright |
-| Malva | `#A88BF6` | `#B39AF8` | Bright |
-| Cielo | `#5DB4E8` | `#6FC0EE` | Bright |
-| Hoja | `#2FA57C` | `#3DB68B` | Bright |
-| Gualda | `#F2C744` | `#F5D05A` | Bright |
-| **Añil** | `#3440C8` | `#8C95F0` | **[open]** No longer the measure pen (2026-10-11); its role is unassigned. Never a fill. |
+| **Lana** (paper) | sheet `#FDFBFA`, field `#F5F3F2` | sheet `#181716`, field `#131211` | Paper. Near-neutral: a faint rose-warm tint (OKLCH chroma 0.0024, hue 45), half the old tint and less yellow. |
+| **Platino** | `#DCDAD9` | `#363534` | The grey plate (sheet 6, footer). Near-neutral too. |
+| **Nogal** (ink) | `#171615` | text `#F7F5F4` | Ink. All drawing, all text, and text on every bright. |
+| **Achiote** | `#F6571C` · text `#CD4000` | `#FF6A2C` | The lead colour: CTA, the red pen, the punchline. "Clean": the old hue, ~10% more chroma (was `#E8582C`). |
+| **Mora** (the plum) | `#6E1A3E` · fill `#B0006A` · text `#9B005A` | fill `#D23A84` · text `#E888B4` | The deep colour, Achiote's shadow; replaces Rubia. In code it keeps the dye key `cochinilla` (`data-dye`, `.rueca-cochinilla`). |
+| Malva | `#EFA6FF` · text `#9640B0` · pen `#C46FDB` | `#F2B3FF` | Accent (lilac). The hero's loop. |
+| Cielo | `#5070F0` · text `#3D5BD6` | `#7088FF` · text `#8DA2FF` | Accent (blue-violet). |
+| Gualda | `#FFD000` · text `#B07000` | `#FFD84D` | Accent (yellow). |
+| Hoja | `#84C900` · text `#278800` | `#9BD83A` · text `#A3CF45` | Accent (lime). |
 
-Six of the names are natural dyes (achiote, cochinilla, gualda, rubia, añil, nogal), and lana is wool. That story can be told; weaving can't (see Don'ts).
+Retired: Rubia `#5E2219`, the coral Cochinilla `#EE7A68` (too close to Achiote), Añil as a separate token (Cielo covers it), and the walnut/wool tints.
 
 Rules:
-1. Paper carries the layout. Brights are **flat blocks, one or two per layout**. All six together only in mark/system moments.
-2. On a bright, text is **Nogal, never white**.
-3. Rubia is the dark, not black.
-4. Achiote is the CTA. Product previews and `[data-studio-embed]` fall back to the kit's neutral tokens, and **the tools stay blue**.
-5. Tonal ramps 50–900 per family are in `brand/data.js` (`ruecaRamps`); regenerate with `brand/tools/ramps.mjs`. The neutral "Tierra" ramp runs from Lana (50) to Nogal (900).
-6. Site surfaces are slightly de-tinted so the shells' neutral UI sits well. See `.site` in `src/landing/landing.css`. Light: field `#f3f1eb`, panel `#faf8f4`, control `#ece9e2`, fg `#181411`, muted `#58524d`. Dark: field `#151210`, panel `#201c19`, fg `#f3f1eb`, muted `#b9b3ac`.
-7. The coloured kickers are retired (2026-10-11). Sections are now labelled by **title strips** (§3), in ink, not brights.
+1. **Achiote is in every composition**, the way Stack Overflow's orange top face is. Pick **two accents** per piece next to it, never all of them (the mark's race is the one exception, and even there each shape gets only its own pair).
+2. **Accents are never backgrounds.** Fields are Lana, Platino, Mora, or Achiote. Lilac, yellow, blue-violet and lime stay as blocks, faces, pens and highlights.
+3. On a bright, text is **Nogal, never white**. Ink on Achiote is 5.4:1.
+4. **Text versions turn their hue as they darken.** A darkened yellow or lime goes olive on the paper, so light-mode text uses marigold, a clean green and a raspberry plum (the "text" values above). Handwriting keeps at least 3.9:1 on the sheet.
+5. Achiote's share by surface: about 5% in the product (it doesn't appear there at all: **the tools stay blue**, previews fall back to the kit's neutral tokens), about 20% on the site, up to 50% in launch pieces.
+6. No gradients, glows or shadows, and never a combination made only of darks.
+7. The coloured kickers stay retired (2026-10-11). Sections are labelled by **title strips** (§3), in ink, not brights.
+
+Where it lives: `.site` tokens in `src/landing/landing.css`, sheet tokens, dyes and the grey plate in `src/landing/plate.css`, drawing colours in `brand/illustration-trials/anatomy/shared.mjs` (`BRIGHTS`; rebuild with `node <name>.mjs --landing`, which writes `src/landing/art/`), the logo race in `src/landing/LogoIntro.tsx`. The old ramps in `brand/data.js` (`ruecaRamps`) are the walnut-era record and are not regenerated for Mora yet.
+
+**Logo race sequence: "Stack"** [decided 2026-10-16]. Each shape races four folds, its own two accents, then Achiote, then the plum, then ink: band Malva → Cielo, wheel Gualda → Malva, whorl Hoja → Cielo. The whole mark converges warm and settles at 1540 ms (E2's six folds settled at 1800). `DYES` in `src/landing/LogoIntro.tsx`.
+
+**Kit section sequence** [decided 2026-10-16]. Three colours, not six: Controls Achiote · Layout Cielo · Time Malva / Structure Cielo · Workflow Malva · Hand-off Achiote. No colour sits beside itself across a row, down a column or in the phone's single column, and Achiote lands last. The brights are set in each drawing's build (`brand/illustration-trials/anatomy/<name>.mjs`), the pens in `src/landing/art/KitArt.tsx` (`DYE`).
 
 ### Type
 
@@ -75,8 +81,8 @@ Rules:
 
 | Pen | Colour | Job |
 |---|---|---|
-| Ink | Nogal | Draws the thing: outlines, hatching, text |
-| Measure | **Neutral ink** (2026-10-11, was Añil): `--measure` rgba(24,20,17,.42) / dark rgba(243,241,235,.4); crosshairs `--cross` #aba9a6 / #5b5855; ruler ticks `--tick` .3 and `--tick-minor` .11 (`src/landing/plate.css`) | Construction circles, dimensions, grids, crosshairs, rulers |
+| Ink | Nogal `#171615` | Draws the thing: outlines, hatching, text |
+| Measure | **Neutral ink** (2026-10-11, was Añil): `--measure` rgba(22,22,22,.42) / dark rgba(245,245,245,.4); crosshairs `--cross` #aaa9a8 / #585756; ruler ticks `--tick` .3 and `--tick-minor` .11 (`src/landing/plate.css`) | Construction circles, dimensions, grids, crosshairs, rulers |
 | Correct | Achiote | La Belle Aurore notes, leader lines to notes, ✗, the circled letters A–D |
 
 Weights carry the hierarchy: **object 1.4 · detail 0.8 · hairline 0.5**, and hidden edges are dashed. **Lines stay lines:** no gradients, glows or neon, and no fills except hatching and the one flat bright.
@@ -87,10 +93,10 @@ Weights carry the hierarchy: **object 1.4 · detail 0.8 · hairline 0.5**, and h
 - **Superseded, don't build from these:** `brand/logo/rueca-lockup-v2*.svg`, `rueca-lockup-v3*.svg` and `rueca-mark-v2*/v3*.svg` (Rafael's 18-unit-band redraw, tried and reverted on his call), `brand/logo/rafael/rueca-lockup-updated(-2).svg` and `rueca-favicon.svg` (the yellow-square favicon), and the Signifier and Newsreader lockups the generator still writes for comparison.
 - Status (11 Oct): the v3 wordmark is live on rueca.dev.
 
-Rafael's two-wheel logo: a drive wheel and a spindle whorl joined by the band (`brand/moodboards/rueca-logo.svg`, `src/landing/parts.tsx`). On the site it's flat, in the page's ink, with a serif wordmark (Rafael, 11 Oct); colour E (Gualda band, Malva wheel, Achiote whorl) is kept behind `LOGO_IN_COLOUR` in `parts.tsx`. The favicon puts the mark in Lana on a Nogal tile. The mark-only crop is `viewBox="0 0 310 218"`. For one-colour, emboss or deboss uses, mask it.
+Rafael's two-wheel logo: a drive wheel and a spindle whorl joined by the band (`brand/moodboards/rueca-logo.svg`, `src/landing/parts.tsx`). On the site it's flat, in the page's ink, with a serif wordmark (Rafael, 11 Oct); colour E (Gualda band, Malva wheel, Achiote whorl) is kept behind `LOGO_IN_COLOUR` in `parts.tsx`. The favicon puts the mark in Lana (`#F7F5F4`) on a Nogal tile (`#171615`). The mark-only crop is `viewBox="0 0 310 218"`. For one-colour, emboss or deboss uses, mask it.
 - **Drawing: "I · Pulido"** [decided]. The file's mark rebuilt on true geometry (`brand/logo/`): one 25-unit band on the external tangents of the two centres, the whorl centred in its loop, the same 22.5 gap round both discs, bottoms level. 11 Oct (Rafael): whorl 30% bigger (r 22.3 → 29), its loop grown to match (centreline r 54.3 → 64) and moved 9.7 right so the mark keeps its 309 × 217 footprint. At ≤24px a heavier cut takes over (band 34, both gaps 19, loop r 65). Files: `brand/logo/rueca-mark.svg`, `-small.svg`, `-dyed.svg`, `-light.svg`; the site's `Mark` and `public/favicon.svg` use it. Regenerate from `brand/logo/marks.js`. The band's two rings need `fill-rule: evenodd`.
 - **Wordmark: outlined, built from the mark** [decided]. The word fills the band's inner box, as Rafael's file had it: baseline on the band's inner bottom edge, x-height up to its inner top, weight 450 (500 in the small cut) so it carries the discs' mass, tracking −0.045em (−0.025em in the small cut) plus pair adjustments (`PAIRS` in the generator). Rafael's v3 (11 Oct, `brand/logo/rafael/rueca-lockup-updated-3.svg`): word 2.9% bigger and 3.3 lower, gap 90.2, and a flat-topped u (top serifs removed, `TRIM`) that sits apart from the r. (A first rule, x-height = the whorl's loop with stems matched to the band, read small and light.) `brand/tools/outline_rueca.py` writes `src/landing/logo.generated.ts` and `brand/logo/rueca-lockup-{signifier,newsreader}-{regular,small}[-light].svg`. **The site ships Sorts Mill Goudy outlines** (OFL, no licence needed), thickened in the generator to the same stem/x-height as the 450/500 weights. `SHIP` in the generator switches face.
-- **[decided 2026-10-11]** The palette tokens are canonical. The logo file is a work in progress (its hues `#F0BF11`, `#41ADDB` and `#EB4D1D` are not brand colours), so never sample colours from it. Anything coloured uses the brand tokens: today Gualda, Malva and Achiote (colour E; comparisons in `brand/logo/colour.html`).
+- **[decided 2026-10-11]** The palette tokens are canonical. The logo file is a work in progress (its hues `#F0BF11`, `#41ADDB` and `#EB4D1D` are not brand colours), so never sample colours from it. Anything coloured uses the brand tokens: today Gualda, Malva and Achiote (colour E; comparisons in `brand/logo/colour.html`), in their Mora values since 2026-10-16.
 
 ### Voice [decided, unchanged]
 

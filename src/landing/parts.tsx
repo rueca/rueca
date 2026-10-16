@@ -76,12 +76,12 @@ export function ThemeButton({ className }: { className?: string }) {
 /* Colour assignment E (brand/logo/colour.html, Rafael 11 Oct): wheel Malva, whorl Achiote, band Gualda. */
 const MARK_DYES = ['malva', 'achiote', 'gualda'] as const // LOCKUP mark order: wheel, whorl, band
 const cutFor = (_size: number) => LOCKUP.regular
-/** brand dyes: light value, then the lifted dark value */
+/** brand dyes (Mora): light value, then the lifted dark value */
 const LOGO_DYE = {
-  achiote: 'fill-[#E8582C] dark:fill-[#F06A3E]',
-  cielo: 'fill-[#5DB4E8] dark:fill-[#6FC0EE]',
-  malva: 'fill-[#A88BF6] dark:fill-[#B39AF8]',
-  gualda: 'fill-[#F2C744] dark:fill-[#F5D05A]',
+  achiote: 'fill-[#F6571C] dark:fill-[#FF6A2C]',
+  cielo: 'fill-[#5070F0] dark:fill-[#7088FF]',
+  malva: 'fill-[#EFA6FF] dark:fill-[#F2B3FF]',
+  gualda: 'fill-[#FFD000] dark:fill-[#FFD84D]',
 }
 
 /** Flat again (Rafael, 11 Oct): the whole logo in the page's ink. True brings colour E back (the dyes above); the word stays ink either way. */

@@ -113,7 +113,7 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
    (there it names the client view): three flat
    dots in the brand dyes standing in for close, minimise and full screen, the shell's real
    address in the mono face, and a link to open it full screen. Sheet-toned, one hairline. */
-const DOTS = ['#E8582C', '#F2C744', '#2FA57C'] // Achiote, Gualda, Hoja
+const DOTS = ['#F6571C', '#FFD000', '#84C900'] // Achiote, Gualda, Hoja (Mora)
 function BrowserBar({ id, query = '' }: { id: string; query?: string }) {
   const host = site.url.replace(/^https?:\/\//, '')
   return (

@@ -7,11 +7,11 @@
 import { useId, type CSSProperties } from 'react'
 import { cn } from '@kit/core/cn'
 
-/** the dyed brights, light values (the artwork doesn't theme) */
-export const DYES = { achiote: '#E8582C', cielo: '#5DB4E8', gualda: '#F2C744', hoja: '#2FA57C', malva: '#A88BF6' }
+/** the dyed brights, light values (the artwork doesn't theme); Mora since 16 Oct */
+export const DYES = { achiote: '#F6571C', cielo: '#5070F0', gualda: '#FFD000', hoja: '#84C900', malva: '#EFA6FF' }
 const THREADS = [DYES.achiote, DYES.cielo, DYES.gualda, DYES.hoja, DYES.malva]
-const LANA = '#F3EEE3'
-const GREYS = ['#8f877e', '#a59d94', '#bab3aa', '#7d756c', '#9c958c']
+const LANA = '#FDFBFA' // the paper
+const GREYS = ['#8f8e8d', '#a5a4a3', '#bab9b8', '#7d7c7b', '#9c9b9a']
 
 /** Flat dyed threads on wool. `mono` = an undyed "before"; `outline` = vector strokes only.
     `drift` moves the threads sideways (any CSS length, e.g. a calc() off a progress var). */

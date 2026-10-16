@@ -55,66 +55,62 @@
 .site :is(.preview, [data-studio-embed]) :is(code, kbd, pre) { font-family: var(--font-mono); }
 
 /* ---------------------------------------------------------------------------
-   Rueca palette (brand/data.js → ruecaPalette / ruecaRamps): rustic ground and
-   ink, flat dyed brights. The marketing pages re-point the kit's surface tokens
+   Rueca palette: Mora (16 Oct 2026, brand/BRAND.md "Palette: Mora"). It replaced the
+   rustic walnut-and-wool palette, which read too vintage. Near-neutral ground and ink
+   (a faint rose-warm tint: OKLCH chroma 0.0024 at hue 45, about half the old tint and
+   less yellow), Achiote as the one lead colour, and clean flat accents after Stack
+   Overflow's rebrand by Koto. The marketing pages re-point the kit's surface tokens
    at the paper; anything that shows the product resets them to the kit's own
    neutral values, so previews still look like the real tool.
 
    Accent rule for the marketing pages (landing, shells gallery):
-     .site     — the page's own accents use Achiote (annatto orange-red) with
-                 walnut text on it (5.5:1); never white on a bright.
+     .site     — the page's own accents use Achiote (Clean: #F6571C, #FF6A2C lifted
+                 on dark) with ink text on it (5.4:1); never white on a bright.
      .preview  — anything that SHOWS the product (mock UI, component thumbs)
                  gets a neutral accent: white in dark, black in light.
    The real blue accent only appears in the full-screen tools. Live iframes and
    captured thumbnails get the neutral accent from neutral.ts instead.
 --------------------------------------------------------------------------- */
 .site {
-  /* dark: walnut night, tint halved 11 Oct so the shells’ neutral UI sits comfortably on it, then
-     every surface's chroma cut by a third (Rafael: a touch less yellow; the same on the sheet tokens in plate.css) */
-  --field: #141211;
-  --panel: #1f1c1a;
-  --overlay: #272321;
-  --control: #2a2624;
-  --well: #191715;
-  --fg: #f3f1eb;
-  --fg-muted: #b9b3ac;
-  --fg-faint: #99928c;
-  --line: rgba(243, 238, 227, 0.08);
-  --line-strong: rgba(243, 238, 227, 0.15);
-  --hover: rgba(243, 238, 227, 0.05);
-  --press: rgba(243, 238, 227, 0.08);
-  --signal: #f06a3e;
-  --signal-strong: #e8582c;
-  --signal-fg: #181411;
-  --signal-soft: rgba(240, 106, 62, 0.16);
-  /* brand inks for illustration and notes */
-  --ink-achiote: #f06a3e;
-  --ink-anil: #8fa7fe;
-  --ink-gualda: #d2a628;
-  --ink-malva: #b39af8;
+  /* dark: near-neutral night */
+  --field: #131211;
+  --panel: #1d1c1b;
+  --overlay: #252423;
+  --control: #292827;
+  --well: #171615;
+  --fg: #f7f5f4;
+  --fg-muted: #acabaa;
+  --fg-faint: #8f8e8d;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.15);
+  --hover: rgba(255, 255, 255, 0.05);
+  --press: rgba(255, 255, 255, 0.08);
+  --signal: #ff6a2c;
+  --signal-strong: #f6571c;
+  --signal-fg: #171615;
+  --signal-soft: rgba(255, 106, 44, 0.16);
+  /* the pen for notes in the drawings */
+  --ink-achiote: #ff6a2c;
 }
 :root.light .site {
-  /* light: undyed wool paper, walnut ink; tint halved 11 Oct (see dark) */
-  --field: #f2f1ed;
-  --panel: #f9f8f5;
-  --overlay: #f9f8f5;
-  --control: #ebe9e5;
-  --well: #e7e4e0;
-  --fg: #181411;
-  --fg-muted: #58524d;
-  --fg-faint: #68625d;
-  --line: rgba(35, 27, 22, 0.1);
-  --line-strong: rgba(35, 27, 22, 0.18);
-  --hover: rgba(35, 27, 22, 0.05);
-  --press: rgba(35, 27, 22, 0.08);
-  --signal: #e8582c;
-  --signal-strong: #e8582c;
-  --signal-fg: #181411;
-  --signal-soft: rgba(232, 88, 44, 0.12);
-  --ink-achiote: #b8381b;
-  --ink-anil: #3440c8;
-  --ink-gualda: #f2c744;
-  --ink-malva: #a88bf6;
+  /* light: white-grey paper, near-black ink */
+  --field: #f5f3f2;
+  --panel: #fcfaf9;
+  --overlay: #fcfaf9;
+  --control: #edebea;
+  --well: #e7e5e4;
+  --fg: #171615;
+  --fg-muted: #585756;
+  --fg-faint: #6c6b6a;
+  --line: rgba(0, 0, 0, 0.1);
+  --line-strong: rgba(0, 0, 0, 0.18);
+  --hover: rgba(0, 0, 0, 0.05);
+  --press: rgba(0, 0, 0, 0.08);
+  --signal: #f6571c;
+  --signal-strong: #f6571c;
+  --signal-fg: #171615;
+  --signal-soft: rgba(246, 87, 28, 0.12);
+  --ink-achiote: #cd4000; /* Achiote as text on the paper, 4.7:1 */
 }
 /* product previews: back to the kit's neutral chrome (values from src/kit/theme.css) */
 .site :is(.preview, [data-studio-embed]) {
@@ -176,9 +172,9 @@ html[data-reveals] [data-reveal='words'][data-in] .reveal-word > span { animatio
 
 /* the hero's pen annotation (HeroArrow.tsx): it mounts once the hero has come to rest, then the loop round the word draws, the line, the head */
 .site .hero-arrow path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: arrow-draw 0.75s cubic-bezier(0.65, 0, 0.35, 1) 0.1s forwards; }
-/* the loop round the word in Gualda, the line and head stay Achiote (Rafael, 11 Oct): the brand yellow on dark, a step deeper (400) on the paper so it holds */
-.site .hero-arrow .hero-arrow-loop { stroke: #f2c744; }
-:root.light .site .hero-arrow .hero-arrow-loop { stroke: #d2a628; }
+/* the loop round the word in Malva (lilac), the line and head stay Achiote (Rafael, 16 Oct: Gualda read muddy); a deeper lilac on the paper so it holds */
+.site .hero-arrow .hero-arrow-loop { stroke: #f2b3ff; }
+:root.light .site .hero-arrow .hero-arrow-loop { stroke: #c46fdb; }
 .site .hero-arrow .hero-arrow-line { animation-duration: 1s; animation-delay: 0.8s; }
 .site .hero-arrow .hero-arrow-head { animation-duration: 0.3s; animation-delay: 1.75s; }
 @keyframes arrow-draw { to { stroke-dashoffset: 0; } }

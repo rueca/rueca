@@ -6,18 +6,18 @@
    Dark is the default theme; :root.light overrides. */
 
 .site {
-  --sheet: #191715;
+  --sheet: #181716;
   /* rules and crosshairs are solid (pre-mixed onto the sheet), so where two parts
      mark the same crossing the marks land on the same pixels and read as one */
-  --rule: #2f2d2b;
-  --cross: #5a5856;
-  --measure: rgba(243, 241, 235, 0.4);
+  --rule: #2c2b2a;
+  --cross: #585756;
+  --measure: rgba(245, 245, 245, 0.4);
 }
 :root.light .site {
-  --sheet: #fbfaf8;
-  --rule: #dfdedc;
-  --cross: #aaa9a7;
-  --measure: rgba(24, 20, 17, 0.42);
+  --sheet: #fdfbfa;
+  --rule: #e0dedd;
+  --cross: #aaa9a8;
+  --measure: rgba(22, 22, 22, 0.42);
 }
 
 /* the sheet: rails down both sides */
@@ -84,24 +84,25 @@
 }
 
 /* The section openers' handwriting, each in its own dye (Rafael, 11 Oct): the six brights in order, sheet 1 to 6.
-   Dark takes the palette's lifted dark values; the paper takes each ramp's 600, so the fine nib keeps
-   at least 3.9:1 on the sheet and 3.3:1 on Platino (sheet 6). */
+   Dark takes the palette's lifted values. On the paper a darkened yellow or lime goes olive, so each text value
+   turns its hue as it darkens (Mora, 16 Oct: marigold, a clean green, a raspberry plum) and keeps at least
+   3.9:1 on the sheet and 3.3:1 on the grey plate (sheet 6). Cochinilla is Mora, the plum. */
 .site [data-dye] .font-hand { color: var(--dye); }
 /* the kit drawings' pen (KitArt.tsx): notes and arrows in the dye of the drawing's bright part */
 .site .rueca-iso[data-dye] .rueca-note { fill: var(--dye); }
 .site .rueca-iso[data-dye] .rueca-pen { stroke: var(--dye); }
-.site [data-dye='achiote'] { --dye: #f06a3e; }
-.site [data-dye='gualda'] { --dye: #f5d05a; }
-.site [data-dye='hoja'] { --dye: #3db68b; }
-.site [data-dye='cielo'] { --dye: #6fc0ee; }
-.site [data-dye='malva'] { --dye: #b39af8; }
-.site [data-dye='cochinilla'] { --dye: #f38b79; }
-:root.light .site [data-dye='achiote'] { --dye: #cb4522; }
-:root.light .site [data-dye='gualda'] { --dye: #9a7103; }
-:root.light .site [data-dye='hoja'] { --dye: #138e6b; }
-:root.light .site [data-dye='cielo'] { --dye: #2e81af; }
-:root.light .site [data-dye='malva'] { --dye: #8363c3; }
-:root.light .site [data-dye='cochinilla'] { --dye: #bc5448; }
+.site [data-dye='achiote'] { --dye: #ff6a2c; }
+.site [data-dye='gualda'] { --dye: #ffd84d; }
+.site [data-dye='hoja'] { --dye: #a3cf45; }
+.site [data-dye='cielo'] { --dye: #8da2ff; }
+.site [data-dye='malva'] { --dye: #f2b3ff; }
+.site [data-dye='cochinilla'] { --dye: #e888b4; }
+:root.light .site [data-dye='achiote'] { --dye: #cd4000; }
+:root.light .site [data-dye='gualda'] { --dye: #b07000; }
+:root.light .site [data-dye='hoja'] { --dye: #278800; }
+:root.light .site [data-dye='cielo'] { --dye: #3d5bd6; }
+:root.light .site [data-dye='malva'] { --dye: #9640b0; }
+:root.light .site [data-dye='cochinilla'] { --dye: #9b005a; }
 
 /* .no-cross: dividers with plain rules, no crosshairs (every section opener and the shells page title strip, Rafael) */
 .site .divide-rule.no-cross > :not(.cross) + :not(.cross)::after { content: none; }
@@ -182,13 +183,13 @@ html[data-reveals] .site [data-reveal='write'][data-in] .hw-pen path {
 }
 
 /* A coloured plate: sheet 6 and the footer printed on Platino, the brand's 90s chrome grey
-   (Rafael picked it from eight dyes, 11 Oct). Light mode #DCDAD5 with the usual dark ink;
-   dark mode #383430 with light text, so the text keeps the theme's colour. Every sheet
+   (Rafael picked it from eight dyes, 11 Oct), near-neutral since Mora (16 Oct). Light mode
+   #DCDAD9 with the usual dark ink; dark mode #363534 with light text, so the text keeps the theme's colour. Every sheet
    token is re-mixed for it (solid rules and crosshairs). It sits above the rails (z-index)
    so they end at its edge. */
 .site .tone-platino { position: relative; z-index: 2; background: var(--sheet); color: var(--fg); }
-.site .tone-platino { --sheet: #373432; --field: #373432; --well: #322f2d; --fg: #f3f1eb; --fg-muted: #cecbc6; --fg-faint: #b7b5af; --rule: #555250; --cross: #7a7875; --line: rgba(243, 241, 235, 0.16); --hover: rgba(243, 241, 235, 0.08); }
-:root.light .site .tone-platino { --sheet: #dbdad7; --field: #dbdad7; --well: #d1d0cd; --fg: #181411; --fg-muted: #4f4b48; --fg-faint: #625f5b; --rule: #c2c0be; --cross: #989794; --line: rgba(24, 20, 17, 0.12); --hover: rgba(24, 20, 17, 0.06); }
+.site .tone-platino { --sheet: #363534; --field: #363534; --well: #31302f; --fg: #f7f5f4; --fg-muted: #cdcccb; --fg-faint: #b6b5b4; --rule: #545352; --cross: #797877; --line: rgba(255, 255, 255, 0.16); --hover: rgba(255, 255, 255, 0.08); }
+:root.light .site .tone-platino { --sheet: #dcdad9; --field: #dcdad9; --well: #d1d0cf; --fg: #171615; --fg-muted: #4e4d4c; --fg-faint: #61605f; --rule: #c2c1c0; --cross: #989796; --line: rgba(0, 0, 0, 0.12); --hover: rgba(0, 0, 0, 0.06); }
 
 /* The install tabs (the kit's Segmented) squared to the sheet, in printed small caps.
    Scoped to the site's sections, so the kit and the shells keep their own shape. */
