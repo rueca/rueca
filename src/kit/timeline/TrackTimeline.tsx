@@ -321,7 +321,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
 
   return (
     <div className={cn('panel flex flex-col overflow-hidden', className)}>
-      <div className="flex h-header flex-none items-center gap-1 px-2">
+      <div className="flex h-header flex-none items-center gap-1 px-2 [--d-control:var(--d-icon)]">
         {toolbar}
         <div className="flex-1" />
         {props.headerExtra}
@@ -373,11 +373,11 @@ export function TrackTimeline(props: TrackTimelineProps) {
                   {props.onTrackToggle && (
                     <>
                       <button type="button" aria-label={tr.muted ? `Show ${tr.name}` : `Hide ${tr.name}`} aria-pressed={tr.muted} onClick={() => props.onTrackToggle!(tr.id, 'muted')}
-                        className={cn('flex size-icon items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.muted && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
+                        className={cn('flex h-control w-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.muted && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
                         {tr.muted ? <EyeOff size={13} strokeWidth={1.5} /> : <Eye size={13} strokeWidth={1.5} />}
                       </button>
                       <button type="button" aria-label={tr.locked ? `Unlock ${tr.name}` : `Lock ${tr.name}`} aria-pressed={tr.locked} onClick={() => props.onTrackToggle!(tr.id, 'locked')}
-                        className={cn('flex size-icon items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.locked && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
+                        className={cn('flex h-control w-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.locked && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
                         {tr.locked ? <Lock size={13} strokeWidth={1.5} /> : <LockOpen size={13} strokeWidth={1.5} />}
                       </button>
                     </>

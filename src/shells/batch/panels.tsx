@@ -323,7 +323,7 @@ export function DataPanel({ rowIssues, openPaste }: { rowIssues: (i: number) => 
           <IconButton icon={FileUp} label="Import CSV file" size="icon-sm" onClick={pickCSV} />
           <IconButton icon={FileDown} label="Download as CSV" size="icon-sm" onClick={exportCSV} />
           <span className="mx-0.5 h-4 w-px bg-line" />
-          <Button size="sm" onClick={() => addRow()}><Plus size={12} strokeWidth={1.75} />Row</Button>
+          <Button size="sm" className="h-icon-sm" onClick={() => addRow()}><Plus size={12} strokeWidth={1.75} />Row</Button>
         </PanelHeader>
       }
     >

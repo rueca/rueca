@@ -386,6 +386,8 @@
   background: color-mix(in srgb, var(--panel) 94%, transparent);
   box-shadow: var(--shadow-cluster);
   border-radius: var(--radius-cluster);
+  /* one height per bar: fields (segmented, scrub values, selects, sm buttons) take the icon buttons' height */
+  --d-control: var(--d-icon);
 }
 @utility pop { background: var(--overlay); box-shadow: var(--shadow-pop); border-radius: var(--radius-pop); }
 @utility no-select { user-select: none; -webkit-user-select: none; }

@@ -390,9 +390,9 @@ export function ParamControl({ def: d, value: v, onChange: set, changed, default
       if (display === 'stepper')
         return (
           <div className="flex w-full items-center gap-1">
-            <Button size="icon-sm" variant="default" aria-label="Decrease" onClick={() => set(Math.max(d.min ?? -Infinity, v - step))}>−</Button>
+            <Button size="control" variant="default" aria-label="Decrease" onClick={() => set(Math.max(d.min ?? -Infinity, v - step))}>−</Button>
             {scrub}
-            <Button size="icon-sm" variant="default" aria-label="Increase" onClick={() => set(Math.min(d.max ?? Infinity, v + step))}>+</Button>
+            <Button size="control" variant="default" aria-label="Increase" onClick={() => set(Math.min(d.max ?? Infinity, v + step))}>+</Button>
           </div>
         )
       return scrub

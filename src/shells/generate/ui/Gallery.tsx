@@ -107,7 +107,7 @@ export function Gallery() {
   return (
     <div className="relative flex h-full flex-col">
       {/* header */}
-      <div className="flex h-11 flex-none items-center gap-2 px-1">
+      <div className="flex h-11 flex-none items-center gap-2 px-1 [--d-control:var(--d-icon)]">
         <div className="flex min-w-0 flex-1 items-baseline gap-2">
           {session
             ? <InlineText value={session.name} onCommit={(n) => renameSession(session.id, n)} className="truncate text-title font-semibold text-fg" label="Rename session" />
@@ -115,20 +115,20 @@ export function Gallery() {
           <span className="tabular text-ui text-fg-faint">{list.length} image{list.length === 1 ? '' : 's'}</span>
         </div>
         {state.selection.length > 0 && (
-          <div className="cluster flex h-bar items-center gap-0.5 pr-1 pl-2.5">
+          <div className="cluster flex h-bar items-center gap-0.5 pr-1 pl-2.5 [--d-control:var(--d-icon)]">
             <span className="tabular pr-1 text-ui text-fg">{state.selection.length} selected</span>
             {state.selection.length === 2 && (
               <Button size="sm" variant="primary" onClick={() => ui.setState({ overlay: { type: 'compare', a: state.selection[0], b: state.selection[1], mode: 'wipe' } })}><Columns2 size={13} strokeWidth={1.5} />Compare</Button>
             )}
-            <IconButton size="icon-sm" icon={Heart} label="Favourite" shortcut="f" onClick={() => toggleFavourite(state.selection)} />
+            <IconButton icon={Heart} label="Favourite" shortcut="f" onClick={() => toggleFavourite(state.selection)} />
             {state.boards.length > 0 && (
-              <Menu align="end" trigger={<IconButton size="icon-sm" icon={FolderHeart} label="Add to board" />}
+              <Menu align="end" trigger={<IconButton icon={FolderHeart} label="Add to board" />}
                 items={state.boards.map((b) => ({ label: b.name, onClick: () => toggleBoard(state.selection, b.id) }))} />
             )}
-            <IconButton size="icon-sm" icon={Download} label="Export PNG" shortcut="mod+e" onClick={() => void exportSelected()} />
-            <IconButton size="icon-sm" icon={Trash2} label="Delete" shortcut="backspace" onClick={() => removeWithUndo(state.selection)} />
+            <IconButton icon={Download} label="Export PNG" shortcut="mod+e" onClick={() => void exportSelected()} />
+            <IconButton icon={Trash2} label="Delete" shortcut="backspace" onClick={() => removeWithUndo(state.selection)} />
             <Divider vertical />
-            <IconButton size="icon-sm" icon={X} label="Clear selection" shortcut="esc" onClick={() => select([])} />
+            <IconButton icon={X} label="Clear selection" shortcut="esc" onClick={() => select([])} />
           </div>
         )}
         <Tip label="Favourites only"><IconButton icon={Heart} label="Favourites only" active={state.favOnly} onClick={() => gallery.setState({ favOnly: !state.favOnly })} /></Tip>

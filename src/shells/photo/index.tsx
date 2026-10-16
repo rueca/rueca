@@ -531,16 +531,16 @@ function StageOverlay() {
       // overflows (comfortable clipped "Done"). The row is also the container the labels give way to on narrow stages;
       // the aspect choice and the straighten slider shrink, the fields and buttons never do
       <div className="@container pointer-events-none absolute inset-x-3 top-3 flex justify-center">
-        <div className="cluster pointer-events-auto flex h-bar max-w-full min-w-0 items-center gap-1.5 px-2">
+        <div className="cluster pointer-events-auto flex h-bar max-w-full min-w-0 items-center gap-1.5 px-2 [--d-control:var(--d-icon)]">
           <span className="shrink-0 pl-1 text-ui text-fg-muted @max-[860px]:hidden">Aspect</span>
           {/* five labelled options need ~268px: on a narrower bar they truncated to "F. O.. 1 4", so a menu takes over */}
           <div className="w-[268px] min-w-0 @max-[900px]:hidden">
-            <Segmented size="sm" label="Aspect" value={presetOf(d.aspect)} onChange={setAspect} options={ASPECTS.map((a) => ({ value: a.value, label: a.label, hint: a.label }))} />
+            <Segmented label="Aspect" value={presetOf(d.aspect)} onChange={setAspect} options={ASPECTS.map((a) => ({ value: a.value, label: a.label, hint: a.label }))} />
           </div>
           <div className="hidden w-[96px] shrink-0 @max-[900px]:block">
             <Select label="Aspect" value={presetOf(d.aspect)} onChange={setAspect} options={ASPECTS.map((a) => ({ value: a.value, label: a.label }))} />
           </div>
-          <IconButton size="icon-sm" icon={d.aspect.split(':').map(Number).reduce((a, b) => a / b) < 1 ? RectangleVertical : RectangleHorizontal} label="Swap orientation" shortcut="x" onClick={flipAspect} />
+          <IconButton icon={d.aspect.split(':').map(Number).reduce((a, b) => a / b) < 1 ? RectangleVertical : RectangleHorizontal} label="Swap orientation" shortcut="x" onClick={flipAspect} />
           <ScrubValue boxed prefix="W" value={Math.round(d.crop.w * s.imageSize.w)} onChange={(x) => setCropSize('w', x)} min={16} max={s.imageSize.w} step={1} unit="px" label="Crop width" className="w-[78px] shrink-0" />
           <ScrubValue boxed prefix="H" value={Math.round(d.crop.h * s.imageSize.h)} onChange={(x) => setCropSize('h', x)} min={16} max={s.imageSize.h} step={1} unit="px" label="Crop height" className="w-[78px] shrink-0" />
           <Divider vertical />
@@ -707,14 +707,14 @@ function ExportPopover({ open, onOpenChange, out, disabled }: { open: boolean; o
         <Popover.Positioner side="bottom" align="end" sideOffset={8} className="z-[100]">
           <Popover.Popup className="pop w-[312px] origin-[var(--transform-origin)] py-2 outline-none transition-[opacity,transform] duration-100 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0">
             <PanelHeader title="Export photo" className="-mt-2 mb-1" />
-            <Row label="Format"><Segmented size="sm" label="Format" value={format} onChange={(f) => setFormat(f as 'jpeg' | 'png')} options={[{ value: 'jpeg', label: 'JPG' }, { value: 'png', label: 'PNG' }]} /></Row>
+            <Row label="Format"><Segmented label="Format" value={format} onChange={(f) => setFormat(f as 'jpeg' | 'png')} options={[{ value: 'jpeg', label: 'JPG' }, { value: 'png', label: 'PNG' }]} /></Row>
             {format === 'jpeg' && (
               <Row label="Quality">
                 <GradientSlider value={quality} onChange={(q) => setQuality(q)} min={40} max={100} step={1} label="JPG quality" />
                 <ScrubValue value={quality} onChange={(q) => setQuality(q)} min={40} max={100} step={1} label="JPG quality" className="w-[40px] shrink-0" />
               </Row>
             )}
-            <Row label="Long edge"><Segmented size="sm" label="Size" value={size} onChange={setSize} options={[{ value: 'full', label: 'Full' }, { value: '2048', label: '2048' }, { value: '1080', label: '1080' }]} /></Row>
+            <Row label="Long edge"><Segmented label="Size" value={size} onChange={setSize} options={[{ value: 'full', label: 'Full' }, { value: '2048', label: '2048' }, { value: '1080', label: '1080' }]} /></Row>
             <Row label="Pixels"><span className="flex-1 text-right text-ui tabular text-fg">{dims}</span></Row>
             <Row label="File name"><TextInput value={name} placeholder={file.replace(/\.[a-z0-9]+$/i, '')} onChange={setName} label="File name" /></Row>
             <div className="px-pad pt-2">
@@ -724,7 +724,7 @@ function ExportPopover({ open, onOpenChange, out, disabled }: { open: boolean; o
             </div>
             <div className="mx-pad my-2.5 h-px bg-line" />
             <Row label="Look as LUT" hint="A 3D lookup table of the global colour and tone settings, for Resolve, Premiere, OBS or a camera monitor.">
-              <Segmented size="sm" label="LUT size" value={lut} onChange={setLut} options={[{ value: '17', label: '17³' }, { value: '33', label: '33³' }, { value: '65', label: '65³' }]} />
+              <Segmented label="LUT size" value={lut} onChange={setLut} options={[{ value: '17', label: '17³' }, { value: '33', label: '33³' }, { value: '65', label: '65³' }]} />
             </Row>
             <div className="px-pad pt-1.5">
               <Button variant="default" size="md" className="w-full" onClick={() => { onOpenChange(false); exportCube(Number(lut)) }}><Palette size={13} strokeWidth={1.5} />Export .cube</Button>

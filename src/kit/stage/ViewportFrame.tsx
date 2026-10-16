@@ -104,7 +104,7 @@ export function ViewportFrame({
       {chrome && <div className="flex flex-none items-center justify-center gap-2 px-4 pt-3 pb-2">
         {presets.length > 0 && (
           <div style={{ width: iconOnly ? presets.length * 30 : Math.min(360, presets.length * 88) }}>
-            <Segmented size="sm" value={active} label={`${label} preset`} iconOnly={iconOnly}
+            <Segmented value={active} label={`${label} preset`} iconOnly={iconOnly}
               onChange={(l) => { const p = presets.find((x) => x.label === l); if (p) onWidth(p.width, true) }}
               options={presets.map((p) => ({ value: p.label, label: p.label, icon: p.icon, hint: `${p.label} · ${p.width}px` }))} />
           </div>

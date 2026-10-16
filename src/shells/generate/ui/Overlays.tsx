@@ -67,7 +67,7 @@ function Compare({ a, b, mode }: { a: string; b: string; mode: 'wipe' | 'side' }
   const ratio = Math.max(A.params.w / A.params.h, B.params.w / B.params.h)
   return (
     <div className="absolute inset-0 z-30 flex flex-col overflow-hidden rounded-[var(--radius-panel)] bg-field" role="dialog" aria-label="Compare images">
-      <div className="flex h-12 flex-none items-center gap-2 px-pad">
+      <div className="flex h-12 flex-none items-center gap-2 px-pad [--d-control:var(--d-icon)]">
         <span className="text-title font-semibold text-fg">Compare</span>
         <div className="w-[170px]"><Segmented value={mode} onChange={(m) => ui.setState({ overlay: { type: 'compare', a, b, mode: m as 'wipe' | 'side' } })} label="Compare mode"
           options={[{ value: 'wipe', label: 'Wipe' }, { value: 'side', label: 'Side by side' }]} /></div>
