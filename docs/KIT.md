@@ -69,9 +69,9 @@ variables for phones. Use the names, never literals, so a part follows the densi
 **One height per row.** Things side by side share a height, so nothing sits a pixel high or low:
 - a button beside a field is the field's height and square: `<Button size="control">` (or `size-control`);
   in a layer or stack row every control is `h-control` (icon buttons `h-control w-icon-sm`)
-- inside a `Cluster`, and in the timeline transport rows, fields take the icon buttons' height
-  (`[--d-control:var(--d-icon)]`, set by the kit). Do the same on a hand-built bar that mixes segmented
-  controls or scrub values with `IconButton`s
+- inside a `Cluster` (or anything with the `cluster` class) and in the timeline transport rows, fields and
+  `sm` buttons take the icon buttons' height (the kit sets `--d-control: var(--d-icon)`). Do the same,
+  `[--d-control:var(--d-icon)]`, on a bare hand-built bar that mixes fields with `IconButton`s
 - don't mix `Segmented size="sm"` with default fields in one group of rows
 
 Hierarchy is weight, not half-pixel sizes: labels 450, section titles 550, panel titles 600. In JS (timelines,

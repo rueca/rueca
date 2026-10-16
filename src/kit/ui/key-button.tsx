@@ -83,7 +83,7 @@ export function KeyButton({ state, onToggle, onPrev, onNext, shortcut, labels, p
       <Tip label={label} shortcut={state === 'key' ? undefined : shortcut} side="left">
         <button
           type="button" aria-label={aria} aria-pressed={state === 'key'} onClick={onToggle} disabled={disabled}
-          className={cn('flex h-control w-icon items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', state === 'none' && reveal)}
+          className={cn('flex size-control items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', state === 'none' && reveal)}
         >
           <KeyDiamond state={state} />
         </button>

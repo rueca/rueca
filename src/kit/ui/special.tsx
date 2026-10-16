@@ -372,7 +372,7 @@ export function GradientEditor({ value, onChange, angle = true }: { value: { ang
 export function PaletteField({ value, onChange, max = 8, min = 1 }: { value: string[]; onChange: (v: string[], final: boolean) => void; max?: number; min?: number }) {
   const remove = (i: number) => value.length > min && onChange(value.filter((_, j) => j !== i), true)
   return (
-    <div className="flex w-full flex-wrap gap-1" role="group" aria-label="Colours">
+    <div className="flex w-full flex-wrap items-center gap-1" role="group" aria-label="Colours">
       {value.map((c, i) => (
         <Popover.Root key={i}>
           <div className="group/sw relative">
