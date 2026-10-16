@@ -96,6 +96,10 @@ stage background then dilutes the sample.
   width.
 - **Phone** — if there is a client view, load it at 375px: no horizontal scroll, icon
   buttons not squeezed.
+- **Comments** — on the dev server, `fetch('/__rueca/notes').then(r => r.headers.get('x-rueca-notes'))` is `'1'`,
+  the toolbar shows Comment and All comments, and `C` then a click on the artboard opens the composer. Missing
+  buttons mean the route (`ruecaNotes()`) or `<NoteLayer>` is missing. Next.js and static builds: absent by design,
+  so say so in the handoff.
 - **Console** — zero errors and zero React key/act warnings.
 
 ## 4. In the shell

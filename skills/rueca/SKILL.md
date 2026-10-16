@@ -59,14 +59,15 @@ you read rides along in every later turn.
    editors with layers + properties), `overlay` (full-bleed art, panels on top).
 6. **QA by measuring, not looking**: typecheck, production build, both themes, the accent
    check → `references/qa.md` before you claim it works.
-7. **Hand off.** Say what you verified versus what you only looked at.
+7. **Hand off.** Say what you verified versus what you only looked at, and how to leave a comment
+   (`C`, then click the art or a knob).
 
 ## Starter (Canvas 2D; swap the surface for other runtimes)
 
 ```tsx
 import {
   Studio, Toolbar, Brand, Panel, PanelHeader, Inspector, ParamActions, Timeline, Stage, Artboard,
-  CanvasSurface, Button, CommandPalette, createClock, createParams, defineSchema, folder, p, renderCanvasPNG,
+  CanvasSurface, Button, CommandPalette, NoteLayer, createClock, createParams, defineSchema, folder, p, renderCanvasPNG,
   useHotkeys, useValues, toast,
 } from '@/components/studio'
 import { draw as art } from './art'          // the artifact: draw(ctx, t, w, h, values), pure
@@ -101,6 +102,7 @@ export function Tool() {
       <Stage contentSize={v.size}>
         <Artboard width={v.size.w} height={v.size.h} label="Rings" background="#0b0b0f">
           <CanvasSurface params={params} clock={clock} draw={draw} />
+          <NoteLayer params={params} clock={clock} />  {/* comments: pins on the art, threads with the agent */}
         </Artboard>
       </Stage>
       <CommandPalette commands={[]} />                 {/* ⌘K and ?; adds View → Density itself */}
@@ -111,12 +113,27 @@ export function Tool() {
 
 What the starter already gives you, so don't rebuild it: `createParams` = undo/redo (⌘Z / ⇧⌘Z),
 persistence across reloads and `#p=` share links; `ParamActions` = undo buttons, named presets
-(save / apply / delete), and **Send to agent** plus **Comment** once `ruecaNotes()` is in `vite.config.ts`
-and `<NoteLayer>` is in the artboard (set both up by default: `references/notes.md`), with A/B compare (`\`),
+(save / apply / delete), **Send to agent** plus **Comment** and the comments list once the notes route
+answers (below), with A/B compare (`\`),
 copy link and the theme toggle in its "…" menu; `Inspector` = the schema's rows, scrubbable, with reset, the
 changed cue and "N more" for `more` rows; `SettingsMenu` = the toolbar button for `place: 'settings'` folders;
 `CommandPalette` = ⌘K and the `?` shortcut sheet, with View → Density (default / comfortable / compact,
 remembered per browser) added for you. Put your own commands in `commands`.
+**Comments and Send to agent are on by default.** They're how the person tells you what to change,
+pinned to the spot or the knob, without retyping it in chat, and they reply to your answers in a thread.
+Set them up in every tool that runs on a dev server you control:
+
+| Route | Set up |
+|---|---|
+| Kit on Vite (the starter) | `npx shadcn@latest add https://rueca.dev/r/notes-server.json -y`, `ruecaNotes()` in `vite.config.ts`, `.rueca/` in `.gitignore`, and the `<NoteLayer>` above |
+| Harness app around an existing page | The same, in the harness app |
+| Another Node server | `createNotesHandler()`, mounted before your routes |
+| One HTML file, no build | `scripts/notes-server.mjs` beside the page and `assets/rueca-notes.js` in it; the page draws its own pins |
+| Next.js | No route yet. "Copy as agent prompt" in the share menu covers it; say so in the handoff |
+
+Details for each are in `references/notes.md`. A static build hides the buttons by itself, so there's
+nothing to strip before shipping. Leave them out only when the person asks.
+
 Expensive params: `p.number(…, { live: false })` and apply them
 in `params.onCommit((v, meta) => …)` — that fires on pointer-up, not every drag frame.
 
@@ -170,7 +187,7 @@ so they undo, persist and share — never in `useState`.
 | `references/qa.md` | Before claiming it works |
 | `references/gotchas.md` | Something behaves strangely — not before |
 | `references/figma.md` | Content comes from Figma or the web |
-| `references/notes.md` | Setting up Send to agent, or the person says "check the notes", or `.rueca/notes/` has open notes |
+| `references/notes.md` | Setting up comments and Send to agent (every new tool), the person says "check the notes", or `.rueca/notes/` has notes waiting |
 
 `assets/theme.css` is the token set (only for the no-build route — the kit ships it).
 `assets/studio-bridge.js` lets the harness drive a page on another origin.

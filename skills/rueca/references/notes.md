@@ -5,6 +5,9 @@ on a knob. Either way the tool writes a note into the repo at `.rueca/notes/<id>
 note, act on it and reply in it. A comment is a thread: the person can answer your reply, and only
 they close it. That way nobody retypes values, or what they saw, into the chat.
 
+Every tool gets this by default (SKILL.md has the table of routes). Leave it out only when the person
+asks.
+
 ## Setting it up (every kit tool on Vite)
 
 1. Install the route: `npx shadcn@latest add https://rueca.dev/r/notes-server.json -y`, then add it to
