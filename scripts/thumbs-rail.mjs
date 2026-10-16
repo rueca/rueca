@@ -27,6 +27,28 @@ mkdirSync('public/thumbs/grid', { recursive: true })
 // 1.5× (2160×1350): the centred rail card shows up to ~1960 device pixels wide on a retina screen
 const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1.5 })
 const page = await ctx.newPage()
+
+/* Animated shells (a gradient that drifts, a timeline playing) are shot where the homepage's live frame first
+   shows them, LIVE_AT into their own clock, so the picture under the hero and the live shell fading in over it
+   agree (they were ~2s apart, and the gradient visibly jumped). Playwright's fake clock holds time while the page
+   loads, steps it only as far as needed to mount the shell, then runs it LIVE_AT more. Still shells don't care. */
+const LIVE_AT = 500
+async function loadAt(pg, url, ready) {
+  await pg.clock.pauseAt(new Date(Date.now() + 1000))
+  for (let tries = 0; ; tries++) {
+    try { await pg.goto(url); break }
+    catch (err) { if (tries >= 3) throw err; await pg.waitForTimeout(1500) }
+  }
+  // step fake time in small amounts until the shell is mounted (lazy chunks, Suspense's reveal timer)
+  for (let i = 0; i < 300; i++) {
+    if (await pg.evaluate(ready).catch(() => false)) break
+    await pg.clock.runFor(20); await pg.waitForTimeout(30)
+  }
+  // real time for images, fonts and shaders to arrive, with the shell's clock held
+  await pg.waitForTimeout(1800)
+  await pg.clock.runFor(LIVE_AT)
+}
+await page.clock.install({ time: new Date() })
 // the dev server's notes route shows "Send to agent", a dev-only button the public site never has: hide it
 await ctx.route('**/__rueca/notes', (r) => r.abort())
 
@@ -41,14 +63,9 @@ mkdirSync('public/thumbs/blueprints', { recursive: true })
 for (const id of shells) {
   for (const theme of ['dark', 'light']) {
     await page.addInitScript((t) => localStorage.setItem('studio:theme', t), theme)
-    // the dev server can reload under us (another session saving files) — retry
-    for (let tries = 0; ; tries++) {
-      try { await page.goto(`${BASE}/?qa=${Date.now()}#/${id}`); break }
-      catch (err) { if (tries >= 3) throw err; await page.waitForTimeout(1500) }
-    }
-    // a dev-server reload mid-capture leaves a blank white page: wait for the shell to be on screen
-    await page.waitForFunction(() => { const r = document.getElementById('root'); return !!r && r.querySelectorAll('*').length > 40 && !/Loading/.test(r.innerText.slice(0, 80)) }, null, { timeout: 15000 }).catch(() => {})
-    await page.waitForTimeout(2200)
+    // retried: the dev server can reload under us (another session saving files). Ready = the shell is on
+    // screen (a reload mid-capture leaves a blank white page)
+    await loadAt(page, `${BASE}/?qa=${Date.now()}#/${id}`, () => { const r = document.getElementById('root'); return !!r && r.querySelectorAll('*').length > 40 && !/Loading/.test(r.innerText.slice(0, 80)) })
     await page.addStyleTag({ content: NEUTRAL_ACCENT_CSS })
     await page.waitForTimeout(100)
     const shot = await page.screenshot({ path: `public/thumbs/rail/${id}-${theme}.jpg`, type: 'jpeg', quality: 86 })
@@ -71,15 +88,11 @@ const CLIENT = ['shader']
 mkdirSync('public/thumbs/client', { recursive: true })
 const phone = await browser.newContext({ viewport: { width: 440, height: 680 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true })
 const pp = await phone.newPage()
+await pp.clock.install({ time: new Date() })
 for (const id of shells.filter((i) => CLIENT.includes(i))) {
   for (const theme of ['dark', 'light']) {
     await pp.addInitScript((t) => localStorage.setItem('studio:theme', t), theme)
-    for (let tries = 0; ; tries++) {
-      try { await pp.goto(`${BASE}/?qa=${Date.now()}#/${id}?client`); break }
-      catch (err) { if (tries >= 3) throw err; await pp.waitForTimeout(1500) }
-    }
-    await pp.waitForFunction(() => { const r = document.getElementById('root'); return !!r && r.querySelectorAll('*').length > 40 }, null, { timeout: 15000 }).catch(() => {})
-    await pp.waitForTimeout(2500)
+    await loadAt(pp, `${BASE}/?qa=${Date.now()}#/${id}?client`, () => { const r = document.getElementById('root'); return !!r && r.querySelectorAll('*').length > 40 })
     await pp.addStyleTag({ content: NEUTRAL_ACCENT_CSS })
     await pp.waitForTimeout(100)
     const shot = await pp.screenshot({ type: 'png' })

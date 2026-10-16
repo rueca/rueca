@@ -3,11 +3,12 @@ import type { ShellMeta } from '@/shells/types'
 import { Chip } from '@/landing/parts'
 import { Hand } from '@/landing/plate'
 import { gridThumb } from './registry'
+import { thumbUrl } from './thumbs'
 
 /** Trial (Rafael, 10 Oct): true shows each shell empty, its stage blank and the window squeezed
     to its chrome (scripts/thumbs-empty.mjs); false goes back to the full screenshots. */
 const EMPTY_THUMBS = true
-const emptyThumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/empty/${id}-${theme}.webp`
+const emptyThumb = (id: string, theme: string) => thumbUrl(`thumbs/empty/${id}-${theme}.webp`)
 
 /** A shell's picture as the shells page shows it: a square of field colour with the screenshot
     mounted in it, like a print on a plate. Shared with the landing's phone shell row. */
