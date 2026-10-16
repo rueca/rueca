@@ -47,7 +47,7 @@ export function PreviewPane() {
   )
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-[var(--radius-panel)] bg-well shadow-[inset_0_0_0_1px_var(--line)]">
+    <div className="relative h-full w-full overflow-hidden rounded-[var(--radius-panel)] bg-field shadow-[inset_0_0_0_1px_var(--line)]">
       <Stage contentSize={{ w: res, h: res }} padding={44} overlay={hud}>
         <Artboard width={res} height={res} label={label || 'Preview'} background="transparent">
           <div className={cn('absolute inset-0', backdrop)} style={{ background: bg }} />

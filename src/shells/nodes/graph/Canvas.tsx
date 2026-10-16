@@ -140,7 +140,20 @@ export function GraphCanvas() {
     }
   }
 
-  useEffect(() => { const t = setTimeout(() => rf.fitView({ padding: 0.18 }), 30); return () => clearTimeout(t) }, [rf])
+  // Fit the graph whenever the pane changes size (the split view settles its width after mount, and the user
+  // can drag it) until the user pans or zooms; after that their view stands.
+  const userMoved = useRef(false)
+  useEffect(() => {
+    const el = wrap.current
+    if (!el) return
+    let t = 0
+    const ro = new ResizeObserver(() => {
+      if (userMoved.current) return
+      clearTimeout(t); t = window.setTimeout(() => { if (visible()) rf.fitView({ padding: 0.18 }) }, 30)
+    })
+    ro.observe(el)
+    return () => { ro.disconnect(); clearTimeout(t) }
+  }, [rf])
 
   const fromLabel = add?.from && (
     <span className="flex items-center gap-1.5">
@@ -153,7 +166,7 @@ export function GraphCanvas() {
     <div
       ref={wrap}
       tabIndex={-1}
-      className="relative h-full w-full overflow-hidden rounded-[var(--radius-panel)] bg-well shadow-[inset_0_0_0_1px_var(--line)] outline-none"
+      className="relative h-full w-full overflow-hidden rounded-[var(--radius-panel)] bg-field shadow-[inset_0_0_0_1px_var(--line)] outline-none"
       onPointerMove={(e) => { pointer.current = { x: e.clientX, y: e.clientY } }}
       onPointerLeave={() => { pointer.current = null }}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy' }}
@@ -173,6 +186,7 @@ export function GraphCanvas() {
         isValidConnection={isValidConnection}
         connectionLineComponent={TypedConnectionLine}
         connectionRadius={28}
+        onMoveStart={(e) => { if (e) userMoved.current = true }}
         onNodeDragStop={() => commit()}
         onSelectionDragStop={() => commit()}
         onDoubleClick={(e) => { if ((e.target as HTMLElement).classList.contains('react-flow__pane')) openAt({ x: e.clientX, y: e.clientY }) }}

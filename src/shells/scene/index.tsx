@@ -214,10 +214,10 @@ export default function SceneShell() {
               >
                 <Divider vertical className="mx-1" />
                 <IconButton tipSide="top" icon={Box} label={v.projection === 'perspective' ? 'Switch to orthographic' : 'Switch to perspective'} shortcut="m" active={v.projection === 'orthographic'}
-                  onClick={() => params.setValue('projection', v.projection === 'perspective' ? 'orthographic' : 'perspective')} className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" />
-                <IconButton tipSide="top" icon={Grid3x3} label="Grid floor" shortcut="g" active={!!v.grid} onClick={() => toggle('grid')} className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" />
-                <IconButton tipSide="top" icon={Orbit} label="Turntable" shortcut="o" active={!!v.turntable} onClick={() => toggle('turntable')} className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" />
-                <IconButton tipSide="top" icon={Focus} label="Frame selection" shortcut="f" onClick={() => engine()?.frame()} className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" />
+                  onClick={() => params.setValue('projection', v.projection === 'perspective' ? 'orthographic' : 'perspective')} size="dock" />
+                <IconButton tipSide="top" icon={Grid3x3} label="Grid floor" shortcut="g" active={!!v.grid} onClick={() => toggle('grid')} size="dock" />
+                <IconButton tipSide="top" icon={Orbit} label="Turntable" shortcut="o" active={!!v.turntable} onClick={() => toggle('turntable')} size="dock" />
+                <IconButton tipSide="top" icon={Focus} label="Frame selection" shortcut="f" onClick={() => engine()?.frame()} size="dock" />
               </ToolDock>
             </div>
             <AxisGizmoSlot />
@@ -301,7 +301,7 @@ function ViewChip({ v }: { v: V }) {
           { type: 'separator' },
           { label: 'Save current view', icon: Plus, shortcut: 'shift+v', onClick: saveView },
         ]}
-        trigger={<Button size="sm" className="gap-1"><Camera size={13} strokeWidth={1.5} />{cur?.name ?? 'Free camera'}<ChevronDown size={12} className="text-fg-faint" /></Button>}
+        trigger={<Button size="sm" className="gap-1"><Camera size={13} strokeWidth={1.5} />{cur?.name ?? 'Free camera'}<ChevronDown size={12} strokeWidth={1.75} className="text-fg-faint" /></Button>}
       />
     </div>
   )

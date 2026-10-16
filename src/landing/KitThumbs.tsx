@@ -21,14 +21,6 @@ function Tile({ children, className }: { children: ReactNode; className?: string
   )
 }
 
-/** A faint dot grid that fades out towards the edges. Shared with How it works. */
-export function DotGrid({ size = 12 }: { size?: number }) {
-  return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_78%)]"
-      style={{ backgroundImage: 'radial-gradient(var(--line-strong) 0.9px, transparent 0.9px)', backgroundSize: `${size}px ${size}px` }} />
-  )
-}
-
 export const KIT_THUMBS: Record<string, () => ReactNode> = Object.fromEntries(
   ['Controls', 'Layout', 'Time', 'Structure', 'Workflow', 'Hand-off'].map((g) => [g, () => <Tile><KitArt group={g} /></Tile>]),
 )

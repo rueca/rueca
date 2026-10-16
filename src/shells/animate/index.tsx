@@ -168,7 +168,7 @@ function AnimationsPanel() {
                 <Tip label={a.loop === 'loop' ? 'Loops' : a.loop === 'once' ? 'Plays once' : 'Ping-pong'}><span className="text-fg-faint"><Icon size={12} strokeWidth={1.5} /></span></Tip>
                 <span className="w-9 text-right tabular text-ui text-fg-faint">{(a.duration / 1000).toFixed(1)}s</span>
                 <span className="text-ui-sm text-fg-faint tabular opacity-0 group-hover/row:opacity-100">{i + 1}</span>
-                <Menu align="end" trigger={<button type="button" aria-label="Animation options" onClick={(e) => e.stopPropagation()} className="flex size-icon-sm items-center justify-center rounded-control text-fg-faint opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/row:opacity-100 focus-visible:opacity-100 data-[popup-open]:opacity-100"><Ellipsis size={14} strokeWidth={1.5} /></button>}
+                <Menu align="end" trigger={<button type="button" aria-label="Animation options" onClick={(e) => e.stopPropagation()} className="flex size-icon-sm focus-visible:ring-2 focus-visible:ring-signal items-center justify-center rounded-control text-fg-faint opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/row:opacity-100 focus-visible:opacity-100 data-[popup-open]:opacity-100"><Ellipsis size={14} strokeWidth={1.5} /></button>}
                   items={[
                     { label: 'Rename', onClick: () => setRenaming(a.id) },
                     { label: 'Duplicate', icon: CopyPlus, onClick: () => addAnim(a) },

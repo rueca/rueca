@@ -4,8 +4,6 @@
 export type Vec3 = [number, number, number]
 
 const toLin = (c: number) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
-const toGam = (c: number) => (c <= 0.0031308 ? 12.92 * c : 1.055 * c ** (1 / 2.4) - 0.055)
-const clamp01 = (x: number) => Math.min(1, Math.max(0, x))
 
 export function hexToRgb01(hex: string): Vec3 {
   let h = hex.replace('#', '').trim()
@@ -13,9 +11,6 @@ export function hexToRgb01(hex: string): Vec3 {
   const n = parseInt(h.slice(0, 6), 16) || 0
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255]
 }
-
-export const rgb01ToHex = ([r, g, b]: Vec3) =>
-  '#' + [r, g, b].map((x) => Math.round(clamp01(x) * 255).toString(16).padStart(2, '0')).join('')
 
 // sRGB → OKLab, after Björn Ottosson's reference (c) 2020, public domain / MIT. See THIRD_PARTY_NOTICES.md
 export function hexToOklab(hex: string): Vec3 {
@@ -28,22 +23,6 @@ export function hexToOklab(hex: string): Vec3 {
     1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
     0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
   ]
-}
-
-export function oklabToHex([L, a, b]: Vec3): string {
-  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
-  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
-  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3
-  return rgb01ToHex([
-    toGam(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
-    toGam(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
-    toGam(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
-  ])
-}
-
-export const oklchToHex = (L: number, C: number, hDeg: number) => {
-  const h = (hDeg * Math.PI) / 180
-  return oklabToHex([L, C * Math.cos(h), C * Math.sin(h)])
 }
 
 /** Small seeded PRNG (mulberry32) so a seed always yields the same palette. */

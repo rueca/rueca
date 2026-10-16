@@ -32,7 +32,6 @@ export const toHex = ([r, g, b, a]: RGBA) => {
 }
 
 /* --- deterministic randomness --- */
-export { mulberry32 }
 const hash2 = (x: number, y: number, s: number) => {
   let h = (x * 374761393 + y * 668265263 + s * 2147483647) | 0
   h = Math.imul(h ^ (h >>> 13), 1274126177)

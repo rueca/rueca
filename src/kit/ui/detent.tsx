@@ -154,7 +154,7 @@ export function DetentSlider({
       className={cn('group/slider relative w-full min-w-0 no-select data-[disabled]:opacity-40', className)}
     >
       <Base.Control data-studio-slider-control className="flex w-full cursor-default touch-pan-y flex-col">
-        <div className="flex h-6 items-center">
+        <div className="flex h-control items-center">
           <Base.Track className="relative h-[3px] w-full rounded-full bg-track shadow-[0_0_0_0.5px_var(--line-strong)]">
             <div className="absolute inset-y-0 rounded-full bg-fill" style={{ left: `${Math.min(from, at)}%`, width: `${Math.abs(at - from)}%` }} />
             {list.map((_, i) => {

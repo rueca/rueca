@@ -271,6 +271,11 @@
           "target": "@components/studio/core/ease.ts"
         },
         {
+          "path": "src/kit/core/focus.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/focus.ts"
+        },
+        {
           "path": "src/kit/core/geometry.ts",
           "type": "registry:lib",
           "target": "@components/studio/core/geometry.ts"
@@ -977,6 +982,11 @@
         "https://rueca.dev/r/tooltip.json"
       ],
       "files": [
+        {
+          "path": "src/kit/layout/brand-override.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/layout/brand-override.tsx"
+        },
         {
           "path": "src/kit/layout/ClientView.tsx",
           "type": "registry:component",

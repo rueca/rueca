@@ -21,3 +21,6 @@ brand/moodboards/
 # Finder / iCloud conflict copies ("theme 2.css", "src 2")
 * 2.*
 * 2
+
+# TypeScript incremental build state
+*.tsbuildinfo

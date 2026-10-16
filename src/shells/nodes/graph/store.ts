@@ -83,10 +83,6 @@ graph.subscribe((s, prev) => {
   saveT = setTimeout(() => { saveLocal(LS, snap(graph.getState())) }, 300)
 })
 
-/* listeners told when history jumps (undo/redo/load) so per-node param stores can resync */
-const jumpListeners = new Set<() => void>()
-export const onJump = (fn: () => void) => { jumpListeners.add(fn); return () => jumpListeners.delete(fn) }
-
 export function commit() {
   const s = graph.getState()
   const now = snap(s)
@@ -98,7 +94,6 @@ function restore(json: string) {
   const sel = new Set(graph.getState().nodes.filter((n) => n.selected).map((n) => n.id))
   const g = fromSaved(JSON.parse(json))
   graph.setState({ ...g, nodes: g.nodes.map((n) => ({ ...n, selected: sel.has(n.id) })), committed: json, live: false })
-  jumpListeners.forEach((fn) => fn())
 }
 
 export function undo() {
@@ -131,7 +126,6 @@ export function load(g: SavedGraph) {
   graph.setState({ ...next, live: false })
   const now = snap(next)
   graph.setState({ committed: now, past: [...s.past, s.committed].slice(-150), future: [] })
-  jumpListeners.forEach((fn) => fn())
 }
 
 /* --- React Flow change handlers --- */

@@ -55,7 +55,6 @@ export interface Persona {
 export interface JourneyDoc { title: string; personas: Persona[] }
 
 export const uid = (p = 'c') => makeUid(p)
-export const initials = (name: string) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || '?'
 export const PERSONA_HUES: string[] = [DYE.cielo, DYE.gualda, DYE.cochinilla, DYE.malva, DYE.hoja, DYE.achiote]
 
 export const emoji = (v: number) => (v >= 1.5 ? '😄' : v >= 0.5 ? '🙂' : v > -0.5 ? '😐' : v > -1.5 ? '🙁' : '😣')
@@ -217,5 +216,3 @@ export const demoDoc = (): JourneyDoc => ({ title: 'Gabinete · first visit', pe
 export const blankStages = (prefix: string): Stage[] =>
   STAGE_NAMES.map((name, i) => ({ id: `${prefix}-s${i}`, name, goal: '', duration: '', emotion: 0, feeling: '' }))
 
-/** A user-picked hue, darkened just enough that white text on it clears WCAG AA (≥4.5:1). */
-export { readableOn as deepen } from '@kit'

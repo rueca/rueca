@@ -39,8 +39,6 @@ export function useHistoryHotkeys(history: HistoryLike) {
     'shift+mod+z,mod+y': { run: () => { history.redo() }, label: 'Redo', group: 'Edit' },
   }, [history], { priority: 1 })
 }
-/** @deprecated use useHistoryHotkeys */
-export const useParamHotkeys = (params: AnyParams) => useHistoryHotkeys(params)
 
 export function HistoryButtons({ params, history }: { params?: AnyParams; history?: HistoryLike }) {
   const h = (history ?? params)!

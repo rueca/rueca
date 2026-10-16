@@ -38,7 +38,7 @@ const measurer = typeof document !== 'undefined' ? document.createElement('canva
 export function textLayout(ctx: CanvasRenderingContext2D, c: Clip, W: number, U: number, chars = Infinity) {
   const px = ((c.size ?? 80) * U) / 1080
   ctx.font = `${c.weight ?? 600} ${px}px ${FONTS[c.font ?? 'sans'].css}`
-  try { (ctx as unknown as { letterSpacing: string }).letterSpacing = `${(c.tracking ?? 0) * px}px` } catch { /* unsupported */ }
+  try { ctx.letterSpacing = `${(c.tracking ?? 0) * px}px` } catch { /* unsupported */ }
   const maxW = (c.maxWidth ?? 0.9) * W
   const lines: string[] = []
   for (const para of (c.text ?? '').split('\n')) {

@@ -30,7 +30,7 @@ export const clearMeasureCache = () => cache.clear()
 
 export function setFont(ctx: CanvasRenderingContext2D, t: TextStyle) {
   ctx.font = `${t.weight} ${t.size}px ${fontCss(t.family)}`
-  ;(ctx as any).letterSpacing = `${(t.letterSpacing / 100) * t.size}px`
+  ;ctx.letterSpacing = `${(t.letterSpacing / 100) * t.size}px`
 }
 
 /** Wrap text to a width (Infinity = no wrapping). Returns lines and the widest line. */

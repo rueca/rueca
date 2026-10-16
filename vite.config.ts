@@ -24,7 +24,7 @@ function thumbVersions(dir = 'public/thumbs', rel = 'thumbs'): Record<string, st
 
 export default defineConfig({
   define: { __THUMB_VERSIONS__: JSON.stringify(thumbVersions()) },
-  // GitHub Pages serves a project site under /<repo>/; the deploy workflow sets BASE_PATH.
+  // Vercel serves at /. Set BASE_PATH to host under a sub-path (a GitHub Pages project site: /<repo>/).
   base: process.env.BASE_PATH || '/',
   plugins: [
     react(),

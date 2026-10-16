@@ -60,7 +60,6 @@ export function PersonasPanel() {
         <Row label="Age"><ScrubValue boxed value={p.age} min={12} max={99} onChange={(age, f) => editPersona((x) => ({ ...x, age }), { commit: f, label: 'Age' })} className="flex-1" label="Age" /></Row>
         <div className="px-pad pt-2">
           <div className="relative rounded-cluster bg-well px-pad py-2.5 text-ui leading-relaxed text-fg italic">
-            <span aria-hidden className="absolute -top-1 left-2 text-[22px] leading-none text-fg-faint not-italic">“</span>
             <InlineText bare allowEmpty value={p.quote} multiline onCommit={(quote) => set({ quote })} placeholder="Add a quote in their words" className="block whitespace-pre-wrap" label="Quote" />
           </div>
         </div>
@@ -86,7 +85,7 @@ function ListSection({ title, items, onChange, add }: { title: string; items: st
           <span className="mt-[7px] size-1 shrink-0 rounded-full bg-fg-faint" />
           <InlineText bare allowEmpty value={g} multiline onCommit={(s) => onChange(s ? items.map((x, j) => (j === i ? s : x)) : items.filter((_, j) => j !== i))} className="block min-w-0 flex-1 text-ui leading-relaxed text-fg" label={title} />
           <button type="button" aria-label="Remove" onClick={() => onChange(items.filter((_, j) => j !== i))}
-            className="mt-0.5 flex size-icon-sm items-center justify-center rounded-control text-fg-faint opacity-0 hover:bg-hover hover:text-fg group-hover/item:opacity-100 focus-visible:opacity-100"><X size={11} /></button>
+            className="mt-0.5 flex size-icon-sm items-center outline-none focus-visible:ring-2 focus-visible:ring-signal justify-center rounded-control text-fg-faint opacity-0 hover:bg-hover hover:text-fg group-hover/item:opacity-100 focus-visible:opacity-100"><X size={11} /></button>
         </div>
       ))}
     </Section>

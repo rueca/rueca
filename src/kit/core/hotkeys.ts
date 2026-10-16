@@ -84,8 +84,16 @@ export function splitCombos(s: string) {
   return out
 }
 
-interface Binding { id: number; combo: string; run: (e: KeyboardEvent) => void; label?: string; group?: string; priority: number; when?: () => boolean; order: number }
+interface Binding { id: number; combo: string; run: (e: KeyboardEvent) => void; label?: string; group?: string; priority: number; when?: () => boolean; order: number; modal?: boolean }
 let bindings: Binding[] = []
+/* While a modal is open (the ? sheet, ⌘K, a kit Dialog) the tool behind it must not react: "t" flipped the theme
+   and "2" switched modes under the shortcut sheet. Only bindings registered with { modal: true } still run. */
+let paused = 0
+export function pauseHotkeys() {
+  paused++
+  let done = false
+  return () => { if (!done) { done = true; paused-- } }
+}
 let seq = 0
 const subs = new Set<() => void>()
 const notify = () => subs.forEach((f) => f())
@@ -100,7 +108,7 @@ function install() {
   let spaceUsed = false
   window.addEventListener('keydown', (e) => {
     if (e.defaultPrevented || typing(e) || onField(e)) return
-    const hits = bindings.filter((b) => splitCombos(b.combo).some((c) => matches(c, e)) && (!b.when || b.when()))
+    const hits = bindings.filter((b) => (!paused || b.modal) && splitCombos(b.combo).some((c) => matches(c, e)) && (!b.when || b.when()))
     if (!hits.length) return
     if (onButton(e, normKey(e.key))) return
     hits.sort((a, b) => b.priority - a.priority || b.order - a.order)
@@ -121,7 +129,7 @@ function install() {
   window.addEventListener('blur', () => { spacePending = null })
 }
 
-export function useHotkeys(map: Record<string, HotkeyHandler>, deps: unknown[] = [], opts: { priority?: number; group?: string; enabled?: boolean } = {}) {
+export function useHotkeys(map: Record<string, HotkeyHandler>, deps: unknown[] = [], opts: { priority?: number; group?: string; enabled?: boolean; modal?: boolean } = {}) {
   const ref = useRef(map)
   ref.current = map
   const priority = opts.priority ?? 10
@@ -134,7 +142,7 @@ export function useHotkeys(map: Record<string, HotkeyHandler>, deps: unknown[] =
       const h = ref.current[combo]
       const meta = typeof h === 'object' && h ? h : undefined
       return {
-        id: ++seq, combo, priority, order: seq, group: meta?.group ?? opts.group, label: meta?.label,
+        id: ++seq, combo, priority, order: seq, group: meta?.group ?? opts.group, label: meta?.label, modal: opts.modal,
         when: meta?.when,
         run: (e: KeyboardEvent) => { const cur = ref.current[combo]; if (typeof cur === 'function') cur(e); else if (cur) cur.run(e) },
       }

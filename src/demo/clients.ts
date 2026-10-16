@@ -34,9 +34,6 @@ export const DYE = {
   anil: '#3D5BD6',
 } as const
 
-/** Dark-theme ink for engravings, as the animate plate uses (a dimmed grey, not white). */
-export const INK_DARK = '#B6B5B4'
-
 /** A demo picture's URL (works under any Vite base). */
 export const demo = (path: string) => `${import.meta.env.BASE_URL}demo/${path}`
 

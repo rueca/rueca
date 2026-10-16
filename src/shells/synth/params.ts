@@ -13,7 +13,8 @@ const validPattern = (v: unknown) => !!v && typeof v === 'object' &&
 const ms = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(2)}s` : `${Math.round(n)}ms`)
 const hz = (n: number) => (n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 1 : 2)}k` : `${Math.round(n)}`)
 const pct = (n: number) => `${Math.round(n * 100)}%`
-const db = (n: number) => (n <= 0.001 ? '−∞ dB' : `${(20 * Math.log10(n)).toFixed(1)} dB`)
+// the mixer's five knobs share a row, so the readout is the number alone (the section title carries "dB"); a true minus
+const db = (n: number) => (n <= 0.001 ? '−∞' : (20 * Math.log10(n)).toFixed(1).replace('-', '−'))
 
 const track = <I extends TrackId>(id: I, level: number, dly: number, rev: number) => ({
   [`${id}Lvl`]: p.number(level, { min: 0, max: 1, step: 0.01, label: 'Level', fmt: db, unit: 'dB', display: 'knob' }),

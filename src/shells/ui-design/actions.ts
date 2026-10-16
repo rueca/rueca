@@ -5,8 +5,8 @@ import * as S from './model/store'
 import { prefs } from './model/prefs'
 import { renderNodeToCanvas } from './render/paint'
 import { cssFor } from './render/css'
-import { find, locate } from './model/tree'
-import { camera, zoomToBox } from './canvas/camera'
+import { locate } from './model/tree'
+import { zoomToBox } from './canvas/camera'
 import { union } from './model/layout'
 import type { Node } from './model/types'
 
@@ -72,7 +72,6 @@ export function zoomToFitPage() {
   const s = S.get()
   zoomToBox(union(S.nodesOf(s).map((n) => S.layout(s).get(n.id)!).filter(Boolean)))
 }
-export function zoomBy(k: number) { camera.zoomTo(camera.getState().zoom * k) }
 
 export function toggleHidden() {
   const sel = S.selectedNodes()
@@ -92,5 +91,3 @@ export function setOpacityKey(digit: number) {
   if (!S.get().selection.length) return
   S.patchSelection({ opacity: digit === 0 ? 1 : digit / 10 }, { label: 'Opacity' })
 }
-
-export function nameOf(id: string) { return find(S.nodesOf(), id)?.name ?? '' }

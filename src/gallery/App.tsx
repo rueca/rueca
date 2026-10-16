@@ -4,7 +4,7 @@ import { ErrorBoundary } from '@kit/system/error-boundary'
 import { DesktopNotice } from './DesktopNotice'
 import { SHELLS } from './registry'
 import { fresh } from './stale'
-import { BrandOverride } from '@kit/layout/Toolbar'
+import { BrandOverride } from '@kit/layout/brand-override'
 import { Mark } from '@/landing/parts'
 
 /* Routes: #/ landing · #/shells every shell · #/<id> one shell · anything else: "no such tool".

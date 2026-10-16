@@ -8,13 +8,16 @@
        end={<><Cluster>…</Cluster><Button variant="primary">Export</Button></>}
      />
 --------------------------------------------------------------------------- */
-import { createContext, forwardRef, useContext, type ButtonHTMLAttributes, type ComponentType, type ReactNode } from 'react'
+import { forwardRef, useContext, type ButtonHTMLAttributes, type ComponentType, type ReactNode } from 'react'
 import { Command, Keyboard, LayoutGrid } from 'lucide-react'
 import { cn } from '../core/cn'
 import { useStudio } from './Studio'
 import { Menu, type MenuItem } from '../ui/controls'
 import { Tip } from '../ui/tooltip'
 import { openPalette, usePaletteAvailable } from '../system/palette'
+import { BrandOverrideContext } from './brand-override'
+
+export { BrandOverride } from './brand-override'
 
 export function Toolbar({ start, center, end, className }: { start?: ReactNode; center?: ReactNode; end?: ReactNode; className?: string }) {
   return (
@@ -39,18 +42,6 @@ export function Cluster({ children, className }: { children: ReactNode; classNam
  * the active look. A fixed caption repeats what the artboard already shows, so leave it out.
  *   <Brand name="Dither lab" doc={file.name} mark={<Glyph />} />
  */
-const BrandOverrideContext = createContext<{ mark: ReactNode; tile: boolean } | null>(null)
-
-/**
- * A host that runs many tools (a gallery, a product site) gives them one mark: every <Brand> inside shows
- * `mark` in place of its own. `tile={false}` (the default) draws it bare, in ink, the way a logo sits in a
- * site header; `tile` keeps the inverted square. A tool used on its own keeps its own mark.
- *   <BrandOverride mark={<Logo />}><Tool /></BrandOverride>
- */
-export function BrandOverride({ mark, tile = false, children }: { mark: ReactNode; tile?: boolean; children: ReactNode }) {
-  return <BrandOverrideContext.Provider value={{ mark, tile }}>{children}</BrandOverrideContext.Provider>
-}
-
 export function Brand({ name, doc, mark, href = '#/', menu = [] }: {
   name: string; doc?: ReactNode; mark?: ReactNode
   /** where "All tools" goes; false drops it */

@@ -14,6 +14,7 @@ import type { Shell } from '@/gallery/registry'
 import { Chip, CommandLine, Heading, scrollToSection } from './parts'
 import { CELL, Row, Sheet, SheetSection, TitleStrip } from './plate'
 import { useReveals } from './reveals'
+import { useScrollMemory } from './scroll-memory'
 import { SiteNav, usePendingSection } from './SiteNav'
 import { LiveShell } from './LiveShell'
 import { HeroArrow } from './HeroArrow'
@@ -27,6 +28,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
   const { theme } = useTheme()
   const root = useRef<HTMLDivElement>(null)
   useReveals(root)
+  useScrollMemory(root)
   usePendingSection()
   const kitGrid = useRef<HTMLDivElement>(null)
   useKitScroll(kitGrid)
@@ -176,7 +178,7 @@ const SHEETS = 6
 
 /* Two navs: the bar at the top of the page scrolls away with it, and once the
    reader is past it a floating pill (80% of the body, blurred) drops in from above.
-   "The body" is Container's content column: 1120 minus its 32px gutters, so 1056 wide. */
+   "The body" is the 1120 content column minus its 32px gutters, so 1056 wide. */
 
 function InstallSection() {
   const [tab, setTab] = useState<string>(installs[0].id)

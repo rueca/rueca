@@ -39,6 +39,9 @@ export interface DocStore<D> extends StoreApi<DocState<D>> {
   get(): D
   set(next: D | ((d: D) => D), opts?: { commit?: boolean; label?: string }): void
   commit(label?: string): void
+  /** commit `label` once a burst of live edits stops (arrow-key nudges): one undo step, like a drag. An undo
+   *  or another commit during the burst commits it first. */
+  settle(label?: string, delay?: number): void
   undo(): string | undefined
   redo(): string | undefined
   canUndo(): boolean
@@ -132,7 +135,10 @@ export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> 
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') flush() })
   }
 
+  let settleTimer: ReturnType<typeof setTimeout> | undefined
+  let settleLabel: string | undefined
   const commit = (label?: string) => {
+    clearTimeout(settleTimer); settleTimer = undefined
     const s = store.getState()
     // a change that ends where it started (a drop that snapped back, a revert) is no undo step (QA: video clip drop)
     if (!s.dirty || s.doc === s.committed || equal(s.doc, s.committed)) { if (s.dirty) store.setState({ dirty: false, doc: s.committed }); return }
@@ -153,8 +159,13 @@ export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> 
       if (o.commit !== false) commit(o.label)
     },
     commit,
+    settle: (label?: string, delay = 500) => {
+      settleLabel = label
+      clearTimeout(settleTimer)
+      settleTimer = setTimeout(() => commit(settleLabel), delay)
+    },
     undo: () => {
-      if (store.getState().dirty) commit()
+      if (store.getState().dirty) commit(settleTimer ? settleLabel : undefined)
       const st = store.getState()
       const prev = st.past.at(-1)
       if (!prev) return undefined
@@ -164,6 +175,7 @@ export function createDocStore<D>(initial: D, opts: DocOptions<D>): DocStore<D> 
       return prev.label
     },
     redo: () => {
+      if (settleTimer && store.getState().dirty) commit(settleLabel)
       const s = store.getState()
       const [next, ...rest] = s.future
       if (!next) return undefined

@@ -6,6 +6,7 @@ import type { ShellMeta } from '@/shells/types'
 import '@/landing/landing.css'
 import { SiteNav } from '@/landing/SiteNav'
 import { useReveals } from '@/landing/reveals'
+import { useScrollMemory } from '@/landing/scroll-memory'
 import { CELL, Field, Hand, Row, Sheet } from '@/landing/plate'
 import { ShellCard, categoriesOf } from './ShellCard'
 import { FOOTER_LINKS, SiteFooter } from '@/landing/SiteFooter'
@@ -46,6 +47,7 @@ export function Gallery({ shells }: { shells: ShellMeta[] }) {
   const { theme } = useTheme()
   const root = useRef<HTMLDivElement>(null)
   useReveals(root)
+  useScrollMemory(root)
   const [cat, setCat] = useState('All')
   const list = shells.filter((s) => cat === 'All' || s.category === cat)
   return (

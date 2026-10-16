@@ -179,7 +179,8 @@ html[data-reveals] .site [data-reveal='write'][data-in] .hw-pen path {
 }
 @keyframes pen-write { from { stroke-dashoffset: var(--len); } to { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  html[data-reveals] .site [data-reveal='write'] .hw-pen path { stroke-dashoffset: 0; animation: none; }
+  /* !important: the animating rules above are more specific (they add [data-in] / :not([data-in])) */
+  html[data-reveals] .site [data-reveal='write'] .hw-pen path { stroke-dashoffset: 0 !important; animation: none !important; }
 }
 
 /* A coloured plate: sheet 6 and the footer printed on Platino, the brand's 90s chrome grey

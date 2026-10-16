@@ -176,7 +176,7 @@
   --signal-strong: #0a6fc0;
   --signal-fg: #ffffff;
   --signal-soft: rgba(11, 132, 224, 0.12);
-  --signal-text: #0866b0;
+  --signal-text: #075a9c; /* ≥4.5:1 on signal-soft too (the Animate badge) */
 
   --key: #c98a00;
   --rec: #e5383b;
@@ -231,7 +231,7 @@
     --signal-strong: #0a6fc0;
     --signal-fg: #ffffff;
     --signal-soft: rgba(11, 132, 224, 0.12);
-  --signal-text: #0866b0;
+  --signal-text: #075a9c; /* ≥4.5:1 on signal-soft too (the Animate badge) */
 
     --key: #c98a00;
     --rec: #e5383b;

@@ -7,6 +7,7 @@ import {
 import {
   Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, SettingsMenu, CommandPalette, Stage, HistoryButtons, useHotkeys, useValues, useDoc, toast,
   type Command, type MenuItem,
+  keepFocus,
 } from '@kit'
 import { JourneyMap } from './map/JourneyMap'
 import { PersonasPanel } from './panels/Personas'
@@ -72,7 +73,7 @@ export default function JourneyShell() {
     ...LANES.filter((l) => l.id !== 'emotion').map((l) => ({ id: `add-${l.id}`, label: `Add ${l.one.toLowerCase()}`, group: 'Map', icon: l.icon, run: () => { const s = ui.getState().sel; const pr = persona(); const stage = s?.kind === 'stage' ? s.id : s?.kind === 'card' ? pr.cards.find((c) => c.id === s.id)?.stage : pr.stages[0]?.id; if (stage) addCard(l.id, stage) } })),
     { id: 'add-stage', label: 'Add stage', group: 'Map', shortcut: 'shift+n', icon: Columns3, run: () => { const s = ui.getState().sel; const pr = persona(); addStage(s?.kind === 'stage' ? pr.stages.findIndex((x) => x.id === s.id) + 1 : undefined) } },
     { id: 'dup', label: 'Duplicate card', group: 'Edit', shortcut: 'mod+d', icon: CopyPlus, run: duplicateCard },
-    { id: 'del', label: 'Delete selection', group: 'Edit', shortcut: 'backspace,delete', icon: Trash2, run: deleteSelection },
+    { id: 'del', label: 'Delete selection', group: 'Edit', shortcut: 'backspace,delete', icon: Trash2, run: () => keepFocus(deleteSelection, '[data-card]') },
     { id: 'fit', label: 'Zoom to fit', group: 'View', shortcut: 'shift+1', icon: Fullscreen, run: fitMap },
     ...LANES.map((l) => ({ id: `lane-${l.id}`, label: `${visible.includes(l.id) ? 'Hide' : 'Show'} lane: ${l.label}`, group: 'View', icon: Rows3, run: () => {
       const cur = params.values().visibleLanes
@@ -99,7 +100,7 @@ export default function JourneyShell() {
           start={<Brand name="Journey" doc={title} mark={Mark} />}
           center={
             <Cluster>
-              <Menu trigger={<Button size="md" active={!!filterTag}><Tag size={14} strokeWidth={1.5} />{filterTag ?? 'Highlight'}<ChevronDown size={12} className="text-fg-faint" /></Button>}
+              <Menu trigger={<Button size="md" active={!!filterTag}><Tag size={14} strokeWidth={1.5} />{filterTag ?? 'Highlight'}<ChevronDown size={12} strokeWidth={1.75} className="text-fg-faint" /></Button>}
                 items={[
                   { type: 'label', label: 'Highlight cards by tag' },
                   ...(tags.length ? tags.map(([t, n]) => ({ label: `${t}  ·  ${n}`, checked: filterTag === t, onClick: () => ui.setState({ filterTag: filterTag === t ? null : t }) })) : [{ label: 'No tags yet', disabled: true, onClick: () => {} }]),

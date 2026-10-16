@@ -5,7 +5,7 @@
    for light and dark. Presets are whole looks ("Compact", "Soft", "Brutal").
 --------------------------------------------------------------------------- */
 import { defineSchema, folder, p, createParams } from '@kit'
-import { formatHex, clampChroma, displayable, inGamut, wcagContrast, type Oklch } from 'culori'
+import { formatHex, clampChroma, wcagContrast, type Oklch } from 'culori'
 
 export const tokenSchema = defineSchema({
   accent: folder('Accent', {
@@ -55,12 +55,6 @@ export type Tokens = ReturnType<typeof tokens.values>
 
 /* --- colour maths -------------------------------------------------------- */
 export const oklch = (l: number, c: number, h: number): Oklch => ({ mode: 'oklch', l, c, h })
-const inP3 = inGamut('p3')
-export type Gamut = 'srgb' | 'p3' | 'out'
-export function gamutOf(l: number, c: number, h: number): Gamut {
-  const col = oklch(l, c, h)
-  return displayable(col) ? 'srgb' : inP3(col) ? 'p3' : 'out'
-}
 /** a safe sRGB hex for the colour (chroma reduced until it fits) */
 export const hexOf = (l: number, c: number, h: number) => formatHex(clampChroma(oklch(l, c, h), 'oklch'))!
 const cssOf = (l: number, c: number, h: number, a = 1) => `oklch(${(l * 100).toFixed(1)}% ${c.toFixed(3)} ${h.toFixed(1)}${a < 1 ? ` / ${a}` : ''})`

@@ -26,7 +26,7 @@ function glyphBox(word: HTMLElement) {
   if (!ctx) return r
   const cs = getComputedStyle(word)
   ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`
-  if ('letterSpacing' in ctx) (ctx as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = cs.letterSpacing
+  if ('letterSpacing' in ctx) ctx.letterSpacing = cs.letterSpacing
   const m = ctx.measureText(word.textContent ?? '')
   if (!m.fontBoundingBoxAscent) return r
   const base = r.top + m.fontBoundingBoxAscent

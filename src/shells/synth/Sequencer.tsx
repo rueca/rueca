@@ -38,7 +38,7 @@ export function SequencerHeader() {
           <Button size="md" className="max-w-[200px] gap-1 px-2">
             <ListMusic size={13} strokeWidth={1.5} />
             <span className="truncate">{current ? current[1].name : 'Custom pattern'}</span>
-            <ChevronDown size={12} className="text-fg-faint" />
+            <ChevronDown size={12} strokeWidth={1.75} className="text-fg-faint" />
           </Button>
         }
         items={[

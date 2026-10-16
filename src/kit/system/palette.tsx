@@ -11,7 +11,7 @@ import { Command as Cmdk } from 'cmdk'
 import { Dialog } from '@base-ui/react/dialog'
 import { useEffect, useRef, useState, useSyncExternalStore, type ComponentType } from 'react'
 import { Check, Search } from 'lucide-react'
-import { useHotkeys, useHotkeyRegistry, prettyCombo } from '../core/hotkeys'
+import { useHotkeys, useHotkeyRegistry, prettyCombo, pauseHotkeys } from '../core/hotkeys'
 import { Kbd } from '../ui/button'
 import { useDensity, type Density } from '../core/density'
 import { toast } from './toast'
@@ -50,7 +50,8 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
   useHotkeys({
     'mod+k': { run: () => setOpen((o) => !o), label: 'Command palette', group: 'Help' },
     '?': { run: () => setSheet((s) => !s), label: 'Keyboard shortcuts', group: 'Help' },
-  }, [], { priority: 0 })
+  }, [], { priority: 0, modal: true })
+  useEffect(() => (open || sheet ? pauseHotkeys() : undefined), [open, sheet])
   const registry = useHotkeyRegistry()
   // every palette gets the kit's density choice (remembered per browser, see core/density)
   const { density, setDensity } = useDensity()
@@ -129,12 +130,17 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
 /** Grouped list of shortcuts — fed by the live hotkey registry, so it can't drift. */
 function ShortcutSheet({ entries }: { entries: { keys: string; label: string; group?: string }[] }) {
   // one row per action: two bindings for the same label ("Replay": R and ↵) share it
+  // and one row per key: the live bindings come first, so a shell's extra entry (or a second binding of the same
+  // key, as when a canvas and a preview both bind ⇧1) never lists that key twice
   const byLabel = new Map<string, { label: string; group?: string; keys: string[] }>()
+  const used = new Set<string>()
   for (const e of entries) {
+    const shown = prettyCombo(e.keys)
+    if (used.has(shown)) continue
+    used.add(shown)
     const k = `${e.group ?? 'General'}|${e.label}`
     const row = byLabel.get(k) ?? byLabel.set(k, { label: e.label, group: e.group, keys: [] }).get(k)!
-    const shown = prettyCombo(e.keys)
-    if (!row.keys.includes(shown)) row.keys.push(shown)
+    row.keys.push(shown)
   }
   const list = [...byLabel.values()]
   const groups = [...new Set(list.map((e) => e.group ?? 'General'))]

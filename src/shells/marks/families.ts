@@ -376,7 +376,7 @@ export function sampleParams(fam: Family, rng: () => number, randomise = true): 
   out.seed = Math.floor(rng() * 99999)
   if (!randomise) return out
   for (const [k, d] of Object.entries(fam.params.defs)) {
-    const def = d as any
+    const def = d
     if (k === 'seed') continue
     if (def.type === 'number') {
       const [lo, hi] = fam.explore[k] ?? [def.min ?? 0, def.max ?? 1]
@@ -384,7 +384,7 @@ export function sampleParams(fam: Family, rng: () => number, randomise = true): 
       out[k] = Math.round((lo + rng() * (hi - lo)) / step) * step
       out[k] = Number((out[k] as number).toFixed(4))
     } else if (def.type === 'select') {
-      const opts = def.options.map((o: any) => (typeof o === 'string' ? o : o.value))
+      const opts = def.options.map((o) => (typeof o === 'string' ? o : o.value))
       out[k] = opts[Math.floor(rng() * opts.length)]
     } else if (def.type === 'boolean') out[k] = rng() < 0.6 ? def.value : !def.value
   }
@@ -396,14 +396,14 @@ export function mutateParams(fam: Family, v: Record<string, unknown>, rng: () =>
   const out = { ...v }
   const gauss = () => (rng() + rng() + rng() - 1.5) / 1.5
   for (const [k, d] of Object.entries(fam.params.defs)) {
-    const def = d as any
+    const def = d
     if (k === 'seed') continue
     if (def.type === 'number') {
       const min = def.min ?? 0, max = def.max ?? 1, step = def.step ?? 0.01
       const nv = (v[k] as number) + gauss() * spread * (max - min) * 0.35
       out[k] = Number((Math.round(Math.min(max, Math.max(min, nv)) / step) * step).toFixed(4))
     } else if (def.type === 'select' && rng() < spread * 0.25) {
-      const opts = def.options.map((o: any) => (typeof o === 'string' ? o : o.value))
+      const opts = def.options.map((o) => (typeof o === 'string' ? o : o.value))
       out[k] = opts[Math.floor(rng() * opts.length)]
     } else if (def.type === 'boolean' && rng() < spread * 0.15) out[k] = !v[k]
   }

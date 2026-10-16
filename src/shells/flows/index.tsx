@@ -7,6 +7,7 @@ import {
 import {
   Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Tip, HistoryButtons, SettingsMenu, useValues, useDoc, toast, copyText,
   type Command, type MenuItem,
+  keepFocus,
 } from '@kit'
 import { FlowCanvas, startWalkthrough } from './canvas/FlowCanvas'
 import { LeftPanel } from './panels/LeftPanel'
@@ -64,7 +65,7 @@ export default function FlowsShell() {
     { id: 'dup', label: 'Duplicate', group: 'Edit', shortcut: 'mod+d', icon: CopyPlus, run: duplicate },
     { id: 'copy', label: 'Copy', group: 'Edit', shortcut: 'mod+c', run: () => { if (copySelection()) toast('Copied') } },
     { id: 'paste', label: 'Paste', group: 'Edit', shortcut: 'mod+v', run: () => paste() },
-    { id: 'delete', label: 'Delete selection', group: 'Edit', shortcut: 'backspace,delete', icon: Trash2, run: deleteSelection },
+    { id: 'delete', label: 'Delete selection', group: 'Edit', shortcut: 'backspace,delete', icon: Trash2, run: () => keepFocus(deleteSelection, '.react-flow__node') },
     { id: 'png', label: 'Export PNG', group: 'Export', shortcut: 'mod+e', icon: ImageIcon, run: () => exportPNG(2) },
     { id: 'json', label: 'Export JSON', group: 'Export', shortcut: 'shift+mod+e', icon: Braces, run: exportFlowJSON },
     { id: 'mermaid', label: 'Copy as Mermaid', group: 'Export', icon: Copy, run: copyMermaid },

@@ -39,7 +39,7 @@
 
 ## Files
 - `src/kit/` — the kit (API in `docs/KIT.md`). `src/kit/theme.css` tokens.
-- `src/shells/<id>/` — test shells (meta.ts + index.tsx), auto-registered by `src/gallery/App.tsx` via import.meta.glob.
+- `src/shells/<id>/` — test shells (meta.ts + index.tsx), auto-registered by `src/gallery/registry.ts` via import.meta.glob.
   All 19 are done (motion, dropin, present, ui-design, component-lab, shader, dither, scene, photo, animate, video,
   flows, journey, nodes, generate, batch, marks, type, synth).
 - `src/landing/` — the landing page (`#/`); `src/gallery/` — the shells gallery (`#/shells`), shells at `#/<id>`.
