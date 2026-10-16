@@ -226,7 +226,47 @@ describe('notes handler', () => {
     expect(new Set(outs).size).toBe(40)
     expect((await readdir(dir)).filter((f) => f.endsWith('.json'))).toHaveLength(40)
   })
-  it('only answers GET, POST and DELETE', async () => {
+  it('threads a comment: the person replies (reopening it) and closes it; the agent never has to', async () => {
+    const a = res()
+    await handle(post({ kind: 'comment', text: 'Too busy', snapshot }), a.r)
+    const { id } = a.json()
+    const patch = async (body: unknown, q = id, headers: Record<string, string> = { origin: `http://${HOST}` }) => {
+      const r = res()
+      await handle(req({ method: 'PATCH', url: `${NOTES_ROUTE}?id=${q}`, headers, body: JSON.stringify(body) }), r.r)
+      return { status: r.out.status, body: r.out.body ? r.json() : null }
+    }
+    // the agent answers the old way, straight in the file
+    const file = join(dir, `${id}.json`)
+    await writeFile(file, JSON.stringify({ ...JSON.parse(await readFile(file, 'utf8')), status: 'resolved', resolution: { text: 'Fewer rings', at: 'then' } }))
+    const r1 = await patch({ text: '  Fewer still  ' })
+    expect(r1.status).toBe(200)
+    expect(r1.body.status).toBe('open')
+    expect(r1.body).not.toHaveProperty('resolution')
+    expect(r1.body.replies.map((m: { from: string; text: string }) => [m.from, m.text])).toEqual([['agent', 'Fewer rings'], ['person', 'Fewer still']])
+    expect(JSON.parse(await readFile(file, 'utf8'))).toEqual(r1.body)
+    expect((await patch({ status: 'done' })).body.status).toBe('done')
+    // a reply on a done thread opens it again
+    expect((await patch({ text: 'One more thing' })).body).toMatchObject({ status: 'open' })
+    expect((await patch({ status: 'done' })).body.replies).toHaveLength(3)
+    expect((await patch({ status: 'open' })).body.status).toBe('open')
+    // what it refuses
+    expect((await patch({ text: '' })).status).toBe(400)
+    expect((await patch({ text: 'x', status: 'done' })).status).toBe(400)
+    expect((await patch({ status: 'resolved' })).status).toBe(400)
+    expect((await patch({ text: 'x'.repeat(3000) + 'é'.repeat(1001) })).status).toBe(413)   // over this test's 4 KB body cap
+    expect((await patch({ text: 'x' }, '../../package')).status).toBe(400)
+    expect((await patch({ text: 'x' }, '2020-01-01T00-00-00-000-abcdef')).status).toBe(404)
+    expect((await patch({ text: 'x' }, id, { origin: 'https://evil.example' })).status).toBe(403)
+    expect((await readdir(dir)).filter((f) => f.includes('.tmp'))).toEqual([])
+  })
+  it('has no thread on a values note', async () => {
+    const a = res()
+    await handle(post({ kind: 'values', snapshot }), a.r)
+    const r = res()
+    await handle(req({ method: 'PATCH', url: `${NOTES_ROUTE}?id=${a.json().id}`, headers: { origin: `http://${HOST}` }, body: JSON.stringify({ text: 'hi' }) }), r.r)
+    expect(r.out.status).toBe(400)
+  })
+  it('only answers GET, POST, PATCH and DELETE', async () => {
     const a = res()
     await handle(req({ method: 'PUT', headers: { origin: `http://${HOST}` } }), a.r)
     expect(a.out.status).toBe(405)

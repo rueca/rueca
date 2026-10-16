@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------------------
    rueca-notes.js — notes to the agent from ANY page (plain HTML, no build, no
    React): send tuned values or a comment into the project's .rueca/notes/,
-   where the agent reads and resolves them. The no-build twin of the kit's
+   where the agent reads and answers them. The no-build twin of the kit's
    core/notes.ts, speaking the same format.
 
      <script src="rueca-notes.js"></script>
@@ -11,7 +11,12 @@
        await ruecaNotes.send({ kind: 'values', snapshot })
        await ruecaNotes.send({ kind: 'comment', text: 'Shadow too hard here', anchor: { on: 'artboard', x: 0.4, y: 0.6 },
                                snapshot, image: ruecaNotes.capture(stageEl, { x: 0.4, y: 0.6 }) })
-       const stop = ruecaNotes.watch((notes) => render(notes))   // replies arrive here (status 'resolved')
+       const stop = ruecaNotes.watch((notes) => render(notes))   // the agent's replies arrive in note.replies
+       await ruecaNotes.reply(note.id, 'Better. Try it smaller')   // answer it: the thread goes back to the agent
+       await ruecaNotes.done(note.id)                              // only the person closes a thread
+
+   A comment's thread: note.text first, then note.replies ({ from: 'agent' | 'person', text, at }), oldest
+   first. ruecaNotes.turn(note) says whose move it is: 'agent', 'person', or null once done.
      </script>
 
    Where notes go: the page's own server if it has the notes route (a Vite dev
@@ -109,9 +114,23 @@
     /** { kind: 'values' | 'comment', text?, anchor?, snapshot, image? } → the stored note */
     send: function (note) { return call('', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(note) }) },
     list: function () { return call('').then(function (b) { return Array.isArray(b) ? b : [] }) },
+    /** Answer a comment; it goes back to the agent (a done one reopens). → the note */
+    reply: function (id, text) { return call('?id=' + encodeURIComponent(id), { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: text }) }) },
+    /** Close a comment's thread, or open it again. → the note */
+    done: function (id) { return call('?id=' + encodeURIComponent(id), { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status: 'done' }) }) },
+    reopen: function (id) { return call('?id=' + encodeURIComponent(id), { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status: 'open' }) }) },
+    /** Whose move: 'agent' (the person spoke last), 'person' (the agent did), null once done. Reads the older single
+        `resolution` (status 'resolved') as the agent's answer. */
+    turn: function (note) {
+      if (note.status === 'done') return null
+      var r = note.replies || []
+      if (!r.length) return note.resolution !== undefined || note.status === 'resolved' ? 'person' : 'agent'
+      var who = String(r[r.length - 1].from || '').toLowerCase()
+      return who === 'person' || who === 'you' || who === 'user' ? 'agent' : 'person'
+    },
     /** Clear a note; already gone counts as done. */
     remove: function (id) { return call('?id=' + encodeURIComponent(id), { method: 'DELETE' }).catch(function (e) { if (e.status === 404) return { id: id }; throw e }) },
-    /** Calls fn(notes) now and whenever they change (the agent resolving one). Paused while the tab is hidden. Returns stop. */
+    /** Calls fn(notes) now and whenever they change (the agent replying to one). Paused while the tab is hidden. Returns stop. */
     watch: function (fn, ms) {
       var last = '', timer = null, stopped = false
       var tick = function () {
