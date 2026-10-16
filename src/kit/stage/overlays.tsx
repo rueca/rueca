@@ -327,7 +327,7 @@ export function Navigator({
   const preset = presets.find((p) => Math.abs(zoom - p) < 0.005)
   return (
     <div className={cn('flex flex-col gap-2 px-pad pb-1', className)}>
-      <div ref={box} className="flex items-center justify-center rounded-[6px] bg-well" style={{ height }}>
+      <div ref={box} className="flex items-center justify-center rounded-control bg-well" style={{ height }}>
         <div
           role="group"
           tabIndex={0}

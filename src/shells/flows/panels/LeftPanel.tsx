@@ -40,7 +40,7 @@ export function LeftPanel() {
           return (
             <div key={f.id} role="option" aria-selected={on} tabIndex={0}
               onClick={() => switchFlow(f.id)} onKeyDown={(e) => { if (e.key === 'Enter') switchFlow(f.id) }}
-              className={cn('group/row mx-1.5 flex h-row items-center gap-2 rounded-[6px] pr-1 pl-2 outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
+              className={cn('group/row mx-1.5 flex h-row items-center gap-2 rounded-control pr-1 pl-2 outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
               <Workflow size={14} strokeWidth={1.5} className={on ? 'text-signal' : 'text-fg-faint'} />
               <InlineText bare focusable={false} value={f.name} onCommit={(s) => renameFlow(f.id, s)} editing={renaming === f.id} onEditingChange={(b) => setRenaming(b ? f.id : null)}
                 className="min-w-0 flex-1 truncate text-ui" label="Flow name" />
@@ -67,7 +67,7 @@ export function LeftPanel() {
               <button type="button" draggable aria-label={`Add ${s.label.toLowerCase()}`}
                 onDragStart={(e) => drag(e, { kind: s.kind, role: s.role })}
                 onClick={() => addNode(s.kind, undefined, s.role ? { role: s.role, name: s.role === 'end' ? 'End' : 'Start' } : {})}
-                className="flex aspect-square items-center justify-center rounded-[7px] bg-control text-fg-muted outline-none transition-colors hover:text-fg hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal active:cursor-grabbing">
+                className="flex aspect-square items-center justify-center rounded-control bg-control text-fg-muted outline-none transition-colors hover:text-fg hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal active:cursor-grabbing">
                 <ShapeGlyph kind={s.glyph} />
               </button>
             </Tip>
@@ -101,11 +101,11 @@ export function LeftPanel() {
 function LibraryTile({ template, label }: { template: Template; label: string }) {
   return (
     <button type="button" draggable onDragStart={(e) => drag(e, { kind: 'screen', template })} onClick={() => addScreen(template)} aria-label={`Add ${label} screen`}
-      className="group/tile flex min-w-0 flex-col items-center gap-1 rounded-[7px] p-1 outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
+      className="group/tile flex min-w-0 flex-col items-center gap-1 rounded-control p-1 outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
       <span className="block w-full overflow-hidden rounded-[5px] shadow-[0_0_0_1px_var(--line-strong)] transition-shadow group-hover/tile:shadow-[0_0_0_1px_var(--signal)]">
         <Wireframe template={template} className="block h-auto w-full" />
       </span>
-      <span className="w-full truncate text-center text-ui-sm text-fg-muted group-hover/tile:text-fg">{label}</span>
+      <span className="line-clamp-2 w-full text-center text-ui-sm leading-tight hyphens-auto text-fg-muted group-hover/tile:text-fg">{label}</span>
     </button>
   )
 }

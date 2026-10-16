@@ -60,12 +60,14 @@ function Transport() {
       {preview ? (
         <span className="ml-1 flex h-icon items-center gap-1.5 px-2 text-ui text-fg"><span className="size-1.5 animate-pulse rounded-full bg-ok" />Live · {anims.find((x) => x.id === smState)?.name ?? '—'}</span>
       ) : <button type="button" onClick={() => setFrames(!frames)} title="Click to switch seconds / frames"
-        className={cn('ml-1 flex h-icon items-baseline gap-1 rounded-[6px] px-2 tabular text-ui outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', autoKey ? 'text-rec' : 'text-fg')}>
-        {frames ? `f${Math.round((at / 1000) * fps)}` : fmtTime(at)}
-        <span className="text-ui text-fg-faint">/ {frames ? `f${Math.round((anim.duration / 1000) * fps)}` : fmtTime(anim.duration)}</span>
+        className={cn('ml-1 flex h-icon items-center rounded-control px-2 tabular text-ui outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', autoKey ? 'text-rec' : 'text-fg')}>
+        <span className="flex items-baseline gap-1">
+          {frames ? `f${Math.round((at / 1000) * fps)}` : fmtTime(at)}
+          <span className="text-ui text-fg-faint">/ {frames ? `f${Math.round((anim.duration / 1000) * fps)}` : fmtTime(anim.duration)}</span>
+        </span>
       </button>}
       <div className="ml-1 w-[96px]">
-        <Segmented size="sm" iconOnly label="Loop mode" value={anim.loop} onChange={(l) => updateAnim({ loop: l as Anim['loop'] })}
+        <Segmented iconOnly label="Loop mode" value={anim.loop} onChange={(l) => updateAnim({ loop: l as Anim['loop'] })}
           options={[{ value: 'loop', label: 'Loop', icon: Repeat, hint: 'Loop' }, { value: 'once', label: 'Once', icon: ArrowRight, hint: 'Play once' }, { value: 'pingpong', label: 'Ping-pong', icon: ArrowLeftRight, hint: 'Ping-pong' }]} />
       </div>
       <div className="flex-1" />
@@ -74,7 +76,7 @@ function Transport() {
       <IconButton icon={Magnet} label={v.snap ? 'Snapping on' : 'Snapping off'} tipSide="top" active={v.snap} onClick={() => params.setValue('snap', !v.snap)} />
       <Tip label={autoKey ? 'Auto-key on — changes write keys' : 'Auto-key'} shortcut="shift+k" side="top">
         <button type="button" aria-pressed={autoKey} aria-label="Auto-key" onClick={() => ui.setState({ autoKey: !autoKey })}
-          className={cn('flex h-icon items-center gap-1.5 rounded-[6px] px-2 text-ui font-medium outline-none focus-visible:ring-2 focus-visible:ring-signal',
+          className={cn('flex h-icon items-center gap-1.5 rounded-control px-2 text-ui font-medium outline-none focus-visible:ring-2 focus-visible:ring-signal',
             autoKey ? 'bg-rec/15 text-rec' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
           <CircleDot size={14} strokeWidth={1.75} />Auto-key
         </button>
@@ -147,13 +149,13 @@ function AnimationsPanel() {
               <div key={a.id}
                 onClick={() => { ui.setState({ animId: a.id, preview: false, keySel: [], pending: {} }); clock.pause(); seek(0) }}
                 onDoubleClick={() => setRenaming(a.id)}
-                className={cn('group/row mx-1.5 flex h-row cursor-default items-center gap-2 rounded-[6px] pr-1 pl-2 text-uihas-[[data-row-main]:focus-visible]:ring-2 has-[[data-row-main]:focus-visible]:ring-signal', on ? 'bg-signal-soft' : 'hover:bg-hover')}>
+                className={cn('group/row mx-1.5 flex h-row cursor-default items-center gap-2 rounded-control pr-1 pl-2 text-ui has-[[data-row-main]:focus-visible]:ring-2 has-[[data-row-main]:focus-visible]:ring-signal', on ? 'bg-signal-soft' : 'hover:bg-hover')}>
                 <Film size={14} strokeWidth={1.5} className={on ? 'text-signal' : 'text-fg-faint'} />
                 {renaming === a.id ? (
                   <input autoFocus defaultValue={a.name} onClick={(e) => e.stopPropagation()}
                     onBlur={(e) => { updateAnim({ name: e.target.value || a.name }, true, a.id); setRenaming(null) }}
                     onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') setRenaming(null) }}
-                    className="h-control-sm min-w-0 flex-1 rounded-[4px] bg-control px-1 text-ui text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
+                    className="h-control-sm min-w-0 flex-1 rounded-control bg-control px-1 text-ui text-fg outline-none shadow-[inset_0_0_0_1px_var(--signal)]" />
                 ) : (
                   <button type="button" data-row-main aria-current={on || undefined} title="Double-click or F2 to rename"
                     onKeyDown={(e) => { if (e.key === 'F2') { e.preventDefault(); setRenaming(a.id) } }}
@@ -443,8 +445,9 @@ export default function AnimateShell() {
               </div>
               <Divider vertical />
               <Tip label={preview ? 'Stop preview' : 'Preview the state machine'} shortcut="p">
-                <Button size="md" variant={preview ? 'primary' : 'ghost'} onClick={() => togglePreview()}>
-                  <Workflow size={14} strokeWidth={1.5} />{preview ? 'Previewing' : 'Preview'}
+                {/* one label in both states: the fill says it's on, so the cluster never shifts */}
+                <Button size="md" variant={preview ? 'primary' : 'ghost'} aria-pressed={preview} onClick={() => togglePreview()}>
+                  <Workflow size={14} strokeWidth={1.5} />Preview
                 </Button>
               </Tip>
             </Cluster>

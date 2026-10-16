@@ -35,8 +35,9 @@ const write = (p, text) => {
   writeFileSync(full, text)
 }
 const json = (o) => JSON.stringify(o, null, 2) + '\n'
+// Names with a space are Finder / iCloud conflict copies ("index 2.ts"), never source: they'd leak into the registry
 const walk = (dir) => existsSync(r(dir))
-  ? readdirSync(r(dir)).flatMap((f) => { const p = posix.join(dir, f); return statSync(r(p)).isDirectory() ? walk(p) : [p] })
+  ? readdirSync(r(dir)).filter((f) => !f.includes(' ')).flatMap((f) => { const p = posix.join(dir, f); return statSync(r(p)).isDirectory() ? walk(p) : [p] })
   : []
 
 const { site, repoURL } = await import(pathToFileURL(r('src/site.config.ts')).href)

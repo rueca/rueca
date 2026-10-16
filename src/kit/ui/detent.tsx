@@ -181,7 +181,7 @@ export function DetentSlider({
               ref={(el) => { names.current[i] = el }}
               onPointerDown={(e) => { if (disabled) return; e.stopPropagation(); e.preventDefault(); onChange(list[i].value, true) }}
               className={cn(
-                'absolute top-0 cursor-pointer whitespace-nowrap text-[10.5px] leading-4 transition-colors duration-100 hover:text-fg',
+                'absolute top-0 cursor-pointer whitespace-nowrap text-ui-sm leading-4 transition-colors duration-100 hover:text-fg',
                 n > 1 && i === 0 ? 'left-0' : n > 1 && i === n - 1 ? 'right-0' : '-translate-x-1/2',
                 i === on ? 'font-medium text-fg' : 'text-fg-faint',
                 hidden[i] && 'invisible',

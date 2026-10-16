@@ -608,7 +608,7 @@ function Thread({ n, num, params, clock, status, className }: {
   const title = `Comment ${num}${n.anchor?.on === 'param' ? ` · ${paramLabel(params, n.anchor.key)}` : ''}`
   return (
     <div data-note-ui="" role="dialog" aria-label={title} className={cn('pop pointer-events-auto w-[272px] overflow-hidden text-ui', className)} onPointerDown={(e) => e.stopPropagation()}>
-      <div className="flex h-9 items-center gap-0.5 pr-1.5 pl-3">
+      <div className="flex h-header items-center gap-0.5 pr-1.5 pl-pad">
         <span className="min-w-0 flex-1 truncate font-medium text-fg-muted">{title}</span>
         {status === 'different' && <IconButton icon={History} size="icon-sm" label="Show the state it was made in" onClick={() => restoreSnapshot(n.snapshot, { params, clock })} />}
         <IconButton icon={Trash2} size="icon-sm" label="Clear comment" onClick={clear} />

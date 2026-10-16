@@ -202,6 +202,9 @@ export function KeyTimeline(props: KeyTimelineProps) {
   const onKeyDown = (e: React.PointerEvent, k: TimelineKey) => {
     if (e.button !== 0) return
     e.stopPropagation()
+    // keep keyboard focus on the key area, not the diamond, so ←/→ then nudge the selected keys (not the layer)
+    e.preventDefault()
+    area.current?.focus({ preventScroll: true })
     ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
     const ids = k.ids ?? [k.id]
     const all = ids.every((id) => selectedIds.has(id))
@@ -419,8 +422,9 @@ export function KeyTimeline(props: KeyTimelineProps) {
                           props.onSegmentClick?.(l.id, a.id, rect)
                           if (props.segmentEditor) setSeg({ laneId: l.id, keyId: a.id, rect })
                         }}
-                        className="group/seg pointer-events-auto absolute top-0 flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-signal"
-                        style={{ left: x0 + 6, width: Math.max(0, w - 12), height: ROW }}>
+                        // a 10px band on the curve line, not the whole lane, so a marquee can start inside a property row
+                        className="group/seg pointer-events-auto absolute flex items-center justify-center outline-none focus-visible:ring-2 focus-visible:ring-signal"
+                        style={{ left: x0 + 6, width: Math.max(0, w - 12), top: (ROW - 10) / 2, height: 10 }}>
                         <span className={cn('absolute inset-x-0 top-1/2 -translate-y-1/2',
                           a.out === 'hold' ? 'border-t border-dashed' : 'h-[2px] rounded-full',
                           active ? (a.out === 'hold' ? 'border-signal' : 'bg-signal') : a.out === 'hold' ? 'border-fg-faint group-hover/seg:border-fg' : 'bg-line-strong group-hover/seg:bg-fg/50')} />
@@ -451,7 +455,7 @@ export function KeyTimeline(props: KeyTimelineProps) {
               ))}
               {guide && (
                 <div className="pointer-events-none absolute inset-y-0 z-10 w-px bg-signal" style={{ left: guide.x }}>
-                  <div className="absolute top-1 left-1.5 rounded-[4px] bg-signal-strong px-1 tabular text-[10px] text-signal-fg">{(guide.t / 1000).toFixed(3)}s</div>
+                  <div className="absolute top-1 left-1.5 rounded-[4px] bg-signal-strong px-1 tabular text-ui-sm text-signal-fg">{(guide.t / 1000).toFixed(3)}s</div>
                 </div>
               )}
               {mq && (

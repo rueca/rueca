@@ -13,11 +13,11 @@
    Building a panel by hand? Use <Section>, <Row>, <ParamRow> (one schema row
    bound to a store) and <ParamControl> (just the control) so it matches.
 --------------------------------------------------------------------------- */
-import { memo, useEffect, useMemo, useState, type CSSProperties, type ReactNode } from 'react'
+import { memo, useState, type ReactNode } from 'react'
 import { ChevronDown, ChevronRight, RotateCcw, Settings2 } from 'lucide-react'
 import { Popover } from '@base-ui/react/popover'
 import { cn } from '../core/cn'
-import { useDensityPx } from '../core/density'
+import { LabelScope, useLabelScope, useReportLabel } from './label-fit'
 import { useParamState, type AnyParams } from '../core/params'
 import { equal, humanize, isValueDef, layoutFolder, type Folder, type ParamDef, type Schema, type ValueDef, type NumberDef } from '../core/schema'
 import { Tip } from '../ui/tooltip'
@@ -62,14 +62,12 @@ export function Inspector({ params, folders, keys, published, className, id }: {
   const [moreOpen, setMoreOpen] = useState<Record<string, boolean>>(() => LS.get(`${lsKey}:more`) ?? {})
   const toggleMore = (fid: string) => { const next = { ...moreOpen, [fid]: !moreOpen[fid] }; setMoreOpen(next); LS.set(`${lsKey}:more`, next) }
 
-  // the label column widens to this inspector's longest label (capped in <Row>), so "Stroke weight" never truncates
-  const fit = useLabelFit(entries.flatMap(([, f]) => Object.entries(f.params)
-    .filter(([, d]) => d.type !== 'data' && d.type !== 'action')
-    .map(([k, d]) => ('label' in d && d.label) || humanize(k))))
+  // the label column fits the longest label on screen (label-fit.tsx): shared with the panel it sits in, or its own
+  const Wrap = useLabelScope() ? 'div' : LabelScope
 
   let shown = 0
   return (
-    <div className={cn('flex flex-col', className)} style={fit ? ({ '--label-fit': `${fit}px` } as CSSProperties) : undefined}>
+    <Wrap className={cn('flex flex-col', className)}>
       {entries.map(([fid, f]) => {
         if (f.when && !f.when(values)) return null
         const lay = layoutFolder(f, values, defaults, { keys, published, moreOpen: !!moreOpen[fid] })
@@ -100,7 +98,7 @@ export function Inspector({ params, folders, keys, published, className, id }: {
           </Section>
         )
       })}
-    </div>
+    </Wrap>
   )
 }
 
@@ -111,7 +109,7 @@ export function MoreRow({ count, open, onClick }: { count: number; open: boolean
       type="button"
       aria-expanded={open}
       onClick={onClick}
-      className="flex h-row items-center gap-1 px-pad text-left text-ui text-fg-faint outline-none no-select hover:text-fg focus-visible:text-signal-text"
+      className="flex h-row items-center gap-1 rounded-control px-pad text-left text-ui text-fg-faint outline-none no-select hover:text-fg focus-visible:text-fg focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal"
     >
       <ChevronDown size={12} strokeWidth={1.75} className={cn('shrink-0 transition-transform duration-150', open && 'rotate-180')} />
       {open ? 'Fewer' : `${count} more`}
@@ -156,22 +154,6 @@ export function SettingsMenu({ params, folders, label = 'View settings', icon: I
   )
 }
 
-/** Width of the longest label at the UI type size, plus room for the changed dot. Re-measures once fonts load. */
-function useLabelFit(labels: unknown[]) {
-  const size = useDensityPx('--ui-text', 11)
-  const [fontsReady, setFontsReady] = useState(false)
-  useEffect(() => { let live = true; document.fonts?.ready.then(() => live && setFontsReady(true)); return () => { live = false } }, [])
-  const key = labels.filter((l): l is string => typeof l === 'string').join('\n')
-  return useMemo(() => {
-    if (typeof document === 'undefined' || !key) return 0
-    const ctx = document.createElement('canvas').getContext('2d')
-    if (!ctx) return 0
-    ctx.font = `450 ${size}px InterVariable, "Inter Variable", system-ui, sans-serif`
-    const widest = Math.max(...key.split('\n').map((l) => ctx.measureText(l).width))
-    return Math.ceil(widest + 10) // dot (4) + gap (4) + slack
-  }, [key, size, fontsReady])
-}
-
 /**
  * A collapsible section. Controlled (`open` + `onToggle`) or uncontrolled
  * (`defaultOpen`, remembered under `persistKey`). `collapsible={false}` drops the chevron.
@@ -202,7 +184,8 @@ export function Section({
           type="button"
           aria-expanded={collapsible ? open : undefined}
           onClick={(e) => toggle(e.altKey)}
-          className={cn('flex h-full min-w-0 flex-1 items-center gap-1 text-left text-ui font-[550] text-fg outline-none no-select rounded-[4px] focus-visible:text-signal-text focus-visible:ring-2 focus-visible:ring-signal', !collapsible && 'cursor-default', off && 'text-fg-faint')}
+          // the ring sits inside the button (inset, with a little room) so the panel's scroller can't clip it
+          className={cn('-ml-1 flex h-full min-w-0 flex-1 items-center gap-1 rounded-control pl-1 text-left text-ui font-[550] text-fg outline-none no-select focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal', !collapsible && 'cursor-default', off && 'text-fg-faint')}
         >
           <Tip label={hint} side="left"><span className="truncate">{title}</span></Tip>
           {changed && <span className="size-1 shrink-0 rounded-full bg-signal" aria-label="changed" />}
@@ -230,7 +213,9 @@ export function Row({
 }: { label?: ReactNode; hint?: string; changed?: boolean; onReset?: () => void; children: ReactNode; stacked?: boolean; className?: string; trailing?: ReactNode; labelWidth?: number
   /** the param key this row edits (data-param): comments anchor to it */
   param?: string }) {
-  const lab = label != null && (
+  // hand-built and schema rows alike report their label so the panel's column fits it
+  useReportLabel(!stacked && labelWidth == null && (typeof label === 'string' || typeof label === 'number') ? String(label) : null)
+  const lab = label != null && label !== '' && (
     <Tip label={hint} side="left">
       <span
         data-row-label
@@ -248,7 +233,7 @@ export function Row({
   if (stacked)
     return (
       <div data-param={param} className={cn('flex flex-col gap-1 px-pad py-1', className)}>
-        <div className="flex items-center justify-between">{lab}{trailing}</div>
+        {(lab || trailing) && <div className="flex items-center justify-between">{lab}{trailing}</div>}
         {children}
       </div>
     )
@@ -326,7 +311,7 @@ export function ParamRow({ k, def, params, values: valuesProp, defaults: default
         <Popover.Root>
           <Popover.Trigger className="flex h-control w-full min-w-0 items-center gap-2 rounded-control bg-control px-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-signal hover:shadow-[inset_0_0_0_1px_var(--line-strong)] data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
             <CurveGlyph value={v as [number, number, number, number]} className="text-signal" />
-            <span className={cn('truncate tabular text-ui', changed ? 'text-fg' : 'text-fg-value')}>{(v as number[]).map((n) => n.toFixed(2)).join(', ')}</span>
+            <span className={cn('truncate tabular text-ui', changed ? 'text-fg' : 'text-fg-value')}>{(v as number[]).map((n) => +n.toFixed(2)).join(', ')}</span>
           </Popover.Trigger>
           <Popover.Portal>
             <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[160]">

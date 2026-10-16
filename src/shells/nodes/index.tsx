@@ -118,7 +118,7 @@ export default function NodesShell() {
             center={
               <Cluster>
                 <div className="w-[104px] px-0.5">
-                  <Segmented size="sm" iconOnly value={view} onChange={setView} label="View"
+                  <Segmented iconOnly value={view} onChange={setView} label="View"
                     options={[{ value: 'graph', icon: Workflow, hint: 'Graph (1)' }, { value: 'split', icon: Columns2, hint: 'Graph + preview (2)' }, { value: 'preview', icon: Image, hint: 'Preview (3)' }]} />
                 </div>
                 <Divider vertical />

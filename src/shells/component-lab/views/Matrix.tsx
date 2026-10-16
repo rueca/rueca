@@ -81,7 +81,7 @@ export function Matrix() {
       <div className={cn('flex flex-none items-center justify-center gap-2 px-4 pt-3 pb-2', present && 'invisible')}>
         <span className="text-ui text-fg-muted tabular">{m.variants.length} variants × {m.states.length} states{zoom < 1 ? ` · ${Math.round(zoom * 100)}%` : ''}</span>
         <div className="w-[120px]">
-          <Segmented size="sm" iconOnly value={both ? 'both' : theme} label="Matrix theme"
+          <Segmented iconOnly value={both ? 'both' : theme} label="Matrix theme"
             onChange={(t) => (t === 'both' ? setUI({ matrixThemes: 'both' }) : setUI({ matrixThemes: 'one', previewTheme: t as Theme }))}
             options={[{ value: 'light', label: 'Light', icon: Sun }, { value: 'dark', label: 'Dark', icon: Moon }, { value: 'both', label: 'Light and dark', icon: Columns2 }]} />
         </div>

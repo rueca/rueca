@@ -34,7 +34,7 @@ export function QueueStatus() {
             </div>
             {!jobs.length && <div className="px-2 pb-2 text-ui text-fg-muted">Nothing running. Runs execute one at a time; switching model costs a cold load.</div>}
             {jobs.map((j) => (
-              <div key={j.id} className="flex items-center gap-2 rounded-[7px] px-2 py-1.5 hover:bg-hover">
+              <div key={j.id} className="flex items-center gap-2 rounded-control px-2 py-1.5 hover:bg-hover">
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-ui text-fg">{j.items[0].prompt}</div>
                   <div className="tabular text-ui text-fg-faint">

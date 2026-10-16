@@ -112,7 +112,7 @@ export function PresetGrid({ items, value, onApply, onPreview, onRemove, columns
                 if ((e.key === 'Delete' || e.key === 'Backspace') && it.removable && onRemove) { e.preventDefault(); e.stopPropagation(); onRemove(it.id); focus(i - 1) }
               }}
               className={cn(
-                'relative w-full overflow-hidden rounded-[7px] bg-well outline-none transition-shadow duration-100',
+                'relative w-full overflow-hidden rounded-[calc(var(--radius-control)+2px)] bg-well outline-none transition-shadow duration-100',
                 on ? 'shadow-[0_0_0_1.5px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[0_0_0_1.5px_var(--line-strong)]',
                 'focus-visible:shadow-[0_0_0_2px_var(--signal)]',
               )}
@@ -171,9 +171,9 @@ export function Filmstrip({
                 if (e.key === 'Home' || e.key === 'End') { e.preventDefault(); focus(e.key === 'Home' ? 0 : items.length - 1); return }
                 if ((e.key === 'Delete' || e.key === 'Backspace') && it.removable && onRemove) { e.preventDefault(); e.stopPropagation(); onRemove(it.id); focus(i - 1) }
               }}
-              className="flex flex-col gap-1 rounded-[8px] p-1 text-left outline-none transition-colors hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal"
+              className="flex flex-col gap-1 rounded-[calc(var(--radius-control)+2px)] p-1 text-left outline-none transition-colors hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal"
             >
-              <div className={cn('relative overflow-hidden rounded-[5px] bg-control transition-shadow', on ? 'shadow-[0_0_0_2px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}
+              <div className={cn('relative overflow-hidden rounded-control bg-control transition-shadow', on ? 'shadow-[0_0_0_2px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}
                 style={{ width: thumbW, height: thumbH }}>
                 <Thumb it={it} pixelated={pixelated} />
               </div>

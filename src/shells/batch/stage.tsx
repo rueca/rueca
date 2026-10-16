@@ -39,7 +39,7 @@ function SafeOverlay({ size, v }: { size: SizeSpec; v: V }) {
           background: `repeating-linear-gradient(45deg, color-mix(in srgb, var(--rec) 30%, transparent) 0 ${stripe}px, color-mix(in srgb, var(--rec) 8%, transparent) ${stripe}px ${stripe * 2}px)`,
         }}>
           {z.label && (
-            <span className="absolute top-0 left-0 m-1 origin-top-left rounded-[4px] bg-overlay px-1.5 py-0.5 text-[10.5px] whitespace-nowrap text-fg shadow-[var(--shadow-segment)]"
+            <span className="absolute top-0 left-0 m-1 origin-top-left rounded-control bg-overlay px-1.5 py-0.5 text-ui-sm whitespace-nowrap text-fg shadow-[var(--shadow-segment)]"
               style={{ transform: `scale(${1 / zoom})` }}>{z.label}</span>
           )}
         </div>

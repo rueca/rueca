@@ -57,10 +57,10 @@ function Thread({ c }: { c: Comment }) {
     <div className="pop pointer-events-auto absolute top-[-28px] left-9 w-[264px] p-3" onPointerDown={(e) => e.stopPropagation()} data-chrome>
       {!isNew && (
         <div className="mb-2 flex items-start gap-2">
-          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-active text-[10.5px] font-semibold text-fg">{initials(c.author)}</div>
+          <div className="flex size-6 shrink-0 items-center justify-center rounded-full bg-active text-ui-sm font-semibold text-fg">{initials(c.author)}</div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 text-[11.5px]"><span className="font-medium text-fg">{c.author}</span><span className="text-fg-faint">{ago(c.at)}</span></div>
-            <p className="mt-0.5 text-[12px] leading-relaxed text-fg select-text">{c.text}</p>
+            <div className="flex items-center gap-1.5 text-ui"><span className="font-medium text-fg">{c.author}</span><span className="text-fg-faint">{ago(c.at)}</span></div>
+            <p className="mt-0.5 text-ui leading-relaxed text-fg select-text">{c.text}</p>
           </div>
           <IconButton icon={Check} label={c.resolved ? 'Reopen' : 'Resolve'} size="icon-sm" active={c.resolved}
             onClick={() => { S.setPage({ comments: S.page().comments.map((x) => (x.id === c.id ? { ...x, resolved: !x.resolved } : x)) }, { label: c.resolved ? 'Reopen comment' : 'Resolve comment' }); S.design.setState({ openComment: null }) }} />
@@ -70,7 +70,7 @@ function Thread({ c }: { c: Comment }) {
       )}
       <textarea autoFocus={isNew} value={draft} onChange={(e) => setDraft(e.target.value)} rows={isNew ? 3 : 2} placeholder={isNew ? 'Add a comment' : 'Edit comment'}
         onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); save() } if (e.key === 'Escape') S.design.setState({ openComment: null }) }}
-        className="w-full resize-none rounded-[6px] bg-control px-2 py-1.5 text-[12px] text-fg outline-none placeholder:text-fg-faint focus:shadow-[inset_0_0_0_1px_var(--signal)]" />
+        className="w-full resize-none rounded-control bg-control px-2 py-1.5 text-ui text-fg outline-none placeholder:text-fg-faint focus:shadow-[inset_0_0_0_1px_var(--signal)]" />
       <div className="mt-2 flex justify-end gap-1.5">
         <Button size="sm" variant="ghost" onClick={() => S.design.setState({ openComment: null })}>Cancel</Button>
         <Button size="sm" variant="primary" onClick={save} disabled={!draft.trim() || draft === c.text}>{isNew ? 'Post' : 'Save'}</Button>

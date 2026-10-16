@@ -24,8 +24,8 @@ export function LeftPanel() {
           const Icon = c.icon
           return (
             <button key={c.id} type="button" onClick={() => setUI({ comp: c.id, picked: null })} aria-pressed={on}
-              className={cn('group flex items-center gap-2.5 rounded-[7px] px-2 py-1.5 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-signal-soft' : 'hover:bg-hover')}>
-              <span className={cn('flex size-icon shrink-0 items-center justify-center rounded-[6px]', on ? 'bg-signal-strong text-signal-fg' : 'bg-control text-fg-muted')}><Icon size={14} strokeWidth={1.5} /></span>
+              className={cn('group flex items-center gap-2.5 rounded-cluster px-2 py-1.5 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-signal-soft' : 'hover:bg-hover')}>
+              <span className={cn('flex size-icon shrink-0 items-center justify-center rounded-control', on ? 'bg-signal-strong text-signal-fg' : 'bg-control text-fg-muted')}><Icon size={14} strokeWidth={1.5} /></span>
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="text-ui font-medium text-fg">{c.name}</span>
                 <span className="truncate text-ui text-fg-faint">{MATRIX[c.id].variants.length} variants · {c.blurb}</span>

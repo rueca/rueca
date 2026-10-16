@@ -121,7 +121,7 @@ export function CodeBlock({
   const lines = src.replace(/\n$/, '').split('\n')
   const panelId = `${uid}-panel`
   return (
-    <div className={cn('overflow-hidden rounded-[8px] bg-well shadow-[inset_0_0_0_1px_var(--line)]', className)}>
+    <div className={cn('overflow-hidden rounded-[calc(var(--radius-control)+2px)] bg-well shadow-[inset_0_0_0_1px_var(--line)]', className)}>
       <div className="flex h-section items-center gap-2 border-b border-line pr-1 pl-pad">
         {tabs?.length ? (
           <div ref={tabList} role="tablist" aria-label="Format" onKeyDown={onTabKey} className="-ml-1.5 flex min-w-0 items-center gap-0.5">

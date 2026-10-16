@@ -42,7 +42,7 @@ function One({ id }: { id: string }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-start gap-2.5 px-pad pt-3 pb-2">
-        <span className="mt-0.5 flex size-icon shrink-0 items-center justify-center rounded-[7px]" style={{ background: `color-mix(in srgb, ${catVar(def.category)} 16%, transparent)`, color: catVar(def.category) }}>
+        <span className="mt-0.5 flex size-icon shrink-0 items-center justify-center rounded-control" style={{ background: `color-mix(in srgb, ${catVar(def.category)} 16%, transparent)`, color: catVar(def.category) }}>
           <Icon size={15} strokeWidth={1.5} />
         </span>
         <div className="min-w-0 flex-1">
@@ -64,7 +64,7 @@ function One({ id }: { id: string }) {
         {node.data.bypass && <Badge tone="key">Bypassed</Badge>}
         {thumb && !error && <Badge tone="ok">{thumb.ms < 10 ? thumb.ms.toFixed(1) : Math.round(thumb.ms)} ms</Badge>}
       </div>
-      {error && <div className="mx-pad mb-2.5 rounded-[7px] bg-rec/10 px-2.5 py-2 text-ui leading-snug text-rec">{error}</div>}
+      {error && <div className="mx-pad mb-2.5 rounded-cluster bg-rec/10 px-2.5 py-2 text-ui leading-snug text-rec">{error}</div>}
 
       {spec.inputs.length > 0 && (
         <Section title="Inputs" first={false}>
@@ -73,9 +73,10 @@ function One({ id }: { id: string }) {
             const current = graph.getState().edges.find((e) => e.target === id && e.targetHandle === p.key)
             const NONE = '__none'
             // The keyboard way to wire (WCAG 2.1.1): pick the source here instead of dragging a wire.
-            const options = [{ value: NONE, label: p.optional ? 'Not connected (optional)' : 'Not connected' }, ...sourcesFor(id, p.key)]
+            // a short label so the field never truncates; whether it's optional lives in the row's hint
+            const options = [{ value: NONE, label: 'None' }, ...sourcesFor(id, p.key)]
             return (
-              <Row key={p.key} label={p.label} hint={`${p.type} input.${p.param ? ` Wiring this overrides the ${p.param} value below.` : ''}${src ? '' : p.optional ? '' : ' Required.'}`}>
+              <Row key={p.key} label={p.label} hint={`${p.type} input.${p.param ? ` Wiring this overrides the ${p.param} value below.` : ''}${p.optional ? ' Optional: None leaves it unconnected.' : src ? '' : ' Required.'}`}>
                 <span className="size-2 shrink-0 rounded-full" aria-hidden style={{ background: src ? portVar(p.type) : 'transparent', boxShadow: `inset 0 0 0 1.5px ${portVar(p.type)}` }} />
                 <Select label={`${p.label} source`} value={current ? `${current.source}:${current.sourceHandle}` : NONE} options={options}
                   className={!current && !p.optional ? 'text-rec' : undefined}

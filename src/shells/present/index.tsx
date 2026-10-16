@@ -72,7 +72,7 @@ export default function Present() {
       right={
         <Panel header={<PanelHeader title="Designer"><Badge tone="accent">{Object.values(params.defs).filter((d) => 'publish' in d && d.publish).length} published</Badge></PanelHeader>}>
           <Inspector params={params} />
-          <div className="mx-pad mb-3 rounded-[8px] bg-well p-pad text-ui leading-relaxed text-fg-muted">
+          <div className="mx-pad mb-3 rounded-cluster bg-well p-pad text-ui leading-relaxed text-fg-muted">
             Params marked <code className="text-fg">publish: true</code> appear in the client view. Everything else stays yours.
           </div>
         </Panel>

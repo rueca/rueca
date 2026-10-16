@@ -93,7 +93,7 @@ export function CompareSplit({
 
   const chip = (text: ReactNode, side: 'left' | 'right') => (
     <div className="pointer-events-none absolute top-0 z-[2] no-select" style={{ [side]: 0, transform: `scale(${k})`, transformOrigin: `top ${side}` }}>
-      <span className="m-2 inline-block rounded-[6px] bg-scrim px-2 py-0.5 text-ui font-medium whitespace-nowrap text-white backdrop-blur-sm">{text}</span>
+      <span className="m-2 inline-block rounded-control bg-scrim px-2 py-0.5 text-ui font-medium whitespace-nowrap text-white backdrop-blur-sm">{text}</span>
     </div>
   )
 

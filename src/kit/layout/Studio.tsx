@@ -24,6 +24,7 @@ import { TipProvider } from '../ui/tooltip'
 import { Toaster } from '../system/toast'
 import { ErrorBoundary } from '../system/error-boundary'
 import { restoreDensity } from '../core/density'
+import { LabelScope } from '../inspector/label-fit'
 
 type Layout = 'islands' | 'overlay' | 'docked'
 const StudioCtx = createContext<{ present: boolean; setPresent: (b: boolean) => void; layout: Layout }>({ present: false, setPresent: () => {}, layout: 'islands' })
@@ -35,7 +36,15 @@ export function Studio({
   toolbar?: ReactNode; left?: ReactNode; right?: ReactNode; bottom?: ReactNode
   children: ReactNode; layout?: Layout; className?: string; leftWidth?: number; rightWidth?: number
 }) {
-  const [present, setPresent] = useState(false)
+  const [present, setPresentRaw] = useState(false)
+  // leaving present mode puts focus back where it was, not on <body>
+  const returnTo = useRef<HTMLElement | null>(null)
+  const setPresent = (v: boolean | ((p: boolean) => boolean)) => setPresentRaw((p) => {
+    const next = typeof v === 'function' ? v(p) : v
+    if (next && !p) returnTo.current = document.activeElement as HTMLElement | null
+    if (!next && p) { const el = returnTo.current; requestAnimationFrame(() => { if (el?.isConnected) el.focus() }) }
+    return next
+  })
   const rootRef = useRef<HTMLDivElement>(null)
   // The #1 install trap: <Studio> fills its parent, and a fresh Vite page has no height → a blank page, no error.
   useLayoutEffect(restoreDensity, []) // the saved density (⌘K → Density), before first paint
@@ -130,7 +139,8 @@ export function Panel({ children, className, header, footer, scroll = true }: { 
   return (
     <div className={cn('flex min-h-0 flex-col overflow-hidden', layout === 'docked' ? 'h-full' : 'panel max-h-full', className)}>
       {header && <div className="flex-none">{header}</div>}
-      <div className={cn('min-h-0 flex-1', scroll ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden')}>{children}</div>
+      {/* one label column for everything in the panel: hand-built rows and inspectors line up */}
+      <LabelScope className={cn('min-h-0 flex-1', scroll ? 'overflow-y-auto overflow-x-hidden' : 'overflow-hidden')}>{children}</LabelScope>
       {footer && <div className="flex-none border-t border-line">{footer}</div>}
     </div>
   )

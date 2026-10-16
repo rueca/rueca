@@ -117,7 +117,7 @@ export function ShaderStage() {
         </div>
       )}
       {error && (
-        <div className="absolute inset-x-0 bottom-20 mx-auto flex w-fit max-w-[520px] items-start gap-2 rounded-[10px] bg-overlay px-3 py-2 text-ui text-fg shadow-[var(--shadow-pop)]">
+        <div className="absolute inset-x-0 bottom-20 mx-auto flex w-fit max-w-[520px] items-start gap-2 rounded-pop bg-overlay px-pad py-2 text-ui text-fg shadow-[var(--shadow-pop)]">
           <TriangleAlert size={14} strokeWidth={1.5} className="mt-px shrink-0 text-rec" />
           <span className="line-clamp-3 font-mono text-ui text-fg-muted">{error}</span>
         </div>

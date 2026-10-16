@@ -25,8 +25,17 @@ export function Segmented<T extends string = string>({
       role="radiogroup"
       value={[value]}
       onValueChange={(v) => v[0] && onChange(v[0] as T)}
-      // no well: a hairline holds the options and the chosen one is a quiet pill
-      className={cn('flex w-full min-w-0 gap-0.5 rounded-[calc(var(--radius-control)+1px)] p-px shadow-[inset_0_0_0_1px_var(--line)]', className)}
+      // announced as radios, so the arrows choose (APG radio group), not just move focus
+      onKeyDown={(e) => {
+        if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'].includes(e.key)) return
+        requestAnimationFrame(() => {
+          const v = (document.activeElement as HTMLElement | null)?.dataset.segValue
+          if (v && v !== value && opts.some((o) => o.value === v)) onChange(v as T)
+        })
+      }}
+      // no well: a hairline holds the options and the chosen one is a quiet pill. The group is exactly one control
+      // tall (the pills sit inside its 1px inset), so it lines up with the fields beside it
+      className={cn('flex w-full min-w-0 gap-0.5 rounded-[calc(var(--radius-control)+1px)] p-px shadow-[inset_0_0_0_1px_var(--line)]', size === 'sm' ? 'h-control-sm' : 'h-control', className)}
     >
       {opts.map((o) => {
         const Icon = o.icon
@@ -34,15 +43,18 @@ export function Segmented<T extends string = string>({
           <Toggle
             key={o.value}
             value={o.value}
+            data-seg-value={o.value}
             aria-label={labelOf(o)}
             // single choice: announce as a radio, not a pressed toggle (APG radiogroup, break-it A12)
             role="radio"
             aria-checked={value === o.value}
             aria-pressed={undefined}
             className={cn(
-              'flex min-w-0 flex-1 items-center justify-center gap-1 rounded-control px-1 font-medium text-fg-muted outline-none no-select transition-colors duration-100',
-              size === 'sm' ? 'h-control-sm text-ui' : 'h-control text-ui',
-              'hover:text-fg data-[pressed]:bg-active data-[pressed]:text-fg',
+              // flex-auto, not flex-1: options start from their label's width and share what's left, so "Stacked"
+              // doesn't truncate beside "Auto" while the group still has room
+              'flex h-full min-w-0 flex-auto items-center justify-center gap-1 rounded-control px-1 text-ui font-medium text-fg-muted outline-none no-select transition-colors duration-100',
+              // the pill carries a hairline: on a light, translucent panel the fill alone is ~1.1:1
+              'hover:text-fg data-[pressed]:bg-active data-[pressed]:text-fg data-[pressed]:shadow-[inset_0_0_0_1px_var(--line-strong)]',
               'focus-visible:ring-2 focus-visible:ring-signal',
             )}
           >
@@ -77,7 +89,7 @@ export function Tiles({
               value={o.value}
               aria-label={labelOf(o)}
               className={cn(
-                aspect === 'square' ? 'aspect-square' : 'h-8', 'flex min-h-0 flex-col items-center justify-center gap-1 rounded-[7px] bg-control text-fg-muted outline-none transition-colors',
+                aspect === 'square' ? 'aspect-square' : 'h-button-lg', 'flex min-h-0 flex-col items-center justify-center gap-1 rounded-[calc(var(--radius-control)+2px)] bg-control text-fg-muted outline-none transition-colors',
                 'hover:text-fg data-[pressed]:bg-signal-soft data-[pressed]:text-signal-text data-[pressed]:shadow-[inset_0_0_0_1px_var(--signal)]',
                 'focus-visible:ring-2 focus-visible:ring-signal',
               )}
@@ -105,7 +117,7 @@ export function Switch({ checked, onChange, label, size = 'md' }: { checked: boo
       aria-label={label}
       className={cn(
         'relative inline-flex shrink-0 items-center rounded-full bg-track p-[2px] outline-none transition-colors duration-150 shadow-[inset_0_0_0_1px_var(--line-strong)] data-[checked]:shadow-none',
-        "after:absolute after:-inset-y-[4px] after:-inset-x-[2px] after:content-['']", // ≥24px hit area, same look
+        "after:absolute after:-inset-y-[5px] after:-inset-x-[2px] after:content-['']", // ≥24px hit area at both sizes, same look
         // on is ink, not signal: blue stays for focus and selection, so a panel of switches doesn't outshout the prototype
         'data-[checked]:bg-ink focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-1 focus-visible:ring-offset-panel',
         size === 'sm' ? 'h-[14px] w-[22px]' : 'h-4 w-[26px]',
@@ -130,7 +142,8 @@ export function Checkbox({ checked, onChange, label }: { checked: boolean; onCha
       aria-label={label}
       onClick={() => onChange(!checked)}
       className={cn(
-        'flex size-[14px] shrink-0 items-center justify-center rounded-[4px] outline-none transition-colors',
+        // a 24px reach around the 14px box, as the switch has
+        "relative flex size-[14px] shrink-0 items-center justify-center rounded-[4px] outline-none transition-colors after:absolute after:-inset-[5px] after:content-['']",
         checked ? 'bg-ink text-ink-fg' : 'shadow-[inset_0_0_0_1px_var(--line-strong)] hover:bg-hover',
         'focus-visible:ring-2 focus-visible:ring-signal',
       )}
@@ -201,20 +214,28 @@ export function TextInput({
     window.addEventListener('pointerdown', early, true)
     el.addEventListener('blur', () => { window.removeEventListener('pointerdown', early, true); settle(el.value); start.current = null }, { once: true })
   }
+  const revertOnEsc = (e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (e.key !== 'Escape' || start.current === null || e.currentTarget.value === start.current) return
+    e.preventDefault(); e.stopPropagation()
+    onChange(start.current)
+  }
   const cls = cn(
     'w-full min-w-0 rounded-control bg-control px-2 text-ui text-fg outline-none placeholder:text-fg-faint',
     'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus:shadow-[inset_0_0_0_1px_var(--signal)]',
     mono && 'font-mono',
-    multiline ? 'resize-none py-1.5 leading-relaxed' : 'h-control',
+    // a textarea grows with its text (from `rows` lines up to ~8) instead of showing half a fourth line
+    multiline ? 'resize-none py-1.5 [field-sizing:content] max-h-[calc(8*var(--ui-leading)+12px)]' : 'h-control',
     className,
   )
   return multiline ? (
-    <textarea aria-label={label} className={cls} rows={rows} value={value} maxLength={maxLength} placeholder={placeholder}
-      onChange={(e) => onChange(e.target.value)} onFocus={focus} onKeyDown={onKeyDown} />
+    <textarea aria-label={label} className={cls} rows={rows} style={{ minHeight: `calc(${rows} * var(--ui-leading) + 12px)` }} value={value} maxLength={maxLength} placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)} onFocus={focus}
+      onKeyDown={(e) => { onKeyDown?.(e); if (!e.defaultPrevented) revertOnEsc(e) }} />
   ) : (
     <input aria-label={label} className={cls} value={value} maxLength={maxLength} placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)} onFocus={focus}
-      onKeyDown={(e) => { onKeyDown?.(e); if (!e.defaultPrevented && e.key === 'Enter') (e.target as HTMLInputElement).blur() }} />
+      // Enter commits and keeps focus where it was; Esc puts back what the field held when it was focused
+      onKeyDown={(e) => { onKeyDown?.(e); if (e.defaultPrevented) return; if (e.key === 'Enter') settle(e.currentTarget.value); else revertOnEsc(e) }} />
   )
 }
 
@@ -251,14 +272,15 @@ function MenuItems({ items }: { items: MenuItem[] }) {
         const Icon = it.icon
         return (
           <BaseMenu.Item key={i} disabled={it.disabled} onClick={it.onClick} className={cn(itemCls, it.danger && 'text-rec', it.hint && 'h-auto min-h-icon py-1.5')}>
-            <span className="flex w-4 justify-center self-start pt-px text-fg-muted group-data-[highlighted]/item:text-signal-fg">
+            {/* centred on the row; an item with a hint pins it to the label's line instead */}
+            <span className={cn('flex w-4 justify-center text-fg-muted group-data-[highlighted]/item:text-signal-fg', it.hint && 'self-start pt-px', it.danger && 'text-rec')}>
               {it.checked ? <Check size={13} strokeWidth={2} /> : Icon ? <Icon size={14} strokeWidth={1.5} /> : null}
             </span>
             <span className="flex min-w-0 flex-1 flex-col">
               <span>{it.label}</span>
               {it.hint && <span className="text-ui leading-snug text-fg-faint group-data-[highlighted]/item:text-signal-fg/75">{it.hint}</span>}
             </span>
-            {it.shortcut && <span className="text-ui text-fg-faint group-data-[highlighted]/item:text-signal-fg/70">{prettyCombo(it.shortcut)}</span>}
+            {it.shortcut && <span className={cn('text-ui text-fg-faint group-data-[highlighted]/item:text-signal-fg/70', it.hint && 'self-start')}>{prettyCombo(it.shortcut)}</span>}
           </BaseMenu.Item>
         )
       })}
@@ -296,5 +318,5 @@ export function Badge({ children, tone = 'default', className }: { children: Rea
     rec: 'bg-rec/15 text-rec-text',
     ok: 'bg-ok/15 text-ok-text',
   }
-  return <span className={cn('inline-flex h-[18px] items-center gap-1 rounded-[5px] px-1.5 text-ui-sm font-medium tabular', tones[tone], className)}>{children}</span>
+  return <span className={cn('inline-flex h-[18px] items-center gap-1 rounded-control px-1.5 text-ui-sm font-medium tabular', tones[tone], className)}>{children}</span>
 }

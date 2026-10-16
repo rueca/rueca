@@ -191,20 +191,24 @@ export function FavouritesPanel() {
             const on = id === focusId, cmp = id === compare
             return (
               <div key={id} className="group/fav flex min-w-0 flex-col gap-1">
-                <button type="button" aria-label={`Open ${markLabel(m)}`}
-                  onClick={(e) => (e.altKey && focusId ? compareWith(id) : focus(id))}
-                  className={cn('relative aspect-square overflow-hidden rounded-[8px] outline-none focus-visible:ring-2 focus-visible:ring-signal',
-                    on ? 'shadow-[0_0_0_2px_var(--signal)]' : cmp ? 'shadow-[0_0_0_2px_var(--key)]' : 'shadow-[0_0_0_1px_var(--line)] hover:shadow-[0_0_0_1px_var(--line-strong)]')}
-                  style={{ background: s.paper }}>
-                  <MarkArt m={m} {...c} />
-                </button>
-                <div className="flex items-center gap-1">
-                  <span className="min-w-0 flex-1 truncate text-ui text-fg-muted">{markLabel(m)}</span>
-                  {focusId && focusId !== id && (
-                    <Tip label="Compare with focused"><button type="button" aria-label="Compare" onClick={() => compareWith(id)} className="flex size-icon-sm items-center justify-center rounded-[4px] text-fg-faint opacity-0 outline-none hover:text-fg group-hover/fav:opacity-100 focus-visible:opacity-100"><Columns2 size={11} strokeWidth={1.5} /></button></Tip>
-                  )}
-                  <Tip label="Remove from favourites"><button type="button" aria-label="Unfavourite" onClick={() => toggleFav(id)} className="flex size-icon-sm items-center justify-center rounded-[4px] text-key opacity-70 outline-none hover:opacity-100 focus-visible:ring-2 focus-visible:ring-signal"><Star size={11} strokeWidth={1.5} fill="currentColor" /></button></Tip>
+                {/* the actions sit on the thumbnail, so the label gets the tile's full width (an invisible Compare
+                    button beside it reserved 20px and truncated every name) */}
+                <div className="relative">
+                  <button type="button" aria-label={`Open ${markLabel(m)}`}
+                    onClick={(e) => (e.altKey && focusId ? compareWith(id) : focus(id))}
+                    className={cn('relative block aspect-square w-full overflow-hidden rounded-[8px] outline-none focus-visible:ring-2 focus-visible:ring-signal',
+                      on ? 'shadow-[0_0_0_2px_var(--signal)]' : cmp ? 'shadow-[0_0_0_2px_var(--key)]' : 'shadow-[0_0_0_1px_var(--line)] hover:shadow-[0_0_0_1px_var(--line-strong)]')}
+                    style={{ background: s.paper }}>
+                    <MarkArt m={m} {...c} />
+                  </button>
+                  <div className="absolute top-1 right-1 flex gap-0.5">
+                    {focusId && focusId !== id && (
+                      <Tip label="Compare with focused"><button type="button" aria-label="Compare" onClick={() => compareWith(id)} className="hidden size-icon-sm items-center justify-center rounded-control bg-overlay text-fg-muted shadow-[var(--shadow-segment)] outline-none hover:text-fg group-focus-within/fav:flex group-hover/fav:flex focus-visible:ring-2 focus-visible:ring-signal"><Columns2 size={11} strokeWidth={1.5} /></button></Tip>
+                    )}
+                    <Tip label="Remove from favourites"><button type="button" aria-label="Unfavourite" onClick={() => toggleFav(id)} className="flex size-icon-sm items-center justify-center rounded-control bg-overlay text-key shadow-[var(--shadow-segment)] outline-none focus-visible:ring-2 focus-visible:ring-signal"><Star size={11} strokeWidth={1.5} fill="currentColor" /></button></Tip>
+                  </div>
                 </div>
+                <span className="min-w-0 truncate text-ui text-fg-muted">{markLabel(m)}</span>
               </div>
             )
           })}
@@ -248,7 +252,7 @@ export function MarkPanel() {
   return (
     <>
       <div className="flex items-start gap-2.5 border-b border-line px-pad py-3">
-        <div className="flex size-button-lg shrink-0 items-center justify-center rounded-[8px] bg-control text-fg-muted"><Icon size={15} strokeWidth={1.5} /></div>
+        <div className="flex size-button-lg shrink-0 items-center justify-center rounded-cluster bg-control text-fg-muted"><Icon size={15} strokeWidth={1.5} /></div>
         <div className="min-w-0 flex-1">
           <div className="text-title font-medium text-fg">{fam.name} <span className="font-normal tabular text-fg-faint">#{String(m.v.seed)}</span></div>
           <div className="text-ui leading-snug text-fg-muted">{fam.blurb}</div>

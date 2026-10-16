@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Slider as Base } from '@base-ui/react/slider'
 import { cn } from '../core/cn'
 
@@ -19,6 +20,9 @@ export function Slider({
   format?: (v: number) => string
 }) {
   const range = Array.isArray(value)
+  const keyed = useRef(false)
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  useEffect(() => () => clearTimeout(timer.current), [])
   const fillFrom = !range && origin !== undefined ? ((origin - min) / (max - min)) * 100 : null
   const at = !range ? ((value - min) / (max - min)) * 100 : 0
   return (
@@ -29,7 +33,14 @@ export function Slider({
       step={step}
       disabled={disabled}
       onValueChange={(v) => onChange(v, false)}
-      onValueCommitted={(v) => onChange(v, true)}
+      // keyboard steps commit once the keys stop (500ms), so five arrow presses are one undo step, as in scrub fields
+      onValueCommitted={(v) => {
+        if (!keyed.current) { onChange(v, true); return }
+        clearTimeout(timer.current)
+        timer.current = setTimeout(() => onChange(v, true), 500)
+      }}
+      onKeyDownCapture={() => { keyed.current = true }}
+      onPointerDownCapture={() => { keyed.current = false; clearTimeout(timer.current) }}
       className={cn('group/slider relative flex h-control w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}
     >
       <Base.Control data-studio-slider-control className="flex h-control w-full cursor-default touch-pan-y items-center">
@@ -53,7 +64,8 @@ export function Slider({
                 'size-3 rounded-full bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,.25),0_1px_3px_rgba(0,0,0,.4)] outline-none',
                 // thumb rests small and quiet (always findable, WCAG 1.4.11), grows on hover/focus/drag
                 track ? '' : 'scale-[0.6] transition-transform duration-100 group-hover/slider:scale-100',
-                'focus-visible:scale-100 focus-visible:ring-2 focus-visible:ring-signal data-[dragging]:scale-100',
+                // the focused element is the range input inside the thumb, so the ring keys off it
+                'has-[:focus-visible]:scale-100 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-signal data-[dragging]:scale-100',
               )}
             />
           ))}

@@ -63,7 +63,12 @@ export default function CanvasShell() {
   useEffect(() => {
     // the demo's faces load on first use; ask for them up front so the first layout measures the real glyphs
     const wanted = ['400 16px "Newsreader Variable"', '400 16px "IBM Plex Sans Variable"', '600 16px "IBM Plex Sans Variable"', '400 16px "La Belle Aurore"']
-    Promise.allSettled(wanted.map((f) => document.fonts?.load(f))).then(() => document.fonts?.ready).then(() => { bumpFontEpoch(); S.design.setState({ doc: { ...S.get().doc } }) })
+    Promise.allSettled(wanted.map((f) => document.fonts?.load(f))).then(() => document.fonts?.ready).then(() => {
+      bumpFontEpoch()
+      // a fresh doc object re-renders the canvas; the history anchor follows it, or select() would stop writing the
+      // selection into the anchor and the first undo would restore an empty selection
+      S.design.setState((s) => { const doc = { ...s.doc }; return { doc, anchor: s.anchor.doc === s.doc ? { ...s.anchor, doc } : s.anchor } })
+    })
   }, [])
 
   const nudge = (dx: number, dy: number) => () => { if (!inTree()) S.nudge(dx, dy) }

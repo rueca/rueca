@@ -184,8 +184,8 @@ function DocumentSections() {
             onChange={(n, f) => updateAnim({ duration: n }, f)} />
         </Row>
         <Row label="Playback" hint="Loop, play once, or ping-pong (forward then back).">
-          <Segmented value={anim.loop} label="Loop mode" onChange={(l) => updateAnim({ loop: l as typeof anim.loop })}
-            options={[{ value: 'loop', label: 'Loop', icon: Repeat }, { value: 'once', label: 'Once', icon: ArrowRight }, { value: 'pingpong', label: 'Ping-pong', icon: ArrowLeftRight }]} />
+          <Segmented iconOnly value={anim.loop} label="Loop mode" onChange={(l) => updateAnim({ loop: l as typeof anim.loop })}
+            options={[{ value: 'loop', label: 'Loop', icon: Repeat, hint: 'Loop' }, { value: 'once', label: 'Once', icon: ArrowRight, hint: 'Play once' }, { value: 'pingpong', label: 'Ping-pong', icon: ArrowLeftRight, hint: 'Ping-pong' }]} />
         </Row>
         <div className="flex gap-1.5 px-pad pt-1">
           <Button size="sm" variant="default" className="flex-1" onClick={() => ui.setState({ sel: 'wheel' })}>Select wheel</Button>

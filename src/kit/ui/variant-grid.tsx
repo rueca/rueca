@@ -45,7 +45,7 @@ export function VariantAction({ label, shortcut, onClick, icon: Icon, on, childr
   return (
     <Tip label={label} shortcut={shortcut}>
       <button type="button" aria-label={label} aria-pressed={on} onClick={(e) => { e.stopPropagation(); onClick() }} onDoubleClick={(e) => e.stopPropagation()}
-        className={cn('flex size-icon items-center justify-center rounded-[7px] bg-overlay/90 text-fg-muted shadow-[var(--shadow-segment)] outline-none backdrop-blur-sm',
+        className={cn('flex size-icon items-center justify-center rounded-[calc(var(--radius-control)+2px)] bg-overlay/90 text-fg-muted shadow-[var(--shadow-segment)] outline-none backdrop-blur-sm',
           'hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', on && 'text-signal-text hover:text-signal-text')}>
         {Icon ? <Icon size={13} strokeWidth={1.5} /> : children}
       </button>
@@ -115,15 +115,15 @@ export function VariantGrid({
                 if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); onOpen(it.id); return }
                 if (move(i, e)) { e.preventDefault(); e.stopPropagation() }
               }}
-              className="group/card flex min-w-0 flex-col gap-1.5 rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-field"
+              className="group/card flex min-w-0 flex-col gap-1.5 rounded-panel outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-field"
               style={{ animation: `studio-variant-in 280ms cubic-bezier(.2,.8,.2,1) ${Math.min(i, 24) * 14}ms both` }}>
-              <div className={cn('relative aspect-square overflow-hidden rounded-[10px] transition-shadow duration-150',
+              <div className={cn('relative aspect-square overflow-hidden rounded-panel transition-shadow duration-150',
                 active ? 'shadow-[0_0_0_2px_var(--signal)]' : it.locked ? 'shadow-[0_0_0_1px_var(--line-strong)]' : 'shadow-[0_0_0_1px_var(--line)] group-hover/card:shadow-[0_0_0_1px_var(--line-strong)]')}
                 style={{ background: it.background }}>
                 <div className="absolute inset-0 [&>svg]:size-full" data-studio-artifact>{render(it.id)}</div>
                 <div className="pointer-events-none absolute top-2 left-2 flex gap-1">
-                  {it.locked && <span className="flex size-icon items-center justify-center rounded-[6px] bg-overlay/90 text-fg shadow-[var(--shadow-segment)]"><Lock size={12} strokeWidth={1.75} /></span>}
-                  {it.fav && <span className="flex size-icon items-center justify-center rounded-[6px] bg-overlay/90 text-key shadow-[var(--shadow-segment)]"><Star size={12} strokeWidth={1.75} fill="currentColor" /></span>}
+                  {it.locked && <span className="flex size-icon items-center justify-center rounded-control bg-overlay/90 text-fg shadow-[var(--shadow-segment)]"><Lock size={12} strokeWidth={1.75} /></span>}
+                  {it.fav && <span className="flex size-icon items-center justify-center rounded-control bg-overlay/90 text-key shadow-[var(--shadow-segment)]"><Star size={12} strokeWidth={1.75} fill="currentColor" /></span>}
                 </div>
                 <div className="absolute top-2 right-2 flex gap-1 opacity-0 transition-opacity duration-100 group-focus-within/card:opacity-100 group-hover/card:opacity-100">
                   {onLock && <VariantAction label={it.locked ? 'Unlock' : 'Keep (lock)'} shortcut={shortcuts.lock} on={it.locked} icon={it.locked ? Lock : LockOpen} onClick={() => onLock(it.id)} />}
@@ -165,7 +165,7 @@ export function SizeLadder({ sizes, surfaces, render, extra, className }: {
     <div className={cn('flex min-w-max gap-3', className)}>
       {surfaces.map((s, si) => (
         <figure key={s.label} data-studio-artifact aria-label={`${s.label}: ${sizes.join(', ')} px`}
-          className="relative m-0 rounded-[10px] p-3 shadow-[inset_0_0_0_1px_var(--line)]" style={{ background: s.bg, color: s.fg }}>
+          className="relative m-0 rounded-panel p-3 shadow-[inset_0_0_0_1px_var(--line)]" style={{ background: s.bg, color: s.fg }}>
           <figcaption className="absolute top-2.5 left-3 text-[11px] opacity-60">{s.label}</figcaption>
           <div className="flex items-end gap-4">
             {sizes.map((z) => (

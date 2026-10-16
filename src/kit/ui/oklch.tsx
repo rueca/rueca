@@ -174,7 +174,7 @@ export function OklchField({ value, onChange, maxC = 0.37, preview = true, class
     <div className={cn('flex flex-col gap-2', className)}>
       {preview && (
         <div className="flex items-center gap-2.5">
-          <div className="checker relative size-10 shrink-0 overflow-hidden rounded-[8px] shadow-[inset_0_0_0_1px_var(--line-strong)]">
+          <div className="checker relative size-10 shrink-0 overflow-hidden rounded-[calc(var(--radius-control)+2px)] shadow-[inset_0_0_0_1px_var(--line-strong)]">
             <div className="absolute inset-0" style={{ background: css }} />
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">

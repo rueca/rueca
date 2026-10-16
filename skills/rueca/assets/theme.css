@@ -114,9 +114,10 @@
   --gutter: 8px;         /* window edge and the gap between islands */
   --inspector-w: 256px;
   --sidebar-w: 224px;
-  --radius-panel: 10px;
-  --radius-cluster: 8px;
-  --radius-control: 5px;
+  --radius-panel: 8px;   /* concentric: a 4px control inside an 8px panel reads as one shape */
+  --radius-cluster: 6px;
+  --radius-pop: 8px;     /* menus, popovers, the palette */
+  --radius-control: 4px;
   --ui-text: 11px;       /* one size for labels, values and controls; hierarchy is weight */
   --ui-text-sm: 10px;
   --ui-text-title: 12px;
@@ -128,7 +129,7 @@
   --d-section: 32px; --d-header: 40px; --d-bar: 36px; --d-dock: 40px; --d-dock-button: 32px;
   --d-pad: 12px; --d-label: 84px; --d-lane: 24px; --d-ruler: 28px;
   --gutter: 12px; --inspector-w: 280px; --sidebar-w: 240px;
-  --radius-panel: 12px; --radius-cluster: 10px; --radius-control: 6px;
+  --radius-panel: 12px; --radius-cluster: 10px; --radius-pop: 10px; --radius-control: 6px;
   --ui-text: 11.5px; --ui-text-sm: 10.5px; --ui-text-title: 12.5px; --ui-leading: 16px;
 }
 /* dense: below this the chrome starts to read as a debug panel */
@@ -137,7 +138,7 @@
   --d-section: 24px; --d-header: 28px; --d-bar: 30px; --d-dock: 34px; --d-dock-button: 26px;
   --d-pad: 8px; --d-label: 72px; --d-lane: 18px; --d-ruler: 22px; /* 68 truncated 'Stroke weight' */
   --gutter: 6px; --inspector-w: 240px; --sidebar-w: 208px;
-  --radius-panel: 8px; --radius-cluster: 8px; --radius-control: 4px;
+  --radius-panel: 6px; --radius-cluster: 5px; --radius-pop: 6px; --radius-control: 3px;
 }
 
 :root:is(.light, [data-studio-theme="light"]) {
@@ -296,6 +297,7 @@
   --radius-panel: var(--radius-panel);
   --radius-control: var(--radius-control);
   --radius-cluster: var(--radius-cluster);
+  --radius-pop: var(--radius-pop);
 
   /* density → utilities: h-control, size-icon, h-section, h-header, px-pad, w-label, h-lane… */
   --spacing-row: var(--row);
@@ -380,7 +382,7 @@
   box-shadow: var(--shadow-cluster);
   border-radius: var(--radius-cluster);
 }
-@utility pop { background: var(--overlay); box-shadow: var(--shadow-pop); border-radius: 10px; }
+@utility pop { background: var(--overlay); box-shadow: var(--shadow-pop); border-radius: var(--radius-pop); }
 @utility no-select { user-select: none; -webkit-user-select: none; }
 @utility checker {
   background-color: #fff;
@@ -407,6 +409,10 @@
   --ui-text: 14px; --ui-text-sm: 12px; --ui-text-title: 15px; --ui-leading: 20px;
 }
 .studio-touch { -webkit-tap-highlight-color: transparent; }
+/* switches at finger size too: the visible switch, not just its reach */
+.studio-touch [role="switch"] { height: 26px; width: 44px; }
+.studio-touch [role="switch"] > * { width: 22px; height: 22px; }
+.studio-touch [role="switch"] > [data-checked] { translate: 18px 0; }
 
 .studio-touch [data-studio-thumb] { width: 24px; height: 24px; scale: 1; }
 /* switches: a 44px reach */

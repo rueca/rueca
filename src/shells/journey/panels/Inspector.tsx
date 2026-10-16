@@ -37,7 +37,7 @@ function CardInspector({ card, p }: { card: Card; p: Persona }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2 px-pad pt-3 pb-1">
-        <span className="flex size-icon items-center justify-center rounded-[6px] bg-active text-fg-muted"><LIcon size={13} strokeWidth={1.5} /></span>
+        <span className="flex size-icon items-center justify-center rounded-control bg-active text-fg-muted"><LIcon size={13} strokeWidth={1.5} /></span>
         <div className="min-w-0 flex-1 text-ui text-fg-muted">{stageName(card.stage)} · {lane.label}</div>
         <IconButton icon={CopyPlus} size="icon-sm" label="Duplicate" shortcut="mod+d" onClick={duplicateCard} />
         <IconButton icon={Trash2} size="icon-sm" label="Delete" shortcut="backspace" onClick={deleteSelection} />
@@ -88,7 +88,7 @@ function CardInspector({ card, p }: { card: Card; p: Persona }) {
             </div>
           ) : answeredBy.map((o) => (
             <button key={o.id} type="button" onClick={() => ui.setState({ sel: { kind: 'card', id: o.id } })}
-              className="mx-1.5 flex min-h-icon items-center gap-2 rounded-[6px] px-1.5 py-1.5 text-left text-ui outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
+              className="mx-1.5 flex min-h-icon items-center gap-2 rounded-control px-1.5 py-1.5 text-left text-ui outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
               <span className="h-3 w-[3px] shrink-0 rounded-full bg-ok" />
               <span className="min-w-0 flex-1 truncate text-fg">{o.text}</span>
               <span className="shrink-0 text-ui-sm text-fg-faint">{stageName(o.stage)}</span>
@@ -123,7 +123,7 @@ function StageInspector({ stage, p }: { stage: Stage; p: Persona }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2 px-pad pt-3 pb-1">
-        <span className="flex h-icon min-w-icon items-center justify-center rounded-[6px] bg-signal-strong px-1 text-ui font-semibold text-signal-fg tabular">{i + 1}</span>
+        <span className="flex h-icon min-w-icon items-center justify-center rounded-control bg-signal-strong px-1 text-ui font-semibold text-signal-fg tabular">{i + 1}</span>
         <div className="min-w-0 flex-1 truncate text-title font-semibold">{stage.name}</div>
         <IconButton icon={ArrowLeft} size="icon-sm" label="Move stage left" shortcut="alt+arrowleft" disabled={i === 0} onClick={() => moveStage(stage.id, -1)} />
         <IconButton icon={ArrowRight} size="icon-sm" label="Move stage right" shortcut="alt+arrowright" disabled={i === p.stages.length - 1} onClick={() => moveStage(stage.id, 1)} />
@@ -188,10 +188,10 @@ function MapInspector({ p }: { p: Persona }) {
         </div>
         {low && high && (
           <div className="mt-2 flex flex-col gap-1 px-pad text-ui">
-            <button type="button" className="flex items-center gap-2 rounded-[6px] py-0.5 text-left hover:text-fg" onClick={() => ui.setState({ sel: { kind: 'stage', id: low.id } })}>
+            <button type="button" className="flex items-center gap-2 rounded-control py-0.5 text-left hover:text-fg" onClick={() => ui.setState({ sel: { kind: 'stage', id: low.id } })}>
               <span className="w-14 shrink-0 text-fg-faint">Low point</span><span className="text-fg">{low.name}</span><Badge tone="rec">{emoji(low.emotion)} {fmtEmotion(low.emotion)}</Badge>
             </button>
-            <button type="button" className="flex items-center gap-2 rounded-[6px] py-0.5 text-left hover:text-fg" onClick={() => ui.setState({ sel: { kind: 'stage', id: high.id } })}>
+            <button type="button" className="flex items-center gap-2 rounded-control py-0.5 text-left hover:text-fg" onClick={() => ui.setState({ sel: { kind: 'stage', id: high.id } })}>
               <span className="w-14 shrink-0 text-fg-faint">High point</span><span className="text-fg">{high.name}</span><Badge tone="ok">{emoji(high.emotion)} {fmtEmotion(high.emotion)}</Badge>
             </button>
           </div>
@@ -201,7 +201,7 @@ function MapInspector({ p }: { p: Persona }) {
             <div className="pb-1 text-ui text-fg-faint">Open pain points</div>
             {open.slice(0, 4).map((pn) => (
               <button key={pn.id} type="button" onClick={() => ui.setState({ sel: { kind: 'card', id: pn.id } })}
-                className="flex min-h-row w-full items-center gap-2 rounded-[6px] py-1 text-left text-ui outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+                className="flex min-h-row w-full items-center gap-2 rounded-control py-1 text-left text-ui outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
                 <span className="h-3 w-[3px] shrink-0 rounded-full bg-rec" /><span className="min-w-0 flex-1 truncate text-fg-muted">{pn.text}</span>
               </button>
             ))}
@@ -213,7 +213,7 @@ function MapInspector({ p }: { p: Persona }) {
         <div className="flex flex-wrap gap-1 px-pad">
           {tags.map(([t, n]) => (
             <button key={t} type="button" aria-pressed={filter === t} onClick={() => ui.setState({ filterTag: filter === t ? null : t })}
-              className={cn('flex h-control items-center gap-1 rounded-[6px] px-2 text-ui outline-none focus-visible:ring-2 focus-visible:ring-signal', filter === t ? 'bg-signal-strong text-signal-fg' : 'bg-control text-fg-muted hover:text-fg')}>
+              className={cn('flex h-control items-center gap-1 rounded-control px-2 text-ui outline-none focus-visible:ring-2 focus-visible:ring-signal', filter === t ? 'bg-signal-strong text-signal-fg' : 'bg-control text-fg-muted hover:text-fg')}>
               <Tag size={11} strokeWidth={1.5} />{t}<span className="tabular opacity-60">{n}</span>
             </button>
           ))}
@@ -225,7 +225,7 @@ function MapInspector({ p }: { p: Persona }) {
 
 function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-0.5 rounded-[8px] bg-well px-2.5 py-2">
+    <div className="flex flex-col gap-0.5 rounded-cluster bg-well px-2.5 py-2">
       <span className="text-ui text-fg-faint">{label}</span>
       <span className="text-[15px] font-semibold tabular">{value}</span>
     </div>

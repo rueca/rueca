@@ -45,7 +45,7 @@ export function Guides({
         ))}
       </svg>
       {measures.map((m, i) => (
-        <span key={`l${i}`} className="absolute -translate-1/2 rounded-[3px] px-1 tabular text-[10.5px] leading-4 font-medium text-signal-fg"
+        <span key={`l${i}`} className="absolute -translate-1/2 rounded-[3px] px-1 tabular text-ui-sm leading-4 font-medium text-signal-fg"
           style={{ left: (X(m.x1) + X(m.x2)) / 2, top: (Y(m.y1) + Y(m.y2)) / 2, background: tone }}>
           {fmt(m.value)}
         </span>

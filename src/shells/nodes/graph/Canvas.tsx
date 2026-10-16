@@ -183,13 +183,13 @@ export function GraphCanvas() {
         style={{ '--xy-edge-stroke-width': 1.75 } as CSSProperties}
       >
         <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color="var(--line-strong)" />
-        {v.minimap && !present && <MiniMap pannable zoomable position="bottom-left" nodeBorderRadius={8} nodeColor={(n) => catVar(defOf((n.data as any).kind).category)} maskColor="color-mix(in srgb, var(--field) 65%, transparent)" />}
+        {v.minimap && !present && <MiniMap pannable zoomable maskStrokeColor="var(--signal)" maskStrokeWidth={1.5} position="bottom-left" nodeBorderRadius={8} nodeColor={(n) => catVar(defOf((n.data as any).kind).category)} maskColor="color-mix(in srgb, var(--field) 65%, transparent)" />}
         {!present && <FlowZoom />}
       </ReactFlow>
 
       {nodes.length <= 1 && (
         <div className="pointer-events-none absolute inset-x-0 top-[38%] flex flex-col items-center gap-2 text-center">
-          <div className="text-[13px] font-medium text-fg">Start by adding a generator</div>
+          <div className="text-title font-medium text-fg">Start by adding a generator</div>
           <div className="flex items-center gap-1.5 text-ui text-fg-muted">Press <Kbd>Tab</Kbd> or double-click the canvas, or drag one in from the library</div>
         </div>
       )}

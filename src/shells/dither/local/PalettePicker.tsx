@@ -43,17 +43,21 @@ export function PalettePicker({ value, options, onChange, columns = 2, className
               onChange(options[n].name, options[n].colors)
             }}
             className={cn(
-              'group/pal flex min-w-0 flex-col gap-1 rounded-[7px] p-1 text-left outline-none transition-colors',
+              'group/pal flex min-w-0 flex-col gap-1 rounded-[calc(var(--radius-control)+2px)] p-1 text-left outline-none transition-colors',
               on ? 'bg-signal-soft' : 'hover:bg-hover',
               'focus-visible:ring-2 focus-visible:ring-signal',
             )}
           >
-            <span className={cn('flex h-4 w-full overflow-hidden rounded-[4px]', on ? 'shadow-[0_0_0_1.5px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}>
+            {/* the edge is drawn over the colours (after:), not under them: an inset shadow sits beneath the swatches and
+                vanished in light theme, where paper-white palettes met the panel with no edge at all */}
+            <span className={cn("relative flex h-4 w-full overflow-hidden rounded-control after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:content-['']",
+              on ? 'shadow-[0_0_0_1.5px_var(--signal)]' : 'after:shadow-[inset_0_0_0_1px_var(--line-strong)]')}>
               {o.colors.map((c, j) => <span key={j} className="h-full min-w-0 flex-1" style={{ background: c }} />)}
             </span>
-            <span className={cn('flex items-center justify-between gap-1 px-0.5 text-ui', on ? 'text-fg' : 'text-fg-muted')}>
-              <span className="truncate">{o.name}</span>
-              <span className="tabular text-fg-faint">{o.colors.length}</span>
+            {/* names take two lines before they truncate ("Riso cielo + achiote" lost its last word at one) */}
+            <span className={cn('flex items-start justify-between gap-1 px-0.5 text-ui', on ? 'text-fg' : 'text-fg-muted')}>
+              <span className="line-clamp-2 min-w-0 break-words">{o.name}</span>
+              <span className="shrink-0 tabular text-fg-faint">{o.colors.length}</span>
             </span>
           </button>
         )

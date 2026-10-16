@@ -210,7 +210,6 @@ export default function GradientStudio() {
       </Stage>
       <CommandPalette commands={commands} extraShortcuts={[
         { keys: '1', label: 'Layer opacity 10% … (0 = 100%)' },
-        { keys: '\\', label: 'A/B compare' },
         { keys: 'alt+arrowup', label: 'Move focused layer' },
         { keys: 'enter', label: 'Rename focused layer' },
       ]} />
@@ -241,7 +240,7 @@ function LayerInspector({ layer }: { layer: Layer }) {
         <Row label={domain ? 'Mix' : 'Opacity'} hint={domain ? 'Blend between straight and fully warped coordinates.' : 'Number keys set it: 1 = 10%, 0 = 100%.'} changed={layer.opacity !== def.opacity} onReset={() => set({ opacity: def.opacity })}>
           <Slider value={layer.opacity} min={0} max={1} step={0.01} onChange={(n, f) => set({ opacity: n }, f)} label={domain ? 'Mix' : 'Opacity'} />
           <ScrubValue value={Math.round(layer.opacity * 100)} min={0} max={100} step={1} unit="%" changed={layer.opacity !== def.opacity} defaultValue={def.opacity * 100}
-            className="w-[52px] shrink-0" onChange={(n, f) => set({ opacity: n / 100 }, f)} label="Opacity" />
+            className="w-[56px] shrink-0" onChange={(n, f) => set({ opacity: n / 100 }, f)} label="Opacity" />
         </Row>
       </Section>
       <div className="border-t border-line">
@@ -252,7 +251,9 @@ function LayerInspector({ layer }: { layer: Layer }) {
 }
 
 /* ---------- looks grid ---------- */
-function Looks({ presets, active, onApply, onSave }: { presets: { name: string; values: any; builtin?: boolean }[]; active?: string; onApply: (n: string) => void; onSave?: () => void }) {
+function Looks({ presets, active, onApply, onSave, bare }: { presets: { name: string; values: any; builtin?: boolean }[]; active?: string; onApply: (n: string) => void; onSave?: () => void
+  /** just the grid, no section header: the client sheet has no hover to preview with, and its own title */
+  bare?: boolean }) {
   const [thumbs, setThumbs] = useState<Record<string, string>>({})
   const loopLen = useValues(params, (v) => v.loop)
   const key = useMemo(() => JSON.stringify(presets.map((p) => [p.name, lookOf(p.values)])), [presets])
@@ -281,18 +282,23 @@ function Looks({ presets, active, onApply, onSave }: { presets: { name: string; 
     ui.setState({ preview: p ? (lookOf(p.values) as unknown as Look) : null })
   }
 
+  const grid = (
+    <PresetGrid
+      label="Looks"
+      value={active ?? null}
+      items={presets.map((p) => ({ id: p.name, name: p.name, thumb: thumbs[p.name], removable: !bare && !p.builtin }))}
+      onApply={onApply}
+      onPreview={bare ? undefined : preview}
+      onRemove={(n) => params.deletePreset(n)}
+      className={bare ? 'pt-1' : undefined}
+    />
+  )
+  if (bare) return grid
   return (
     <div className="border-t border-line">
       <Section title="Looks" hint="Hover or focus to preview on the canvas, click to apply. Applying is one undo step." persistKey="shader:looks" first
         actions={onSave && <IconButton icon={Plus} label="Save current look" size="icon-sm" onClick={onSave} />}>
-        <PresetGrid
-          label="Looks"
-          value={active ?? null}
-          items={presets.map((p) => ({ id: p.name, name: p.name, thumb: thumbs[p.name], removable: !p.builtin }))}
-          onApply={onApply}
-          onPreview={preview}
-          onRemove={(n) => params.deletePreset(n)}
-        />
+        {grid}
       </Section>
     </div>
   )
@@ -303,13 +309,8 @@ const useClientView = () => {
   const read = () => /[?&]client\b/.test(location.hash)
   const [on, setOn] = useState(read)
   useEffect(() => { const f = () => setOn(read()); addEventListener('hashchange', f); return () => removeEventListener('hashchange', f) }, [])
-  // bigger touch targets, as in the Client demo; the editor keeps whatever density was set
-  useEffect(() => {
-    if (!on) return
-    const root = document.documentElement, prev = root.dataset.density
-    root.dataset.density = 'comfortable'
-    return () => { if (prev) root.dataset.density = prev; else delete root.dataset.density }
-  }, [on])
+  // finger-sized controls come from the sheet's .studio-touch (the kit's touch density), not from
+  // retuning the whole page's data-density
   return on
 }
 
@@ -318,21 +319,22 @@ function ClientSheet({ presets, active, onApply, onShuffle, onSave }: {
 }) {
   const [open, setOpen] = useState(true)
   return (
-    <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
-      <div className={cn('panel pointer-events-auto flex w-full max-w-[420px] flex-col overflow-hidden transition-[max-height] duration-300', open ? 'max-h-[62vh]' : 'max-h-[64px]')}>
-        <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex h-[64px] flex-none items-center gap-3 px-4 text-left">
-          <div className="flex-1">
-            <div className="text-[14px] font-semibold">Make it yours</div>
-            <div className="text-[12px] text-fg-muted">Pick a look, shuffle, download</div>
+    // studio-touch: the kit's touch density (48px rows, 36px controls, 14px text) for this sheet only
+    <div className="studio-touch pointer-events-none absolute inset-x-0 bottom-0 flex justify-center p-3 pb-[max(12px,env(safe-area-inset-bottom))]">
+      <div className={cn('panel pointer-events-auto flex w-full max-w-[420px] flex-col overflow-hidden transition-[max-height] duration-300', open ? 'max-h-[62vh]' : 'max-h-14')}>
+        <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="flex h-14 flex-none items-center gap-3 px-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal">
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-title font-semibold">Make it yours</div>
+            <div className="truncate text-ui-sm text-fg-muted">Pick a look, shuffle, download</div>
           </div>
           <ChevronUp size={18} strokeWidth={1.5} className={cn('text-fg-faint transition-transform', open && 'rotate-180')} />
         </button>
         <div className="min-h-0 overflow-y-auto">
-          <Looks presets={presets} active={active} onApply={onApply} />
+          <Looks presets={presets} active={active} onApply={onApply} bare />
         </div>
         <div className="flex flex-none gap-2 border-t border-line p-3">
-          <Button variant="default" size="lg" className="h-11 flex-1 text-[13px]" onClick={onShuffle}><Dices size={16} strokeWidth={1.5} />Shuffle</Button>
-          <Button variant="primary" size="lg" className="h-11 flex-1 text-[13px]" onClick={onSave}><Download size={16} strokeWidth={1.5} />Download</Button>
+          <Button variant="default" size="lg" className="h-11 flex-1 text-ui" onClick={onShuffle}><Dices size={16} strokeWidth={1.5} />Shuffle</Button>
+          <Button variant="primary" size="lg" className="h-11 flex-1 text-ui" onClick={onSave}><Download size={16} strokeWidth={1.5} />Download</Button>
         </div>
       </div>
     </div>

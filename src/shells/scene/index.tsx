@@ -214,10 +214,10 @@ export default function SceneShell() {
               >
                 <Divider vertical className="mx-1" />
                 <IconButton tipSide="top" icon={Box} label={v.projection === 'perspective' ? 'Switch to orthographic' : 'Switch to perspective'} shortcut="m" active={v.projection === 'orthographic'}
-                  onClick={() => params.setValue('projection', v.projection === 'perspective' ? 'orthographic' : 'perspective')} className="size-dock-button rounded-[8px]" />
-                <IconButton tipSide="top" icon={Grid3x3} label="Grid floor" shortcut="g" active={!!v.grid} onClick={() => toggle('grid')} className="size-dock-button rounded-[8px]" />
-                <IconButton tipSide="top" icon={Orbit} label="Turntable" shortcut="o" active={!!v.turntable} onClick={() => toggle('turntable')} className="size-dock-button rounded-[8px]" />
-                <IconButton tipSide="top" icon={Focus} label="Frame selection" shortcut="f" onClick={() => engine()?.frame()} className="size-dock-button rounded-[8px]" />
+                  onClick={() => params.setValue('projection', v.projection === 'perspective' ? 'orthographic' : 'perspective')} className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" />
+                <IconButton tipSide="top" icon={Grid3x3} label="Grid floor" shortcut="g" active={!!v.grid} onClick={() => toggle('grid')} className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" />
+                <IconButton tipSide="top" icon={Orbit} label="Turntable" shortcut="o" active={!!v.turntable} onClick={() => toggle('turntable')} className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" />
+                <IconButton tipSide="top" icon={Focus} label="Frame selection" shortcut="f" onClick={() => engine()?.frame()} className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" />
               </ToolDock>
             </div>
             <AxisGizmoSlot />
@@ -309,9 +309,10 @@ function ViewChip({ v }: { v: V }) {
 function Stats() {
   const s = useStore(ui, (x) => x.stats)
   return (
-    // top-right: bottom-left collided with the tool dock on stages ≤1280px wide (break-it F5)
-    <div className="pointer-events-none absolute top-0 right-0 h-bar max-w-[calc(100%-220px)] truncate leading-[var(--d-bar)] text-ui tabular text-fg-faint no-select">
-      {(s.tris / 1000).toFixed(1)}k triangles · {s.meshes} meshes · {s.lights} lights
+    // top-right: bottom-left collided with the tool dock on stages ≤1280px wide (break-it F5). A cluster chip like the
+    // camera HUD: bare text on the backdrop was unreadable over the grid and the light floor
+    <div className="cluster pointer-events-none absolute top-0 right-0 flex h-bar max-w-[calc(100%-220px)] items-center px-pad text-ui tabular text-fg-muted no-select">
+      <span className="truncate">{(s.tris / 1000).toFixed(1)}k triangles · {s.meshes} meshes · {s.lights} lights</span>
     </div>
   )
 }
@@ -447,7 +448,7 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
             const Icon = iconOf(c, v)
             return (
               <button key={c} type="button" onClick={() => ui.setState({ selected: c })}
-                className="mx-1.5 flex h-row items-center gap-2 rounded-[6px] px-2 text-left text-ui text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
+                className="mx-1.5 flex h-row items-center gap-2 rounded-control px-2 text-left text-ui text-fg outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
                 <Icon size={14} strokeWidth={1.5} className="text-fg-faint" />
                 <span className="flex-1 truncate">{nameOf(c)}</span>
                 <Swatch color={v[`${c}_color`]} size={12} className="rounded-full" />

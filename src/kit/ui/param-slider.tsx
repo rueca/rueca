@@ -56,14 +56,15 @@ export function GradientSlider({
       onValueChange={(v) => onChange(v as number, false)} onValueCommitted={(v) => onChange(v as number, true)}
       className={cn('group/slider relative flex h-control w-full min-w-0 items-center no-select data-[disabled]:opacity-40', className)}>
       <Base.Control className="flex h-control w-full cursor-default items-center">
-        <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[2px] bg-track')} style={track ? { background: track } : undefined}>
+        <Base.Track className={cn('relative w-full rounded-full', track ? 'h-[5px] shadow-[inset_0_0_0_0.5px_var(--line-strong)]' : 'h-[2px] bg-track shadow-[0_0_0_0.5px_var(--line-strong)]')} style={track ? { background: track } : undefined}>
           {!track && <div className="absolute inset-y-0 rounded-full bg-fill" style={{ left: `${Math.min(from, at)}%`, width: `${Math.abs(at - from)}%` }} />}
           <Base.Thumb
             aria-label={label}
             className={cn(
-              'rounded-full bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,.3),0_1px_3px_rgba(0,0,0,.45)] outline-none transition-opacity duration-100',
-              'focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal data-[dragging]:opacity-100',
-              track ? 'size-[11px]' : 'size-3 opacity-0 group-hover/slider:opacity-100',
+              'rounded-full bg-white shadow-[0_0_0_0.5px_rgba(0,0,0,.3),0_1px_3px_rgba(0,0,0,.45)] outline-none duration-100',
+              // like <Slider>: the thumb rests small but always visible (WCAG 1.4.11) and grows on hover, focus and drag
+              'has-[:focus-visible]:scale-100 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-signal data-[dragging]:scale-100',
+              track ? 'size-[11px]' : 'size-3 scale-[0.6] transition-transform group-hover/slider:scale-100',
             )}
           />
         </Base.Track>

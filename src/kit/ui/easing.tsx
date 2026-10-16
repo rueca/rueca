@@ -119,8 +119,8 @@ export function EasingEditor({ value, onChange, span, presets = EASE_PRESETS, cu
       {value.kind === 'spring' && <SpringField value={{ duration: value.duration, bounce: value.bounce }} span={span} onChange={(s, f) => set({ kind: 'spring', ...s }, f)} />}
       {value.kind === 'hold' && (
         <div className="flex flex-col gap-2">
-          <svg viewBox="0 0 100 64" preserveAspectRatio="none" aria-hidden className="h-16 w-full rounded-[6px] bg-control">
-            <polyline points="0,52 98,52 98,16 100,16" fill="none" stroke="var(--signal)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
+          <svg viewBox="0 0 100 64" preserveAspectRatio="none" aria-hidden className="h-16 w-full rounded-control bg-control">
+            <polyline points="8,52 88,52 88,16 92,16" fill="none" stroke="var(--signal)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
           </svg>
           <p className="text-ui leading-relaxed text-fg-muted">The value stays put, then jumps when the next key is reached. Use it for colour swaps and visibility.</p>
         </div>
@@ -139,7 +139,7 @@ export function SpringGraph({ value, span, height = 64 }: { value: Spring; span:
   const settle = Math.min(1, value.duration / Math.max(span, 1)) * 100
   return (
     <svg viewBox="0 0 100 64" preserveAspectRatio="none" role="img" aria-label={`Spring response, ${Math.round(value.duration)} ms, bounce ${Math.round(value.bounce * 100)}%`}
-      className="w-full rounded-[6px] bg-control" style={{ height }}>
+      className="w-full rounded-control bg-control" style={{ height }}>
       <line x1={0} x2={100} y1={16} y2={16} stroke="var(--line-strong)" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
       <line x1={0} x2={100} y1={52} y2={52} stroke="var(--line)" vectorEffect="non-scaling-stroke" />
       {settle < 100 && <line x1={settle} x2={settle} y1={4} y2={60} stroke="var(--fg-faint)" strokeDasharray="1.5 2" vectorEffect="non-scaling-stroke" />}
@@ -186,15 +186,15 @@ export function SpringField({ value, onChange, span, presets = SPRINGS, defaultP
           </div>
         </div>
       )}
-      <div className="flex items-center gap-1">
+      {/* wraps rather than pushing the Physics switch out of the popover */}
+      <div className="flex flex-wrap items-center gap-1">
         {Object.entries(presets).map(([n, p]) => (
           <button key={n} type="button" aria-pressed={presetName === n} onClick={() => onChange(p, true)}
             className={cn('h-icon-sm rounded-control px-1.5 text-ui-sm outline-none focus-visible:ring-2 focus-visible:ring-signal', presetName === n ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
             {n}
           </button>
         ))}
-        <div className="flex-1" />
-        <label className="flex items-center gap-1.5 text-ui text-fg-muted">
+        <label className="ml-auto flex items-center gap-1.5 text-ui text-fg-muted">
           Physics
           <Switch size="sm" checked={physics} onChange={setPhysics} label="Edit as stiffness, damping and mass" />
         </label>

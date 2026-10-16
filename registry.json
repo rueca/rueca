@@ -502,6 +502,11 @@
           "path": "src/kit/inspector/Inspector.tsx",
           "type": "registry:component",
           "target": "@components/studio/inspector/Inspector.tsx"
+        },
+        {
+          "path": "src/kit/inspector/label-fit.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/inspector/label-fit.tsx"
         }
       ]
     },

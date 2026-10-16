@@ -35,7 +35,7 @@ export function PreviewPane() {
   const hud = (
     <div className="pointer-events-none absolute inset-x-3 top-3 z-10 flex flex-wrap items-center justify-between gap-1.5">
       <div className="pointer-events-auto w-[164px] shrink-0">
-        <Segmented size="sm" value={v.previewOf} onChange={(x) => doc.setValue('previewOf', x as 'output' | 'selection')} label="Preview"
+        <Segmented value={v.previewOf} onChange={(x) => doc.setValue('previewOf', x as 'output' | 'selection')} label="Preview"
           options={[{ value: 'output', label: 'Output', hint: 'Show the Output node' }, { value: 'selection', label: 'Selection', hint: 'Show the selected node (P)' }]} />
       </div>
       <div className="flex items-center gap-1.5">

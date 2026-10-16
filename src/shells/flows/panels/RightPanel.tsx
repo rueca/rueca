@@ -64,7 +64,7 @@ function NodeInspector({ node }: { node: FlowNode }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2 px-pad pt-3 pb-1">
-        <span className="flex size-icon items-center justify-center rounded-[6px] bg-active text-fg-muted"><Icon size={13} strokeWidth={1.5} /></span>
+        <span className="flex size-icon items-center justify-center rounded-control bg-active text-fg-muted"><Icon size={13} strokeWidth={1.5} /></span>
         <div className="min-w-0 flex-1">
           <div className="truncate text-title font-semibold">{d.name || 'Untitled'}</div>
           <div className="text-ui text-fg-faint">{node.type === 'screen' ? templateLabel(d.template) : node.type === 'terminal' ? (d.role === 'end' ? 'End point' : 'Start point') : node.type === 'decision' ? 'Decision' : node.type === 'note' ? 'Sticky note' : 'Section'}</div>
@@ -141,7 +141,7 @@ function NodeInspector({ node }: { node: FlowNode }) {
             const T = TRIGGER_ICON[e.data?.trigger ?? 'tap']
             return (
               <button key={e.id} type="button" onClick={() => select([], [e.id])}
-                className="mx-1.5 flex h-row items-center gap-2 rounded-[6px] px-1.5 text-left text-ui text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+                className="mx-1.5 flex h-row items-center gap-2 rounded-control px-1.5 text-left text-ui text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
                 <span className="w-7 shrink-0 text-ui-sm text-fg-faint">{dir === 'in' ? 'From' : 'To'}</span>
                 <span className="min-w-0 flex-1 truncate text-fg">{name(dir === 'in' ? e.source : e.target)}</span>
                 <T size={11} strokeWidth={1.5} className="shrink-0 text-fg-faint" />
@@ -166,15 +166,15 @@ function EdgeInspector({ edge }: { edge: FlowEdge }) {
   return (
     <div className="flex flex-col">
       <div className="flex items-center gap-2 px-pad pt-3 pb-1">
-        <span className="flex size-icon items-center justify-center rounded-[6px] bg-active text-fg-muted"><T size={13} strokeWidth={1.5} /></span>
+        <span className="flex size-icon items-center justify-center rounded-control bg-active text-fg-muted"><T size={13} strokeWidth={1.5} /></span>
         <div className="min-w-0 flex-1 text-title font-semibold">Connection</div>
         <IconButton icon={ArrowLeftRight} label="Reverse direction" size="icon-sm" onClick={() => setEdges((es) => es.map((e) => (e.id === edge.id ? { ...e, source: e.target, target: e.source, sourceHandle: e.targetHandle, targetHandle: e.sourceHandle } : e)), { label: 'Reverse' })} />
         <IconButton icon={Trash2} label="Delete" shortcut="backspace" size="icon-sm" onClick={deleteSelection} />
       </div>
-      <div className="mx-pad my-1.5 flex items-center gap-1.5 rounded-[8px] bg-well p-1.5 text-ui">
-        <button type="button" className="min-w-0 flex-1 truncate rounded-[5px] bg-raised px-2 py-1 text-left shadow-[var(--shadow-segment)] hover:text-signal" onClick={() => src && select([src.id])}>{src?.data.name ?? '—'}</button>
+      <div className="mx-pad my-1.5 flex items-center gap-1.5 rounded-cluster bg-well p-1.5 text-ui">
+        <button type="button" className="min-w-0 flex-1 truncate rounded-control bg-raised px-2 py-1 text-left shadow-[var(--shadow-segment)] hover:text-signal" onClick={() => src && select([src.id])}>{src?.data.name ?? '—'}</button>
         <ArrowRight size={12} className="shrink-0 text-fg-faint" />
-        <button type="button" className="min-w-0 flex-1 truncate rounded-[5px] bg-raised px-2 py-1 text-left shadow-[var(--shadow-segment)] hover:text-signal" onClick={() => tgt && select([tgt.id])}>{tgt?.data.name ?? '—'}</button>
+        <button type="button" className="min-w-0 flex-1 truncate rounded-control bg-raised px-2 py-1 text-left shadow-[var(--shadow-segment)] hover:text-signal" onClick={() => tgt && select([tgt.id])}>{tgt?.data.name ?? '—'}</button>
       </div>
       <Section title="Interaction" first>
         <Row label="Trigger" hint="What the user does (or what happens) to move along this connection.">
@@ -287,7 +287,7 @@ const sectionCount = () => doc.get().flows.find((f) => f.id === ui.getState().fl
 
 function Stat({ label, value, children }: { label: string; value: ReactNode; children?: ReactNode }) {
   return (
-    <div className="flex flex-col gap-0.5 rounded-[8px] bg-well px-2.5 py-2">
+    <div className="flex flex-col gap-0.5 rounded-cluster bg-well px-2.5 py-2">
       <span className="text-ui text-fg-muted">{label}</span>
       <span className="text-[15px] font-semibold tabular">{value}</span>
       {children}

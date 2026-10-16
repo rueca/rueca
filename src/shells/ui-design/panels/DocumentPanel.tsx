@@ -43,8 +43,8 @@ export function DocumentPanel() {
             <div className="flex flex-wrap gap-1.5">
               {[...colours.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 18).map(([c, ids]) => (
                 <Tip key={c} label={`${c.toUpperCase()} · ${ids.length} layer${ids.length > 1 ? 's' : ''}`}>
-                  <button type="button" aria-label={`Select layers using ${c}`} onClick={() => S.select(ids)} className="rounded-[5px] outline-none hover:scale-110 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
-                    <Swatch color={c} size={20} className="rounded-[5px]" />
+                  <button type="button" aria-label={`Select layers using ${c}`} onClick={() => S.select(ids)} className="rounded-control outline-none hover:scale-110 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
+                    <Swatch color={c} size={20} className="rounded-control" />
                   </button>
                 </Tip>
               ))}
@@ -78,7 +78,7 @@ export function DocumentPanel() {
           <Button variant="ghost" size="md" className="w-full" onClick={() => S.resetDocument()}><RotateCcw size={13} strokeWidth={1.5} />Reset to demo file</Button>
         </div>
       </Section>
-      <div className="flex items-center gap-1.5 px-pad py-3 text-ui text-fg-faint"><MousePointerClick size={12} strokeWidth={1.5} />Select a layer to edit it. Hold ⌥ over a layer to measure.</div>
+      <div className="flex items-start gap-1.5 px-pad py-3 text-ui text-fg-faint"><MousePointerClick size={12} strokeWidth={1.5} className="mt-0.5 shrink-0" />Select a layer to edit it. Hold ⌥ over a layer to measure.</div>
     </div>
   )
 }

@@ -135,6 +135,15 @@ export function load(g: SavedGraph) {
 }
 
 /* --- React Flow change handlers --- */
+/* Deleting a node arrives as two calls in one tick: onEdgesChange(remove) for its wires, then onNodesChange(remove).
+   Committing in each made one Delete take two undos, so removals commit once, after the tick. */
+let removalPending = false
+function commitRemoval() {
+  if (removalPending) return
+  removalPending = true
+  queueMicrotask(() => { removalPending = false; commit() })
+}
+
 export function onNodesChange(changes: NodeChange<GNode>[]) {
   const s = graph.getState()
   // Output is the document's sink; keep at least the graph valid by allowing delete but warn in UI.
@@ -142,12 +151,12 @@ export function onNodesChange(changes: NodeChange<GNode>[]) {
   if (changes.some((c) => c.type === 'remove')) {
     const ids = new Set(changes.filter((c) => c.type === 'remove').map((c) => (c as { id: string }).id))
     graph.setState({ edges: graph.getState().edges.filter((e) => !ids.has(e.source) && !ids.has(e.target)) })
-    commit()
+    commitRemoval()
   }
 }
 export function onEdgesChange(changes: EdgeChange<GEdge>[]) {
   graph.setState({ edges: applyEdgeChanges(changes, graph.getState().edges) })
-  if (changes.some((c) => c.type === 'remove')) commit()
+  if (changes.some((c) => c.type === 'remove')) commitRemoval()
 }
 
 /** Would connecting source → target create a loop? */

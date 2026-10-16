@@ -153,7 +153,7 @@ export default function SynthShell() {
                 </div>
               </Tip>
               <Divider vertical />
-              <div className="flex h-icon min-w-[64px] items-center gap-1.5 rounded-[6px] px-2 tabular text-ui" aria-live="off">
+              <div className="flex h-icon min-w-[64px] items-center gap-1.5 rounded-control px-2 tabular text-ui" aria-live="off">
                 <span className={cn('size-1.5 rounded-full', playing ? 'bg-rec' : started ? 'bg-ok' : 'bg-line-strong')} />
                 <span className={playing ? 'text-fg' : 'text-fg-faint'}>{bar}</span>
               </div>
@@ -178,7 +178,7 @@ export default function SynthShell() {
             <>
               <div className="absolute top-3 left-3 z-10 flex items-center gap-2">
                 <div className="cluster flex h-bar w-[168px] items-center px-1">
-                  <Segmented size="sm" value={v.visual} onChange={(s) => params.setValue('visual', s)} options={[{ value: 'plate', label: 'Plate' }, { value: 'harmonograph', label: 'Pendulum' }]} label="Visual" />
+                  <Segmented value={v.visual} onChange={(s) => params.setValue('visual', s)} options={[{ value: 'plate', label: 'Plate' }, { value: 'harmonograph', label: 'Pendulum' }]} label="Visual" />
                 </div>
               </div>
               {/* hidden in QA / thumbnail captures (?qa) — the card would cover the visual */}

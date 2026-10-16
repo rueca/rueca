@@ -55,7 +55,7 @@ export const cardSchema = defineSchema({
   look: folder('Appearance', {
     cardVariant: p.select('elevated', [{ value: 'elevated', label: 'Elevated' }, { value: 'outline', label: 'Outline' }, { value: 'filled', label: 'Filled' }], { label: 'Variant', display: 'dropdown' }),
     layout: p.select('auto', [{ value: 'vertical', label: 'Stacked' }, { value: 'horizontal', label: 'Side' }, { value: 'auto', label: 'Auto' }],
-      { hint: 'Auto switches to side-by-side when the card is wider than 520px (a container query). Drag the viewport to see it.' }),
+      { display: 'dropdown', hint: 'Auto switches to side-by-side when the card is wider than 520px (a container query). Drag the viewport to see it.' }),
     cardState: p.select('default', [{ value: 'default', label: 'Live' }, { value: 'hover', label: 'Hover' }, { value: 'focus', label: 'Focus' }], { label: 'State' }),
   }),
   content: folder('Content', {

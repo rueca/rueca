@@ -165,10 +165,10 @@ export function GlyphPanel({ v }: { v: V }) {
     <div className="flex flex-col gap-2 p-3">
       <div className="relative flex h-[132px] items-center justify-center overflow-hidden rounded-[8px]" style={{ background: v.bg }}>
         <span style={{ ...headlineStyle(v, 96), lineHeight: 1, textTransform: 'none', letterSpacing: 0 }}>{hover}</span>
-        <span className="absolute bottom-1.5 left-2 tabular text-[10.5px]" style={{ color: rgba(v.fg, 0.55) }}>U+{cp.toString(16).toUpperCase().padStart(4, '0')}</span>
-        <span className="absolute right-2 bottom-1.5 tabular text-[10.5px]" style={{ color: rgba(v.fg, 0.55) }}>wght {Math.round(v.wght)}</span>
+        <span className="absolute bottom-1.5 left-2 tabular text-ui-sm" style={{ color: rgba(v.fg, 0.55) }}>U+{cp.toString(16).toUpperCase().padStart(4, '0')}</span>
+        <span className="absolute right-2 bottom-1.5 tabular text-ui-sm" style={{ color: rgba(v.fg, 0.55) }}>wght {Math.round(v.wght)}</span>
       </div>
-      <Segmented size="sm" value={set} onChange={setSet} options={SET_OPTS} label="Glyph set" />
+      <Segmented value={set} onChange={setSet} options={SET_OPTS} label="Glyph set" />
       <div className="grid grid-cols-6 gap-1" role="grid" aria-label="Glyphs — click to insert">
         {glyphs.map((g) => (
           <button
@@ -180,13 +180,13 @@ export function GlyphPanel({ v }: { v: V }) {
             onFocus={() => setHover(g)}
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => insertAtCaret(g)}
-            className="flex aspect-square items-center justify-center rounded-[6px] bg-control text-fg outline-none transition-colors hover:bg-hover hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal"
+            className="flex aspect-square items-center justify-center rounded-control bg-control text-fg outline-none transition-colors hover:bg-hover hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal"
           >
             <span style={{ ...style, color: undefined, textTransform: 'none', letterSpacing: 0, lineHeight: 1 }}>{g}</span>
           </button>
         ))}
       </div>
-      <p className="px-0.5 text-[11px] leading-relaxed text-fg-faint">Click a glyph to insert it at the caret. Rendered with the current axes.</p>
+      <p className="px-0.5 text-ui leading-relaxed text-fg-faint">Click a glyph to insert it at the caret. Rendered with the current axes.</p>
     </div>
   )
 }
@@ -197,8 +197,8 @@ export function WaterfallPanel({ v }: { v: V }) {
   return (
     <div className="flex flex-col py-1">
       {WATERFALL.map((s) => (
-        <div key={s} className="flex items-baseline gap-2 border-b border-line px-3 py-2 last:border-b-0">
-          <span className="w-6 shrink-0 tabular text-[10.5px] text-fg-faint">{s}</span>
+        <div key={s} className="flex items-baseline gap-2 border-b border-line px-pad py-2 last:border-b-0">
+          <span className="w-6 shrink-0 tabular text-ui-sm text-fg-faint">{s}</span>
           <span className="min-w-0 truncate text-fg" style={{ ...headlineStyle(v, s), color: undefined, lineHeight: 1.15 }}>{sample}</span>
         </div>
       ))}
