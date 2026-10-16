@@ -1,6 +1,8 @@
 # Branding session — handoff (updated 11 Oct 2026, Trove pass done)
 
-Read this first. Full history is in `BRAND.md`. The board is http://localhost:5273/brand/ (the dev server is owned by the main session, "OG agent").
+Read this first. Full history is in `BRAND.md`.
+
+> **16 Oct 2026: the palette is now Mora** (near-neutral paper and ink, Achiote "Clean" #F6571C, Mora the plum, Malva, Cielo, Gualda, Hoja). The palette notes below are history. Current values and rules: `brand/RUECA.md` → Colour. The board is http://localhost:5273/brand/ (the dev server is owned by the main session, "OG agent").
 
 ## START HERE (next session)
 1. **The product is now RUECA** (Spanish for spinning wheel). It was Trompo, which Rafael dropped because it reads like "Trump".

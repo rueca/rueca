@@ -22,7 +22,7 @@ function keys() {
   const list = [];
   TRACKS.forEach((y, t) => KEYS[t].forEach((x, i) => list.push({ x, y, set: t === SET[0] && i === SET[1] })));
   list.sort((a, b) => k.depthOf([a.x, a.y, 0], P) - k.depthOf([b.x, b.y, 0], P));
-  return list.map(({ x, y, set }) => { const paths = k.extrude(diamond(x, y, 5), MT, 3.6, P, { bevel: 0.4 }); return set ? bright(paths, "gualda") : S(paths, { tone: "hi", crease: "lo" }); }).join("");
+  return list.map(({ x, y, set }) => { const paths = k.extrude(diamond(x, y, 5), MT, 3.6, P, { bevel: 0.4 }); return set ? bright(paths, "malva") : S(paths, { tone: "hi", crease: "lo" }); }).join("");
 }
 function gantry() {
   const legs = [RAILS[0].y - 1, RAILS[1].y - 1].map((y) => S(k.slabOf({ x: HEAD - 3, y, w: 6, d: 8, r: 1.5 }, MT, 16, P, 3, 0.4), { tone: "hi", crease: "lo" }));
@@ -32,7 +32,7 @@ function gantry() {
 
 const key = at([KEYS[1][1], TRACKS[1], MT + 2]);
 emit({
-  name: "time", exportName: "TIME_SVG", bright: "gualda",
+  name: "time", exportName: "TIME_SVG", bright: "malva",
   label: "Three tracks of keyframe studs under a gantry that rides two rails, with a ruler along the back.",
   art: [plate(), bed(), keys(), `<g ${apart([TRAVEL, 0, 0])}>${gantry()}</g>`],
   pen: caption({ text: "always in sync", w: 185, side: "left", to: key, loop: [30, 19, 24, 1.2], seed: 7 }),

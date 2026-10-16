@@ -14,8 +14,11 @@ import { WORKING_SVG } from './working'
 import { HANDOFF_SVG } from './handoff'
 
 const ART: Record<string, string> = { Controls: CONTROLS_SVG, Layout: LAYOUT_SVG, Time: TIME_SVG, Structure: STRUCTURE_SVG, Workflow: WORKING_SVG, 'Hand-off': HANDOFF_SVG }
-/** each drawing's notes and arrows in the dye of its one bright part (Rafael), via plate.css [data-dye] */
-const DYE: Record<string, string> = { Controls: 'achiote', Layout: 'cielo', Time: 'gualda', Structure: 'malva', Workflow: 'hoja', 'Hand-off': 'cochinilla' }
+/** each drawing's notes and arrows in the dye of its one bright part (Rafael), via plate.css [data-dye].
+    Three colours, not six (Mora, 16 Oct): Achiote with Cielo and Malva, no colour beside itself across a row,
+    down a column or in the phone's single column, and Achiote last as the punchline. The brights themselves
+    are set in each drawing's build (brand/illustration-trials/anatomy/<name>.mjs). */
+const DYE: Record<string, string> = { Controls: 'achiote', Layout: 'cielo', Time: 'malva', Structure: 'cielo', Workflow: 'malva', 'Hand-off': 'achiote' }
 
 /** the drawing for a kit group */
 export function KitArt({ group }: { group: string }) {

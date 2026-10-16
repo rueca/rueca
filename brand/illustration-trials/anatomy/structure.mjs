@@ -28,13 +28,13 @@ function tray() {
 }
 function dragged() {
   const y = ROWS_Y[DRAGGED] + 6, z = MT + 12, plan = { x: ROW.x + 6, y, w: ROW.w, d: ROW.d, r: 1 };
-  return bright(k.slabOf(plan, z, H, P, 3, 0.3), "malva") + rowParts(y, z, "ink", plan.x)
+  return bright(k.slabOf(plan, z, H, P, 3, 0.3), "cielo") + rowParts(y, z, "ink", plan.x)
     + stud(plan.x + ROW.w - 24, y + 8, z + H, 2.4) + stud(plan.x + ROW.w - 10, y + 8, z + H, 2.4);
 }
 
 const studs = at([ROW.x + ROW.w - 17, ROWS_Y[HIDDEN] + 8, MT + H + 1]); // the hidden row's eye and lock: they stay put, so the loop stays on them
 emit({
-  name: "structure", exportName: "STRUCTURE_SVG", bright: "malva",
+  name: "structure", exportName: "STRUCTURE_SVG", bright: "cielo",
   label: "A layers tray: rows with thumbnails, names, eye and lock studs, one row lifted mid-drag above its empty slot.",
   art: [plate(), tray(), `<g ${up(10)}>${dragged()}</g>`],
   pen: caption({ text: "hide, lock, reorder", w: 215, side: "centre", to: studs, loop: [30, 16, 24, 1.4], seed: 11 }),

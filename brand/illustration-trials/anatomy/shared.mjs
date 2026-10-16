@@ -60,7 +60,8 @@ export const floor = (plan, z, steps = 4, className = "rueca-glass") => S(k.slab
 const HATCH = [2.4, 3.6, 6, 0];
 const pattern = (id, spacing, cls, angle = 0, bg = "") =>
   `<pattern id="${id}" width="${spacing}" height="20" patternUnits="userSpaceOnUse"${angle ? ` patternTransform="rotate(${angle})"` : ""}>${bg ? `<rect width="${spacing}" height="20" fill="${bg}"/>` : ""}<path class="${cls}" d="M${spacing / 2} 0V20"/></pattern>`;
-export const BRIGHTS = { achiote: "#E8582C", cielo: "#5DB4E8", gualda: "#F2C744", hoja: "#2FA57C", malva: "#A88BF6", cochinilla: "#EE7A68" };
+// Mora (16 Oct 2026, brand/BRAND.md): Clean Achiote, blue-violet, yellow, lime, lilac and Mora the plum as Cochinilla
+export const BRIGHTS = { achiote: "#F6571C", cielo: "#5070F0", gualda: "#FFD000", hoja: "#84C900", malva: "#EFA6FF", cochinilla: "#B0006A" };
 /** the hatch patterns; `brights` is the drawing's flat colour (or, for the build-up, one per step) */
 export const defs = (brights) => `<defs>${HATCH.map((sp, i) => (sp ? pattern(`kit-h${i}`, sp, "rueca-hatch") + [brights].flat().map((b) => pattern(`kit-b${i}-${b}`, sp, "rueca-hatch-bright", 0, BRIGHTS[b])).join("") : "")).join("")}${HATCH.map((sp, i) => (sp ? `<pattern id="kit-b${i}-logo" width="${sp}" height="20" patternUnits="userSpaceOnUse"><rect width="${sp}" height="20" style="fill:var(--logo-card)"/><path class="rueca-hatch-bright" d="M${sp / 2} 0V20"/></pattern>` : "")).join("")}${pattern("kit-cast", 3, "rueca-hatch-cast", 45)}<linearGradient id="kit-fade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><mask id="kit-mask" maskContentUnits="objectBoundingBox"><rect width="1" height="1" fill="url(#kit-fade)"/></mask></defs>`;
 /** a solid in this drawing's bright, hatched on its shaded sides */
@@ -163,24 +164,24 @@ const ENGRAVING = `
 .iso-shade[data-shade="3"]{fill:none}
 .iso-solid[data-lit]>.iso-shade{fill:url(#kit-h2)}
 ${brightCss}
-.rueca-bright>.iso-edge,.rueca-bright>.iso-crease,.rueca-bright>.iso-bevel{stroke:#181411!important}
-.rueca-bright{color:#181411}
+.rueca-bright>.iso-edge,.rueca-bright>.iso-crease,.rueca-bright>.iso-bevel{stroke:#171615!important}
+.rueca-bright{color:#171615}
 .rueca-glass>.iso-fill{fill:var(--anatomy-shade-0)}
 .rueca-hatch,.rueca-hatch-bright,.rueca-hatch-cast{fill:none;stroke-width:.45;stroke-linecap:butt}
 .rueca-hatch{stroke:var(--rueca-hatch)}
-.rueca-hatch-bright{stroke:#3a1408;stroke-opacity:.45}
+.rueca-hatch-bright{stroke:#171615;stroke-opacity:.45}
 .rueca-hatch-cast{stroke:var(--rueca-hatch);stroke-opacity:.7}
 .rueca-cast{fill:url(#kit-cast);stroke:none}
-.iso-line[data-tone="ink"]{stroke:#181411}
-.iso-face-text[data-tone="ink"]{fill:#181411}
+.iso-line[data-tone="ink"]{stroke:#171615}
+.iso-face-text[data-tone="ink"]{fill:#171615}
 @media (prefers-reduced-motion: reduce){.iso-svg *{transition:none!important}}
 @property --s1{syntax:'<number>';inherits:true;initial-value:0}
 @property --s2{syntax:'<number>';inherits:true;initial-value:0}
 @property --s3{syntax:'<number>';inherits:true;initial-value:0}
 .rueca-chat{fill:var(--anatomy-hi);font-family:var(--font-body,"IBM Plex Sans",system-ui,sans-serif);font-weight:450}
-.rueca-chat-ink{fill:#181411}
+.rueca-chat-ink{fill:#171615}
 .rueca-chat-strong{font-weight:550}
-/* the logo on its card: a deep Cielo with a white mark in dark, the light Cielo with an ink mark in light */
+/* the logo on its card: Mora (the plum) with a light mark in dark, Malva (lilac) with an ink mark in light */
 .rueca-logo-card>.iso-fill,.rueca-logo-card>.iso-top,.rueca-logo-card>.iso-shade[data-shade="3"]{fill:var(--logo-card)!important}
 .rueca-logo-card>.iso-shade[data-shade="0"]{fill:url(#kit-b0-logo)!important}
 .rueca-logo-card>.iso-shade[data-shade="1"]{fill:url(#kit-b1-logo)!important}
@@ -192,15 +193,15 @@ ${brightCss}
 /* the mark's strokes scale with the sheet (the kit pins every other stroke to screen pixels), so their dashes measure true */
 .iso-svg .rueca-mark-band,.iso-svg .rueca-mark-trace,.iso-svg .rueca-mark-edge{vector-effect:none}
 .rueca-mark-band{fill:none;stroke:var(--logo-ink);stroke-linejoin:round}
-.rueca-pale .iso-fill,.rueca-pale .iso-top{fill:color-mix(in srgb,#5DB4E8 30%,var(--anatomy-paper))!important}
-.rueca-pale .iso-shade{fill:color-mix(in srgb,#5DB4E8 22%,var(--anatomy-paper))!important}
+.rueca-pale .iso-fill,.rueca-pale .iso-top{fill:color-mix(in srgb,#5070F0 30%,var(--anatomy-paper))!important}
+.rueca-pale .iso-shade{fill:color-mix(in srgb,#5070F0 22%,var(--anatomy-paper))!important}
 .rueca-pale .iso-edge{stroke:var(--anatomy-mid)!important}
-.iso-line[data-tone="ink-faint"]{stroke:#181411;stroke-opacity:.2}
+.iso-line[data-tone="ink-faint"]{stroke:#171615;stroke-opacity:.2}
 .rueca-board>.iso-fill{fill:#fff;fill-opacity:.35}
-.rueca-board>.iso-edge{stroke:#181411}
-.iso-svg .rueca-note{fill:var(--ink-achiote,#b8381b);font-family:var(--font-hand,"La Belle Aurore",cursive)}
+.rueca-board>.iso-edge{stroke:#171615}
+.iso-svg .rueca-note{fill:var(--ink-achiote,#cd4000);font-family:var(--font-hand,"La Belle Aurore",cursive)}
 .iso-svg .pen-ink{fill:none;stroke:#fff;stroke-linecap:round;stroke-linejoin:round;vector-effect:none;stroke-dasharray:var(--len) var(--len);stroke-dashoffset:calc(var(--len) * (1 - clamp(0, (var(--pw, 1) - var(--a)) / var(--f), 1)))}
-.iso-svg .rueca-pen{fill:none;stroke:var(--ink-achiote,#b8381b);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.iso-svg .rueca-pen{fill:none;stroke:var(--ink-achiote,#cd4000);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .iso-svg .rueca-pen-m{display:none}
 @media (max-width:767px){.iso-svg .rueca-pen-d{display:none}.iso-svg .rueca-pen-m{display:inline}}
 `;
@@ -210,19 +211,19 @@ const SITE_TOKENS = `
   --anatomy-paper:${mix(2.5)};--anatomy-face:${mix(5)};--anatomy-top:${mix(5)};--anatomy-lit-top:${mix(6)};--anatomy-lit-shade:${mix(5)};
   --anatomy-shade-0:${mix(9)};--anatomy-hi:var(--fg);--anatomy-mid:${mix(62)};--anatomy-lo:${mix(38)};--anatomy-faint:${mix(20)};
   --anatomy-lit:var(--fg);--anatomy-dot:var(--fg);--anatomy-weight:.6px;--rueca-hatch:${mix(46)};
-  --logo-card:#2E81AF;--logo-ink:#F3F1EB;--logo-pale:78%;
+  --logo-card:#6E1A3E;--logo-ink:#F7F5F4;--logo-pale:78%;
 }
 :root.light .site .rueca-iso{
   --anatomy-face:color-mix(in srgb, #fff 65%, var(--sheet));--anatomy-top:color-mix(in srgb, #fff 65%, var(--sheet));--anatomy-lit-top:color-mix(in srgb, #fff 65%, var(--sheet));
   --anatomy-shade-0:${mix(8)};--anatomy-mid:${mix(54)};--anatomy-lo:${mix(32)};--anatomy-faint:${mix(16)};--anatomy-weight:.55px;--rueca-hatch:${mix(48)};
-  --logo-card:#5DB4E8;--logo-ink:#181411;
+  --logo-card:#EFA6FF;--logo-ink:#171615;
 }
 .rueca-iso .iso-svg{width:100%;height:100%}
 `;
 // the same paper and ink for the trial pages, which have no .site
 const TRIAL_TOKENS = `
-.iso{--sheet:#1a1714;--fg:#f3f1eb;--ink-achiote:#fe8562;--font-hand:"La Belle Aurore",cursive}
-.iso[data-theme="light"]{--sheet:#fbfaf7;--fg:#181411;--ink-achiote:#b8381b}
+.iso{--sheet:#181716;--fg:#f7f5f4;--ink-achiote:#ff6a2c;--font-hand:"La Belle Aurore",cursive}
+.iso[data-theme="light"]{--sheet:#fdfbfa;--fg:#171615;--ink-achiote:#cd4000}
 ${SITE_TOKENS.replaceAll(".site .rueca-iso", ".iso").replace(":root.light .iso", '.iso[data-theme="light"]').replace(".rueca-iso .iso-svg", ".iso-stage .iso-svg")}
 .iso{--anatomy-page:${mix(0)};--anatomy-card:${mix(2.5)};--anatomy-text:${mix(70)};--anatomy-muted:${mix(50)}}
 .iso-stage:hover,.iso-stage:focus-visible{--kh:1}
