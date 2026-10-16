@@ -37,7 +37,7 @@ export function App() {
     <ErrorBoundary key={shell!.id} label={shell!.name} resetPrefix={`studio:${shell!.id}`}>
       <Suspense fallback={<div className="flex h-full items-center justify-center text-[12px] text-fg-faint">Loading {shell!.name}…</div>}>
         {/* on rueca.dev every shell is one of Rueca's demos: its corner carries Rueca's mark, and the menu leads back to all of them */}
-        <BrandOverride mark={<Mark size={15} />}><Comp /></BrandOverride>
+        <BrandOverride mark={<Mark size={12} />}><Comp /></BrandOverride>
       </Suspense>
       <DesktopNotice />
     </ErrorBoundary>
