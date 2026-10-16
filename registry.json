@@ -271,6 +271,11 @@
           "target": "@components/studio/core/ease.ts"
         },
         {
+          "path": "src/kit/core/focus.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/focus.ts"
+        },
+        {
           "path": "src/kit/core/geometry.ts",
           "type": "registry:lib",
           "target": "@components/studio/core/geometry.ts"

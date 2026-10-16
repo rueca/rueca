@@ -180,7 +180,7 @@ export function PanelHeader({ title, children, className }: { title?: ReactNode;
 /* Text tabs in a panel header (Design / Prototype, Layers / Assets). */
 /* Text tabs in a panel header (Design / Prototype, Layers / Assets). APG tabs: one tab stop,
    ←/→ (and Home/End) move between tabs and select (break-it A12). Pass `controls` to name the panel. */
-export function PanelTabs<T extends string>({ value, onChange, tabs, controls }: { value: T; onChange: (t: T) => void; tabs: { value: T; label: string }[]; controls?: string }) {
+export function PanelTabs<T extends string>({ value, onChange, tabs, controls, label = 'Panel views' }: { value: T; onChange: (t: T) => void; tabs: { value: T; label: string }[]; controls?: string; /** the tab list's name for screen readers */ label?: string }) {
   const ref = useRef<HTMLDivElement>(null)
   const go = (i: number) => {
     const t = tabs[(i + tabs.length) % tabs.length]
@@ -188,7 +188,7 @@ export function PanelTabs<T extends string>({ value, onChange, tabs, controls }:
     requestAnimationFrame(() => ref.current?.querySelector<HTMLElement>(`[data-tab="${t.value}"]`)?.focus())
   }
   return (
-    <div ref={ref} role="tablist" className="flex flex-1 items-center gap-0.5"
+    <div ref={ref} role="tablist" aria-label={label} className="flex flex-1 items-center gap-0.5"
       onKeyDown={(e) => {
         const i = tabs.findIndex((t) => t.value === value)
         if (e.key === 'ArrowRight') { e.preventDefault(); go(i + 1) }

@@ -194,8 +194,10 @@ export function Section({
         {actions}
         {onReset && !off && (
           <Tip label="Reset section">
-            <button type="button" aria-label={`Reset ${typeof title === 'string' ? title.toLowerCase() : 'section'}`} onClick={onReset}
-              className="flex size-icon-sm items-center justify-center rounded-control text-fg-faint opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/section:opacity-100 focus-visible:opacity-100">
+            <button type="button" aria-label={`Reset ${typeof title === 'string' ? title.toLowerCase() : 'section'}`}
+              // the button hides once nothing is changed: move focus to the section title first, not <body>
+              onClick={(e) => { e.currentTarget.closest('[data-section-header]')?.querySelector('button')?.focus(); onReset() }}
+              className="flex size-icon-sm items-center justify-center rounded-control text-fg-faint opacity-0 outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal hover:text-fg group-hover/section:opacity-100 focus-visible:opacity-100">
               <RotateCcw size={12} strokeWidth={1.75} />
             </button>
           </Tip>

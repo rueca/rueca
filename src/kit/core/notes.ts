@@ -193,7 +193,7 @@ async function call<T>(path = '', init?: RequestInit): Promise<T> {
   try {
     const r = await fetch(url + path, { ...init, signal: ctl.signal })
     const body = await r.json().catch(() => null)
-    if (!r.ok) throw Object.assign(new Error(body?.error ?? `Notes endpoint answered ${r.status}`), { status: r.status })
+    if (!r.ok) throw Object.assign(new Error(body?.error ?? `Couldn't reach the notes server (${r.status}). Is the dev server running?`), { status: r.status })
     return body as T
   } finally { clearTimeout(timer) }
 }

@@ -14,6 +14,7 @@ import type { Shell } from '@/gallery/registry'
 import { Chip, CommandLine, Heading, scrollToSection } from './parts'
 import { CELL, Row, Sheet, SheetSection, TitleStrip } from './plate'
 import { useReveals } from './reveals'
+import { useScrollMemory } from './scroll-memory'
 import { SiteNav, usePendingSection } from './SiteNav'
 import { LiveShell } from './LiveShell'
 import { HeroArrow } from './HeroArrow'
@@ -27,6 +28,7 @@ export function Landing({ shells }: { shells: Shell[] }) {
   const { theme } = useTheme()
   const root = useRef<HTMLDivElement>(null)
   useReveals(root)
+  useScrollMemory(root)
   usePendingSection()
   const kitGrid = useRef<HTMLDivElement>(null)
   useKitScroll(kitGrid)

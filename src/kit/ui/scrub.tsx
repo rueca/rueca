@@ -276,6 +276,8 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
         discard.current = true
         setEditing(false)
         commitNum(defaultValue, true)
+        // the first click opened the text editor, which unmounts while focused: keep focus on the field
+        requestAnimationFrame(() => el.current?.focus())
       }}
       onKeyDown={onKeyDown}
       onBlur={settleNudge}

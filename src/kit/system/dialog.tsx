@@ -27,6 +27,7 @@
    kit `pop` surface over a `scrim` backdrop; tokens only.
    (Promoted from shells/batch/local/Modal.tsx.)
 --------------------------------------------------------------------------- */
+import { pauseHotkeys } from '../core/hotkeys'
 import { Dialog as BaseDialog } from '@base-ui/react/dialog'
 import { AlertDialog } from '@base-ui/react/alert-dialog'
 import { X } from 'lucide-react'
@@ -55,6 +56,7 @@ export interface DialogProps {
 export function Dialog({ open, onOpenChange, title, description, children, footer, width = 480, onSubmit, alert, initialFocus, className }: DialogProps) {
   // Dialog and AlertDialog share part names; AlertDialog only drops backdrop dismissal.
   const D = (alert ? AlertDialog : BaseDialog) as typeof BaseDialog
+  useEffect(() => (open ? pauseHotkeys() : undefined), [open])
   return (
     <D.Root open={open} onOpenChange={(o) => onOpenChange(o)}>
       <D.Portal>

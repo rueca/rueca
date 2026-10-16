@@ -35,8 +35,10 @@ type Drop = { id: string; where: 'before' | 'after' | 'inside' } | null
 
 export function LayerTree({
   items, selected = [], onSelect, onToggle, onMove, onRename, className, rowHeight,
-  toggles = ['locked', 'visible'], defaultCollapsed = false, expanded, onExpandedChange, onHover,
+  toggles = ['locked', 'visible'], defaultCollapsed = false, expanded, onExpandedChange, onHover, label = 'Layers',
 }: {
+  /** the tree's name for screen readers */
+  label?: string
   items: LayerItem[]
   selected?: string[]
   onSelect?: (ids: string[], e?: React.MouseEvent) => void
@@ -85,6 +87,14 @@ export function LayerTree({
   const [drop, setDrop] = useState<Drop>(null)
   const [editing, setEditing] = useState<string | null>(null)
 
+  // A focused row that gets deleted (Backspace) unmounts without a blur, which dropped focus to <body>: move it to
+  // the row now at that position, so arrow keys keep working. A real blur (click elsewhere) clears this.
+  const lastFocus = useRef(-1)
+  useEffect(() => {
+    if (lastFocus.current < 0 || (document.activeElement && document.activeElement !== document.body)) return
+    const rows = rootRef.current?.querySelectorAll<HTMLElement>('[role="treeitem"]')
+    if (rows?.length) rows[Math.min(lastFocus.current, rows.length - 1)].focus({ preventScroll: false })
+  })
   const flat: { item: LayerItem; depth: number; hiddenParent: boolean; pos: number; size: number }[] = []
   const walk = (list: LayerItem[], depth: number, hiddenParent: boolean) => {
     for (const [i, it] of list.entries()) {
@@ -95,7 +105,9 @@ export function LayerTree({
   walk(items, 0, false)
 
   return (
-    <div ref={rootRef} role="tree" aria-multiselectable className={cn('flex flex-col py-1', className)} onDragEnd={() => { setDrag(null); setDrop(null) }} onPointerLeave={() => onHover?.(null)}>
+    <div ref={rootRef} role="tree" aria-label={label} aria-multiselectable className={cn('flex flex-col py-1', className)}
+      onFocus={(e) => { const i = [...(rootRef.current?.querySelectorAll('[role="treeitem"]') ?? [])].indexOf(e.target as Element); if (i >= 0) lastFocus.current = i }}
+      onBlur={(e) => { if (!rootRef.current?.contains(e.relatedTarget as Node)) lastFocus.current = -1 }} onDragEnd={() => { setDrag(null); setDrop(null) }} onPointerLeave={() => onHover?.(null)}>
       {flat.map(({ item, depth, hiddenParent, pos, size }) => {
         const sel = selected.includes(item.id)
         const Icon = item.icon

@@ -118,7 +118,7 @@ export default function MarksShell() {
               <Segmented size="md" className="w-[212px]" value={filter} onChange={setFamily} iconOnly label="Families"
                 options={[{ value: 'all', label: 'All families', icon: LayoutGrid, hint: 'All families (0)' }, ...FAMILIES.map((f, i) => ({ value: f.id, label: f.name, icon: f.icon, hint: `${f.name} (${i + 1})` }))]} />
               <Divider vertical />
-              <Button size="md" onClick={reroll} className="gap-2"><Dices size={14} strokeWidth={1.5} />Reroll<Kbd>Space</Kbd></Button>
+              <Button size="md" onClick={reroll} className="gap-2" aria-keyshortcuts="Space"><Dices size={14} strokeWidth={1.5} />Reroll<span aria-hidden><Kbd>Space</Kbd></span></Button>
             </Cluster>
           )}
           end={

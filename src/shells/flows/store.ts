@@ -136,14 +136,16 @@ export function sectionAt(nodes: FlowNode[], n: FlowNode): string | undefined {
 }
 
 /** After a drop: refresh section membership and smart handles for what moved. */
-export function settle(moved: Set<string>, label = 'Move') {
+/** `burst`: the move came from arrow keys, so a run of presses commits as one undo step once it stops. */
+export function settle(moved: Set<string>, label = 'Move', burst = false) {
   const v = params.values()
   setNodes((ns) => ns.map((n) => (moved.has(n.id) && n.type !== 'section' ? { ...n, data: { ...n.data, section: sectionAt(ns, n) } } : n)), { commit: false })
   if (v.smartHandles) {
     const f = activeFlow()
     setEdges((es) => rehandle(f.nodes, es, moved, v.direction as 'LR' | 'TB', sizeOf), { commit: false })
   }
-  doc.commit(label)
+  if (burst) doc.settle(label)
+  else doc.commit(label)
 }
 
 export function addNode(kind: Kind, at?: { x: number; y: number }, data: Partial<NodeData> = {}) {

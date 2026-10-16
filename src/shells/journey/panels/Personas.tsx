@@ -85,7 +85,7 @@ function ListSection({ title, items, onChange, add }: { title: string; items: st
           <span className="mt-[7px] size-1 shrink-0 rounded-full bg-fg-faint" />
           <InlineText bare allowEmpty value={g} multiline onCommit={(s) => onChange(s ? items.map((x, j) => (j === i ? s : x)) : items.filter((_, j) => j !== i))} className="block min-w-0 flex-1 text-ui leading-relaxed text-fg" label={title} />
           <button type="button" aria-label="Remove" onClick={() => onChange(items.filter((_, j) => j !== i))}
-            className="mt-0.5 flex size-icon-sm items-center justify-center rounded-control text-fg-faint opacity-0 hover:bg-hover hover:text-fg group-hover/item:opacity-100 focus-visible:opacity-100"><X size={11} /></button>
+            className="mt-0.5 flex size-icon-sm items-center outline-none focus-visible:ring-2 focus-visible:ring-signal justify-center rounded-control text-fg-faint opacity-0 hover:bg-hover hover:text-fg group-hover/item:opacity-100 focus-visible:opacity-100"><X size={11} /></button>
         </div>
       ))}
     </Section>

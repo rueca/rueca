@@ -26,7 +26,7 @@ export function TokensPanel() {
           const v = { ...defaults, ...p.values }
           const on = equal(v, t)
           return (
-            <button key={p.name} type="button" onClick={() => tokens.applyPreset(p.name)}
+            <button key={p.name} type="button" aria-pressed={on} aria-label={`${p.name} look`} onClick={() => tokens.applyPreset(p.name)}
               className={cn('group flex min-h-12 items-center gap-2 rounded-cluster px-2 py-1.5 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-signal-soft shadow-[inset_0_0_0_1px_var(--signal)]' : 'bg-control hover:bg-hover')}>
               <span className="flex size-7 shrink-0 items-center justify-center text-[11px] font-semibold"
                 style={{ background: hexOf(v.accentL, v.accentC, v.accentH), borderRadius: Math.min(14, v.radius), boxShadow: v.shadow === 'hard' ? '2px 2px 0 0 currentColor' : undefined, color: onAccent(hexOf(v.accentL, v.accentC, v.accentH)) }}>Aa</span>

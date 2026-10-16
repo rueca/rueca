@@ -120,6 +120,8 @@ export function FlowCanvas() {
   }, [initialised, flow.id, flow.nodes, rf])
 
   /* ---- changes from React Flow → doc / ui */
+  // arrow-key moves arrive as drops too; remember the input so a run of presses settles into one undo step
+  const viaKeys = useRef(false)
   const onNodesChange = useCallback((changes: NodeChange<FlowNode>[]) => {
     const st = ui.getState()
     let selSet: Set<string> | null = null
@@ -154,7 +156,7 @@ export function FlowCanvas() {
       }
     }
     setNodes((ns) => applyNodeChanges([...docChanges, ...extra], ns), { commit: false })
-    if (dropped.size) settle(dropped, dropped.size > 1 ? `Move ${dropped.size} nodes` : 'Move')
+    if (dropped.size) settle(dropped, dropped.size > 1 ? `Move ${dropped.size} nodes` : 'Move', viaKeys.current)
     if (resized) setTimeout(() => doc.commit('Resize section'), 0)
   }, [])
 
@@ -278,7 +280,8 @@ export function FlowCanvas() {
   const hud = interactive && !present
 
   return (
-    <div ref={wrap} className="@container relative h-full w-full" onDragOver={onDragOver} onDrop={onDrop}>
+    <div ref={wrap} className="@container relative h-full w-full" onDragOver={onDragOver} onDrop={onDrop}
+      onKeyDownCapture={(e) => { if (e.key.startsWith('Arrow')) viaKeys.current = true }} onPointerDownCapture={() => { viaKeys.current = false }}>
       <ReactFlow<FlowNode, FlowEdge>
         className={cn('studio-flow handles-on-hover flows-rf', connecting && 'is-connecting', animating && 'is-animating', tool === 'comment' && '[&_.react-flow__pane]:!cursor-crosshair [&_.react-flow__node]:!cursor-crosshair')}
         nodes={nodes}

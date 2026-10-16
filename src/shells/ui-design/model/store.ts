@@ -136,6 +136,7 @@ const restore = (snap: Snap) => {
 }
 /** Returns the label of the step undone (undefined when there was none). */
 export function undo() {
+  flushNudge()
   const s = get()
   const prev = s.past.at(-1)
   if (!prev) return undefined
@@ -144,6 +145,7 @@ export function undo() {
   return prev.label
 }
 export function redo() {
+  flushNudge()
   const s = get()
   const [next, ...rest] = s.future
   if (!next) return undefined
@@ -443,8 +445,14 @@ export function nudge(dx: number, dy: number) {
     const n = p.children![loc.index]
     ns = insert(remove(ns, new Set([id])), p.id, n, to)
   }
-  setNodes(() => ns, { label: 'Nudge' })
+  // a run of arrow-key nudges is one undo step (like the kit's scrub fields): live now, committed 500ms after the
+  // last press, or before an undo / redo
+  setNodes(() => ns, { commit: false })
+  clearTimeout(nudgeTimer)
+  nudgeTimer = window.setTimeout(flushNudge, 500)
 }
+let nudgeTimer = 0
+function flushNudge() { if (nudgeTimer) { clearTimeout(nudgeTimer); nudgeTimer = 0; commit('Nudge') } }
 
 export function addNode(n: Node, parentId: string | null, index?: number) {
   setNodes((ns) => insert(ns, parentId, n, index), { label: `Add ${n.type}` })

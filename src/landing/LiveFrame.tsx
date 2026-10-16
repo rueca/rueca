@@ -41,7 +41,8 @@ export function LiveFrame({ id, name, query = '', native = NATIVE, hint = 'Click
     shown.current = route
     setReady(false)
     let live = true, tries = 0
-    try { win.location.hash = route.slice(1) } catch { return }
+    // replace, not assign: setting .hash pushes a joint-history entry, so Back stepped through hero shells
+    try { win.location.replace(win.location.pathname + win.location.search + route) } catch { return }
     // ready once the new shell has painted: its route is current and the studio is on screen (not "Loading…")
     const check = () => {
       if (!live) return

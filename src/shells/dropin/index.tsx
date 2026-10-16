@@ -122,7 +122,10 @@ export default function DropIn() {
       <Stage key={view} contentSize={content} grid>
         {placed.map((s) => (
           <Artboard key={s.id} x={s.x} width={s.w} height={s.h} background={WIRE.paper} label={<><s.icon size={11} strokeWidth={1.75} />{s.label}</>}>
-            <FrameSurface key={nonce} src={SRC} params={params} title={`Prototype at ${s.label}`} />
+            {/* inert outside Interact: Tab ran through every link in all three frames, and Enter followed them */}
+            <div className="contents" inert={!interact}>
+              <FrameSurface key={nonce} src={SRC} params={params} title={`Prototype at ${s.label}`} />
+            </div>
             {!interact && <div className="absolute inset-0" aria-hidden />}
           </Artboard>
         ))}

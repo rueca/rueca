@@ -295,7 +295,9 @@ export default function VideoShell() {
     if (!ids.length) return
     e.preventDefault()
     const cs = getComp().clips.filter((c) => ids.includes(c.id))
-    updateClips(Object.fromEntries(cs.map((c) => [c.id, { x: Math.round((c.x + dx) * 1000) / 1000, y: Math.round((c.y + dy) * 1000) / 1000 }])))
+    // a run of presses is one undo step
+    updateClips(Object.fromEntries(cs.map((c) => [c.id, { x: Math.round((c.x + dx) * 1000) / 1000, y: Math.round((c.y + dy) * 1000) / 1000 }])), false)
+    doc.settle('Nudge')
   }
   const shift = (frames: number) => (e: KeyboardEvent) => {
     const ids = ui.getState().sel
@@ -305,7 +307,7 @@ export default function VideoShell() {
     const orig = Object.fromEntries(cs.map((c) => [c.id, { start: c.start, track: c.track }]))
     updateClips(Object.fromEntries(cs.map((c) => [c.id, { start: Math.max(0, Math.min(v.duration - c.dur, c.start + frames * frameMs())) }])), false)
     settleClips(ids, orig)
-    commitComp('Move clips')
+    doc.settle('Move clips')
   }
   const E = 'Edit', C = 'Clips'
   useHotkeys({
