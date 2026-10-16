@@ -185,7 +185,7 @@ function Connectors({ nodes, L, sc, selection }: { nodes: Node[]; L: LayoutMap; 
       {start && L.get(start.id) && (() => {
         const b = sc(L.get(start.id)!)
         return (
-          <div className="absolute flex items-center gap-1 rounded-[5px] bg-signal-strong px-1.5 py-0.5 text-[10.5px] font-medium text-signal-fg" style={{ left: b.x, top: b.y - 46 }}>
+          <div className="absolute flex items-center gap-1 rounded-control bg-signal-strong px-1.5 py-0.5 text-ui-sm font-medium text-signal-fg" style={{ left: b.x, top: b.y - 46 }}>
             <Play size={10} strokeWidth={2} fill="currentColor" />Flow 1
           </div>
         )

@@ -96,7 +96,8 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
         <Dialog.Portal>
           <Dialog.Backdrop className="fixed inset-0 z-[150] bg-black/30" />
           <Dialog.Popup className="pop fixed top-1/2 left-1/2 z-[151] max-h-[80vh] w-[600px] max-w-[calc(100vw-32px)] -translate-1/2 overflow-y-auto p-5 outline-none">
-            <Dialog.Title className="mb-3 text-title font-semibold">Keyboard shortcuts</Dialog.Title>
+            {/* the title stays put while a long sheet scrolls under it */}
+            <Dialog.Title className="sticky -top-5 z-10 -mx-5 -mt-5 mb-1 bg-overlay px-5 pt-5 pb-2 text-title font-semibold">Keyboard shortcuts</Dialog.Title>
             <ShortcutSheet entries={[...registry.map((b) => ({ keys: b.combo, label: b.label!, group: b.group })), ...extraShortcuts]} />
           </Dialog.Popup>
         </Dialog.Portal>
@@ -107,8 +108,15 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
 
 /** Grouped list of shortcuts — fed by the live hotkey registry, so it can't drift. */
 function ShortcutSheet({ entries }: { entries: { keys: string; label: string; group?: string }[] }) {
-  const seen = new Set<string>()
-  const list = entries.filter((e) => { const k = e.keys + e.label; if (seen.has(k)) return false; seen.add(k); return true })
+  // one row per action: two bindings for the same label ("Replay": R and ↵) share it
+  const byLabel = new Map<string, { label: string; group?: string; keys: string[] }>()
+  for (const e of entries) {
+    const k = `${e.group ?? 'General'}|${e.label}`
+    const row = byLabel.get(k) ?? byLabel.set(k, { label: e.label, group: e.group, keys: [] }).get(k)!
+    const shown = prettyCombo(e.keys)
+    if (!row.keys.includes(shown)) row.keys.push(shown)
+  }
+  const list = [...byLabel.values()]
   const groups = [...new Set(list.map((e) => e.group ?? 'General'))]
   return (
     <div className="columns-2 gap-x-8">
@@ -116,9 +124,9 @@ function ShortcutSheet({ entries }: { entries: { keys: string; label: string; gr
         <div key={g} className="mb-3 break-inside-avoid">
           <div className="mb-1 text-ui text-fg-faint">{g}</div>
           {list.filter((e) => (e.group ?? 'General') === g).map((s) => (
-            <div key={s.keys + s.label} className="flex h-row items-center justify-between gap-3 text-ui">
+            <div key={s.label} className="flex h-row items-center justify-between gap-3 text-ui">
               <span className="truncate text-fg-muted">{s.label}</span>
-              <Kbd>{prettyCombo(s.keys)}</Kbd>
+              <span className="flex shrink-0 gap-1">{s.keys.map((k) => <Kbd key={k}>{k}</Kbd>)}</span>
             </div>
           ))}
         </div>

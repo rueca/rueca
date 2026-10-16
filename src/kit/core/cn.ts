@@ -8,7 +8,7 @@ const twMerge = extendTailwindMerge({
     theme: {
       spacing: ['row', 'control', 'control-sm', 'icon', 'icon-sm', 'button-lg', 'section', 'header', 'bar', 'dock', 'dock-button', 'pad', 'label', 'lane', 'ruler', 'gutter'],
       text: ['ui', 'ui-sm', 'title'],
-      radius: ['panel', 'control', 'cluster'],
+      radius: ['panel', 'control', 'cluster', 'pop'],
     },
   },
 })

@@ -192,7 +192,7 @@ export function prettyCombo(combo: string) {
   const first = splitCombos(combo)[0] ?? combo
   const parts = first === '+' ? ['+'] : first.endsWith('+') ? [...first.slice(0, -1).split('+').filter(Boolean), '+'] : first.split('+')
   const map: Record<string, string> = isMac
-    ? { mod: '⌘', shift: '⇧', alt: '⌥', ctrl: '⌃', space: 'Space', esc: 'Esc', enter: '↵', backspace: '⌫', delete: '⌦', arrowleft: '←', arrowright: '→', arrowup: '↑', arrowdown: '↓', plus: '+' }
-    : { mod: 'Ctrl+', shift: 'Shift+', alt: 'Alt+', ctrl: 'Ctrl+', space: 'Space', esc: 'Esc', enter: 'Enter', backspace: 'Bksp', delete: 'Del', arrowleft: '←', arrowright: '→', arrowup: '↑', arrowdown: '↓', plus: '+' }
+    ? { mod: '⌘', shift: '⇧', alt: '⌥', ctrl: '⌃', space: 'Space', esc: 'Esc', enter: '↵', backspace: '⌫', delete: '⌦', arrowleft: '←', arrowright: '→', arrowup: '↑', arrowdown: '↓', plus: '+', home: 'Home', end: 'End', tab: 'Tab', pageup: 'PgUp', pagedown: 'PgDn' }
+    : { mod: 'Ctrl+', shift: 'Shift+', alt: 'Alt+', ctrl: 'Ctrl+', space: 'Space', esc: 'Esc', enter: 'Enter', backspace: 'Bksp', delete: 'Del', arrowleft: '←', arrowright: '→', arrowup: '↑', arrowdown: '↓', plus: '+', home: 'Home', end: 'End', tab: 'Tab', pageup: 'PgUp', pagedown: 'PgDn' }
   return parts.map((p) => map[p.toLowerCase()] ?? p.toUpperCase()).join('')
 }

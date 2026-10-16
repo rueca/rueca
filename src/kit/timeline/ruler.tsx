@@ -69,7 +69,7 @@ export function RulerTicks({ ticks, x, fmt, className }: { ticks: Ticks; x: (t: 
       {ticks.ticks.map(({ t, major }) => (
         <div key={t} className="absolute bottom-0" style={{ left: x(t) }}>
           <div className={cn('w-px', major ? 'h-2 bg-line-strong' : 'h-1 bg-line')} />
-          {major && <div className="absolute bottom-2.5 left-1 whitespace-nowrap tabular text-[10px] text-fg-muted">{f(t, ticks.labelStep)}</div>}
+          {major && <div className="absolute bottom-2.5 left-1 whitespace-nowrap tabular text-ui-sm leading-none text-fg-muted">{f(t, ticks.labelStep)}</div>}
         </div>
       ))}
     </div>

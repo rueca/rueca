@@ -51,9 +51,9 @@ function NodeList() {
                   onDragStart={(e) => { e.dataTransfer.setData(LIB_MIME, d.kind); e.dataTransfer.effectAllowed = 'copy' }}
                   onClick={() => add(d.kind)}
                   title={d.description}
-                  className="group/lib mx-1 flex h-row w-[calc(100%-8px)] items-center gap-2 rounded-[6px] px-2 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal"
+                  className="group/lib mx-1 flex h-row w-[calc(100%-8px)] items-center gap-2 rounded-control px-2 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal"
                 >
-                  <span className="flex size-icon-sm shrink-0 items-center justify-center rounded-[5px]" style={{ background: `color-mix(in srgb, ${catVar(c)} 16%, transparent)`, color: catVar(c) }}>
+                  <span className="flex size-icon-sm shrink-0 items-center justify-center rounded-control" style={{ background: `color-mix(in srgb, ${catVar(c)} 16%, transparent)`, color: catVar(c) }}>
                     <Icon size={13} strokeWidth={1.5} />
                   </span>
                   <span className="min-w-0 flex-1 truncate text-ui text-fg">{d.label}</span>
@@ -80,7 +80,7 @@ function Samples() {
     <div className="flex flex-col gap-1 p-2">
       {SAMPLES.map((s) => (
         <button key={s.id} type="button" onClick={() => open(s.graph, s.name)}
-          className={cn('flex flex-col gap-0.5 rounded-[8px] px-pad py-2 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', current === s.name && 'bg-active')}>
+          className={cn('flex flex-col gap-0.5 rounded-cluster px-pad py-2 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', current === s.name && 'bg-active')}>
           <span className="flex items-center justify-between text-ui font-medium text-fg">{s.name}<span className="tabular text-ui font-normal text-fg-faint">{s.graph.nodes.length} nodes</span></span>
           <span className="text-ui leading-snug text-fg-muted">{s.description}</span>
         </button>

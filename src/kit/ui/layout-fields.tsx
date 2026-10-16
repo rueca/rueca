@@ -77,7 +77,7 @@ export function AlignGrid({
   return (
     <div role="radiogroup" aria-label={label} aria-disabled={disabled || undefined} tabIndex={disabled ? -1 : 0} onKeyDown={disabled ? undefined : onKey}
       aria-activedescendant={cellId(x, y)}
-      className={cn('grid shrink-0 grid-cols-3 grid-rows-3 rounded-[6px] bg-control p-1 outline-none focus-visible:ring-2 focus-visible:ring-signal', disabled && 'pointer-events-none opacity-40', className)}
+      className={cn('grid shrink-0 grid-cols-3 grid-rows-3 rounded-control bg-control p-1 outline-none focus-visible:ring-2 focus-visible:ring-signal', disabled && 'pointer-events-none opacity-40', className)}
       style={{ width: size, height: size }}>
       {AX.map((cy) => AX.map((cx) => {
         const lit = between ? (dir === 'row' ? cy === y : cx === x) : cx === x && cy === y
@@ -264,7 +264,7 @@ export function PaintField<T extends Paint>({
                     <div className="grid grid-cols-3 gap-1.5" role="radiogroup" aria-label="Image">
                       {Object.entries(images).map(([k, l]) => (
                         <button key={k} type="button" role="radio" aria-checked={value.image === k} aria-label={l} title={l} onClick={() => set({ image: k }, true)}
-                          className={cn('aspect-square rounded-[6px] bg-cover bg-center outline-none focus-visible:ring-2 focus-visible:ring-signal', value.image === k ? 'shadow-[0_0_0_2px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}
+                          className={cn('aspect-square rounded-control bg-cover bg-center outline-none focus-visible:ring-2 focus-visible:ring-signal', value.image === k ? 'shadow-[0_0_0_2px_var(--signal)]' : 'shadow-[inset_0_0_0_1px_var(--line)]')}
                           style={{ backgroundImage: `url("${imageURL(k)}")` }} />
                       ))}
                     </div>

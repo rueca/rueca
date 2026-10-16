@@ -444,7 +444,7 @@ export default function DevelopShell() {
             onRemove={(id) => ui.setState((x) => ({ userLooks: x.userLooks.filter((l) => l.id !== id) }))}
           />
           <button type="button" onClick={saveLook}
-            className="mt-[28px] mr-3 flex shrink-0 flex-col items-center justify-center gap-1 rounded-[8px] text-ui text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"
+            className="mt-[28px] mr-3 flex shrink-0 flex-col items-center justify-center gap-1 rounded-control text-ui text-fg-muted outline-none hover:text-fg focus-visible:ring-2 focus-visible:ring-signal"
             style={{ width: 120, height: 80, boxShadow: 'inset 0 0 0 1px var(--line-strong)' }}>
             <Plus size={16} strokeWidth={1.5} />Save look
           </button>
@@ -481,7 +481,7 @@ export default function DevelopShell() {
             <Empty icon={X} title="The develop engine couldn’t start" hint={`It needs WebGL2. ${failed}`} />
           </div>
         )}
-        {intake.over && <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-[12px] bg-signal-soft text-title font-medium text-signal shadow-[inset_0_0_0_2px_var(--signal)]">Drop to open</div>}
+        {intake.over && <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-panel bg-signal-soft text-title font-medium text-signal shadow-[inset_0_0_0_2px_var(--signal)]">Drop to open</div>}
       </div>
       <CommandPalette
         commands={commands}
@@ -526,22 +526,27 @@ function StageOverlay() {
   const chip = 'cluster absolute top-3 left-1/2 flex h-bar -translate-x-1/2 items-center gap-2 px-pad text-ui'
   if (d)
     return (
-      <div className="cluster absolute top-3 left-1/2 flex h-bar max-w-[calc(100%-24px)] -translate-x-1/2 items-center gap-1.5 overflow-x-auto px-2">
-        <span className="shrink-0 pl-1 text-ui text-fg-muted">Aspect</span>
-        <div className="w-[268px] shrink-0">
-          <Segmented size="sm" label="Aspect" value={presetOf(d.aspect)} onChange={setAspect} options={ASPECTS.map((a) => ({ value: a.value, label: a.label }))} />
+      // A full-width row that centres the cluster, not a left-1/2 box: that may only grow to half the stage before it
+      // overflows (comfortable clipped "Done"). The row is also the container the labels give way to on narrow stages;
+      // the aspect choice and the straighten slider shrink, the fields and buttons never do
+      <div className="@container pointer-events-none absolute inset-x-3 top-3 flex justify-center">
+        <div className="cluster pointer-events-auto flex h-bar max-w-full min-w-0 items-center gap-1.5 px-2">
+          <span className="shrink-0 pl-1 text-ui text-fg-muted @max-[860px]:hidden">Aspect</span>
+          <div className="w-[268px] min-w-0">
+            <Segmented size="sm" label="Aspect" value={presetOf(d.aspect)} onChange={setAspect} options={ASPECTS.map((a) => ({ value: a.value, label: a.label, hint: a.label }))} />
+          </div>
+          <IconButton size="icon-sm" icon={d.aspect.split(':').map(Number).reduce((a, b) => a / b) < 1 ? RectangleVertical : RectangleHorizontal} label="Swap orientation" shortcut="x" onClick={flipAspect} />
+          <ScrubValue boxed prefix="W" value={Math.round(d.crop.w * s.imageSize.w)} onChange={(x) => setCropSize('w', x)} min={16} max={s.imageSize.w} step={1} unit="px" label="Crop width" className="w-[78px] shrink-0" />
+          <ScrubValue boxed prefix="H" value={Math.round(d.crop.h * s.imageSize.h)} onChange={(x) => setCropSize('h', x)} min={16} max={s.imageSize.h} step={1} unit="px" label="Crop height" className="w-[78px] shrink-0" />
+          <Divider vertical />
+          <span className="shrink-0 text-ui text-fg-muted @max-[860px]:hidden">Straighten</span>
+          <div className="w-[112px] min-w-[48px]"><GradientSlider value={d.angle} onChange={(a) => setAngle(a)} min={-45} max={45} step={0.1} origin={0} label="Straighten" /></div>
+          <ScrubValue value={d.angle} onChange={(a) => setAngle(a)} min={-45} max={45} step={0.1} unit="°" defaultValue={0} label="Straighten angle" className="w-[50px] shrink-0" />
+          <Divider vertical />
+          <Button size="md" onClick={resetCrop}>Reset</Button>
+          <Button size="md" onClick={cancelCrop}>Cancel</Button>
+          <Button size="md" variant="primary" onClick={applyCrop} title="Apply crop (Enter)">Done</Button>
         </div>
-        <IconButton size="icon-sm" icon={d.aspect.split(':').map(Number).reduce((a, b) => a / b) < 1 ? RectangleVertical : RectangleHorizontal} label="Swap orientation" shortcut="x" onClick={flipAspect} />
-        <ScrubValue boxed prefix="W" value={Math.round(d.crop.w * s.imageSize.w)} onChange={(x) => setCropSize('w', x)} min={16} max={s.imageSize.w} step={1} unit="px" label="Crop width" className="w-[78px] shrink-0" />
-        <ScrubValue boxed prefix="H" value={Math.round(d.crop.h * s.imageSize.h)} onChange={(x) => setCropSize('h', x)} min={16} max={s.imageSize.h} step={1} unit="px" label="Crop height" className="w-[78px] shrink-0" />
-        <Divider vertical />
-        <span className="shrink-0 text-ui text-fg-muted">Straighten</span>
-        <div className="w-[112px] shrink-0"><GradientSlider value={d.angle} onChange={(a) => setAngle(a)} min={-45} max={45} step={0.1} origin={0} label="Straighten" /></div>
-        <ScrubValue value={d.angle} onChange={(a) => setAngle(a)} min={-45} max={45} step={0.1} unit="°" defaultValue={0} label="Straighten angle" className="w-[50px] shrink-0" />
-        <Divider vertical />
-        <Button size="md" onClick={resetCrop}>Reset</Button>
-        <Button size="md" onClick={cancelCrop}>Cancel</Button>
-        <Button size="md" variant="primary" onClick={applyCrop} title="Apply crop (Enter)">Done</Button>
       </div>
     )
   if (s.bypass) return <div className={chip}><span className="size-1.5 rounded-full bg-key" />Before — release <Kbd>\</Kbd> for after</div>
@@ -580,6 +585,11 @@ const HSL_KEYS = BANDS.flatMap((b) => ['h', 's', 'l'].map((c) => `hsl_${b.id}_${
 const VIG_KEYS = ['vignette', 'vigMid', 'vigFeather']
 const GRAIN_KEYS = ['grain', 'grainSize']
 const SHARP_KEYS = ['sharpen', 'sharpRadius']
+const CURVE_PRESETS: { value: string; label: string; hint: string; points: CurvePoint[] }[] = [
+  { value: 'linear', label: 'Linear', hint: 'Linear', points: [[0, 0], [1, 1]] },
+  { value: 'medium', label: 'Medium', hint: 'Medium contrast', points: [[0, 0], [0.25, 0.21], [0.75, 0.8], [1, 1]] },
+  { value: 'strong', label: 'Strong', hint: 'Strong contrast', points: [[0, 0], [0.25, 0.17], [0.75, 0.85], [1, 1]] },
+]
 const sub = (t: string) => <div className="px-pad pt-2 pb-0.5 text-ui text-fg-faint no-select">{t}</div>
 
 function Adjustments({ v }: { v: V }) {
@@ -614,14 +624,9 @@ function Adjustments({ v }: { v: V }) {
           <Segmented size="sm" label="Curve channel" value={ch} onChange={(c) => ui.setState({ curveChannel: c as typeof ch })}
             options={[{ value: 'RGB', label: 'RGB' }, { value: 'R', label: 'Red' }, { value: 'G', label: 'Green' }, { value: 'B', label: 'Blue' }]} />
           <ToneCurve value={pts} onChange={(p, final) => params.setValue(ck, p, { commit: final, label: curveStep })} color={ccolor} histogram={chist} label={`${ch} tone curve`} />
-          <div className="flex gap-1">
-            {([['Linear', [[0, 0], [1, 1]]], ['Medium', [[0, 0], [0.25, 0.21], [0.75, 0.8], [1, 1]]], ['Strong', [[0, 0], [0.25, 0.17], [0.75, 0.85], [1, 1]]]] as [string, CurvePoint[]][]).map(([n, p]) => (
-              <button key={n} type="button" onClick={() => curvePreset(p, n)}
-                className={cn('h-control-sm flex-1 rounded-[5px] text-ui-sm outline-none focus-visible:ring-2 focus-visible:ring-signal', JSON.stringify(p) === JSON.stringify(pts) ? 'bg-signal-soft text-signal' : 'bg-hover text-fg-muted hover:text-fg')}>
-                {n === 'Linear' ? n : `${n} contrast`}
-              </button>
-            ))}
-          </div>
+          <Segmented size="sm" label="Curve preset" value={CURVE_PRESETS.find((c) => JSON.stringify(c.points) === JSON.stringify(pts))?.value ?? ''}
+            onChange={(n) => { const c = CURVE_PRESETS.find((x) => x.value === n); if (c) curvePreset(c.points, c.label) }}
+            options={CURVE_PRESETS.map((c) => ({ value: c.value, label: c.label, hint: c.hint }))} />
         </div>
       </Section>
       <Section title="Colour mixer" persistKey="photo:mixer" changed={changedOf(v, HSL_KEYS)} onReset={changedOf(v, HSL_KEYS) ? resetKeys('Colour mixer', HSL_KEYS) : undefined}>

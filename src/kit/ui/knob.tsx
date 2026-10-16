@@ -188,11 +188,11 @@ export function Knob({
       {hint ? <Tip label={hint} side="top">{dialEl}</Tip> : dialEl}
       {!hideLabel && (
         <span onDoubleClick={() => defaultValue !== undefined && onChange(defaultValue, true)}
-          className={cn('max-w-full truncate text-[10.5px] leading-tight no-select', changed ? 'text-fg' : 'text-fg-muted')}>{label}</span>
+          className={cn('max-w-full truncate text-ui-sm no-select', changed ? 'text-fg' : 'text-fg-muted')}>{label}</span>
       )}
       {!hideValue && (
         <ScrubValue value={value} onChange={onChange} min={min} max={max} step={step} defaultValue={defaultValue} fmt={fmt} parse={parse} unit={unit}
-          label={`${label} value`} changed={changed} align="left" className={cn('h-[18px] justify-center px-0.5 text-[10.5px] [&>span]:text-center', dragging && 'text-signal-text')} />
+          label={`${label} value`} changed={changed} align="left" className={cn('h-control-sm justify-center px-0.5 text-ui-sm [&>span]:text-center', dragging && 'text-signal-text')} />
       )}
     </div>
   )

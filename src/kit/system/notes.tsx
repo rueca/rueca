@@ -315,7 +315,7 @@ function Thread({ n, num, params, clock, stale, style, className }: {
   }
   return (
     <div data-note-ui="" className={cn('pop pointer-events-auto w-[272px] overflow-hidden text-ui', className)} style={style} onPointerDown={(e) => e.stopPropagation()}>
-      <div className="flex h-9 items-center gap-0.5 border-b border-line pr-1.5 pl-3">
+      <div className="flex h-header items-center gap-0.5 border-b border-line pr-1.5 pl-pad">
         <span className="min-w-0 flex-1 truncate font-medium text-fg-muted">
           Comment {num}{n.anchor?.on === 'param' ? ` · ${paramLabel(params, n.anchor.key)}` : ''}
         </span>

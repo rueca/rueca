@@ -90,14 +90,14 @@ export function Player({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-[160] flex flex-col bg-field" role="dialog" aria-label="Prototype preview">
-      <div className="flex h-12 flex-none items-center gap-2 border-b border-line bg-panel px-3">
+      <div className="flex h-12 flex-none items-center gap-2 border-b border-line bg-panel px-pad">
         <IconButton icon={ArrowLeft} label="Back" shortcut="arrowleft" disabled={stack.length < 2} onClick={() => back()} />
         <IconButton icon={RotateCcw} label="Restart" shortcut="r" onClick={restart} />
-        <div className="flex min-w-0 flex-1 items-center justify-center gap-2 text-[12.5px]">
+        <div className="flex min-w-0 flex-1 items-center justify-center gap-2 text-title">
           <span className="truncate font-medium">{frame?.name ?? 'No frames'}</span>
           <span className="text-fg-faint tabular">{stack.length > 1 ? `${stack.length} deep` : ''}</span>
         </div>
-        <span className="hidden items-center gap-1 text-[11px] text-fg-faint sm:flex">Click anywhere to see hotspots <Kbd>esc</Kbd></span>
+        <span className="hidden items-center gap-1 text-ui text-fg-faint sm:flex">Click anywhere to see hotspots <Kbd>esc</Kbd></span>
         <IconButton icon={X} label="Close preview" shortcut="esc" onClick={onClose} />
       </div>
       <div ref={box} className="relative flex min-h-0 flex-1 items-center justify-center" onClick={() => setFlash(true)}>

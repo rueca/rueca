@@ -175,16 +175,20 @@ export function Stage({
     'mod+-': { run: () => { touched.current = true; zoomTo(cam.getState().zoom / 2) }, label: 'Zoom out', group: 'View' },
   }, [fill, hotkeys], { priority: 0 })
 
-  const onPointerDown = (e: React.PointerEvent) => {
+  // Space-drag and middle-drag pan in the CAPTURE phase: the artwork's own handlers (a draggable layer, a canvas
+  // overlay that stops propagation) never see the press, so Space+drag over an object pans instead of moving it
+  const onPointerDownCapture = (e: React.PointerEvent) => {
     if (fill) return
     if (e.button === 1 || (e.button === 0 && space)) {
-      e.preventDefault()
+      e.preventDefault(); e.stopPropagation()
       touched.current = true
       const s = cam.getState()
       pan.current = { x: e.clientX, y: e.clientY, cx: s.x, cy: s.y }
       el.current!.setPointerCapture(e.pointerId)
-      return
     }
+  }
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (fill || pan.current) return
     if (e.target === el.current || e.target === world.current) onBackgroundPointerDown?.(e)
   }
   const onPointerMove = (e: React.PointerEvent) => {
@@ -205,6 +209,7 @@ export function Stage({
           backgroundSize: grid ? `${20 * zoom}px ${20 * zoom}px` : undefined,
           backgroundPosition: grid ? `${x}px ${y}px` : undefined,
         }}
+        onPointerDownCapture={onPointerDownCapture}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -287,7 +292,8 @@ export function Artboard({
           // never wider than the board on screen, so neighbouring boards' labels can't overlap (cleanup L5)
           style={{ transform: `scale(${1 / zoom})`, maxWidth: Math.max(48, width * zoom) }}
         >
-          <span className="min-w-0 truncate">{label}</span>
+          {/* inline so a label passed with an icon (<Icon/> Desktop) stays on one line */}
+          <span className="flex min-w-0 items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap [&>svg]:shrink-0">{label}</span>
           <span className="shrink-0 tabular opacity-60">{width} × {height}</span>
         </div>
       )}

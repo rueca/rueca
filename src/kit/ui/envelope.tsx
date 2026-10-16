@@ -177,7 +177,7 @@ export function EnvelopeEditor({
 
   return (
     <div role="group" aria-label={label} className={cn('flex w-full flex-col gap-1.5', className)}>
-      <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="w-full touch-none rounded-[6px] bg-control" style={{ aspectRatio: `${W} / ${H}` }}
+      <svg ref={svg} viewBox={`0 0 ${W} ${H}`} className="w-full touch-none rounded-control bg-control" style={{ aspectRatio: `${W} / ${H}` }}
         onPointerMove={move} onPointerUp={up} onPointerCancel={up}>
         {[0.25, 0.5, 0.75].map((g) => <line key={g} x1={PAD} x2={W - PAD} y1={yOf(g)} y2={yOf(g)} stroke="var(--line)" />)}
         {[slotX.d, slotX.hold, slotX.r].map((x) => <line key={x} x1={x} x2={x} y1={PAD} y2={H - PAD} stroke="var(--line)" strokeDasharray="2 3" />)}

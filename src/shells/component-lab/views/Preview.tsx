@@ -29,7 +29,7 @@ export function Preview() {
       minHeight={480}
       toolbar={
         <div className="w-[64px]">
-          <Segmented size="sm" iconOnly value={theme} onChange={(t) => setUI({ previewTheme: t as 'light' | 'dark' })} label="Preview theme"
+          <Segmented iconOnly value={theme} onChange={(t) => setUI({ previewTheme: t as 'light' | 'dark' })} label="Preview theme"
             options={[{ value: 'light', label: 'Light', icon: Sun, hint: 'Preview light (D)' }, { value: 'dark', label: 'Dark', icon: Moon, hint: 'Preview dark (D)' }]} />
         </div>
       }

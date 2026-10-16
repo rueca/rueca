@@ -14,6 +14,7 @@
       ],
       "registryDependencies": [
         "https://rueca.dev/r/actions.json",
+        "https://rueca.dev/r/actions 2.json",
         "https://rueca.dev/r/button.json",
         "https://rueca.dev/r/charts.json",
         "https://rueca.dev/r/chip-input.json",
@@ -57,9 +58,19 @@
       ],
       "files": [
         {
+          "path": "src/kit/index 2.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/index 2.ts"
+        },
+        {
           "path": "src/kit/index.ts",
           "type": "registry:lib",
           "target": "@components/studio/index.ts"
+        },
+        {
+          "path": "src/kit/xyflow 2.css",
+          "type": "registry:file",
+          "target": "@components/studio/xyflow 2.css"
         },
         {
           "path": "src/kit/xyflow.css",
@@ -90,6 +101,30 @@
           "path": "src/kit/system/actions.tsx",
           "type": "registry:component",
           "target": "@components/studio/system/actions.tsx"
+        }
+      ]
+    },
+    {
+      "name": "actions 2",
+      "type": "registry:component",
+      "title": "Actions 2",
+      "description": "Actions 2 — part of the Rueca kit.",
+      "dependencies": [
+        "lucide-react@^1.54.0",
+        "zustand@^5.0.15"
+      ],
+      "registryDependencies": [
+        "https://rueca.dev/r/button.json",
+        "https://rueca.dev/r/controls.json",
+        "https://rueca.dev/r/core.json",
+        "https://rueca.dev/r/dialog.json",
+        "https://rueca.dev/r/toast.json"
+      ],
+      "files": [
+        {
+          "path": "src/kit/system/actions 2.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/system/actions 2.tsx"
         }
       ]
     },
@@ -296,9 +331,19 @@
           "target": "@components/studio/core/io.ts"
         },
         {
+          "path": "src/kit/core/notes 2.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/notes 2.ts"
+        },
+        {
           "path": "src/kit/core/notes.ts",
           "type": "registry:lib",
           "target": "@components/studio/core/notes.ts"
+        },
+        {
+          "path": "src/kit/core/params 2.ts",
+          "type": "registry:lib",
+          "target": "@components/studio/core/params 2.ts"
         },
         {
           "path": "src/kit/core/params.ts",
@@ -499,9 +544,19 @@
       ],
       "files": [
         {
+          "path": "src/kit/inspector/Inspector 2.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/inspector/Inspector 2.tsx"
+        },
+        {
           "path": "src/kit/inspector/Inspector.tsx",
           "type": "registry:component",
           "target": "@components/studio/inspector/Inspector.tsx"
+        },
+        {
+          "path": "src/kit/inspector/label-fit.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/inspector/label-fit.tsx"
         }
       ]
     },
@@ -924,6 +979,11 @@
           "target": "@components/studio/stage/snap.ts"
         },
         {
+          "path": "src/kit/stage/Stage 2.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/stage/Stage 2.tsx"
+        },
+        {
           "path": "src/kit/stage/Stage.tsx",
           "type": "registry:component",
           "target": "@components/studio/stage/Stage.tsx"
@@ -964,6 +1024,11 @@
       ],
       "files": [
         {
+          "path": "src/kit/layout/ClientView 2.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/layout/ClientView 2.tsx"
+        },
+        {
           "path": "src/kit/layout/ClientView.tsx",
           "type": "registry:component",
           "target": "@components/studio/layout/ClientView.tsx"
@@ -977,6 +1042,11 @@
           "path": "src/kit/layout/Studio.tsx",
           "type": "registry:component",
           "target": "@components/studio/layout/Studio.tsx"
+        },
+        {
+          "path": "src/kit/layout/Toolbar 2.tsx",
+          "type": "registry:component",
+          "target": "@components/studio/layout/Toolbar 2.tsx"
         },
         {
           "path": "src/kit/layout/Toolbar.tsx",

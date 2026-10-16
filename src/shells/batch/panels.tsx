@@ -1,5 +1,5 @@
 /* Batch panels: sizes (left), design / brand / export (right), data (bottom). */
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import { useStore } from 'zustand'
 import {
   ArrowLeft, ArrowUpFromLine, ClipboardPaste, Download, FileDown, FileUp, Lock, LockOpen, Plus, RectangleHorizontal, RectangleVertical,
@@ -104,7 +104,7 @@ function TemplateInspector() {
           const keys = Object.keys(d.overrides[s.id] ?? {})
           return (
             <button key={s.id} type="button" onClick={() => selectSize(s.id)}
-              className="group/ov mx-1.5 flex min-h-8 items-center gap-2 rounded-[6px] px-1.5 py-1 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
+              className="group/ov mx-1.5 flex min-h-row items-center gap-2 rounded-control px-1.5 py-1 text-left outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal">
               <span className="size-1.5 shrink-0 rounded-full bg-signal" />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-ui text-fg">{s.name}</span>
@@ -119,8 +119,11 @@ function TemplateInspector() {
   )
 }
 
+/* one stable empty object: `?? {}` inside the selector made a new snapshot every read (getSnapshot loop) */
+const NO_OVERRIDES: Record<string, unknown> = {}
+
 function SizeInspector({ size, issues }: { size: SizeSpec; issues: string[] }) {
-  const overrides = useDoc(doc, (d) => (d.overrides[size.id] ?? {}) as Record<string, unknown>)
+  const overrides = useDoc(doc, (d) => (d.overrides[size.id] ?? NO_OVERRIDES) as Record<string, unknown>)
   const v = useValues(params) as V
   const n = Object.keys(overrides).length
   const eff = { ...v, ...overrides } as V
@@ -199,7 +202,7 @@ export function BrandTab() {
     <>
       <div className="p-2">
         <button type="button" onClick={() => params.setValue('brandLocked', !locked)} aria-pressed={locked}
-          className="flex w-full items-center gap-2.5 rounded-[8px] bg-control px-2.5 py-2 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal">
+          className="flex w-full items-center gap-2.5 rounded-cluster bg-control px-2.5 py-2 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal">
           <span className={locked ? 'text-signal' : 'text-fg-faint'}>{locked ? <Lock size={14} strokeWidth={1.5} /> : <LockOpen size={14} strokeWidth={1.5} />}</span>
           <span className="min-w-0 flex-1">
             <span className="block text-ui font-medium text-fg">{locked ? 'Brand locked' : 'Brand unlocked'}</span>
@@ -214,7 +217,7 @@ export function BrandTab() {
           <Tip label="Paper"><span><Swatch color={v.paper} size={20} /></span></Tip>
           <Tip label="Ink"><span><Swatch color={v.ink} size={20} /></span></Tip>
           <span className="mx-1 w-px self-stretch bg-line" />
-          {rows.map((r, i) => <Tip key={i} label={`${r.name} · ${r.color}`}><button type="button" onClick={() => setRow(i)} className="rounded-[4px] outline-none focus-visible:ring-2 focus-visible:ring-signal"><Swatch color={r.color} size={20} /></button></Tip>)}
+          {rows.map((r, i) => <Tip key={i} label={`${r.name} · ${r.color}`}><button type="button" onClick={() => setRow(i)} className="rounded-control outline-none focus-visible:ring-2 focus-visible:ring-signal"><Swatch color={r.color} size={20} /></button></Tip>)}
         </div>
         <div className="px-pad pt-1 text-ui text-fg-faint">Row colours come from the data table.</div>
       </Section>
@@ -304,6 +307,9 @@ export function ExportTab() {
 
 /* ---------------- bottom: data ---------------- */
 
+/* the row-number column, every data column's minimum and the remove column (kit DataGrid template) */
+const GRID_MIN = 36 + COLUMNS.reduce((n, c) => n + c.width, 0) + 32
+
 export function DataPanel({ rowIssues, openPaste }: { rowIssues: (i: number) => string[] | undefined; openPaste: () => void }) {
   const rows = useDoc(doc, (d) => d.rows)
   const row = useStore(ui, (s) => s.row)
@@ -324,12 +330,14 @@ export function DataPanel({ rowIssues, openPaste }: { rowIssues: (i: number) => 
       {/* Shell-side patches for the kit DataGrid (break-it A15/A20 — proper fix belongs in kit/ui/data-grid.tsx):
           the grid's keydown handler swallowed Enter/Space on the colour cell's "Pick colour" button, so let those
           reach the button; and pad that 14px swatch button to a 24px target. */}
-      <div className="contents" onKeyDownCapture={(e) => {
+      {/* The kit grid's rowgroup is min-w-max, so its fr columns grew to the longest Subhead and the table ran ~220px
+          past the panel (Badge off-screen). Cap it at the panel width, but never below the columns' minimums. */}
+      <div className="contents" style={{ '--grid-min': `${GRID_MIN}px` } as CSSProperties} onKeyDownCapture={(e) => {
         const t = e.target as HTMLElement
         if ((e.key === 'Enter' || e.key === ' ') && t.getAttribute('aria-label') === 'Pick colour') e.stopPropagation()
       }}>
       <DataGrid
-        className="h-full [&_[aria-label='Pick_colour']]:-m-[5px] [&_[aria-label='Pick_colour']]:p-[5px]"
+        className="h-full [&>[role=rowgroup]]:w-full [&>[role=rowgroup]]:min-w-[var(--grid-min)] [&_[aria-label='Pick_colour']]:-m-[5px] [&_[aria-label='Pick_colour']]:p-[5px]"
         columns={COLUMNS}
         rows={rows}
         activeRow={row}

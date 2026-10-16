@@ -224,7 +224,7 @@ export default function TypeShell() {
     <Section title="Code" first={false}
       actions={<IconButton size="icon-sm" icon={Copy} label="Copy CSS variables" onClick={() => copy(scaleCSS(v, steps), 'CSS variables')} />}>
       <div className="px-pad">
-        <pre className="max-h-[220px] overflow-auto rounded-[6px] bg-control p-2 font-mono text-ui-sm leading-[1.55] text-fg-muted select-text">{scaleCSS(v, steps)}</pre>
+        <pre className="max-h-[220px] overflow-auto rounded-control bg-control p-2 font-mono text-ui-sm leading-[1.55] text-fg-muted select-text">{scaleCSS(v, steps)}</pre>
         <div className="mt-2 grid grid-cols-2 gap-1">
           <Button size="sm" variant="default" onClick={() => copy(scaleTailwind4(v, steps), 'Tailwind theme')}>Tailwind v4</Button>
           <Button size="sm" variant="default" onClick={() => copy(scaleTailwind3(v, steps), 'Tailwind config')}>Tailwind v3</Button>

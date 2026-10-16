@@ -12,6 +12,7 @@
    developer wires up in code. Every input works without the graph.
 --------------------------------------------------------------------------- */
 import { Hash, ToggleLeft, Zap } from 'lucide-react'
+import { useLayoutEffect, useRef, useState } from 'react'
 import { cn, Button, ScrubValue, Switch, Tip } from '@kit'
 
 export interface SMState { id: string; name: string }
@@ -19,19 +20,42 @@ export interface SMInputView { id: string; name: string; type: 'trigger' | 'bool
 export interface SMTransitionView { id: string; from: string; to: string; label: string; mix: number }
 
 const ICON = { trigger: Zap, boolean: ToggleLeft, number: Hash }
-const NW = 64, NH = 24
+const NH = 24, GAP = 18, FONT = 10.5
+
+/* The graph draws at 1:1 in its panel: the viewBox is the measured width, so labels render at their real size
+   (a fixed 278-wide viewBox in a ~208px sidebar scaled them to ~7.9px). Columns spread over whatever width there is. */
+function useWidth<T extends Element>() {
+  const ref = useRef<T>(null)
+  const [w, setW] = useState(0)
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const ro = new ResizeObserver(([e]) => setW(Math.round(e.contentRect.width)))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return [ref, w] as const
+}
 
 export function StateMachineGraph({ states, entry, current, transitions, lastTransition, onSelect }: {
   states: SMState[]; entry: string; current?: string | null; transitions: SMTransitionView[]; lastTransition?: string | null; onSelect?: (id: string) => void
 }) {
-  const pos: Record<string, { x: number; y: number }> = { __entry: { x: 4, y: 96 }, any: { x: 4, y: 18 } }
+  const [ref, measured] = useWidth<HTMLDivElement>()
   const rest = states.filter((s) => s.id !== entry)
-  pos[entry] = { x: 94, y: 96 }
+  const cols = 2 + Math.max(1, Math.ceil(rest.length / 3))
+  const avail = measured || 256
+  const NW = Math.max(56, Math.min(72, Math.floor((avail - 8 - GAP * (cols - 1)) / cols)))
+  const W = Math.max(avail, 8 + cols * NW + GAP * (cols - 1))
+  const step = (W - 8 - NW) / (cols - 1)
+  const colX = (c: number) => 4 + c * step
+  const MID = 80, ROW = 50, H = MID + ROW + NH + 6
+  // Any state sits above the entry state: its arrows fan out right without crossing the entry node
+  const pos: Record<string, { x: number; y: number }> = { __entry: { x: colX(0), y: MID }, any: { x: colX(1), y: 6 } }
+  pos[entry] = { x: colX(1), y: MID }
   rest.forEach((s, i) => {
     const col = Math.floor(i / 3), row = i % 3, n = Math.min(3, rest.length - col * 3)
-    pos[s.id] = { x: 188 + col * 90, y: 96 + (row - (n - 1) / 2) * 62 }
+    pos[s.id] = { x: colX(2 + col), y: MID + (row - (n - 1) / 2) * ROW }
   })
-  const W = Math.max(256, 188 + Math.ceil(rest.length / 3) * 90)
   const edge = (a: { x: number; y: number }, b: { x: number; y: number }, off = 0) => {
     const ax = a.x + NW / 2, ay = a.y + NH / 2, bx = b.x + NW / 2, by = b.y + NH / 2
     const dx = bx - ax, dy = by - ay, len = Math.hypot(dx, dy) || 1
@@ -49,7 +73,8 @@ export function StateMachineGraph({ states, entry, current, transitions, lastTra
   }
   const pairs = new Set(transitions.map((t) => `${t.from}>${t.to}`))
   return (
-    <svg viewBox={`0 0 ${W} 196`} className="w-full" role="img" aria-label="State machine graph">
+    <div ref={ref} className="w-full">
+    <svg viewBox={`0 0 ${W} ${H}`} className="block w-full" role="img" aria-label="State machine graph">
       <defs>
         <marker id="sm-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
           <path d="M0,0 L8,4 L0,8 z" fill="var(--fg-faint)" />
@@ -77,15 +102,16 @@ export function StateMachineGraph({ states, entry, current, transitions, lastTra
         const special = s.id === '__entry' || s.id === 'any'
         return (
           <g key={s.id} transform={`translate(${p.x},${p.y})`} onClick={() => !special && onSelect?.(s.id)} className={cn(!special && 'cursor-pointer')}>
-            <rect width={NW} height={NH} rx={6}
+            <rect width={NW} height={NH} rx={5}
               fill={live ? 'var(--signal-strong)' : special ? 'var(--well)' : 'var(--control)'}
               stroke={live ? 'var(--signal)' : 'var(--line-strong)'} strokeWidth={1} className="transition-[fill] duration-200" />
-            <text x={NW / 2} y={NH / 2 + 0.5} textAnchor="middle" dominantBaseline="middle" fontSize={10.5} fontWeight={500}
+            <text x={NW / 2} y={NH / 2 + 0.5} textAnchor="middle" dominantBaseline="middle" fontSize={FONT} fontWeight={500}
               fill={live ? 'var(--signal-fg)' : special ? 'var(--fg-faint)' : 'var(--fg)'}>{s.name}</text>
           </g>
         )
       })}
     </svg>
+    </div>
   )
 }
 

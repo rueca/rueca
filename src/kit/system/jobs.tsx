@@ -122,7 +122,8 @@ export function JobQueue({ jobs, onOpen, openLabel = 'Download', openIcon: OpenI
             {j.status === 'done' && j.meta && <span className={cn(onOpen && 'group-hover/job:hidden group-focus-within/job:hidden')}>{j.meta}</span>}
             {j.status === 'done' && onOpen && (
               <button type="button" aria-label={`${openLabel} ${j.label}`} onClick={() => onOpen(j)}
-                className="flex size-icon items-center justify-center rounded-control text-fg-muted opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/job:opacity-100 focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal">
+                // swapped in for the size and tick on hover (not just made transparent), so it doesn't take the title's room at rest
+                className="hidden size-icon items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg group-hover/job:flex group-focus-within/job:flex focus-visible:flex focus-visible:ring-2 focus-visible:ring-signal">
                 <OpenIcon size={13} strokeWidth={1.5} />
               </button>
             )}

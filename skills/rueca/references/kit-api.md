@@ -61,7 +61,7 @@ variables for phones. Use the names, never literals, so a part follows the densi
 | `px-pad` · `w-label` | 10 · 72 (comfortable 12 · 84; compact 8 · 72) | row side padding · inspector label column |
 | `h-lane` · `h-ruler` | 20 · 24 (comfortable 24 · 28) | timeline lanes and ruler |
 | `text-ui` · `text-ui-sm` · `text-title` | 11 · 10 · 12 px (comfortable 11.5 · 10.5 · 12.5) | all UI text · rulers, hints · panel titles, Brand |
-| `rounded-panel` `rounded-control` `rounded-cluster` | 10 · 5 · 8 | radii |
+| `rounded-panel` `rounded-cluster` `rounded-pop` `rounded-control` | 8 · 6 · 8 · 4 (comfortable 12 · 10 · 10 · 6; compact 6 · 5 · 6 · 3) | panels · toolbar clusters · menus and popovers · controls |
 
 Widths: `--inspector-w` (256), `--sidebar-w` (224), `--gutter` (8). Hierarchy is weight, not half-pixel
 sizes: labels 450, section titles 550, panel titles 600. In JS (timelines, canvas rows) read a token with
@@ -69,7 +69,9 @@ sizes: labels 450, section titles 550, panel titles 600. In JS (timelines, canva
 People choose a density in ⌘K (View → Density: Default / Comfortable / Compact). The choice is remembered
 per browser (`studio:density`) and `<Studio>` restores it on mount, unless something already set the
 attribute. In code: `setDensity('compact')`, `useDensity()`, `currentDensity()`. The inspector's label
-column fits its longest label (from 72px up to 42% of the row), so long labels don't truncate.
+column fits the longest label on screen (from 72px up to 42% of the row). Every `<Row>` with a text label reports
+to the nearest `<LabelScope>`; `<Panel>` is one, so hand-built rows and any `<Inspector>`s in a panel share one
+column, and an `<Inspector>` outside a panel is its own. Hidden rows (a `when` that's false) don't count.
 Token names are namespaced so they never collide with shadcn (`muted`, `accent`, `input` mean
 something else there): ours are `fg-muted`, `signal`, `control`; font is `font-ui`.
 

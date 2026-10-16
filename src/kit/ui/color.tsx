@@ -100,7 +100,8 @@ function Rail({ value, onChange, background, label, valueText }: { value: number
       className="relative h-3 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-signal"
       style={{ background }}
     >
-      <div className="pointer-events-none absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,.2),0_1px_3px_rgba(0,0,0,.4)]" style={{ left: `${value * 100}%` }} />
+      {/* kept inside the rail at 0 and 1 rather than hanging 7px off its ends */}
+      <div className="pointer-events-none absolute top-1/2 size-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-[0_0_0_1px_rgba(0,0,0,.2),0_1px_3px_rgba(0,0,0,.4)]" style={{ left: `calc(7px + ${value} * (100% - 14px))` }} />
     </div>
   )
 }
@@ -185,7 +186,7 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
           e.preventDefault()
           emit({ ...hsva, s: clamp(hsva.s + (k === 'ArrowRight' ? st : k === 'ArrowLeft' ? -st : 0), 0, 1), v: clamp(hsva.v + (k === 'ArrowUp' ? st : k === 'ArrowDown' ? -st : 0), 0, 1) }, true)
         }}
-        className="relative h-[150px] cursor-crosshair rounded-[8px] outline-none focus-visible:ring-2 focus-visible:ring-signal"
+        className="relative h-[150px] cursor-crosshair rounded-[calc(var(--radius-control)+2px)] outline-none focus-visible:ring-2 focus-visible:ring-signal"
         style={{ background: `linear-gradient(to top, #000, transparent), linear-gradient(to right, #fff, ${hueHex})` }}
       >
         <div
@@ -214,15 +215,15 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
         </div>
       </div>
       <div className="flex items-center gap-1.5">
-        <div className="w-[92px] shrink-0">
-          <Segmented size="sm" value={mode} onChange={(m) => setMode(m as typeof mode)} options={[{ value: 'hex', label: 'Hex' }, { value: 'rgb', label: 'RGB' }, { value: 'oklch', label: 'Lch', hint: 'OKLCH' }]} />
+        <div className="w-[108px] shrink-0">
+          <Segmented value={mode} onChange={(m) => setMode(m as typeof mode)} options={[{ value: 'hex', label: 'Hex' }, { value: 'rgb', label: 'RGB' }, { value: 'oklch', label: 'Lch', hint: 'OKLCH' }]} />
         </div>
         <input
           aria-label={`Colour value (${mode === 'hex' ? 'hex' : mode.toUpperCase()})`}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onBlur={applyText}
-          onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') applyText() }}
+          onKeyDown={(e) => { if (e.key !== 'Escape') e.stopPropagation(); if (e.key === 'Enter') applyText() }} // Esc still closes the picker
           className="h-control w-full min-w-0 rounded-control bg-control px-2 tabular text-ui text-fg uppercase outline-none focus:shadow-[inset_0_0_0_1px_var(--signal)]"
         />
       </div>
@@ -244,8 +245,10 @@ export function ColorPanel({ value, onChange, alpha = true, swatches }: { value:
 export function Swatch({ color, className, size = 16 }: { color: string; className?: string; size?: number }) {
   const [, , , a] = hexToRgba(color)
   return (
-    <span className={cn('relative inline-block shrink-0 overflow-hidden rounded-[4px] shadow-[inset_0_0_0_1px_var(--line-strong)]', a < 1 && 'checker', className)} style={{ width: size, height: size }}>
+    <span className={cn('relative inline-block shrink-0 overflow-hidden rounded-[4px]', a < 1 && 'checker', className)} style={{ width: size, height: size }}>
       <span className="absolute inset-0" style={{ background: color }} />
+      {/* the edge sits ABOVE the colour, so paper on a white panel still has one */}
+      <span className="absolute inset-0 rounded-[inherit] shadow-[inset_0_0_0_1px_var(--line-strong)]" />
     </span>
   )
 }

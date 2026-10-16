@@ -44,8 +44,8 @@ export function Composer() {
   return (
     <div className="@container panel pointer-events-auto flex w-full max-w-[780px] flex-col gap-2 p-2.5">
       {remix && (
-        <div className="flex items-center gap-2 rounded-[8px] bg-signal-soft py-1 pr-1 pl-1">
-          <span className="size-6 overflow-hidden rounded-[5px] bg-well">{remixPix && <img src={remixPix.url} alt="" className="h-full w-full object-cover" />}</span>
+        <div className="flex items-center gap-2 rounded-cluster bg-signal-soft py-1 pr-1 pl-1">
+          <span className="size-icon overflow-hidden rounded-control bg-well">{remixPix && <img src={remixPix.url} alt="" className="h-full w-full object-cover" />}</span>
           <span className="flex-1 text-ui text-fg">Remixing <span className="text-fg-muted">#{remix.id.slice(-4)} · seed {remix.params.seed} locked — edit the prompt and generate</span></span>
           <Button size="icon-sm" variant="ghost" aria-label="Stop remixing" onClick={() => ui.setState({ remixOf: null })}><X size={13} strokeWidth={1.5} /></Button>
         </div>
@@ -65,7 +65,7 @@ export function Composer() {
         />
       </div>
       {negativeOpen && (
-        <div className="flex items-start gap-2 rounded-[8px] bg-control px-2.5 py-2">
+        <div className="flex items-start gap-2 rounded-cluster bg-control px-2.5 py-2">
           <MinusCircle size={13} strokeWidth={1.5} className="mt-[3px] shrink-0 text-fg-faint" />
           <PromptBox
             className="flex-1"
@@ -90,14 +90,14 @@ export function Composer() {
             <span className="tabular">{a.id}</span><ChevronDown size={11} className="text-fg-faint" />
           </Button>}
           items={[{ type: 'label', label: 'Aspect ratio' }, ...ASPECTS.map((x) => ({ label: `${x.id}  ·  ${x.label}`, icon: aspectIcon(x.w, x.h), checked: x.id === v.aspect, hint: `${x.w} × ${x.h}`, onClick: () => params.setValue('aspect', x.id) }))]} />
-        <div className="w-[92px]"><Segmented size="sm" value={String(v.batch)} onChange={(n) => params.setValue('batch', Number(n))} label="Images per run"
+        <div className="w-[92px]"><Segmented value={String(v.batch)} onChange={(n) => params.setValue('batch', Number(n))} label="Images per run"
           options={['1', '2', '3', '4'].map((n) => ({ value: n, label: n, hint: `${n} image${n === '1' ? '' : 's'} per run` }))} /></div>
         <Tip label={negativeOpen ? 'Hide negative prompt' : 'Negative prompt'}>
           <Button size="icon-sm" variant="ghost" active={negativeOpen || !!t.negative} aria-label="Negative prompt" onClick={() => ui.setState({ negativeOpen: !negativeOpen })}><MinusCircle size={14} strokeWidth={1.5} /></Button>
         </Tip>
         <Tip label="Enhance prompt"><Button size="icon-sm" variant="ghost" aria-label="Enhance prompt" disabled={!t.prompt.trim()} onClick={enhance}><Wand2 size={14} strokeWidth={1.5} /></Button></Tip>
         <button type="button" onClick={() => ui.setState({ tab: 'create' })} aria-label={`Settings: ${v.steps} steps, CFG ${v.guidance}, seed ${v.lockSeed ? 'locked' : 'random'}`}
-          className="hidden h-control min-w-0 items-center gap-1.5 rounded-[5px] px-1.5 text-ui text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal @[460px]:flex">
+          className="hidden h-control min-w-0 items-center gap-1.5 rounded-control px-1.5 text-ui text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal @[460px]:flex">
           <SlidersHorizontal size={13} strokeWidth={1.5} className="shrink-0" />
           <span className="hidden tabular truncate @[700px]:inline">{v.steps} steps · CFG {v.guidance}</span>
           {v.lockSeed ? <Lock size={11} strokeWidth={1.75} className="shrink-0" /> : <Shuffle size={11} strokeWidth={1.75} className="shrink-0" />}

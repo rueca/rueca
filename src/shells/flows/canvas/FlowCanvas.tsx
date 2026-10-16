@@ -322,7 +322,7 @@ export function FlowCanvas() {
             color={v.background === 'lines' ? 'var(--line)' : 'var(--line-strong)'} />
         )}
         {v.minimap && hud && (
-          <MiniMap pannable zoomable position="bottom-right" style={{ width: 176, height: 112, bottom: 52, right: 12 }} ariaLabel="Minimap"
+          <MiniMap pannable zoomable maskStrokeColor="var(--signal)" maskStrokeWidth={1.5} position="bottom-right" style={{ width: 176, height: 112, bottom: 52, right: 12 }} ariaLabel="Minimap"
             nodeBorderRadius={4} nodeClassName={(n) => `mm-${n.type}`} />
         )}
         {!present && <ViewportPortal><CommentLayer zoom={zoom} /></ViewportPortal>}
@@ -343,9 +343,9 @@ export function FlowCanvas() {
           <div className="absolute bottom-3 left-1/2 z-10 -translate-x-1/2 @max-[760px]:right-[120px] @max-[760px]:left-auto @max-[760px]:translate-x-0">
             <ToolDock value={tool} onChange={(t) => ui.setState({ tool: t, draft: null })} tools={TOOLS}>
               <Divider vertical className="mx-1 h-5" />
-              <IconButton icon={Square} label="Screen" shortcut="s" tipSide="top" className="size-8 rounded-[8px]" onClick={() => addScreen('home')} />
-              <IconButton icon={Diamond} label="Decision" shortcut="d" tipSide="top" className="size-8 rounded-[8px]" onClick={() => addNode('decision')} />
-              <IconButton icon={StickyNote} label="Sticky note" shortcut="n" tipSide="top" className="size-8 rounded-[8px]" onClick={() => addNode('note')} />
+              <IconButton icon={Square} label="Screen" shortcut="s" tipSide="top" className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" onClick={() => addScreen('home')} />
+              <IconButton icon={Diamond} label="Decision" shortcut="d" tipSide="top" className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" onClick={() => addNode('decision')} />
+              <IconButton icon={StickyNote} label="Sticky note" shortcut="n" tipSide="top" className="size-dock-button rounded-[calc(var(--radius-cluster)-2px)]" onClick={() => addNode('note')} />
             </ToolDock>
           </div>
           <ZoomPill zoom={zoom} onZoom={(z) => rf.zoomTo(z, { duration: 200 })} onFit={() => viewport.fit?.()} />
@@ -387,13 +387,13 @@ function WalkHUD({ index, onStep, onExit, playing, onPlay, canPlay }: { index: n
         <div className="pop overflow-hidden rounded-[14px]">
           <div className="flex items-start gap-3 px-4 pt-3.5 pb-3">
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 text-[11px] text-fg-faint tabular">
+              <div className="flex items-center gap-2 text-ui text-fg-faint tabular">
                 Step {index + 1} of {ids.length}
                 {node.data.status && <span className={cn('flex items-center gap-1', STATUS[node.data.status].text)}>· {STATUS[node.data.status].label}</span>}
               </div>
               <div className="mt-0.5 truncate text-[15px] font-semibold tracking-[-0.01em]">{node.data.name}</div>
-              {via && <div className="mt-1 flex items-center gap-1.5 text-[11.5px] text-fg-muted"><ViaIcon size={12} strokeWidth={1.5} />Arrived via {via.data?.label || via.data?.trigger}</div>}
-              {node.data.notes && <p className="mt-1.5 text-[12px] leading-relaxed text-fg-muted">{node.data.notes}</p>}
+              {via && <div className="mt-1 flex items-center gap-1.5 text-ui text-fg-muted"><ViaIcon size={12} strokeWidth={1.5} />Arrived via {via.data?.label || via.data?.trigger}</div>}
+              {node.data.notes && <p className="mt-1.5 text-title font-normal leading-relaxed text-fg-muted">{node.data.notes}</p>}
             </div>
             <IconButton icon={X} label="Exit walkthrough" shortcut="esc" tipSide="top" onClick={onExit} />
           </div>

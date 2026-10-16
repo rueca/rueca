@@ -65,6 +65,8 @@ export function SceneSVG({
     return (
       <g key={o.id} data-id={live ? o.id : undefined} transform={tf(p)} opacity={Math.max(0, Math.min(1, num(p.opacity)))}
         onPointerDown={live && interactive ? (e) => onObjectDown?.(o, e) : undefined}
+        // locked layers let clicks through to what's beneath (Figma): a locked Drive band no longer shields the wheel
+        pointerEvents={live && interactive && o.locked ? 'none' : undefined}
         style={live && interactive && !o.locked ? { cursor: 'default' } : undefined}>
         <g data-content={live ? o.id : undefined}>
           <Shape o={o} p={p} doc={doc} inputs={inputs} />

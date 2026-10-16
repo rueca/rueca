@@ -139,7 +139,7 @@ export function Histogram({
 
   return (
     <div className={cn('flex flex-col gap-1.5', className)}>
-      <div className="relative overflow-hidden rounded-[7px] bg-well" style={{ height }}>
+      <div className="relative overflow-hidden rounded-[calc(var(--radius-control)+2px)] bg-well" style={{ height }}>
         <canvas ref={canvas} className="absolute inset-0 size-full" aria-label={label} role="img" />
         {tri('shadows')}
         {tri('highlights')}
@@ -269,7 +269,7 @@ export function ToneCurve({
         ref={box}
         role="group"
         aria-label={`${label}. Click to add a point.`}
-        className="relative w-full cursor-crosshair touch-none rounded-[6px] bg-control shadow-[inset_0_0_0_1px_var(--line)]"
+        className="relative w-full cursor-crosshair touch-none rounded-control bg-control shadow-[inset_0_0_0_1px_var(--line)]"
         style={{ height }}
         onPointerDown={onDown}
         onPointerMove={onMove}

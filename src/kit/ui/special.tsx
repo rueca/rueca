@@ -4,7 +4,7 @@
 --------------------------------------------------------------------------- */
 import { useEffect, useRef, useState } from 'react'
 import { ImagePlus, Link2, Unlink2, Dices, X } from 'lucide-react'
-import { clamp, cn } from '../core/cn'
+import { clamp, cn, decimalsOf } from '../core/cn'
 import { ScrubValue } from './scrub'
 import { Swatch, ColorPanel, hexToRgba } from './color'
 import { Popover } from '@base-ui/react/popover'
@@ -69,7 +69,7 @@ export function XYPad({
   return (
     <div className="flex w-full flex-col gap-1.5">
       {pad && (
-        <div {...drag} className="relative aspect-[2/1] w-full cursor-crosshair overflow-hidden rounded-[6px] bg-control shadow-[inset_0_0_0_1px_var(--line)]">
+        <div {...drag} className="relative aspect-[2/1] w-full cursor-crosshair overflow-hidden rounded-control bg-control shadow-[inset_0_0_0_1px_var(--line)]">
           <div className="absolute top-1/2 left-0 h-px w-full bg-line" />
           <div className="absolute top-0 left-1/2 h-full w-px bg-line" />
           <div className="absolute h-px w-full bg-signal/25" style={{ top: `${py}%` }} />
@@ -113,7 +113,9 @@ export function Vec3Fields({
     <div className="flex w-full min-w-0 items-center gap-1">
       <div className="grid min-w-0 flex-1 grid-cols-3 gap-1">
         {axes.map(([k, l, c]) => (
+          // three fields share ~150px: values drop trailing zeros ("0", "1.5") so "X 0.…" never happens
           <ScrubValue key={k} boxed align="left" prefix={<span className={c}>{l}</span>} value={value[k]} step={step} min={min} max={max} unit={unit}
+            fmt={(n) => `${+n.toFixed(decimalsOf(step))}${unit ?? ''}`} className="px-1"
             changed={changed} defaultValue={defaultValue?.[k]} label={`${label ? `${label} ` : ''}${l}`} onChange={(v, f) => set(k, v, f)} />
         ))}
       </div>
@@ -141,7 +143,7 @@ export function SizeFields({
         onChange={(w, f) => onChange(lock ? { w, h: Math.round(w / ratio) } : { ...value, w }, f)} className="flex-1" />
       <Tip label={lock ? 'Unlink proportions' : 'Link proportions'}>
         <button type="button" aria-label={lock ? 'Unlink proportions' : 'Link proportions'} aria-pressed={lock} onClick={() => setLock(!lock)}
-          className={cn('flex size-icon shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
+          className={cn('flex size-control shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
           {lock ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
         </button>
       </Tip>
@@ -196,7 +198,7 @@ export function CurveEditor({ value, onChange, presets = EASINGS, height = 132 }
         onPointerMove={(e) => move(e, false)}
         onPointerUp={(e) => { move(e, true); which.current = null }}
       >
-        <svg viewBox={`0 0 ${W} ${H + padY * 2}`} className="block size-full overflow-visible rounded-[6px] bg-control" preserveAspectRatio="none">
+        <svg viewBox={`0 0 ${W} ${H + padY * 2}`} className="block size-full overflow-visible rounded-control bg-control" preserveAspectRatio="none">
           <rect x={0} y={padY} width={W} height={H} fill="none" stroke="var(--line)" vectorEffect="non-scaling-stroke" />
           <line x1={sx} y1={sy} x2={ex} y2={ey} stroke="var(--line)" strokeDasharray="2 3" vectorEffect="non-scaling-stroke" />
           <line x1={sx} y1={sy} x2={ax} y2={ay} stroke="var(--fg-faint)" vectorEffect="non-scaling-stroke" />
@@ -219,7 +221,7 @@ export function CurveEditor({ value, onChange, presets = EASINGS, height = 132 }
       <div className="flex flex-wrap gap-1">
         {Object.entries(presets).map(([name, v]) => (
           <button key={name} type="button" onClick={() => onChange(v, true)}
-            className={cn('h-icon-sm rounded-control px-1.5 text-ui-sm outline-none', presetName === name ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
+            className={cn('h-icon-sm rounded-control px-1.5 text-ui-sm outline-none focus-visible:ring-2 focus-visible:ring-signal', presetName === name ? 'bg-signal-soft text-signal-text' : 'bg-hover text-fg-muted hover:text-fg')}>
             {name}
           </button>
         ))}
@@ -269,7 +271,7 @@ export function SpringEditor({ value, onChange }: { value: { stiffness: number; 
   const feel = st.zeta >= 1 ? 'no bounce' : st.zeta > 0.7 ? 'soft' : st.zeta > 0.4 ? 'bouncy' : 'very bouncy'
   return (
     <div className="flex w-full flex-col gap-1.5">
-      <svg viewBox="0 0 100 64" className="h-16 w-full rounded-[6px] bg-control" preserveAspectRatio="none" role="img" aria-label={`Spring curve over ${span.toFixed(1)} s`}>
+      <svg viewBox="0 0 100 64" className="h-16 w-full rounded-control bg-control" preserveAspectRatio="none" role="img" aria-label={`Spring curve over ${span.toFixed(1)} s`}>
         <line x1={0} x2={100} y1={30} y2={30} stroke="var(--line-strong)" strokeDasharray="2 2" vectorEffect="non-scaling-stroke" />
         <polyline points={pts.join(' ')} fill="none" stroke="var(--signal)" strokeWidth={1.75} vectorEffect="non-scaling-stroke" />
       </svg>
@@ -308,7 +310,7 @@ export function GradientEditor({ value, onChange, angle = true }: { value: { ang
           setSel(value.stops.length)
         }}
       >
-        <div data-fill className="absolute inset-0 rounded-[6px] shadow-[inset_0_0_0_1px_var(--line-strong)]" style={{ background: css }} />
+        <div data-fill className="absolute inset-0 rounded-control shadow-[inset_0_0_0_1px_var(--line-strong)]" style={{ background: css }} />
         {value.stops.map((s, i) => (
           <div
             key={i}
@@ -375,8 +377,8 @@ export function PaletteField({ value, onChange, max = 8, min = 1 }: { value: str
           <div className="group/sw relative">
             <Popover.Trigger aria-label={`Colour ${i + 1}, ${c}${value.length > min ? '. Delete to remove' : ''}`}
               onKeyDown={(e) => { if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); e.stopPropagation(); if (value.length > min) remove(i) } }}
-              className="relative block size-6 rounded-[5px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
-              <Swatch color={c} size={24} className="rounded-[5px]" />
+              className="relative block size-6 rounded-control outline-none focus-visible:ring-2 focus-visible:ring-signal">
+              <Swatch color={c} size={24} className="rounded-control" />
             </Popover.Trigger>
             {value.length > min && (
               <button type="button" tabIndex={-1} aria-hidden onClick={() => remove(i)}
@@ -426,7 +428,7 @@ export function ImageDrop({ value, onChange, accept = 'image/*', compact }: { va
       aria-label="Choose image"
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); input.current?.click() } }}
       className={cn(
-        'group/drop relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-[7px] bg-control outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
+        'group/drop relative flex w-full cursor-pointer items-center justify-center overflow-hidden rounded-[calc(var(--radius-control)+2px)] bg-control outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
         compact ? 'h-12' : 'h-[88px]',
         over ? 'shadow-[inset_0_0_0_1.5px_var(--signal)] bg-signal-soft' : 'shadow-[inset_0_0_0_1px_var(--line)] hover:shadow-[inset_0_0_0_1px_var(--line-strong)]',
       )}
@@ -485,7 +487,7 @@ export function Monitor({ get, graph, min, max, fmt }: { get: () => number | str
   return (
     <div className="flex w-full items-center gap-2">
       {graph && <canvas ref={canvas} className="h-control min-w-0 flex-1 rounded-[4px] bg-control" />}
-      <span className={cn('tabular text-ui text-fg', graph ? 'w-12 text-right' : 'flex-1 text-right')}>{text}</span>
+      <span className={cn('tabular text-ui text-fg pr-1', graph ? 'min-w-12 shrink-0 text-right' : 'flex-1 text-right')}>{text}</span>
     </div>
   )
 }

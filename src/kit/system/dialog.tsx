@@ -195,7 +195,7 @@ function PromptDialog({ open, o, onDone }: { open: boolean; o: PromptOptions; on
           <input ref={input} value={value} maxLength={o.maxLength} placeholder={o.placeholder}
             aria-invalid={!!error || undefined} aria-describedby={error ? errId : undefined}
             onChange={(e) => { setValue(e.target.value); if (error) setError(null) }}
-            className={cn('h-icon w-full rounded-control bg-control px-2 text-ui text-fg outline-none placeholder:text-fg-faint',
+            className={cn('h-control w-full rounded-control bg-control px-2 text-ui text-fg outline-none placeholder:text-fg-faint',
               error ? 'shadow-[inset_0_0_0_1px_var(--rec)]' : 'hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus:shadow-[inset_0_0_0_1px_var(--signal)]')} />
         </label>
         {error && <div id={errId} role="alert" className="mt-1.5 text-ui text-rec">{error}</div>}

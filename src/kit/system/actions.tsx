@@ -71,7 +71,8 @@ export function HistoryList({ history, params, className, openLabel = 'Open' }: 
       {rows.map((label, i) => (
         <li key={i}>
           <button type="button" onClick={() => jump(i)}
-            className={cn('flex h-row w-full items-center gap-2 rounded-control px-pad text-left text-ui outline-none focus-visible:ring-2 focus-visible:ring-signal',
+            // text lines up with the section title above (the list itself sits 6px in)
+            className={cn('flex h-row w-full items-center gap-2 rounded-control px-[calc(var(--d-pad)-6px)] text-left text-ui outline-none focus-visible:ring-2 focus-visible:ring-signal',
               i === at ? 'bg-signal-soft text-fg' : i > at ? 'text-fg-faint hover:bg-hover' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
             <span className="truncate">{label}</span>
           </button>

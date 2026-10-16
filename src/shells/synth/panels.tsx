@@ -99,7 +99,7 @@ export function SynthPanel() {
         </Grid>
       </KSection>
       <KSection id="fx" title="Effects" hint="Two send effects. Per-track send amounts live in the mixer.">
-        <Row label="Delay time"><PSegmented k="delayTime" size="sm" /></Row>
+        <Row label="Delay time"><PSegmented k="delayTime" /></Row>
         <Grid cols={3}>
           <PKnob k="delayFb" />
           <PKnob k="delayTone" />
@@ -194,9 +194,9 @@ export function MonitorPanel() {
     <div className="flex flex-col">
       <div className="flex flex-col gap-1.5 px-pad pt-3 pb-2">
         <div className="flex items-center justify-between text-ui text-fg-muted"><span>Oscilloscope</span><span className="text-fg-faint">{started ? 'master' : 'no signal'}</span></div>
-        <canvas ref={scope} className="h-[84px] w-full rounded-[6px] bg-control" aria-label="Oscilloscope" role="img" />
+        <canvas ref={scope} className="h-[84px] w-full rounded-control bg-control" aria-label="Oscilloscope" role="img" />
         <div className="mt-1 flex items-center justify-between text-ui text-fg-muted"><span>Spectrum</span><span className="text-fg-faint">20 Hz – 20 kHz</span></div>
-        <canvas ref={spec} className="h-[84px] w-full rounded-[6px] bg-control" aria-label="Spectrum analyser" role="img" />
+        <canvas ref={spec} className="h-[84px] w-full rounded-control bg-control" aria-label="Spectrum analyser" role="img" />
         <div className="mt-1 flex items-center gap-2">
           <span className="w-10 text-ui text-fg-muted">Level</span>
           <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-track">
@@ -221,8 +221,9 @@ export function MonitorPanel() {
           </div>
         ))}
         <div className="mt-1 flex items-center gap-3 border-t border-line px-pad pt-3">
-          <PKnob k="volume" />
-          <p className="text-ui leading-relaxed text-fg-faint">Master runs through a gentle bus compressor before the analysers and the WAV bounce.</p>
+          {/* shrink-0: the hint beside it squeezed the master knob to 16px */}
+          <div className="shrink-0"><PKnob k="volume" /></div>
+          <p className="min-w-0 flex-1 text-ui leading-relaxed text-fg-faint">Master runs through a gentle bus compressor before the analysers and the WAV bounce.</p>
         </div>
       </KSection>
     </div>

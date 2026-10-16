@@ -142,7 +142,7 @@ export default function DitherLab() {
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>}
                 items={[
                   { type: 'label', label: `Image · ${size.w} × ${size.h}${isRaster ? ', nearest-neighbour' : ', re-drawn at size'}` },
-                  { label: 'PNG 1×', icon: ImageIcon, shortcut: 'mod+e', onClick: () => exportPNG(1) },
+                  { label: `PNG 1× · ${size.w} × ${size.h}`, icon: ImageIcon, shortcut: 'mod+e', onClick: () => exportPNG(1) },
                   { label: `PNG 2× · ${size.w * 2} × ${size.h * 2}`, icon: ImageIcon, onClick: () => exportPNG(2) },
                   { label: `PNG 4× · ${size.w * 4} × ${size.h * 4}`, icon: ImageIcon, onClick: () => exportPNG(4) },
                   { type: 'separator' },
@@ -193,7 +193,7 @@ export default function DitherLab() {
     >
       <div className="relative h-full">
         <Stage contentSize={contentSize} grid hud={false}
-          overlay={<><ZoomPill steps={PIXEL_STEPS} presets={[0.5, 1, 2, 4, 8, 16]} keys /><StatusPill /><ViewDock /></>}>
+          overlay={<><ZoomPill steps={PIXEL_STEPS} presets={[0.5, 1, 2, 4, 8, 16]} keys className="h-bar" /><StatusPill /><ViewDock /></>}>
           <Canvas result={result} split={split} grid={grid} />
         </Stage>
         {intake.over && (
@@ -332,8 +332,9 @@ function StatusPill() {
     : r.kind === 'halftone' ? `${r.count.toLocaleString()} dots`
     : `${r.cols} × ${r.rows} chars`
   return (
-    // narrow stages: the effect name gives way first, then the size — each with an ellipsis, never a hard clip (break-it F10)
-    <div className="cluster absolute bottom-3 left-3 z-10 flex h-button-lg max-w-[calc(50%-96px)] min-w-0 items-center gap-2 overflow-hidden px-pad text-ui no-select" aria-live="polite">
+    // narrow stages: the effect name gives way first, then the size — each with an ellipsis, never a hard clip (break-it F10).
+    // h-bar, like the zoom pill and the view dock beside it: one height, one radius along the stage's bottom edge
+    <div className="cluster absolute bottom-3 left-3 z-10 flex h-bar max-w-[calc(50%-96px)] min-w-0 items-center gap-2 overflow-hidden px-pad text-ui no-select" aria-live="polite">
       {error ? <span className="size-1.5 shrink-0 rounded-full bg-rec" />
         : busy ? <span className="size-3 shrink-0 animate-spin rounded-full border-[1.5px] border-line-strong border-t-signal" />
         : <span className="size-1.5 shrink-0 rounded-full bg-ok" />}
@@ -356,7 +357,7 @@ function ViewDock() {
   const peek = useStore(view, (s) => s.peek)
   const grid = useStore(view, (s) => s.grid)
   return (
-    <div className="cluster absolute bottom-3 left-1/2 z-10 flex h-bar -translate-x-1/2 items-center gap-0.5 rounded-[12px] px-1" role="toolbar" aria-label="View">
+    <div className="cluster absolute bottom-3 left-1/2 z-10 flex h-bar -translate-x-1/2 items-center gap-0.5 px-1" role="toolbar" aria-label="View">
       <IconButton icon={Columns2} label={split ? 'Hide split' : 'Before / after split'} shortcut="y" tipSide="top" active={split} onClick={() => view.setState({ split: !split })} />
       <IconButton icon={Eye} label="Hold to see the original" shortcut="\\" tipSide="top" active={peek}
         onPointerDown={(e) => { e.currentTarget.setPointerCapture(e.pointerId); view.setState({ peek: true }) }}

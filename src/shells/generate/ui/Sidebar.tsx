@@ -13,7 +13,7 @@ const same = (a: View, b: View) => a.type === b.type && ('id' in a ? a.id : '') 
 function Thumb({ rec }: { rec?: ImageRec }) {
   const pix = usePix(rec?.id, rec?.params, 'thumb')
   return (
-    <span className="relative size-8 shrink-0 overflow-hidden rounded-[6px] bg-well shadow-[inset_0_0_0_1px_var(--line)]">
+    <span className="relative size-8 shrink-0 overflow-hidden rounded-control bg-well shadow-[inset_0_0_0_1px_var(--line)]">
       {pix && <img src={pix.url} alt="" className="h-full w-full object-cover" draggable={false} />}
     </span>
   )
@@ -22,7 +22,7 @@ function Thumb({ rec }: { rec?: ImageRec }) {
 function NavRow({ view, icon: Icon, label, count, active }: { view: View; icon: typeof Images; label: string; count: number; active: boolean }) {
   return (
     <button type="button" onClick={() => setView(view)} aria-current={active || undefined}
-      className={cn('flex h-row w-full items-center gap-2 rounded-[6px] px-2 text-left text-ui outline-none focus-visible:ring-2 focus-visible:ring-signal', active ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
+      className={cn('flex h-row w-full items-center gap-2 rounded-control px-2 text-left text-ui outline-none focus-visible:ring-2 focus-visible:ring-signal', active ? 'bg-active text-fg' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
       <Icon size={14} strokeWidth={1.5} />
       <span className="min-w-0 flex-1 truncate">{label}</span>
       <span className="tabular text-ui text-fg-faint">{count}</span>
@@ -93,7 +93,7 @@ export function Sidebar() {
             return (
               <div key={s.id} className="group/row relative">
                 <button type="button" onClick={() => setView({ type: 'session', id: s.id })} onDoubleClick={() => setEditing(s.id)} aria-current={active || undefined}
-                  className={cn('flex w-full items-center gap-2.5 rounded-[8px] p-1.5 pr-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-signal', active ? 'bg-active' : 'hover:bg-hover')}>
+                  className={cn('flex w-full items-center gap-2.5 rounded-cluster p-1.5 pr-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-signal', active ? 'bg-active' : 'hover:bg-hover')}>
                   <Thumb rec={latest} />
                   <span className="flex min-w-0 flex-1 flex-col">
                     {editing === s.id

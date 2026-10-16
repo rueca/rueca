@@ -136,8 +136,20 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
       setScrubbing(false)
       if (mixed && onDelta) onDelta(0, true); else commitNum(d.orig, true)
     }
+    // Chrome takes Esc itself to leave pointer lock, so the keydown above may never arrive: losing the lock
+    // mid-drag (Esc, a window switch) is a cancel too
+    let locked = !!document.pointerLockElement
+    const onLock = () => {
+      if (document.pointerLockElement === el.current) { locked = true; return }
+      if (!locked || drag.current.id === -1) return
+      const d = drag.current
+      d.id = -1
+      setScrubbing(false)
+      if (mixed && onDelta) onDelta(0, true); else commitNum(d.orig, true)
+    }
     window.addEventListener('keydown', onKey, true)
-    return () => window.removeEventListener('keydown', onKey, true)
+    document.addEventListener('pointerlockchange', onLock)
+    return () => { window.removeEventListener('keydown', onKey, true); document.removeEventListener('pointerlockchange', onLock) }
   })
 
   // Wheel while focused → step. Non-passive so the panel doesn't scroll instead (break-it V10).
@@ -149,7 +161,13 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
       e.preventDefault()
       const mult = e.shiftKey ? 10 : e.altKey ? 0.1 : 1
       const d = (e.deltaY < 0 ? 1 : -1) * step * mult
-      if (mixed && onDelta) onDelta(d, true); else commitNum(live.current + d, true)
+      if (mixed && onDelta) { onDelta(d, true); return }
+      // a burst of wheel ticks is one undo step, like the arrow keys
+      const n = clamp(roundTo((nudged.current ?? live.current) + d, step), min, max)
+      nudged.current = n
+      commitNum(n, false)
+      clearTimeout(nudgeTimer.current)
+      nudgeTimer.current = setTimeout(settleNudge, 500)
     }
     node.addEventListener('wheel', onWheel, { passive: false })
     return () => node.removeEventListener('wheel', onWheel)
@@ -163,13 +181,15 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
   }
   const onPointerMove = (e: React.PointerEvent) => {
     const d = drag.current
-    if (d.id !== e.pointerId || !el.current?.hasPointerCapture(e.pointerId)) return
+    // Taking the pointer lock makes Chrome drop the pointer capture; under the lock, moves still come here
+    const locked = !!el.current && document.pointerLockElement === el.current
+    if (d.id !== e.pointerId || (!locked && !el.current?.hasPointerCapture(e.pointerId))) return
     if (!d.moved) {
       if (Math.abs(e.clientX - d.x) < 3) return
       d.moved = true
       d.acc = e.clientX
       setScrubbing(true)
-      try { (el.current.requestPointerLock?.() as Promise<void> | undefined)?.catch?.(() => {}) } catch { /* unsupported */ }
+      try { (el.current?.requestPointerLock?.() as Promise<void> | undefined)?.catch?.(() => {}) } catch { /* unsupported */ }
       return
     }
     // Under pointer lock clientX freezes, so read movementX; otherwise diff clientX.
@@ -184,7 +204,7 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
     const d = drag.current
     if (d.id !== e.pointerId) return
     d.id = -1
-    el.current?.releasePointerCapture(e.pointerId)
+    try { el.current?.releasePointerCapture(e.pointerId) } catch { /* the lock already released it */ }
     if (document.pointerLockElement) document.exitPointerLock()
     if (d.moved) { setScrubbing(false); if (mixed && onDelta) onDelta(roundTo(d.acc2 ?? 0, step), true); else commitNum(d.start, true) }
     else { setDraft(mixed ? '' : editText()); setEditing(true) }

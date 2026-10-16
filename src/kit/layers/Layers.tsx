@@ -167,16 +167,21 @@ export function LayerTree({
               className={cn('flex size-4 shrink-0 items-center justify-center text-fg-faint', !hasKids && 'invisible')}>
               <ChevronRight size={11} strokeWidth={2} className={cn('transition-transform', !closed[item.id] && 'rotate-90')} />
             </button>
-            {item.thumb ? (
-              <img src={item.thumb} alt="" className="size-5 shrink-0 rounded-[3px] object-cover shadow-[inset_0_0_0_1px_var(--line)]" />
-            ) : Icon ? (
-              <Icon size={14} strokeWidth={1.5} className={cn('shrink-0', sel ? 'text-signal' : 'text-fg-faint')} />
-            ) : null}
+            {/* thumbnails and type icons share one 20px slot, so every name starts at the same x */}
+            {(item.thumb || Icon) && (
+              <span className="flex w-5 shrink-0 justify-center">
+                {item.thumb ? (
+                  <img src={item.thumb} alt="" className="size-5 shrink-0 rounded-[3px] object-cover shadow-[inset_0_0_0_1px_var(--line)]" />
+                ) : Icon ? (
+                  <Icon size={14} strokeWidth={1.5} className={cn('shrink-0', sel ? 'text-signal' : 'text-fg-faint')} />
+                ) : null}
+              </span>
+            )}
             <span className="ml-1 flex min-w-0 flex-1" onClick={(e) => editing === item.id && e.stopPropagation()}>
               <InlineText bare focusable={false} editing={editing === item.id} onEditingChange={(b) => { setEditing(b ? item.id : null); if (!b) requestAnimationFrame(() => rootRef.current?.querySelector<HTMLElement>(`[data-row-id="${item.id}"]`)?.focus()) }}
                 value={item.name} onCommit={(v) => onRename?.(item.id, v)} label="Rename layer" className="min-w-0 flex-1 truncate" />
             </span>
-            {item.meta && <span className="shrink-0 text-ui text-fg-faint group-hover/row:hidden">{item.meta}</span>}
+            {item.meta && <span className="inline-flex shrink-0 items-center text-ui text-fg-faint group-hover/row:hidden group-focus-within/row:hidden">{item.meta}</span>}
             {onToggle && rowToggles.length > 0 && (
               // Overlaid on hover so names keep their full width when toggles are hidden;
               // toggles that are ON (locked, hidden) stay visible in flow.
@@ -195,7 +200,7 @@ export function LayerTree({
 function RowToggle({ on, label, onClick, icon: Icon }: { on?: boolean; label: string; onClick: () => void; icon: ComponentType<{ size?: number; strokeWidth?: number }> }) {
   return (
     <button type="button" aria-label={label} aria-pressed={on} onClick={(e) => { e.stopPropagation(); onClick() }}
-      className={cn('flex size-icon-sm items-center justify-center rounded-control text-fg-faint outline-none hover:text-fg focus-visible:flex',
+      className={cn('flex size-icon-sm items-center justify-center rounded-control text-fg-faint outline-none hover:text-fg focus-visible:flex focus-visible:ring-2 focus-visible:ring-signal',
         on ? 'flex' : 'hidden group-hover/row:flex group-focus-within/row:flex')}>
       <Icon size={13} strokeWidth={1.5} />
     </button>

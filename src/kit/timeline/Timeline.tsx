@@ -199,10 +199,11 @@ function TrackArea({
   }
 
   const playX = X(t)
+  const contentH = ruler + lanes.length * lane + 8
   return (
-    <div className="flex min-h-0 overflow-y-auto overflow-x-hidden border-t border-line" style={{ maxHeight: height ?? 240, height: ruler + lanes.length * lane + 8 }} onWheel={onWheel}>
-      {/* names */}
-      <div className="flex-none overflow-hidden border-r border-line" style={{ width: LABEL_W }}>
+    <div className="flex min-h-0 items-start overflow-y-auto overflow-x-hidden border-t border-line" style={{ maxHeight: height ?? 240, height: contentH }} onWheel={onWheel}>
+      {/* names — both columns keep their content height, so a clamped strip scrolls instead of clipping lanes */}
+      <div className="flex-none overflow-hidden border-r border-line" style={{ width: LABEL_W, height: contentH }}>
         <div className="h-ruler" />
         {lanes.map((l) => (
           <div key={l.id} className="flex h-lane items-center gap-1.5 pr-2 text-ui text-fg-muted" style={{ paddingLeft: 12 + (l.depth ?? 0) * 12 }}>
@@ -212,7 +213,7 @@ function TrackArea({
         ))}
       </div>
       {/* tracks */}
-      <div ref={area} className="relative min-w-0 flex-1 overflow-hidden">
+      <div ref={area} className="relative min-w-0 flex-1 overflow-hidden" style={{ height: contentH }}>
         <div className="absolute inset-x-0 top-0 h-ruler cursor-ew-resize border-b border-line" onPointerDown={onRulerDown} onPointerMove={onRulerMove} onPointerUp={onRulerUp}
           onDoubleClick={() => clock.setState({ region: null })}>
           {ticks.map((m) => {

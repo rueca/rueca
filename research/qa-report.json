@@ -5,7 +5,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 81
+    "textSampled": 67
   },
   {
     "id": "motion",
@@ -13,7 +13,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 81
+    "textSampled": 67
   },
   {
     "id": "dropin",
@@ -21,7 +21,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 44
+    "textSampled": 42
   },
   {
     "id": "dropin",
@@ -29,7 +29,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 44
+    "textSampled": 42
   },
   {
     "id": "present",
@@ -37,7 +37,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 39
+    "textSampled": 36
   },
   {
     "id": "present",
@@ -45,7 +45,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 39
+    "textSampled": 36
   },
   {
     "id": "animate",
@@ -53,7 +53,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 85
+    "textSampled": 82
   },
   {
     "id": "animate",
@@ -61,7 +61,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 85
+    "textSampled": 82
   },
   {
     "id": "ui-design",
@@ -69,7 +69,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 120
+    "textSampled": 118
   },
   {
     "id": "ui-design",
@@ -77,7 +77,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 120
+    "textSampled": 118
   },
   {
     "id": "shader",
@@ -85,7 +85,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 49
+    "textSampled": 47
   },
   {
     "id": "shader",
@@ -93,7 +93,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 49
+    "textSampled": 47
   },
   {
     "id": "component-lab",
@@ -101,7 +101,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 126
+    "textSampled": 121
   },
   {
     "id": "component-lab",
@@ -109,7 +109,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 126
+    "textSampled": 121
   },
   {
     "id": "video",
@@ -117,7 +117,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 146
+    "textSampled": 143
   },
   {
     "id": "video",
@@ -125,7 +125,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 146
+    "textSampled": 143
   },
   {
     "id": "dither",
@@ -133,7 +133,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 89
+    "textSampled": 80
   },
   {
     "id": "dither",
@@ -141,7 +141,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 89
+    "textSampled": 80
   },
   {
     "id": "scene",
@@ -149,7 +149,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 69
+    "textSampled": 62
   },
   {
     "id": "scene",
@@ -157,7 +157,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 69
+    "textSampled": 62
   },
   {
     "id": "batch",
@@ -165,7 +165,7 @@
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 152
+    "textSampled": 145
   },
   {
     "id": "batch",
@@ -173,134 +173,134 @@
     "errors": [],
     "fails": [],
     "lowText": [],
+    "textSampled": 145
+  },
+  {
+    "id": "photo",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 88
+  },
+  {
+    "id": "photo",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 88
+  },
+  {
+    "id": "flows",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 128
+  },
+  {
+    "id": "flows",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 128
+  },
+  {
+    "id": "nodes",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 100
+  },
+  {
+    "id": "nodes",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 100
+  },
+  {
+    "id": "type",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 94
+  },
+  {
+    "id": "type",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 94
+  },
+  {
+    "id": "generate",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 75
+  },
+  {
+    "id": "generate",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 75
+  },
+  {
+    "id": "journey",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 96
+  },
+  {
+    "id": "journey",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 96
+  },
+  {
+    "id": "marks",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 64
+  },
+  {
+    "id": "marks",
+    "theme": "light",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
+    "textSampled": 64
+  },
+  {
+    "id": "synth",
+    "theme": "dark",
+    "errors": [],
+    "fails": [],
+    "lowText": [],
     "textSampled": 152
   },
   {
-    "id": "photo",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 90
-  },
-  {
-    "id": "photo",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 90
-  },
-  {
-    "id": "flows",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 130
-  },
-  {
-    "id": "flows",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 130
-  },
-  {
-    "id": "nodes",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 104
-  },
-  {
-    "id": "nodes",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 102
-  },
-  {
-    "id": "type",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 100
-  },
-  {
-    "id": "type",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 100
-  },
-  {
-    "id": "generate",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 77
-  },
-  {
-    "id": "generate",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 77
-  },
-  {
-    "id": "journey",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 98
-  },
-  {
-    "id": "journey",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 98
-  },
-  {
-    "id": "marks",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 66
-  },
-  {
-    "id": "marks",
-    "theme": "light",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 66
-  },
-  {
-    "id": "synth",
-    "theme": "dark",
-    "errors": [],
-    "fails": [],
-    "lowText": [],
-    "textSampled": 158
-  },
-  {
     "id": "synth",
     "theme": "light",
     "errors": [],
     "fails": [],
     "lowText": [],
-    "textSampled": 158
+    "textSampled": 152
   }
 ]

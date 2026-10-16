@@ -29,7 +29,7 @@ function Create() {
   const est = ((m.msPerStep * Math.pow((a.w * a.h) / 1048576, 0.85) * (1 + 0.14 * (v.batch - 1)) * v.steps) / 1000)
   return (
     <div className="flex flex-col">
-      <div className="mx-pad mt-3 mb-1 rounded-[8px] bg-well p-2.5">
+      <div className="mx-pad mt-3 mb-1 rounded-cluster bg-well p-2.5">
         <div className="flex items-center justify-between text-ui font-medium text-fg">{m.name}<Badge>{m.sampler}</Badge></div>
         <div className="mt-0.5 text-ui text-fg-muted">{m.blurb}. Best at {m.steps} steps, CFG {m.guidance}.</div>
         <div className="mt-2 flex items-center gap-3 text-ui text-fg-faint tabular">
@@ -67,7 +67,7 @@ function Details({ id }: { id: string }) {
     <div className="flex flex-col">
       <div className="p-pad pb-2">
         <button type="button" onClick={() => ui.setState({ overlay: { type: 'lightbox' } })} aria-label="Open large"
-          className="relative block w-full overflow-hidden rounded-[8px] bg-well outline-none focus-visible:ring-2 focus-visible:ring-signal" style={{ aspectRatio: `${p.w} / ${p.h}` }}>
+          className="relative block w-full overflow-hidden rounded-cluster bg-well outline-none focus-visible:ring-2 focus-visible:ring-signal" style={{ aspectRatio: `${p.w} / ${p.h}` }}>
           {pix ? <img src={pix.url} alt="" className="h-full w-full object-cover" /> : <span className="block h-full w-full animate-pulse bg-hover" />}
         </button>
         <div className="mt-2 flex items-center gap-1">
@@ -147,7 +147,7 @@ function Pair({ a, b }: { a: string; b: string }) {
       <Button variant="primary" onClick={() => ui.setState({ overlay: { type: 'compare', a, b, mode: 'wipe' } })}><Columns2 size={14} strokeWidth={1.5} />Compare</Button>
       <div className="pt-2 text-ui font-medium text-fg">{diffs.length ? `${diffs.length} difference${diffs.length > 1 ? 's' : ''}` : 'Identical settings'}</div>
       {diffs.map((d) => (
-        <div key={d.k} className="rounded-[7px] bg-well px-pad py-2 text-ui">
+        <div key={d.k} className="rounded-cluster bg-well px-pad py-2 text-ui">
           <div className="text-fg-faint">{d.label}</div>
           <div className="mt-0.5 grid grid-cols-[14px_1fr] gap-x-1.5 gap-y-0.5 text-fg">
             <span className="text-fg-faint">A</span><span className="line-clamp-2 tabular">{d.fmt ? d.fmt(A.params[d.k]) : String(A.params[d.k] ?? '—')}</span>
@@ -162,9 +162,9 @@ function Pair({ a, b }: { a: string; b: string }) {
 function PairThumb({ rec, label }: { rec: ImageRec; label: string }) {
   const pix = usePix(rec.id, rec.params, 'thumb')
   return (
-    <div className="relative overflow-hidden rounded-[7px] bg-well" style={{ aspectRatio: `${rec.params.w} / ${rec.params.h}` }}>
+    <div className="relative overflow-hidden rounded-cluster bg-well" style={{ aspectRatio: `${rec.params.w} / ${rec.params.h}` }}>
       {pix && <img src={pix.url} alt="" className="h-full w-full object-cover" />}
-      <span className="absolute top-1 left-1 rounded-[4px] bg-scrim px-1.5 text-ui-sm font-medium text-white">{label}</span>
+      <span className="absolute top-1 left-1 rounded-control bg-scrim px-1.5 text-ui-sm font-medium text-white">{label}</span>
     </div>
   )
 }

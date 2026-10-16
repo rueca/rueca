@@ -101,7 +101,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
   const RULER = useDensityPx('--d-ruler', 28), lane = useDensityPx('--d-lane', 24), label = useDensityPx('--d-label', 84)
   const ROW = props.rowHeight ?? lane + 12
   const HEAD_W = props.headerWidth ?? label * 2
-  const height = props.height ?? RULER + 6 * ROW
+  const height = props.height ?? RULER + 6 * ROW + 1 // +1: the scroller's top border
   const scroller = useRef<HTMLDivElement>(null)
   const [vw, setVw] = useState(800)
   useLayoutEffect(() => {
@@ -187,7 +187,11 @@ export function TrackTimeline(props: TrackTimelineProps) {
     const selected = c.selected ? clips.filter((x) => x.selected) : [c]
     if (!c.selected) props.onSelect([c.id], 'replace')
     if (lockedTrack(c.track)) return
-    ;(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId)
+    // Follow the drag on window, not with pointer capture on the clip: moving a clip to another track remounts it
+    // in that track's row, which drops the capture and used to strand the drag (the clip kept following the mouse)
+    const move = (ev: PointerEvent) => live.current.onMove(ev as unknown as React.PointerEvent)
+    const up = (ev: PointerEvent) => { removeEventListener('pointermove', move); removeEventListener('pointerup', up); removeEventListener('pointercancel', up); live.current.onUp(ev as unknown as React.PointerEvent) }
+    addEventListener('pointermove', move); addEventListener('pointerup', up); addEventListener('pointercancel', up)
     const moving = mode === 'move' ? selected.filter((x) => !lockedTrack(x.track)) : [c]
     const orig: ClipOriginal = Object.fromEntries(moving.map((x) => [x.id, { start: x.start, dur: x.dur, track: x.track }]))
     const others = clips.filter((x) => !orig[x.id])
@@ -251,6 +255,9 @@ export function TrackTimeline(props: TrackTimelineProps) {
     setGuide(null)
     if (d?.moved) props.onChange(compute(e, d), true, d.orig)
   }
+
+  const live = useRef({ onMove, onUp })
+  live.current = { onMove, onUp }
 
   /* ---------- keyboard on the clip area ---------- */
   const onAreaKey = (e: React.KeyboardEvent) => {
@@ -353,9 +360,9 @@ export function TrackTimeline(props: TrackTimelineProps) {
                     const mix = (p: number) => `color-mix(in oklab, ${c.color} ${p}%, var(--panel))`
                     return (
                       <div key={c.id} role="button" tabIndex={-1} aria-label={`${c.label}, ${(c.start / 1000).toFixed(2)}s to ${((c.start + c.dur) / 1000).toFixed(2)}s`} aria-pressed={!!c.selected}
-                        onPointerDown={(e) => begin(e, c, 'move')} onPointerMove={onMove} onPointerUp={onUp}
+                        onPointerDown={(e) => begin(e, c, 'move')}
                         onDoubleClick={() => props.onClipDoubleClick?.(c.id)}
-                        className={cn('group/clip absolute top-[4px] bottom-[4px] overflow-hidden rounded-[6px] no-select', tr.locked ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing', tr.muted && 'opacity-40')}
+                        className={cn('group/clip absolute top-[4px] bottom-[4px] overflow-hidden rounded-control no-select', tr.locked ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing', tr.muted && 'opacity-40')}
                         style={{
                           left: X(c.start), width: w,
                           // painted as an image layer so the fill composites over the panel exactly
@@ -373,11 +380,11 @@ export function TrackTimeline(props: TrackTimelineProps) {
                         </div>
                         {!tr.locked && (
                           <>
-                            <div aria-hidden onPointerDown={(e) => begin(e, c, 'start')} onPointerMove={onMove} onPointerUp={onUp}
+                            <div aria-hidden onPointerDown={(e) => begin(e, c, 'start')}
                               className="absolute top-0 bottom-0 left-0 flex w-2 cursor-ew-resize items-center justify-center opacity-0 group-hover/clip:opacity-100">
                               <div className="h-3 w-[3px] rounded-full bg-fg/70" />
                             </div>
-                            <div aria-hidden onPointerDown={(e) => begin(e, c, 'end')} onPointerMove={onMove} onPointerUp={onUp}
+                            <div aria-hidden onPointerDown={(e) => begin(e, c, 'end')}
                               className="absolute top-0 right-0 bottom-0 flex w-2 cursor-ew-resize items-center justify-center opacity-0 group-hover/clip:opacity-100">
                               <div className="h-3 w-[3px] rounded-full bg-fg/70" />
                             </div>

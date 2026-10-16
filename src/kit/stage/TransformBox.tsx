@@ -88,7 +88,7 @@ export function TransformBox({
         </div>
       ))}
       {badge != null && badge !== false && (
-        <div className="absolute left-1/2 rounded-[4px] bg-signal-strong px-1.5 py-px tabular text-[10.5px] font-medium whitespace-nowrap text-signal-fg"
+        <div className="absolute left-1/2 rounded-[4px] bg-signal-strong px-1.5 py-px tabular text-ui-sm font-medium whitespace-nowrap text-signal-fg"
           style={{ top: h + 8, transform: `translateX(-50%) rotate(${-rotation}deg)`, transformOrigin: 'top center' }}>
           {badge}
         </div>

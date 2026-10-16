@@ -195,7 +195,7 @@ function SizeRow({ nodes, W, H, anyAuto }: { nodes: Node[]; W: NF; H: NF; anyAut
       {field('h', H, sizingH)}
       <Tip label={lock ? 'Unlock aspect ratio' : 'Lock aspect ratio'}>
         <button type="button" aria-pressed={lock} onClick={() => setLock(!lock)}
-          className={cn('flex size-control shrink-0 items-center justify-center rounded-[5px] outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
+          className={cn('flex size-control shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal', lock ? 'text-signal' : 'text-fg-faint')}>
           {lock ? <Link2 size={13} strokeWidth={1.5} /> : <Unlink2 size={13} strokeWidth={1.5} />}
         </button>
       </Tip>
@@ -211,7 +211,7 @@ function AutoLayoutRows({ n }: { n: Node }) {
     <>
       <Row label="Direction">
         <div className="w-[92px]">
-          <Segmented size="sm" iconOnly value={L.dir} onChange={(d) => set({ dir: d as 'row' | 'column' })} label="Direction"
+          <Segmented iconOnly value={L.dir} onChange={(d) => set({ dir: d as 'row' | 'column' })} label="Direction"
             options={[{ value: 'row', label: 'Horizontal', icon: ArrowRight, hint: 'Horizontal' }, { value: 'column', label: 'Vertical', icon: ArrowDown, hint: 'Vertical' }]} />
         </div>
         <div className="flex flex-1 justify-end">
@@ -304,7 +304,7 @@ function EffectsSection({ nodes, open }: { nodes: Node[]; open: { open: boolean;
           <>
             <Popover.Root>
               <Tip label="Effect settings">
-                <Popover.Trigger aria-label="Effect settings" className="flex size-control shrink-0 items-center justify-center rounded-[5px] bg-control text-fg-muted outline-none hover:text-fg data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)] focus-visible:ring-2 focus-visible:ring-signal">
+                <Popover.Trigger aria-label="Effect settings" className="flex size-control shrink-0 items-center justify-center rounded-control bg-control text-fg-muted outline-none hover:text-fg data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)] focus-visible:ring-2 focus-visible:ring-signal">
                   <Sun size={13} strokeWidth={1.5} />
                 </Popover.Trigger>
               </Tip>
@@ -365,7 +365,7 @@ function TextSection({ nodes, open }: { nodes: Node[]; open: { open: boolean; on
       </Row>
       <Row label="Align">
         <div className="w-[96px]">
-          <Segmented size="sm" iconOnly value={align === MIXED ? '' : String(align)} onChange={(a) => setT({ align: a as 'left' })} label="Text align"
+          <Segmented iconOnly value={align === MIXED ? '' : String(align)} onChange={(a) => setT({ align: a as 'left' })} label="Text align"
             options={[{ value: 'left', label: 'Left', icon: TextAlignStart }, { value: 'center', label: 'Centre', icon: TextAlignCenter }, { value: 'right', label: 'Right', icon: TextAlignEnd }]} />
         </div>
         <div className="min-w-0 flex-1">

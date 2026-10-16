@@ -105,7 +105,7 @@ function Transport() {
       <IconButton icon={playing ? Pause : Play} label={playing ? 'Pause' : 'Play'} shortcut="space" tipSide="top" variant="default" onClick={() => clock.toggle()} />
       <IconButton icon={StepForward} label="Next frame" shortcut="." tipSide="top" onClick={() => clock.step(1)} />
       <IconButton icon={SkipForward} label="Go to end" shortcut="end" tipSide="top" onClick={() => clock.seek(duration)} />
-      <div className="ml-1 flex h-icon items-baseline gap-1 rounded-[6px] px-2 tabular text-ui text-fg">
+      <div className="ml-1 flex h-icon items-baseline gap-1 rounded-control px-2 tabular text-ui text-fg">
         {fmtTime(t, 'timecode', fps)}<span className="text-ui text-fg-faint">/ {fmtTime(duration, 'timecode', fps)}</span>
         <span className="ml-1 text-ui-sm text-fg-faint">{fps} fps</span>
       </div>

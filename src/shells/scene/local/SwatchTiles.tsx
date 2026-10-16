@@ -81,7 +81,7 @@ export function SwatchTiles({
             onBlur={() => onPreview?.(null)}
             onKeyDown={(e) => onKey(e, i)}
             className={cn(
-              'flex min-w-0 flex-col items-center gap-1 rounded-[7px] pt-1.5 pb-1 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
+              'flex min-w-0 flex-col items-center gap-1 rounded-[calc(var(--radius-control)+2px)] pt-1.5 pb-1 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
               value === o.value ? 'bg-signal-soft shadow-[inset_0_0_0_1px_var(--signal)]' : 'bg-control hover:shadow-[inset_0_0_0_1px_var(--line-strong)]',
             )}
           >

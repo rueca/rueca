@@ -43,7 +43,7 @@ export function PrototypePanel({ onPresent }: { onPresent: () => void }) {
           {countLinks(pg.nodes) ? (
             <div className="flex flex-col gap-0.5 px-pad">
               {listLinks(pg.nodes).map((l) => (
-                <button key={l.id} type="button" onClick={() => S.select([l.from.id])} className="flex h-row items-center gap-1.5 rounded-[5px] px-1.5 text-left text-ui hover:bg-hover">
+                <button key={l.id} type="button" onClick={() => S.select([l.from.id])} className="flex h-row items-center gap-1.5 rounded-control px-1.5 text-left text-ui hover:bg-hover">
                   <Zap size={12} strokeWidth={1.5} className="shrink-0 text-signal" />
                   <span className="truncate text-fg">{l.from.name}</span>
                   <span className="text-fg-faint">→</span>
@@ -80,7 +80,7 @@ export function PrototypePanel({ onPresent }: { onPresent: () => void }) {
           const upd = (patch: Partial<Interaction>, final = true) => set(list.map((x) => (x.id === it.id ? { ...x, ...patch } : x)), final)
           const preset = Object.entries(EASINGS).find(([, e]) => e.join() === it.easing.join())?.[0] ?? 'Custom'
           return (
-            <div key={it.id} className="mx-2 mb-1.5 rounded-[8px] bg-well py-1">
+            <div key={it.id} className="mx-2 mb-1.5 rounded-cluster bg-well py-1">
               <Row label="Trigger" trailing={<IconButton icon={Minus} size="icon-sm" label="Remove interaction" onClick={() => set(list.filter((x) => x.id !== it.id))} />}>
                 <Select value={it.trigger} label="Trigger" onChange={(t) => upd({ trigger: t as Interaction['trigger'] })} options={TRIGGERS} />
               </Row>
@@ -98,7 +98,7 @@ export function PrototypePanel({ onPresent }: { onPresent: () => void }) {
               {it.transition !== 'instant' && (
                 <Row label="Curve">
                   <Popover.Root>
-                    <Popover.Trigger className="flex h-control min-w-0 flex-1 items-center gap-2 rounded-[5px] bg-control px-1.5 text-left outline-none hover:shadow-[inset_0_0_0_1px_var(--line-strong)] data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
+                    <Popover.Trigger className="flex h-control min-w-0 flex-1 items-center gap-2 rounded-control bg-control px-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-signal hover:shadow-[inset_0_0_0_1px_var(--line-strong)] data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
                       <CurveGlyph value={it.easing} className="text-signal" />
                       <span className="truncate text-ui text-fg">{preset}</span>
                     </Popover.Trigger>
@@ -108,7 +108,12 @@ export function PrototypePanel({ onPresent }: { onPresent: () => void }) {
                       </Popover.Positioner>
                     </Popover.Portal>
                   </Popover.Root>
-                  <ScrubValue boxed value={it.duration} min={0} max={5000} step={10} unit="ms" label="Duration" onChange={(d, f) => upd({ duration: d }, f)} className="w-[64px] shrink-0" />
+                </Row>
+              )}
+              {/* its own row: sharing one with Curve cut the preset name to "Out …" */}
+              {it.transition !== 'instant' && (
+                <Row label="Duration">
+                  <ScrubValue boxed align="left" value={it.duration} min={0} max={5000} step={10} unit="ms" label="Duration" onChange={(d, f) => upd({ duration: d }, f)} className="flex-1" />
                 </Row>
               )}
             </div>

@@ -29,7 +29,7 @@ export function PersonasPanel() {
           return (
             <div key={x.id} role="option" aria-selected={on} tabIndex={0}
               onClick={() => switchPersona(x.id)} onKeyDown={(e) => e.key === 'Enter' && switchPersona(x.id)}
-              className={cn('group/row flex items-center gap-2.5 rounded-[8px] p-2 outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-active' : 'hover:bg-hover')}>
+              className={cn('group/row flex items-center gap-2.5 rounded-cluster p-2 outline-none focus-visible:ring-2 focus-visible:ring-signal', on ? 'bg-active' : 'hover:bg-hover')}>
               <Avatar p={x} size={30} />
               <div className="min-w-0 flex-1">
                 <div className={'truncate text-title font-medium text-fg'}>{x.name}</div>
@@ -53,13 +53,13 @@ export function PersonasPanel() {
         <div className="flex flex-col items-center gap-2 px-pad pt-1 pb-2 text-center">
           <Avatar p={p} size={56} />
           <div className="w-full">
-            <InlineText bare value={p.name} onCommit={(name) => set({ name }, 'Rename persona')} className="block min-h-6 truncate text-[14px] leading-6 font-semibold" label="Persona name" />
-            <InlineText bare allowEmpty value={p.role} onCommit={(role) => set({ role })} className="block min-h-6 truncate text-ui leading-6 text-fg-muted" label="Role" />
+            <InlineText bare value={p.name} onCommit={(name) => set({ name }, 'Rename persona')} className="block min-h-icon truncate text-title leading-6 font-semibold" label="Persona name" />
+            <InlineText bare allowEmpty value={p.role} onCommit={(role) => set({ role })} className="block min-h-icon truncate text-ui leading-6 text-fg-muted" label="Role" />
           </div>
         </div>
         <Row label="Age"><ScrubValue boxed value={p.age} min={12} max={99} onChange={(age, f) => editPersona((x) => ({ ...x, age }), { commit: f, label: 'Age' })} className="flex-1" label="Age" /></Row>
         <div className="px-pad pt-2">
-          <div className="relative rounded-[10px] bg-well px-3 py-2.5 text-ui leading-relaxed text-fg italic">
+          <div className="relative rounded-cluster bg-well px-pad py-2.5 text-ui leading-relaxed text-fg italic">
             <span aria-hidden className="absolute -top-1 left-2 text-[22px] leading-none text-fg-faint not-italic">“</span>
             <InlineText bare allowEmpty value={p.quote} multiline onCommit={(quote) => set({ quote })} placeholder="Add a quote in their words" className="block whitespace-pre-wrap" label="Quote" />
           </div>
@@ -86,7 +86,7 @@ function ListSection({ title, items, onChange, add }: { title: string; items: st
           <span className="mt-[7px] size-1 shrink-0 rounded-full bg-fg-faint" />
           <InlineText bare allowEmpty value={g} multiline onCommit={(s) => onChange(s ? items.map((x, j) => (j === i ? s : x)) : items.filter((_, j) => j !== i))} className="block min-w-0 flex-1 text-ui leading-relaxed text-fg" label={title} />
           <button type="button" aria-label="Remove" onClick={() => onChange(items.filter((_, j) => j !== i))}
-            className="mt-0.5 flex size-icon-sm items-center justify-center rounded-[4px] text-fg-faint opacity-0 hover:bg-hover hover:text-fg group-hover/item:opacity-100 focus-visible:opacity-100"><X size={11} /></button>
+            className="mt-0.5 flex size-icon-sm items-center justify-center rounded-control text-fg-faint opacity-0 hover:bg-hover hover:text-fg group-hover/item:opacity-100 focus-visible:opacity-100"><X size={11} /></button>
         </div>
       ))}
     </Section>

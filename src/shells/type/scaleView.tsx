@@ -80,17 +80,18 @@ export function TokensPanel({ v, steps }: { v: V; steps: Step[] }) {
           key={s.i}
           type="button"
           onClick={async () => { await copyText(`var(--text-${s.name})`); toast(`Copied var(--text-${s.name})`, { type: 'success' }) }}
-          className={cn('group flex h-9 items-center gap-2 px-3 text-left outline-none hover:bg-hover focus-visible:bg-hover', s.i === 0 && 'bg-signal-soft/40')}
+          className={cn('group flex h-row items-center gap-2 px-pad text-left outline-none hover:bg-hover focus-visible:bg-hover', s.i === 0 && 'bg-signal-soft/40')}
         >
-          <span className={cn('w-14 shrink-0 truncate text-[11.5px]', s.i === 0 ? 'text-fg font-medium' : 'text-fg-muted')}>{s.name}</span>
+          <span className={cn('w-14 shrink-0 truncate text-ui', s.i === 0 ? 'text-fg font-medium' : 'text-fg-muted')}>{s.name}</span>
           <span className="relative h-1 min-w-0 flex-1 rounded-full bg-track">
             <span className={cn('absolute inset-y-0 left-0 rounded-full', s.i === 0 ? 'bg-signal' : 'bg-line-strong')} style={{ width: `${(s.px / maxPx) * 100}%` }} />
           </span>
-          <span className="w-[74px] shrink-0 text-right tabular text-[11px] text-fg">{v.unit === 'rem' ? `${+(s.px / 16).toFixed(3)}rem` : `${+s.px.toFixed(2)}px`}</span>
-          <Copy size={12} strokeWidth={1.5} className="shrink-0 text-fg-faint opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100" />
+          <span className="w-[74px] shrink-0 text-right tabular text-ui text-fg">{v.unit === 'rem' ? `${+(s.px / 16).toFixed(3)}rem` : `${+s.px.toFixed(2)}px`}</span>
+          {/* swapped in, not faded in: an invisible icon kept its 20px and the values ended short of the edge */}
+          <Copy size={12} strokeWidth={1.5} className="hidden shrink-0 text-fg-faint group-hover:block group-focus-visible:block" />
         </button>
       ))}
-      <p className="px-3 pt-2 pb-2 text-[11px] leading-relaxed text-fg-faint">Click a step to copy its custom property.</p>
+      <p className="px-pad pt-2 pb-2 text-ui leading-relaxed text-fg-faint">Click a step to copy its custom property.</p>
     </div>
   )
 }

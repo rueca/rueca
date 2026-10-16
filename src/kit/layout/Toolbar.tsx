@@ -52,7 +52,8 @@ export function Brand({ name, doc, mark, href = '#/', menu = [] }: {
   return (
     <div className={cn('flex h-bar min-w-0 items-center gap-1', doc ? 'pr-3 pl-1' : 'px-1', layout !== 'docked' && 'cluster')}>
       <Menu items={items} trigger={<BrandMark name={name} mark={mark} />} />
-      {doc && <span className="min-w-0 truncate text-title text-fg-muted">{doc}</span>}
+      {/* a few px of room inside the truncating box, so an editable title's focus ring isn't cut to slivers */}
+      {doc && <span className="-mx-[3px] min-w-0 truncate p-[3px] text-title text-fg-muted">{doc}</span>}
     </div>
   )
 }
@@ -61,7 +62,7 @@ const BrandMark = forwardRef<HTMLButtonElement, { name: string; mark?: ReactNode
   <Tip label={name}>
     <button ref={ref} type="button" aria-label={name} {...rest}
       className={cn('flex size-icon shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover', className)}>
-      <span className="flex size-5 items-center justify-center rounded-[5px] bg-fg text-field">
+      <span className="flex size-5 items-center justify-center rounded-control bg-fg text-field">
         {mark ?? <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>}
       </span>
     </button>
