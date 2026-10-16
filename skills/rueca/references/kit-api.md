@@ -351,6 +351,7 @@ stops ticks while paused too (default true for artifacts with their own life).
   Pins say whose turn it is: hollow while the agent's, blue for an unread reply (read state is per browser), ink once read; done ones leave the board
   unless "Show done on the board" is on. Pins fade when the tool is in another state, and their thread can restore it.
   Replies arrive live (`useNotes()`) with a toast. Pins keep screen size via `useZoom()`.
+  `CommentIcon` / `CommentsIcon`: the comment glyphs (the pin's bubble with a plus, and with lines), for a custom toolbar's Comment and All comments buttons.
 - `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound. It adds the
   View → Density commands itself, so every tool should render one (`commands={[]}` is fine).
 - `toast(title, opts)` works anywhere (it mounts a single toaster if none is rendered) and returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
