@@ -24,7 +24,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties
 import { createPortal } from 'react-dom'
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { ArrowUp, Check, MessageCirclePlus, MessagesSquare, RotateCcw, Trash2, History } from 'lucide-react'
+import { ArrowUp, Check, RotateCcw, Trash2, History } from 'lucide-react'
 import { Popover } from '@base-ui/react/popover'
 import { useParamState, type AnyParams } from '../core/params'
 import type { HistoryLike } from '../core/history'
@@ -70,6 +70,24 @@ const bump = (key: 'tools' | 'watching', id: string, by: number) => notesUI.setS
   if (next[id] <= 0) delete next[id]
   return { [key]: next } as Partial<NotesUI>
 })
+
+/* The comment icons, drawn from the pin and the comment cursor (a circle with its bottom-left corner left square) so
+   the toolbar, the cursor and the pins read as one family. Lucide's grid, caps and joins, so they sit with its icons. */
+const BUBBLE_PATH = 'M3 12a9 9 0 1 1 9 9H4a1 1 0 0 1-1-1z'
+type GlyphProps = { size?: number; strokeWidth?: number; className?: string }
+const glyph = (name: string, children: ReactNode) => function Glyph({ size = 24, strokeWidth = 2, className }: GlyphProps) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth}
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden className={cn('lucide', `lucide-${name}`, className)}>
+      <path d={BUBBLE_PATH} />
+      {children}
+    </svg>
+  )
+}
+/** Comment: the bubble with a plus. */
+export const CommentIcon = glyph('rueca-comment', <><path d="M12 8v8" /><path d="M8 12h8" /></>)
+/** All comments: the bubble with two lines of text. */
+export const CommentsIcon = glyph('rueca-comments', <><path d="M8 10h8" /><path d="M8 14h5" /></>)
 
 /** True once the dev server's notes route answers (ruecaNotes()); false on a static build. Re-checks after a failure. */
 export function useNotesEndpoint() {
@@ -191,7 +209,7 @@ export function CommentButton({ params, hotkey = 'c' }: { params?: AnyParams; ho
   if (!on) return null
   const label = `${commenting ? 'Stop commenting' : 'Comment'}${fresh ? ` (${fresh} new ${fresh === 1 ? 'reply' : 'replies'})` : ''}`
   return (
-    <IconButton icon={MessageCirclePlus} label={label} shortcut={hotkey || undefined} active={commenting} onClick={toggle} className="relative">
+    <IconButton icon={CommentIcon} label={label} shortcut={hotkey || undefined} active={commenting} onClick={toggle} className="relative">
       {fresh > 0 && (
         <span aria-hidden className="absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-signal-strong px-0.5 text-ui-sm leading-none font-semibold text-signal-fg tabular">
           {fresh}
@@ -302,7 +320,7 @@ export function CommentsList({ params }: { params: AnyParams }) {
       <Tip label={label}>
         <Popover.Trigger aria-label={label}
           className="relative flex size-icon items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover data-[popup-open]:text-fg">
-          <MessagesSquare size={14} strokeWidth={1.5} />
+          <CommentsIcon size={14} strokeWidth={1.5} />
         </Popover.Trigger>
       </Tip>
       <Popover.Portal>
