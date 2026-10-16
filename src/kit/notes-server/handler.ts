@@ -13,6 +13,9 @@
    Vite: use ruecaNotes() from ./vite. Anything else (express, a bare http
    server): `if (await handle(req, res)) return` before your own routes, and
    before any body parser (or it reads the body the parser already took).
+   A static page with no server of its own: the standalone notes server
+   (skills/rueca/scripts/notes-server.mjs) runs this on its own port with
+   `cors: 'local'`, so a page on another localhost port can reach it.
 
    Dev only. It writes into the project, so it guards the door:
    - only the page's own origin (fetch metadata, then Origin against Host), and
@@ -40,6 +43,9 @@ export interface NotesHandlerOptions {
   maxBytes?: number
   /** extra host names to answer besides loopback, *.localhost and IP addresses (`true`: any host) */
   allowedHosts?: string[] | true
+  /** 'local': also answer pages on OTHER local origins (another localhost port), with CORS headers — for the
+      standalone server beside a static page. Off by default: only the page's own origin. */
+  cors?: 'local'
 }
 
 const send = (res: ServerResponse, status: number, body: unknown) => {
@@ -59,6 +65,15 @@ export function isLocalHost(host: string | undefined, allowed?: string[] | true)
   if (allowed === true) return true
   const name = hostName(host)
   return name === 'localhost' || name.endsWith('.localhost') || isIP(name) !== 0 || !!allowed?.some((a) => a.toLowerCase() === name)
+}
+
+/** A page on another local origin (localhost on another port), when the handler runs beside a static page. Fetch
+    metadata can't decide this one: a page on localhost calling 127.0.0.1 is "cross-site" to the browser. The Origin
+    is what counts, and a real website (or a DNS-rebinding one) never has a local Origin. */
+function isLocalOrigin(req: IncomingMessage, allowed?: string[] | true): boolean {
+  const origin = req.headers.origin
+  if (!origin) return req.method === 'GET'
+  try { return isLocalHost(new URL(origin).host, allowed) } catch { return false }
 }
 
 /** Same-origin only: the browser's own fetch metadata, then Origin against Host. */
@@ -228,7 +243,18 @@ export function createNotesHandler(opts: NotesHandlerOptions = {}) {
     if (path !== NOTES_ROUTE) return false
     try {
       if (!isLocalHost(req.headers.host, opts.allowedHosts)) { send(res, 403, { error: 'Notes only answer on a local host' }); return true }
-      if (!isSameOrigin(req)) { send(res, 403, { error: 'Notes only accept requests from the page’s own origin' }); return true }
+      if (opts.cors === 'local') {
+        if (!isLocalOrigin(req, opts.allowedHosts)) { send(res, 403, { error: 'Notes only accept requests from a local page' }); return true }
+        const origin = req.headers.origin
+        if (origin) {
+          res.setHeader('access-control-allow-origin', origin)
+          res.setHeader('vary', 'origin')
+          res.setHeader('access-control-allow-methods', 'GET, POST, DELETE')
+          res.setHeader('access-control-allow-headers', 'content-type')
+          res.setHeader('access-control-expose-headers', 'x-rueca-notes')
+        }
+        if (req.method === 'OPTIONS') { res.statusCode = 204; res.end(); return true }
+      } else if (!isSameOrigin(req)) { send(res, 403, { error: 'Notes only accept requests from the page’s own origin' }); return true }
       if (req.method === 'GET') { send(res, 200, await list()); return true }
       if (req.method === 'DELETE') {
         const id = new URL(req.url ?? '', 'http://x').searchParams.get('id') ?? ''
