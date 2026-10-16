@@ -1,12 +1,15 @@
 # Getting the kit into a project
 
-Three routes. Pick by what already exists, not by preference.
+Three routes. Pick by the project the tool lives in, not by preference and not by what you can run
+this session (a session that can't run npm still uses A: see § The kit, not installed yet).
 
 | Situation | Route |
 |---|---|
-| A React project, or nothing yet | **A. Kit** via the component registry |
-| An existing prototype you must not rewrite (plain HTML, Svelte, Vue, Webflow export, p5, a built app) | **B. Drop-in** — a small harness app wraps it through the bridge |
-| One self-contained HTML file, no build step | **C. Hand-built** from `assets/theme.css` + the visual rules |
+| A React 19 + Tailwind v4 project, or nothing yet | **A. Kit** via the component registry |
+| React 19 without Tailwind | **A**, with `@tailwindcss/vite` added and the tool in an entry of its own, so Tailwind's reset only reaches the tool |
+| An existing prototype you must not rewrite (plain HTML, Svelte, Vue, Webflow export, p5, a built app), or an app on React 18 / Tailwind v3 | **B. Drop-in**: a harness wraps it in an iframe |
+| Astro, Remix, Next.js pages router (untested) | **B**: a small Vite harness app beside it, rather than installing into it |
+| The tool itself must be one HTML file with no build step | **C. Hand-built** from `assets/theme.css` + the visual rules |
 
 Registry base URL: `https://rueca.dev/r/` (each item is
 `<name>.json`). Source and live examples: `https://github.com/rueca/rueca`.
@@ -41,7 +44,8 @@ printf '\n@import "./components/studio/theme.css";\nhtml, body, #root { height: 
   `index.ts` ships only with the full `studio` item — after installing single pieces, import
   from the file (`@/components/studio/ui/slider`). The kit docs write `@kit`: alias it to that
   folder in `vite.config.ts` + `tsconfig`, or rewrite the imports.
-- **Theme:** `@import "./components/studio/theme.css";` in the main CSS. Its tokens (`--panel`, `--line`,
+- **Theme:** `@import "./components/studio/theme.css";` in the main CSS of a new project, or in the
+  tool's own CSS file beside an existing app (§ A tool entry of its own). Its tokens (`--panel`, `--line`,
   `--gutter`…) are declared only on the kit's own roots — `.studio` (the `<Studio>` root), the `.pop`
   popups and `[data-studio]` — so the app's own variables, `dark:` variant and `<body>` are untouched,
   and the utility names (`fg-muted`, `signal`, `control`, `font-ui`, …) don't overlap shadcn's. Using
@@ -95,7 +99,8 @@ printf '\n@import "./components/studio/theme.css";\nhtml, body, #root { height: 
   them, say so in the handoff rather than editing kit files. Add `src/components/studio` to the
   linter's ignores (it is vendored source).
 - **Build once after installing** (`npm run build`), not just `npm run dev` — the dev server
-  doesn't typecheck, so a missing dependency only shows there.
+  doesn't typecheck, so a missing dependency only shows there. A tool in its own `tool.html` is built
+  only once that page is in the build input (§ A tool entry of its own).
 - If `shadcn init` refuses (no Tailwind detected, odd setup), write the files
   directly — they are just source. Fetch the item JSON and write each
   `files[].content` to its target.
@@ -115,33 +120,118 @@ Adjacent libraries when the artifact needs them: `@xyflow/react` (node graphs, f
 studio (AGPL), tldraw (licence key), Remotion (company licence), GSAP (non-OSI),
 `@ffmpeg/core` (GPL).
 
+## A tool entry of its own
+
+Beside an existing app, give the tool its own page, so nothing in the app imports it and the app's
+CSS is never edited:
+
+- `tool.html` at the project root: a copy of `index.html` whose script is `/src/tool/main.tsx`. The tool
+  lives in `src/tool/`, and opens at `/tool.html` on the app's dev server.
+- **Its own CSS file**, `src/tool/tool.css`, imported only by `src/tool/main.tsx`. Point
+  `components.json`'s `tailwind.css` at it.
+  ```css
+  @import "tailwindcss";
+  @import "../components/studio/theme.css";
+  html, body, #root { height: 100%; margin: 0 }
+  ```
+- **In the build input**, so `npm run build` bundles and checks the tool too (Vite builds only
+  `index.html` unless told otherwise). In `vite.config.ts` (on Vite 8, `rolldownOptions` is the new name):
+  ```ts
+  build: { rollupOptions: { input: { main: 'index.html', tool: 'tool.html' } } },
+  ```
+
+### The kit, not installed yet
+
+When you can't install (no shell, told not to run anything, registry unreachable), write the tool
+against the kit anyway, and keep the app building until someone runs the install:
+
+1. The tool entry above, but **leave `tool.html` out of the build input** and add `"src/tool"` to
+   `exclude` in `tsconfig.app.json`. Its imports don't resolve yet, and `tsc -b` checks everything
+   under `src`.
+2. **Write the notes lines commented out** in `vite.config.ts`, because an import of a missing file
+   stops the dev server and the build:
+   ```ts
+   // import { ruecaNotes } from './rueca/notes-server/vite.ts'   // after the kit install
+   export default defineConfig({ plugins: [react() /* , ruecaNotes() */] })
+   ```
+3. Touch nothing else in the app: not its main CSS, not `index.html`.
+4. Hand off the install as a list, in this order:
+   1. `npx shadcn@latest add https://rueca.dev/r/studio.json -y` (an app without Tailwind v4, the `@`
+      alias or a `components.json` gets those first, as in route A)
+   2. Remove `"src/tool"` from `exclude` in `tsconfig.app.json`
+   3. Add `tool.html` to the build input
+   4. Uncomment the two `ruecaNotes` lines
+   5. `npm run build`, then open `/tool.html` on the dev server
+
+   Then a `Not run:` line for every check you skipped (qa.md § Static checks only).
+
 ## B. Drop-in (wrap an existing prototype)
 
-1. Copy `assets/studio-bridge.js` next to the prototype and add to its page:
-   ```html
-   <script src="studio-bridge.js"></script>
-   <script>
-     studio.cssVars()                          // every value → a CSS custom property
-     studio.on((v) => { /* or apply by hand */ })
-   </script>
-   ```
-2. Build the harness as route A in a separate small app, and render the prototype
-   with `<FrameSurface src="…" params={params} />`.
-3. Values flow down on every change; the page can push values back with
-   `studio.set(key, value)` (e.g. text edited in place).
+The harness renders the page with `<FrameSurface src="…" params={params} />` and pushes every value
+change into it. How it reaches the page depends on whether the two share an origin (scheme, host and
+port). A separate harness app on its own port does not.
+
+**1. The harness in the page's own project.** Same dev server, same origin, no edits to the page.
+Works when that project can take the kit (React 19 + Tailwind v4): add the tool as an entry of its own
+(§ A tool entry of its own) and point `src` at the page's own path.
+
+**2. The page served through the harness.** Same origin, no edits to the page. Use this when the
+page's project can't take the kit (React 18, Tailwind v3, Vue, Svelte) or the person said not to
+touch it.
+- A static page or folder (HTML, a Webflow export, a built `dist/`): serve it from the harness app's
+  `public/` (a copy, or a symlink to keep it live).
+- A running app on another dev server: the harness takes a base path and proxies everything else to
+  the app, so the app keeps its own absolute paths (`/src/…`, `/assets/…`). Then open the harness at
+  `http://localhost:5273/__tool/`, and the app is at `/` on the same origin:
+  ```ts
+  // the harness app's vite.config.ts; the app runs on :3000
+  export default defineConfig({
+    base: '/__tool/',
+    server: { port: 5273, strictPort: true,
+      proxy: { '^/(?!__tool/)': { target: 'http://localhost:3000', changeOrigin: true, ws: true } } },
+  })
+  ```
+  `<FrameSurface src="/" …>`. The app's dev server must be running.
+
+**3. The bridge script, when an edit is allowed.** Copy `assets/studio-bridge.js` next to the page (or
+install the `bridge` item, which lands in `public/`) and add it. Values arrive by `postMessage`, across
+origins too, and the page can push values back with `studio.set(key, value)` (text edited in place):
+```html
+<script src="studio-bridge.js"></script>
+<script>
+  studio.cssVars()                          // every value → a CSS custom property
+  studio.on((v) => { /* or apply by hand */ })
+</script>
+```
+
+**Driving a same-origin page** (setups 1 and 2): `cssVars` writes every scalar as a custom property
+on the page's `:root` (`headlineSize` → `--headline-size`), which reaches only CSS that reads those
+variables. A component styled inline (`style={{ padding: 24 }}`) or with literal values ignores them.
+Write an override stylesheet into the page from `apply` instead. A stylesheet `!important` beats an
+inline style without one, and the page re-rendering doesn't wipe it:
+```tsx
+<FrameSurface src="/" params={params} apply={(doc, v) => {
+  const s = doc.getElementById('rueca-tune') ?? doc.head.appendChild(Object.assign(doc.createElement('style'), { id: 'rueca-tune' }))
+  s.textContent = `.pricing-card { padding: ${v.pad}px !important; border-radius: ${v.radius}px !important }`
+}} />
+```
+To start from the page's own values, read them once on load:
+`params.replace(readCssVars(doc, ['accent', 'headlineSize']), { history: false })`.
 
 What route B gives: inspector, presets, undo, A/B, share links and persistence for the page's
 values, and live breakpoints. What it doesn't: a timeline (the page keeps its own time) or
 render export (the harness can't draw the page into a canvas) — leave the starter's `Timeline`
 and Export button out, or wire Export to something real (copy CSS, JSON).
 
-Several `FrameSurface`s at once give live breakpoints (mobile / tablet / desktop).
+Several `FrameSurface`s at once give live breakpoints (mobile / tablet / desktop); `ViewportFrame`
+(`kit-components.md`) gives each one a resizable frame.
 Iframes eat pointer events — give the stage a Hand / Interact toggle (`architecture.md`).
 
 ## C. Hand-built single file
 
-This is the one place hand-building is right: with no npm the kit can't be installed, so build
-the same harness by hand (one param table, undo, presets, share link) rather than skip it.
+This is the one place hand-building is right: the tool must stay one HTML file that opens with no
+build step, so the kit has nowhere to go. A session that can't run npm is not this case (§ The kit,
+not installed yet). Build the same harness by hand (one param table, undo, presets, share link) rather than skip it.
 Inline `assets/theme.css`, dropping its `@import` lines, `@custom-variant` and the `@theme inline`
 block — but first copy the block's `--font-ui` / `--font-mono` lines into `:root` (or the chrome
 renders in Times), and rewrite each `@utility name { … }` (`panel`, `cluster`, `pop`, `tabular`, …)

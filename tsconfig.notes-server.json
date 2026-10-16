@@ -1,0 +1,22 @@
+{
+  // The notes server lands at the project root of someone else's app and is type-checked by THEIR
+  // tsconfig.node.json. These are create-vite's react-ts settings (module: nodenext), so an import that
+  // breaks their `npm run build` breaks ours first.
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "skipLibCheck": true,
+    "module": "nodenext",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src/kit/notes-server"]
+}

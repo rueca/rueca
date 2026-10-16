@@ -58,9 +58,11 @@ utility and cannot be themed at runtime.
   `localStorage`. Resolve it in a tiny inline script in `<head>` before first paint.
   Never hardcode `class="dark"` in `index.html` — the first paint fights the stored
   choice.
-- **Two accents.** A bright one (`#0d99ff`) for fills, tracks and indicators; a
-  **darker** one (`#0a72c6`) for accent *surfaces that carry text*. White on
-  `#0d99ff` is 2.99:1 and fails WCAG AA for a button label.
+- **Two accents.** A bright one (`--signal`, `#0d99ff`) for focus and selection: focus
+  rings, selection outlines and handles, drop lines, the changed dot. A **darker** one
+  (`--signal-strong`, `#0a72c6`) for accent *surfaces that carry text*, such as the primary
+  button. White on `#0d99ff` is 2.99:1 and fails WCAG AA for a button label. Neither
+  fills a slider, a switch or a tick: those are neutral ink (§ Density and ink).
 - **Semantic colours, sparingly:** `key` (amber — keyframed), `rec` (red — playhead,
   record, error), `ok` (green).
 

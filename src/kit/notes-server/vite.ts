@@ -4,15 +4,19 @@
    .gitignore).
 
      // vite.config.ts
-     import { ruecaNotes } from './rueca/notes-server/vite'
+     import { ruecaNotes } from './rueca/notes-server/vite.ts'
      export default defineConfig({ plugins: [react(), ruecaNotes()] })
 
    Dev server only (`apply: 'serve'`): a production build has no route, so the
    notes buttons stay hidden there ("Copy as agent prompt" in the share menu
    still works). Hosts named in Vite's `server.allowedHosts` are answered too.
+
+   Imports keep their `.ts` extension: today's Vite template checks vite.config.ts
+   with `module: nodenext`, which rejects extensionless relative imports (TS2835).
+   tsconfig.notes-server.json checks these files under those settings.
 --------------------------------------------------------------------------- */
 import type { Plugin } from 'vite'
-import { createNotesHandler, type NotesHandlerOptions } from './handler'
+import { createNotesHandler, type NotesHandlerOptions } from './handler.ts'
 
 export function ruecaNotes(opts: Omit<NotesHandlerOptions, 'root'> = {}): Plugin {
   return {

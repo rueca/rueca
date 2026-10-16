@@ -16,5 +16,7 @@
     "types": ["vite/client"],
     "paths": { "@kit": ["./src/kit/index.ts"], "@kit/*": ["./src/kit/*"], "@/*": ["./src/*"] }
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests"],
+  // checked by tsconfig.notes-server.json instead: it imports with .ts extensions, as a nodenext config needs
+  "exclude": ["src/kit/notes-server/vite.ts"]
 }

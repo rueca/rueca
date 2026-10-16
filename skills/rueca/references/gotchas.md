@@ -52,7 +52,7 @@ Check here before debugging.
 | Clicking an option shows nothing | The effect only plays in the intro. Replay on mode change. |
 | `backdrop-filter: blur()` does nothing | Blurring a flat colour returns the same colour. Use `contrast()` / `brightness()` on flat ground. |
 | A "flash" is invisible on white text | White can't get whiter; `brightness(1.2)` on `#fff` is a no-op. Use a `text-shadow` bloom. |
-| Element reads as metal, not glass | Face gradient + top-light / bottom-dark bevel is the brushed-metal recipe. Glass is an even face plus edge optics. Measure the reference (`qa.md` §5). |
+| Element reads as metal, not glass | Face gradient + top-light / bottom-dark bevel is the brushed-metal recipe. Glass is an even face plus edge optics. Measure the reference (`qa.md` §6). |
 | Sliders sticky, text selects while dragging | `user-select: none` on the shell (`no-select`). |
 | Whole script dies on init | Duplicate `id` between a control and a DOM node — `getElementById` returns the wrong one. Scope lookups or use refs. |
 
@@ -87,6 +87,6 @@ Check here before debugging.
 | Tab key dead in a shell | A bare `tab` hotkey. The kit drops Tab bindings without a `when` guard. |
 | Leaving a three.js shell leaks a WebGL context | Disposing after React removed the DOM: OrbitControls unbinds from a detached root. `MountSurface` now disposes in a layout effect; also call `renderer.forceContextLoss()`. |
 | Gallery burns CPU after visiting animated shells | Module-level clocks ran rAF forever. Clocks now start on the first `onTick` and stop with none. |
-| Untouched values / captions fail contrast | Faint is for non-essential text only; values use muted. QA asks 4.5:1 of faint text. |
-| Editing `theme.css` broke every page silently | One stray `}`. After editing CSS, `curl` it from the dev server or run `qa.mjs` on one shell before moving on — a spot check can pass on cached CSS. |
+| Untouched values / captions fail contrast | Labels are `text-fg-faint`, untouched values `text-fg-value`, changed values `text-fg`; `text-fg-muted` is for secondary text. Each must reach 4.5:1 on its panel and field, faint included (`qa.md` §1). |
+| Editing `theme.css` broke every page silently | One stray `}`. After editing CSS, `curl` it from the dev server or rerun the contrast audit (`qa.md` §1) before moving on — a spot check can pass on cached CSS. |
 | Parallel test agents bring the machine to a crawl | Close the browser in `finally`, one Chrome per agent, and keep heavy repos out of synced folders (Google Drive / iCloud Documents re-sync every `node_modules` change). |
