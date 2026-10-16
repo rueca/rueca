@@ -52,8 +52,8 @@ background — a token can pass while a component uses the wrong one.
 ## 2. Accent clash, both themes
 
 The contrast audit proves the accent is legible on the *chrome*. This proves it is
-legible on the *work*, where the selection outline actually sits (rule and fallbacks:
-`visual-rules.md` §3).
+legible on the *work*, where the selection outline actually sits. The fallbacks are
+below; the reasoning is in `visual-rules.md` §3.
 
 `scripts/` sits next to this file's `references/` folder (the skill's own folder):
 
@@ -61,7 +61,22 @@ legible on the *work*, where the selection outline actually sits (rule and fallb
 npm i -D playwright-core            # once; uses the installed Chrome
 node <skill folder>/scripts/accent-check.mjs http://localhost:5173/#/my-tool
 node <skill folder>/scripts/accent-check.mjs <url> --artboard "#preview"   # if it picks the wrong element
+node <skill folder>/scripts/accent-check.mjs <url> <preset link> <preset link>   # the defaults and each preset
 ```
+
+**Which versions of the art to check.** The defaults, plus every preset the tool ships. The project
+gets one accent, so pass them all in one run and it names the one fallback that clears all of them. A preset's
+link is the tool's URL with `p=` and the preset's values as base64url JSON, stamped with the store's
+`version`. Add it as `#p=…`, or as `&p=…` after a hash route such as `#/my-tool`:
+
+```bash
+node -e 'console.log(Buffer.from(JSON.stringify({ $v: 1, count: 8, ease: "easeInOut" })).toString("base64url"))'
+```
+
+Or apply the preset in the tool and use Copy link in the "…" menu. Colours the person picks freely (a
+`p.color` knob, an image they drop in) can't be checked in advance, and no accent clears every
+possible palette. When the palette is open-ended, or nothing clears the defaults and presets together,
+keep blue and use the two-tone outline below.
 
 It finds the artboard (`--artboard` selector → the kit's `[data-studio-artifact]`
 hook → `.font-artboard` on older kits → the largest canvas/iframe/media on hand-built
@@ -73,12 +88,33 @@ against them and against `rec`, `key` and `ok`.
 ```
 dark  artboard canvas.block.h-full (largest media) · chromatic hues 240° 21%, 250° 18%, 30° 16% · accent 249°
       CLASH — too close to artboard hue 240° (21%), artboard hue 250° (18%)
-      → switch to magenta (clears everything by 53°)
+light artboard canvas.block.h-full (largest media) · chromatic hues 240° 22%, 250° 17%, 30° 15% · accent 249°
+      CLASH — too close to artboard hue 240° (22%), artboard hue 250° (17%)
+
+→ switch to magenta (clears both themes by 53°)
 ```
 
 Exit code: 0 pass, 1 clash (it prints the override CSS to paste), 2 couldn't run.
 If it reports "whole stage" for a single-artboard tool, pass `--artboard`, because the
 stage background then dilutes the sample.
+
+**Fallbacks**, pre-audited (fill ≥ 3:1 on the panel, white label on `strong` ≥ 4.5:1, both themes).
+Use the one the check names; it prints the override to paste after the theme import.
+
+| Accent | Hue | Dark: fill / strong | Light: fill / strong |
+|---|---|---|---|
+| blue (default) | 249° | `#0d99ff` / `#0a72c6` | `#0b84e0` / `#0a6fc0` |
+| violet | 293° | `#9c78fd` / `#704ec0` | `#8862e5` / `#6a48b9` |
+| magenta | 332° | `#d561c8` / `#9e3a93` | `#be4bb1` / `#97338d` |
+| cyan | 222° | `#00a5cb` / `#007590` | `#008eaf` / `#006e89` |
+
+Override in the project's own CSS, never in the kit's theme file. If nothing clears 35° (a
+full-spectrum prototype, or colours the person picks), keep blue and make selection shape-led rather
+than colour-led, with a two-tone outline that reads on any background:
+
+```css
+box-shadow: 0 0 0 1.5px var(--signal), 0 0 0 3px var(--field);
+```
 
 ## 3. Assert in the browser
 

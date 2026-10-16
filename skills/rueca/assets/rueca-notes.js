@@ -10,7 +10,7 @@
                                                labels: { angle: 'Light angle' }, t: clock.now })
        await ruecaNotes.send({ kind: 'values', snapshot })
        await ruecaNotes.send({ kind: 'comment', text: 'Shadow too hard here', anchor: { on: 'artboard', x: 0.4, y: 0.6 },
-                               snapshot, image: ruecaNotes.capture(stageEl, { x: 0.4, y: 0.6 }) })
+                               snapshot, image: ruecaNotes.capture(stageEl, { x: 0.4, y: 0.6 }) })   // send waits for it
        const stop = ruecaNotes.watch((notes) => render(notes))   // the agent's replies arrive in note.replies
        await ruecaNotes.reply(note.id, 'Better. Try it smaller')   // answer it: the thread goes back to the agent
        await ruecaNotes.done(note.id)                              // only the person closes a thread
@@ -80,39 +80,127 @@
     return s
   }
 
-  /** A JPEG data URL of the canvases inside `el` as they sit on screen, with a ring at `anchor` (x, y as 0–1). Call it
-      from the frame you just drew in: a WebGL canvas without preserveDrawingBuffer is empty after the frame ends. */
+  // The DOM and inline SVG part of a thumbnail, as the kit's snapshotElement does it: a clone with every computed
+  // style written inline (diffed against a blank iframe's defaults to keep it small), inside an SVG <foreignObject>,
+  // loaded as an image. Canvases, images, video and iframes keep their boxes here but are drawn separately.
+  var SVG_NS = 'http://www.w3.org/2000/svg'
+  var blankFrame = null, defaultsByTag = {}
+  function defaultStyle(node) {
+    var key = node.namespaceURI + '|' + node.localName
+    if (defaultsByTag[key]) return defaultsByTag[key]
+    if (!blankFrame) {
+      blankFrame = document.createElement('iframe')
+      blankFrame.setAttribute('aria-hidden', 'true')
+      blankFrame.style.cssText = 'position:fixed;left:-9999px;top:0;width:10px;height:10px;visibility:hidden;border:0'
+      document.body.appendChild(blankFrame)
+    }
+    var d = blankFrame.contentDocument
+    var probe = node.namespaceURI === SVG_NS ? d.createElementNS(SVG_NS, node.localName) : d.createElement(node.localName)
+    var host = probe
+    if (node.namespaceURI === SVG_NS && node.localName !== 'svg') { host = d.createElementNS(SVG_NS, 'svg'); host.appendChild(probe) }
+    d.body.appendChild(host)
+    var cs = blankFrame.contentWindow.getComputedStyle(probe), map = {}
+    for (var i = 0; i < cs.length; i++) map[cs[i]] = cs.getPropertyValue(cs[i])
+    host.remove()
+    return (defaultsByTag[key] = map)
+  }
+  function styledClone(node, parentStyle) {
+    if (node.nodeType === 3) return node.cloneNode()
+    if (node.nodeType !== 1 || node.localName === 'script' || node.localName === 'style') return null
+    var cs = getComputedStyle(node)
+    if (cs.display === 'none') return null
+    var copy = node.cloneNode(false), def = defaultStyle(node), out = []
+    for (var i = 0; i < cs.length; i++) {
+      var p = cs[i]
+      if (p.lastIndexOf('--', 0) === 0) continue
+      var v = cs.getPropertyValue(p)
+      // border widths always: a 0px width equals the default, but would fall back to `medium` beside a set style
+      if (def[p] !== v || (parentStyle && parentStyle.getPropertyValue(p) !== v) || /^border-\w+-width$/.test(p)) out.push(p + ':' + v)
+    }
+    if (/^(canvas|img|video|iframe)$/.test(node.localName)) { out.push('visibility:hidden'); copy.setAttribute('style', out.join(';')); return copy }
+    copy.setAttribute('style', out.join(';'))
+    if (node.localName === 'input' || node.localName === 'textarea') copy.setAttribute('value', node.value)
+    for (var c = node.firstChild; c; c = c.nextSibling) { var k = styledClone(c, cs); if (k) copy.appendChild(k) }
+    return copy
+  }
+  function drawDom(el, w, h) {
+    var wrap = document.createElement('div')
+    wrap.setAttribute('style', 'width:' + w + 'px;height:' + h + 'px;position:relative;overflow:hidden')
+    var clone = styledClone(el, getComputedStyle(el.parentElement || document.body))
+    if (!clone) return Promise.resolve(null)
+    // the element's own place on the page (fixed, offset, zoomed by a stage) isn't part of the picture
+    // (appended last, so it beats the logical inset-* and margin-* copies of the same values)
+    clone.setAttribute('style', clone.getAttribute('style') + ';position:relative;inset:0 auto auto 0;margin:0;transform:none')
+    wrap.appendChild(clone)
+    var svg = '<svg xmlns="' + SVG_NS + '" width="' + w + '" height="' + h + '"><foreignObject x="0" y="0" width="100%" height="100%">' +
+      new XMLSerializer().serializeToString(wrap) + '</foreignObject></svg>'
+    var img = new Image()
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
+    return img.decode().then(function () {
+      var c = document.createElement('canvas')
+      c.width = w; c.height = h
+      c.getContext('2d').drawImage(img, 0, 0, w, h)
+      c.getContext('2d').getImageData(0, 0, 1, 1)   // throws where the browser taints foreignObject: leave the DOM out then
+      return c
+    }).catch(function () { return null })
+  }
+
+  /** A promise of a JPEG data URL of `el` as it sits on screen: its DOM and inline SVG, then its canvases and
+      images where they are, with a ring at `anchor` (x, y as 0–1). Canvases are copied at once, so call it from
+      the frame you just drew in: a WebGL canvas without preserveDrawingBuffer is empty after the frame ends.
+      Text in the thumbnail uses a system face. Resolves undefined when there's nothing to draw. */
   function capture(el, anchor, maxWidth) {
     var box = el.getBoundingClientRect()
-    if (!box.width || !box.height) return undefined
+    if (!box.width || !box.height) return Promise.resolve(undefined)
     var k = Math.min(1, (maxWidth || 800) / box.width)
-    var out = document.createElement('canvas')
-    out.width = Math.round(box.width * k); out.height = Math.round(box.height * k)
-    var ctx = out.getContext('2d')
-    var bg = getComputedStyle(el).backgroundColor
-    ctx.fillStyle = bg && !/rgba\(0, 0, 0, 0\)|transparent/.test(bg) ? bg : '#1a1a1a'
-    ctx.fillRect(0, 0, out.width, out.height)
-    var canvases = el.tagName === 'CANVAS' ? [el] : Array.prototype.slice.call(el.querySelectorAll('canvas'))
-    canvases.forEach(function (c) {
-      var r = c.getBoundingClientRect()
-      try { ctx.drawImage(c, (r.left - box.left) * k, (r.top - box.top) * k, r.width * k, r.height * k) } catch (e) { /* tainted */ }
-    })
-    if (anchor) {
-      var x = Math.min(1, Math.max(0, anchor.x)) * out.width, y = Math.min(1, Math.max(0, anchor.y)) * out.height
-      var R = Math.max(10, out.width / 40), lw = Math.max(3, out.width / 200)
-      ctx.lineWidth = lw
-      ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, R + lw, 0, Math.PI * 2); ctx.stroke()
-      ctx.strokeStyle = '#ff3b30'; ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.stroke()
+    var place = function (node) {
+      var r = node.getBoundingClientRect()
+      return [(r.left - box.left) * k, (r.top - box.top) * k, r.width * k, r.height * k]
     }
-    try { return out.toDataURL('image/jpeg', 0.85) } catch (e) { return undefined }
+    // canvases now, while their pixels are there; images can wait
+    var media = (el.tagName === 'CANVAS' ? [el] : Array.prototype.slice.call(el.querySelectorAll('canvas, img'))).map(function (n) {
+      if (n.tagName === 'IMG') return { src: n, at: place(n) }
+      if (!n.width || !n.height) return null
+      var copy = document.createElement('canvas')
+      copy.width = n.width; copy.height = n.height
+      try { copy.getContext('2d').drawImage(n, 0, 0) } catch (e) { return null }   // tainted
+      return { src: copy, at: place(n) }
+    }).filter(Boolean)
+    var dom = el.tagName === 'CANVAS' ? Promise.resolve(null) : drawDom(el, Math.round(el.offsetWidth || box.width), Math.round(el.offsetHeight || box.height))
+    return dom.then(function (domCanvas) {
+      var out = document.createElement('canvas')
+      out.width = Math.round(box.width * k); out.height = Math.round(box.height * k)
+      var ctx = out.getContext('2d')
+      var bg = getComputedStyle(el).backgroundColor
+      ctx.fillStyle = bg && !/rgba\(0, 0, 0, 0\)|transparent/.test(bg) ? bg : '#1a1a1a'
+      ctx.fillRect(0, 0, out.width, out.height)
+      if (domCanvas) ctx.drawImage(domCanvas, 0, 0, out.width, out.height)
+      media.forEach(function (m) {
+        if (m.src.tagName === 'IMG' && !(m.src.complete && m.src.naturalWidth)) return
+        try { ctx.drawImage(m.src, m.at[0], m.at[1], m.at[2], m.at[3]) } catch (e) { /* tainted or broken */ }
+      })
+      if (anchor) {
+        var x = Math.min(1, Math.max(0, anchor.x)) * out.width, y = Math.min(1, Math.max(0, anchor.y)) * out.height
+        var R = Math.max(10, out.width / 40), lw = Math.max(3, out.width / 200)
+        ctx.lineWidth = lw
+        ctx.strokeStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, R + lw, 0, Math.PI * 2); ctx.stroke()
+        ctx.strokeStyle = '#ff3b30'; ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.stroke()
+      }
+      try { return out.toDataURL('image/jpeg', 0.85) } catch (e) { return undefined }
+    })
   }
 
   window.ruecaNotes = {
     endpoint: endpoint,
     snapshot: snapshot,
     capture: capture,
-    /** { kind: 'values' | 'comment', text?, anchor?, snapshot, image? } → the stored note */
-    send: function (note) { return call('', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(note) }) },
+    /** { kind: 'values' | 'comment', text?, anchor?, snapshot, image? } → the stored note. `image` may be capture()'s promise. */
+    send: function (note) {
+      return Promise.resolve(note.image).then(function (image) {
+        var body = JSON.stringify(Object.assign({}, note, { image: image }))
+        return call('', { method: 'POST', headers: { 'content-type': 'application/json' }, body: body })
+      })
+    },
     list: function () { return call('').then(function (b) { return Array.isArray(b) ? b : [] }) },
     /** Answer a comment; it goes back to the agent (a done one reopens). → the note */
     reply: function (id, text) { return call('?id=' + encodeURIComponent(id), { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: text }) }) },

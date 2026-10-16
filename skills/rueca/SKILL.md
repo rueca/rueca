@@ -49,7 +49,8 @@ you read rides along in every later turn.
      opens or ships that file as is) → install.md §C, theme.css plus the visual rules. When the only
      problem is that this session can't run npm, use "not installed yet" above.
 3. **Write the schema first** — one line per knob, each with a `hint`. It drives the
-   inspector, defaults, reset, the changed cue, presets, undo, share link and agent export.
+   inspector, defaults, reset, the changed cue (a knob off its default gets a brighter label and a small
+   accent dot), presets, undo, share link and agent export.
    Then rank it. What the presets vary and what gets tuned every session stays in view, about 8–12
    rows. A section's rarely touched tail gets `more: true`; an optional feature becomes a folder with
    `toggle`; grid, snap, fps and units go in a `place: 'settings'` folder. Rules: `references/layouts.md`
@@ -58,8 +59,9 @@ you read rides along in every later turn.
    undo, persist and share. Never keep them in `useState`. Set `presetKeys` so "Save preset" captures the look,
    not the export size or the document. `label` renames a row (`p.number(4, { label: 'Blur (px)' })`),
    and motion gets `p.spring({ stiffness, damping, mass })` or `p.curve([…])` rather than loose numbers.
-4. **Build the artifact as a pure function of `(values, t)`**, drawn by a surface the clock
-   ticks — never by a hand-written rAF loop, and never by re-rendering React on every frame.
+4. **Build the artifact as a pure function of `(values, t)`**, drawn by a surface (the kit component
+   that holds the art and redraws it) that the clock ticks — never by a hand-written rAF loop, and never
+   by re-rendering React on every frame.
    - Canvas, WebGL, three.js, p5: the surfaces below.
    - **SVG or DOM that moves**: React renders the structure from `useValues` (it changes only when a
      knob does), and the clock moves it through refs. Subscribe once, read values with
@@ -155,7 +157,8 @@ nothing to strip before shipping. Leave them out only when the person asks.
 Expensive params: `p.number(…, { live: false })` and apply them
 in `params.onCommit((v, meta) => …)` — that fires on pointer-up, not every drag frame.
 
-Other surfaces, same contract: `WebGLSurface` (`setup(gl)` → `draw(gl, frame, state)`),
+Other surfaces, same contract: `WebGLSurface` (WebGL2: `setup(gl)` once, then `draw(gl, f, state)` each tick
+with the starter's `f`. Export it with `renderWebGLPNG`, which re-renders at size; kit-api.md §4),
 `MountSurface` (`mount={(el, api) => { const s = start(el); return () => s.dispose() }}` for
 vanilla three.js / any imperative lib; push changes via `params.subscribe` / `params.onCommit`,
 never re-mount), `FrameSurface` (an existing page).
@@ -172,18 +175,25 @@ artboard on a phone) — and draw in output units so the download looks like wha
 
 ## Non-negotiables
 
-- **Neutral chrome, brand inside the artboard.** Tokens only in chrome (`bg-panel`, `text-fg`,
-  `text-fg-muted`, `bg-control`, `ring-signal`…); a hex colour belongs inside the artwork only.
-- **Four control surfaces** — well, track, raised, active — never conflated.
+- **Neutral chrome, brand inside the artboard.** The chrome is the tool's own UI (panels, toolbar,
+  timeline). Tokens only there (`bg-panel`, `text-fg`, `text-fg-muted`, `bg-control`, `ring-signal`…);
+  a hex colour belongs inside the artwork only.
+- **Four control surfaces, never conflated.** These are the fills a control sits on. **Well** is recessed
+  below the panel (a preset grid, a code block). **Track** is a groove that must stay visible (a slider's
+  rail, a switch that's off). **Raised** sits above a well (a knob's cap, a pill inside a well). **Active**
+  is a toggled control sitting straight on a panel (a pressed icon button, the chosen segment). Mix two up
+  and a state disappears (`visual-rules.md` §2).
 - **Radius and shadow, not borders.** Sentence case, never micro-caps. Tabular numbers on
   anything live.
-- **Sizes from the density names** (`h-row`, `h-control`, `size-icon`, `px-pad`, `text-ui`,
-  `rounded-control`…), never `h-6` / `px-3` / `text-[11px]`, or the part ignores the density setting.
+- **Sizes from the density names**: the size classes that follow View → Density (default, comfortable,
+  compact), such as `h-row`, `h-control`, `size-icon`, `px-pad`, `text-ui` and `rounded-control`. Never
+  `h-6` / `px-3` / `text-[11px]`, or the part ignores the density setting.
 - **Blue only for focus, selection and the primary action; fills are neutral ink; labels dimmer than
-  values.** A switch that's on or a slider's fill is `bg-ink` / `bg-fill`, never blue. Labels are
+  values.** Ink is the near-white (dark theme) or near-black (light theme) fill for anything switched on.
+  A switch that's on or a slider's fill is `bg-ink` / `bg-fill`, never blue. Labels are
   `text-fg-faint`, untouched values `text-fg-value`, changed values `text-fg`. The playhead is
-  red/orange, not the accent. The accent defaults to system blue (`--signal`) and must not clash with
-  the work: run `scripts/accent-check.mjs <url>` before handoff.
+  red/orange, not the accent. The accent (the `signal` token, system blue by default) must not clash with
+  the work: run `scripts/accent-check.mjs <url>` on the defaults and each preset before handoff (`qa.md` §2).
 - **Every number is a scrubber** (drag, type, expressions) and every drag has a non-drag
   alternative — kit controls already do this; don't hand-build inputs.
 - **Derive the timeline from the same maths that draws the render**, never a hand-kept list.

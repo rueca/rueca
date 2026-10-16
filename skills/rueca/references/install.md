@@ -232,15 +232,30 @@ Iframes eat pointer events — give the stage a Hand / Interact toggle (`archite
 This is the one place hand-building is right: the tool must stay one HTML file that opens with no
 build step, so the kit has nowhere to go. A session that can't run npm is not this case (§ The kit,
 not installed yet). Build the same harness by hand (one param table, undo, presets, share link) rather than skip it.
-Inline `assets/theme.css`, dropping its `@import` lines, `@custom-variant` and the `@theme inline`
-block — but first copy the block's `--font-ui` / `--font-mono` lines into `:root` (or the chrome
-renders in Times), and rewrite each `@utility name { … }` (`panel`, `cluster`, `pop`, `tabular`, …)
-as a plain `.name { … }` rule. Use the raw `var(--panel)` etc. directly, and
-follow `visual-rules.md` to the letter. Keep the same architecture — one param table,
-pure render, refs — so it can be upgraded to the kit later.
+Inline `assets/theme.css`, dropping its `@import` lines, the `@font-face` block under them (it points
+into the `inter-ui` npm package), `@custom-variant` and the `@theme inline` block. First copy that
+block's `--font-ui` / `--font-mono` lines into `:root`, or the chrome renders in Times. Then rewrite each
+`@utility name { … }` (`panel`, `cluster`, `pop`, `tabular`, …) as a plain `.name { … }` rule. Use the
+raw `var(--panel)` etc. directly, and follow `visual-rules.md` to the letter. Size every control from
+its geometry table (§ 5, Control geometry) instead of guessing. Keep the same architecture (one param
+table, pure render, refs) so it can be upgraded to the kit later.
 
-Fonts: copy the `.woff2` into the project and `@font-face` it; serve over HTTP.
-Chrome blocks `@font-face` over `file://` and silently falls back.
+Fonts: the skill ships no font file. Fetch Inter's Latin subset (100 KB) into the project:
+
+```bash
+curl -fsSLo InterVariable.woff2 https://cdn.jsdelivr.net/npm/inter-ui@4.1.1/variable-latin/InterVariable-subset.woff2
+```
+
+Then declare it with `@font-face { font-family: InterVariable; font-weight: 100 900; font-display: swap;
+src: url("InterVariable.woff2") format("woff2"); }` and serve the page over HTTP, because Chrome blocks
+`@font-face` over `file://` and silently falls back. If the page has to open from disk as one file,
+inline the font instead: `url(data:font/woff2;base64,…)`, with the text from
+`base64 < InterVariable.woff2 | tr -d '\n'`.
+
+Can't fetch it (no network, or told not to run anything)? Leave Inter out and delete the theme's
+`font-feature-settings: "cv05", "cv08"` line. Those codes pick Inter's alternate I and l, but on SF Pro,
+the fallback on a Mac, they turn on a slashed zero and a serifed I. Put the download on the handoff's
+`Not run:` line.
 
 Comments and Send to agent still belong here. Run `scripts/notes-server.mjs` beside the page and add
 `assets/rueca-notes.js` to it. The page draws its own Comment button, pins and thread card, hidden while
