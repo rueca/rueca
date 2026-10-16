@@ -60,7 +60,6 @@ export function PersonasPanel() {
         <Row label="Age"><ScrubValue boxed value={p.age} min={12} max={99} onChange={(age, f) => editPersona((x) => ({ ...x, age }), { commit: f, label: 'Age' })} className="flex-1" label="Age" /></Row>
         <div className="px-pad pt-2">
           <div className="relative rounded-cluster bg-well px-pad py-2.5 text-ui leading-relaxed text-fg italic">
-            <span aria-hidden className="absolute -top-1 left-2 text-[22px] leading-none text-fg-faint not-italic">“</span>
             <InlineText bare allowEmpty value={p.quote} multiline onCommit={(quote) => set({ quote })} placeholder="Add a quote in their words" className="block whitespace-pre-wrap" label="Quote" />
           </div>
         </div>

@@ -216,7 +216,7 @@ export function MonitorPanel() {
           </div>
         </div>
       </div>
-      <KSection id="mixer" title="Mixer" hint="Level per track and the master. Sends to delay and reverb sit under the levels. Mute and solo are on the sequencer rows.">
+      <KSection id="mixer" title="Mixer · dB" hint="Level per track and the master, in dB. Sends to delay and reverb sit under the levels. Mute and solo are on the sequencer rows.">
         <Grid cols={5}>
           {TRACKS.map((t) => <PKnob key={t.id} k={`${t.id}Lvl`} size="sm" label={t.name} />)}
           <PKnob k="volume" size="sm" />

@@ -305,7 +305,7 @@ export function EffectStack<T extends StackItem>({
               {remove && removeIcon === 'trash' && (
                 <Tip label="Remove">
                   <button type="button" aria-label={`Remove ${name}`} onClick={(e) => { e.stopPropagation(); remove(it.id) }}
-                    className="hidden h-control w-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none group-focus-within/row:flex group-hover/row:flex hover:bg-hover hover:text-rec focus-visible:ring-2 focus-visible:ring-signal">
+                    className="hidden size-control shrink-0 items-center justify-center rounded-control text-fg-faint outline-none group-focus-within/row:flex group-hover/row:flex hover:bg-hover hover:text-rec focus-visible:ring-2 focus-visible:ring-signal">
                     <Trash2 size={13} strokeWidth={1.5} />
                   </button>
                 </Tip>
@@ -335,7 +335,7 @@ export function EffectStack<T extends StackItem>({
                   <Tip label={hidden ? 'Show' : 'Hide'}>
                     <button type="button" aria-label={hidden ? `Show ${name}` : `Hide ${name}`} aria-pressed={hidden}
                       onClick={(e) => { e.stopPropagation(); toggle(it.id) }}
-                      className={cn('flex h-control w-icon-sm items-center justify-center rounded-control outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', hidden ? 'text-fg-muted' : 'text-fg-faint')}>
+                      className={cn('flex size-control items-center justify-center rounded-control outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', hidden ? 'text-fg-muted' : 'text-fg-faint')}>
                       {hidden ? <EyeOff size={13} strokeWidth={1.5} /> : <Eye size={13} strokeWidth={1.5} />}
                     </button>
                   </Tip>
@@ -343,7 +343,7 @@ export function EffectStack<T extends StackItem>({
                 {remove && removeIcon === 'minus' && (
                   <Tip label="Remove">
                     <button type="button" aria-label={`Remove ${name}`} onClick={(e) => { e.stopPropagation(); remove(it.id) }}
-                      className="flex h-control w-icon-sm items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+                      className="flex size-control items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
                       <Minus size={13} strokeWidth={1.5} />
                     </button>
                   </Tip>

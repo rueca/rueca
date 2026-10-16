@@ -25,6 +25,7 @@ import { IconButton } from '../ui/button'
 import { Menu } from '../ui/controls'
 import { useStudio } from '../layout/Studio'
 import { useDensityPx } from '../core/density'
+import { fmtTick } from './ruler'
 
 export interface Key { t: number; ease?: string; value?: string | number; selected?: boolean }
 export interface Lane {
@@ -201,7 +202,7 @@ function TrackArea({
   const playX = X(t)
   const contentH = ruler + lanes.length * lane + 8
   return (
-    <div className="flex min-h-0 items-start overflow-y-auto overflow-x-hidden border-t border-line" style={{ maxHeight: height ?? 240, height: contentH }} onWheel={onWheel}>
+    <div className="flex min-h-0 items-start overflow-y-auto overflow-x-hidden border-t border-line" style={{ maxHeight: height ?? 240, height: contentH + 1 /* + the top border, or the strip scrolls by 1px */ }} onWheel={onWheel}>
       {/* names — both columns keep their content height, so a clamped strip scrolls instead of clipping lanes */}
       <div className="flex-none overflow-hidden border-r border-line" style={{ width: LABEL_W, height: contentH }}>
         <div className="h-ruler" />
@@ -221,7 +222,7 @@ function TrackArea({
             return (
               <div key={m} className="pointer-events-none absolute bottom-0" style={{ left: X(m) }}>
                 <div className={cn('w-px', major ? 'h-2 bg-line-strong' : 'h-1 bg-line')} />
-                {major && <div className="absolute bottom-2.5 left-1 tabular text-ui-sm text-fg-muted">{m >= 1000 ? `${m / 1000}s` : `${m}ms`}</div>}
+                {major && <div className="absolute bottom-2.5 left-1 tabular text-ui-sm text-fg-muted">{fmtTick(m, labelStep)}</div>}
               </div>
             )
           })}

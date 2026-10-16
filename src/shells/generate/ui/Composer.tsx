@@ -42,7 +42,7 @@ export function Composer() {
   }
 
   return (
-    <div className="@container panel pointer-events-auto flex w-full max-w-[780px] flex-col gap-2 p-2.5">
+    <div className="@container pointer-events-auto flex rounded-panel bg-panel shadow-[var(--shadow-panel)] w-full max-w-[780px] flex-col gap-2 p-2.5">
       {remix && (
         <div className="flex items-center gap-2 rounded-cluster bg-signal-soft py-1 pr-1 pl-1">
           <span className="size-icon overflow-hidden rounded-control bg-well">{remixPix && <img src={remixPix.url} alt="" className="h-full w-full object-cover" />}</span>

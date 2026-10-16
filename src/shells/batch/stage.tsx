@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { useStore } from 'zustand'
 import { Plus, TriangleAlert, ClipboardPaste, EyeOff } from 'lucide-react'
-import { Stage, Artboard, Empty, Button, Tip, useValues, useDoc, useCamera, type CameraStore } from '@kit'
+import { Stage, Artboard, Empty, Button, Tip, cn, useValues, useDoc, useCamera, type CameraStore } from '@kit'
 import { drawPost, ensureFonts, onShotReady, peekImage } from './artifact'
 import { doc, params, ui, effective, type DataRow, type SizeSpec, type V } from './model'
 import { packArtboards } from './local/pack'
@@ -112,9 +112,9 @@ export function BatchStage({ camera, issues }: { camera: CameraStore; issues: Re
             return (
               <Artboard key={s.id} x={p.x} y={p.y} width={s.w} height={s.h} background={eff.paper} selected={selected === s.id} onSelect={() => selectSize(s.id)}
                 label={
-                  <span className="flex items-center gap-1.5">
-                    <span className={selected === s.id ? 'text-signal-text' : 'text-fg-muted'}>{s.name}</span>
-                    {n > 0 && <span className="text-signal-text">{n} override{n > 1 ? 's' : ''}</span>}
+                  <span className="inline-flex max-w-full items-center gap-1.5 align-bottom">
+                    <span className={cn('min-w-0 truncate', selected === s.id ? 'text-signal-text' : 'text-fg-muted')}>{s.name}</span>
+                    {n > 0 && <span className="shrink-0 text-signal-text">{n} override{n > 1 ? 's' : ''}</span>}
                     {iss.length > 0 && (
                       <Tip label={iss.join(' · ')}><span className="flex items-center gap-0.5 text-key-text"><TriangleAlert size={11} strokeWidth={1.75} />{iss.length}</span></Tip>
                     )}

@@ -32,7 +32,7 @@ export function TokensPanel() {
                 style={{ background: hexOf(v.accentL, v.accentC, v.accentH), borderRadius: Math.min(14, v.radius), boxShadow: v.shadow === 'hard' ? '2px 2px 0 0 currentColor' : undefined, color: onAccent(hexOf(v.accentL, v.accentC, v.accentH)) }}>Aa</span>
               <span className="flex min-w-0 flex-col">
                 <span className="truncate text-ui font-medium text-fg">{p.name}</span>
-                <span className="line-clamp-2 text-ui-sm leading-tight text-fg-faint">{v.radius}px · {v.density}</span>
+                <span className="truncate text-ui-sm leading-tight text-fg-faint">{v.radius}px · {v.density}</span>
               </span>
             </button>
           )

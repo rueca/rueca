@@ -373,11 +373,11 @@ export function TrackTimeline(props: TrackTimelineProps) {
                   {props.onTrackToggle && (
                     <>
                       <button type="button" aria-label={tr.muted ? `Show ${tr.name}` : `Hide ${tr.name}`} aria-pressed={tr.muted} onClick={() => props.onTrackToggle!(tr.id, 'muted')}
-                        className={cn('flex h-control w-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.muted && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
+                        className={cn('flex size-control shrink-0 items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.muted && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
                         {tr.muted ? <EyeOff size={13} strokeWidth={1.5} /> : <Eye size={13} strokeWidth={1.5} />}
                       </button>
                       <button type="button" aria-label={tr.locked ? `Unlock ${tr.name}` : `Lock ${tr.name}`} aria-pressed={tr.locked} onClick={() => props.onTrackToggle!(tr.id, 'locked')}
-                        className={cn('flex h-control w-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.locked && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
+                        className={cn('flex size-control shrink-0 items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-signal', !tr.locked && 'opacity-0 group-hover/track:opacity-100 group-focus-within/track:opacity-100')}>
                         {tr.locked ? <Lock size={13} strokeWidth={1.5} /> : <LockOpen size={13} strokeWidth={1.5} />}
                       </button>
                     </>
@@ -385,9 +385,12 @@ export function TrackTimeline(props: TrackTimelineProps) {
                 </div>
                 <div className={cn('relative flex-none', tr.locked && 'bg-[repeating-linear-gradient(135deg,transparent_0_6px,var(--line)_6px_7px)]')} style={{ width: contentW }}
                   onPointerDown={(e) => { if (e.button === 0 && e.target === e.currentTarget) { props.onSelect([], 'replace'); props.onSeek(toFrame(timeAt(e.clientX), fps)) } }}>
-                  {clips.filter((c) => c.track === tr.id).map((c) => {
+                  {clips.filter((c) => c.track === tr.id).map((c, _, onTrack) => {
                     const Icon = c.icon
                     const w = Math.max(6, X(c.dur))
+                    // a later clip that overlaps this one paints over it: end the label where it starts, so it truncates
+                    const next = onTrack.reduce((n, o) => (o.start > c.start && o.start < c.start + c.dur && o.start < n ? o.start : n), Infinity)
+                    const lw = next === Infinity ? w : Math.min(w, X(next - c.start))
                     const mix = (p: number) => `color-mix(in oklab, ${c.color} ${p}%, var(--panel))`
                     return (
                       <div key={c.id} role="button" tabIndex={-1} aria-label={`${c.label}, ${(c.start / 1000).toFixed(2)}s to ${((c.start + c.dur) / 1000).toFixed(2)}s`} aria-pressed={!!c.selected}
@@ -404,10 +407,10 @@ export function TrackTimeline(props: TrackTimelineProps) {
                         <div className="absolute inset-x-0 top-0 h-[2px]" style={{ background: c.color }} />
                         {!!c.rampIn && <div className="pointer-events-none absolute top-0 bottom-0 left-0" style={{ width: Math.min(w, X(c.rampIn)), background: `linear-gradient(to top right, ${c.color} 0 49%, transparent 51%)`, opacity: 0.14 }} />}
                         {!!c.rampOut && <div className="pointer-events-none absolute top-0 right-0 bottom-0" style={{ width: Math.min(w, X(c.rampOut)), background: `linear-gradient(to top left, ${c.color} 0 49%, transparent 51%)`, opacity: 0.14 }} />}
-                        <div className="relative flex h-full min-w-0 items-center gap-1.5 px-2">
-                          {Icon && w > 34 && <Icon size={12} strokeWidth={1.75} className="shrink-0 text-fg/80" />}
-                          {w > 52 && <span className="truncate text-ui font-medium text-fg">{c.label}</span>}
-                          {c.detail && w > 140 && <span className="truncate text-ui-sm text-fg-muted">{c.detail}</span>}
+                        <div className="relative flex h-full min-w-0 items-center gap-1.5 px-2" style={{ maxWidth: lw }}>
+                          {Icon && lw > 34 && <Icon size={12} strokeWidth={1.75} className="shrink-0 text-fg/80" />}
+                          {lw > 52 && <span className="truncate text-ui font-medium text-fg">{c.label}</span>}
+                          {c.detail && lw > 140 && <span className="truncate text-ui-sm text-fg-muted">{c.detail}</span>}
                         </div>
                         {!tr.locked && (
                           <>

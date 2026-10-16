@@ -189,10 +189,10 @@ function MapInspector({ p }: { p: Persona }) {
         {low && high && (
           <div className="mt-2 flex flex-col gap-1 px-pad text-ui">
             <button type="button" className="flex items-center gap-2 rounded-control py-0.5 text-left hover:text-fg" onClick={() => ui.setState({ sel: { kind: 'stage', id: low.id } })}>
-              <span className="w-14 shrink-0 text-fg-faint">Low point</span><span className="text-fg">{low.name}</span><Badge tone="rec">{emoji(low.emotion)} {fmtEmotion(low.emotion)}</Badge>
+              <span className="w-label shrink-0 text-fg-faint">Low point</span><span className="text-fg">{low.name}</span><Badge tone="rec">{emoji(low.emotion)} {fmtEmotion(low.emotion)}</Badge>
             </button>
             <button type="button" className="flex items-center gap-2 rounded-control py-0.5 text-left hover:text-fg" onClick={() => ui.setState({ sel: { kind: 'stage', id: high.id } })}>
-              <span className="w-14 shrink-0 text-fg-faint">High point</span><span className="text-fg">{high.name}</span><Badge tone="ok">{emoji(high.emotion)} {fmtEmotion(high.emotion)}</Badge>
+              <span className="w-label shrink-0 text-fg-faint">High point</span><span className="text-fg">{high.name}</span><Badge tone="ok">{emoji(high.emotion)} {fmtEmotion(high.emotion)}</Badge>
             </button>
           </div>
         )}

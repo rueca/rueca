@@ -125,7 +125,7 @@ export default function BatchShell() {
                   <span className="tabular text-fg-faint">{rows.length ? row + 1 : 0}/{rows.length}</span>
                   <span className="min-w-0 flex-1 truncate text-left text-fg">{current?.name ?? 'No rows'}</span>
                   {rowIssueCount[row] ? <span className="text-key"><Badge tone="key">{rowIssueCount[row]}</Badge></span> : null}
-                  <ChevronDown size={12} className="text-fg-faint" />
+                  <ChevronDown size={12} strokeWidth={1.75} className="text-fg-faint" />
                 </Button>
               } items={[
                 { type: 'label', label: 'Preview row' },

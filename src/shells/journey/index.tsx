@@ -99,7 +99,7 @@ export default function JourneyShell() {
           start={<Brand name="Journey" doc={title} mark={Mark} />}
           center={
             <Cluster>
-              <Menu trigger={<Button size="md" active={!!filterTag}><Tag size={14} strokeWidth={1.5} />{filterTag ?? 'Highlight'}<ChevronDown size={12} className="text-fg-faint" /></Button>}
+              <Menu trigger={<Button size="md" active={!!filterTag}><Tag size={14} strokeWidth={1.5} />{filterTag ?? 'Highlight'}<ChevronDown size={12} strokeWidth={1.75} className="text-fg-faint" /></Button>}
                 items={[
                   { type: 'label', label: 'Highlight cards by tag' },
                   ...(tags.length ? tags.map(([t, n]) => ({ label: `${t}  ·  ${n}`, checked: filterTag === t, onClick: () => ui.setState({ filterTag: filterTag === t ? null : t }) })) : [{ label: 'No tags yet', disabled: true, onClick: () => {} }]),

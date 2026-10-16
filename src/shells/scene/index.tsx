@@ -301,7 +301,7 @@ function ViewChip({ v }: { v: V }) {
           { type: 'separator' },
           { label: 'Save current view', icon: Plus, shortcut: 'shift+v', onClick: saveView },
         ]}
-        trigger={<Button size="sm" className="gap-1"><Camera size={13} strokeWidth={1.5} />{cur?.name ?? 'Free camera'}<ChevronDown size={12} className="text-fg-faint" /></Button>}
+        trigger={<Button size="sm" className="gap-1"><Camera size={13} strokeWidth={1.5} />{cur?.name ?? 'Free camera'}<ChevronDown size={12} strokeWidth={1.75} className="text-fg-faint" /></Button>}
       />
     </div>
   )

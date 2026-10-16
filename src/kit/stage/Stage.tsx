@@ -297,8 +297,9 @@ export function Artboard({
           style={{ transform: `scale(${1 / zoom})`, maxWidth: Math.max(48, width * zoom) }}
         >
           {/* inline so a label passed with an icon (<Icon/> Desktop) stays on one line */}
-          <span className="flex min-w-0 items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap [&>svg]:shrink-0">{label}</span>
-          <span className="shrink-0 tabular text-fg-faint">{width} × {height}</span>
+          {/* a block, not flex, so a long name ends in an ellipsis; the size gives way first */}
+          <span className="block min-w-0 truncate [&>svg]:mr-1 [&>svg]:inline-block [&>svg]:align-[-2px]">{label}</span>
+          <span className="min-w-0 shrink-[8] truncate tabular text-fg-faint">{width} × {height}</span>
         </div>
       )}
       <div

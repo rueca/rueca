@@ -47,9 +47,12 @@ export interface ScrubProps {
   soft?: [number, number]
 }
 
+/** A leading hyphen as a true minus sign, for numbers on screen. */
+export const minus = (s: string) => s.replace(/^-(?=[\d.])/, '\u2212')
+
 /** "+8" / "-8" typed into a Mixed field → a delta for every selected item (break-it V9) */
 export function relativeDelta(text: string): number | null {
-  const m = text.trim().replace(/,/g, '.').match(/^([+-])\s*([\d.]+(?:e[+-]?\d+)?)$/i)
+  const m = text.trim().replace(/,/g, '.').replace(/\u2212/g, '-').match(/^([+-])\s*([\d.]+(?:e[+-]?\d+)?)$/i)
   if (!m) return null
   const n = Number(m[2]) * (m[1] === '-' ? -1 : 1)
   return Number.isFinite(n) ? n : null
@@ -57,7 +60,7 @@ export function relativeDelta(text: string): number | null {
 
 /** Typed field text → number: "120/2", "+8" (relative to `current`), "1e3". null = reject. */
 export function evaluate(text: string, current: number): number | null {
-  const s = text.trim().replace(/,/g, '.').replace(/[a-z%°×]+$/i, '')
+  const s = text.trim().replace(/,/g, '.').replace(/\u2212/g, '-').replace(/[a-z%°×]+$/i, '')
   if (!s) return null
   const rel = s.match(/^([+\-*/])\s*(-?[\d.]+(?:e[+-]?\d+)?)$/i)
   if (rel && !/^-[\d.]+(?:e[+-]?\d+)?$/i.test(s)) {
@@ -102,7 +105,8 @@ export const ScrubValue = forwardRef<HTMLDivElement, ScrubProps & Omit<HTMLAttri
   const settle = useSettle(value, commitNum)
   const settleNudge = () => settle.flush()
 
-  const display = mixed ? 'Mixed' : fmt ? fmt(value) : `${value.toFixed(decimalsOf(step))}${unit ?? ''}`
+  // a true minus (−) on screen: tabular Inter's hyphen reads as "- 2.5"; typing either is fine
+  const display = mixed ? 'Mixed' : minus(fmt ? fmt(value) : `${value.toFixed(decimalsOf(step))}${unit ?? ''}`)
 
   // A fmt that renders percent ("-3.5%" for -0.035) edits in percent too, so typing "5%" means 5%,
   // not 500% pinned to max (break-it V11). Scale is read off fmt(1): "100%" → ×100, "1%" → ×1.
