@@ -644,6 +644,7 @@
       ],
       "registryDependencies": [
         "https://rueca.dev/r/button.json",
+        "https://rueca.dev/r/controls.json",
         "https://rueca.dev/r/core.json",
         "https://rueca.dev/r/stage.json",
         "https://rueca.dev/r/studio-layout.json",

@@ -11,8 +11,11 @@
    a knob's row in the Inspector to pin it to that param (keyboard: Enter on the
    artboard target drops a pin in its middle; Enter on a focused knob pins to it).
    The note carries the snapshot (values, link, steps, playhead) and a
-   thumbnail with the point ringed. The agent's reply shows on the pin as soon
-   as it resolves the note (the folder is polled), with a toast.
+   thumbnail with the point ringed. A comment is a thread: the agent's reply
+   shows on the pin as soon as it writes it (the folder is polled), with a
+   toast, and you can answer it. A pin says whose turn it is: quiet while the
+   agent's, blue for a reply you haven't read, ink once read. Only you close a
+   thread (Done); done threads leave the board for the list's Done tab.
 
    Everything renders nothing until the dev server's notes route answers
    (ruecaNotes()), so a static build never shows it.
@@ -21,7 +24,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties
 import { createPortal } from 'react-dom'
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { Check, MessageCirclePlus, MessagesSquare, Send, Trash2, History } from 'lucide-react'
+import { ArrowUp, Check, MessageCirclePlus, MessagesSquare, RotateCcw, Trash2, History } from 'lucide-react'
 import { Popover } from '@base-ui/react/popover'
 import { useParamState, type AnyParams } from '../core/params'
 import type { HistoryLike } from '../core/history'
@@ -31,12 +34,14 @@ import { humanize } from '../core/schema'
 import { useHotkeys } from '../core/hotkeys'
 import { clamp, cn } from '../core/cn'
 import {
-  CANVAS_REACH, captureImage, captureSnapshot, deleteNote, findNotesEndpoint, refreshNotes, restoreSnapshot, sendNote, snapshotStatus, watchNotes,
+  CANVAS_REACH, captureImage, captureSnapshot, deleteNote, findNotesEndpoint, noteMessages, noteTurn, refreshNotes, replyToNote, restoreSnapshot,
+  sendNote, setNoteStatus, snapshotStatus, watchNotes,
   type NoteAnchor, type StudioNote,
 } from '../core/notes'
 import { useZoom } from '../stage/Stage'
 import { useSafeArea } from '../layout/Studio'
 import { Button, IconButton } from '../ui/button'
+import { Segmented, Switch } from '../ui/controls'
 import { toast } from './toast'
 import { Tip } from '../ui/tooltip'
 import { revealInScroller } from '../core/scroll'
@@ -55,8 +60,10 @@ interface NotesUI {
   watching: Record<string, number>
   open: string | null
   draft: Draft | null
+  /** done threads keep their pins on the board too (the list's Done tab switches it) */
+  showDone: boolean
 }
-export const notesUI = createStore<NotesUI>(() => ({ commenting: false, tools: {}, watching: {}, open: null, draft: null }))
+export const notesUI = createStore<NotesUI>(() => ({ commenting: false, tools: {}, watching: {}, open: null, draft: null, showDone: false }))
 const useUI = <T,>(pick: (s: NotesUI) => T) => useStore(notesUI, pick)
 const bump = (key: 'tools' | 'watching', id: string, by: number) => notesUI.setState((s) => {
   const next = { ...s[key], [id]: (s[key][id] ?? 0) + by }
@@ -82,38 +89,72 @@ export function useNotesEndpoint() {
   return ok
 }
 
+/* What you've read: per comment, how many messages its thread had when you last looked. Kept in this browser, so
+   opening a thread never rewrites its file. A comment whose last message is the agent's and that has grown since is
+   a new reply: its pin turns blue. */
+const SEEN_KEY = 'rueca:notes:seen'
+const seen = createStore<Record<string, number>>(() => {
+  try {
+    const v = JSON.parse(localStorage.getItem(SEEN_KEY) ?? '{}')
+    return v && typeof v === 'object' && !Array.isArray(v) ? v : {}
+  } catch { return {} }
+})
+const writeSeen = (next: Record<string, number>) => {
+  seen.setState(next, true)
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify(next)) } catch { /* private window: read state lasts the visit */ }
+}
+function markSeen(n: StudioNote) {
+  const count = noteMessages(n).length
+  if ((seen.getState()[n.id] ?? 0) !== count) writeSeen({ ...seen.getState(), [n.id]: count })
+}
+const isUnread = (n: StudioNote, map: Record<string, number>) => noteTurn(n) === 'person' && (map[n.id] ?? 0) < noteMessages(n).length
+
+type PinState = 'waiting' | 'new' | 'replied' | 'done'
+const pinState = (n: StudioNote, map: Record<string, number>): PinState =>
+  n.status === 'done' ? 'done' : noteTurn(n) === 'agent' ? 'waiting' : isUnread(n, map) ? 'new' : 'replied'
+const STATE_LABEL: Record<PinState, string> = { waiting: 'waiting for the agent', new: 'new reply', replied: 'the agent replied', done: 'done' }
+const lastReply = (n: StudioNote) => n.replies[n.replies.length - 1]
+
 /* One watcher for the page turns the agent's replies into toasts, however many components show notes. It runs while
    any notes UI is mounted, and only announces notes for the tools on screen. */
 let stopReplies: (() => void) | null = null
 function watchReplies() {
   if (stopReplies) return
-  // resolved notes already toasted (or resolved before the page looked): a note that vanishes for a poll (a
-  // half-written file) and comes back resolved is still announced once, and so is one created and resolved
-  // between two polls
+  // agent replies already toasted (or there before the page looked), as id:length: a note that vanishes for a poll
+  // (a half-written file) and comes back is still announced once, and so is one answered between two polls
   let announced: Set<string> | null = null
+  const key = (n: StudioNote) => `${n.id}:${n.replies.length}`
   stopReplies = watchNotes((notes) => {
-    if (!announced) { announced = new Set(notes.filter((n) => n.status === 'resolved').map((n) => n.id)); return }
-    const { watching, tools } = notesUI.getState()
-    for (const n of notes) {
-      if (n.status !== 'resolved' || announced.has(n.id)) continue
-      announced.add(n.id)
+    // forget read state for comments that are gone
+    const ids = new Set(notes.map((n) => n.id))
+    const map = seen.getState()
+    if (Object.keys(map).some((k) => !ids.has(k))) writeSeen(Object.fromEntries(Object.entries(map).filter(([k]) => ids.has(k))))
+    const answered = notes.filter((n) => lastReply(n)?.from === 'agent')
+    const first = !announced
+    announced ??= new Set(answered.map(key))
+    const { watching, tools, open } = notesUI.getState()
+    for (const n of answered) {
       if (!watching[n.snapshot.tool]) continue
-      const text = n.resolution?.text ?? ''
-      const description = text.length > 160 ? `${text.slice(0, 157)}…` : text || undefined
-      if (n.kind === 'comment') {
-        toast('The agent replied', {
-          description, timeout: 8000,
-          // Show only where the pin is on screen; it opens the thread without dropping a comment being written
-          ...(tools[n.snapshot.tool] ? { action: { label: 'Show', onClick: () => notesUI.setState({ open: n.id }) } } : {}),
-        })
-      } else {
-        toast('The agent applied your values', { description, timeout: 8000 })
-        // a values note has no thread to clear it from: once it's announced, it has done its job
+      if (n.kind === 'values') {
+        // a values note has no thread: once the agent has answered it, it has done its job
+        if (!first && !announced.has(key(n))) toast('The agent applied your values', { description: clip(lastReply(n)!.text), timeout: 8000 })
+        announced.add(key(n))
         deleteNote(n.id).then(refreshNotes, () => {})
+        continue
       }
+      if (announced.has(key(n))) continue
+      announced.add(key(n))
+      // the thread is open: the reply appears right there
+      if (open === n.id) continue
+      toast('The agent replied', {
+        description: clip(lastReply(n)!.text), timeout: 8000,
+        // Show only where the pin is on screen; it opens the thread without dropping a comment being written
+        ...(tools[n.snapshot.tool] ? { action: { label: 'Show', onClick: () => notesUI.setState({ open: n.id }) } } : {}),
+      })
     }
   })
 }
+const clip = (text: string) => (text.length > 160 ? `${text.slice(0, 157)}…` : text || undefined)
 
 /** Every note in .rueca/notes/, kept live. Empty without the notes route. Pass the tool id to have its replies announced. */
 export function useNotes(tool?: string): StudioNote[] {
@@ -140,18 +181,20 @@ export function CommentButton({ params, hotkey = 'c' }: { params?: AnyParams; ho
   const layers = useUI((s) => Object.keys(s.tools).length)
   const commenting = useUI((s) => s.commenting)
   const notes = useNotes(params?.id)
+  const map = useStore(seen)
   const on = available && layers > 0
-  const waiting = notes.filter((n) => n.kind === 'comment' && n.status === 'open' && (!params || n.snapshot.tool === params.id)).length
+  // the badge counts what needs you: replies you haven't read
+  const fresh = notes.filter((n) => n.kind === 'comment' && (!params || n.snapshot.tool === params.id) && isUnread(n, map)).length
   const toggle = () => notesUI.setState((s) => ({ commenting: !s.commenting, draft: null, open: null }))
   // a held key repeats: only the first press toggles
   useHotkeys(on && hotkey ? { [hotkey]: { run: (e) => { if (!e.repeat) toggle() }, label: 'Comment', group: 'Tools' } } : {}, [on, hotkey], { priority: 0 })
   if (!on) return null
-  const label = `${commenting ? 'Stop commenting' : 'Comment'}${waiting ? ` (${waiting} waiting for the agent)` : ''}`
+  const label = `${commenting ? 'Stop commenting' : 'Comment'}${fresh ? ` (${fresh} new ${fresh === 1 ? 'reply' : 'replies'})` : ''}`
   return (
     <IconButton icon={MessageCirclePlus} label={label} shortcut={hotkey || undefined} active={commenting} onClick={toggle} className="relative">
-      {waiting > 0 && (
+      {fresh > 0 && (
         <span aria-hidden className="absolute -top-1 -right-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-signal-strong px-0.5 text-ui-sm leading-none font-semibold text-signal-fg tabular">
-          {waiting}
+          {fresh}
         </span>
       )}
     </IconButton>
@@ -166,18 +209,28 @@ export const COMMENT_CURSOR = `url("data:image/svg+xml,${encodeURIComponent(BUBB
 
 /**
  * Every comment on this tool as a list, beside the Comment button. A pin only shows while its spot is on screen
- * (a knob's row in a collapsed section has none), so the list is where nothing gets lost: each row opens to the
- * full comment and the agent's reply, shows its pin, or clears it.
+ * (a knob's row in a collapsed section has none), so the list is where nothing gets lost. Open threads group by
+ * whose turn it is, yours first; done ones have their own tab. Each row opens to the whole thread.
  */
 export function CommentsList({ params }: { params: AnyParams }) {
   const available = useNotesEndpoint()
   const layers = useUI((s) => Object.keys(s.tools).length)
-  const notes = useNotes(params.id).filter((n) => n.kind === 'comment' && n.snapshot.tool === params.id)
+  const showDone = useUI((s) => s.showDone)
+  const all = useNotes(params.id).filter((n) => n.kind === 'comment' && n.snapshot.tool === params.id)
+  const map = useStore(seen)
   const [expanded, setExpanded] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
+  const [tab, setTab] = useState<'open' | 'done'>('open')
+  // reading a thread in the list counts as reading it
+  const reading = all.find((n) => n.id === expanded)
+  useEffect(() => { if (reading) markSeen(reading) })
   if (!available || !layers) return null
-  const waiting = notes.filter((n) => n.status === 'open').length
-  const label = notes.length ? `All comments (${notes.length}${waiting ? `, ${waiting} waiting` : ''})` : 'All comments'
+  const num = (n: StudioNote) => all.indexOf(n) + 1
+  const yours = all.filter((n) => noteTurn(n) === 'person')
+  const waiting = all.filter((n) => noteTurn(n) === 'agent')
+  const done = all.filter((n) => n.status === 'done')
+  const fresh = yours.filter((n) => isUnread(n, map)).length
+  const label = all.length ? `All comments (${all.length}${fresh ? `, ${fresh} new ${fresh === 1 ? 'reply' : 'replies'}` : ''})` : 'All comments'
   const where = (n: StudioNote) => {
     const a = n.anchor
     if (!a) return 'On the tool'
@@ -191,9 +244,59 @@ export function CommentsList({ params }: { params: AnyParams }) {
     notesUI.setState({ open: n.id })
     setOpen(false)
   }
-  const clear = async (n: StudioNote) => {
-    try { await deleteNote(n.id); refreshNotes(); if (expanded === n.id) setExpanded(null) } catch (e) { toast('Could not clear', { type: 'error', description: (e as Error).message }) }
+  const act = async (what: string, run: () => Promise<unknown>) => {
+    try { await run(); refreshNotes() } catch (e) { toast(`Could not ${what}`, { type: 'error', description: (e as Error).message }) }
   }
+  const row = (n: StudioNote) => {
+    const state = pinState(n, map)
+    const isOpen = expanded === n.id
+    const last = lastReply(n)
+    const msgs = noteMessages(n)
+    return (
+      <li key={n.id}>
+        <button type="button" aria-expanded={isOpen} onClick={() => setExpanded(isOpen ? null : n.id)}
+          className="flex w-full items-start gap-2.5 px-3 py-2 text-left outline-none hover:bg-hover focus-visible:bg-hover">
+          <MiniPin state={state} num={num(n)} />
+          <span className="min-w-0 flex-1">
+            <span className="flex items-baseline gap-1.5">
+              <span className="min-w-0 flex-1 truncate text-fg-muted">{where(n)}</span>
+              <span className="shrink-0 text-fg-faint">{ago(msgs[msgs.length - 1].at || n.snapshot.at)}</span>
+            </span>
+            <span className={cn('mt-0.5 block text-fg [overflow-wrap:anywhere]', !isOpen && 'line-clamp-2')}>{n.text}</span>
+            {!isOpen && last && (
+              <span className={cn('mt-0.5 block truncate', state === 'new' ? 'text-signal-text' : 'text-fg-faint')}>
+                {last.from === 'agent' ? 'Agent' : 'You'}: {last.text || 'Done.'}
+              </span>
+            )}
+          </span>
+        </button>
+        {isOpen && (
+          <div className="pb-2 pl-[42px] pr-3">
+            {n.replies.map((m, i) => (
+              <p key={i} className="mb-1.5 leading-relaxed whitespace-pre-wrap text-fg/90 [overflow-wrap:anywhere]">
+                <span className="font-medium text-fg">{m.from === 'agent' ? 'Agent' : 'You'}</span> <span className="text-fg-faint">{ago(m.at)}</span><br />
+                {m.text || <span className="text-fg-faint">Done.</span>}
+              </p>
+            ))}
+            {state === 'waiting' && <p className="mb-1.5 text-fg-faint">Waiting for the agent.</p>}
+            <div className="mt-1.5 flex flex-wrap gap-1">
+              <Button size="sm" variant="default" onClick={() => show(n)}>{state === 'done' ? 'Show' : 'Reply'}</Button>
+              {state === 'done'
+                ? <Button size="sm" variant="ghost" onClick={() => act('reopen', () => setNoteStatus(n.id, 'open'))}><RotateCcw size={12} strokeWidth={1.75} />Reopen</Button>
+                : <Button size="sm" variant="ghost" onClick={() => act('mark done', () => setNoteStatus(n.id, 'done'))}><Check size={12} strokeWidth={1.75} />Done</Button>}
+              <Button size="sm" variant="ghost" onClick={() => act('delete', async () => { await deleteNote(n.id); setExpanded(null) })}><Trash2 size={12} strokeWidth={1.75} />Delete</Button>
+            </div>
+          </div>
+        )}
+      </li>
+    )
+  }
+  const group = (title: string, list: StudioNote[]) => list.length > 0 && (
+    <li key={title}>
+      <div className="px-3 pt-2 pb-0.5 text-fg-faint">{title}</div>
+      <ol>{list.map(row)}</ol>
+    </li>
+  )
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Tip label={label}>
@@ -207,42 +310,27 @@ export function CommentsList({ params }: { params: AnyParams }) {
           <Popover.Popup data-note-ui="" className="pop flex max-h-[min(70vh,560px)] w-[320px] flex-col overflow-hidden text-ui outline-none">
             <div className="flex h-9 shrink-0 items-center justify-between px-3">
               <span className="font-medium text-fg">Comments</span>
-              {notes.length > 0 && <span className="text-fg-faint tabular">{waiting ? `${waiting} waiting` : 'All answered'}</span>}
+              {fresh > 0 && <span className="text-signal-text tabular">{fresh} new</span>}
             </div>
-            {!notes.length && <p className="px-3 pb-3 text-fg-faint">No comments yet. Press C, then click the artboard, the canvas around it or a knob.</p>}
+            {!all.length && <p className="px-3 pb-3 text-fg-faint">No comments yet. Press C, then click the artboard, the canvas around it or a knob.</p>}
+            {all.length > 0 && (
+              <div className="shrink-0 px-3 pb-1.5">
+                <Segmented size="sm" label="Which comments" value={tab} onChange={setTab} className="w-full"
+                  options={[{ value: 'open', label: `Open · ${yours.length + waiting.length}` }, { value: 'done', label: `Done · ${done.length}` }]} />
+              </div>
+            )}
             <ol className="min-h-0 overflow-y-auto pb-1">
-              {notes.map((n, i) => {
-                const resolved = n.status === 'resolved'
-                const isOpen = expanded === n.id
-                return (
-                  <li key={n.id}>
-                    <button type="button" aria-expanded={isOpen} onClick={() => setExpanded(isOpen ? null : n.id)}
-                      className="flex w-full items-start gap-2.5 px-3 py-2 text-left outline-none hover:bg-hover focus-visible:bg-hover">
-                      <span aria-hidden className={cn('mt-px flex size-5 shrink-0 items-center justify-center rounded-full rounded-bl-[2px] text-ui-sm font-semibold tabular',
-                        resolved ? 'bg-fg text-panel' : 'bg-signal-strong text-signal-fg')}>{i + 1}</span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-baseline gap-1.5">
-                          <span className="min-w-0 flex-1 truncate text-fg-muted">{where(n)}</span>
-                          <span className="shrink-0 text-fg-faint">{resolved ? 'Replied' : 'Waiting'} · {ago(n.snapshot.at)}</span>
-                        </span>
-                        <span className={cn('mt-0.5 block text-fg [overflow-wrap:anywhere]', !isOpen && 'line-clamp-2')}>{n.text}</span>
-                      </span>
-                    </button>
-                    {isOpen && (
-                      <div className="pb-2 pl-[42px] pr-3">
-                        {resolved
-                          ? <p className="leading-relaxed whitespace-pre-wrap text-fg/90 [overflow-wrap:anywhere]"><span className="font-medium text-fg">Agent</span> <span className="text-fg-faint">{ago(n.resolution?.at ?? '')}</span><br />{n.resolution?.text || 'Marked this done.'}</p>
-                          : <p className="text-fg-faint">Waiting for the agent.</p>}
-                        <div className="mt-1.5 flex gap-1">
-                          <Button size="sm" variant="default" onClick={() => show(n)}>Show pin</Button>
-                          <Button size="sm" variant="ghost" onClick={() => clear(n)}><Trash2 size={12} strokeWidth={1.75} />Clear</Button>
-                        </div>
-                      </div>
-                    )}
-                  </li>
-                )
-              })}
+              {tab === 'open'
+                ? <>{group('Your turn', yours)}{group('Waiting for the agent', waiting)}</>
+                : done.map(row)}
             </ol>
+            {all.length > 0 && tab === 'open' && !yours.length && !waiting.length && <p className="px-3 pb-3 text-fg-faint">Nothing open. Done threads are in the Done tab.</p>}
+            {tab === 'done' && (
+              <label className="flex h-9 shrink-0 items-center gap-2 border-t border-line px-3 text-fg-muted">
+                <span className="flex-1">Show done on the board</span>
+                <Switch size="sm" checked={showDone} onChange={(b) => notesUI.setState({ showDone: b })} label="Show done on the board" />
+              </label>
+            )}
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
@@ -252,7 +340,7 @@ export function CommentsList({ params }: { params: AnyParams }) {
 
 const paramLabel = (params: AnyParams, key: string) => (params.defs[key] as { label?: string } | undefined)?.label ?? humanize(key)
 const PIN = 28
-const CARD = { w: 272, h: 220 }
+const CARD = { w: 272, h: 320 }
 
 /** The part of the window the stage really shows: the studio root minus what its floating panels cover. */
 function useStageRect(anchor: HTMLElement | null) {
@@ -297,6 +385,9 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
   const commenting = useUI((s) => s.commenting)
   const draft = useUI((s) => (s.draft?.layer === id ? s.draft : null))
   const open = useUI((s) => s.open)
+  const showDone = useUI((s) => s.showDone)
+  // done threads leave the board, unless asked for, or opened from the list
+  const pinned = notes.filter((n) => n.status !== 'done' || showDone || open === n.id)
   useParamState(params, (s) => s.committed)   // pins from another state fade: re-check on every commit
   const num = (nid: string) => notes.findIndex((n) => n.id === nid) + 1
   const status = (n: StudioNote) => snapshotStatus(n.snapshot, params)
@@ -395,7 +486,7 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
 
   // Knob comments sit beside their rows: follow them as panels scroll and resize, and hide them when the row is
   // scrolled out of its panel (or not rendered: a collapsed section, a hidden param).
-  const paramKeys = [...new Set([...notes, ...(draft ? [{ anchor: draft.anchor }] : [])].flatMap((n) => (n.anchor?.on === 'param' ? [n.anchor.key] : [])))]
+  const paramKeys = [...new Set([...pinned, ...(draft ? [{ anchor: draft.anchor }] : [])].flatMap((n) => (n.anchor?.on === 'param' ? [n.anchor.key] : [])))]
   const [rows, setRows] = useState<Record<string, { left: number; top: number }>>({})
   const keysId = paramKeys.join('|')
   useEffect(() => {
@@ -470,7 +561,7 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
       const note = await sendNote({ kind: 'comment', text, anchor: d.anchor, snapshot, image })
       notesUI.setState({ draft: null, commenting: false, open: note.id })
       refreshNotes()
-      toast('Comment sent to the agent', { type: 'success', description: 'Ask it to check the notes.' })
+      toast('Comment sent to the agent', { type: 'success', description: 'It picks this up with your next message.' })
     } catch (err) {
       // keep the composer and what was typed: nothing is lost to a failed send
       const cur = notesUI.getState().draft
@@ -501,7 +592,7 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
               onPointerDown={place}
               onKeyDown={(e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) { e.preventDefault(); placeAt(0.5, 0.5) } }} />
           )}
-          {notes.map((n) => n.anchor && n.anchor.on !== 'param' && (
+          {pinned.map((n) => n.anchor && n.anchor.on !== 'param' && (
             <PinAt key={n.id} x={n.anchor.x} y={n.anchor.y} zoom={zoom} scale={pinScale} z={open === n.id ? 3 : 1} sides={sides}
               render={(side) => (
                 <>
@@ -527,7 +618,7 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
       )}
       {createPortal(
         <div data-studio="" className="studio-notes">
-          {notes.map((n) => {
+          {pinned.map((n) => {
             const at = n.anchor?.on === 'param' ? rows[n.anchor.key] : undefined
             if (!at) return null
             const side = sides(at.left - 34, at.top - PIN / 2)
@@ -575,19 +666,35 @@ function PinAt({ x, y, zoom, scale, z, sides, render }: {
 }
 
 const pinShape = 'absolute bottom-0 left-0 flex size-7 items-center justify-center rounded-full rounded-bl-[3px] text-ui font-semibold tabular shadow-[0_0_0_2px_var(--panel),var(--shadow-cluster)]'
+/* Loud only where you're needed: quiet (hollow) while it's the agent's turn, blue for a reply you haven't read, ink once
+   read, and a small check for a done thread shown on the board */
+const PIN_LOOK: Record<PinState, string> = {
+  waiting: 'bg-overlay text-fg-muted shadow-[0_0_0_2px_var(--panel),inset_0_0_0_1px_var(--line-strong),var(--shadow-cluster)]',
+  new: 'bg-signal-strong text-signal-fg',
+  replied: 'bg-fg text-panel',
+  done: 'size-[22px] bg-overlay text-fg-faint opacity-70',
+}
 
 function Pin({ n, num, open, stale }: { n: StudioNote; num: number; open: boolean; stale: boolean }) {
-  const resolved = n.status === 'resolved'
+  const state = pinState(n, useStore(seen))
   return (
     <button type="button" data-note-ui="" aria-expanded={open}
-      aria-label={`Comment ${num}${resolved ? ', the agent replied' : ', waiting for the agent'}${stale ? ', made in another state' : ''}`}
+      aria-label={`Comment ${num}, ${STATE_LABEL[state]}${stale ? ', made in another state' : ''}`}
       onClick={(e) => { e.stopPropagation(); notesUI.setState((s) => ({ open: s.open === n.id ? null : n.id })) }}
       className={cn(pinShape, 'pointer-events-auto outline-none transition-[transform,opacity] hover:scale-110 focus-visible:ring-2 focus-visible:ring-signal',
-        // answered pins invert (dark on a light board, light on a dark one) and keep their number
-        resolved ? 'bg-fg text-panel' : 'bg-signal-strong text-signal-fg', stale && !open && 'opacity-55', open && 'ring-2 ring-signal')}>
-      {num}
-      {resolved && <span aria-hidden className="absolute -top-1 -right-1 flex size-3.5 items-center justify-center rounded-full bg-panel text-fg shadow-[var(--shadow-cluster)]"><Check size={9} strokeWidth={3} /></span>}
+        PIN_LOOK[state], stale && !open && 'opacity-55', open && 'opacity-100 ring-2 ring-signal')}>
+      {state === 'done' ? <Check size={11} strokeWidth={3} /> : num}
     </button>
+  )
+}
+
+/** A pin's face at list size. */
+function MiniPin({ state, num }: { state: PinState; num: number }) {
+  return (
+    <span aria-hidden className={cn('mt-px flex size-5 shrink-0 items-center justify-center rounded-full rounded-bl-[2px] text-ui-sm font-semibold tabular',
+      state === 'waiting' ? 'bg-overlay text-fg-muted shadow-[inset_0_0_0_1px_var(--line-strong)]' : state === 'done' ? 'bg-overlay text-fg-faint' : PIN_LOOK[state])}>
+      {state === 'done' ? <Check size={10} strokeWidth={3} /> : num}
+    </span>
   )
 }
 
@@ -607,33 +714,99 @@ const ago = (iso: string) => {
 function Thread({ n, num, params, clock, status, className }: {
   n: StudioNote; num: number; params: AnyParams; clock?: { seek(t: number): void; pause(): void }; status: 'same' | 'different' | 'other-version'; className?: string
 }) {
-  const clear = async () => {
-    try { await deleteNote(n.id); notesUI.setState({ open: null }); refreshNotes() } catch (e) { toast('Could not clear', { type: 'error', description: (e as Error).message }) }
+  const msgs = noteMessages(n)
+  const turn = noteTurn(n)
+  // what was already read when the card opened: newer agent messages get a blue edge while it stays open
+  const [since] = useState(() => seen.getState()[n.id] ?? 0)
+  // the reply was new when you opened it: Done stays lit while you read it
+  const fresh = turn === 'person' && since < msgs.length
+  useEffect(() => { markSeen(n) }, [n.id, msgs.length])   // eslint-disable-line react-hooks/exhaustive-deps
+  const act = async (what: string, run: () => Promise<unknown>) => {
+    try { await run(); refreshNotes() } catch (e) { toast(`Could not ${what}`, { type: 'error', description: (e as Error).message }) }
   }
+  const done = () => act('mark done', async () => {
+    await setNoteStatus(n.id, 'done')
+    notesUI.setState({ open: null })
+    toast('Marked done', { description: 'Find it in the comments list, under Done.', action: { label: 'Undo', onClick: () => act('reopen', () => setNoteStatus(n.id, 'open')) } })
+  })
   const title = `Comment ${num}${n.anchor?.on === 'param' ? ` · ${paramLabel(params, n.anchor.key)}` : ''}`
   return (
     <div data-note-ui="" role="dialog" aria-label={title} className={cn('pop pointer-events-auto w-[272px] overflow-hidden text-ui', className)} onPointerDown={(e) => e.stopPropagation()}>
       <div className="flex h-header items-center gap-0.5 pr-1.5 pl-pad">
         <span className="min-w-0 flex-1 truncate font-medium text-fg-muted">{title}</span>
         {status === 'different' && <IconButton icon={History} size="icon-sm" label="Show the state it was made in" onClick={() => restoreSnapshot(n.snapshot, { params, clock })} />}
-        <IconButton icon={Trash2} size="icon-sm" label="Clear comment" onClick={clear} />
+        {turn === null
+          ? (
+            <Tip label="Reopen">
+              <button type="button" onClick={() => act('reopen', () => setNoteStatus(n.id, 'open'))}
+                className="mr-0.5 inline-flex h-[18px] items-center gap-1 rounded-full bg-[color-mix(in_srgb,var(--ok)_14%,transparent)] pr-1.5 pl-1 font-medium text-ok-text outline-none hover:brightness-125 focus-visible:ring-2 focus-visible:ring-signal">
+                <Check size={11} strokeWidth={2.5} />Done
+              </button>
+            </Tip>
+          )
+          : turn === 'person'
+            // your move: the way to close it is labelled, and lit while the reply is new
+            ? <Button size="sm" variant="ghost" onClick={done} className={cn('h-icon-sm gap-1 px-1.5', fresh ? 'bg-signal-soft text-signal-text hover:bg-signal-soft hover:text-signal-text' : 'bg-control text-fg')}><Check size={12} strokeWidth={2} />Done</Button>
+            : <IconButton icon={Check} size="icon-sm" label="Mark done" onClick={done} />}
+        <IconButton icon={Trash2} size="icon-sm" label="Delete comment" onClick={() => act('delete', async () => { await deleteNote(n.id); notesUI.setState({ open: null }) })} />
       </div>
       <div className="max-h-[280px] overflow-y-auto">
-        <Message who="You" at={n.snapshot.at} text={n.text ?? ''} />
-        {n.status === 'resolved'
-          ? <Message who="Agent" at={n.resolution?.at ?? ''} text={n.resolution?.text || 'Marked this done.'} />
-          : <p className="px-3 pb-3 text-fg-faint">Waiting for the agent. Ask it to check the notes.</p>}
-        {status === 'other-version' && <p className="px-3 pb-3 text-fg-faint">Made with an earlier version of this tool, so its state can’t be shown.</p>}
+        {msgs.map((m, i) => <Message key={i} who={m.from} at={m.at} text={m.text} fresh={m.from === 'agent' && i >= since} />)}
+        {turn === 'agent' && <p className="flex gap-1.5 px-3 pb-2 pl-[33px] text-fg-faint"><Dots />Waiting for the agent. It picks this up with your next message.</p>}
+        {status === 'other-version' && <p className="px-3 pb-2 text-fg-faint">Made with an earlier version of this tool, so its state can’t be shown.</p>}
+      </div>
+      <ReplyBox key={n.id} placeholder={turn === null ? 'Reply to reopen…' : turn === 'agent' ? 'Add to this…' : 'Reply…'}
+        onPost={(text) => act('send', () => replyToNote(n.id, text))} />
+    </div>
+  )
+}
+
+/** Three dots breathing: the agent's turn. */
+function Dots() {
+  return (
+    <span aria-hidden className="mt-[7px] flex shrink-0 gap-[2px]">
+      {[0, 1, 2].map((i) => <i key={i} className="size-[3px] rounded-full bg-current motion-safe:animate-pulse" style={{ animationDelay: `${i * 0.2}s` }} />)}
+    </span>
+  )
+}
+
+function Message({ who, at, text, fresh }: { who: 'person' | 'agent'; at: string; text: string; fresh?: boolean }) {
+  return (
+    <div className="relative grid grid-cols-[16px_1fr] gap-x-[7px] px-3 py-2 [&+&]:border-t [&+&]:border-line">
+      {fresh && <span aria-hidden className="absolute inset-y-2 left-0 w-[2px] rounded-full bg-signal" />}
+      <span aria-hidden className={cn('flex size-4 items-center justify-center rounded-full text-[9px] font-semibold', who === 'agent' ? 'bg-fg text-panel' : 'bg-active text-fg')}>
+        {who === 'agent' ? '✳' : 'Y'}
+      </span>
+      <div className="min-w-0">
+        <div className="flex items-baseline gap-1.5"><span className="font-medium text-fg">{who === 'agent' ? 'Agent' : 'You'}</span><span className="text-fg-faint">{ago(at)}</span>{fresh && <span className="sr-only">(new)</span>}</div>
+        <p className="mt-0.5 leading-relaxed whitespace-pre-wrap text-fg/90 [overflow-wrap:anywhere]">{text || <span className="text-fg-faint">Done.</span>}</p>
       </div>
     </div>
   )
 }
 
-function Message({ who, at, text }: { who: string; at: string; text: string }) {
+/** The reply box at the foot of a thread: Enter sends, Shift+Enter is a new line, Esc closes the card. */
+function ReplyBox({ placeholder, onPost }: { placeholder: string; onPost: (text: string) => Promise<void> }) {
+  const [text, setText] = useState('')
+  const [sending, setSending] = useState(false)
+  const post = async () => {
+    const t = text.trim()
+    if (!t || sending) return
+    setSending(true)
+    try { await onPost(t); setText('') } finally { setSending(false) }
+  }
   return (
-    <div className="px-3 py-2">
-      <div className="flex items-baseline gap-1.5"><span className="font-medium text-fg">{who}</span><span className="text-fg-faint">{ago(at)}</span></div>
-      <p className="mt-0.5 leading-relaxed whitespace-pre-wrap text-fg/90 [overflow-wrap:anywhere]">{text}</p>
+    <div className="flex items-end gap-1.5 px-1.5 pb-1.5">
+      <textarea rows={1} value={text} maxLength={MAX_TEXT} readOnly={sending} placeholder={placeholder} aria-label={placeholder.replace('…', '')}
+        ref={(t) => { if (t) { t.style.height = '0px'; t.style.height = `${Math.min(140, t.scrollHeight)}px` } }}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => {
+          e.stopPropagation()
+          if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); post() }
+          if (e.key === 'Escape') notesUI.setState({ open: null })
+        }}
+        className="min-h-control flex-1 resize-none rounded-control bg-control px-2 py-[3px] text-ui leading-snug text-fg outline-none placeholder:text-fg-faint focus:shadow-[inset_0_0_0_1px_var(--signal)]" />
+      <Button size="icon-sm" variant={text.trim() ? 'primary' : 'ghost'} aria-label="Send reply" disabled={!text.trim() || sending} onClick={post}><ArrowUp size={12} strokeWidth={2} /></Button>
     </div>
   )
 }
@@ -659,7 +832,7 @@ function Composer({ draft, onPost, label, className, style }: { draft: Draft; on
             if (e.key === 'Escape') notesUI.setState({ draft: null })
           }}
           className="min-h-control flex-1 resize-none rounded-control bg-control px-2 py-1.5 text-ui leading-snug text-fg outline-none placeholder:text-fg-faint focus:shadow-[inset_0_0_0_1px_var(--signal)]" />
-        <Button size="icon-sm" variant={text.trim() ? 'primary' : 'ghost'} aria-label="Send comment" disabled={!text.trim() || sending} onClick={post}><Send size={12} strokeWidth={1.75} /></Button>
+        <Button size="icon-sm" variant={text.trim() ? 'primary' : 'ghost'} aria-label="Send comment" disabled={!text.trim() || sending} onClick={post}><ArrowUp size={12} strokeWidth={2} /></Button>
       </div>
       {text.length > MAX_TEXT - 500 && <span className="px-1 text-fg-faint tabular">{MAX_TEXT - text.length} characters left</span>}
     </div>

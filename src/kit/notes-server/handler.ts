@@ -1,10 +1,12 @@
 /// <reference types="node" />
 /* ---------------------------------------------------------------------------
    The notes route, for any Node server: the tool POSTs a note, this writes it
-   to .rueca/notes/<id>.json, where the agent reads it (and marks it resolved).
+   to .rueca/notes/<id>.json, where the agent reads it (and replies in it).
 
      GET    /__rueca/notes          → every note, oldest first
      POST   /__rueca/notes          → { kind, text?, anchor?, snapshot, image? } → the stored note
+     PATCH  /__rueca/notes?id=<id>  → { text } adds the person's reply to a comment (reopening it),
+                                      { status: 'done' | 'open' } closes or reopens it → the note
      DELETE /__rueca/notes?id=<id>  → clears one note (and its image)
 
    `image` is a data URL (png / jpeg / webp): it is written next to the note as
@@ -120,7 +122,7 @@ function depthOf(v: unknown, limit: number): number {
 /** What makes a stored file a note: anything else in the folder (hand-made, half-edited) is never served. */
 export function isNote(n: unknown): boolean {
   return isObj(n) && typeof n.id === 'string' && (n.kind === 'values' || n.kind === 'comment') &&
-    (n.status === 'open' || n.status === 'resolved') && isObj(n.snapshot) && typeof n.snapshot.tool === 'string' && isObj(n.snapshot.changed)
+    (n.status === 'open' || n.status === 'done' || n.status === 'resolved') && isObj(n.snapshot) && typeof n.snapshot.tool === 'string' && isObj(n.snapshot.changed)
 }
 
 /** The note's shape, checked before anything touches the disk. Returns an error message, or null. */
@@ -144,6 +146,16 @@ export function checkNote(b: unknown): string | null {
   }
   const s = b.snapshot
   if (!isObj(s) || s.$v !== 1 || typeof s.tool !== 'string' || !isObj(s.changed)) return 'snapshot is missing or not format 1'
+  return null
+}
+
+/** A PATCH body: a reply, or a status. Returns an error message, or null. */
+export function checkPatch(b: unknown): string | null {
+  if (!isObj(b)) return 'Expected a JSON object'
+  const hasText = b.text !== undefined, hasStatus = b.status !== undefined
+  if (hasText === hasStatus) return 'Send either text (a reply) or status'
+  if (hasText && !(typeof b.text === 'string' && b.text.trim() && b.text.length <= 5000)) return 'text must be a string under 5000 characters'
+  if (hasStatus && b.status !== 'open' && b.status !== 'done') return 'status must be "open" or "done"'
   return null
 }
 
@@ -237,6 +249,41 @@ export function createNotesHandler(opts: NotesHandlerOptions = {}) {
     return note
   }
 
+  /** Writes `note` over its file, atomically (write then rename), within the size cap. */
+  const save = async (note: Record<string, unknown>) => {
+    const id = note.id as string
+    const text = JSON.stringify(note, null, 2) + '\n'
+    if (text.length > max * 2) throw Object.assign(new Error('too large'), { status: 413 })
+    const tmp = join(dir, `${id}.json.${randomBytes(3).toString('hex')}.tmp`)
+    try { await writeFile(tmp, text); await rename(tmp, join(dir, `${id}.json`)) } catch (e) { await rm(tmp, { force: true }); throw e }
+  }
+
+  /** A reply or a status change on a stored comment. Null when there's no such note. */
+  const patch = async (id: string, b: Record<string, unknown>) => {
+    const file = join(dir, `${id}.json`)
+    let note: Record<string, unknown>
+    try {
+      if (!(await lstat(file)).isFile()) return null
+      note = JSON.parse(await readFile(file, 'utf8'))
+    } catch { return null }
+    if (!isNote(note)) return null
+    if (note.kind !== 'comment') throw Object.assign(new Error('Only a comment has a thread'), { status: 400 })
+    const replies = Array.isArray(note.replies) ? [...note.replies] : []
+    // a note from before threads: its one `resolution` becomes the agent's first reply, so the order holds
+    if (note.resolution !== undefined) {
+      const r = note.resolution
+      replies.push({ from: 'agent', text: isObj(r) ? String(r.text ?? r.summary ?? r.message ?? '') : String(r ?? ''), at: isObj(r) && typeof r.at === 'string' ? r.at : '' })
+      delete note.resolution
+    } else if (note.status === 'resolved' && !replies.length) replies.push({ from: 'agent', text: '', at: '' })
+    if (typeof b.text === 'string') {
+      replies.push({ from: 'person', text: b.text.trim(), at: new Date().toISOString() })
+      note.status = 'open'
+    } else note.status = b.status
+    note.replies = replies
+    await save(note)
+    return note
+  }
+
   /** Answers the notes route; resolves false for any other request, so the caller passes it on. */
   return async function handle(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
     const path = (req.url ?? '').split('?')[0]
@@ -249,7 +296,7 @@ export function createNotesHandler(opts: NotesHandlerOptions = {}) {
         if (origin) {
           res.setHeader('access-control-allow-origin', origin)
           res.setHeader('vary', 'origin')
-          res.setHeader('access-control-allow-methods', 'GET, POST, DELETE')
+          res.setHeader('access-control-allow-methods', 'GET, POST, PATCH, DELETE')
           res.setHeader('access-control-allow-headers', 'content-type')
           res.setHeader('access-control-expose-headers', 'x-rueca-notes')
         }
@@ -263,18 +310,29 @@ export function createNotesHandler(opts: NotesHandlerOptions = {}) {
         send(res, 200, { id })
         return true
       }
-      if (req.method !== 'POST') { res.setHeader('allow', 'GET, POST, DELETE'); send(res, 405, { error: 'Use GET, POST or DELETE' }); return true }
+      if (req.method !== 'POST' && req.method !== 'PATCH') { res.setHeader('allow', 'GET, POST, PATCH, DELETE'); send(res, 405, { error: 'Use GET, POST, PATCH or DELETE' }); return true }
 
       const raw = await readBody(req, max)
       if (raw === null) { send(res, 413, { error: `Note is larger than ${Math.round(max / 1024)} KB` }); return true }
       let body: unknown
       try { body = JSON.parse(raw) } catch { send(res, 400, { error: 'Body is not JSON' }); return true }
+      if (req.method === 'PATCH') {
+        const id = new URL(req.url ?? '', 'http://x').searchParams.get('id') ?? ''
+        if (!NOTE_ID.test(id)) { send(res, 400, { error: 'Not a note id' }); return true }
+        const problem = checkPatch(body)
+        if (problem) { send(res, 400, { error: problem }); return true }
+        const note = await patch(id, body as Record<string, unknown>)
+        if (!note) { send(res, 404, { error: 'No such note' }); return true }
+        send(res, 200, note)
+        return true
+      }
       const problem = checkNote(body)
       if (problem) { send(res, 400, { error: problem }); return true }
       send(res, 201, await create(body as Record<string, unknown>))
       return true
     } catch (e) {
       if ((e as { status?: number }).status === 413) { send(res, 413, { error: 'Note is too large to store' }); return true }
+      if ((e as { status?: number }).status === 400) { send(res, 400, { error: (e as Error).message }); return true }
       // the detail goes to the dev server's terminal, never into the response (it would carry paths)
       console.error('[rueca notes]', e)
       if (!res.headersSent) send(res, 500, { error: 'The notes route failed. See the dev server’s terminal.' })

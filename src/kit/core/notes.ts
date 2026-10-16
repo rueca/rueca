@@ -63,6 +63,14 @@ export type NoteAnchor =
 
 export type NoteKind = 'values' | 'comment'
 
+/** One message in a comment's thread after the first (the first is the note's own `text`). */
+export interface NoteMessage {
+  from: 'person' | 'agent'
+  text: string
+  /** ISO time; '' when an agent left it out */
+  at: string
+}
+
 export interface StudioNote {
   id: string
   kind: NoteKind
@@ -71,9 +79,10 @@ export interface StudioNote {
   snapshot: StudioSnapshot
   /** thumbnail file name beside the note (<id>.jpg), when one was taken */
   image?: string
-  status: 'open' | 'resolved'
-  /** written by the agent when it has acted on the note */
-  resolution?: { text: string; at: string }
+  /** 'done' once the person closes the thread. Only the person closes it: the agent replies instead */
+  status: 'open' | 'done'
+  /** the thread after `text`, oldest first: the agent's replies and the person's answers */
+  replies: NoteMessage[]
 }
 
 export interface NoteInput {
@@ -194,35 +203,73 @@ export function sendNote(input: NoteInput): Promise<StudioNote> {
   return call<StudioNote>('', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(input) })
 }
 
+/** Answer a comment: the reply joins its thread and hands it back to the agent (a done thread reopens). */
+export function replyToNote(id: string, text: string): Promise<StudioNote> {
+  return call<StudioNote>(`?id=${encodeURIComponent(id)}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text }) })
+}
+
+/** Close a comment's thread ('done'), or open it again. */
+export function setNoteStatus(id: string, status: 'open' | 'done'): Promise<StudioNote> {
+  return call<StudioNote>(`?id=${encodeURIComponent(id)}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ status }) })
+}
+
+/** The whole thread, the first comment included. */
+export function noteMessages(n: StudioNote): NoteMessage[] {
+  return [{ from: 'person', text: n.text ?? '', at: n.snapshot.at }, ...n.replies]
+}
+
+/** Whose move it is: the agent's after the person spoke last, the person's after the agent did, nobody's once done. */
+export function noteTurn(n: StudioNote): 'agent' | 'person' | null {
+  if (n.status === 'done') return null
+  return n.replies[n.replies.length - 1]?.from === 'agent' ? 'person' : 'agent'
+}
+
 /** how far around the artboard a canvas comment can sit, in artboard widths / heights */
 export const CANVAS_REACH = 50
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
 
+const asText = (v: unknown) => (typeof v === 'string' ? v : v == null ? '' : JSON.stringify(v))
+
+/** A reply as an agent may have written it: an object with some name for its text and its author, or a bare string. */
+function toMessage(r: unknown, fallback: 'person' | 'agent'): NoteMessage {
+  if (!isObj(r)) return { from: fallback, text: asText(r), at: '' }
+  const who = String(r.from ?? r.who ?? r.author ?? r.role ?? '').toLowerCase()
+  const from = who === 'person' || who === 'you' || who === 'user' || who === 'human' ? 'person' : who ? 'agent' : fallback
+  return { from, text: asText(r.text ?? r.message ?? r.body ?? r.summary), at: typeof r.at === 'string' ? r.at : '' }
+}
+
 /**
  * A note file as the tool can safely show it, or null. Files are hand-edited by agents, so this forgives
- * what it can (a reply written as a bare string, or as an object) and drops what it can't (no snapshot).
+ * what it can (a reply written as a bare string, or as an object; the older single `resolution`) and drops
+ * what it can't (no snapshot).
  */
 export function normalizeNote(n: unknown): StudioNote | null {
   if (!isObj(n) || typeof n.id !== 'string' || !n.id || (n.kind !== 'values' && n.kind !== 'comment')) return null
   const s = n.snapshot
   if (!isObj(s) || typeof s.tool !== 'string' || !isObj(s.changed)) return null
-  const r = n.resolution
-  const text = (v: unknown) => (typeof v === 'string' ? v : v == null ? '' : JSON.stringify(v))
-  const resolution = r === undefined ? undefined
-    : isObj(r) ? { text: text(r.text ?? r.summary ?? r.message), at: typeof r.at === 'string' ? r.at : '' }
-    : { text: text(r), at: '' }
+  const replies = (Array.isArray(n.replies) ? n.replies : []).map((r) => toMessage(r, 'agent'))
+  // the format before threads: one `resolution` from the agent. It reads as the agent's latest reply
+  if (n.resolution !== undefined) {
+    const r = toMessage(n.resolution, 'agent')
+    r.from = 'agent'
+    if (!replies.some((m) => m.from === 'agent' && m.text === r.text)) replies.push(r)
+  }
+  // marked resolved with no words: still an answer
+  if (n.status === 'resolved' && !replies.some((m) => m.from === 'agent')) replies.push({ from: 'agent', text: '', at: '' })
   const a = n.anchor
   const anchor = isObj(a) && a.on === 'param' && typeof a.key === 'string' ? { on: 'param' as const, key: a.key }
     : isObj(a) && a.on === 'artboard' && typeof a.x === 'number' && typeof a.y === 'number' ? { on: 'artboard' as const, x: Math.min(1, Math.max(0, a.x)), y: Math.min(1, Math.max(0, a.y)), ...(typeof a.target === 'string' ? { target: a.target } : {}) }
     : isObj(a) && a.on === 'canvas' && Number.isFinite(a.x) && Number.isFinite(a.y) ? { on: 'canvas' as const, x: Math.min(CANVAS_REACH, Math.max(-CANVAS_REACH, a.x as number)), y: Math.min(CANVAS_REACH, Math.max(-CANVAS_REACH, a.y as number)) }
     : undefined
+  const { resolution: _legacy, ...rest } = n
   return {
-    ...(n as unknown as StudioNote),
+    ...(rest as unknown as StudioNote),
     text: typeof n.text === 'string' ? n.text : undefined,
     anchor,
-    status: n.status === 'resolved' || resolution ? 'resolved' : 'open',
-    ...(resolution ? { resolution } : {}),
+    // 'resolved' used to mean "the agent answered", which a reply now says; only the person marks a thread done
+    status: n.status === 'done' ? 'done' : 'open',
+    replies,
     snapshot: { ...(s as unknown as StudioSnapshot), steps: Array.isArray(s.steps) ? s.steps.map(String) : [], at: typeof s.at === 'string' ? s.at : '' },
   }
 }
@@ -275,7 +322,7 @@ async function poll(): Promise<void> {
   if (watchers.size) timer = setTimeout(poll, pollMs)
 }
 
-/** Calls `fn` with every note now and whenever any changes (the agent resolving one, a new one from another tab).
+/** Calls `fn` with every note now and whenever any changes (the agent replying to one, a new one from another tab).
     One shared poll of the dev server, paused while the tab is hidden. Returns unsubscribe. */
 let visibilityHooked = false
 

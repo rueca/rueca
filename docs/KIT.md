@@ -304,15 +304,20 @@ stops ticks while paused too (default true for artifacts with their own life).
   until the route answers (so it never shows on a static build). Route: `ruecaNotes()` from `rueca/notes-server/vite` (installed at the project root) in `vite.config.ts`, or
   `createNotesHandler({ dir?, allowedHosts? })` from `rueca/notes-server/handler` for any Node server (before any body parser). Add `.rueca/` to `.gitignore`.
   Core, framework-agnostic: `captureSnapshot({ params, history?, clock?, doc? })` → `{ tool, schema, url, changed: { key: { value, default, label, hint } }, steps, t, doc, view }` ·
-  `sendNote({ kind: 'values' | 'comment', text?, anchor?, snapshot, image? })` · `listNotes()` · `deleteNote(id)` · `findNotesEndpoint()` · `formatNotePrompt(note)` (the clipboard version) ·
+  `sendNote({ kind: 'values' | 'comment', text?, anchor?, snapshot, image? })` · `listNotes()` · `deleteNote(id)` ·
+  `replyToNote(id, text)` (joins the thread, hands it back to the agent, reopens a done one) · `setNoteStatus(id, 'open' | 'done')` ·
+  `noteMessages(note)` (the whole thread, first comment included) · `noteTurn(note)` → `'agent' | 'person' | null` (null once done) · `findNotesEndpoint()` · `formatNotePrompt(note)` (the clipboard version) ·
   `watchNotes(fn)` (one shared poll; returns unsubscribe) · `refreshNotes()` · `captureImage(artboardEl, { anchor? })` (JPEG data URL: DOM plus canvases, anchor ringed) ·
   `restoreSnapshot(snapshot, { params, clock? })` (one undo step, the playhead paused at `t`; refuses another schema version) ·
   `snapshotStatus(snapshot, params)` → `'same' | 'different' | 'other-version'` · `isSnapshotState(snapshot, params)` · `normalizeNote(raw)` (a note file as the tool can safely show it, or null).
 - Comments: `<NoteLayer params history? clock? doc? describeAt? />` inside an `<Artboard>` — comment mode (`C`, or `CommentButton`, which `ParamActions`
   includes) pins a comment to an artboard point, to a spot on the stage around it (`on: 'canvas'`, artboard units outside 0–1;
   the Stage carries `data-studio-stage`), or to a knob by clicking its Inspector row (rows carry `data-param`). The clock pauses while you write.
-  `CommentsList params` (also in `ParamActions`, beside Comment) lists every comment with its reply, so one on a collapsed knob is never lost.
-  Pins fade when the tool is in another state, and their thread can restore it. Replies arrive live (`useNotes()`) with a toast. Pins keep screen size via `useZoom()`.
+  `CommentsList params` (also in `ParamActions`, beside Comment) lists every comment, yours-to-answer first, with a Done tab, so one on a collapsed knob is never lost.
+  A comment is a thread (`replies`, `{ from: 'agent' | 'person', text, at }`): the card has a reply box, and only the person closes it (Done).
+  Pins say whose turn it is: hollow while the agent's, blue for an unread reply (read state is per browser), ink once read; done ones leave the board
+  unless "Show done on the board" is on. Pins fade when the tool is in another state, and their thread can restore it.
+  Replies arrive live (`useNotes()`) with a toast. Pins keep screen size via `useZoom()`.
 - `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound.
 - `toast(title, opts)` works anywhere (it mounts a single toaster if none is rendered) and returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
   `toast.promise(p, { loading, success, error })` · `toast.progress(title, { onCancel })` → `{ set(p), done(msg), fail(msg) }`.

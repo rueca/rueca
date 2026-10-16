@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comment threads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* the kit's dark tokens, copied from src/kit/theme.css */
+  :root {
+    --field: #131313; --panel: #1e1e1e; --overlay: #262626; --control: #2a2a2a; --active: #333333;
+    --fg: #ffffff; --fg-muted: #a8a8a8; --fg-faint: #8a8a8a;
+    --line: rgba(255,255,255,.07); --line-strong: rgba(255,255,255,.13); --hover: rgba(255,255,255,.05);
+    --signal: #0d99ff; --signal-strong: #0a72c6; --signal-soft: rgba(13,153,255,.16); --signal-text: #4db0ff;
+    --ok-text: #3ccf8e;
+    --shadow-cluster: 0 0 0 1px rgba(255,255,255,.06), 0 1px 4px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.04);
+    --shadow-pop: 0 10px 30px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06);
+    --r-pop: 8px; --r-control: 4px;
+    --ui: 11px; --lead: 16px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--field); color: var(--fg); }
+  body { font: 13px/1.55 Inter, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  .page { max-width: 1240px; margin: 0 auto; padding: 48px 24px 96px; }
+  h1 { font-size: 26px; font-weight: 600; letter-spacing: -.01em; margin: 0 0 6px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  .lede { color: var(--fg-muted); max-width: 680px; margin: 0; }
+  section { margin-top: 56px; }
+  .sub { color: var(--fg-muted); max-width: 720px; margin: 0 0 20px; }
+  .eyebrow { color: var(--fg-faint); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+  code { font: 11.5px "SF Mono", Menlo, monospace; color: var(--fg); background: var(--control); padding: 1px 4px; border-radius: 3px; }
+
+  /* the two facts */
+  .facts { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 1px; background: var(--line); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-cluster); }
+  .fact { background: var(--panel); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .fact .row { display: flex; align-items: center; gap: 10px; }
+  .fact b { font-weight: 600; }
+  .fact p { margin: 0; color: var(--fg-muted); font-size: 12px; }
+  .tag { font-size: 10.5px; color: var(--fg-faint); border: 1px solid var(--line-strong); border-radius: 99px; padding: 0 7px; align-self: flex-start; }
+  .tag.you { color: var(--signal-text); border-color: rgba(13,153,255,.35); }
+  .rule { margin-top: 14px; padding: 12px 14px; border-radius: 8px; background: var(--panel); box-shadow: var(--shadow-cluster); color: var(--fg-muted); font-size: 12.5px; }
+  .rule b { color: var(--fg); font-weight: 500; }
+
+  /* pins */
+  .pin { position: relative; width: 28px; height: 28px; flex: none; border-radius: 99px 99px 99px 3px; display: flex; align-items: center; justify-content: center;
+    font: 600 var(--ui)/1 Inter, sans-serif; font-variant-numeric: tabular-nums; box-shadow: 0 0 0 2px var(--panel), var(--shadow-cluster); }
+  .pin.wait { background: var(--overlay); color: var(--fg-muted); box-shadow: 0 0 0 2px var(--panel), inset 0 0 0 1px var(--line-strong), var(--shadow-cluster); }
+  .pin.new  { background: var(--signal-strong); color: #fff; }
+  .pin.read { background: var(--fg); color: var(--panel); }
+  .pin.done { background: var(--overlay); color: var(--fg-faint); opacity: .6; width: 22px; height: 22px; }
+  .pin.open-ring { outline: 2px solid var(--signal); outline-offset: 1px; }
+  .pin .badge { position: absolute; top: -4px; right: -4px; width: 14px; height: 14px; border-radius: 99px; background: var(--panel); color: var(--fg); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-cluster); }
+  .pin .dots { display: flex; gap: 2px; }
+  .pin .dots i { width: 3px; height: 3px; border-radius: 9px; background: currentColor; animation: blink 1.4s infinite; }
+  .pin .dots i:nth-child(2) { animation-delay: .2s } .pin .dots i:nth-child(3) { animation-delay: .4s }
+  @keyframes blink { 0%, 60%, 100% { opacity: .35 } 30% { opacity: 1 } }
+  @media (prefers-reduced-motion: reduce) { .pin .dots i { animation: none; opacity: .7 } }
+
+  /* the board */
+  .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .board { position: relative; background: var(--field); border-radius: 10px; box-shadow: var(--shadow-cluster); padding: 22px; min-height: 290px; overflow: hidden;
+    background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px); background-size: 16px 16px; }
+  .board .label { position: absolute; top: 12px; left: 14px; font-size: 11px; color: var(--fg-faint); }
+  .art { position: absolute; inset: 44px 60px 34px 60px; border-radius: 3px; background: #F4E4D8; box-shadow: 0 24px 70px -16px rgba(0,0,0,.8); overflow: hidden; }
+  .art .bell { position: absolute; left: 50%; top: 52%; width: 120px; height: 120px; transform: translate(-50%,-50%); border-radius: 50%;
+    background: repeating-radial-gradient(circle, transparent 0 6px, rgba(196,167,151,.9) 6px 7.5px); }
+  .art .bell::after { content: ''; position: absolute; inset: 38px; border-radius: 50%; background: #B23E1A; filter: blur(10px); opacity: .55; }
+  .art .cap { position: absolute; left: 14px; bottom: 10px; font: 500 10px Inter; color: #8d6f60; letter-spacing: .02em; }
+  .board .p { position: absolute; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .board .p span { font-size: 10.5px; color: var(--fg-muted); white-space: nowrap; background: rgba(19,19,19,.85); padding: 1px 6px; border-radius: 4px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 18px; margin-top: 12px; font-size: 12px; color: var(--fg-muted); }
+  .legend > div { display: flex; align-items: center; gap: 8px; }
+
+  /* the card, at the kit's real size */
+  .cards { display: grid; grid-template-columns: repeat(4, 272px); gap: 20px; justify-content: space-between; align-items: start; }
+  .card-col { display: flex; flex-direction: column; gap: 10px; }
+  .card-col .cap { font-size: 12px; color: var(--fg-muted); min-height: 38px; }
+  .card-col .cap b { color: var(--fg); font-weight: 500; display: block; }
+  .pop { width: 272px; background: var(--overlay); border-radius: var(--r-pop); box-shadow: var(--shadow-pop); font: var(--ui)/var(--lead) Inter, sans-serif; color: var(--fg); overflow: hidden; }
+  .hd { height: 32px; display: flex; align-items: center; gap: 2px; padding: 0 6px 0 10px; }
+  .hd .t { flex: 1; min-width: 0; color: var(--fg-muted); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hd .t em { font-style: normal; color: var(--fg-faint); font-weight: 400; }
+  .ib { width: 20px; height: 20px; border-radius: var(--r-control); display: inline-flex; align-items: center; justify-content: center; color: var(--fg-muted); }
+  .ib:hover { background: var(--hover); color: var(--fg); }
+  .done-btn { height: 20px; padding: 0 7px 0 5px; border-radius: var(--r-control); display: inline-flex; align-items: center; gap: 4px; color: var(--fg); background: var(--control); font-weight: 500; }
+  .done-btn.hot { background: var(--signal-soft); color: var(--signal-text); }
+  .done-chip { height: 18px; padding: 0 6px 0 4px; border-radius: 99px; display: inline-flex; align-items: center; gap: 3px; color: var(--ok-text); background: rgba(60,207,142,.12); font-weight: 500; margin-right: 4px; }
+  .msgs { max-height: 300px; overflow: auto; padding-bottom: 2px; }
+  .m { padding: 7px 10px 7px 10px; display: grid; grid-template-columns: 16px 1fr; column-gap: 7px; position: relative; }
+  .m + .m { border-top: 1px solid var(--line); }
+  .m.unread::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: var(--signal); }
+  .av { width: 16px; height: 16px; border-radius: 99px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; margin-top: 0; }
+  .av.you { background: var(--active); color: var(--fg); }
+  .av.agent { background: var(--fg); color: var(--panel); }
+  .m .who { display: flex; align-items: baseline; gap: 6px; }
+  .m .who b { font-weight: 500; }
+  .m .who small { font-size: var(--ui); color: var(--fg-faint); }
+  .m p { grid-column: 2; margin: 1px 0 0; color: rgba(255,255,255,.9); white-space: pre-wrap; }
+  .m .chips { grid-column: 2; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
+  .m .chip { font: 10.5px/16px "SF Mono", Menlo, monospace; color: var(--fg-muted); background: var(--control); border-radius: 3px; padding: 0 5px; }
+  .m .chip i { font-style: normal; color: var(--fg); }
+  .status { display: flex; align-items: flex-start; gap: 6px; padding: 2px 10px 8px 33px; color: var(--fg-faint); }
+  .status .dots { display: flex; gap: 2px; flex: none; margin-top: 7px; } .status .dots i { width: 3px; height: 3px; border-radius: 9px; background: var(--fg-faint); animation: blink 1.4s infinite; }
+  .status .dots i:nth-child(2) { animation-delay: .2s } .status .dots i:nth-child(3) { animation-delay: .4s }
+  .composer { margin: 0 6px 6px; display: flex; align-items: flex-end; gap: 6px; padding: 0; }
+  .ta { flex: 1; min-height: 22px; border-radius: var(--r-control); background: var(--control); padding: 3px 8px; color: var(--fg-faint); }
+  .ta.typing { color: var(--fg); box-shadow: inset 0 0 0 1px var(--signal); }
+  .send { width: 20px; height: 20px; border-radius: var(--r-control); display: inline-flex; align-items: center; justify-content: center; color: var(--fg-faint); }
+  .send.on { background: var(--signal); color: #fff; }
+
+  /* the loop */
+  .loop { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; background: var(--panel); border-radius: 10px; box-shadow: var(--shadow-cluster); padding: 18px; }
+  .step { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .arrow { color: var(--fg-faint); font-size: 12px; display: flex; align-items: center; gap: 6px; }
+  .arrow em { font-style: normal; font-size: 11px; color: var(--fg-faint); }
+  .loop-note { margin: 10px 0 0; font-size: 12px; color: var(--fg-muted); }
+
+  /* the list */
+  .listwrap { display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }
+  .list { width: 300px; }
+  .seg { display: flex; gap: 2px; background: var(--control); border-radius: var(--r-control); padding: 2px; margin: 0 8px 6px; }
+  .seg span { flex: 1; text-align: center; border-radius: 3px; height: 18px; line-height: 18px; color: var(--fg-muted); }
+  .seg span.on { background: var(--active); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.5); }
+  .grp { padding: 6px 10px 2px; color: var(--fg-faint); }
+  .li { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; padding: 5px 10px; }
+  .li:hover { background: var(--hover); }
+  .li .pin { width: 20px; height: 20px; font-size: 10px; box-shadow: none; }
+  .li .pin.wait { box-shadow: inset 0 0 0 1px var(--line-strong); }
+  .li .tx { min-width: 0; }
+  .li .tx b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .li .tx small { display: block; color: var(--fg-faint); font-size: var(--ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .li .when { color: var(--fg-faint); }
+  .li.unread .tx b { color: var(--fg); } .li.unread .tx small { color: var(--signal-text); }
+
+  /* decisions */
+  .calls { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px; }
+  .call { background: var(--panel); border-radius: 10px; box-shadow: var(--shadow-cluster); padding: 16px; }
+  .call h3 { font-size: 13px; font-weight: 600; margin: 0 0 10px; }
+  .opt { border-radius: 8px; padding: 10px 12px; background: var(--field); margin-top: 8px; font-size: 12px; color: var(--fg-muted); }
+  .opt b { color: var(--fg); font-weight: 500; display: block; margin-bottom: 2px; }
+  .opt.pick { box-shadow: inset 0 0 0 1px rgba(13,153,255,.5); }
+  .opt.pick b::after { content: 'My pick'; margin-left: 8px; font-size: 10.5px; color: var(--signal-text); font-weight: 500; }
+
+  .refs { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px 32px; font-size: 12.5px; color: var(--fg-muted); }
+  .refs div b { color: var(--fg); font-weight: 500; }
+  .refs a { color: var(--signal-text); text-decoration: none; }
+  .data { background: var(--panel); border-radius: 10px; box-shadow: var(--shadow-cluster); padding: 16px 18px; font-size: 12.5px; color: var(--fg-muted); }
+  .data ul { margin: 0; padding-left: 18px; } .data li { margin: 4px 0; }
+
+  @media (max-width: 1240px) { .cards { grid-template-columns: repeat(2, 272px); justify-content: start; } }
+  @media (max-width: 900px) {
+    .facts, .calls, .refs { grid-template-columns: 1fr; }
+    .compare, .listwrap { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 620px) { .cards { grid-template-columns: 272px; justify-content: center; } .art { inset: 44px 24px 34px 24px; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="eyebrow">Rueca · notes to the agent · design exploration</div>
+  <h1>Comment threads</h1>
+  <p class="lede">Letting you answer the agent's reply, and keep going, without the pins turning into a puzzle. Nothing here is built yet. Three calls at the bottom are yours.</p>
+
+  <!-- 1 -->
+  <section>
+    <h2>Two facts, four states</h2>
+    <p class="sub">Today a pin says one thing: has the agent answered? Replies break that, because an answer isn't the end. So a thread keeps track of only two facts: <b style="color:var(--fg);font-weight:500">who spoke last</b>, and <b style="color:var(--fg);font-weight:500">whether you closed it</b>. Everything you see comes from those two.</p>
+    <div class="facts">
+      <div class="fact">
+        <div class="row"><div class="pin wait"><span class="dots"><i></i><i></i><i></i></span></div><b>Waiting</b></div>
+        <p>You spoke last. It's the agent's turn, and nothing is asked of you.</p>
+        <span class="tag">Agent's turn</span>
+      </div>
+      <div class="fact">
+        <div class="row"><div class="pin new">2</div><b>New reply</b></div>
+        <p>The agent answered and you haven't opened it yet. The only loud pin.</p>
+        <span class="tag you">Your turn</span>
+      </div>
+      <div class="fact">
+        <div class="row"><div class="pin read">3</div><b>Replied</b></div>
+        <p>You've read the reply but haven't closed the thread. Reply, or mark it done.</p>
+        <span class="tag you">Your turn</span>
+      </div>
+      <div class="fact">
+        <div class="row"><div class="pin done"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><b>Done</b></div>
+        <p>You closed it. It leaves the board and lives under Done in the comments list.</p>
+        <span class="tag">Closed</span>
+      </div>
+    </div>
+    <div class="rule"><b>The agent's to-do list</b> is every open thread where you spoke last. <b>Replying</b> to any thread, even a done one, hands it back to the agent. <b>Only you</b> close a thread; the agent replies but never closes.</div>
+  </section>
+
+  <!-- 2 -->
+  <section>
+    <h2>Pins on the board</h2>
+    <p class="sub">The loud colour moves to where your attention is needed. Today the blue pin means "waiting for the agent", which is the one moment you have nothing to do. Proposed: waiting goes quiet, a new reply turns blue, a read reply goes ink, and done disappears.</p>
+    <div class="compare">
+      <div class="board">
+        <div class="label">Today</div>
+        <div class="art"><div class="bell"></div><div class="cap">Bronze, 19 cm tall</div></div>
+        <div class="p" style="left:96px;top:70px"><div class="pin new">1</div><span>Waiting</span></div>
+        <div class="p" style="left:62%;top:96px"><div class="pin read">2<span class="badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></div><span>Agent replied</span></div>
+        <div class="p" style="left:40%;bottom:46px"><div class="pin read">3<span class="badge"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span></div><span>Agent replied, and done?</span></div>
+      </div>
+      <div class="board">
+        <div class="label">Proposed</div>
+        <div class="art"><div class="bell"></div><div class="cap">Bronze, 19 cm tall</div></div>
+        <div class="p" style="left:96px;top:70px"><div class="pin wait">1</div><span>Waiting</span></div>
+        <div class="p" style="left:62%;top:96px"><div class="pin new">2</div><span>New reply</span></div>
+        <div class="p" style="left:40%;bottom:46px"><div class="pin read">3</div><span>Replied</span></div>
+        <div class="p" style="right:76px;bottom:46px;opacity:.9"><div class="pin done"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div><span>Done, only with “Show done”</span></div>
+      </div>
+    </div>
+    <div class="legend">
+      <div><div class="pin wait" style="transform:scale(.8)">1</div>Quiet: hollow, grey number</div>
+      <div><div class="pin new" style="transform:scale(.8)">2</div>Blue: the agent answered, unread</div>
+      <div><div class="pin read" style="transform:scale(.8)">3</div>Ink: read, still open</div>
+      <div><div class="pin done" style="transform:scale(.9)"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>Hidden; a check when shown</div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section>
+    <h2>The thread card</h2>
+    <p class="sub">One card for every state, at the kit's real size. The reply box is always at the bottom, like Figma, Framer and Felt. The check in the header closes the thread; when it's your turn it gets a label so it's easy to find. A new agent message gets a thin blue edge until you've seen it.</p>
+    <div class="cards">
+
+      <!-- waiting -->
+      <div class="card-col">
+        <div class="cap"><b>Waiting</b>You just sent it, or you replied.</div>
+        <div class="pop">
+          <div class="hd">
+            <span class="t">1 <em>·</em> Rings</span>
+            <span class="ib" title="Mark done"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+            <span class="ib" title="More"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></span>
+          </div>
+          <div class="msgs">
+            <div class="m"><div class="av you">R</div><div class="who"><b>You</b><small>just now</small></div><p>Fewer rings near the centre. It reads busy at this size.</p></div>
+          </div>
+          <div class="status"><span class="dots"><i></i><i></i><i></i></span>The agent sees this with your next message.</div>
+          <div class="composer"><div class="ta">Add to this…</div><span class="send"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></div>
+        </div>
+      </div>
+
+      <!-- new reply -->
+      <div class="card-col">
+        <div class="cap"><b>New reply</b>The agent answered. Pin is blue until you open it.</div>
+        <div class="pop">
+          <div class="hd">
+            <span class="t">2 <em>·</em> Glow</span>
+            <span class="done-btn hot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Done</span>
+            <span class="ib" title="More"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></span>
+          </div>
+          <div class="msgs">
+            <div class="m"><div class="av you">R</div><div class="who"><b>You</b><small>12m ago</small></div><p>The glow is too hot against Arcilla.</p></div>
+            <div class="m unread"><div class="av agent">✳</div><div class="who"><b>Agent</b><small>just now</small></div><p>Cooled it a step and made it smaller, only in the Arcilla palette.</p>
+              <div class="chips"><span class="chip">glow <i>#B23E1A → #9C3A1E</i></span><span class="chip">size <i>0.6 → 0.45</i></span></div></div>
+          </div>
+          <div class="composer"><div class="ta">Reply…</div><span class="send"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></div>
+        </div>
+      </div>
+
+      <!-- replying -->
+      <div class="card-col">
+        <div class="cap"><b>Replied, and you keep going</b>Sending hands it back: the pin goes quiet.</div>
+        <div class="pop">
+          <div class="hd">
+            <span class="t">3 <em>·</em> On the artboard</span>
+            <span class="done-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Done</span>
+            <span class="ib" title="More"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></span>
+          </div>
+          <div class="msgs">
+            <div class="m"><div class="av you">R</div><div class="who"><b>You</b><small>1h ago</small></div><p>The caption sits too close to the bell.</p></div>
+            <div class="m"><div class="av agent">✳</div><div class="who"><b>Agent</b><small>40m ago</small></div><p>Moved it down 12 px and set it in small caps.</p></div>
+          </div>
+          <div class="composer"><div class="ta typing">Better. Try it without small caps</div><span class="send on"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></div>
+        </div>
+      </div>
+
+      <!-- done -->
+      <div class="card-col">
+        <div class="cap"><b>Done</b>Opened from the list. Replying reopens it.</div>
+        <div class="pop">
+          <div class="hd">
+            <span class="t">4 <em>·</em> Dash</span>
+            <span class="done-chip"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Done</span>
+            <span class="ib" title="More"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg></span>
+          </div>
+          <div class="msgs">
+            <div class="m"><div class="av you">R</div><div class="who"><b>You</b><small>2d ago</small></div><p>Dotted, not dashed.</p></div>
+            <div class="m"><div class="av agent">✳</div><div class="who"><b>Agent</b><small>2d ago</small></div><p>Done. Dotted is the default now.</p></div>
+          </div>
+          <div class="composer"><div class="ta">Reply to reopen…</div><span class="send"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span></div>
+        </div>
+      </div>
+
+    </div>
+    <p class="loop-note">The ⋯ menu holds “Show the state it was made in” and “Delete”. The value chips are optional: they'd appear only when the agent's change maps to knobs, so you can see what moved without reading code.</p>
+  </section>
+
+  <!-- 4 -->
+  <section>
+    <h2>The loop</h2>
+    <div class="loop">
+      <div class="step"><div class="pin wait">1</div>You comment</div>
+      <div class="arrow">→ <em>agent replies</em> →</div>
+      <div class="step"><div class="pin new">1</div>New reply</div>
+      <div class="arrow">→ <em>you open it</em> →</div>
+      <div class="step"><div class="pin read">1</div>Replied</div>
+      <div class="arrow">→ <em>you reply</em> → back to waiting, <em>or</em> →</div>
+      <div class="step"><div class="pin done"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>Done</div>
+    </div>
+    <p class="loop-note">A reply on a done thread starts the loop again from waiting. Values sent with “Send to agent” keep clearing themselves once the agent has them: they're not conversations.</p>
+  </section>
+
+  <!-- 5 -->
+  <section>
+    <h2>The comments list</h2>
+    <div class="listwrap">
+      <div class="pop list" style="padding:6px 0">
+        <div class="seg"><span class="on">Open · 3</span><span>Done · 1</span></div>
+        <div class="grp">Your turn</div>
+        <div class="li unread"><div class="pin new">2</div><div class="tx"><b>The glow is too hot against Arcilla.</b><small>Agent: Cooled it a step and made it smaller…</small></div><span class="when">now</span></div>
+        <div class="li"><div class="pin read">3</div><div class="tx"><b>The caption sits too close to the bell.</b><small>Agent: Moved it down 12 px…</small></div><span class="when">40m</span></div>
+        <div class="grp">Waiting for the agent</div>
+        <div class="li"><div class="pin wait">1</div><div class="tx"><b>Fewer rings near the centre.</b><small>You, just now</small></div><span class="when">now</span></div>
+      </div>
+      <p class="sub" style="margin:0">Open threads group by whose turn it is, so what needs you sits on top. Each row shows the last message, not the first, because that's the one you act on. Done threads move to their own tab, which is also where “Show done on the board” lives.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section>
+    <h2>Your calls</h2>
+    <div class="calls">
+      <div class="call">
+        <h3>Who can close a thread?</h3>
+        <div class="opt pick"><b>Only you</b>The agent replies; you decide it's done. Matches Linear: a person stays responsible, the agent does the work.</div>
+        <div class="opt"><b>The agent too, when it's sure</b>Fewer clicks, but a thread could vanish before you've looked at the change.</div>
+      </div>
+      <div class="call">
+        <h3>Where do done threads go?</h3>
+        <div class="opt pick"><b>Off the board</b>They live under Done in the list, with a “Show done” switch. Figma does this.</div>
+        <div class="opt"><b>Stay on the board, faded</b>History stays in place, but the board fills up and faded pins already mean “made in another state”.</div>
+      </div>
+      <div class="call">
+        <h3>Show that the agent has seen it?</h3>
+        <div class="opt pick"><b>Not for now</b>The agent usually answers in the same turn it reads the comment. A fifth state for a few seconds of value.</div>
+        <div class="opt"><b>Yes, a “looking at it” mark</b>Like GitHub's 👀 when Copilot picks up a comment. Worth it if fixes start taking minutes.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section>
+    <h2>What changes underneath</h2>
+    <div class="data"><ul>
+      <li>A comment gets a list of messages instead of one comment plus one answer. Old notes read as a two-message thread.</li>
+      <li>Status becomes open or done. “Whose turn” isn't stored; it's read from the last message.</li>
+      <li>The agent appends a message instead of resolving. The hook counts threads where you spoke last.</li>
+      <li>“Read” is kept in your browser, so opening a thread never rewrites its file.</li>
+      <li>The agent guide (notes.md) learns the new rule: reply, don't close.</li>
+    </ul></div>
+  </section>
+
+  <!-- 8 -->
+  <section>
+    <h2>What I looked at</h2>
+    <div class="refs">
+      <div><b>Figma.</b> Check in the header to resolve, unread threads first, resolved ones hidden. Its users keep asking for an in-between state; “whose turn” fills that gap. <a href="https://forum.figma.com/suggest-a-feature-11/show-opened-or-partially-resolved-comments-47190">Forum</a></div>
+      <div><b>Google Docs.</b> Replying to a resolved comment reopens it. Same rule here.</div>
+      <div><b>Magnific</b> (Mobbin). A resolved thread's reply box says “Reopen and comment…”, which is where “Reply to reopen…” comes from. <a href="https://mobbin.com/screens/3610f00a-ec02-4ed9-8a7c-47ab8ee17c3a">Screen</a></div>
+      <div><b>Linear agents.</b> Work is delegated to an agent, but a person stays the owner. Session state comes from the agent's last activity, not a switch. <a href="https://linear.app/blog/our-approach-to-building-the-agent-interaction-sdk">Post</a></div>
+      <div><b>GitHub Copilot.</b> Reacts 👀 when it picks up a comment; follow-up comments on the same PR keep context. <a href="https://docs.github.com/en/copilot/how-tos/use-copilot-agents/coding-agent/review-copilot-prs">Docs</a></div>
+      <div><b>Vercel comments.</b> Agents can list, reply to and resolve toolbar comments from the CLI, with a closing note. <a href="https://vercel.com/changelog/manage-vercel-toolbar-comments-from-the-cli">Changelog</a></div>
+      <div><b>Framer, Felt, Gamma, Higgsfield</b> (Mobbin). The reply box always sits at the bottom of the card, never behind a “Reply” button.</div>
+      <div><b>Your Trove.</b> Nothing on comment threads directly. aicss.dev and the AI-states kits are useful later for the “waiting” animation.</div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
