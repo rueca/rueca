@@ -463,8 +463,9 @@ export default function AnimateShell() {
       }
       left={
         <div className="flex h-full min-h-0 flex-col gap-[var(--gutter)]">
-          <div className="flex min-h-0 flex-[1.1] flex-col"><LayersPanel /></div>
-          <div className="flex min-h-0 flex-1 flex-col"><AnimationsPanel /></div>
+          {/* each panel hugs its content and only shrinks (and scrolls) when the column runs out of room */}
+          <div className="flex min-h-0 flex-initial flex-col"><LayersPanel /></div>
+          <div className="flex min-h-0 flex-initial flex-col"><AnimationsPanel /></div>
         </div>
       }
       right={
