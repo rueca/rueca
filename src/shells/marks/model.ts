@@ -7,9 +7,9 @@ export const settingsSchema = defineSchema({
   brand: folder('Brand', {
     name: p.text('Agalla', { label: 'Wordmark', hint: 'Set beside the mark in lockups and in the browser-tab preview.' }),
     initials: p.text('AG', { maxLength: 3, hint: 'Letters for the monogram family — up to three.' }),
-    ink: p.color('#181411', { alpha: false }),
-    paper: p.color('#F3F1EB', { alpha: false }),
-    accent: p.color('#E8582C', { alpha: false, hint: 'Used sparingly: orbit planets, grid accents, bloom cores.' }),
+    ink: p.color('#171615', { alpha: false }),
+    paper: p.color('#F5F3F2', { alpha: false }),
+    accent: p.color('#F6571C', { alpha: false, hint: 'Used sparingly: orbit planets, grid accents, bloom cores.' }),
   }),
   explore: folder('Explore', {
     families: p.multi(FAMILIES.map((f) => f.id), FAMILIES.map((f) => ({ value: f.id, label: f.name, icon: f.icon })), { min: 1, label: 'Families', hint: 'Which families a reroll draws from.' }),
@@ -33,10 +33,10 @@ export const settings = createParams(settingsSchema, {
   id: 'marks',
   version: 2, // v2: the demo's clients (src/demo/clients.ts); v1 was "Mentee"
   presets: [
-    { name: 'Agalla', values: { name: 'Agalla', initials: 'AG', ink: '#181411', paper: '#F3F1EB', accent: '#E8582C' } },
-    { name: 'Night', values: { ink: '#F3F1EB', paper: '#181411', accent: '#F06A3E' } },
-    { name: 'Gabinete', values: { name: 'Gabinete', initials: 'G', ink: '#181411', paper: '#F3F1EB', accent: '#5DB4E8' } },
-    { name: 'Campana', values: { name: 'Campana', initials: 'C', ink: '#F3F1EB', paper: '#5E2219', accent: '#F2C744' } },
+    { name: 'Agalla', values: { name: 'Agalla', initials: 'AG', ink: '#171615', paper: '#F5F3F2', accent: '#F6571C' } },
+    { name: 'Night', values: { ink: '#F5F3F2', paper: '#171615', accent: '#FF6A2C' } },
+    { name: 'Gabinete', values: { name: 'Gabinete', initials: 'G', ink: '#171615', paper: '#F5F3F2', accent: '#5070F0' } },
+    { name: 'Campana', values: { name: 'Campana', initials: 'C', ink: '#F5F3F2', paper: '#6E1A3E', accent: '#FFD000' } },
   ],
 })
 export type SV = ReturnType<typeof settings.values>

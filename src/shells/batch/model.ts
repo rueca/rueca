@@ -97,7 +97,7 @@ export const DEMO_ROWS: DataRow[] = AGALLA.inks.map((i) => {
   const [headline, subhead, cta, badge] = COPY[i.id]
   return { name: i.name, headline, subhead, cta, price: i.price, color: i.dye.toUpperCase(), badge }
 })
-export const blankRow = (): DataRow => ({ name: 'New ink', headline: 'Your headline here.', subhead: 'One line about what makes it good.', cta: 'Shop now', price: '€14', color: '#E8582C', badge: '' })
+export const blankRow = (): DataRow => ({ name: 'New ink', headline: 'Your headline here.', subhead: 'One line about what makes it good.', cta: 'Shop now', price: '€14', color: '#F6571C', badge: '' })
 
 /* --- output sizes --- */
 export interface Zone { x: number; y: number; w: number; h: number; label: string }

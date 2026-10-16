@@ -13,7 +13,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300..500;1,6..72,300..500&display=swap" rel="stylesheet" />
 <style>
   :root {
-    --bg: #f3f1eb; --ink: #181411; --accent: #e8582c; --radius: 4px; --headline-size: 80px; --gap: 36px; --blob-speed: 14; --tilt: 0;
+    --bg: #f5f3f2; --ink: #171615; --accent: #f6571c; --radius: 4px; --headline-size: 80px; --gap: 36px; --blob-speed: 14; --tilt: 0;
     --line: color-mix(in srgb, var(--ink) 14%, var(--bg));
     --sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
     --serif: "Newsreader", Georgia, "Times New Roman", serif;
@@ -34,24 +34,24 @@
   .actions { margin-top: 30px; display: flex; gap: 12px; font: 600 15px/1 var(--sans) }
   .actions a { padding: 15px 22px; border-radius: var(--radius); text-decoration: none }
   /* on a bright, text is ink (never white) */
-  .primary { background: var(--accent); color: #181411 }
+  .primary { background: var(--accent); color: #171615 }
   .secondary { color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink) }
   /* states: ink deepens on hover, a visible ring on keyboard focus, selection in the brand's paper and ink */
   .actions a, nav .cta { transition: background-color .15s ease, box-shadow .15s ease }
   .primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)) }
   .secondary:hover, nav .cta:hover { background: color-mix(in srgb, var(--ink) 6%, var(--bg)) }
   a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px }
-  ::selection { background: var(--accent); color: #181411 }
+  ::selection { background: var(--accent); color: #171615 }
   @media (prefers-reduced-motion: reduce) { .actions a, nav .cta { transition: none } }
   .range { margin-top: 44px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px }
   .range span { display: inline-flex; align-items: center; gap: 7px; font: 500 13px/1 var(--sans) }
   .range i { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 18%, transparent) }
 
-  .art { position: relative; height: 80%; border-radius: calc(var(--radius) * 2); overflow: hidden; background: #e8582c; transform: rotate(calc(var(--tilt) * 1deg)) }
+  .art { position: relative; height: 80%; border-radius: calc(var(--radius) * 2); overflow: hidden; background: #f6571c; transform: rotate(calc(var(--tilt) * 1deg)) }
   .art img { position: absolute; left: 0; top: -4%; width: 100%; height: 108%; object-fit: cover; object-position: 50% 45%; animation: float calc(var(--blob-speed) * 1s) ease-in-out infinite alternate }
   .art::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 0 0 1px var(--line); pointer-events: none }
   .card { position: absolute; left: 7%; right: 7%; bottom: 7%; display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-radius: var(--radius); background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); font: 400 13px/1.35 var(--sans) }
-  .card i { flex: none; width: 34px; height: 34px; border-radius: 50%; background: #e8582c; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 20%, transparent) }
+  .card i { flex: none; width: 34px; height: 34px; border-radius: 50%; background: #f6571c; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 20%, transparent) }
   .card b { display: block; font: 600 13px/1.3 var(--sans); margin-bottom: 2px }
   .card em { font-style: normal; opacity: .62 }
   @keyframes float { from { transform: translateY(1.5%) } to { transform: translateY(-1.5%) } }
@@ -71,8 +71,8 @@
       <p class="lede" id="lede">Six natural inks, made in small batches from seeds, beetles, leaves and walnut husks. Each bottle says where its colour grew.</p>
       <div class="actions"><a class="primary" href="#">Shop the six inks</a><a class="secondary" href="#">Order samples</a></div>
       <div class="range" aria-label="The six inks">
-        <span><i style="background:#e8582c"></i>Achiote</span><span><i style="background:#ee7a68"></i>Cochinilla</span><span><i style="background:#f2c744"></i>Gualda</span>
-        <span><i style="background:#5db4e8"></i>Añil</span><span><i style="background:#8a5a3a"></i>Nogal</span><span><i style="background:#2fa57c"></i>Hoja</span>
+        <span><i style="background:#f6571c"></i>Achiote</span><span><i style="background:#b0006a"></i>Cochinilla</span><span><i style="background:#ffd000"></i>Gualda</span>
+        <span><i style="background:#5070f0"></i>Añil</span><span><i style="background:#8a5a3a"></i>Nogal</span><span><i style="background:#84c900"></i>Hoja</span>
       </div>
     </section>
     <div class="art" id="art">

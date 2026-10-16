@@ -535,7 +535,7 @@ export default function AnimateShell() {
         ) : null
       }>
         {/* no artboard: the plate sits straight on the canvas, its inks following the theme */}
-        <div className="absolute [--plate-ink:#181411] [--plate-measure:rgba(24,20,17,.42)] [--plate-mute:#6E6A64] dark:[--plate-ink:#B8B1A7] dark:[--plate-measure:rgba(243,241,235,.34)] dark:[--plate-mute:#8C857C]"
+        <div className="absolute [--plate-ink:#171615] [--plate-measure:rgba(24,20,17,.42)] [--plate-mute:#6C6A69] dark:[--plate-ink:#B6B5B4] dark:[--plate-measure:rgba(243,241,235,.34)] dark:[--plate-mute:#878685]"
           style={{ left: 0, top: 0, width: doc.width, height: doc.height, '--signal': CIELO } as React.CSSProperties} data-studio-artifact="">
           <LiveScene svgRef={svgRef} />
           <NoteLayer params={params} clock={clock} doc={docStore} />
