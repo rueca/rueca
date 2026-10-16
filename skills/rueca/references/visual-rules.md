@@ -235,7 +235,9 @@ Density (comfortable, compact) still resizes it.
 | Segmented control | 22px; 1px inner padding, 2px between options, 5px radius, inset 1px `--line` ring; the selected option on `--active` with an inset 1px `--line-strong` ring; 13px icons | `--d-control` |
 | Switch | 26 × 16px (small 22 × 14), 2px padding; off `--track` with an inset 1px `--line-strong` ring, on `--ink`; 12px thumb (small 10px) | none |
 | Checkbox | 14px, 4px radius, inset 1px `--line-strong` ring; ticked `--ink` with a 10px check; 24px hit area | none |
+| Field inside a toolbar cluster | 24px, the icon buttons' height, so each bar has one height (the cluster sets `--d-control` to `--d-icon`) | `--d-control` |
 | Icon button, button, menu item, tab | 24px | `--d-icon` |
+| Button beside a field (stepper −/+) | 22px square, the field's height | `--d-control` |
 | Small icon button | 20px drawn, 24px hit area | `--d-icon-sm` |
 | Large button | 28px, 12px text | `--d-button-lg` |
 | Section header · panel header · toolbar cluster | 26px · 32px · 32px | `--d-section`, `--d-header`, `--d-bar` |
