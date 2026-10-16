@@ -1,0 +1,4 @@
+schema_version: "1.1"
+name: comments-by-default
+context:
+  scaffold_script: fixture.sh
