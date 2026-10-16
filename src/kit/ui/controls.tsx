@@ -244,6 +244,8 @@ export type MenuItem =
   | { type?: 'item'; label: string; onClick: () => void; shortcut?: string; icon?: ComponentType<{ size?: number; strokeWidth?: number }>; disabled?: boolean; danger?: boolean; checked?: boolean; hint?: string }
   | { type: 'separator' }
   | { type: 'label'; label: string }
+  /** the menu's subject (a tool, a file): full ink, set apart from the items below it */
+  | { type: 'title'; label: string; hint?: string }
   | { type: 'submenu'; label: string; items: MenuItem[]; icon?: ComponentType<{ size?: number; strokeWidth?: number }> }
 
 function MenuItems({ items }: { items: MenuItem[] }) {
@@ -252,6 +254,12 @@ function MenuItems({ items }: { items: MenuItem[] }) {
       {items.map((it, i) => {
         if (it.type === 'separator') return <BaseMenu.Separator key={i} className="mx-2 my-1 h-px bg-line" />
         if (it.type === 'label') return <div key={i} className="px-2 pt-1.5 pb-1 text-ui text-fg-faint">{it.label}</div>
+        if (it.type === 'title') return (
+          <div key={i} className="flex flex-col gap-0.5 px-2 pt-1.5 pb-1.5">
+            <span className="text-title font-semibold text-fg">{it.label}</span>
+            {it.hint && <span className="text-ui leading-snug text-fg-faint">{it.hint}</span>}
+          </div>
+        )
         if (it.type === 'submenu') {
           const Icon = it.icon
           return (

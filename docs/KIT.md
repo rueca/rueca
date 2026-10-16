@@ -258,6 +258,8 @@ stops ticks while paused too (default true for artifacts with their own life).
 - Toolbar: `<Brand name doc? mark? href? menu?>`: the mark is a button with the tool name as its tooltip, opening
   a menu ("All tools" → `href`, then `menu` items); pass a plain glyph as `mark`. Pass `doc` only for live state
   (the open file, an editable title, the active look), never a fixed caption.
+  A host that runs many tools sets one mark for all of them with `<BrandOverride mark={…} tile?>` (drawn bare,
+  in ink, unless `tile`); the menu's first item is the tool name as a `{ type: 'title' }` row.
   `<Cluster>` groups, `<ToolDock value onChange tools>` (bottom-centre tools, place it yourself
   absolutely inside the Stage overlay), `<Button variant="primary">` for the ONE primary action.
 - `<Stage>` = camera (wheel pan, ⌘wheel/pinch zoom, space-drag, Shift+0/1), `contentSize`
