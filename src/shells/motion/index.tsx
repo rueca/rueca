@@ -21,8 +21,8 @@ export default function MotionShell() {
     const out = b.filter((x) => x.kind === 'out')
     const back = b.filter((x) => x.kind === 'back')
     const lanes: Lane[] = [
-      { id: 'sweep', label: 'Outward sweep', start: out[0]?.start ?? 0, end: out.at(-1)?.end ?? 0, color: 'var(--signal)' },
-      ...out.filter((_, i) => i % Math.ceil(v.rings / 6) === 0).map((x) => ({ id: `r${x.ring}`, label: `Ring ${x.ring + 1}`, start: x.start, end: x.end, depth: 1, color: 'var(--signal)' })),
+      { id: 'sweep', label: 'Outward sweep', start: out[0]?.start ?? 0, end: out.at(-1)?.end ?? 0, color: 'var(--cat-1)' },
+      ...out.filter((_, i) => i % Math.ceil(v.rings / 6) === 0).map((x) => ({ id: `r${x.ring}`, label: `Ring ${x.ring + 1}`, start: x.start, end: x.end, depth: 1, color: 'var(--cat-1)' })),
     ]
     if (back.length) lanes.push({ id: 'back', label: 'Return sweep', start: back[0].start, end: back.at(-1)!.end, color: 'var(--cat-7)' })
     lanes.push({ id: 'cues', label: 'Cues', kind: 'markers', keys: [{ t: 0, value: 'in' }, { t: out.at(-1)?.end ?? 0, value: 'peak' }], color: 'var(--key)' })

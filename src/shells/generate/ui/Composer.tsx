@@ -82,7 +82,9 @@ export function Composer() {
       )}
       {/* Narrow bars (1024–1280 windows): the settings summary shrinks to its icon, then hides, and Generate wraps
           onto its own line rather than overflowing the panel (break-it F6). */}
-      <div className="flex flex-wrap items-center gap-1.5">
+      {/* The bar's controls take the icon-button height (24px at default density) rather than the field height (22px):
+          they float over the gallery, so they need a full 24px target (WCAG 2.5.8), not the spacing exception. */}
+      <div className="flex flex-wrap items-center gap-1.5 [--d-control:var(--d-icon)]">
         <div className="w-[112px] @[560px]:w-[150px]"><Select value={v.model} onChange={setModel} label="Model" options={MODELS.map((x) => ({ value: x.id, label: x.name, hint: x.blurb }))} /></div>
         <Menu side="top" trigger={
           <Button size="sm" variant="default" className="h-control gap-1 px-2" aria-label={`Aspect ratio ${a.id}`}>
@@ -90,12 +92,12 @@ export function Composer() {
             <span className="tabular">{a.id}</span><ChevronDown size={11} className="text-fg-faint" />
           </Button>}
           items={[{ type: 'label', label: 'Aspect ratio' }, ...ASPECTS.map((x) => ({ label: `${x.id}  ·  ${x.label}`, icon: aspectIcon(x.w, x.h), checked: x.id === v.aspect, hint: `${x.w} × ${x.h}`, onClick: () => params.setValue('aspect', x.id) }))]} />
-        <div className="w-[92px]"><Segmented value={String(v.batch)} onChange={(n) => params.setValue('batch', Number(n))} label="Images per run"
+        <div className="w-[104px]"><Segmented value={String(v.batch)} onChange={(n) => params.setValue('batch', Number(n))} label="Images per run"
           options={['1', '2', '3', '4'].map((n) => ({ value: n, label: n, hint: `${n} image${n === '1' ? '' : 's'} per run` }))} /></div>
         <Tip label={negativeOpen ? 'Hide negative prompt' : 'Negative prompt'}>
-          <Button size="icon-sm" variant="ghost" active={negativeOpen || !!t.negative} aria-label="Negative prompt" onClick={() => ui.setState({ negativeOpen: !negativeOpen })}><MinusCircle size={14} strokeWidth={1.5} /></Button>
+          <Button size="icon" variant="ghost" active={negativeOpen || !!t.negative} aria-label="Negative prompt" onClick={() => ui.setState({ negativeOpen: !negativeOpen })}><MinusCircle size={14} strokeWidth={1.5} /></Button>
         </Tip>
-        <Tip label="Enhance prompt"><Button size="icon-sm" variant="ghost" aria-label="Enhance prompt" disabled={!t.prompt.trim()} onClick={enhance}><PencilSparkles size={14} strokeWidth={1.5} /></Button></Tip>
+        <Tip label="Enhance prompt"><Button size="icon" variant="ghost" aria-label="Enhance prompt" disabled={!t.prompt.trim()} onClick={enhance}><PencilSparkles size={14} strokeWidth={1.5} /></Button></Tip>
         <button type="button" onClick={() => ui.setState({ tab: 'create' })} aria-label={`Settings: ${v.steps} steps, CFG ${v.guidance}, seed ${v.lockSeed ? 'locked' : 'random'}`}
           className="hidden h-control min-w-0 items-center gap-1.5 rounded-control px-1.5 text-ui text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal @[460px]:flex">
           <SlidersHorizontal size={13} strokeWidth={1.5} className="shrink-0" />

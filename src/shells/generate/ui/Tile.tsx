@@ -45,9 +45,9 @@ export const Tile = memo(function Tile({ rec, selected, multi }: { rec: ImageRec
       </button>
 
       <div className="pointer-events-none absolute bottom-2 left-2 flex gap-1">
-        {rec.params.upscale && <span className="rounded-[5px] bg-scrim px-1.5 py-0.5 text-[10.5px] font-medium text-white backdrop-blur-md">{rec.params.upscale}×</span>}
-        {rec.kind === 'variation' && <span className="rounded-[5px] bg-scrim px-1.5 py-0.5 text-[10.5px] font-medium text-white backdrop-blur-md">Variation</span>}
-        {rec.kind === 'remix' && <span className="rounded-[5px] bg-scrim px-1.5 py-0.5 text-[10.5px] font-medium text-white backdrop-blur-md">Remix</span>}
+        {rec.params.upscale && <span className="rounded-[5px] bg-scrim px-1.5 py-0.5 text-ui-sm font-medium text-white backdrop-blur-md">{rec.params.upscale}×</span>}
+        {rec.kind === 'variation' && <span className="rounded-[5px] bg-scrim px-1.5 py-0.5 text-ui-sm font-medium text-white backdrop-blur-md">Variation</span>}
+        {rec.kind === 'remix' && <span className="rounded-[5px] bg-scrim px-1.5 py-0.5 text-ui-sm font-medium text-white backdrop-blur-md">Remix</span>}
       </div>
 
       <div className="absolute right-2 bottom-2 flex gap-1 opacity-0 transition-opacity group-hover/tile:opacity-100 group-focus-within/tile:opacity-100">

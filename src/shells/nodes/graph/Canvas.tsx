@@ -1,7 +1,7 @@
 /* The graph canvas: React Flow wired to the store, add-node search at the cursor (Tab / double-click / wire drop), library drops, zoom HUD. */
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import {
-  ReactFlow, Background, BackgroundVariant, MiniMap, useReactFlow, useViewport, useStore as useFlowStore,
+  ReactFlow, Background, BackgroundVariant, MiniMap, useReactFlow, useViewport, useKeyPress, useStore as useFlowStore,
   type FinalConnectionState, type XYPosition,
 } from '@xyflow/react'
 import { Kbd, ZoomPill, toast, useHotkeys, useStudio, useTheme, useValues } from '@kit'
@@ -49,6 +49,14 @@ export function GraphCanvas() {
   const wrap = useRef<HTMLDivElement>(null)
   const pointer = useRef<XYPosition | null>(null)
   const [add, setAdd] = useState<AddState | null>(null)
+  // Space held = hand tool everywhere, nodes included: a draggable node wins the pointer over panning, so nodes stop
+  // being draggable (and selectable) while Space is down. useKeyPress ignores Space typed into a field.
+  const spaceHeld = useKeyPress('Space')
+  // Delete removes the focused node and focus would fall to <body>: keep it on the canvas.
+  const keepFocus = useCallback(() => requestAnimationFrame(() => {
+    const a = document.activeElement
+    if (!a || a === document.body || !a.isConnected) wrap.current?.focus({ preventScroll: true })
+  }), [])
 
   const openAt = useCallback((screen: XYPosition, from?: From) => setAdd({ screen, flow: rf.screenToFlowPosition(screen), from }), [rf])
   const centerScreen = () => {
@@ -144,7 +152,8 @@ export function GraphCanvas() {
   return (
     <div
       ref={wrap}
-      className="relative h-full w-full overflow-hidden rounded-[var(--radius-panel)] bg-well shadow-[inset_0_0_0_1px_var(--line)]"
+      tabIndex={-1}
+      className="relative h-full w-full overflow-hidden rounded-[var(--radius-panel)] bg-well shadow-[inset_0_0_0_1px_var(--line)] outline-none"
       onPointerMove={(e) => { pointer.current = { x: e.clientX, y: e.clientY } }}
       onPointerLeave={() => { pointer.current = null }}
       onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy' }}
@@ -169,6 +178,10 @@ export function GraphCanvas() {
         onDoubleClick={(e) => { if ((e.target as HTMLElement).classList.contains('react-flow__pane')) openAt({ x: e.clientX, y: e.clientY }) }}
         zoomOnDoubleClick={false}
         deleteKeyCode={['Backspace', 'Delete']}
+        onNodesDelete={keepFocus}
+        onEdgesDelete={keepFocus}
+        nodesDraggable={!spaceHeld}
+        elementsSelectable={!spaceHeld}
         multiSelectionKeyCode={['Shift', 'Meta', 'Control']}
         selectionOnDrag
         panOnDrag={[1, 2]}

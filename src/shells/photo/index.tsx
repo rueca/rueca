@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Section, MoreRow, Row, Stage, Artboard, Menu, Button, IconButton, CommandPalette,
-  HistoryButtons, HistoryList, ThemeToggle, Segmented, ScrubValue, TextInput, ImageDrop, Empty, Divider, Kbd, Badge, toast, download,
+  HistoryButtons, HistoryList, ThemeToggle, Segmented, Select, ScrubValue, TextInput, ImageDrop, Empty, Divider, Kbd, Badge, toast, download,
   shareMenuItems, createCamera, useParamState, useHotkeys, useHoldKey, clamp, cn, type Command, NoteLayer, CommentButton, CommentsList, SendToAgentButton,
 } from '@kit'
 import { ToneCurve, Histogram, histogramBins, type CurvePoint, type Bins } from '@kit/ui/charts'
@@ -533,8 +533,12 @@ function StageOverlay() {
       <div className="@container pointer-events-none absolute inset-x-3 top-3 flex justify-center">
         <div className="cluster pointer-events-auto flex h-bar max-w-full min-w-0 items-center gap-1.5 px-2">
           <span className="shrink-0 pl-1 text-ui text-fg-muted @max-[860px]:hidden">Aspect</span>
-          <div className="w-[268px] min-w-0">
+          {/* five labelled options need ~268px: on a narrower bar they truncated to "F. O.. 1 4", so a menu takes over */}
+          <div className="w-[268px] min-w-0 @max-[900px]:hidden">
             <Segmented size="sm" label="Aspect" value={presetOf(d.aspect)} onChange={setAspect} options={ASPECTS.map((a) => ({ value: a.value, label: a.label, hint: a.label }))} />
+          </div>
+          <div className="hidden w-[96px] shrink-0 @max-[900px]:block">
+            <Select label="Aspect" value={presetOf(d.aspect)} onChange={setAspect} options={ASPECTS.map((a) => ({ value: a.value, label: a.label }))} />
           </div>
           <IconButton size="icon-sm" icon={d.aspect.split(':').map(Number).reduce((a, b) => a / b) < 1 ? RectangleVertical : RectangleHorizontal} label="Swap orientation" shortcut="x" onClick={flipAspect} />
           <ScrubValue boxed prefix="W" value={Math.round(d.crop.w * s.imageSize.w)} onChange={(x) => setCropSize('w', x)} min={16} max={s.imageSize.w} step={1} unit="px" label="Crop width" className="w-[78px] shrink-0" />
@@ -570,7 +574,7 @@ function HistogramCard({ out, active }: { out: { w: number; h: number }; active:
             <span className="tabular text-fg-muted">{out.w} × {out.h}</span>
             <span className="text-fg-faint">·</span>
             <span className="text-fg-faint">sRGB</span>
-            <span className="ml-auto truncate">{active ? <Badge tone="accent">{active}</Badge> : <Badge>Custom</Badge>}</span>
+            <span className="ml-auto truncate">{active ? <Badge tone="default">{active}</Badge> : <Badge>Custom</Badge>}</span>
           </div>
         }
       />

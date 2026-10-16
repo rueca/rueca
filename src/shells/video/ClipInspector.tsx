@@ -176,7 +176,7 @@ function ClipSections({ c }: { c: Clip }) {
           <div className="grid grid-cols-4 gap-1.5 px-pad pb-1.5">
             {(['aurora', 'sunset', 'mesh', 'app'] as ImageGen[]).map((g) => (
               <button key={g} type="button" aria-pressed={c.image === g} onClick={() => set({ image: g })}
-                className={cn('flex flex-col items-center gap-1 rounded-[7px] p-1 text-ui-sm outline-none focus-visible:ring-2 focus-visible:ring-signal', c.image === g ? 'bg-signal-soft text-signal' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
+                className={cn('flex flex-col items-center gap-1 rounded-[calc(var(--radius-control)+2px)] p-1 text-ui-sm outline-none focus-visible:ring-2 focus-visible:ring-signal', c.image === g ? 'bg-signal-soft text-signal-text' : 'text-fg-muted hover:bg-hover hover:text-fg')}>
                 <Thumb gen={g} seed={c.seed ?? 1} />
                 {IMAGE_LABEL[g]}
               </button>

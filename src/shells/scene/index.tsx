@@ -367,7 +367,7 @@ function ViewsPanel() {
             <button
               type="button"
               onClick={() => goView(x)}
-              className={cn('flex w-full flex-col gap-1 rounded-[8px] p-1 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
+              className={cn('flex w-full flex-col gap-1 rounded-[calc(var(--radius-control)+2px)] p-1 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-signal',
                 active === x.id ? 'bg-signal-soft shadow-[inset_0_0_0_1px_var(--signal)]' : 'hover:bg-hover')}
             >
               <div className="aspect-[176/112] w-full overflow-hidden rounded-[5px] bg-control">

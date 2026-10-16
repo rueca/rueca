@@ -73,7 +73,7 @@ export function Sidebar() {
                 </div>
               ) : <NavRow view={{ type: 'board', id: b.id }} icon={FolderHeart} label={b.name} count={images.filter((i) => i.boards?.includes(b.id)).length} active={active} />}
               <div className="absolute top-1/2 right-7 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100">
-                <Menu align="end" trigger={<IconButton icon={MoreHorizontal} label="Board options" size="icon-sm" />}
+                <Menu align="end" trigger={<IconButton icon={MoreHorizontal} label="Board options" size="icon" />}
                   items={[
                     { label: 'Rename', icon: Pencil, onClick: () => setEditing(b.id) },
                     { label: 'Delete board', icon: Trash2, danger: true, onClick: () => { deleteBoard(b.id); toast(`Deleted board “${b.name}”`, { description: 'Images stay in their sessions.', action: { label: 'Undo', onClick: () => history.undo() } }) } },
@@ -103,7 +103,7 @@ export function Sidebar() {
                   </span>
                 </button>
                 <div className="absolute top-2 right-1.5 opacity-0 group-hover/row:opacity-100 group-focus-within/row:opacity-100">
-                  <Menu align="end" trigger={<IconButton icon={MoreHorizontal} label="Session options" size="icon-sm" />}
+                  <Menu align="end" trigger={<IconButton icon={MoreHorizontal} label="Session options" size="icon" />}
                     items={[
                       { label: 'Rename', icon: Pencil, onClick: () => setEditing(s.id) },
                       { label: 'Export session JSON', icon: Braces, onClick: () => { setView({ type: 'session', id: s.id }); exportSession() } },

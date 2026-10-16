@@ -52,10 +52,13 @@ const audit = () => {
   // Text actually rendered in chrome: sample visible text nodes outside canvases/artboards.
   const lowText = []
   // computed colours come as rgb(255 255 255 / .9) or, from color-mix(), color(srgb 1 1 1 / 0.9) in 0–1
+  // any computed colour (rgb(), color(srgb …), oklab(…) from Tailwind's /15 opacity) → sRGB 0–255 + alpha, via canvas
+  const probe = document.createElement('canvas').getContext('2d', { willReadFrequently: true })
   const rgba = (c) => {
-    const m = c?.match(/[\d.]+/g)?.map(Number)
-    if (!m) return null
-    return c.startsWith('color(srgb') ? [m[0] * 255, m[1] * 255, m[2] * 255, m[3]] : m
+    if (!c || c === 'transparent') return [0, 0, 0, 0]
+    probe.clearRect(0, 0, 1, 1); probe.fillStyle = '#000'; probe.fillStyle = c; probe.fillRect(0, 0, 1, 1)
+    const [r, g, b, a] = probe.getImageData(0, 0, 1, 1).data
+    return [r, g, b, a / 255]
   }
   // the background up the tree: translucent layers (washes, 90% glass panels) are composited over the first
   // opaque one, or over --field. null = text sits on an image / gradient / canvas we can't measure — skip it
@@ -83,7 +86,7 @@ const audit = () => {
     const r = el.getBoundingClientRect(); if (!r.width || r.bottom < 0 || r.top > innerHeight) continue
     const cs = getComputedStyle(el); if (cs.visibility === 'hidden' || +cs.opacity < 0.5) continue
     seen++
-    const fg = cs.color.match(/[\d.]+/g).map(Number); if (fg[3] !== undefined && fg[3] < 0.5) continue
+    const fg = rgba(cs.color); if (fg[3] < 0.5) continue
     const bg = bgOf(el); if (!bg) continue
     // text stacked over an image sibling (absolute overlay) — skip
     if ([...(el.parentElement?.children ?? [])].some((c) => c !== el && (c.tagName === 'IMG' || c.tagName === 'CANVAS' || c.tagName === 'VIDEO'))) continue

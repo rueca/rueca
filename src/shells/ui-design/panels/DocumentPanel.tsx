@@ -3,7 +3,7 @@
    view, export defaults) live in the toolbar's <SettingsMenu>. */
 import { useRef } from 'react'
 import { RotateCcw, ImageDown, FileDown, FileUp, MousePointerClick } from 'lucide-react'
-import { PanelHeader, Section, Row, ColorField, IconButton, Button, Tip, Swatch, Badge } from '@kit'
+import { PanelHeader, Section, Row, ColorField, IconButton, Button, Tip, Swatch, Badge, Select, Segmented } from '@kit'
 import * as S from '../model/store'
 import { prefs } from '../model/prefs'
 import { walk } from '../model/tree'
@@ -40,11 +40,12 @@ export function DocumentPanel() {
         </Row>
         {colours.size > 0 && (
           <Row label="Colours" hint="Every solid fill on this page. Click one to select the layers using it." stacked>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(16px,1fr))] gap-1.5">
               {[...colours.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 18).map(([c, ids]) => (
                 <Tip key={c} label={`${c.toUpperCase()} · ${ids.length} layer${ids.length > 1 ? 's' : ''}`}>
-                  <button type="button" aria-label={`Select layers using ${c}`} onClick={() => S.select(ids)} className="rounded-control outline-none hover:scale-110 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
-                    <Swatch color={c} size={20} className="rounded-control" />
+                  <button type="button" aria-label={`Select layers using ${c}`} onClick={() => S.select(ids)} className="block w-full max-w-7 rounded-control outline-none hover:scale-110 transition-transform focus-visible:ring-2 focus-visible:ring-signal">
+                    {/* the swatch fills its grid cell, so a row never strands one swatch on its own line */}
+                    <Swatch color={c} size={20} className="block aspect-square h-auto! w-full! rounded-control" />
                   </button>
                 </Tip>
               ))}
@@ -53,17 +54,15 @@ export function DocumentPanel() {
         )}
       </Section>
       <Section title="Export">
-        <div className="flex flex-wrap gap-1 px-pad pb-1.5">
-          {([{ s: '1', f: 'png' }, { s: '2', f: 'png' }, { s: '3', f: 'png' }, { s: '2', f: 'jpg' }, { s: '2', f: 'webp' }] as const).map((p) => {
-            const on = v.exportScale === p.s && v.exportFormat === p.f
-            return (
-              <Button key={p.s + p.f} size="sm" variant={on ? 'default' : 'ghost'} active={on} onClick={() => prefs.patch({ exportScale: p.s, exportFormat: p.f, exportSuffix: p.s === '1' ? '' : `@${p.s}x` })}>
-                {p.s}× {p.f.toUpperCase()}
-              </Button>
-            )
-          })}
-        </div>
-        <div className="px-pad">
+        <Row label="Format">
+          <Select label="Export format" value={v.exportFormat} onChange={(f) => prefs.patch({ exportFormat: f })}
+            options={[{ value: 'png', label: 'PNG' }, { value: 'jpg', label: 'JPG' }, { value: 'webp', label: 'WebP' }]} />
+        </Row>
+        <Row label="Scale">
+          <Segmented label="Export scale" className="flex-1" value={v.exportScale} onChange={(sc) => prefs.patch({ exportScale: sc, exportSuffix: sc === '1' ? '' : `@${sc}x` })}
+            options={[{ value: '1', label: '1×' }, { value: '2', label: '2×' }, { value: '3', label: '3×' }, { value: '4', label: '4×' }]} />
+        </Row>
+        <div className="px-pad pt-1">
           <Button variant="default" size="md" className="w-full" onClick={exportFrames} disabled={!frames}><ImageDown size={14} strokeWidth={1.5} />Export {frames} frame{frames === 1 ? '' : 's'}</Button>
         </div>
       </Section>

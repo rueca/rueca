@@ -174,7 +174,7 @@ export function Knob({
     >
       <svg viewBox="0 0 100 100" width={px} height={px} className="block overflow-visible" aria-hidden>
         <path d={arc(0, 1)} fill="none" stroke="var(--track)" strokeWidth={stroke} strokeLinecap="round" />
-        <path d={arc(Math.min(from, norm), Math.max(from, norm))} fill="none" stroke="var(--signal)" strokeWidth={stroke} strokeLinecap="round"
+        <path d={arc(Math.min(from, norm), Math.max(from, norm))} fill="none" stroke="var(--fill)" strokeWidth={stroke} strokeLinecap="round"
           className={cn(!changed && changed !== undefined && 'opacity-70')} />
         <circle cx={cx} cy={cy} r={r * 0.68} fill="var(--raised)" className="transition-[fill] group-hover/knob:fill-[var(--active)] group-data-[dragging]/knob:fill-[var(--active)]" />
         <circle cx={cx} cy={cy} r={r * 0.68} fill="none" stroke="var(--line-strong)" strokeWidth={1} vectorEffect="non-scaling-stroke" />

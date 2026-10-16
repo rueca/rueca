@@ -169,7 +169,7 @@ export function GlyphPanel({ v }: { v: V }) {
         <span className="absolute right-2 bottom-1.5 tabular text-ui-sm" style={{ color: rgba(v.fg, 0.55) }}>wght {Math.round(v.wght)}</span>
       </div>
       <Segmented value={set} onChange={setSet} options={SET_OPTS} label="Glyph set" />
-      <div className="grid grid-cols-6 gap-1" role="grid" aria-label="Glyphs — click to insert">
+      <div className="grid grid-cols-6 gap-1" role="group" aria-label="Glyphs — click to insert">
         {glyphs.map((g) => (
           <button
             key={g}

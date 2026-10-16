@@ -59,7 +59,7 @@ function LibraryPanel() {
           <div className="grid grid-cols-2 gap-1.5 px-pad">
             {g.items.map((it) => (
               <button key={it.label} type="button" onClick={() => { addClip(it.kind, it.patch); toast(`Added ${it.label.toLowerCase()} at ${fmtTime(clock.time())}`) }}
-                className="group/lib flex h-14 flex-col items-center justify-center gap-1 rounded-[8px] bg-control text-fg-muted outline-none transition-colors hover:text-fg hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal">
+                className="group/lib flex h-14 flex-col items-center justify-center gap-1 rounded-control bg-control text-fg-muted outline-none transition-colors hover:text-fg hover:shadow-[inset_0_0_0_1px_var(--line-strong)] focus-visible:ring-2 focus-visible:ring-signal">
                 <span className="flex h-5 items-center text-fg">{it.preview}</span>
                 <span className="text-ui">{it.label}</span>
               </button>
@@ -71,9 +71,9 @@ function LibraryPanel() {
         <div className="grid grid-cols-2 gap-1.5 px-pad">
           {IMAGES.map(([gen, label]) => (
             <button key={gen} type="button" onClick={() => { addClip('image', { name: label, image: gen, seed: Math.floor(Math.random() * 9999), ...(gen === 'app' ? { w: 0.72, h: 1.28, radius: 0.06 } : {}) }); toast(`Added ${label} image`) }}
-              className="group/lib relative h-16 overflow-hidden rounded-[8px] outline-none focus-visible:ring-2 focus-visible:ring-signal">
+              className="group/lib relative h-16 overflow-hidden rounded-control outline-none focus-visible:ring-2 focus-visible:ring-signal">
               <img src={thumbURL(gen, 7)} alt="" className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover/lib:scale-105" />
-              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-2 pt-3 pb-1 text-left text-ui text-white">{label}</span>
+              <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 from-40% via-black/60 via-70% to-transparent px-2 pt-4 pb-1 text-left text-ui text-white">{label}</span>
             </button>
           ))}
         </div>

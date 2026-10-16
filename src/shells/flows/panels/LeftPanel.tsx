@@ -80,7 +80,7 @@ export function LeftPanel() {
           <label className="flex h-control items-center gap-1.5 rounded-control bg-control px-2 text-fg-faint focus-within:shadow-[inset_0_0_0_1px_var(--signal)]">
             <Search size={12} strokeWidth={1.5} />
             <input value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.stopPropagation()} placeholder="Search screens" aria-label="Search screens"
-              className="min-w-0 flex-1 bg-transparent text-ui text-fg outline-none placeholder:text-fg-faint" />
+              className="h-control min-w-0 flex-1 bg-transparent text-ui text-fg outline-none placeholder:text-fg-faint" />
           </label>
         </div>
         {groups.map((g) => (

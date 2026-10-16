@@ -13,7 +13,7 @@ export const settingsSchema = defineSchema({
   }),
   explore: folder('Explore', {
     families: p.multi(FAMILIES.map((f) => f.id), FAMILIES.map((f) => ({ value: f.id, label: f.name, icon: f.icon })), { min: 1, label: 'Families', hint: 'Which families a reroll draws from.' }),
-    count: p.select('16', ['12', '16', '20', '24'], { label: 'Variants' }),
+    count: p.select('16', ['12', '16', '20', '24'], { label: 'Variants' }), // label = COUNT_LABEL below
     randomise: p.boolean(true, { label: 'Reroll params', hint: 'Off: Space only changes seeds and keeps each family’s defaults.' }),
     spread: p.number(0.3, { min: 0.05, max: 1, step: 0.01, label: 'Variation', hint: 'How far “More like this” strays from the original.' }),
   }),
@@ -77,6 +77,30 @@ export const resetDemoDoc = () => doc.set(demoDoc(), { label: 'Restore demo vari
 
 /** ⌘Z undoes the last change — to brand settings or to the marks. */
 export const history = createHistory([settings, doc])
+
+/* One Variants change is one undo step. The setting lives in `settings` and the grid it sizes in `doc`, two
+   stores with their own steps: the grid resize (COUNT_STEP, committed right after the setting by fitCount)
+   is chained to the setting step, so ⌘Z / ⇧⌘Z never leave the control saying 12 over a grid of 16. */
+export const COUNT_STEP = 'Variant count'
+const SETTINGS = 0, DOC = 1
+const COUNT_LABEL = 'Variants' // the `count` param's label: the step name createParams gives a change to it
+const isCountSetting = (step?: { source: number; label: string }) => step?.source === SETTINGS && step.label === COUNT_LABEL
+const isCountResize = (step?: { source: number; label: string }) => step?.source === DOC && step.label === COUNT_STEP
+{
+  const undo = history.undo, redo = history.redo
+  history.undo = () => {
+    const resize = isCountResize(history.getState().past.at(-1))
+    const label = undo()
+    if (resize && isCountSetting(history.getState().past.at(-1))) return undo()
+    return label
+  }
+  history.redo = () => {
+    const setting = isCountSetting(history.getState().future[0])
+    const label = redo()
+    if (setting && isCountResize(history.getState().future[0])) redo()
+    return label
+  }
+}
 
 /* --- view state (not undoable) --- */
 export interface UI {

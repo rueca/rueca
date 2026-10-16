@@ -139,13 +139,13 @@ export function SettingsMenu({ params, folders, label = 'View settings', icon: I
           aria-label={changed ? `${label}, changed from default` : label}
           className="relative flex size-icon items-center justify-center rounded-control text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover data-[popup-open]:text-fg"
         >
-          <Icon size={15} strokeWidth={1.5} />
+          <Icon size={14} strokeWidth={1.5} />
           {changed && <span aria-hidden className="absolute top-1 right-1 size-1 rounded-full bg-signal" />}
         </Popover.Trigger>
       </Tip>
       <Popover.Portal>
         <Popover.Positioner side="bottom" align="end" sideOffset={6} className="z-[160]">
-          <Popover.Popup className="pop max-h-[min(70vh,560px)] w-[var(--inspector-w)] overflow-y-auto py-1 outline-none">
+          <Popover.Popup aria-label={label} className="pop max-h-[min(70vh,560px)] w-[var(--inspector-w)] overflow-y-auto py-1 outline-none">
             <Inspector params={params} folders={ids} id="settings" />
           </Popover.Popup>
         </Popover.Positioner>
@@ -188,7 +188,7 @@ export function Section({
           className={cn('-ml-1 flex h-full min-w-0 flex-1 items-center gap-1 rounded-control pl-1 text-left text-ui font-[550] text-fg outline-none no-select focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-signal', !collapsible && 'cursor-default', off && 'text-fg-faint')}
         >
           <Tip label={hint} side="left"><span className="truncate">{title}</span></Tip>
-          {changed && <span className="size-1 shrink-0 rounded-full bg-signal" aria-label="changed" />}
+          {changed && <><span aria-hidden className="size-1 shrink-0 rounded-full bg-signal" /><span className="sr-only">, changed</span></>}
           {collapsible && <ChevronRight size={12} strokeWidth={1.75} className={cn('ml-0.5 shrink-0 text-fg-faint transition-transform duration-150', open && 'rotate-90')} />}
         </button>
         {actions}
@@ -296,7 +296,7 @@ export function ParamRow({ k, def, params, values: valuesProp, defaults: default
     const stops = normDetents(d.detents!)
     const parse = d.parse ?? ((s: string) => stops.find((x) => x.label?.toLowerCase() === s.trim().toLowerCase())?.value ?? evaluate(s, v as number))
     const scrub = <ScrubValue value={v as number} onChange={(n, f) => set(n, f)} min={d.min} max={d.max} step={step} unit={d.unit} fmt={d.fmt} parse={parse}
-      defaultValue={defaults[k] as number} changed={changed} label={label} className="w-[56px] shrink-0" />
+      defaultValue={defaults[k] as number} changed={changed} label={`${label} value`} className="w-[56px] shrink-0" />
     return (
       <div className={cn(disabled && 'pointer-events-none opacity-40')}>
         <Row {...common} stacked trailing={<div className="flex items-center gap-1">{scrub}{trailing}</div>}>{control}</Row>
@@ -310,12 +310,12 @@ export function ParamRow({ k, def, params, values: valuesProp, defaults: default
       <Row {...common}>
         <Popover.Root>
           <Popover.Trigger className="flex h-control w-full min-w-0 items-center gap-2 rounded-control bg-control px-1.5 text-left outline-none focus-visible:ring-2 focus-visible:ring-signal hover:shadow-[inset_0_0_0_1px_var(--line-strong)] data-[popup-open]:shadow-[inset_0_0_0_1px_var(--signal)]">
-            <CurveGlyph value={v as [number, number, number, number]} className="text-signal" />
+            <CurveGlyph value={v as [number, number, number, number]} className="text-fg-muted" />
             <span className={cn('truncate tabular text-ui', changed ? 'text-fg' : 'text-fg-value')}>{(v as number[]).map((n) => +n.toFixed(2)).join(', ')}</span>
           </Popover.Trigger>
           <Popover.Portal>
             <Popover.Positioner side="left" align="start" sideOffset={12} className="z-[160]">
-              <Popover.Popup className="pop w-[260px] p-3 outline-none">{control}</Popover.Popup>
+              <Popover.Popup aria-label={`${label} editor`} className="pop w-[260px] p-3 outline-none">{control}</Popover.Popup>
             </Popover.Positioner>
           </Popover.Portal>
         </Popover.Root>
@@ -366,7 +366,8 @@ export function ParamControl({ def: d, value: v, onChange: set, changed, default
         return <DetentSlider value={v} onChange={(n, f) => set(n, f)} stops={d.detents!} snap={d.snap} step={step} label={label} format={show} />
       const scrub = (
         <ScrubValue value={v} onChange={(n, f) => set(n, f)} min={d.min} max={d.max} step={step} unit={d.unit} fmt={d.fmt} parse={d.parse} soft={d.soft}
-          defaultValue={dflt} changed={changed} label={label} boxed={display !== 'slider'} className={display === 'slider' ? 'w-[56px] shrink-0' : 'flex-1'} />
+          // beside a slider it's the same param, so it needs its own name (two tab stops both called "Rings" was confusing)
+          defaultValue={dflt} changed={changed} label={display === 'slider' ? `${label} value` : label} boxed={display !== 'slider'} className={display === 'slider' ? 'w-[56px] shrink-0' : 'flex-1'} />
       )
       if (display === 'knob')
         return <div className="flex flex-1 justify-end"><Knob value={v} onChange={(n, f) => set(n, f)} min={d.min} max={d.max} step={d.step} defaultValue={dflt} label={label ?? ''} hideLabel fmt={d.fmt} unit={d.unit} taper={d.scale === 'log' ? 'log' : 'linear'} bipolar={(d.min ?? 0) < 0 && (d.max ?? 0) > 0} size="sm" changed={changed} /></div>

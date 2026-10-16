@@ -7,10 +7,10 @@ Six research passes went out:
 - overlay tuning panels: DialKit, Leva, Tweakpane, lil-gui, Theatre, Toolcraft, Agentation, React Scan
 - tools outside design: Ableton, Bitwig, TouchDesigner, Houdini, Unity, Zed, VS Code, the TE web tools, and the smallest sizes of Radix, Primer, Fluent and Carbon
 - UI fonts, measured
-- a live audit of our 17 shells
+- a live audit of our 19 shells
 - Rafael's Trove
 
-Then the two candidate directions were simulated as a CSS override on the real shells. Boards, close-ups and the simulation CSS are in [`21-chrome-density/`](21-chrome-density/).
+Then the two candidate directions were simulated as a CSS override on the real shells. Boards, close-ups and the simulation CSS are in [`21-chrome-density/`](21-chrome-density/). `sim.css` has a `__FONT__` placeholder in its `@font-face`, filled with the candidate font's URL by the injection script, which isn't in the repo: point it at a woff2 by hand to run the simulation again.
 
 ## What we found
 
@@ -61,7 +61,7 @@ Then the two candidate directions were simulated as a CSS override on the real s
 - *Lighter panel material.* Panels at 90% opacity, `blur(24px) saturate(1.4)`, a 1px 6% hairline and a `0 2px 8px .25` shadow in place of the 32px one. Solid under `prefers-reduced-transparency`.
 - *Quieter fields.* Fields lose the solid fill: B keeps a faint 4.5% wash, C shows bare values with a hairline underline and a fill on hover. The segmented control drops its well for a hairline outline, with a 9% white pill.
 
-**Font:** stay on Inter, but ship the official Inter 4 build (rsms, `inter-ui`, about 65KB subset) so the features actually render: `cv05` (l with a tail) and `cv08` (I with serifs) separate I from l, and values use `tnum`. Drop `cv11` and `ss01`. Fix the mono stack so it ends on a font that exists. A mono face for values (Geist Mono) was considered: it runs 3–10% wider and edges toward the Leva/Tweakpane look, so it's not recommended.
+**Font:** stay on Inter, but ship Inter 4 from rsms's own files (the `inter-ui` npm package, about 65KB subset) so the features actually render: `cv05` (l with a tail) and `cv08` (I with serifs) separate I from l, and values use `tnum`. Drop `cv11` and `ss01`. Fix the mono stack so it ends on a font that exists. A mono face for values (Geist Mono) was considered: it runs 3–10% wider and edges toward the Leva/Tweakpane look, so it's not recommended.
 
 **What it buys** (simulation, 1440×900, chrome coverage today → B → C):
 
@@ -91,6 +91,8 @@ The bigger win is how it looks: compare `closeup-dither.png` and `closeup-ui-des
 - no glass under 85% opacity over busy prototypes
 - hit targets stay at least 24px (WCAG 2.5.8): rows are 24, and controls smaller than that keep a 24px hit area, as the switch already does
 
+These rails are for the default (B). As shipped, `--d-control-sm` is the 20px floor in default and comfortable; compact (C) goes under two rails on purpose, with 22px rows and 18px small controls and small icon buttons, which keep a 24px reach.
+
 ## Wiring it so it's one place to tune
 
 1. **`theme.css`.** Add raw density variables:
@@ -98,6 +100,8 @@ The bigger win is how it looks: compare `closeup-dither.png` and `closeup-ui-des
    - spacing: `--d-pad`, `--d-gap`, `--d-label`, `--sidebar-w`
    - timeline: `--d-lane`, `--d-ruler`
    - type: `--ui-text`, `--ui-text-title`, `--ui-text-small`
+
+   As shipped, the names differ: `--d-toolbar` became `--d-bar`, `--ui-text-small` became `--ui-text-sm`, the gap is `--gutter` (no `--d-gap`), and `--row`, `--d-button-lg`, `--d-dock`, `--d-dock-button`, `--inspector-w` and `--ui-leading` were added. `docs/KIT.md` §1 has the full table.
 
    B is the default `:root`; `[data-density="comfortable"]` holds today's values and `[data-density="compact"]` holds C. Map them in `@theme inline` to `--spacing-control`, `--text-ui` and so on, so components read `h-control`, `size-icon`, `px-pad` and `text-ui`.
 2. **`cn.ts`.** Register the new names with `extendTailwindMerge`, or `cn('text-ui', 'text-fg')` will drop one of them.
@@ -127,8 +131,8 @@ What changed:
   - switches, checkboxes and slider fills in neutral ink
   - the segmented control without a well
   - 90% glass panels with a hairline and a tight shadow, solid under reduced transparency
-- **Font.** Official Inter 4 (`inter-ui`) with `cv05`/`cv08` for the chrome. The shells' artwork keeps fontsource's "Inter Variable", now imported by the app. The mono stack is fixed.
-- **Touch.** `.studio-touch` is now variable overrides, keeping the class selectors for shells that still use literals.
+- **Font.** Inter 4 from rsms's files (the `inter-ui` npm package) with `cv05`/`cv08` for the chrome. The shells' artwork keeps fontsource's "Inter Variable", now imported by the app. The mono stack is fixed.
+- **Touch.** `.studio-touch` is now variable overrides, keeping the class selectors for shells that still use literals. (Superseded in phase 2: the class selectors are gone.)
 
 Measured chrome coverage at 1440×900 (comfortable → default → compact):
 
@@ -146,7 +150,7 @@ Motion gains the most because its timeline is now token-sized. Dither, ui-design
 **Phase 2 is built (2026-10-15).** The tokens now reach every shell.
 
 What changed:
-- **Panel widths.** All 16 shells stopped pinning `leftWidth`/`rightWidth`, so they get the density's 224/256 (240/280 comfortable). None needed a pinned width back. Where content broke at the new width, the content changed:
+- **Panel widths.** No shell pins `leftWidth`/`rightWidth` any more (all 19), so they get the density's 224/256 (240/280 comfortable). None needed a pinned width back. Where content broke at the new width, the content changed:
   - flows' Status and Route style rows stack
   - the journey severity segment reads "Med" (with "Medium" as its tip)
   - photo's navigator zoom reads Fit / 1:2 / 1:1 / 2:1, as in Lightroom
@@ -182,14 +186,25 @@ Chrome coverage at 1440×900. Method: the union of every `.panel` and `.cluster`
 | marks | 17.3% | **15.2%** | 18.6% | 13.4% |
 | generate | 14.0% | **12.2%** | 14.2% | 11.1% |
 
-What's left on the timeline shells is mostly the bottom band: video's 248px timeline, synth's sequencer, and photo's 135px looks strip, whose tiles are fixed-size previews. Labels longer than the 72px label column still truncate in schema rows ("Column wi…", "Node previ…", "Headline …" with its changed dot). That's the phase-1 column width, not something a shell can fix.
+What's left on the timeline shells is mostly the bottom band: video's 248px timeline, synth's sequencer, and photo's 135px looks strip, whose tiles are fixed-size previews. Labels longer than the 72px label column still truncate in schema rows ("Column wi…", "Node previ…", "Headline …" with its changed dot). That's the phase-1 column width, not something a shell can fix. (Fixed in the follow-ups below: the column now fits its labels.)
 
 ## Follow-ups done (2026-10-15)
 
 - **Density setting.** ⌘K → View → Density: Default / Comfortable / Compact. Remembered per browser (`studio:density`) and restored by `<Studio>`.
-- **Labels fit.** The inspector's label column widens to its longest label, from 72px up to 42% of the row. "Stroke weight", "Column width" and "Reroll parameters" no longer truncate in schema inspectors. Hand-built `Row`s outside an `<Inspector>` keep the 72px column.
+- **Labels fit.** The inspector's label column widens to its longest label, from 72px up to 42% of the row. "Stroke weight", "Column width" and "Reroll parameters" no longer truncate in schema inspectors. Every `Row` with a text label reports to the nearest `<LabelScope>`, and `<Panel>` is one, so hand-built `Row`s in a panel share its column with any `<Inspector>` there. A `Row` with `labelWidth` opts out.
 - **Badge contrast.** Badges use `text-ok-text`, `text-key-text` and `text-rec-text`, at least 4.5:1 on their wash in both themes. That fixes oklch's "sRGB", component-lab's AA/AAA grades and journey's high and low points. Component-lab's variant tiles pick ink or paper by real contrast.
-- **Glass over WebGL.** Measured in the app's browser on Apple silicon at 120Hz, on the scene shell with the canvas forced to redraw every frame (a worst case): 111–117fps with the blur, 120 without, and the same slowest-5% frame time (9ms). The blur stays. `prefers-reduced-transparency` makes islands solid. Weaker GPUs haven't been measured.
+- **Glass over WebGL.** Measured in the app's browser on Apple silicon at 120Hz, on the scene shell with the canvas forced to redraw every frame (a worst case): 111–117fps with the blur, 120 without, and the same slowest-5% frame time (9ms). The blur stays. (Reversed in QA round 2, below: the blur is gone.) `prefers-reduced-transparency` makes islands solid. Weaker GPUs haven't been measured.
+
+## QA round 2 (2026-10-16)
+
+In the working tree, not yet committed:
+- `--d-control-sm` is 20px in default and comfortable (the guard-rail floor), 18 in compact.
+- `--fg-faint` is brighter in dark (`#999`) and darker in light (`#6b6b6b`), and panels are 94% opaque: at 90% a bright or saturated prototype pulled labels under 4.5:1.
+- Panels and clusters dropped the backdrop blur. At 94% it barely showed, and over a live stage (WebGL, video, an orbiting scene) it doubled the GPU's work and dropped frames. This reverses "The blur stays" above.
+- `useDensityPx` reads from the kit's root, so it works in registry installs, and the timelines' fallbacks are the default density's values.
+- A burst of arrow-key or wheel steps on a scrub field or slider is one undo step (`useSettle`).
+- The density API, `useSettle` and the label-scope hooks are exported from the kit barrel.
+- Small icon buttons and keyframe diamonds keep a 24px reach. TrackTimeline clips without a colour are neutral, not blue.
 
 ## Still open
 
