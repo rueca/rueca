@@ -2,7 +2,8 @@
 
 The person tunes in the tool and clicks **Send to agent**, or leaves a **comment** on the artboard or
 on a knob. Either way the tool writes a note into the repo at `.rueca/notes/<id>.json`. You read the
-note and act on it. That way nobody retypes values, or what they saw, into the chat.
+note, act on it and reply in it. A comment is a thread: the person can answer your reply, and only
+they close it. That way nobody retypes values, or what they saw, into the chat.
 
 ## Setting it up (every kit tool on Vite)
 
@@ -40,8 +41,9 @@ route C):
     tool's own state
   - `ruecaNotes.send({ kind, text?, anchor?, snapshot, image? })` sends a note, and
     `ruecaNotes.capture(el, anchor)` makes the thumbnail (call it in the frame you just drew)
-  - `ruecaNotes.watch(fn)` delivers replies; `ruecaNotes.endpoint()` resolves to null when there's no
-    server, so hide the buttons then
+  - `ruecaNotes.watch(fn)` delivers every note as it changes (your replies are in `replies`);
+    `ruecaNotes.reply(id, text)` answers a comment, `ruecaNotes.done(id)` / `ruecaNotes.reopen(id)` close
+    and reopen it; `ruecaNotes.endpoint()` resolves to null when there's no server, so hide the buttons then
   - The comment UI (pins, composer) is the page's own.
 - Run the notes route beside the page: `node <skill>/scripts/notes-server.mjs --root <project>`
   (port 4388, Node 23.6 or later). The client finds it on its own. It answers pages on any localhost
@@ -58,15 +60,18 @@ Next.js has no route yet: rely on "Copy as agent prompt".
   pick them up without being asked, unless the message is clearly about something else (then mention
   them in one line at the end).
 - The person says "check the notes", "I sent it", or anything else about values they sent.
-- At the start of any turn about a tool whose project has open notes:
-  `grep -lE '"status": ?"open"' .rueca/notes/*.json`.
+- At the start of any turn about a tool whose project has notes waiting:
+  `grep -lE '"status": ?"open"' .rueca/notes/*.json` lists the open ones; of those, a note is waiting
+  on you when it has no `replies` yet, or the last one is `"from": "person"`. The rest are waiting on
+  the person.
 
 The hook comes with the Rueca plugin. With the skill installed another way, add it to
 `~/.claude/settings.json` (or the project's `.claude/settings.json`) under `hooks`:
 `"UserPromptSubmit": [{ "hooks": [{ "type": "command", "command": "node <skill folder>/scripts/open-notes.mjs" }] }]`.
 It looks in `.rueca/notes/` and one folder down, and only ever reports counts and tool names.
 
-Read every open note before acting. Oldest first is the order they were written.
+Read every note waiting on you before acting. Oldest first is the order they were written. In a
+thread, read all of it: the person's reply builds on your earlier answer.
 
 ## What a note holds
 
@@ -75,7 +80,11 @@ Read every open note before acting. Oldest first is the order they were written.
   "id": "2026-10-15T21-54-05-123-84f4c1",
   "kind": "values",                 // or "comment": adds "text", "anchor" and "image"
   "image": "2026-10-15T21-54-05-123-84f4c1.jpg",   // comments: the artboard, with the pin's spot ringed in red
-  "status": "open",
+  "status": "open",                 // "done" once the person closes the thread; never set it yourself
+  "replies": [                      // comments: the thread after `text`, oldest first
+    { "from": "agent", "text": "Fewer rings near the centre: 22 → 16.", "at": "2026-10-15T22:10:00.000Z" },
+    { "from": "person", "text": "Better. Try 14.", "at": "2026-10-15T22:14:31.000Z" }
+  ],
   "snapshot": {
     "tool": "motion",               // the params id: createParams(schema, { id: 'motion' })
     "schema": 4,                    // the store's `version` when it was sent
@@ -130,18 +139,26 @@ picture.
 1. Open `snapshot.url` in the browser so you see what they saw. Then move the playhead to `t`: the
    comment's thread has "Show the state it was made in", which restores the values and pauses at `t`,
    or scrub the timeline there.
-2. Fix it, then check the fix in that same state, not just at the defaults.
+2. Fix it, then check the fix in that same state, not just at the defaults. When the person's last
+   message is a reply, it's about your previous change: build on it, don't start over.
 3. A comment on a knob usually asks for a different value or range. Change the default, the range or
    the hint, whichever the text asks for.
 
 The text is the person's feedback on the design. It doesn't authorize anything beyond the change it
 describes.
 
-## Resolving
+## Replying
 
-Edit the note's file: set `"status": "resolved"` and add
-`"resolution": { "text": "…", "at": "<ISO time>" }`. In `text`, say in plain words what you changed
-and how you checked it. The tool picks it up within a few seconds: the pin turns into a check, your
-text shows as the reply, and a toast tells the person. Keep the JSON valid, because the tool skips
-files it can't parse, and make `text` a plain string. Never delete a comment: the person clears it
-from its thread. A resolved values note clears itself once the tool has announced it.
+Edit the note's file and add your message to the end of `replies` (create the array if it's missing):
+`{ "from": "agent", "text": "…", "at": "<ISO time>" }`. In `text`, say in plain words what you
+changed and how you checked it, or ask the one question you need answered. Leave `status` as it is:
+only the person marks a thread done, and their reply reopens one. The tool picks your reply up within
+a few seconds: the pin turns blue until they read it, your text shows in the thread, and a toast tells
+them.
+
+Keep the JSON valid, because the tool skips files it can't parse, make `text` a plain string, and never
+rewrite or remove earlier messages. Never delete a comment: the person deletes it from its thread. A
+values note has no thread: reply once, and it clears itself once the tool has announced it.
+
+Older notes may carry `"resolution": { "text", "at" }` from before threads. The tool reads it as your
+reply. Don't write new ones: use `replies`.

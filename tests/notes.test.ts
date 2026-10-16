@@ -97,11 +97,32 @@ describe('normalizeNote', () => {
     const snap = { $v: 1, tool: 't', schema: 1, at: '', url: '', changed: {}, steps: [], view: { width: 1, height: 1, theme: 'dark' } }
     expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', text: 'no snapshot' })).toBeNull()
     expect(normalizeNote('a string')).toBeNull()
-    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'resolved', snapshot: snap, resolution: 'Done: slowed it' })?.resolution).toEqual({ text: 'Done: slowed it', at: '' })
-    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'resolved', snapshot: snap, resolution: { text: { summary: 'x' }, at: 'now' } })?.resolution?.text).toBe('{"summary":"x"}')
-    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', snapshot: snap, resolution: { text: 'forgot status' } })?.status).toBe('resolved')
+    // the format before threads: one resolution reads as the agent's reply, and the thread stays open (only the person closes it)
+    const old = normalizeNote({ id: 'a', kind: 'comment', status: 'resolved', snapshot: snap, resolution: 'Done: slowed it' })
+    expect(old?.replies).toEqual([{ from: 'agent', text: 'Done: slowed it', at: '' }])
+    expect(old?.status).toBe('open')
+    expect(old).not.toHaveProperty('resolution')
+    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'resolved', snapshot: snap, resolution: { text: { summary: 'x' }, at: 'now' } })?.replies[0].text).toBe('{"summary":"x"}')
+    expect(normalizeNote({ id: 'a', kind: 'values', status: 'resolved', snapshot: snap })?.replies).toEqual([{ from: 'agent', text: '', at: '' }])
+    // replies written loosely: a bare string, another name for the author or the text
+    const loose = normalizeNote({ id: 'a', kind: 'comment', status: 'open', snapshot: snap, replies: ['Fixed', { author: 'user', message: 'Smaller', at: 't' }, { role: 'assistant', text: 'Done' }] })
+    expect(loose?.replies).toEqual([{ from: 'agent', text: 'Fixed', at: '' }, { from: 'person', text: 'Smaller', at: 't' }, { from: 'agent', text: 'Done', at: '' }])
+    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'done', snapshot: snap })?.status).toBe('done')
     expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', snapshot: snap, anchor: { on: 'canvas', x: -0.25, y: 1.4 } })?.anchor).toEqual({ on: 'canvas', x: -0.25, y: 1.4 })
     expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', snapshot: snap, anchor: { on: 'artboard', x: 1.4, y: 0.5 } })?.anchor).toEqual({ on: 'artboard', x: 1, y: 0.5 })
+  })
+})
+
+describe('threads', () => {
+  it('says whose turn it is from the last message, and nobody\'s once done', async () => {
+    const { normalizeNote, noteTurn, noteMessages } = await import('@kit/core/notes')
+    const snap = { $v: 1, tool: 't', schema: 1, at: 'then', url: '', changed: {}, steps: [], view: { width: 1, height: 1, theme: 'dark' } }
+    const note = (o: object) => normalizeNote({ id: 'a', kind: 'comment', status: 'open', text: 'Too busy', snapshot: snap, ...o })!
+    expect(noteTurn(note({}))).toBe('agent')
+    expect(noteTurn(note({ replies: [{ from: 'agent', text: 'Fewer rings' }] }))).toBe('person')
+    expect(noteTurn(note({ replies: [{ from: 'agent', text: 'Fewer rings' }, { from: 'person', text: 'Fewer still' }] }))).toBe('agent')
+    expect(noteTurn(note({ status: 'done', replies: [{ from: 'agent', text: 'x' }] }))).toBeNull()
+    expect(noteMessages(note({ replies: [{ from: 'agent', text: 'Fewer rings', at: 'now' }] }))).toEqual([{ from: 'person', text: 'Too busy', at: 'then' }, { from: 'agent', text: 'Fewer rings', at: 'now' }])
   })
 })
 

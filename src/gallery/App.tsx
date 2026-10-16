@@ -3,12 +3,13 @@ import { site } from '@/site.config'
 import { ErrorBoundary } from '@kit/system/error-boundary'
 import { DesktopNotice } from './DesktopNotice'
 import { SHELLS } from './registry'
+import { fresh } from './stale'
 
 /* Routes: #/ landing · #/shells every shell · #/<id> one shell · anything else: "no such tool".
    The landing and the gallery load on demand, so a shell's own route never pays for them
    (or for motion, which only the landing uses). */
-const Landing = lazy(() => import('@/landing/Landing').then((m) => ({ default: m.Landing })))
-const Gallery = lazy(() => import('./Gallery').then((m) => ({ default: m.Gallery })))
+const Landing = lazy(fresh(() => import('@/landing/Landing').then((m) => ({ default: m.Landing }))))
+const Gallery = lazy(fresh(() => import('./Gallery').then((m) => ({ default: m.Gallery }))))
 const blank = <div className="h-full bg-field" />
 
 const useRoute = () => {
@@ -21,7 +22,7 @@ const useRoute = () => {
 export function App() {
   const route = useRoute()
   const shell = SHELLS.find((s) => s.id === route)
-  const Comp = useMemo(() => (shell ? lazy(shell.load) : null), [shell])
+  const Comp = useMemo(() => (shell ? lazy(fresh(shell.load)) : null), [shell])
   useEffect(() => {
     document.title = shell ? `${shell.name} · ${site.name}` : route === 'shells' ? `Shells · ${site.name}` : route === '' ? `${site.name} · ${site.tagline.replace(/\.$/, '')}` : `Not found · ${site.name}`
   }, [shell, route])
