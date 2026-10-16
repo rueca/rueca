@@ -10,7 +10,7 @@
       "name": "rueca",
       "source": "./",
       "description": "Teaches your agent to wrap what you’ve already built in a design tool: inspector, timeline, layers, export and a client view. Ships as an agent skill, a Claude Code plugin and a component registry.",
-      "version": "0.3.0"
+      "version": "0.2.0"
     }
   ]
 }
