@@ -17,7 +17,7 @@
      layout="docked"   panels flush to the window edges, Figma UI3 style
    `present` hides all chrome (⌘\ / F) — the client-facing view.
 --------------------------------------------------------------------------- */
-import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { cn } from '../core/cn'
 import { useHotkeys } from '../core/hotkeys'
 import { TipProvider } from '../ui/tooltip'
@@ -36,16 +36,23 @@ export function Studio({
   toolbar?: ReactNode; left?: ReactNode; right?: ReactNode; bottom?: ReactNode
   children: ReactNode; layout?: Layout; className?: string; leftWidth?: number; rightWidth?: number
 }) {
-  const [present, setPresent] = useState(false)
+  const [present, setPresentRaw] = useState(false)
   // Hiding the interface unmounts the panels, so the element that had focus is gone by the time it comes back:
   // remember how to find it again (its param row and name) and restore it once the panels have remounted.
   const returnTo = useRef<{ el: HTMLElement | null; param?: string; label?: string } | null>(null)
-  useLayoutEffect(() => {
-    if (present) {
+  // remember the focused element BEFORE the panels unmount (an effect after the commit would only see <body>)
+  const presentRef = useRef(false)
+  presentRef.current = present
+  const setPresent = useCallback((v: boolean | ((p: boolean) => boolean)) => {
+    const next = typeof v === 'function' ? v(presentRef.current) : v
+    if (next && !presentRef.current) {
       const el = document.activeElement instanceof HTMLElement && document.activeElement !== document.body ? document.activeElement : null
       returnTo.current = { el, param: el?.closest<HTMLElement>('[data-param]')?.dataset.param, label: el?.getAttribute('aria-label') ?? undefined }
-      return
     }
+    setPresentRaw(next)
+  }, [])
+  useLayoutEffect(() => {
+    if (present) return
     const r = returnTo.current
     returnTo.current = null
     if (!r) return
