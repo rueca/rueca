@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
 import type { ShellMeta } from '@/shells/types'
+import { thumbUrl } from './thumbs'
 
 /* Every folder in src/shells with a meta.ts + index.tsx registers itself.
    Nothing to edit here when a shell is added. */
@@ -23,8 +24,8 @@ if (import.meta.env.DEV) for (const s of SHELLS) if ((RESERVED_ROUTES as readonl
   throw new Error(`[studio] shell id "${s.id}" is a reserved route (${RESERVED_ROUTES.map((r) => `"${r}"`).join(', ')}) — rename it in its meta.ts`)
 
 /** Marketing thumbnail: the neutral-accent capture from scripts/thumbs-rail.mjs (qa.mjs's PNGs stay QA artefacts). */
-export const thumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/rail/${id}-${theme}.jpg`
+export const thumb = (id: string, theme: string) => thumbUrl(`thumbs/rail/${id}-${theme}.jpg`)
 /** a shell's client view as the phone hero shows it (scripts/thumbs-rail.mjs CLIENT): 880×1360 WebP */
-export const clientThumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/client/${id}-${theme}.webp`
+export const clientThumb = (id: string, theme: string) => thumbUrl(`thumbs/client/${id}-${theme}.webp`)
 /** the small one, for the shells page grid (~340px cards): 720w WebP */
-export const gridThumb = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/grid/${id}-${theme}.webp`
+export const gridThumb = (id: string, theme: string) => thumbUrl(`thumbs/grid/${id}-${theme}.webp`)

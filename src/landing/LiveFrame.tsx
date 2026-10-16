@@ -30,6 +30,32 @@ export function LiveFrame({ id, name, query = '', native = NATIVE, hint = 'Click
   const [w, setW] = useState(0)
   const [ready, setReady] = useState(false)
   const [active, setActive] = useState(false)
+  // The app loads once; switching shells changes the frame's address, so the next shell is up in a moment
+  // instead of reloading the whole app behind a still picture (that ~2s still read as the hero freezing)
+  const [src] = useState(() => `${import.meta.env.BASE_URL}#/${id}${query}`)
+  const shown = useRef(`#/${id}${query}`)
+  useEffect(() => {
+    const route = `#/${id}${query}`
+    const win = frame.current?.contentWindow
+    if (route === shown.current || !win) return
+    shown.current = route
+    setReady(false)
+    let live = true, tries = 0
+    try { win.location.hash = route.slice(1) } catch { return }
+    // ready once the new shell has painted: its route is current and the studio is on screen (not "Loading…")
+    const check = () => {
+      if (!live) return
+      let painted = false
+      try {
+        const d = win.document
+        painted = win.location.hash === route && !!d.querySelector('.studio') && !/^\s*Loading/.test(d.getElementById('root')?.innerText.slice(0, 40) ?? '')
+      } catch { painted = true }
+      if (painted || ++tries > 300) setTimeout(() => { if (live) { setReady(true); onReady?.() } }, 200)
+      else requestAnimationFrame(check)
+    }
+    requestAnimationFrame(check)
+    return () => { live = false }
+  }, [id, query])
 
   useEffect(() => {
     const el = wrap.current!
@@ -52,7 +78,7 @@ export function LiveFrame({ id, name, query = '', native = NATIVE, hint = 'Click
   return (
     <div ref={wrap} className="absolute inset-0" onPointerLeave={(e) => { if (e.pointerType === 'mouse') setActive(false) }}>
       {w > 0 && (
-        <iframe ref={frame} src={`${import.meta.env.BASE_URL}#/${id}${query}`} title={`${name} — live`} tabIndex={active ? 0 : -1}
+        <iframe ref={frame} src={src} title={`${name} — live`} tabIndex={active ? 0 : -1}
           // inert until clicked: tabIndex alone doesn't stop a shell's own autofocus pulling page focus into the frame
           inert={!active}
           onLoad={() => {
@@ -64,7 +90,8 @@ export function LiveFrame({ id, name, query = '', native = NATIVE, hint = 'Click
             } catch { /* cross-origin: leave it */ }
             setTimeout(() => { setReady(true); onReady?.() }, 500)
           }}
-          className={cn('absolute top-0 left-0 origin-top-left border-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]', ready ? 'opacity-100' : 'opacity-0')}
+          // fades in over the thumbnail; on a switch it drops out at once, so the next shell's picture shows clean
+          className={cn('absolute top-0 left-0 origin-top-left border-0', ready ? 'opacity-100 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]' : 'opacity-0')}
           style={{ width: native.w, height: native.h, transform: `scale(${w / native.w})` }} />
       )}
       {!active && (

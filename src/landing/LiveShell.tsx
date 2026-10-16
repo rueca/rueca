@@ -97,7 +97,8 @@ export function LiveShell({ shells, phone }: { shells: Shell[]; phone?: Shell })
             onError={(e) => { (e.target as HTMLImageElement).style.visibility = 'hidden' }}
             className="absolute inset-0 size-full object-cover object-top" />
           {w > 0 && onScreen && shell && (
-            <LiveFrame key={`${current}${narrow ? '-client' : ''}`} id={current} name={shell.name}
+            // keyed by the view (desktop / client), not the shell: switching shells navigates the one live frame
+            <LiveFrame key={narrow ? 'client' : 'desktop'} id={current} name={shell.name}
               query={narrow ? '?client' : ''} native={narrow ? box : NATIVE}
               hint={narrow ? 'Tap to try the client view' : undefined} hintAlways={narrow} />
           )}

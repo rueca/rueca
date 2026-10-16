@@ -22,6 +22,7 @@ import { Heading } from './parts'
 import { LiveFrame } from './LiveFrame'
 import { Cross, Row } from './plate'
 import { usePinFrame } from './StepDeck'
+import { thumbUrl } from '@/gallery/thumbs'
 
 /** the row moves this much faster than the page scrolls — 19 big cards at 1:1 would be ~19 screens */
 const SPEED = 1.8
@@ -45,7 +46,7 @@ const CARDED = true
 // the card's header takes ~70px, so the carded image gets a little less height
 const CARD_W = CARDED ? 'max(320px, min(68vw, calc((100svh - 390px) * 1.6)))' : 'max(320px, min(70vw, calc((100svh - 320px) * 1.6)))'
 
-const rail = (id: string, theme: string) => `${import.meta.env.BASE_URL}thumbs/rail/${id}-${theme}.jpg`
+const rail = (id: string, theme: string) => thumbUrl(`thumbs/rail/${id}-${theme}.jpg`)
 
 function scrollParent(el: HTMLElement | null): HTMLElement | null {
   for (let p = el?.parentElement; p; p = p.parentElement) {
@@ -260,7 +261,7 @@ type BlueprintMark = { k: string; x: number; y: number; w?: number; h?: number; 
 type Blueprint = { w: number; h: number; marks: BlueprintMark[] }
 const blueprintCache = new Map<string, Promise<Blueprint | null>>()
 const loadBlueprint = (id: string) => {
-  if (!blueprintCache.has(id)) blueprintCache.set(id, fetch(`${import.meta.env.BASE_URL}thumbs/blueprints/${id}.json`).then((r) => (r.ok ? r.json() : null)).catch(() => null))
+  if (!blueprintCache.has(id)) blueprintCache.set(id, fetch(thumbUrl(`thumbs/blueprints/${id}.json`)).then((r) => (r.ok ? r.json() : null)).catch(() => null))
   return blueprintCache.get(id)!
 }
 /** The card's own skeleton, once its tracing has loaded (the generic one stands in until then). */

@@ -13,7 +13,10 @@ import { randomPalette, rng } from './color'
    Colours from the Rueca palette and its tonal ramps (brand/data.js ruecaPalette,
    ruecaRamps). The first look, the default, is the logo's three dyes on walnut. */
 const L = makeLayer
-const look = (name: string, bg: string, seed: number, layers: Layer[]) => ({ name, values: { bg, seed, layers } })
+// Preset layers get ids from the look's name: a layer's id salts its noise, so a time-based id drew a different
+// picture on every load (and the homepage thumbnail never matched the live shell)
+const look = (name: string, bg: string, seed: number, layers: Layer[]) =>
+  ({ name, values: { bg, seed, layers: layers.map((l, i) => ({ ...l, id: `${name.toLowerCase().replace(/\W+/g, '-')}-${i}` })) } })
 
 export const LOOKS = [
   look('Achiote', '#181411', 4127, [
