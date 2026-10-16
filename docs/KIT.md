@@ -56,7 +56,7 @@ variables for phones. Use the names, never literals, so a part follows the densi
 | `h-row` `min-h-row` (`--row`) | 24 / 28 / 22 | inspector rows, layer rows |
 | `h-control` · `h-control-sm` | 22 / 24 / 20 · 20 / 20 / 18 | fields, selects, sliders, scrub, segmented |
 | `size-icon` `h-icon` · `size-icon-sm` | 24 / 28 / 22 · 20 / 24 / 18 | icon buttons, md buttons, menu items, tabs |
-| `h-button-lg` | 28 / 32 / 26 | large buttons, the zoom cluster |
+| `h-button-lg` | 28 / 32 / 26 | large buttons, the zoom cluster (in a `Toolbar` they match the clusters: `h-bar`) |
 | `h-section` · `h-header` · `h-bar` | 26 · 32 · 32 / 32 · 40 · 36 / 24 · 28 · 30 | section headers · panel headers, transport · toolbar clusters |
 | `h-dock` · `size-dock-button` | 36 · 28 / 40 · 32 / 34 · 26 | the bottom tool dock |
 | `px-pad` · `w-label` | 10 · 72 / 12 · 84 / 8 · 72 | row side padding · the label column's minimum |
