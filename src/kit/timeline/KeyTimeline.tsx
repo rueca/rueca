@@ -103,7 +103,7 @@ export interface KeyTimelineProps {
   empty?: ReactNode
   /** cover the tracks with a message (e.g. while previewing) */
   blocked?: ReactNode
-  /** height of the lanes area (px); lanes scroll past it */
+  /** the lanes area's maximum height (px): it shrinks to fit a few lanes (never under 3 rows), and longer lists scroll */
   height?: number
   labelWidth?: number
   /** left of the ruler: defaults to "N animated properties" (click = zoom to fit) */
@@ -348,6 +348,8 @@ export function KeyTimeline(props: KeyTimelineProps) {
 
   const tEnd = X(duration)
   const bodyH = Math.max(lanes.length * ROW, 1)
+  // fit the lanes, with half a row of air, so five lanes don't sit on top of 100px of empty grid
+  const rowsH = lanes.length && !blocked ? Math.min(height, Math.max(lanes.length, 3) * ROW + ROW / 2) : height
 
   return (
     <div ref={root} className={cn('panel flex flex-col overflow-hidden', autoKey && 'outline outline-[1.5px] -outline-offset-[1.5px] outline-rec', className)}>
@@ -379,7 +381,7 @@ export function KeyTimeline(props: KeyTimelineProps) {
       </div>
 
       {/* rows */}
-      <div className="relative flex-none overflow-x-hidden overflow-y-auto" style={{ height }} onWheel={onWheel}>
+      <div className="relative flex-none overflow-x-hidden overflow-y-auto" style={{ height: rowsH }} onWheel={onWheel}>
         {lanes.length === 0 && empty ? (
           <div className="flex h-full items-center justify-center">{empty}</div>
         ) : (
