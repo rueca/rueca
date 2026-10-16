@@ -8,7 +8,7 @@ import {
 import {
   Brand, Button, Cluster, CommandPalette, Divider, Empty, IconButton, LayerTree, Menu, Panel, PanelHeader, PanelTabs, ParamActions,
   Section, Segmented, Stage, Studio, Tip, Toolbar, cn, copyText, download, exportJSON, fmtTime, recordFrames, shareMenuItems, toast, useClock, useClockTime, useHotkeys, useValues,
-  type Command, type LayerItem, type MenuItem,
+  type Command, type LayerItem, type MenuItem, NoteLayer,
 } from '@kit'
 import { KeyTimeline, type KeyLane } from '@kit/timeline/KeyTimeline'
 import { KeyButton, KeyDiamond } from '@kit/ui/key-button'
@@ -531,6 +531,7 @@ export default function AnimateShell() {
         <div className="absolute [--plate-ink:#181411] [--plate-measure:rgba(24,20,17,.42)] [--plate-mute:#6E6A64] dark:[--plate-ink:#B8B1A7] dark:[--plate-measure:rgba(243,241,235,.34)] dark:[--plate-mute:#8C857C]"
           style={{ left: 0, top: 0, width: doc.width, height: doc.height, '--signal': CIELO } as React.CSSProperties} data-studio-artifact="">
           <LiveScene svgRef={svgRef} />
+          <NoteLayer params={params} clock={clock} doc={docStore} />
         </div>
       </Stage>
 

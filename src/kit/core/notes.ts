@@ -401,6 +401,9 @@ export async function captureImage(el: HTMLElement, opts: { maxWidth?: number; a
       try { copy.getContext('2d')!.drawImage(c, 0, 0) } catch { return [] }   // tainted
       return isBlank(copy) ? [] : [{ src: c as Element, copy }]
     }))
+    // in the next frame, after the renderers' own loop callbacks (registered earlier) have drawn: a WebGL buffer without
+    // preserveDrawingBuffer is only full within the frame it was drawn in. A paused renderer draws when the clock is
+    // nudged first (NoteLayer does), so it draws in this very frame too
     if (typeof requestAnimationFrame === 'undefined') grab()
     else requestAnimationFrame(grab)
   })

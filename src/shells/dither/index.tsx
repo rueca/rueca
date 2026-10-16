@@ -6,7 +6,7 @@ import {
 import { ZoomPill,
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Artboard, Menu, Button, IconButton, Divider, Badge,
   PaletteField, ImageDrop, ParamActions, CommandPalette, useValues, useCamera, useHoldKey, shareMenuItems, equal, toast, promptText,
-  copyText, download, stamp, cn, type Command, type MenuItem,
+  copyText, download, stamp, cn, type Command, type MenuItem, NoteLayer,
 } from '@kit'
 import { CompareSplit } from '@kit/stage/CompareSplit'
 import { PresetGrid } from '@kit/ui/preset-grid'
@@ -312,6 +312,7 @@ function Canvas({ result, split, grid }: { result: Result | null; split: boolean
           }} />
         )}
       </div>
+      <NoteLayer params={params} />
     </Artboard>
   )
 }

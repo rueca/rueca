@@ -9,7 +9,7 @@ import {
 import { Vec3Fields,
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Inspector, SettingsMenu, Section, Row, Stage, MountSurface, ParamActions, Menu,
   Button, IconButton, CommandPalette, ToolDock, LayerTree, Badge, Swatch, Divider, Kbd, Tip, toast, download, copyText, stamp,
-  useParamState, useSafeArea, useStudio, equal, shareMenuItems, cn, type Command, type LayerItem, type MenuItem,
+  useParamState, useSafeArea, useStudio, equal, shareMenuItems, cn, type Command, type LayerItem, type MenuItem, NoteLayer,
 } from '@kit'
 import { AxisGizmo } from '@kit/stage/overlays'
 import {
@@ -226,6 +226,7 @@ export default function SceneShell() {
         }
       >
         <MountSurface params={params} ref={viewport} mount={(el) => mountViewport(el)} />
+        <NoteLayer params={params} />
       </Stage>
       <CommandPalette
         commands={commands}

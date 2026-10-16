@@ -12,7 +12,7 @@ import {
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Section, MoreRow, Row, Stage, Artboard, Menu, Button, IconButton, CommandPalette,
   HistoryButtons, HistoryList, ThemeToggle, Segmented, ScrubValue, TextInput, ImageDrop, Empty, Divider, Kbd, Badge, toast, download,
-  shareMenuItems, createCamera, useParamState, useHotkeys, useHoldKey, clamp, cn, type Command,
+  shareMenuItems, createCamera, useParamState, useHotkeys, useHoldKey, clamp, cn, type Command, NoteLayer, CommentButton, CommentsList, SendToAgentButton,
 } from '@kit'
 import { ToneCurve, Histogram, histogramBins, type CurvePoint, type Bins } from '@kit/ui/charts'
 import { ParamSlider, GradientSlider } from '@kit/ui/param-slider'
@@ -388,6 +388,9 @@ export default function DevelopShell() {
             <>
               <Cluster>
                 <HistoryButtons history={history} />
+                <CommentButton params={params} />
+                <CommentsList params={params} />
+                <SendToAgentButton params={params} history={history} />
                 <Divider vertical />
                 <Menu align="end" trigger={<IconButton icon={Link} label="Share & copy" />}
                   items={[...shareMenuItems(params), { type: 'separator' }, { label: 'Export look as .cube LUT', icon: Palette, shortcut: 'shift+mod+l', onClick: () => exportCube(33) }]} />
@@ -465,6 +468,7 @@ export default function DevelopShell() {
             )}
             {/* the shader draws the split; this is the handle + labels */}
             {!s.cropping && s.split !== null && <CompareSplit value={s.split} onChange={(x) => ui.setState({ split: x })} peek={s.bypass} peekLabel={null} />}
+            <NoteLayer params={params} history={history} />
           </Artboard>
         </Stage>
         {!s.hasImage && (
