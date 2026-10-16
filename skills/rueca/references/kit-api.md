@@ -290,6 +290,8 @@ stops ticks while paused too (default true for artifacts with their own life).
 - Toolbar: `<Brand name doc? mark? href? menu?>`: the mark is a button with the tool name as its tooltip, opening
   a menu ("All tools" → `href`, then `menu` items); pass a plain glyph as `mark`. Pass `doc` only for live state
   (the open file, an editable title, the active look), never a fixed caption.
+  A host that runs many tools sets one mark for all of them with `<BrandOverride mark={…} tile?>` (drawn bare,
+  in ink, unless `tile`); the menu's first item is the tool name as a `{ type: 'title' }` row.
   `<Cluster>` groups, `<ToolDock value onChange tools>` (bottom-centre tools, place it yourself
   absolutely inside the Stage overlay), `<Button variant="primary">` for the ONE primary action.
 - `<Stage>` = camera (wheel pan, ⌘wheel/pinch zoom, space-drag, Shift+0/1), `contentSize`
@@ -351,6 +353,7 @@ stops ticks while paused too (default true for artifacts with their own life).
   Pins say whose turn it is: hollow while the agent's, blue for an unread reply (read state is per browser), ink once read; done ones leave the board
   unless "Show done on the board" is on. Pins fade when the tool is in another state, and their thread can restore it.
   Replies arrive live (`useNotes()`) with a toast. Pins keep screen size via `useZoom()`.
+  `CommentIcon` / `CommentsIcon`: the comment glyphs (the pin's bubble with a plus, and with lines), for a custom toolbar's Comment and All comments buttons.
 - `CommandPalette commands extraShortcuts` — ⌘K palette + `?` sheet; commands with `shortcut` are bound. It adds the
   View → Density commands itself, so every tool should render one (`commands={[]}` is fine).
 - `toast(title, opts)` works anywhere (it mounts a single toaster if none is rendered) and returns an id · `toast.update(id, title, opts)` · `toast.dismiss(id)` ·
