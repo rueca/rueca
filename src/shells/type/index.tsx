@@ -5,7 +5,7 @@ import {
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Stage, Artboard, CanvasSurface, Timeline,
   ParamActions, Menu, Button, IconButton, Segmented, CommandPalette, Badge, useValues, exportCanvasPNG, recordCanvas, recordFrames, download, copyText,
-  toast, cn, type SurfaceHandle, type Lane, type Command, type MenuItem, shareMenuItems,
+  toast, cn, type SurfaceHandle, type Lane, type Command, type MenuItem, shareMenuItems, NoteLayer,
 } from '@kit'
 import { params, clock, family, FORMATS, PAIRS, type Mode, type V } from './params'
 import { FAMILIES, SPECIMEN_FAMILY, fontDataURI, loadSpecimenFonts } from './fonts'
@@ -286,6 +286,7 @@ export default function TypeShell() {
           {mode === 'kinetic' && (
             <CanvasSurface ref={surface} params={params} clock={clock} draw={(ctx, f) => drawKinetic(ctx, f.v as V, f.t, f.w, f.h)} />
           )}
+          <NoteLayer params={params} clock={mode === 'kinetic' ? clock : undefined} />
         </Artboard>
       </Stage>
       {!fontsReady && <div className="pointer-events-none absolute top-3 left-1/2 -translate-x-1/2"><Badge>Loading Inter…</Badge></div>}

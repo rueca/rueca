@@ -8,7 +8,7 @@ import {
   Artboard, Brand, Button, CanvasSurface, Cluster, CommandPalette, Empty, IconButton, Menu, Panel, PanelHeader, ParamActions, Section, Segmented, SettingsMenu, Stage,
   Studio, Toolbar, cn, download, exportJSON, fmtTime, recordFrames, shareMenuItems, toast, useCamera, useClock, useClockTime, useHotkeys, useValues,
   type Command, type MenuItem, type SurfaceHandle,
-  useStudio,
+  useStudio, NoteLayer,
 } from '@kit'
 import { ASPECTS, demoComp, type Aspect, type Clip, type ClipKind } from './comp'
 import { WIRE } from '@/demo/wire'
@@ -428,6 +428,7 @@ export default function VideoShell() {
           <CanvasSurface ref={surface} params={params} clock={clock} width={W} height={H} pixelRatio={Number(v.quality)} deps={[comp]}
             draw={(ctx, f) => drawComp(ctx, getComp(), f.t, f.w, f.h, { matte: (f.v as V).matte })} />
           <CanvasOverlay W={W} H={H} />
+          <NoteLayer params={params} clock={clock} doc={doc} />
         </Artboard>
       </Stage>
       <input ref={fileIn} type="file" accept="application/json,.json" hidden onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = '' }} />

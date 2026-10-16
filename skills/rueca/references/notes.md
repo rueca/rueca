@@ -102,7 +102,8 @@ often about framing, spacing or the artboard as a whole), or `{ on: 'param', key
 `image` sits next to the note: look at it first. The clock was paused at `t` while they wrote, so the
 image shows the frame they meant. For a canvas comment the ring sits on the nearest edge, with an arrow
 pointing out toward the spot. It's an approximation: fonts the page can't embed fall back, and a
-WebGL canvas that doesn't keep its drawing buffer can come out missing. Trust the live state over the
+WebGL canvas that doesn't keep its drawing buffer can come out missing when the tool has no clock to nudge
+it into one more frame. Trust the live state over the
 picture.
 
 1. Open `snapshot.url` in the browser so you see what they saw. Then move the playhead to `t`: the

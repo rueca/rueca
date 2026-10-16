@@ -9,7 +9,7 @@ import {
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Stage, CanvasSurface, ParamActions, Menu, Button, IconButton, CommandPalette, ScrubValue, Segmented,
   Divider, Badge, Tip, useValues, createClock, exportCanvasPNG, exportJSON, download, copyText, toast, cn, shareMenuItems,
-  type SurfaceHandle, type Command, type MenuItem,
+  type SurfaceHandle, type Command, type MenuItem, NoteLayer,
 } from '@kit'
 import { params, patternOf, setPattern, SOUNDS, type V } from './params'
 import { PATTERNS, TRACKS, clearTrack, humanise, randomHats, sanitizePattern, shiftPattern, type TrackId } from './pattern'
@@ -218,6 +218,7 @@ export default function SynthShell() {
               })
             }}
           />
+          <NoteLayer params={params} />
         </Stage>
       </div>
       <input ref={file} type="file" accept="application/json,.json" className="hidden" onChange={(e) => onImport(e.target.files?.[0])} />

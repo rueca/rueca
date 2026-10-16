@@ -25,7 +25,7 @@ export const site = {
   url: 'https://rueca.dev',
   author: { name: 'Rafael Cespedes', url: 'https://rafaelcespedes.com' },
   license: 'MIT',
-  version: '0.1.0',
+  version: '0.2.0',
 } as const
 
 export const repoURL = `https://github.com/${site.repo}`

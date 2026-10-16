@@ -461,7 +461,12 @@ export function NoteLayer({ params, history, clock, doc, describeAt }: {
       // capture while the frame is still frozen; clearing the draft lets the clock run again
       const snapshot = captureSnapshot({ params, history, clock, doc, view: { width: el.art.offsetWidth, height: el.art.offsetHeight } })
       if (d.t !== undefined) snapshot.t = Math.round(d.t)
+      // the clock is paused on this frame, and a paused WebGL renderer has stopped drawing (its buffer is already
+      // cleared). Renderers redraw when the time changes, so nudge it half a millisecond for the capture, then put it back.
+      const t0 = clock?.time()
+      if (clock && t0 !== undefined) clock.seek(t0 > 1 ? t0 - 0.5 : t0 + 0.5)
       const image = await captureImage(el.art, { anchor: d.anchor.on === 'param' ? undefined : d.anchor })
+      if (clock && t0 !== undefined) clock.seek(t0)
       const note = await sendNote({ kind: 'comment', text, anchor: d.anchor, snapshot, image })
       notesUI.setState({ draft: null, commenting: false, open: note.id })
       refreshNotes()

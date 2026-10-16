@@ -6,7 +6,7 @@ import { useRef } from 'react'
 import { Download, Eye, Shuffle, Smartphone } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Stage, Artboard, CanvasSurface, ParamActions, Button,
-  ClientView, useClientMode, clientLink, CommandPalette, Badge, copyText, toast, download, useValues, type SurfaceHandle, type Command,
+  ClientView, useClientMode, clientLink, CommandPalette, Badge, copyText, toast, download, useValues, type SurfaceHandle, type Command, NoteLayer,
 } from '@kit'
 import { params, clock, draw, FRAMES, PALETTES, type V } from './artifact'
 
@@ -41,6 +41,7 @@ export default function Present() {
     <Stage contentSize={{ w: fw, h: fh }} hud={!client} padding={client ? 16 : 48}>
       <Artboard width={fw} height={fh} label={client ? undefined : v.frame}>
         <CanvasSurface ref={surface} params={params} clock={clock} animate={v.drift} width={fw} height={fh} draw={(ctx, f) => draw(ctx, f.v as V, f.t, f.w, f.h)} />
+        <NoteLayer params={params} clock={clock} />
       </Artboard>
     </Stage>
   )

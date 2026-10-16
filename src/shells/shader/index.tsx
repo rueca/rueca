@@ -7,7 +7,7 @@ import {
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Section, Row, Stage, Slider, ScrubValue, Select, Menu, Button, IconButton,
   Divider, Empty, Monitor, ParamActions, SettingsMenu, CommandPalette, useValues, useHotkeys, useClock, useClockTime, shareMenuItems, equal, toast, fmtTime,
-  createItemParams, bindItem, cn, type Command,
+  createItemParams, bindItem, cn, type Command, NoteLayer,
 } from '@kit'
 import { EffectStack, StackAddMenu, type StackAddGroup } from '@kit/ui/stack'
 import { PresetGrid } from '@kit/ui/preset-grid'
@@ -207,6 +207,7 @@ export default function GradientStudio() {
     >
       <Stage fill>
         <ShaderStage />
+        <NoteLayer params={params} clock={clock} />
       </Stage>
       <CommandPalette commands={commands} extraShortcuts={[
         { keys: '1', label: 'Layer opacity 10% … (0 = 100%)' },
