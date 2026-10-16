@@ -61,17 +61,17 @@ export function rng(seed: number) {
    and a deep dark (800). Randomise only ever mixes these, so every shuffle stays
    on brand. */
 const DYES: { light: string; base: string; dark: string }[] = [
-  { light: '#FED0C3', base: '#E8582C', dark: '#7F1E0C' }, // Achiote
-  { light: '#FED0C7', base: '#EE7A68', dark: '#752B25' }, // Cochinilla
-  { light: '#F0DBA1', base: '#F2C744', dark: '#5E4000' }, // Gualda
-  { light: '#B6EAD2', base: '#2FA57C', dark: '#015341' }, // Hoja
-  { light: '#B9E3FF', base: '#5DB4E8', dark: '#0B4C6C' }, // Cielo
-  { light: '#DED6FF', base: '#A88BF6', dark: '#503578' }, // Malva
-  { light: '#D0DBFE', base: '#3440C8', dark: '#2C3A95' }, // Añil
+  { light: '#FFD0C1', base: '#F6571C', dark: '#7C2300' }, // Achiote
+  { light: '#FFCCDF', base: '#B0006A', dark: '#7D134C' }, // Cochinilla
+  { light: '#F2DB95', base: '#FFD000', dark: '#564400' }, // Gualda
+  { light: '#C5EBA0', base: '#84C900', dark: '#325100' }, // Hoja
+  { light: '#CFDCFF', base: '#5070F0', dark: '#293D90' }, // Cielo
+  { light: '#EDD2F2', base: '#EFA6FF', dark: '#5e3168' }, // Malva
+  { light: '#CFDCFC', base: '#3D5BD6', dark: '#283D8F' }, // Añil (Cielo's deep blue since Mora)
 ]
 /** the grounds: walnut, madder and the deepest dyes */
-const GROUNDS = ['#181411', '#181411', '#5E2219', '#5B0C04', '#1B246C', '#372156', '#00382C']
-const LANA = '#F3F1EB'
+const GROUNDS = ['#171615', '#171615', '#6E1A3E', '#561600', '#182768', '#421e49', '#203600']
+const LANA = '#F5F3F2'
 
 /** A 4–5 colour palette from the brand: one dark ground, two or three dyes, one light lift. */
 export function randomPalette(seed: number): string[] {

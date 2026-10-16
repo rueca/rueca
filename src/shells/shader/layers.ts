@@ -72,7 +72,7 @@ export const LAYER_TYPES: Record<LayerType, LayerTypeDef> = {
     hint: 'Soft colour points drifting on looping orbits, mixed in OKLab.',
     schema: defineSchema({
       mesh: folder('Mesh', {
-        colors: p.palette(['#181411', '#5E2219', '#E8582C', '#F2C744', '#F3F1EB'], { max: 8, hint: 'Each colour is a point in the mesh. Up to eight.' }),
+        colors: p.palette(['#171615', '#6E1A3E', '#F6571C', '#FFD000', '#F5F3F2'], { max: 8, hint: 'Each colour is a point in the mesh. Up to eight.' }),
         softness: p.number(0.55, { min: 0, max: 1, step: 0.01, hint: 'How far each colour bleeds into its neighbours.' }),
         scale: p.number(1, { min: 0.3, max: 3, step: 0.01, unit: '×', hint: 'Zoom of the point field.' }),
         drift: p.number(0.6, { min: 0, max: 1.5, step: 0.01, hint: 'How far points travel around their home position.' }),
@@ -95,7 +95,7 @@ export const LAYER_TYPES: Record<LayerType, LayerTypeDef> = {
     hint: 'Linear, radial or conic ramp, interpolated in OKLab.',
     schema: defineSchema({
       gradient: folder('Gradient', {
-        ramp: p.gradient({ angle: 160, stops: [{ pos: 0, color: '#5E2219' }, { pos: 0.55, color: '#E8582C' }, { pos: 1, color: '#F0DBA1' }] }, { hint: 'Stops and direction.' }),
+        ramp: p.gradient({ angle: 160, stops: [{ pos: 0, color: '#6E1A3E' }, { pos: 0.55, color: '#F6571C' }, { pos: 1, color: '#F2DB95' }] }, { hint: 'Stops and direction.' }),
         shape: p.select('linear', GRAD_SHAPES),
         spin: p.number(0, { min: -3, max: 3, step: 1, hint: 'Full turns per loop.' }),
       }),
@@ -169,8 +169,8 @@ export const LAYER_TYPES: Record<LayerType, LayerTypeDef> = {
       }),
       ink: folder('Ink', {
         inkMode: p.select('source', [{ value: 'source', label: 'Source' }, { value: 'ink', label: 'Single ink' }], { label: 'Colour', hint: 'Dots take the colour beneath them, or one ink.' }),
-        ink: p.color('#181411', { alpha: false, when: (v) => v.inkMode === 'ink' }),
-        paper: p.color('#F3F1EB', { alpha: false }),
+        ink: p.color('#171615', { alpha: false, when: (v) => v.inkMode === 'ink' }),
+        paper: p.color('#F5F3F2', { alpha: false }),
       }),
     }),
     uniforms: [
@@ -224,7 +224,7 @@ export const LAYER_TYPES: Record<LayerType, LayerTypeDef> = {
     hint: 'Maps brightness onto a colour ramp — duotones and tritones.',
     schema: defineSchema({
       map: folder('Map', {
-        colors: p.palette(['#181411', '#E8582C', '#F3F1EB'], { max: 8, hint: 'Shadows to highlights.' }),
+        colors: p.palette(['#171615', '#F6571C', '#F5F3F2'], { max: 8, hint: 'Shadows to highlights.' }),
         offset: p.number(0, { min: -0.5, max: 0.5, step: 0.01, hint: 'Slides the ramp along brightness.' }),
       }),
     }),
@@ -262,7 +262,7 @@ export const LAYER_TYPES: Record<LayerType, LayerTypeDef> = {
         size: p.number(0.55, { min: 0, max: 1.6, step: 0.01, hint: 'Radius of the clear centre.' }),
         softness: p.number(0.9, { min: 0.02, max: 2, step: 0.01 }),
         roundness: p.number(0.6, { min: 0, max: 1, step: 0.01, hint: '0 follows the frame, 1 is a circle.' }),
-        tint: p.color('#181411', { alpha: false }),
+        tint: p.color('#171615', { alpha: false }),
       }),
     }),
     uniforms: [

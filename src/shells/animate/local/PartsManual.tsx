@@ -5,7 +5,7 @@
 import sizes from '../parts.json'
 import { HAND } from '../demo'
 
-const PEN = '#E8582C'
+const PEN = '#F6571C'
 const RULE = 'var(--plate-measure, rgba(24,20,17,.42))'
 const src = (id: string) => `${import.meta.env.BASE_URL}demo/animate/part-${id}.webp`
 

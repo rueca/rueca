@@ -36,7 +36,7 @@ export function triggerIndex(d: Float32Array, span: number) {
                     The bass note picks the mode; the kick scatters the sand; the rest settles it.
      harmonograph   a pendulum drawing: two swings at the ratio of the bass intervals,
                     decaying, restarted by each kick. */
-const PAPER = '#F3F1EB', INK = '#181411', MUTE = '#6E6A64', LINE = '#DCD7CE'
+const PAPER = '#F5F3F2', INK = '#171615', MUTE = '#6C6A69', LINE = '#D9D7D6'
 const SANS = '"IBM Plex Sans Variable", "Inter Variable", system-ui, sans-serif'
 const HAND = '"La Belle Aurore", cursive'
 

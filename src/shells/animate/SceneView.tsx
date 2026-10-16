@@ -13,7 +13,7 @@ const num = (v: Val) => (typeof v === 'number' ? v : parseFloat(v))
 
 /* On the bare stage the plate's two inks follow the theme (Nogal on light, Lana on dark), set as CSS vars on the wrapper.
    The fallbacks are the light values, so an exported SVG frame prints Nogal on Lana. */
-const INK: Record<string, string> = { '#181411': 'var(--plate-ink, #181411)', '#6e6a64': 'var(--plate-mute, #6E6A64)' }
+const INK: Record<string, string> = { '#171615': 'var(--plate-ink, #171615)', '#6c6a69': 'var(--plate-mute, #6C6A69)' }
 const inked = (fill: Val) => INK[String(fill).toLowerCase()] ?? String(fill)
 
 function Shape({ o, p, doc, inputs }: { o: Obj; p: Record<PropKey, Val>; doc: Doc; inputs: Record<string, boolean | number> }) {
@@ -88,9 +88,9 @@ export function SceneSVG({
       <defs>
         <linearGradient id="tw-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={bg[0]} /><stop offset="1" stopColor={bg[1]} /></linearGradient>
         {/* engraved layers are ink-alpha images: recolour them to the plate ink */}
-        <filter id="tw-ink" colorInterpolationFilters="sRGB"><feFlood style={{ floodColor: 'var(--plate-ink, #181411)' }} /><feComposite in2="SourceAlpha" operator="in" /></filter>
+        <filter id="tw-ink" colorInterpolationFilters="sRGB"><feFlood style={{ floodColor: 'var(--plate-ink, #171615)' }} /><feComposite in2="SourceAlpha" operator="in" /></filter>
         {/* a backing in the paper colour: the canvas on the stage, Lana in an exported frame */}
-        <filter id="tw-paper" colorInterpolationFilters="sRGB"><feFlood style={{ floodColor: bare ? 'var(--field, #F3F1EB)' : bg[1] }} /><feComposite in2="SourceAlpha" operator="in" /></filter>
+        <filter id="tw-paper" colorInterpolationFilters="sRGB"><feFlood style={{ floodColor: bare ? 'var(--field, #F5F3F2)' : bg[1] }} /><feComposite in2="SourceAlpha" operator="in" /></filter>
         <filter id="tw-shadow" x="-50%" y="-50%" width="200%" height="220%"><feDropShadow dx="0" dy="12" stdDeviation="14" floodColor="#140a3c" floodOpacity="0.35" /></filter>
       </defs>
       <rect data-bg width={doc.width} height={doc.height} fill={bare ? 'transparent' : 'url(#tw-bg)'} />
@@ -104,7 +104,7 @@ export function SceneSVG({
 /* Plate marks (Lámina): annotation only, drawn on the stage overlay so SVG/PNG
    export never carries them. A measure-pen diameter under the wheel, and one
    Achiote note on the flyer. They follow the wheel as it moves. */
-const MEASURE = 'var(--plate-measure, rgba(24,20,17,.42))', PEN = '#E8582C'
+const MEASURE = 'var(--plate-measure, rgba(24,20,17,.42))', PEN = '#F6571C'
 function PenMarks({ doc, r }: { doc: Doc; r: Resolved }) {
   const wheel = r.wheel
   if (!wheel || !doc.objects.find((o) => o.id === 'wheel')?.visible) return null

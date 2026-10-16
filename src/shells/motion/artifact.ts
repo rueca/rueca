@@ -19,9 +19,9 @@ export const schema = defineSchema({
     returnDelay: p.number(160, { min: 0, max: 800, step: 10, unit: 'ms', label: 'Return delay', when: (v) => v.returnSweep }),
   }),
   color: folder('Colour', {
-    bg: p.color('#F3F1EB', { label: 'Background', alpha: false }),
-    ink: p.color('#A39E96', { label: 'Ring', hint: 'A ring at rest.' }),
-    glow: p.color('#181411', { label: 'Highlight', hint: 'A ring at the crest of the sweep, and the headline.' }),
+    bg: p.color('#F5F3F2', { label: 'Background', alpha: false }),
+    ink: p.color('#A09E9D', { label: 'Ring', hint: 'A ring at rest.' }),
+    glow: p.color('#171615', { label: 'Highlight', hint: 'A ring at the crest of the sweep, and the headline.' }),
     headline: p.text('Ring once.', { hint: 'Set under the rings.' }),
   }, { collapsed: true }),
 })
@@ -60,7 +60,7 @@ export function beats(v: V) {
    ripple as the sound it makes, drawn like rings in a physics plate. A lit ring
    gets heavier and darker, so the sweep reads by line weight, not colour. The
    screen around it is the product sheet: the bell's three finishes. */
-const W = { card: DYE.card, sheet: '#E7E3DB', ink: DYE.nogal, muted: DYE.mute, faint: DYE.faint, line: DYE.line }
+const W = { card: DYE.card, sheet: '#E5E3E2', ink: DYE.nogal, muted: DYE.mute, faint: DYE.faint, line: DYE.line }
 const SANS = '"IBM Plex Sans Variable", "Inter Variable", Inter, sans-serif'
 const SERIF = '"Newsreader Variable", Newsreader, Georgia, serif'
 let bell: HTMLImageElement | null = null

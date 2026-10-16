@@ -88,7 +88,7 @@ const schema = defineSchema({
   cap_xf: xf('cap'), cap_mat: mat('cap', { type: 'physical', color: '#5a3a26', rough: 0.42, metal: 0, clearcoat: 0.5 }),
   ring_xf: xf('ring'), ring_mat: mat('ring', { type: 'standard', color: '#d6b260', rough: 0.22, metal: 1 }),
   base_xf: xf('base'), base_mat: mat('base', { type: 'standard', color: '#8a6a35', rough: 0.35, metal: 1 }),
-  pedestal_xf: xf('pedestal'), pedestal_mat: mat('pedestal', { type: 'standard', color: '#f5d05a', rough: 0.9, metal: 0 }),
+  pedestal_xf: xf('pedestal'), pedestal_mat: mat('pedestal', { type: 'standard', color: '#ffd84d', rough: 0.9, metal: 0 }),
   floor: folder('Shadow catcher', {
     floor_visible: p.boolean(true, { label: 'Visible' }),
     floor_locked: p.boolean(true, { label: 'Locked' }),
@@ -100,7 +100,7 @@ const schema = defineSchema({
 
   /* scene settings — the inspector with nothing selected (Spline) */
   look: folder('Background', {
-    bg: p.color('#f2c744', { alpha: false, label: 'Colour', hint: 'Also the colour behind a transparent export.' }),
+    bg: p.color('#ffd000', { alpha: false, label: 'Colour', hint: 'Also the colour behind a transparent export.' }),
   }),
   env: folder('Environment', {
     envIntensity: p.number(0.8, { min: 0, max: 3, step: 0.01, label: 'Intensity', hint: 'Strength of the studio reflection map (RoomEnvironment).' }),
@@ -130,11 +130,11 @@ export const params = createParams(schema as Schema, { id: 'scene', version: 2, 
 /* --- colourways: partial patches, so they never touch transforms ---------- */
 export interface Colourway { id: string; name: string; values: V }
 export const COLOURWAYS: Colourway[] = [
-  { id: 'brass', name: 'Brass', values: { body_color: '#c9a14a', cap_color: '#5a3a26', ring_color: '#d6b260', base_color: '#8a6a35', pedestal_color: '#f5d05a', bg: '#f2c744' } },
-  { id: 'achiote', name: 'Achiote', values: { body_color: '#e8582c', cap_color: '#2b1d14', ring_color: '#d6b260', base_color: '#8a6a35', pedestal_color: '#e7e3db', bg: '#f3f1eb' } },
-  { id: 'cielo', name: 'Cielo', values: { body_color: '#5db4e8', cap_color: '#e9e2d2', ring_color: '#c8c3ba', base_color: '#6e6a64', pedestal_color: '#e7e3db', bg: '#f3f1eb' } },
-  { id: 'nogal', name: 'Nogal', values: { body_color: '#5b4a32', cap_color: '#181411', ring_color: '#8a6a35', base_color: '#3b2f22', pedestal_color: '#2a2420', bg: '#151210' } },
-  { id: 'lana', name: 'Lana', values: { body_color: '#efe9dd', cap_color: '#8a5a3a', ring_color: '#c9a14a', base_color: '#8a6a35', pedestal_color: '#f3f1eb', bg: '#dcd7ce' } },
+  { id: 'brass', name: 'Brass', values: { body_color: '#c9a14a', cap_color: '#5a3a26', ring_color: '#d6b260', base_color: '#8a6a35', pedestal_color: '#ffd84d', bg: '#ffd000' } },
+  { id: 'achiote', name: 'Achiote', values: { body_color: '#f6571c', cap_color: '#222020', ring_color: '#d6b260', base_color: '#8a6a35', pedestal_color: '#e5e3e2', bg: '#f5f3f2' } },
+  { id: 'cielo', name: 'Cielo', values: { body_color: '#5070f0', cap_color: '#e4e2e1', ring_color: '#c5c3c2', base_color: '#6c6a69', pedestal_color: '#e5e3e2', bg: '#f5f3f2' } },
+  { id: 'nogal', name: 'Nogal', values: { body_color: '#5b4a32', cap_color: '#171615', ring_color: '#8a6a35', base_color: '#3b2f22', pedestal_color: '#2a2420', bg: '#131211' } },
+  { id: 'lana', name: 'Lana', values: { body_color: '#ebe9e8', cap_color: '#8a5a3a', ring_color: '#c9a14a', base_color: '#8a6a35', pedestal_color: '#f5f3f2', bg: '#d9d7d6' } },
 ]
 export const colourwayOf = (v: V) => COLOURWAYS.find((c) => Object.entries(c.values).every(([k, x]) => String(v[k]).toLowerCase() === String(x).toLowerCase()))?.id ?? null
 
