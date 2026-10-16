@@ -259,7 +259,7 @@ Verified in this session: the live counts (11 shells, 1440×900, default density
 
 ## Status
 
-**Built (2026-10-15), not yet committed.** Rafael chose: kit first, then the skill, then the shell pass.
+**Kit, skill and the schema half of the shell pass: merged (#8, 2026-10-15). The `index.tsx` half: built 2026-10-15, below.** Rafael chose: kit first, then the skill, then the shell pass.
 
 - **Kit:**
   - `more: true` and `MoreRow` ("3 more" / "Fewer", remembered per section). A changed `more` param stays in view.
@@ -279,12 +279,45 @@ Verified in this session: the live counts (11 shells, 1440×900, default density
   - ui-design: snap distance hidden with object snapping off
   - batch: Grain under "more"; Seed under "more" and only with seals on
 
-**Waiting:**
-- **The `index.tsx` half of the shell pass** waits for density phase 2. That work sits uncommitted in its own worktree and rewrites every shell's `index.tsx` and its panels. It covers:
-  - duplicates
-  - the toolbar Settings buttons for nodes, ui-design, shader, video, flows and journey
-  - hand-built panels: photo, synth, ui-design DesignPanel
-  - dither's section order, and the dead "iPhone 15" button
-  - generate's share
-- **`npm run sync`** (`registry.json`) waits for the notes PR. Run now, it would inline that session's unfinished notes files.
+- **Shell pass, `index.tsx` and panels** (after density phase 2, #7):
+  - Duplicates, down to one home on screen plus ⌘K:
+    - scene: colourway lives in the toolbar only. Views live in the viewport's camera menu and the Views tab, so the camera inspector's list is gone. "Copy camera JSON" stays in Export and ⌘K. Grid sits in the dock, with its pref in Settings.
+    - ui-design: zoom lives in the canvas pill (the panel-header zoom menu is gone). Align lives in the Design panel's Position row; the context bar keeps only distribute. Export settings: the page panel's presets at rest, the Design panel's Export section with a selection, and the full set in Settings.
+    - video: clips are added from the library. The inspector's "Add clip" section is gone, and the transport's "+" became a Tracks menu. Aspect lives in the toolbar only (its own folder, left out of Settings). Snap lives in the transport.
+    - shader: speed, resolution and fps live in the transport only (their folders are kept out of the inspector and Settings).
+    - photo: Auto lives in the Basic header, and clipping in the histogram corners. Both are gone from the toolbar.
+    - flows: Walkthrough lives in the toolbar; the Overview keeps the step count.
+    - motion: Replay lives in the transport and ⌘K.
+  - Settings menus (`place: 'settings'` plus `<SettingsMenu>` in the toolbar): nodes (preview, graph, export), ui-design (snapping, nudge, view, export defaults), shader (aspect, loop length), video (composition, view), flows (canvas, connections, auto layout, walkthrough), journey (view, emotion curve; lanes keep their toolbar menu). The empty-selection inspector now shows document content only.
+  - Hand-built panels:
+    - photo: Basic and the filmstrip open; Tone curve, Colour mixer, Effects and Crop collapsed. Texture and Dehaze sit under "2 more" (a changed one stays in view). Vignette, Grain and Sharpening merged into one Effects section.
+    - synth: Oscillator, Envelope and Filter open; Effects and Drums collapsed. The mixer shows the four levels plus master, with the 8 sends under "8 more" (shown while any send is changed). Scope and spectrum shrink from 84 to 48 px.
+    - ui-design DesignPanel: Effects and Export start collapsed and remember what you open. Effects shows the changed dot when the selection carries effects, and adding one opens the section.
+  - dither: Effect → Palette → Adjust. "Copy ASCII" (dock and Export menu) shows only for the ASCII effect.
+  - Fixes: motion's dead "iPhone 15" button is gone. generate hides Share. video has `compare={false}`. animate passes `doc` (Send to agent captures the document) and turns off compare and share, which acted on view prefs.
+
+**`qa.md` §7 re-run (2026-10-15, 1440×900, default density, dark, fresh storage, nothing selected beyond each shell's default).** *Before* is main at `4a3fde1` (density phase 2 and the kit already in), and *after* is this pass. Both count every interactive element in view, by the same method as *Live* above.
+
+| Shell | Before | After | Inspector scrolls at rest? | Note |
+|---|---|---|---|---|
+| synth | 180 | 161 | no | sends nested, Effects and Drums collapsed |
+| video | 92 | 93 | yes, +135 px | opens with a clip selected, so the clip inspector shows; the removed duplicates appear with nothing selected. +1 is the Settings button |
+| animate | 87 | 87 | no | compare and share moved out of the "…" menu, not off the surface |
+| ui-design | 79 | 69 | no | |
+| photo | 69 | 64 | no (was ~2 screens) | *before* counted only what fit; the panel now fits whole |
+| journey | 64 | 43 | no | |
+| flows | 63 | 48 | no | |
+| dither | 62 | 61 | no | reorder only; ASCII button hidden |
+| scene | 53 | 47 | no | |
+| nodes | 51 | 36 | no | |
+| shader | 45 | 39 | no | |
+| motion | 41 | 39 | no | |
+| generate | 41 | 41 | no | Share sat in the "…" menu |
+| **13 shells** | **927** | **828** | | **−99 (−11%)** |
+
+Checked in both themes in the browser. tsc and the 118 tests pass (after merging #10).
+
+**Still open:**
+- video's clip inspector scrolls by 135 px with the default clip selected; outside this pass.
+- dither's palette library as a popover off the Colours row (Proposal §C, Reorder) was not part of this brief.
 - **Not started:** `paramCommands` (⌘K), folder-as-popover, and the dev usage counter (B6–B8).

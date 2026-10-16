@@ -1,7 +1,7 @@
 /* The stage: the current row rendered at every visible output size, auto-arranged. */
 import { useEffect, useMemo, useReducer, useRef, useState } from 'react'
 import { useStore } from 'zustand'
-import { Plus, TriangleAlert, Eye, ClipboardPaste } from 'lucide-react'
+import { Plus, TriangleAlert, ClipboardPaste, EyeOff } from 'lucide-react'
 import { Stage, Artboard, Empty, Button, Tip, useValues, useDoc, useCamera, type CameraStore } from '@kit'
 import { drawPost, ensureFonts, onShotReady, peekImage } from './artifact'
 import { doc, params, ui, effective, type DataRow, type SizeSpec, type V } from './model'
@@ -96,7 +96,7 @@ export function BatchStage({ camera, issues }: { camera: CameraStore; issues: Re
   } else if (!visible.length) {
     body = (
       <div className="flex h-full items-center justify-center">
-        <Empty icon={Eye} title="Every size is hidden" hint="Show a size in the Sizes panel to preview it here."
+        <Empty icon={EyeOff} title="Every size is hidden" hint="Show a size in the Sizes panel to preview it here."
           action={<Button variant="default" className="mt-2" onClick={() => sizes.forEach((s) => patchSize(s.id, { visible: true }))}>Show all sizes</Button>} />
       </div>
     )

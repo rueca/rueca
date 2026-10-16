@@ -10,7 +10,7 @@
 --------------------------------------------------------------------------- */
 import { useRef, useState } from 'react'
 import { useStore } from 'zustand'
-import { ArrowLeft, ArrowRight, Dices, Eraser, Sparkles, ListMusic, ChevronDown } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Dices, Eraser, ListMusic, ChevronDown, Fingerprint } from 'lucide-react'
 import { Menu, IconButton, Button, Divider, PanelHeader, Tip, cn, useValues, toast } from '@kit'
 import { params, patternOf, setPattern, audible, type V } from './params'
 import { PATTERNS, STEPS, TRACKS, clearTrack, humanise, noteName, randomHats, setNote, setStep, shiftPattern, type TrackId } from './pattern'
@@ -50,7 +50,7 @@ export function SequencerHeader() {
       <IconButton icon={ArrowLeft} label="Shift pattern left" shortcut="alt+arrowleft" tipSide="top" onClick={() => setPattern(shiftPattern(patternOf(params.values() as V), -1))} />
       <IconButton icon={ArrowRight} label="Shift pattern right" shortcut="alt+arrowright" tipSide="top" onClick={() => setPattern(shiftPattern(patternOf(params.values() as V), 1))} />
       <IconButton icon={Dices} label="New hat groove" shortcut="h" tipSide="top" onClick={() => setPattern(randomHats(patternOf(params.values() as V)))} />
-      <IconButton icon={Sparkles} label="Humanise velocities" tipSide="top" onClick={() => setPattern(humanise(patternOf(params.values() as V)))} />
+      <IconButton icon={Fingerprint} label="Humanise velocities" tipSide="top" onClick={() => setPattern(humanise(patternOf(params.values() as V)))} />
       <IconButton icon={Eraser} label="Clear pattern" tipSide="top" onClick={() => { setPattern(clearTrack(patternOf(params.values() as V))); toast('Pattern cleared', { action: { label: 'Undo', onClick: () => params.undo() } }) }} />
     </PanelHeader>
   )

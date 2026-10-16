@@ -1,6 +1,6 @@
 /* Lightbox (Space / double-click) and Compare (select two, C). Both cover the gallery, not the whole app. */
 import { useEffect, useMemo, useState } from 'react'
-import { ChevronLeft, ChevronRight, X, Heart, Sparkles, Maximize2, Wand2, Download, ArrowLeftRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, Heart, Wand2, Download, ArrowLeftRight, ImageUpscale, Grid2x2Plus } from 'lucide-react'
 import { CompareSplit, IconButton, Segmented, Badge, toast, cn } from '@kit'
 import { modelOf, type GenParams } from '../engine/models'
 import { useGallery, visible, step, toggleFavourite, byId, type ImageRec } from '../state/gallery'
@@ -38,8 +38,8 @@ function Lightbox() {
           <div className="tabular text-ui text-fg-faint">{idx + 1} / {list.length} · {modelOf(p.model).name} · seed {p.seed} · {p.w * (p.upscale ?? 1)} × {p.h * (p.upscale ?? 1)}</div>
         </div>
         <IconButton icon={Heart} label="Favourite" shortcut="f" active={!!rec.favourite} onClick={() => toggleFavourite([rec.id])} />
-        <IconButton icon={Sparkles} label="Variations" shortcut="v" onClick={() => variations(rec)} />
-        <IconButton icon={Maximize2} label="Upscale 2×" shortcut="u" disabled={!!p.upscale} onClick={() => upscale(rec)} />
+        <IconButton icon={Grid2x2Plus} label="Variations" shortcut="v" onClick={() => variations(rec)} />
+        <IconButton icon={ImageUpscale} label="Upscale 2×" shortcut="u" disabled={!!p.upscale} onClick={() => upscale(rec)} />
         <IconButton icon={Wand2} label="Remix" shortcut="r" onClick={() => { close(); remix(rec) }} />
         <IconButton icon={Download} label="Download PNG" onClick={async () => { await exportPNG(p, rec.id); toast('PNG exported', { type: 'success' }) }} />
         <IconButton icon={X} label="Close" shortcut="esc" onClick={close} />

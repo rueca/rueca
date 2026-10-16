@@ -3,7 +3,7 @@ import { createParams } from '@kit/core/params'
 import { createDocStore } from '@kit/core/doc'
 import { createHistory } from '@kit/core/history'
 import { defineSchema, folder, p } from '@kit/core/schema'
-import { captureSnapshot, formatNotePrompt } from '@kit/core/notes'
+import { captureSnapshot, formatNotePrompt, isSnapshotState, restoreSnapshot, snapshotStatus } from '@kit/core/notes'
 
 const schema = defineSchema({
   look: folder('Look', {
@@ -88,5 +88,55 @@ describe('watchNotes', () => {
       expect(calls).toBeLessThanOrEqual(4)   // the endpoint probe, the first poll, one queued refresh
       offs.forEach((off) => off())
     } finally { globalThis.fetch = real }
+  })
+})
+
+describe('normalizeNote', () => {
+  it('drops notes the tool cannot show, and forgives replies written loosely', async () => {
+    const { normalizeNote } = await import('@kit/core/notes')
+    const snap = { $v: 1, tool: 't', schema: 1, at: '', url: '', changed: {}, steps: [], view: { width: 1, height: 1, theme: 'dark' } }
+    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', text: 'no snapshot' })).toBeNull()
+    expect(normalizeNote('a string')).toBeNull()
+    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'resolved', snapshot: snap, resolution: 'Done: slowed it' })?.resolution).toEqual({ text: 'Done: slowed it', at: '' })
+    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'resolved', snapshot: snap, resolution: { text: { summary: 'x' }, at: 'now' } })?.resolution?.text).toBe('{"summary":"x"}')
+    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', snapshot: snap, resolution: { text: 'forgot status' } })?.status).toBe('resolved')
+    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', snapshot: snap, anchor: { on: 'canvas', x: -0.25, y: 1.4 } })?.anchor).toEqual({ on: 'canvas', x: -0.25, y: 1.4 })
+    expect(normalizeNote({ id: 'a', kind: 'comment', status: 'open', snapshot: snap, anchor: { on: 'artboard', x: 1.4, y: 0.5 } })?.anchor).toEqual({ on: 'artboard', x: 1, y: 0.5 })
+  })
+})
+
+describe('snapshot state', () => {
+  it('keeps every value, so a note still matches after the agent bakes values in as defaults', () => {
+    const s = make()
+    s.setValue('rings', 20)
+    const snap = captureSnapshot({ params: s })
+    expect(snap.values).toMatchObject({ rings: 20, tint: '#5b8cff' })
+    expect(snap.values).not.toHaveProperty('secret')
+    // the agent made 20 the default: a fresh tool at rings 20 shows the note's state
+    const baked = createParams(defineSchema({ look: folder('Look', { rings: p.number(20, { min: 3, max: 40, step: 1 }), tint: p.color('#5b8cff'), secret: p.text('x', { share: false }) }) }), { id: `notes-baked${n}`, url: false, version: 3 })
+    expect(snapshotStatus(snap, baked)).toBe('same')
+    // and a note made at the OLD default no longer pretends to match
+    const old = captureSnapshot({ params: make() })
+    expect(snapshotStatus(old, baked)).toBe('different')
+    expect(restoreSnapshot(old, { params: baked })).toBe(true)
+    expect(baked.values().rings).toBe(14)
+    expect(snapshotStatus(old, baked)).toBe('same')
+  })
+  it('ignores removed keys and clamps like the tool, so restore never leaves a pin stale', () => {
+    const s = make()
+    const snap = { ...captureSnapshot({ params: s }), values: { rings: 80, oldKnob: 3, tint: '#5b8cff' } }
+    expect(restoreSnapshot(snap, { params: s })).toBe(true)
+    expect(s.values().rings).toBe(40)
+    expect(snapshotStatus(snap, s)).toBe('same')
+  })
+  it('never restores a note from another schema version', () => {
+    const s = make()
+    s.setValue('rings', 30)
+    const snap = { ...captureSnapshot({ params: s }), schema: 2 }
+    s.setValue('rings', 10)
+    expect(snapshotStatus(snap, s)).toBe('other-version')
+    expect(isSnapshotState(snap, s)).toBe(true)
+    expect(restoreSnapshot(snap, { params: s })).toBe(false)
+    expect(s.values().rings).toBe(10)
   })
 })

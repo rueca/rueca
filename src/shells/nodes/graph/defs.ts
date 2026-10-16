@@ -5,9 +5,10 @@
 --------------------------------------------------------------------------- */
 import type { ComponentType } from 'react'
 import {
-  Waves, Blend, Circle, Square, Star, Hexagon, Move3d, Droplets, Contrast, Palette, Layers2, Hash, Pipette, MonitorPlay,
-  SwatchBook, MoveRight, CircleDot, RotateCw, Diamond,
+  Waves, Blend, Circle, Square, Star, Hexagon, Contrast, Layers2, Hash, Pipette, MonitorPlay, MoveRight, CircleDot, RotateCw, Diamond, Move, Droplet,
+  Rainbow,
 } from 'lucide-react'
+import { Gradient } from '../../icons'
 import { defineSchema, folder, p, defaultsOf, type Schema } from '@kit'
 import { BLEND_MODES } from '../engine/ops'
 
@@ -52,7 +53,7 @@ const defs: NodeDef[] = [
     }),
   },
   {
-    kind: 'gradient', label: 'Gradient', category: 'Generate', icon: SwatchBook,
+    kind: 'gradient', label: 'Gradient', category: 'Generate', icon: Gradient,
     description: 'Linear, radial, conic or diamond ramp of colour stops.', keywords: ['ramp', 'linear', 'radial', 'vignette', 'conic'],
     schema: defineSchema({
       gradient: folder('Gradient', {
@@ -87,7 +88,7 @@ const defs: NodeDef[] = [
     }),
   },
   {
-    kind: 'transform', label: 'Transform', category: 'Filter', icon: Move3d,
+    kind: 'transform', label: 'Transform', category: 'Filter', icon: Move,
     description: 'Offset, scale and rotate with repeat, mirror or clamp edges.', keywords: ['move', 'scale', 'rotate', 'tile', 'repeat'],
     schema: defineSchema({
       transform: folder('Transform', {
@@ -99,7 +100,7 @@ const defs: NodeDef[] = [
     }),
   },
   {
-    kind: 'blur', label: 'Blur', category: 'Filter', icon: Droplets,
+    kind: 'blur', label: 'Blur', category: 'Filter', icon: Droplet,
     description: 'Gaussian-like blur, optionally in one direction.', keywords: ['soften', 'gaussian', 'motion', 'glow'],
     schema: defineSchema({
       blur: folder('Blur', {
@@ -140,7 +141,7 @@ const defs: NodeDef[] = [
     }),
   },
   {
-    kind: 'ramp', label: 'Colour ramp', category: 'Colour', icon: Palette,
+    kind: 'ramp', label: 'Colour ramp', category: 'Colour', icon: Rainbow,
     description: 'Maps brightness onto a palette — the colour grading node.', keywords: ['color ramp', 'gradient map', 'palette', 'lut', 'colorize'],
     schema: defineSchema({
       ramp: folder('Ramp', {

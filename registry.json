@@ -688,6 +688,7 @@
       "title": "Notes",
       "description": "Notes — part of the Rueca kit.",
       "dependencies": [
+        "@base-ui/react@^1.9.0",
         "lucide-react@^1.54.0",
         "zustand@^5.0.15"
       ],
@@ -695,7 +696,9 @@
         "https://rueca.dev/r/button.json",
         "https://rueca.dev/r/core.json",
         "https://rueca.dev/r/stage.json",
-        "https://rueca.dev/r/toast.json"
+        "https://rueca.dev/r/studio-layout.json",
+        "https://rueca.dev/r/toast.json",
+        "https://rueca.dev/r/tooltip.json"
       ],
       "files": [
         {
@@ -710,20 +713,18 @@
       "type": "registry:lib",
       "title": "Notes server",
       "description": "Dev-server route that lets the tool send notes to your agent: writes them to .rueca/notes/. Vite plugin plus a handler for any Node server.",
-      "dependencies": [
-        "vite@^8.3.4"
-      ],
+      "dependencies": [],
       "registryDependencies": [],
       "files": [
         {
           "path": "src/kit/notes-server/handler.ts",
           "type": "registry:lib",
-          "target": "@components/studio/notes-server/handler.ts"
+          "target": "~/rueca/notes-server/handler.ts"
         },
         {
           "path": "src/kit/notes-server/vite.ts",
           "type": "registry:lib",
-          "target": "@components/studio/notes-server/vite.ts"
+          "target": "~/rueca/notes-server/vite.ts"
         }
       ]
     },

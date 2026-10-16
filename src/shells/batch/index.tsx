@@ -2,8 +2,8 @@ import '@fontsource-variable/newsreader'
 import { useDeferredValue, useMemo, useState } from 'react'
 import { useStore } from 'zustand'
 import {
-  ChevronLeft, ChevronRight, ChevronDown, Download, SquareDashed, Plus, Copy, Trash2, ClipboardPaste, FileUp, FileDown, Lock, Image as ImageIcon,
-  Braces, Rows3, RotateCcw, Package, X, Eraser, ArrowRightLeft, PanelBottom,
+  ChevronLeft, ChevronRight, ChevronDown, Download, SquareDashed, Plus, Trash2, ClipboardPaste, FileUp, FileDown, Lock, Image as ImageIcon, Braces,
+  RotateCcw, Package, X, Eraser, PanelBottom, Link, CopyPlus,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Button, IconButton, Menu, Divider, PresetMenu, ThemeToggle, CommandPalette,
@@ -83,7 +83,7 @@ export default function BatchShell() {
     { id: 'prev', label: 'Previous row', group: 'Rows', shortcut: 'arrowleft', icon: ChevronLeft, run: prevRow },
     ...rows.map((r, i) => ({ id: `row-${i}`, label: `Go to ${r.name}`, group: 'Rows', keywords: [r.headline, `row ${i + 1}`], run: () => setRow(i) })),
     { id: 'add-row', label: 'Add row', group: 'Data', icon: Plus, shortcut: 'mod+enter', run: () => addRow() },
-    { id: 'dup-row', label: 'Duplicate row', group: 'Data', icon: Copy, shortcut: 'mod+d', run: () => duplicateRow() },
+    { id: 'dup-row', label: 'Duplicate row', group: 'Data', icon: CopyPlus, shortcut: 'mod+d', run: () => duplicateRow() },
     { id: 'del-row', label: 'Delete row', group: 'Data', icon: Trash2, run: () => removeRow() },
     { id: 'paste', label: 'Paste CSV…', group: 'Data', icon: ClipboardPaste, keywords: ['import', 'spreadsheet', 'sheets', 'excel'], run: () => setPaste(true) },
     { id: 'import', label: 'Import CSV file…', group: 'Data', icon: FileUp, run: pickCSV },
@@ -109,7 +109,7 @@ export default function BatchShell() {
     { id: 'brand', label: 'Edit brand', group: 'Brand', run: () => ui.setState({ tab: 'brand' }) },
     ...params.getState().presets.map((p) => ({ id: `preset-${p.name}`, label: `Look: ${p.name}`, group: 'Template', run: () => params.applyPreset(p.name) })),
     { id: 'reset-tpl', label: 'Reset template to defaults', group: 'Template', icon: RotateCcw, run: () => params.reset(['layout', 'align', 'headlineScale', 'subheadScale', 'imageScale', 'padding', 'showSubhead', 'showBadge', 'showPrice', 'bgStyle', 'ctaStyle', 'decor', 'grain', 'seed'] as never) },
-    { id: 'demo', label: 'Restore demo data', group: 'Template', icon: Rows3, run: resetDemo },
+    { id: 'demo', label: 'Restore demo data', group: 'Template', icon: RotateCcw, run: resetDemo },
   ]
 
   return (
@@ -150,7 +150,7 @@ export default function BatchShell() {
                 <HistoryButtons history={history} />
                 <Divider vertical />
                 <PresetMenu params={params} />
-                <Menu align="end" trigger={<IconButton icon={ArrowRightLeft} label="Share & copy" />} items={shareMenuItems(params)} />
+                <Menu align="end" trigger={<IconButton icon={Link} label="Share & copy" />} items={shareMenuItems(params)} />
                 <ThemeToggle />
               </Cluster>
               <Button variant="primary" size="lg" onClick={startExport} disabled={running || !exportCount}>

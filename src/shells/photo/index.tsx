@@ -6,11 +6,11 @@ import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
 import { Popover } from '@base-ui/react/popover'
 import {
-  Braces, Columns2, Contrast, Crop, Download, ImageDown, ImagePlus, ImageUp, Images, Palette, Plus, RectangleHorizontal, RectangleVertical,
-  RotateCcw, Triangle, WandSparkles, X, ZoomIn,
+  Columns2, Crop, Download, ImageDown, ImagePlus, ImageUp, Images, Palette, Plus, RectangleHorizontal, RectangleVertical, RotateCcw, Triangle,
+  WandSparkles, X, ZoomIn, Eye, TriangleAlert, Link,
 } from 'lucide-react'
 import {
-  Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Section, Row, Stage, Artboard, Menu, Button, IconButton, CommandPalette,
+  Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Section, MoreRow, Row, Stage, Artboard, Menu, Button, IconButton, CommandPalette,
   HistoryButtons, HistoryList, ThemeToggle, Segmented, ScrubValue, TextInput, ImageDrop, Empty, Divider, Kbd, Badge, toast, download,
   shareMenuItems, createCamera, useParamState, useHotkeys, useHoldKey, clamp, cn, type Command,
 } from '@kit'
@@ -380,11 +380,8 @@ export default function DevelopShell() {
             <Cluster>
               <IconButton icon={Crop} label={s.cropping ? 'Apply crop' : 'Crop & straighten'} shortcut="c" active={!!s.cropping} onClick={toggleCrop} disabled={!s.hasImage} />
               <IconButton icon={Columns2} label="Before / after split" shortcut="y" active={s.split !== null} onClick={toggleSplit} disabled={!s.hasImage || !!s.cropping} />
-              <IconButton icon={Contrast} label="Hold to see the original" shortcut="\\" active={s.bypass} disabled={!s.hasImage}
+              <IconButton icon={Eye} label="Hold to see the original" shortcut="\\" active={s.bypass} disabled={!s.hasImage}
                 onPointerDown={() => ui.setState({ bypass: true })} onPointerUp={() => ui.setState({ bypass: false })} onPointerLeave={() => s.bypass && ui.setState({ bypass: false })} />
-              <Divider vertical />
-              <IconButton icon={Triangle} label="Clipping warnings" shortcut="j" active={s.clip.shadows && s.clip.highlights} onClick={toggleClip} disabled={!s.hasImage} />
-              <IconButton icon={WandSparkles} label="Auto tone" shortcut="shift+a" onClick={autoTone} disabled={!s.hasImage} />
             </Cluster>
           }
           end={
@@ -392,7 +389,7 @@ export default function DevelopShell() {
               <Cluster>
                 <HistoryButtons history={history} />
                 <Divider vertical />
-                <Menu align="end" trigger={<IconButton icon={Braces} label="Share & copy" />}
+                <Menu align="end" trigger={<IconButton icon={Link} label="Share & copy" />}
                   items={[...shareMenuItems(params), { type: 'separator' }, { label: 'Export look as .cube LUT', icon: Palette, shortcut: 'shift+mod+l', onClick: () => exportCube(33) }]} />
                 <ThemeToggle />
               </Cluster>
@@ -478,7 +475,7 @@ export default function DevelopShell() {
         )}
         {failed && (
           <div className="absolute inset-0 flex items-center justify-center bg-field">
-            <Empty icon={X} title="The develop engine couldn’t start" hint={`It needs WebGL2. ${failed}`} />
+            <Empty icon={TriangleAlert} title="The develop engine couldn’t start" hint={`It needs WebGL2. ${failed}`} />
           </div>
         )}
         {intake.over && <div className="pointer-events-none absolute inset-3 flex items-center justify-center rounded-panel bg-signal-soft text-title font-medium text-signal shadow-[inset_0_0_0_2px_var(--signal)]">Drop to open</div>}
@@ -590,6 +587,10 @@ const CURVE_PRESETS: { value: string; label: string; hint: string; points: Curve
   { value: 'medium', label: 'Medium', hint: 'Medium contrast', points: [[0, 0], [0.25, 0.21], [0.75, 0.8], [1, 1]] },
   { value: 'strong', label: 'Strong', hint: 'Strong contrast', points: [[0, 0], [0.25, 0.17], [0.75, 0.85], [1, 1]] },
 ]
+const FX_KEYS = [...VIG_KEYS, ...GRAIN_KEYS, ...SHARP_KEYS]
+/** Presence's details: no look moves them, so they wait under "2 more" unless changed. */
+const PRES_MORE = ['texture', 'dehaze']
+const MORE_KEY = 'photo:basic:more'
 const sub = (t: string) => <div className="px-pad pt-2 pb-0.5 text-ui text-fg-faint no-select">{t}</div>
 
 function Adjustments({ v }: { v: V }) {
@@ -603,6 +604,11 @@ function Adjustments({ v }: { v: V }) {
   const pts = v[ck] as CurvePoint[]
   const curveStep = `Tone curve${ch === 'RGB' ? '' : ` · ${ch}`}`
   const curvePreset = (p: CurvePoint[], name: string) => params.setValue(ck, p, { label: `${curveStep} · ${name}` })
+  const [more, setMore] = useState<boolean>(() => { try { return localStorage.getItem(MORE_KEY) === '1' } catch { return false } })
+  const toggleMore = () => { setMore(!more); try { localStorage.setItem(MORE_KEY, more ? '0' : '1') } catch { /* private mode */ } }
+  // a changed detail always stays in view, so a look, undo or link never hides what it set
+  const shown = (k: string) => !PRES_MORE.includes(k) || more || changedOf(v, [k])
+  const hidden = PRES_MORE.filter((k) => !shown(k)).length
   return (
     <>
       <Section title="Basic" persistKey="photo:basic" first changed={changedOf(v, basic)} onReset={changedOf(v, basic) ? resetKeys('Basic', basic) : undefined}
@@ -613,13 +619,14 @@ function Adjustments({ v }: { v: V }) {
         {sub('Tone')}
         {BASIC_TONE.map((k) => <Slide key={k} k={k} track={TRACK.tone} />)}
         {sub('Presence')}
-        <Slide k="texture" />
+        {shown('texture') && <Slide k="texture" />}
         <Slide k="clarity" />
-        <Slide k="dehaze" />
+        {shown('dehaze') && <Slide k="dehaze" />}
         <Slide k="vibrance" track={TRACK.sat} />
         <Slide k="saturation" track={TRACK.sat} />
+        {(hidden > 0 || more) && <MoreRow count={hidden} open={more} onClick={toggleMore} />}
       </Section>
-      <Section title="Tone curve" persistKey="photo:curve" changed={changedOf(v, CURVE_KEYS)} onReset={changedOf(v, CURVE_KEYS) ? resetKeys('Tone curve', CURVE_KEYS) : undefined}>
+      <Section title="Tone curve" persistKey="photo:curve" defaultOpen={false} changed={changedOf(v, CURVE_KEYS)} onReset={changedOf(v, CURVE_KEYS) ? resetKeys('Tone curve', CURVE_KEYS) : undefined}>
         <div className="flex flex-col gap-2 px-pad">
           <Segmented size="sm" label="Curve channel" value={ch} onChange={(c) => ui.setState({ curveChannel: c as typeof ch })}
             options={[{ value: 'RGB', label: 'RGB' }, { value: 'R', label: 'Red' }, { value: 'G', label: 'Green' }, { value: 'B', label: 'Blue' }]} />
@@ -629,7 +636,7 @@ function Adjustments({ v }: { v: V }) {
             options={CURVE_PRESETS.map((c) => ({ value: c.value, label: c.label, hint: c.hint }))} />
         </div>
       </Section>
-      <Section title="Colour mixer" persistKey="photo:mixer" changed={changedOf(v, HSL_KEYS)} onReset={changedOf(v, HSL_KEYS) ? resetKeys('Colour mixer', HSL_KEYS) : undefined}>
+      <Section title="Colour mixer" persistKey="photo:mixer" defaultOpen={false} changed={changedOf(v, HSL_KEYS)} onReset={changedOf(v, HSL_KEYS) ? resetKeys('Colour mixer', HSL_KEYS) : undefined}>
         <div className="px-pad pb-1">
           <Segmented size="sm" label="Mixer mode" value={s.hslMode} onChange={(m) => ui.setState({ hslMode: m as 'h' | 's' | 'l' })}
             options={[{ value: 'h', label: 'Hue' }, { value: 's', label: 'Saturation' }, { value: 'l', label: 'Luminance' }]} />
@@ -638,17 +645,16 @@ function Adjustments({ v }: { v: V }) {
           <Slide key={`${b.id}-${s.hslMode}`} k={`hsl_${b.id}_${s.hslMode}`} label={b.name} track={bandTrack(b.hue, s.hslMode)} />
         ))}
       </Section>
-      <Section title="Vignette" persistKey="photo:vignette" changed={changedOf(v, VIG_KEYS)} onReset={changedOf(v, VIG_KEYS) ? resetKeys('Vignette', VIG_KEYS) : undefined}>
+      {/* Hand-built (not <Inspector>) so each step is named "Grain 24", not "Amount". */}
+      <Section title="Effects" persistKey="photo:effects" defaultOpen={false} changed={changedOf(v, FX_KEYS)} onReset={changedOf(v, FX_KEYS) ? resetKeys('Effects', FX_KEYS) : undefined}>
+        {sub('Vignette')}
         <Slide k="vignette" track="linear-gradient(90deg,#141414,#8c8c8c 50%,#f0f0f0)" />
         <Slide k="vigMid" />
         <Slide k="vigFeather" />
-      </Section>
-      {/* Hand-built (not <Inspector>) so each step is named "Grain 24", not "Amount". */}
-      <Section title="Grain" persistKey="photo:grain" changed={changedOf(v, GRAIN_KEYS)} onReset={changedOf(v, GRAIN_KEYS) ? resetKeys('Grain', GRAIN_KEYS) : undefined}>
+        {sub('Grain')}
         <Slide k="grain" />
         <Slide k="grainSize" />
-      </Section>
-      <Section title="Sharpening" persistKey="photo:sharpen" changed={changedOf(v, SHARP_KEYS)} onReset={changedOf(v, SHARP_KEYS) ? resetKeys('Sharpening', SHARP_KEYS) : undefined}>
+        {sub('Sharpening')}
         <Slide k="sharpen" />
         <Slide k="sharpRadius" />
       </Section>
@@ -663,7 +669,7 @@ function CropSummary({ v }: { v: V }) {
   const keys = ['crop', 'angle', 'aspect']
   const changed = changedOf(v, keys)
   return (
-    <Section title="Crop & straighten" persistKey="photo:crop" changed={changed} onReset={changed ? resetKeys('Crop', keys) : undefined}>
+    <Section title="Crop & straighten" persistKey="photo:crop" defaultOpen={false} changed={changed} onReset={changed ? resetKeys('Crop', keys) : undefined}>
       <Row label="Aspect"><span className="flex-1 text-right text-ui text-fg tabular">{ASPECTS.find((a) => a.value === v.aspect)?.label ?? v.aspect}</span></Row>
       <Row label="Straighten"><span className="flex-1 text-right text-ui text-fg tabular">{v.angle > 0 ? '+' : ''}{Number(v.angle).toFixed(1)}°</span></Row>
       <Row label="Output"><span className="flex-1 text-right text-ui text-fg tabular">{Math.round(crop.w * size.w)} × {Math.round(crop.h * size.h)}</span></Row>

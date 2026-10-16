@@ -1,6 +1,5 @@
 /* The selection-aware context bar: what this selection can do next. */
 import {
-  AlignStartVertical, AlignCenterVertical, AlignEndVertical, AlignStartHorizontal, AlignCenterHorizontal, AlignEndHorizontal,
   AlignHorizontalDistributeCenter, AlignVerticalDistributeCenter, SquaresUnite, SquaresSubtract, SquaresIntersect, SquaresExclude,
   Frame, Component, Columns3, Rows3, ImageDown, CodeXml, Type, Ellipsis, TextAlignStart, TextAlignCenter, TextAlignEnd, Ungroup, Combine,
 } from 'lucide-react'
@@ -51,15 +50,10 @@ export function ContextBar({ rect }: { rect: { x: number; y: number; w: number; 
         onClick: () => { const r = S.toggleComponent(); toast(r === 'created' ? 'Component created' : 'Component detached', { type: 'success' }) } },
       { type: 'divider' as const },
     ] : []),
-    ...(free > 1 ? [
-      { icon: AlignStartVertical, label: 'Align left', shortcut: 'alt+a', onClick: () => S.align('left') },
-      { icon: AlignCenterVertical, label: 'Align horizontal centres', shortcut: 'alt+h', onClick: () => S.align('hcenter') },
-      { icon: AlignEndVertical, label: 'Align right', shortcut: 'alt+d', onClick: () => S.align('right') },
-      { icon: AlignStartHorizontal, label: 'Align top', shortcut: 'alt+w', onClick: () => S.align('top') },
-      { icon: AlignCenterHorizontal, label: 'Align vertical centres', shortcut: 'alt+v', onClick: () => S.align('vcenter') },
-      { icon: AlignEndHorizontal, label: 'Align bottom', shortcut: 'alt+s', onClick: () => S.align('bottom') },
-      free > 2 && { icon: AlignHorizontalDistributeCenter, label: 'Distribute horizontally', shortcut: 'alt+shift+h', onClick: () => S.distribute('x') },
-      free > 2 && { icon: AlignVerticalDistributeCenter, label: 'Distribute vertically', shortcut: 'alt+shift+v', onClick: () => S.distribute('y') },
+    // align lives in the Design panel's Position row; distribute has no other home on screen
+    ...(free > 2 ? [
+      { icon: AlignHorizontalDistributeCenter, label: 'Distribute horizontally', shortcut: 'alt+shift+h', onClick: () => S.distribute('x') },
+      { icon: AlignVerticalDistributeCenter, label: 'Distribute vertically', shortcut: 'alt+shift+v', onClick: () => S.distribute('y') },
       { type: 'divider' as const },
     ] : []),
     (shapes || isBool) && {

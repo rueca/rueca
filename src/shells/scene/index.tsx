@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useStore } from 'zustand'
 import {
-  Box, Braces, Camera, Circle, CircleDot, Cylinder, Disc, Download, Focus, Grid3x3, Image as ImageIcon, ImageDown, Lightbulb,
-  MousePointer2, Move3d, Orbit, Package, Plus, Rotate3d, Scale3d, SquareDashed, Spotlight, Sun, Video, X, Eye, EyeOff, ChevronDown, FileBox,
+  Box, Braces, Camera, Circle, CircleDot, Cylinder, Disc, Download, Focus, Grid3x3, Image as ImageIcon, ImageDown, Lightbulb, MousePointer2, Move3d,
+  Orbit, Plus, Rotate3d, Scale3d, SquareDashed, Spotlight, Sun, Video, X, Eye, EyeOff, ChevronDown, FileBox, Speaker,
 } from 'lucide-react'
 import { Vec3Fields,
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Inspector, SettingsMenu, Section, Row, Stage, MountSurface, ParamActions, Menu,
@@ -25,7 +25,7 @@ const viewport: { current: Viewport | null } = { current: null }
 const engine = () => viewport.current?.handle ?? null
 
 
-const MESH_ICON: Record<string, typeof Box> = { speaker: Package, body: Cylinder, cap: Circle, ring: CircleDot, base: Disc, pedestal: Cylinder, floor: SquareDashed, camera: Video }
+const MESH_ICON: Record<string, typeof Box> = { speaker: Speaker, body: Cylinder, cap: Circle, ring: CircleDot, base: Disc, pedestal: Cylinder, floor: SquareDashed, camera: Video }
 const LIGHT_ICON = { directional: Sun, spot: Spotlight, point: Lightbulb }
 const iconOf = (id: string, v: V) => (OBJ[id].kind === 'light' ? LIGHT_ICON[v[`${id}_ltype`] as keyof typeof LIGHT_ICON] : MESH_ICON[id]) ?? Box
 const kindLabel = (id: string, v: V) => {
@@ -192,7 +192,7 @@ export default function SceneShell() {
       }
       right={
         <Panel header={<InspectorHeader id={selected} v={v} />}>
-          {selected ? <SelectionInspector key={selected} id={selected} v={v} /> : <SceneSettings v={v} cw={cw} />}
+          {selected ? <SelectionInspector key={selected} id={selected} v={v} /> : <SceneSettings v={v} />}
         </Panel>
       }
     >
@@ -299,7 +299,6 @@ function ViewChip({ v }: { v: V }) {
           ...all.map((x, i) => ({ label: x.name, checked: x.id === active, shortcut: i < 9 ? String(i + 1) : undefined, onClick: () => goView(x) })),
           { type: 'separator' },
           { label: 'Save current view', icon: Plus, shortcut: 'shift+v', onClick: saveView },
-          { label: 'Copy camera JSON', icon: Braces, onClick: copyCamera },
         ]}
         trigger={<Button size="sm" className="gap-1"><Camera size={13} strokeWidth={1.5} />{cur?.name ?? 'Free camera'}<ChevronDown size={12} className="text-fg-faint" /></Button>}
       />
@@ -410,18 +409,10 @@ function InspectorHeader({ id, v }: { id: string | null; v: V }) {
   )
 }
 
-function SceneSettings({ v, cw }: { v: V; cw: string | null }) {
+function SceneSettings({ v }: { v: V }) {
   return (
     <>
-      <Section title="Colourway" first>
-        <div className="px-pad pt-0.5 pb-1">
-          <SwatchTiles value={cw} options={swatchOptions} onChange={applyColourway} onPreview={(p) => ui.setState({ preview: p })} label="Colourway" />
-        </div>
-        <p className="px-pad pt-1 text-ui leading-relaxed text-fg-faint">
-          {cw ? 'Colourways change materials and background only — transforms and lights stay put.' : 'Custom colours. Pick a colourway to snap back to a defined variant.'}
-        </p>
-      </Section>
-      <div className="border-t border-line"><Inspector params={params} folders={['look', 'env', 'render']} /></div>
+      <Inspector params={params} folders={['look', 'env', 'render']} />
       <Section title="Selection">
         <p className="px-pad text-ui leading-relaxed text-fg-muted">
           Click the product to select it, click again to select a part. <Kbd>W</Kbd> <Kbd>E</Kbd> <Kbd>R</Kbd> switch the gizmo; <Kbd>F</Kbd> frames it. {v.turntable ? 'Turntable is on.' : ''}
@@ -437,19 +428,7 @@ function SelectionInspector({ id, v }: { id: string; v: V }) {
     return (
       <>
         <Inspector params={params} folders={['camera']} />
-        <Section title="Views">
-          <div className="flex flex-col gap-px">
-            {allViews().map((x, i) => (
-              <Row key={x.id} label={x.name} trailing={i < 9 ? <Kbd>{i + 1}</Kbd> : undefined}>
-                <Button size="sm" variant="default" className="ml-auto" onClick={() => goView(x)}>Go</Button>
-              </Row>
-            ))}
-          </div>
-          <div className="flex gap-1.5 px-pad pt-2">
-            <Button size="md" variant="default" className="flex-1" onClick={saveView}><Plus size={13} strokeWidth={1.5} />Save view</Button>
-            <Button size="md" variant="default" className="flex-1" onClick={copyCamera}><Braces size={13} strokeWidth={1.5} />Copy JSON</Button>
-          </div>
-        </Section>
+        <p className="px-pad pt-1 pb-3 text-ui leading-relaxed text-fg-faint">Saved views are in the camera menu on the viewport and in the Views tab.</p>
       </>
     )
   if (kind === 'floor') return <Inspector params={params} folders={['floor']} />

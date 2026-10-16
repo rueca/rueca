@@ -37,7 +37,7 @@
    (Promoted from shells/video/local/TrackTimeline.tsx.)
 --------------------------------------------------------------------------- */
 import { useEffect, useLayoutEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
-import { Eye, EyeOff, Lock, LockOpen, Maximize2, ZoomIn, ZoomOut } from 'lucide-react'
+import { Eye, EyeOff, Lock, LockOpen, ZoomIn, ZoomOut, Fullscreen } from 'lucide-react'
 import { clamp, cn } from '../core/cn'
 import { useDensityPx } from '../core/density'
 import type { Clock } from '../core/clock'
@@ -297,7 +297,7 @@ export function TrackTimeline(props: TrackTimelineProps) {
         <IconButton icon={ZoomOut} label="Zoom out" tipSide="top" onClick={() => zoomAt(zoom / 1.5)} />
         <div className="w-[88px]"><Slider value={Math.log(zoom)} min={0} max={Math.log(40)} step={0.01} label="Timeline zoom" onChange={(v) => zoomAt(Math.exp(v))} /></div>
         <IconButton icon={ZoomIn} label="Zoom in" tipSide="top" onClick={() => zoomAt(zoom * 1.5)} />
-        <IconButton icon={Maximize2} label="Fit to window" tipSide="top" onClick={() => { setZoom(1); if (scroller.current) scroller.current.scrollLeft = 0 }} />
+        <IconButton icon={Fullscreen} label="Fit to window" tipSide="top" onClick={() => { setZoom(1); if (scroller.current) scroller.current.scrollLeft = 0 }} />
       </div>
       <div ref={scroller} className="relative flex-none overflow-auto border-t border-line" style={{ height }}>
         <div className="relative" style={{ width: HEAD_W + contentW, minHeight: '100%' }}>

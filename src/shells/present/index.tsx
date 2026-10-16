@@ -3,7 +3,7 @@
    Client view: the kit's <ClientView> — full-bleed art, ONLY `publish: true` params at touch size,
    Shuffle, Download and Send. Forced on narrow screens and by `#/present?client`. */
 import { useRef } from 'react'
-import { Download, Eye, Shuffle, Send } from 'lucide-react'
+import { Download, Eye, Shuffle, Smartphone } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, Inspector, Stage, Artboard, CanvasSurface, ParamActions, Button,
   ClientView, useClientMode, clientLink, CommandPalette, Badge, copyText, toast, download, useValues, type SurfaceHandle, type Command,
@@ -31,7 +31,7 @@ export default function Present() {
     { id: 'client', label: client ? 'Designer view' : 'Client view', shortcut: 'mod+shift+p', icon: Eye, run: () => setClient((c) => !c) },
     { id: 'shuffle', label: 'Shuffle', shortcut: 'shift+r', icon: Shuffle, run: shuffle },
     { id: 'download', label: 'Download PNG', shortcut: 'mod+e', icon: Download, run: () => save().then(() => toast('Saved to downloads', { type: 'success' })) },
-    { id: 'send', label: 'Copy client link', icon: Send, run: send },
+    { id: 'send', label: 'Copy client link', icon: Smartphone, run: send },
   ]
 
   // The art is shown at its export size on an artboard, fitted to the screen: what the client tunes on a phone is

@@ -1,11 +1,11 @@
 /* Flows — a UX flow mapper. React Flow does the graph; the kit does the tool. */
 import { ReactFlowProvider } from '@xyflow/react'
 import {
-  Download, Image as ImageIcon, Braces, Play, Network, MessageCircle, Square, Diamond, StickyNote, Frame, CircleDot, Circle, Copy, Trash2,
-  Upload, Map as MapIcon, Maximize2, RotateCcw, Share2, ClipboardCopy, Link,
+  Download, Image as ImageIcon, Braces, Play, Network, MessageCircle, Square, Diamond, StickyNote, Frame, CircleDot, Circle, Copy, Trash2, Upload,
+  Map as MapIcon, RotateCcw, Link, FileCode, Fullscreen, CopyPlus,
 } from 'lucide-react'
 import {
-  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Tip, HistoryButtons, useValues, useDoc, toast, copyText,
+  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Tip, HistoryButtons, SettingsMenu, useValues, useDoc, toast, copyText,
   type Command, type MenuItem,
 } from '@kit'
 import { FlowCanvas, startWalkthrough } from './canvas/FlowCanvas'
@@ -35,9 +35,9 @@ export default function FlowsShell() {
     { label: 'PNG image (2×)', icon: ImageIcon, shortcut: 'mod+e', onClick: () => exportPNG(2) },
     { label: 'PNG image (1×)', icon: ImageIcon, onClick: () => exportPNG(1) },
     { label: 'JSON', icon: Braces, shortcut: 'shift+mod+e', onClick: exportFlowJSON },
-    { label: 'Mermaid (.mmd)', icon: Share2, onClick: downloadMermaid },
+    { label: 'Mermaid (.mmd)', icon: FileCode, onClick: downloadMermaid },
     { type: 'separator' },
-    { label: 'Copy as Mermaid', icon: ClipboardCopy, hint: 'For docs, tickets and agent prompts', onClick: copyMermaid },
+    { label: 'Copy as Mermaid', icon: Copy, hint: 'For docs, tickets and agent prompts', onClick: copyMermaid },
     { label: 'Copy link', icon: Link, onClick: async () => { await copyText(location.href); toast('Link copied', { type: 'success' }) } },
     { type: 'separator' },
     { label: 'Import JSON…', icon: Upload, onClick: importFlowJSON },
@@ -55,19 +55,19 @@ export default function FlowsShell() {
     { id: 'walk', label: 'Start walkthrough', group: 'Canvas', shortcut: 'p', icon: Play, run: startWalkthrough, keywords: ['present', 'happy path', 'play'] },
     { id: 'comment', label: 'Comment mode', group: 'Canvas', icon: MessageCircle, run: () => ui.setState({ tool: 'comment' }) },
     { id: 'minimap', label: minimap ? 'Hide minimap' : 'Show minimap', group: 'Canvas', shortcut: 'm', icon: MapIcon, run: () => params.setValue('minimap', !params.values().minimap) },
-    { id: 'fit', label: 'Zoom to fit', group: 'Canvas', shortcut: 'shift+1', icon: Maximize2, run: () => viewport.fit?.() },
+    { id: 'fit', label: 'Zoom to fit', group: 'Canvas', shortcut: 'shift+1', icon: Fullscreen, run: () => viewport.fit?.() },
     { id: 'zoom-sel', label: 'Zoom to selection', group: 'Canvas', shortcut: 'shift+2', run: () => { const s = ui.getState().sel.nodes; if (s.length) viewport.focus?.(s) } },
     { id: 'zoom-100', label: 'Zoom to 100%', group: 'Canvas', shortcut: 'shift+0', run: () => viewport.zoomTo?.(1) },
     { id: 'zoom-in', label: 'Zoom in', group: 'Canvas', shortcut: 'mod+=', run: () => viewport.zoomIn?.() },
     { id: 'zoom-out', label: 'Zoom out', group: 'Canvas', shortcut: 'mod+-', run: () => viewport.zoomOut?.() },
     { id: 'select-all', label: 'Select all', group: 'Edit', shortcut: 'mod+a', run: () => select(activeFlow().nodes.filter((n) => n.type !== 'section').map((n) => n.id)) },
-    { id: 'dup', label: 'Duplicate', group: 'Edit', shortcut: 'mod+d', icon: Copy, run: duplicate },
+    { id: 'dup', label: 'Duplicate', group: 'Edit', shortcut: 'mod+d', icon: CopyPlus, run: duplicate },
     { id: 'copy', label: 'Copy', group: 'Edit', shortcut: 'mod+c', run: () => { if (copySelection()) toast('Copied') } },
     { id: 'paste', label: 'Paste', group: 'Edit', shortcut: 'mod+v', run: () => paste() },
     { id: 'delete', label: 'Delete selection', group: 'Edit', shortcut: 'backspace,delete', icon: Trash2, run: deleteSelection },
     { id: 'png', label: 'Export PNG', group: 'Export', shortcut: 'mod+e', icon: ImageIcon, run: () => exportPNG(2) },
     { id: 'json', label: 'Export JSON', group: 'Export', shortcut: 'shift+mod+e', icon: Braces, run: exportFlowJSON },
-    { id: 'mermaid', label: 'Copy as Mermaid', group: 'Export', icon: ClipboardCopy, run: copyMermaid },
+    { id: 'mermaid', label: 'Copy as Mermaid', group: 'Export', icon: Copy, run: copyMermaid },
     { id: 'import', label: 'Import JSON…', group: 'Export', icon: Upload, run: importFlowJSON },
     { id: 'new-flow', label: 'New flow', group: 'Flows', run: newFlow },
     ...flows.map((f) => ({ id: `flow-${f.id}`, label: `Open flow: ${f.name}`, group: 'Flows', run: () => switchFlow(f.id) })),
@@ -93,6 +93,7 @@ export default function FlowsShell() {
                   <HistoryButtons history={history} />
                   <Divider vertical />
                   <PresetMenu params={params} />
+                  <SettingsMenu params={params} label="Canvas settings" />
                   <ThemeToggle />
                 </Cluster>
                 <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />

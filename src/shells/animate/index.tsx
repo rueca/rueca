@@ -1,9 +1,9 @@
 import '@fontsource/la-belle-aurore/latin-400.css'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  ArrowLeftRight, ArrowRight, Boxes, Braces, Circle, CircleDot, Clipboard, ClipboardPaste, Code, Copy, Diamond, Download, Ellipsis,
-  Film, Image as ImageIcon, Layers, Magnet, MousePointer2, Pause, PenTool, Play, Plus, Repeat, RotateCcw, SkipBack, Square, StepBack, StepForward,
-  Trash2, Type, Workflow, Zap,
+  ArrowLeftRight, ArrowRight, Braces, Circle, CircleDot, ClipboardPaste, Code, Copy, Diamond, Download, Ellipsis, Film, Image as ImageIcon, Layers,
+  Magnet, MousePointer2, Pause, PenTool, Play, Plus, Repeat, RotateCcw, SkipBack, Square, StepBack, StepForward, Trash2, Type, Workflow, Zap, Group,
+  CopyPlus,
 } from 'lucide-react'
 import {
   Brand, Button, Cluster, CommandPalette, Divider, Empty, IconButton, LayerTree, Menu, Panel, PanelHeader, PanelTabs, ParamActions,
@@ -19,14 +19,14 @@ import { LiveScene } from './SceneView'
 import { AnimInspector } from './AnimInspector'
 import { InputsList, StateMachineGraph, TransitionsList } from './local/StateMachinePanel'
 import {
-  addAnim, addKeysAtPlayhead, animTime, clock, commitPending, copyKeys, currentAnim, deleteAnim, deleteKeys, editProps, findKey, getDoc,
+  addAnim, addKeysAtPlayhead, animTime, clock, doc as docStore, commitPending, copyKeys, currentAnim, deleteAnim, deleteKeys, editProps, findKey, getDoc,
   history, moveKeys, nudgeKeys, params, pasteKeys, patchObject, reorderObject, runtime, seek, setDoc, setEase, toAnimTime, toggleKey, ui, updateAnim,
   useDoc, useUI,
 } from './store'
 import { demoDoc } from './demo'
 import { ENTRY_TOP } from './local/PlateEntry'
 
-const KIND_ICON = { group: Boxes, rect: Square, ellipse: Circle, path: PenTool, text: Type, image: ImageIcon }
+const KIND_ICON = { group: Group, rect: Square, ellipse: Circle, path: PenTool, text: Type, image: ImageIcon }
 const LOOP_ICON = { loop: Repeat, once: ArrowRight, pingpong: ArrowLeftRight }
 
 const fmtVal = (p: PropKey, v: unknown) => {
@@ -168,7 +168,7 @@ function AnimationsPanel() {
                 <Menu align="end" trigger={<button type="button" aria-label="Animation options" onClick={(e) => e.stopPropagation()} className="flex size-icon-sm items-center justify-center rounded-control text-fg-faint opacity-0 outline-none hover:bg-hover hover:text-fg group-hover/row:opacity-100 focus-visible:opacity-100 data-[popup-open]:opacity-100"><Ellipsis size={14} strokeWidth={1.5} /></button>}
                   items={[
                     { label: 'Rename', onClick: () => setRenaming(a.id) },
-                    { label: 'Duplicate', icon: Copy, onClick: () => addAnim(a) },
+                    { label: 'Duplicate', icon: CopyPlus, onClick: () => addAnim(a) },
                     { label: 'Set as entry state', checked: doc.sm.entry === a.id, onClick: () => setDoc({ ...getDoc(), sm: { ...getDoc().sm, entry: a.id } }) },
                     { type: 'separator' },
                     { label: 'Delete', icon: Trash2, danger: true, disabled: doc.anims.length <= 1, onClick: () => { if (deleteAnim(a.id)) toast(`Deleted “${a.name}”`, { action: { label: 'Undo', onClick: () => history.undo() } }) } },
@@ -389,7 +389,7 @@ export default function AnimateShell() {
     { id: 'add-key', label: 'Add keyframe at playhead', group: 'Keyframes', shortcut: 'k', icon: Diamond, run: addKey },
     { id: 'auto-key', label: autoKey ? 'Turn auto-key off' : 'Turn auto-key on', group: 'Keyframes', shortcut: 'shift+k', icon: CircleDot, run: () => ui.setState({ autoKey: !autoKey }) },
     { id: 'select-all', label: 'Select all keyframes', group: 'Keyframes', shortcut: 'mod+a', run: () => ui.setState({ keySel: Object.values(anim.tracks).flatMap((ks) => ks.map((k) => k.id)) }) },
-    { id: 'copy', label: 'Copy keyframes', group: 'Keyframes', shortcut: 'mod+c', icon: Clipboard, run: () => { const n = copyKeys(keySel); if (n) toast(`Copied ${n} keys`) } },
+    { id: 'copy', label: 'Copy keyframes', group: 'Keyframes', shortcut: 'mod+c', icon: Copy, run: () => { const n = copyKeys(keySel); if (n) toast(`Copied ${n} keys`) } },
     { id: 'paste', label: 'Paste keyframes at playhead', group: 'Keyframes', shortcut: 'mod+v', icon: ClipboardPaste, run: () => { const n = pasteKeys(); if (n) toast(`Pasted ${n} keys`) } },
     { id: 'delete', label: 'Delete selected keyframes', group: 'Keyframes', shortcut: 'backspace,delete', icon: Trash2, run: () => { const n = deleteKeys(ui.getState().keySel); if (n) toast(`Deleted ${n} ${n === 1 ? 'key' : 'keys'}`, { action: { label: 'Undo', onClick: () => history.undo() } }) } },
     ease('Linear', { kind: 'bezier', p: [0, 0, 1, 1] }),
@@ -401,7 +401,7 @@ export default function AnimateShell() {
     ease('Hold', { kind: 'hold' }),
     ...doc.anims.slice(0, 9).map((a, i) => ({ id: `anim-${a.id}`, label: `Edit “${a.name}”`, group: 'Animations', shortcut: String(i + 1), icon: Film, run: () => ui.setState({ animId: a.id, preview: false, keySel: [], pending: {} }) })),
     { id: 'new-anim', label: 'New animation', group: 'Animations', icon: Plus, run: () => addAnim() },
-    { id: 'dup-anim', label: `Duplicate “${anim.name}”`, group: 'Animations', icon: Copy, run: () => addAnim(anim) },
+    { id: 'dup-anim', label: `Duplicate “${anim.name}”`, group: 'Animations', icon: CopyPlus, run: () => addAnim(anim) },
     { id: 'onion', label: v.onion ? 'Hide onion skin' : 'Show onion skin', group: 'View', shortcut: 'o', icon: Layers, run: () => params.setValue('onion', !v.onion) },
     { id: 'png', label: 'Export PNG (current frame)', group: 'Export', shortcut: 'mod+e', icon: ImageIcon, run: exportPNG },
     { id: 'mp4', label: 'Export video (MP4)', group: 'Export', shortcut: 'shift+mod+e', icon: Film, run: exportVideo },
@@ -454,7 +454,8 @@ export default function AnimateShell() {
           }
           end={
             <>
-              <Cluster><ParamActions params={params} history={history} presets={false} /></Cluster>
+              {/* params here are view prefs, not the animation: A/B and share would act on the wrong thing */}
+              <Cluster><ParamActions params={params} history={history} doc={docStore} clock={clock} presets={false} compare={false} share={false} /></Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />
             </>
           }

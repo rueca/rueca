@@ -20,7 +20,7 @@ import { useStore } from 'zustand'
 import type { AnyParams } from '../core/params'
 import type { DocStore } from '../core/doc'
 import { captureSnapshot, formatNotePrompt, refreshNotes, sendNote } from '../core/notes'
-import { CommentButton, useNotesEndpoint } from './notes'
+import { CommentButton, CommentsList, useNotesEndpoint } from './notes'
 import { useCanUndo, type HistoryLike } from '../core/history'
 import { copyText, exportJSON } from '../core/io'
 import { useHotkeys } from '../core/hotkeys'
@@ -194,6 +194,7 @@ export function ParamActions({
         <Divider vertical />
         {presets && <PresetMenu params={params} />}
         {agent && <CommentButton params={params} />}
+        {agent && <CommentsList params={params} />}
         {agent && <SendToAgentButton params={params} history={history} clock={clock} doc={doc} />}
         {share && <Menu align="end" trigger={<IconButton icon={Link} label="Share & copy" />} items={shareMenuItems(params)} />}
         {theme && <ThemeToggle hotkey={typeof theme === 'object' ? theme.hotkey : 't'} />}
@@ -232,6 +233,7 @@ function ParamActionsMenu({ params, history, clock, doc, presets, compare, agent
       <Divider vertical />
       {presets && <PresetMenu params={params} />}
       {agent && <CommentButton params={params} />}
+        {agent && <CommentsList params={params} />}
       {agent && send.available && <IconButton icon={Send} label="Send to agent" disabled={send.busy} onClick={send.run} />}
       {items.length > 0 && <Menu align="end" trigger={<IconButton icon={Ellipsis} label="More actions" />} items={items} />}
     </>

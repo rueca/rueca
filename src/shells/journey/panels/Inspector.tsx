@@ -1,12 +1,12 @@
 /* Right panel: the selected card or stage; the map document when nothing is selected. */
-import { ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Copy, Trash2, Plus, Tag, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ArrowUp, ArrowDown, Trash2, Plus, Tag, X, CopyPlus } from 'lucide-react'
 import {
-  Panel, PanelHeader, Section, Row, TextInput, Select, Segmented, Slider, ScrubValue, IconButton, Button, Inspector, Checkbox, Badge, useDoc, cn,
+  Panel, PanelHeader, Section, Row, TextInput, Select, Segmented, Slider, ScrubValue, IconButton, Button, Checkbox, Badge, useDoc, cn,
 } from '@kit'
 import { ChipInput } from '@kit/ui/chip-input'
 import { CHANNELS, LANES, TEAMS, emoji, fmtEmotion, laneOf, type Card, type Channel, type LaneId, type Persona, type Stage } from '../model'
 import {
-  params, doc, ui, useUI, usePersona, updateCard, updateStage, deleteSelection, duplicateCard, nudgeCard, moveCard, cellCards, toggleLink, allTags, addCard, moveStage, editPersona,
+  doc, ui, useUI, usePersona, updateCard, updateStage, deleteSelection, duplicateCard, nudgeCard, moveCard, cellCards, toggleLink, allTags, addCard, moveStage, editPersona,
 } from '../store'
 
 export function JourneyInspector() {
@@ -39,7 +39,7 @@ function CardInspector({ card, p }: { card: Card; p: Persona }) {
       <div className="flex items-center gap-2 px-pad pt-3 pb-1">
         <span className="flex size-icon items-center justify-center rounded-control bg-active text-fg-muted"><LIcon size={13} strokeWidth={1.5} /></span>
         <div className="min-w-0 flex-1 text-ui text-fg-muted">{stageName(card.stage)} · {lane.label}</div>
-        <IconButton icon={Copy} size="icon-sm" label="Duplicate" shortcut="mod+d" onClick={duplicateCard} />
+        <IconButton icon={CopyPlus} size="icon-sm" label="Duplicate" shortcut="mod+d" onClick={duplicateCard} />
         <IconButton icon={Trash2} size="icon-sm" label="Delete" shortcut="backspace" onClick={deleteSelection} />
       </div>
       <Section title="Content" first>
@@ -219,7 +219,6 @@ function MapInspector({ p }: { p: Persona }) {
           ))}
         </div>
       </Section>
-      <div className="border-t border-line"><Inspector params={params} /></div>
     </div>
   )
 }

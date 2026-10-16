@@ -4,7 +4,7 @@
 
      <VariantGrid items={items} render={(id) => <svg…/>} cursor={i} onCursor={setI}
        onOpen={focus} onLock={toggleLock} onFav={toggleFav}
-       actions={(id) => <VariantAction label="More like this" icon={Sparkles} onClick={…} />}
+       actions={(id) => <VariantAction label="More like this" icon={Grid2x2Plus} onClick={…} />}
        onColumns={(n) => (cols.current = n)} />
 
      <SizeLadder sizes={[16, 32, 64, 256]}

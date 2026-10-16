@@ -13,18 +13,17 @@ import '@fontsource-variable/ibm-plex-sans'
 import '@fontsource/la-belle-aurore/latin-400.css'
 import { useEffect, useState } from 'react'
 import {
-  MousePointer2, Hash, Square, Circle, Type, Hand, MessageCircle, Play, Download, Undo2, Redo2, Sun, Moon, ImageDown, CodeXml,
-  Copy, Trash2, Component, Frame, Group, Ungroup, Columns3, Eye, Lock, ArrowUpToLine, ArrowDownToLine, FileDown, RefreshCw, Grid3x3, Magnet, Focus, Maximize, FilePlus, ClipboardPaste,
+  MousePointer2, Hash, Square, Circle, Type, Hand, MessageCircle, Play, Download, Undo2, Redo2, Sun, Moon, ImageDown, CodeXml, Trash2, Component,
+  Frame, Group, Ungroup, Columns3, Eye, Lock, ArrowUpToLine, ArrowDownToLine, FileDown, Grid3x3, Magnet, Focus, FilePlus, ClipboardPaste, RotateCcw,
+  Fullscreen, CopyPlus,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Brand, Cluster, Panel, PanelHeader, PanelTabs, ToolDock, CommandPalette, IconButton, Button, Menu, Divider,
-  HistoryButtons, ThemeToggle, useHotkeys, useTheme, toast, type Command, type HotkeyHandler,
+  HistoryButtons, SettingsMenu, ThemeToggle, useHotkeys, useTheme, toast, type Command, type HotkeyHandler,
 } from '@kit'
-import { useStore } from 'zustand'
 import * as S from './model/store'
 import { prefs } from './model/prefs'
 import { bumpFontEpoch } from './model/layout'
-import { camera } from './canvas/camera'
 import { Canvas } from './canvas/Canvas'
 import { LayersPanel } from './panels/LayersPanel'
 import { DesignPanel } from './panels/DesignPanel'
@@ -56,7 +55,6 @@ export default function CanvasShell() {
   const selection = S.useDesign((s) => s.selection)
   const doc = S.useDesign((s) => s.doc)
   const pageId = S.useDesign((s) => s.pageId)
-  const zoom = useStore(camera, (c) => c.zoom)
   const { theme, toggle } = useTheme()
   const [presenting, setPresenting] = useState(false)
   const hasSel = selection.length > 0
@@ -108,7 +106,7 @@ export default function CanvasShell() {
     ...TOOLS.map((t) => ({ id: `tool-${t.value}`, label: `${t.label} tool`, group: 'Tools', icon: t.icon, run: () => S.setTool(t.value), keywords: [t.shortcut] })),
     { id: 'undo', label: 'Undo', group: 'Edit', icon: Undo2, run: () => { S.history.undo() } },
     { id: 'redo', label: 'Redo', group: 'Edit', icon: Redo2, run: () => { S.history.redo() } },
-    { id: 'dup', label: 'Duplicate', group: 'Edit', shortcut: 'mod+d', icon: Copy, run: () => S.duplicateSelection() },
+    { id: 'dup', label: 'Duplicate', group: 'Edit', shortcut: 'mod+d', icon: CopyPlus, run: () => S.duplicateSelection() },
     { id: 'copy', label: 'Copy', group: 'Edit', shortcut: 'mod+c', run: () => { const n = S.copySelection(); if (n) toast(`Copied ${n} layer${n > 1 ? 's' : ''}`) } },
     { id: 'cut', label: 'Cut', group: 'Edit', shortcut: 'mod+x', run: () => { if (S.copySelection()) S.deleteSelection() } },
     { id: 'paste', label: 'Paste', group: 'Edit', shortcut: 'mod+v', icon: ClipboardPaste, run: S.paste },
@@ -141,13 +139,13 @@ export default function CanvasShell() {
     { id: 'tab-design', label: 'Show Design tab', group: 'View', run: () => S.design.setState({ tab: 'design' }) },
     { id: 'tab-proto', label: 'Show Prototype tab', group: 'View', run: () => S.design.setState({ tab: 'prototype' }) },
     { id: 'zoom-sel', label: 'Zoom to selection', group: 'View', shortcut: 'shift+2', icon: Focus, run: A.zoomToSelection },
-    { id: 'zoom-page', label: 'Zoom to fit page', group: 'View', icon: Maximize, run: A.zoomToFitPage },
+    { id: 'zoom-page', label: 'Zoom to fit page', group: 'View', icon: Fullscreen, run: A.zoomToFitPage },
     { id: 'grid', label: 'Toggle dot grid', group: 'View', icon: Grid3x3, run: () => prefs.setValue('showGrid', !prefs.values().showGrid) },
     { id: 'snap', label: 'Toggle snapping', group: 'View', icon: Magnet, run: () => { prefs.setValue('snapObjects', !prefs.values().snapObjects); toast(prefs.values().snapObjects ? 'Snapping on' : 'Snapping off') } },
     { id: 'theme', label: theme === 'dark' ? 'Light theme' : 'Dark theme', group: 'View', icon: theme === 'dark' ? Sun : Moon, run: toggle },
     { id: 'page-new', label: 'New page', group: 'Pages', icon: FilePlus, run: S.addPage },
     ...doc.pages.filter((p) => p.id !== pageId).map((p) => ({ id: `page-${p.id}`, label: `Go to ${p.name}`, group: 'Pages', run: () => S.gotoPage(p.id) })),
-    { id: 'reset', label: 'Reset to demo file', group: 'Document', icon: RefreshCw, run: () => { S.resetDocument(); toast('Demo file restored', { action: { label: 'Undo', onClick: () => S.undo() } }) } },
+    { id: 'reset', label: 'Reset to demo file', group: 'Document', icon: RotateCcw, run: () => { S.resetDocument(); toast('Demo file restored', { action: { label: 'Undo', onClick: () => S.undo() } }) } },
   ]
 
   return (
@@ -165,7 +163,7 @@ export default function CanvasShell() {
                 { label: 'Export selection', icon: ImageDown, shortcut: 'shift+mod+e', onClick: A.exportSelection, disabled: !hasSel },
                 { label: 'Export all frames', icon: ImageDown, onClick: A.exportFrames },
                 { type: 'separator' },
-                { label: 'Reset to demo file', icon: RefreshCw, onClick: () => S.resetDocument() },
+                { label: 'Reset to demo file', icon: RotateCcw, onClick: () => S.resetDocument() },
               ]} />
             </>
           }
@@ -174,6 +172,7 @@ export default function CanvasShell() {
               <Cluster>
                 <HistoryButtons history={S.history} />
                 <Divider vertical />
+                <SettingsMenu params={prefs} folders={['snapping', 'nudge', 'view', 'exporting']} label="Canvas settings" />
                 <ThemeToggle hotkey={false} />
                 <IconButton icon={Play} label="Present" shortcut="alt+mod+enter" onClick={() => setPresenting(true)} />
               </Cluster>
@@ -195,13 +194,6 @@ export default function CanvasShell() {
         <Panel header={
           <PanelHeader>
             <PanelTabs value={tab} onChange={(t) => S.design.setState({ tab: t })} tabs={[{ value: 'design', label: 'Design' }, { value: 'prototype', label: 'Prototype' }]} />
-            <Menu align="end" trigger={<Button size="sm" variant="ghost" className="tabular">{Math.round(zoom * 100)}%</Button>} items={[
-              { label: 'Zoom to fit page', onClick: A.zoomToFitPage },
-              { label: 'Zoom to selection', shortcut: 'shift+2', onClick: A.zoomToSelection, disabled: !hasSel },
-              { label: 'Zoom in', shortcut: 'mod+=', onClick: () => A.zoomBy(2) },
-              { label: 'Zoom out', shortcut: 'mod+-', onClick: () => A.zoomBy(0.5) },
-              { label: 'Zoom to 100%', shortcut: 'shift+0', onClick: () => camera.zoomTo(1) },
-            ]} />
           </PanelHeader>
         }>
           {tab === 'design' ? (hasSel ? <DesignPanel /> : <DocumentPanel />) : <PrototypePanel onPresent={() => setPresenting(true)} />}

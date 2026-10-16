@@ -1,10 +1,11 @@
 /* Journey — a customer journey map on the kit's docked layout and <Stage> camera. */
 import { useEffect, useRef } from 'react'
 import {
-  Download, Image as ImageIcon, FileSpreadsheet, ClipboardCopy, Braces, Upload, Plus, Columns3, Tag, X, Maximize2, RotateCcw, Trash2, Copy, UserRound, Rows3, ChevronDown,
+  Download, Image as ImageIcon, FileSpreadsheet, Braces, Upload, Plus, Columns3, Tag, X, RotateCcw, Trash2, Copy, UserRound, Rows3, ChevronDown,
+  Fullscreen, CopyPlus,
 } from 'lucide-react'
 import {
-  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, CommandPalette, Stage, HistoryButtons, useHotkeys, useValues, useDoc, toast,
+  Studio, Toolbar, Cluster, Brand, Button, Menu, Divider, ThemeToggle, PresetMenu, SettingsMenu, CommandPalette, Stage, HistoryButtons, useHotkeys, useValues, useDoc, toast,
   type Command, type MenuItem,
 } from '@kit'
 import { JourneyMap } from './map/JourneyMap'
@@ -60,7 +61,7 @@ export default function JourneyShell() {
     { type: 'label', label: `Export ${p.name}’s journey` },
     { label: 'PNG image (2×)', icon: ImageIcon, shortcut: 'mod+e', onClick: () => exportPNG(2) },
     { label: 'CSV (one row per card)', icon: FileSpreadsheet, onClick: exportCSV },
-    { label: 'Copy as Markdown', icon: ClipboardCopy, shortcut: 'shift+mod+c', onClick: copyMarkdown },
+    { label: 'Copy as Markdown', icon: Copy, shortcut: 'shift+mod+c', onClick: copyMarkdown },
     { type: 'separator' },
     { label: 'Download all as JSON', icon: Braces, onClick: exportJourneyJSON },
     { label: 'Import JSON…', icon: Upload, onClick: importJourneyJSON },
@@ -70,9 +71,9 @@ export default function JourneyShell() {
     { id: 'add-card', label: 'Add card', group: 'Map', shortcut: 'n', icon: Plus, run: addHere, keywords: ['sticky', 'note', 'new'] },
     ...LANES.filter((l) => l.id !== 'emotion').map((l) => ({ id: `add-${l.id}`, label: `Add ${l.one.toLowerCase()}`, group: 'Map', icon: l.icon, run: () => { const s = ui.getState().sel; const pr = persona(); const stage = s?.kind === 'stage' ? s.id : s?.kind === 'card' ? pr.cards.find((c) => c.id === s.id)?.stage : pr.stages[0]?.id; if (stage) addCard(l.id, stage) } })),
     { id: 'add-stage', label: 'Add stage', group: 'Map', shortcut: 'shift+n', icon: Columns3, run: () => { const s = ui.getState().sel; const pr = persona(); addStage(s?.kind === 'stage' ? pr.stages.findIndex((x) => x.id === s.id) + 1 : undefined) } },
-    { id: 'dup', label: 'Duplicate card', group: 'Edit', shortcut: 'mod+d', icon: Copy, run: duplicateCard },
+    { id: 'dup', label: 'Duplicate card', group: 'Edit', shortcut: 'mod+d', icon: CopyPlus, run: duplicateCard },
     { id: 'del', label: 'Delete selection', group: 'Edit', shortcut: 'backspace,delete', icon: Trash2, run: deleteSelection },
-    { id: 'fit', label: 'Zoom to fit', group: 'View', shortcut: 'shift+1', icon: Maximize2, run: fitMap },
+    { id: 'fit', label: 'Zoom to fit', group: 'View', shortcut: 'shift+1', icon: Fullscreen, run: fitMap },
     ...LANES.map((l) => ({ id: `lane-${l.id}`, label: `${visible.includes(l.id) ? 'Hide' : 'Show'} lane: ${l.label}`, group: 'View', icon: Rows3, run: () => {
       const cur = params.values().visibleLanes
       if (cur.includes(l.id) && cur.length === 1) return
@@ -84,7 +85,7 @@ export default function JourneyShell() {
     { id: 'new-persona', label: 'New persona', group: 'Personas', icon: Plus, run: addPersona },
     { id: 'png', label: 'Export PNG', group: 'Export', shortcut: 'mod+e', icon: ImageIcon, run: () => exportPNG(2) },
     { id: 'csv', label: 'Export CSV', group: 'Export', icon: FileSpreadsheet, run: exportCSV },
-    { id: 'md', label: 'Copy as Markdown', group: 'Export', shortcut: 'shift+mod+c', icon: ClipboardCopy, run: copyMarkdown },
+    { id: 'md', label: 'Copy as Markdown', group: 'Export', shortcut: 'shift+mod+c', icon: Copy, run: copyMarkdown },
     { id: 'json', label: 'Download JSON', group: 'Export', icon: Braces, run: exportJourneyJSON },
     { id: 'import', label: 'Import JSON…', group: 'Export', icon: Upload, run: importJourneyJSON },
     { id: 'reset', label: 'Reset demo content', group: 'Export', icon: RotateCcw, run: () => { resetDemo(); toast('Demo restored') } },
@@ -123,6 +124,7 @@ export default function JourneyShell() {
                 <HistoryButtons history={history} />
                 <Divider vertical />
                 <PresetMenu params={params} />
+                <SettingsMenu params={params} folders={['view', 'curve']} label="Map settings" />
                 <ThemeToggle />
               </Cluster>
               <Menu align="end" trigger={<Button variant="primary" size="lg"><Download size={14} strokeWidth={1.75} />Export</Button>} items={exportItems} />

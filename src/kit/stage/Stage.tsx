@@ -201,6 +201,7 @@ export function Stage({
     <CamCtx.Provider value={cam}>
       <div
         ref={el}
+        data-studio-stage=""
         className={cn(bleed ? 'absolute' : 'relative h-full w-full', 'overflow-hidden', fill ? '' : 'touch-none', space && (pan.current ? 'cursor-grabbing' : 'cursor-grab'), className)}
         style={{
           ...(bleed ? BLEED : null),
@@ -284,7 +285,7 @@ export function Artboard({
 }: { width: number; height: number; label?: ReactNode; x?: number; y?: number; children?: ReactNode; className?: string; background?: string; selected?: boolean; onSelect?: () => void; style?: React.CSSProperties }) {
   const zoom = useStore(useContext(CamCtx) ?? NO_CAMERA, (s) => s.zoom)
   return (
-    <div className="absolute" style={{ left: x, top: y, width, height }}>
+    <div data-studio-artboard="" className="absolute" style={{ left: x, top: y, width, height }}>
       {label && (
         <div
           onPointerDown={onSelect}

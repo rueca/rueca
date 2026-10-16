@@ -1,6 +1,6 @@
 /* Left island: the file's flows + the screen library (drag or click to add). */
 import { useState } from 'react'
-import { Workflow, Plus, MoreHorizontal, Copy, Trash2, Pencil, Search, Braces } from 'lucide-react'
+import { Workflow, Plus, MoreHorizontal, Trash2, Pencil, Search, Braces, CopyPlus } from 'lucide-react'
 import { Panel, PanelHeader, Section, IconButton, Menu, Tip, useDoc, cn } from '@kit'
 import { InlineText } from '@kit/ui/inline-text'
 import { Wireframe } from '../wireframes'
@@ -49,7 +49,7 @@ export function LeftPanel() {
                 <Menu align="end" trigger={<IconButton icon={MoreHorizontal} size="icon-sm" label="Flow actions" />}
                   items={[
                     { label: 'Rename', icon: Pencil, onClick: () => setRenaming(f.id) },
-                    { label: 'Duplicate', icon: Copy, onClick: () => duplicateFlow(f.id) },
+                    { label: 'Duplicate', icon: CopyPlus, onClick: () => duplicateFlow(f.id) },
                     { label: 'Download JSON', icon: Braces, onClick: () => { switchFlow(f.id); setTimeout(exportFlowJSON, 0) } },
                     { type: 'separator' },
                     { label: 'Delete', icon: Trash2, danger: true, disabled: flows.length < 2, onClick: () => deleteFlow(f.id) },

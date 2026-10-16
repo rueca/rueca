@@ -170,10 +170,15 @@ for (const f of files) {
   it.files.push({
     path: f,
     type: isCss ? 'registry:file' : f.endsWith('.tsx') ? 'registry:component' : 'registry:lib',
-    target: `@components/studio/${relative(KIT, f)}`,
+    // the notes server is Node code for vite.config: it lands at the project root, outside src/, so the app's
+    // browser tsconfig never type-checks it (its `types: node` would leak into the app — QA review R3)
+    target: it.name === 'notes-server' ? `~/rueca/notes-server/${posix.basename(f)}` : `@components/studio/${relative(KIT, f)}`,
     content: src,
   })
-  for (const [, spec] of src.matchAll(/(?:from\s+|import\s+|import\(\s*)['"]([^'"]+)['"]/g)) {
+  // a type-only import costs the consumer nothing at runtime: never a dependency (`import type { Plugin } from 'vite'`
+  // once forced vite@8 into every consumer's dependencies — QA review R2)
+  const runtime = src.replace(/^\s*import\s+type\s[^;]*?from\s+['"][^'"]+['"];?/gm, '')
+  for (const [, spec] of runtime.matchAll(/(?:from\s+|import\s+|import\(\s*)['"]([^'"]+)['"]/g)) {
     if (spec.startsWith('.')) {
       const target = posix.normalize(posix.join(posix.dirname(f), spec))
       const hit = files.find((g) => g === target || g.replace(/\.(tsx?|css)$/, '') === target || g === `${target}/index.ts`)

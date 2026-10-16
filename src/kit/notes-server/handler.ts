@@ -11,16 +11,22 @@
    <id>.<ext> and the note keeps only the file name.
 
    Vite: use ruecaNotes() from ./vite. Anything else (express, a bare http
-   server): `if (await handle(req, res)) return` before your own routes.
+   server): `if (await handle(req, res)) return` before your own routes, and
+   before any body parser (or it reads the body the parser already took).
 
-   Dev only. It writes into the project, so it only answers the page's own
-   origin: without that check any website open in the same browser could
-   write files into the repo through localhost. File names are made here,
-   never taken from the request, and bodies are capped.
+   Dev only. It writes into the project, so it guards the door:
+   - only the page's own origin (fetch metadata, then Origin against Host), and
+     only local hosts (loopback names, *.localhost, IP addresses, or
+     `allowedHosts`) — a DNS-rebinding site can't pass Origin == Host either;
+   - file names are made here, never taken from the request; symlinks and
+     anything that isn't a note are never served;
+   - bodies are capped, nesting is capped (a deep body would otherwise blow the
+     stack on every GET), and the stored file is capped too.
 --------------------------------------------------------------------------- */
-import { mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
+import { lstat, mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
 import { randomBytes } from 'node:crypto'
 import { isAbsolute, join } from 'node:path'
+import { isIP } from 'node:net'
 import type { IncomingMessage, ServerResponse } from 'node:http'
 
 export const NOTES_ROUTE = '/__rueca/notes'
@@ -32,6 +38,8 @@ export interface NotesHandlerOptions {
   dir?: string
   /** largest accepted body in bytes, image included (default 4 MB) */
   maxBytes?: number
+  /** extra host names to answer besides loopback, *.localhost and IP addresses (`true`: any host) */
+  allowedHosts?: string[] | true
 }
 
 const send = (res: ServerResponse, status: number, body: unknown) => {
@@ -40,6 +48,17 @@ const send = (res: ServerResponse, status: number, body: unknown) => {
   res.setHeader('cache-control', 'no-store')
   res.setHeader('x-rueca-notes', '1')
   res.end(JSON.stringify(body))
+}
+
+/** The Host header's name without its port ("[::1]:5273" → "::1"). */
+const hostName = (host: string) => (host.startsWith('[') ? host.slice(1, host.indexOf(']')) : host.replace(/:\d+$/, '')).toLowerCase().replace(/\.$/, '')
+
+/** A local host: loopback names, *.localhost, IP addresses (LAN testing with --host), or one the caller allowed. */
+export function isLocalHost(host: string | undefined, allowed?: string[] | true): boolean {
+  if (!host) return false
+  if (allowed === true) return true
+  const name = hostName(host)
+  return name === 'localhost' || name.endsWith('.localhost') || isIP(name) !== 0 || !!allowed?.some((a) => a.toLowerCase() === name)
 }
 
 /** Same-origin only: the browser's own fetch metadata, then Origin against Host. */
@@ -53,15 +72,46 @@ export function isSameOrigin(req: IncomingMessage): boolean {
 }
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
-const IMAGE = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/]+={0,2})$/
+const IMAGE = /^data:image\/(png|jpeg|webp);base64,((?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?)$/
 const EXT: Record<string, string> = { png: 'png', jpeg: 'jpg', webp: 'webp' }
-/** the shape every note id has (made by newId): the only thing DELETE will touch */
-export const NOTE_ID = /^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-[0-9a-f]{4}$/
+/** the file must really be the type it claims (magic bytes), so nothing else is ever written as an image */
+const MAGIC: Record<string, (b: Buffer) => boolean> = {
+  png: (b) => b.length > 8 && b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
+  jpeg: (b) => b.length > 3 && b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff,
+  webp: (b) => b.length > 12 && b.toString('latin1', 0, 4) === 'RIFF' && b.toString('latin1', 8, 12) === 'WEBP',
+}
+/** the shape every note id has (made by newId): the only thing DELETE will touch. The short form is phase 1's. */
+export const NOTE_ID = /^\d{4}-\d\d-\d\dT\d\d-\d\d-\d\d-(?:\d{3}-[0-9a-f]{6}|[0-9a-f]{4})$/
 const unit = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n <= 1
+/** a canvas comment sits around the artboard: artboard units, within 50 widths / heights of it */
+const reach = (n: unknown) => typeof n === 'number' && Number.isFinite(n) && Math.abs(n) <= 50
+/** deep enough for any snapshot (a doc graph is ~8); deeper would blow the stack when the note is stringified */
+const MAX_DEPTH = 32
+
+/** How deeply a parsed JSON value nests, without recursion. Stops counting past `limit`. */
+function depthOf(v: unknown, limit: number): number {
+  let max = 0
+  const stack: [unknown, number][] = [[v, 1]]
+  while (stack.length) {
+    const [x, d] = stack.pop()!
+    if (!x || typeof x !== 'object') continue
+    if (d > max) max = d
+    if (max > limit) return max
+    for (const c of Object.values(x as object)) if (c && typeof c === 'object') stack.push([c, d + 1])
+  }
+  return max
+}
+
+/** What makes a stored file a note: anything else in the folder (hand-made, half-edited) is never served. */
+export function isNote(n: unknown): boolean {
+  return isObj(n) && typeof n.id === 'string' && (n.kind === 'values' || n.kind === 'comment') &&
+    (n.status === 'open' || n.status === 'resolved') && isObj(n.snapshot) && typeof n.snapshot.tool === 'string' && isObj(n.snapshot.changed)
+}
 
 /** The note's shape, checked before anything touches the disk. Returns an error message, or null. */
 export function checkNote(b: unknown): string | null {
   if (!isObj(b)) return 'Expected a JSON object'
+  if (depthOf(b, MAX_DEPTH) > MAX_DEPTH) return `Note nests deeper than ${MAX_DEPTH} levels`
   if (b.kind !== 'values' && b.kind !== 'comment') return 'kind must be "values" or "comment"'
   if (b.text !== undefined && (typeof b.text !== 'string' || b.text.length > 5000)) return 'text must be a string under 5000 characters'
   if (b.kind === 'comment' && !(typeof b.text === 'string' && b.text.trim())) return 'A comment needs text'
@@ -69,18 +119,26 @@ export function checkNote(b: unknown): string | null {
     const a = b.anchor
     const ok = isObj(a) && (
       (a.on === 'artboard' && unit(a.x) && unit(a.y) && (a.target === undefined || (typeof a.target === 'string' && a.target.length <= 200))) ||
+      (a.on === 'canvas' && reach(a.x) && reach(a.y)) ||
       (a.on === 'param' && typeof a.key === 'string' && a.key.length > 0 && a.key.length <= 100))
-    if (!ok) return 'anchor is not a valid artboard point or param'
+    if (!ok) return 'anchor is not a valid artboard point, canvas point or param'
   }
-  if (b.image !== undefined && !(typeof b.image === 'string' && IMAGE.test(b.image))) return 'image must be a base64 png, jpeg or webp data URL'
+  if (b.image !== undefined) {
+    const m = typeof b.image === 'string' ? b.image.match(IMAGE) : null
+    if (!m || !MAGIC[m[1]](Buffer.from(m[2], 'base64'))) return 'image must be a base64 png, jpeg or webp data URL'
+  }
   const s = b.snapshot
   if (!isObj(s) || s.$v !== 1 || typeof s.tool !== 'string' || !isObj(s.changed)) return 'snapshot is missing or not format 1'
   return null
 }
 
-const newId = () => `${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}-${randomBytes(2).toString('hex')}`
+/** Sortable to the millisecond, with enough randomness that two notes in the same millisecond never meet. */
+const newId = () => `${new Date().toISOString().slice(0, 23).replace(/[:.]/g, '-')}-${randomBytes(3).toString('hex')}`
 
 function readBody(req: IncomingMessage, max: number): Promise<string | null> {
+  // An express body parser got there first: the stream is spent, so take what it parsed.
+  const parsed = (req as { body?: unknown }).body
+  if (req.readableEnded) return Promise.resolve(parsed === undefined ? '' : typeof parsed === 'string' ? parsed : Buffer.isBuffer(parsed) ? parsed.toString('utf8') : JSON.stringify(parsed))
   return new Promise((resolve, reject) => {
     let size = 0
     const chunks: Buffer[] = []
@@ -103,57 +161,98 @@ export function createNotesHandler(opts: NotesHandlerOptions = {}) {
     let files: string[]
     try { files = (await readdir(dir)).filter((f) => f.endsWith('.json')).sort() } catch { return [] }
     const notes = await Promise.all(files.map(async (f) => {
-      try { return JSON.parse(await readFile(join(dir, f), 'utf8')) } catch { return null }   // half-edited by hand: skip it
+      try {
+        // never follow a link out of the folder, never serve a directory
+        if (!(await lstat(join(dir, f))).isFile()) return null
+        const n = JSON.parse(await readFile(join(dir, f), 'utf8'))
+        return isNote(n) && depthOf(n, MAX_DEPTH) <= MAX_DEPTH ? n : null
+      } catch { return null }   // half-edited by hand: skip it
     }))
     return notes.filter(Boolean)
+  }
+
+  const remove = async (id: string) => {
+    try { if (!(await lstat(join(dir, `${id}.json`))).isFile()) return false } catch { return false }
+    // images first: if something fails midway, the note is still there to clear again
+    for (const f of [...Object.values(EXT).map((e) => `${id}.${e}`), `${id}.json`]) {
+      try { if ((await lstat(join(dir, f))).isDirectory()) continue } catch { continue }
+      await rm(join(dir, f), { force: true })
+    }
+    return true
+  }
+
+  const create = async (b: Record<string, unknown>) => {
+    const a = b.anchor as Record<string, unknown> | undefined
+    // only the fields this format defines: nothing extra rides along into the agent's files
+    const anchor = !a ? undefined : a.on === 'param' ? { on: 'param', key: a.key } : a.on === 'canvas' ? { on: 'canvas', x: a.x, y: a.y }
+      : { on: 'artboard', x: a.x, y: a.y, ...(typeof a.target === 'string' ? { target: a.target } : {}) }
+    let id = newId()
+    await mkdir(dir, { recursive: true })
+    // claim the name before writing anything under it (a clash only on a clock jump: try again)
+    for (let tries = 0; ; tries++) {
+      try { await writeFile(join(dir, `${id}.json.tmp`), '', { flag: 'wx' }); break } catch (e) {
+        if ((e as NodeJS.ErrnoException).code !== 'EEXIST' || tries > 4) throw e
+        id = newId()
+      }
+    }
+    const m = typeof b.image === 'string' ? b.image.match(IMAGE) : null
+    const image = m ? `${id}.${EXT[m[1]]}` : undefined
+    const note = {
+      id,
+      kind: b.kind,
+      ...(typeof b.text === 'string' && b.text.trim() ? { text: b.text.trim() } : {}),
+      ...(anchor ? { anchor } : {}),
+      ...(image ? { image } : {}),
+      status: 'open',
+      snapshot: b.snapshot,
+    }
+    const tmp = join(dir, `${id}.json.tmp`)
+    try {
+      const text = JSON.stringify(note, null, 2) + '\n'
+      // indentation can multiply a small body many times over: the stored file is capped too
+      if (text.length > max * 2) throw Object.assign(new Error('too large'), { status: 413 })
+      if (m && image) await writeFile(join(dir, image), Buffer.from(m[2], 'base64'))
+      // write then rename, so an agent reading the folder never sees half a file
+      await writeFile(tmp, text)
+      await rename(tmp, join(dir, `${id}.json`))
+    } catch (e) {
+      await Promise.all([rm(tmp, { force: true }), image ? rm(join(dir, image), { force: true }) : null])
+      throw e
+    }
+    return note
   }
 
   /** Answers the notes route; resolves false for any other request, so the caller passes it on. */
   return async function handle(req: IncomingMessage, res: ServerResponse): Promise<boolean> {
     const path = (req.url ?? '').split('?')[0]
     if (path !== NOTES_ROUTE) return false
-    if (!isSameOrigin(req)) { send(res, 403, { error: 'Notes only accept requests from the page’s own origin' }); return true }
-    if (req.method === 'GET') { send(res, 200, await list()); return true }
-    if (req.method === 'DELETE') {
-      const id = new URL(req.url ?? '', 'http://x').searchParams.get('id') ?? ''
-      if (!NOTE_ID.test(id)) { send(res, 400, { error: 'Not a note id' }); return true }
-      try { await readFile(join(dir, `${id}.json`)) } catch { send(res, 404, { error: 'No such note' }); return true }
-      await Promise.all([`${id}.json`, ...Object.values(EXT).map((e) => `${id}.${e}`)].map((f) => rm(join(dir, f), { force: true })))
-      send(res, 200, { id })
+    try {
+      if (!isLocalHost(req.headers.host, opts.allowedHosts)) { send(res, 403, { error: 'Notes only answer on a local host' }); return true }
+      if (!isSameOrigin(req)) { send(res, 403, { error: 'Notes only accept requests from the page’s own origin' }); return true }
+      if (req.method === 'GET') { send(res, 200, await list()); return true }
+      if (req.method === 'DELETE') {
+        const id = new URL(req.url ?? '', 'http://x').searchParams.get('id') ?? ''
+        if (!NOTE_ID.test(id)) { send(res, 400, { error: 'Not a note id' }); return true }
+        if (!(await remove(id))) { send(res, 404, { error: 'No such note' }); return true }
+        send(res, 200, { id })
+        return true
+      }
+      if (req.method !== 'POST') { res.setHeader('allow', 'GET, POST, DELETE'); send(res, 405, { error: 'Use GET, POST or DELETE' }); return true }
+
+      const raw = await readBody(req, max)
+      if (raw === null) { send(res, 413, { error: `Note is larger than ${Math.round(max / 1024)} KB` }); return true }
+      let body: unknown
+      try { body = JSON.parse(raw) } catch { send(res, 400, { error: 'Body is not JSON' }); return true }
+      const problem = checkNote(body)
+      if (problem) { send(res, 400, { error: problem }); return true }
+      send(res, 201, await create(body as Record<string, unknown>))
+      return true
+    } catch (e) {
+      if ((e as { status?: number }).status === 413) { send(res, 413, { error: 'Note is too large to store' }); return true }
+      // the detail goes to the dev server's terminal, never into the response (it would carry paths)
+      console.error('[rueca notes]', e)
+      if (!res.headersSent) send(res, 500, { error: 'The notes route failed. See the dev server’s terminal.' })
       return true
     }
-    if (req.method !== 'POST') { res.setHeader('allow', 'GET, POST, DELETE'); send(res, 405, { error: 'Use GET, POST or DELETE' }); return true }
-
-    const raw = await readBody(req, max)
-    if (raw === null) { send(res, 413, { error: `Note is larger than ${Math.round(max / 1024)} KB` }); return true }
-    let body: unknown
-    try { body = JSON.parse(raw) } catch { send(res, 400, { error: 'Body is not JSON' }); return true }
-    const problem = checkNote(body)
-    if (problem) { send(res, 400, { error: problem }); return true }
-
-    const b = body as Record<string, unknown>
-    const id = newId()
-    await mkdir(dir, { recursive: true })
-    let image: string | undefined
-    if (typeof b.image === 'string') {
-      const [, type, data] = b.image.match(IMAGE)!
-      image = `${id}.${EXT[type]}`
-      await writeFile(join(dir, image), Buffer.from(data, 'base64'))
-    }
-    const note = {
-      id,
-      kind: b.kind,
-      ...(typeof b.text === 'string' && b.text.trim() ? { text: b.text.trim() } : {}),
-      ...(b.anchor ? { anchor: b.anchor } : {}),
-      ...(image ? { image } : {}),
-      status: 'open',
-      snapshot: b.snapshot,
-    }
-    // write then rename, so an agent reading the folder never sees half a file
-    const file = join(dir, `${note.id}.json`)
-    await writeFile(`${file}.tmp`, JSON.stringify(note, null, 2) + '\n')
-    await rename(`${file}.tmp`, file)
-    send(res, 201, note)
-    return true
   }
 }

@@ -1,6 +1,6 @@
 /* The prompt bar: prompt, collapsible negative prompt, model / aspect / batch, settings summary, Generate. */
 import { useEffect, useRef } from 'react'
-import { Sparkles, MinusCircle, ChevronDown, SlidersHorizontal, X, Wand2, Lock, Shuffle } from 'lucide-react'
+import { Sparkles, MinusCircle, ChevronDown, SlidersHorizontal, X, Lock, Shuffle, PencilSparkles } from 'lucide-react'
 import { Button, Menu, Select, Segmented, Tip, Kbd, useValues, prettyCombo, cn } from '@kit'
 import { MODELS, ASPECTS, aspectOf, modelOf } from '../engine/models'
 import { params, prompt } from '../state/params'
@@ -95,7 +95,7 @@ export function Composer() {
         <Tip label={negativeOpen ? 'Hide negative prompt' : 'Negative prompt'}>
           <Button size="icon-sm" variant="ghost" active={negativeOpen || !!t.negative} aria-label="Negative prompt" onClick={() => ui.setState({ negativeOpen: !negativeOpen })}><MinusCircle size={14} strokeWidth={1.5} /></Button>
         </Tip>
-        <Tip label="Enhance prompt"><Button size="icon-sm" variant="ghost" aria-label="Enhance prompt" disabled={!t.prompt.trim()} onClick={enhance}><Wand2 size={14} strokeWidth={1.5} /></Button></Tip>
+        <Tip label="Enhance prompt"><Button size="icon-sm" variant="ghost" aria-label="Enhance prompt" disabled={!t.prompt.trim()} onClick={enhance}><PencilSparkles size={14} strokeWidth={1.5} /></Button></Tip>
         <button type="button" onClick={() => ui.setState({ tab: 'create' })} aria-label={`Settings: ${v.steps} steps, CFG ${v.guidance}, seed ${v.lockSeed ? 'locked' : 'random'}`}
           className="hidden h-control min-w-0 items-center gap-1.5 rounded-control px-1.5 text-ui text-fg-muted outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal @[460px]:flex">
           <SlidersHorizontal size={13} strokeWidth={1.5} className="shrink-0" />

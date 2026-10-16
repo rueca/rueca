@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
-  Braces, Code2, Copy, Download, Film, FileCode2, Image as ImageIcon, Italic, PenLine, RotateCcw, Ruler, Shapes, Sparkles, Type as TypeIcon,
+  Braces, Code2, Copy, Download, Film, FileCode2, Image as ImageIcon, Italic, PenLine, RotateCcw, Ruler, Shapes, Type as TypeIcon, Play,
 } from 'lucide-react'
 import {
   Studio, Toolbar, Cluster, Brand, Panel, PanelHeader, PanelTabs, Inspector, Section, Row, Stage, Artboard, CanvasSurface, Timeline,
@@ -167,7 +167,7 @@ export default function TypeShell() {
 
   const nudge = (key: 'wght' | 'kwght', d: number) => params.setValue(key, Math.min(900, Math.max(100, params.values()[key] + d)))
   const commands: Command[] = [
-    ...MODES.map((m, i) => ({ id: `mode-${m.value}`, label: `Mode: ${m.label}`, group: 'Mode', shortcut: String(i + 1), icon: [TypeIcon, Sparkles, Ruler][i], run: () => setMode(m.value) })),
+    ...MODES.map((m, i) => ({ id: `mode-${m.value}`, label: `Mode: ${m.label}`, group: 'Mode', shortcut: String(i + 1), icon: [TypeIcon, Play, Ruler][i], run: () => setMode(m.value) })),
     { id: 'png', label: 'Export PNG', group: 'Export', shortcut: 'mod+e', icon: ImageIcon, run: exportPNG },
     { id: 'svg', label: 'Export SVG', group: 'Export', shortcut: 'shift+mod+e', icon: Shapes, run: exportSVGFile },
     { id: 'css', label: mode === 'scale' ? 'Copy CSS variables' : mode === 'kinetic' ? 'Copy CSS animation' : 'Copy CSS', group: 'Export', shortcut: 'shift+mod+c', icon: Code2, run: copyCSS },

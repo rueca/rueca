@@ -17,7 +17,7 @@
    step frames (shift ×10), J/K jump between keys, ⌘wheel zooms.
 --------------------------------------------------------------------------- */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { ChevronDown, Pause, Play, Repeat, Repeat1, SkipBack, StepBack, StepForward, Gauge, ArrowRightLeft } from 'lucide-react'
+import { ChevronDown, Pause, Play, Repeat, SkipBack, StepBack, StepForward, Gauge, ArrowLeftRight, ArrowRightToLine } from 'lucide-react'
 import { clamp, cn } from '../core/cn'
 import { useClock, useClockTime, fmtTime, type Clock } from '../core/clock'
 import { useHotkeys } from '../core/hotkeys'
@@ -92,7 +92,7 @@ export function Timeline({
   } : {}, [allKeys, region, hotkeys], { priority: 0 })
 
   const nextMode = mode === 'loop' ? 'pingpong' : mode === 'pingpong' ? 'once' : 'loop'
-  const ModeIcon = mode === 'loop' ? Repeat : mode === 'pingpong' ? ArrowRightLeft : Repeat1
+  const ModeIcon = mode === 'loop' ? Repeat : mode === 'pingpong' ? ArrowLeftRight : ArrowRightToLine
   const modeLabel = mode === 'loop' ? 'Looping' : mode === 'pingpong' ? 'Ping-pong' : 'Play once'
 
   const docked = layout === 'docked'

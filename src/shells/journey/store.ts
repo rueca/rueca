@@ -11,16 +11,17 @@ export const schema = defineSchema({
     density: p.select('comfortable', ['compact', 'comfortable'], { hint: 'Card padding and spacing.' }),
     showTags: p.boolean(true, { label: 'Tags', hint: 'Show #tags on cards.' }),
     showLinks: p.boolean(true, { label: 'Links', hint: 'Draw pain point → opportunity links.' }),
-  }),
+  }, { place: 'settings' }),
+  // the toolbar's Lanes menu is this folder's home
   lanes: folder('Lanes', {
     visibleLanes: p.multi(LANES.map((l) => l.id), LANES.map((l) => ({ value: l.id, label: l.label, icon: l.icon, hint: l.label })), { label: 'Visible', min: 1 }),
-  }),
+  }, { place: 'settings' }),
   curve: folder('Emotion curve', {
     smoothing: p.number(0.75, { min: 0, max: 1, step: 0.05, hint: '0 = straight segments, 1 = smooth Catmull-Rom.' }),
     curveHeight: p.number(150, { min: 100, max: 260, step: 2, unit: 'px', label: 'Height' }),
     fill: p.boolean(true, { label: 'Fill', hint: 'Tint the area above (positive) and below (negative) the neutral line.' }),
     emoji: p.boolean(true, { label: 'Emoji' }),
-  }),
+  }, { place: 'settings' }),
 })
 export const params = createParams(schema, {
   id: 'journey',
