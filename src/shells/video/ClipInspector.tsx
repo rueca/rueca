@@ -233,8 +233,8 @@ function ClipSections({ c }: { c: Clip }) {
           )}
           {positioned && (
             <Row label="Rotation"><ScrubValue boxed align="left" value={c.rotation} min={-180} max={180} step={1} unit="°" className="flex-1" label="Rotation" onChange={(v, f) => set({ rotation: v }, f)} />
-              <IconButton size="icon-sm" icon={AlignHorizontalJustifyCenter} label="Centre horizontally" onClick={() => set({ x: 0.5 })} />
-              <IconButton size="icon-sm" icon={AlignVerticalJustifyCenter} label="Centre vertically" onClick={() => set({ y: 0.5 })} />
+              <IconButton size="control" icon={AlignHorizontalJustifyCenter} label="Centre horizontally" onClick={() => set({ x: 0.5 })} />
+              <IconButton size="control" icon={AlignVerticalJustifyCenter} label="Centre vertically" onClick={() => set({ y: 0.5 })} />
             </Row>
           )}
           <Row label="Opacity">

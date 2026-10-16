@@ -271,7 +271,7 @@ export function EffectStack<T extends StackItem>({
               {renderDetails && (
                 <button type="button" tabIndex={-1} aria-label={open ? `Collapse ${name}` : `Expand ${name}`}
                   onClick={(e) => { e.stopPropagation(); setExpanded(open ? expanded.filter((x) => x !== it.id) : [...expanded, it.id]) }}
-                  className="flex size-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none hover:text-fg">
+                  className="flex h-control w-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none hover:text-fg">
                   <ChevronRight size={11} strokeWidth={2} className={cn('transition-transform duration-150', open && 'rotate-90')} />
                 </button>
               )}
@@ -292,7 +292,7 @@ export function EffectStack<T extends StackItem>({
                   onPointerDown={(e) => e.stopPropagation()}
                   onBlur={(e) => { rename?.(it.id, e.target.value.trim() || name); setEditing(null); focusRow(it.id) }}
                   onKeyDown={(e) => { e.stopPropagation(); if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); if (e.key === 'Escape') { setEditing(null); focusRow(it.id) } }}
-                  className="h-control-sm min-w-0 flex-1 rounded-control bg-control px-1 text-ui text-fg shadow-[inset_0_0_0_1px_var(--signal)] outline-none"
+                  className="h-control min-w-0 flex-1 rounded-control bg-control px-1 text-ui text-fg shadow-[inset_0_0_0_1px_var(--signal)] outline-none"
                 />
               ) : renderRow ? (
                 <div className={cn('flex min-w-0 flex-1 items-center gap-1.5', hidden && 'opacity-50')}>{renderRow(it, c)}</div>
@@ -305,7 +305,7 @@ export function EffectStack<T extends StackItem>({
               {remove && removeIcon === 'trash' && (
                 <Tip label="Remove">
                   <button type="button" aria-label={`Remove ${name}`} onClick={(e) => { e.stopPropagation(); remove(it.id) }}
-                    className="hidden size-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none group-focus-within/row:flex group-hover/row:flex hover:bg-hover hover:text-rec focus-visible:ring-2 focus-visible:ring-signal">
+                    className="hidden h-control w-icon-sm shrink-0 items-center justify-center rounded-control text-fg-faint outline-none group-focus-within/row:flex group-hover/row:flex hover:bg-hover hover:text-rec focus-visible:ring-2 focus-visible:ring-signal">
                     <Trash2 size={13} strokeWidth={1.5} />
                   </button>
                 </Tip>
@@ -316,7 +316,7 @@ export function EffectStack<T extends StackItem>({
                     align="end"
                     trigger={
                       <button type="button" aria-label={`Blend mode: ${blendLabel}`}
-                        className="h-control-sm max-w-[72px] truncate rounded-control px-0.5 text-ui text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover data-[popup-open]:text-fg">
+                        className="h-control max-w-[72px] truncate rounded-control px-0.5 text-ui text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover data-[popup-open]:text-fg">
                         {blendLabel}
                       </button>
                     }
@@ -335,7 +335,7 @@ export function EffectStack<T extends StackItem>({
                   <Tip label={hidden ? 'Show' : 'Hide'}>
                     <button type="button" aria-label={hidden ? `Show ${name}` : `Hide ${name}`} aria-pressed={hidden}
                       onClick={(e) => { e.stopPropagation(); toggle(it.id) }}
-                      className={cn('flex size-icon-sm items-center justify-center rounded-control outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', hidden ? 'text-fg-muted' : 'text-fg-faint')}>
+                      className={cn('flex h-control w-icon-sm items-center justify-center rounded-control outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal', hidden ? 'text-fg-muted' : 'text-fg-faint')}>
                       {hidden ? <EyeOff size={13} strokeWidth={1.5} /> : <Eye size={13} strokeWidth={1.5} />}
                     </button>
                   </Tip>
@@ -343,7 +343,7 @@ export function EffectStack<T extends StackItem>({
                 {remove && removeIcon === 'minus' && (
                   <Tip label="Remove">
                     <button type="button" aria-label={`Remove ${name}`} onClick={(e) => { e.stopPropagation(); remove(it.id) }}
-                      className="flex size-icon-sm items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
+                      className="flex h-control w-icon-sm items-center justify-center rounded-control text-fg-faint outline-none hover:bg-hover hover:text-fg focus-visible:ring-2 focus-visible:ring-signal">
                       <Minus size={13} strokeWidth={1.5} />
                     </button>
                   </Tip>

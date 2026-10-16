@@ -66,6 +66,14 @@ variables for phones. Use the names, never literals, so a part follows the densi
 | `text-ui` · `text-ui-sm` · `text-title` | 11 · 10 · 12 px (comfortable 11.5 · 10.5 · 12.5); line height 16 | all UI text · rulers, hints · panel titles, Brand |
 | `rounded-panel` `rounded-cluster` `rounded-pop` `rounded-control` | 8 · 6 · 8 · 4 / 12 · 10 · 10 · 6 / 6 · 5 · 6 · 3 | panels · toolbar clusters · menus and popovers · controls |
 
+**One height per row.** Things side by side share a height, so nothing sits a pixel high or low:
+- a button beside a field is the field's height and square: `<Button size="control">` (or `size-control`);
+  in a layer or stack row every control is `h-control` (icon buttons `h-control w-icon-sm`)
+- inside a `Cluster` (or anything with the `cluster` class) and in the timeline transport rows, fields and
+  `sm` buttons take the icon buttons' height (the kit sets `--d-control: var(--d-icon)`). Do the same,
+  `[--d-control:var(--d-icon)]`, on a bare hand-built bar that mixes fields with `IconButton`s
+- don't mix `Segmented size="sm"` with default fields in one group of rows
+
 Hierarchy is weight, not half-pixel sizes: labels 450, section titles 550, panel titles 600. In JS (timelines,
 canvas rows) read a token with `useDensityPx('--d-lane', 20)` (the fallback is the default density's value);
 it reads from the kit's root, so it works in a registry install too, and re-reads when the density changes.
@@ -320,7 +328,7 @@ stops ticks while paused too (default true for artifacts with their own life).
   `Checkbox` · `Select` · `TextInput` · `Menu` (items: item/separator/label/submenu) · `ColorField`
   / `ColorPanel` / `Swatch` · `AngleDial` · `XYPad` · `Vec3Fields` (`lockable` = uniform scale lock, `unit`, `defaultValue`) · `SizeFields` · `SeedField` ·
   `CurveEditor` / `CurveGlyph` · `SpringEditor` · `GradientEditor` · `PaletteField` · `ImageDrop` ·
-  `Monitor` · `Knob` (rotary, log taper, bipolar) · `Button` (variants ghost/default/primary/outline/danger; sizes sm/md/lg/icon/icon-sm) ·
+  `Monitor` · `Knob` (rotary, log taper, bipolar) · `Button` (variants ghost/default/primary/outline/danger; sizes sm/md/lg/icon/icon-sm/control — `control` is square at field height, for a button beside a field) ·
   `IconButton icon label shortcut active` · `Tip label shortcut` · `Kbd` · `Badge tone` · `Divider`.
 - `Timeline clock lanes hotkeys?` — read-only beat view + transport (loop / ping-pong / once). Lanes: `{ id, label, start, end }` bars, `{ kind: 'keys', keys: [{ t, value, selected }] }`,
   `{ kind: 'markers', keys }`; `depth` indents. Derive lanes from the render maths.

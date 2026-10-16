@@ -81,7 +81,7 @@ export function PrototypePanel({ onPresent }: { onPresent: () => void }) {
           const preset = Object.entries(EASINGS).find(([, e]) => e.join() === it.easing.join())?.[0] ?? 'Custom'
           return (
             <div key={it.id} className="mx-2 mb-1.5 rounded-cluster bg-well py-1">
-              <Row label="Trigger" trailing={<IconButton icon={Minus} size="icon-sm" label="Remove interaction" onClick={() => set(list.filter((x) => x.id !== it.id))} />}>
+              <Row label="Trigger" trailing={<IconButton icon={Minus} size="control" label="Remove interaction" onClick={() => set(list.filter((x) => x.id !== it.id))} />}>
                 <Select value={it.trigger} label="Trigger" onChange={(t) => upd({ trigger: t as Interaction['trigger'] })} options={TRIGGERS} />
               </Row>
               <Row label="Action">
