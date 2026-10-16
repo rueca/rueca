@@ -96,7 +96,8 @@ export function CommandPalette({ commands, extraShortcuts = [] }: { commands: Co
                       return (
                         <Cmdk.Item key={c.id} value={`${c.label}`} keywords={c.keywords} onSelect={() => { setOpen(false); setTimeout(c.run, 0) }}
                           aria-keyshortcuts={c.shortcut}
-                          className="flex h-button-lg cursor-default items-center gap-2.5 rounded-control px-2 text-ui text-fg data-[selected=true]:bg-signal-strong data-[selected=true]:text-signal-fg">
+                          // 12px, like the search field above it: the palette is read as a list, not scanned like the inspector
+                          className="flex h-button-lg cursor-default items-center gap-2.5 rounded-control px-2 text-title text-fg data-[selected=true]:bg-signal-strong data-[selected=true]:text-signal-fg">
                           <span className="flex w-4 justify-center opacity-70">{Icon && <Icon size={14} strokeWidth={1.5} />}</span>
                           <span className="flex-1">{c.label}{c.icon === Check && <span className="sr-only"> (current)</span>}</span>
                           {c.shortcut && <span aria-hidden className="text-ui opacity-60">{prettyCombo(c.shortcut)}</span>}

@@ -18,7 +18,8 @@ import { openPalette, usePaletteAvailable } from '../system/palette'
 
 export function Toolbar({ start, center, end, className }: { start?: ReactNode; center?: ReactNode; end?: ReactNode; className?: string }) {
   return (
-    <header className={cn('grid h-bar grid-cols-[1fr_auto_1fr] items-center gap-2', className)}>
+    // large buttons here (Export, Hand off) stand as tall as the clusters beside them, at every density
+    <header className={cn('grid h-bar grid-cols-[1fr_auto_1fr] items-center gap-2 [--d-button-lg:var(--d-bar)]', className)}>
       <div className="flex min-w-0 items-center gap-2">{start}</div>
       <div className="flex items-center gap-2">{center}</div>
       <div className="flex min-w-0 items-center justify-end gap-2">{end}</div>
