@@ -98,7 +98,12 @@ minimum, so build label + control rows with `<Row>`, not a hand-made `w-label` s
 
 **Keyboard and wheel steps.** `useSettle(value, onChange)` makes a burst of arrow-key or wheel steps one undo
 step, like a drag: `settle.step(next)` sends it live and commits 500ms after the burst (or on `settle.flush()`
-at blur).
+at blur). For a document store, nudge with `doc.set(next, { commit: false })` then `doc.settle('Nudge')`: the
+run of presses commits once it stops (an undo during it commits it first).
+
+**Deleting with the keyboard.** A focused row, card or node that gets deleted would drop focus to `<body>`.
+`LayerTree` handles its rows; elsewhere wrap the command: `run: () => keepFocus(deleteSelection, '[data-card]')`
+moves focus to the item now in that place.
 
 **Font.** Inter 4 (rsms's files, from the `inter-ui` npm package) with `cv05` / `cv08`, so I, l and 1 never
 collide; values use `tabular-nums`.
@@ -206,6 +211,7 @@ error at startup.
 export const doc = createDocStore(initialDoc, { id: 'flows', version: 1 })  // graph, rows, layer tree…
 doc.set((d) => ({ ...d, nodes }), { commit: false })   // mid-drag
 doc.commit('Move 3 nodes')                             // pointer-up = one labelled step
+doc.settle('Nudge')                                    // arrow keys: commit once the burst stops
 const nodes = useDoc(doc, (d) => d.nodes)
 export const history = createHistory([params, doc])    // ⌘Z undoes whichever changed last
 <ParamActions params={params} history={history} />     // or <HistoryButtons history={history} />
@@ -342,7 +348,7 @@ textures inside it.
   `Checkbox` · `Select` · `TextInput` · `Menu` (items: item/separator/label/submenu) · `ColorField`
   / `ColorPanel` / `Swatch` · `AngleDial` · `XYPad` · `Vec3Fields` (`lockable` = uniform scale lock, `unit`, `defaultValue`) · `SizeFields` · `SeedField` ·
   `CurveEditor` / `CurveGlyph` · `SpringEditor` · `GradientEditor` · `PaletteField` · `ImageDrop` ·
-  `Monitor` · `Knob` (rotary, log taper, bipolar) · `Button` (variants ghost/default/primary/outline/danger; sizes sm/md/lg/icon/icon-sm/control — `control` is square at field height, for a button beside a field) ·
+  `Monitor` · `Knob` (rotary, log taper, bipolar) · `Button` (variants ghost/default/primary/outline/danger; sizes sm/md/lg/icon/icon-sm/control/dock — `control` is square at field height, for a button beside a field; `dock` is an action inside `ToolDock`) ·
   `IconButton icon label shortcut active` · `Tip label shortcut` · `Kbd` · `Badge tone` · `Divider`.
 - `Timeline clock lanes hotkeys?` — read-only beat view + transport (loop / ping-pong / once). Lanes: `{ id, label, start, end }` bars, `{ kind: 'keys', keys: [{ t, value, selected }] }`,
   `{ kind: 'markers', keys }`; `depth` indents. Derive lanes from the render maths.
@@ -385,6 +391,8 @@ textures inside it.
 - Hotkeys: `useHotkeys({ 'mod+e': fn, t: { run, label: 'Text tool', group: 'Tools' } }, deps, { priority })`.
   One dispatcher; shell bindings (priority 10) beat kit defaults (0); labelled bindings appear in the
   `?` sheet automatically; dev warns on duplicates. `useHoldKey('\\', (down) => …)` for hold-to-peek.
+  While a modal is open (the `?` sheet, ⌘K, a kit `Dialog`) shortcuts pause; a modal of your own calls
+  `pauseHotkeys()` (returns the resume) and a binding that must still run passes `{ modal: true }`.
   Space/Enter on a focused button go to the button. A bare `space` binding (play / pause) fires on
   release and only if the pointer wasn't pressed meanwhile, so Space+drag pans without toggling playback.
   A focused number field or slider owns digits, Backspace, Delete and arrows; typing a digit into a focused
