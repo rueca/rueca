@@ -24,7 +24,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties
 import { createPortal } from 'react-dom'
 import { createStore } from 'zustand/vanilla'
 import { useStore } from 'zustand'
-import { ArrowUp, Check, RotateCcw, Trash2, History } from 'lucide-react'
+import { ArrowUp, Check, RotateCcw, Sparkle, Trash2, History } from 'lucide-react'
 import { Popover } from '@base-ui/react/popover'
 import { useParamState, type AnyParams } from '../core/params'
 import type { HistoryLike } from '../core/history'
@@ -793,7 +793,7 @@ function Message({ who, at, text, fresh }: { who: 'person' | 'agent'; at: string
     <div className="relative grid grid-cols-[16px_1fr] gap-x-[7px] px-3 py-2 [&+&]:border-t [&+&]:border-line">
       {fresh && <span aria-hidden className="absolute inset-y-2 left-0 w-[2px] rounded-full bg-signal" />}
       <span aria-hidden className={cn('flex size-4 items-center justify-center rounded-full text-[9px] font-semibold', who === 'agent' ? 'bg-fg text-panel' : 'bg-active text-fg')}>
-        {who === 'agent' ? '✳' : 'Y'}
+        {who === 'agent' ? <Sparkle size={10} strokeWidth={2} fill="currentColor" /> : 'Y'}
       </span>
       <div className="min-w-0">
         <div className="flex items-baseline gap-1.5"><span className="font-medium text-fg">{who === 'agent' ? 'Agent' : 'You'}</span><span className="text-fg-faint">{ago(at)}</span>{fresh && <span className="sr-only">(new)</span>}</div>
