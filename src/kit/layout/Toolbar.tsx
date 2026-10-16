@@ -8,7 +8,7 @@
        end={<><Cluster>…</Cluster><Button variant="primary">Export</Button></>}
      />
 --------------------------------------------------------------------------- */
-import { forwardRef, type ButtonHTMLAttributes, type ComponentType, type ReactNode } from 'react'
+import { createContext, forwardRef, useContext, type ButtonHTMLAttributes, type ComponentType, type ReactNode } from 'react'
 import { Command, Keyboard, LayoutGrid } from 'lucide-react'
 import { cn } from '../core/cn'
 import { useStudio } from './Studio'
@@ -37,6 +37,18 @@ export function Cluster({ children, className }: { children: ReactNode; classNam
  * the active look. A fixed caption repeats what the artboard already shows, so leave it out.
  *   <Brand name="Dither lab" doc={file.name} mark={<Glyph />} />
  */
+const BrandOverrideContext = createContext<{ mark: ReactNode; tile: boolean } | null>(null)
+
+/**
+ * A host that runs many tools (a gallery, a product site) gives them one mark: every <Brand> inside shows
+ * `mark` in place of its own. `tile={false}` (the default) draws it bare, in ink, the way a logo sits in a
+ * site header; `tile` keeps the inverted square. A tool used on its own keeps its own mark.
+ *   <BrandOverride mark={<Logo />}><Tool /></BrandOverride>
+ */
+export function BrandOverride({ mark, tile = false, children }: { mark: ReactNode; tile?: boolean; children: ReactNode }) {
+  return <BrandOverrideContext.Provider value={{ mark, tile }}>{children}</BrandOverrideContext.Provider>
+}
+
 export function Brand({ name, doc, mark, href = '#/', menu = [] }: {
   name: string; doc?: ReactNode; mark?: ReactNode
   /** where "All tools" goes; false drops it */
@@ -45,9 +57,11 @@ export function Brand({ name, doc, mark, href = '#/', menu = [] }: {
   menu?: MenuItem[]
 }) {
   const { layout } = useStudio()
+  const host = useContext(BrandOverrideContext)
   const palette = usePaletteAvailable()
   const items: MenuItem[] = [
-    { type: 'label', label: name },
+    { type: 'title', label: name },
+    { type: 'separator' },
     ...(href ? [{ label: 'All tools', icon: LayoutGrid, onClick: () => { location.href = href } } as MenuItem] : []),
     // the palette and the shortcut sheet are otherwise only reachable by knowing ⌘K and ?
     ...(palette ? [
@@ -58,20 +72,22 @@ export function Brand({ name, doc, mark, href = '#/', menu = [] }: {
   ]
   return (
     <div className={cn('flex h-bar min-w-0 items-center gap-1', doc ? 'pr-3 pl-1' : 'px-1', layout !== 'docked' && 'cluster')}>
-      <Menu items={items} trigger={<BrandMark name={name} mark={mark} />} />
+      <Menu items={items} trigger={<BrandMark name={name} mark={host ? host.mark : mark} tile={host ? host.tile : true} />} />
       {/* a few px of room inside the truncating box, so an editable title's focus ring isn't cut to slivers */}
       {doc && <span className="-mx-[3px] min-w-0 truncate p-[3px] text-title text-fg-muted">{doc}</span>}
     </div>
   )
 }
 
-const BrandMark = forwardRef<HTMLButtonElement, { name: string; mark?: ReactNode } & ButtonHTMLAttributes<HTMLButtonElement>>(({ name, mark, className, ...rest }, ref) => (
+const BrandMark = forwardRef<HTMLButtonElement, { name: string; mark?: ReactNode; tile?: boolean } & ButtonHTMLAttributes<HTMLButtonElement>>(({ name, mark, tile = true, className, ...rest }, ref) => (
   <Tip label={name}>
     <button ref={ref} type="button" aria-label={name} {...rest}
       className={cn('flex size-icon shrink-0 items-center justify-center rounded-control outline-none hover:bg-hover focus-visible:ring-2 focus-visible:ring-signal data-[popup-open]:bg-hover', className)}>
-      <span className="flex size-5 items-center justify-center rounded-control bg-fg text-field">
-        {mark ?? <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>}
-      </span>
+      {tile ? (
+        <span className="flex size-5 items-center justify-center rounded-control bg-fg text-field">
+          {mark ?? <svg viewBox="0 0 16 16" width="11" height="11" aria-hidden><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" strokeWidth="2.2" /></svg>}
+        </span>
+      ) : <span className="flex items-center justify-center text-fg">{mark}</span>}
     </button>
   </Tip>
 ))
