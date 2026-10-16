@@ -2,10 +2,28 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath } from 'node:url'
+import { createHash } from 'node:crypto'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { site } from './src/site.config'
 import { ruecaNotes } from './src/kit/notes-server/vite'
 
+/* Every file under public/thumbs, by content hash (src/gallery/thumbs.ts): thumbnail URLs change when the picture
+   does, so a cached old picture can't outlive a deploy. Names with a space are Finder/iCloud copies: skipped. */
+function thumbVersions(dir = 'public/thumbs', rel = 'thumbs'): Record<string, string> {
+  const out: Record<string, string> = {}
+  let names: string[] = []
+  try { names = readdirSync(dir) } catch { return out }
+  for (const n of names) {
+    if (n.includes(' ') || n.startsWith('.')) continue
+    const p = `${dir}/${n}`, r = `${rel}/${n}`
+    if (statSync(p).isDirectory()) Object.assign(out, thumbVersions(p, r))
+    else out[r] = createHash('sha1').update(readFileSync(p)).digest('hex').slice(0, 10)
+  }
+  return out
+}
+
 export default defineConfig({
+  define: { __THUMB_VERSIONS__: JSON.stringify(thumbVersions()) },
   // GitHub Pages serves a project site under /<repo>/; the deploy workflow sets BASE_PATH.
   base: process.env.BASE_PATH || '/',
   plugins: [

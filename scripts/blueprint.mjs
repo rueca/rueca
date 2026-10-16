@@ -22,13 +22,18 @@ export function traceBlueprint() {
   const shown = (e) => { const s = getComputedStyle(e); return s.visibility !== 'hidden' && s.display !== 'none' && +s.opacity > 0.05 }
   const radius = (e) => Math.min(16, parseFloat(getComputedStyle(e).borderTopLeftRadius) || 0)
 
-  // panels: floating (.panel, .cluster) and docked (<aside>, the docked toolbar <header>)
-  const chrome = [...document.querySelectorAll('.panel, .cluster, aside')].filter((e) => shown(e) && vis(e.getBoundingClientRect()))
-  // nested chrome (a panel inside a panel) is drawn once, as its outer edge
-  for (const e of chrome) { if (e.parentElement?.closest('.panel, .cluster, aside')) continue; const r = e.getBoundingClientRect(); out.push({ k: 'box', x: R(r.x), y: R(r.y), w: R(r.width), h: R(r.height), r: radius(e) }) }
-  // what a panel hides past its edge (scrolled or clipped) isn't drawn
-  const within = (r, e) => { const c = e.closest('.panel, .cluster, aside'); if (!c) return true; const b = c.getBoundingClientRect(); return r.top >= b.top - 1 && r.bottom <= b.bottom + 1 && r.left >= b.left - 1 && r.right <= b.right + 1 }
   const alpha = (bg) => { const m = bg.match(/rgba?\(([^)]+)\)/); if (!m) return 0; const p = m[1].split(/[ ,/]+/).filter(Boolean); return p.length > 3 ? parseFloat(p[3]) : 1 }
+  // panels: floating (.panel, .cluster) and docked (an <aside> with its own fill). In the floating layouts an <aside>
+  // is only a transparent column holding panels: draw the panels in it, not the column (a column drawn as one tall
+  // box didn't match panels that hug their content)
+  const SEL = '.panel, .cluster, aside'
+  const drawn = (e) => e.matches('.panel, .cluster') || alpha(getComputedStyle(e).backgroundColor) > 0.5
+  const outer = (e) => { let p = e.parentElement?.closest(SEL); while (p && !drawn(p)) p = p.parentElement?.closest(SEL); return p }
+  const chrome = [...document.querySelectorAll(SEL)].filter((e) => drawn(e) && shown(e) && vis(e.getBoundingClientRect()))
+  // nested chrome (a panel inside a panel) is drawn once, as its outer edge
+  for (const e of chrome) { if (outer(e)) continue; const r = e.getBoundingClientRect(); out.push({ k: 'box', x: R(r.x), y: R(r.y), w: R(r.width), h: R(r.height), r: radius(e) }) }
+  // what a panel hides past its edge (scrolled or clipped) isn't drawn
+  const within = (r, e) => { let c = e.closest(SEL); while (c && !drawn(c)) c = c.parentElement?.closest(SEL); if (!c) return true; const b = c.getBoundingClientRect(); return r.top >= b.top - 1 && r.bottom <= b.bottom + 1 && r.left >= b.left - 1 && r.right <= b.right + 1 }
 
   // artboards on the stage: the biggest framed boxes outside the chrome (a background or a shadow), outermost only
   const boards = []
