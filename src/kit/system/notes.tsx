@@ -823,13 +823,17 @@ function ReplyBox({ placeholder, onPost }: { placeholder: string; onPost: (text:
           if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); post() }
           if (e.key === 'Escape') notesUI.setState({ open: null })
         }}
-        className="min-h-control flex-1 resize-none rounded-control bg-control px-2 py-[3px] text-ui leading-snug text-fg outline-none placeholder:text-fg-faint focus:shadow-[inset_0_0_0_1px_var(--signal)]" />
-      <Button size="icon-sm" variant={text.trim() ? 'primary' : 'ghost'} aria-label="Send reply" disabled={!text.trim() || sending} onClick={post}><ArrowUp size={12} strokeWidth={2} /></Button>
+        className={FIELD} />
+      <Button size="icon-sm" variant={text.trim() ? 'primary' : 'ghost'} className={SEND} aria-label="Send reply" disabled={!text.trim() || sending} onClick={post}><ArrowUp size={12} strokeWidth={2} /></Button>
     </div>
   )
 }
 
 const MAX_TEXT = 5000
+/* The comment and reply fields rest at one control height (one line, padded to centre it, at every density), and the send
+   button beside them is a square of that same height, kept at the bottom as the field grows. */
+const FIELD = 'min-h-control flex-1 resize-none rounded-control bg-control px-2 py-[calc((var(--spacing-control)-1lh)/2)] text-ui leading-snug text-fg outline-none placeholder:text-fg-faint focus:shadow-[inset_0_0_0_1px_var(--signal)]'
+const SEND = 'size-control shrink-0 self-end'
 
 function Composer({ draft, onPost, label, className, style }: { draft: Draft; onPost: (text: string) => void; label?: string; className?: string; style?: CSSProperties }) {
   const text = draft.text ?? ''
@@ -849,8 +853,8 @@ function Composer({ draft, onPost, label, className, style }: { draft: Draft; on
             if (e.key === 'Enter' && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) { e.preventDefault(); post() }
             if (e.key === 'Escape') notesUI.setState({ draft: null })
           }}
-          className="min-h-control flex-1 resize-none rounded-control bg-control px-2 py-1.5 text-ui leading-snug text-fg outline-none placeholder:text-fg-faint focus:shadow-[inset_0_0_0_1px_var(--signal)]" />
-        <Button size="icon-sm" variant={text.trim() ? 'primary' : 'ghost'} aria-label="Send comment" disabled={!text.trim() || sending} onClick={post}><ArrowUp size={12} strokeWidth={2} /></Button>
+          className={FIELD} />
+        <Button size="icon-sm" variant={text.trim() ? 'primary' : 'ghost'} className={SEND} aria-label="Send comment" disabled={!text.trim() || sending} onClick={post}><ArrowUp size={12} strokeWidth={2} /></Button>
       </div>
       {text.length > MAX_TEXT - 500 && <span className="px-1 text-fg-faint tabular">{MAX_TEXT - text.length} characters left</span>}
     </div>
