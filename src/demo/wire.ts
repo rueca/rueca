@@ -8,14 +8,14 @@
 --------------------------------------------------------------------------- */
 
 export const WIRE = {
-  paper: '#F3F1EB',  // Lana (brand/RUECA.md §2)
-  card: '#FAF8F4',   // a surface sitting on the paper
-  sheet: '#E7E3DB',  // the blank sheet / empty slot
-  ink: '#181411',    // Nogal
-  muted: '#6E6A64',  // ink at roughly 60%
-  faint: '#A39E96',
-  line: '#DCD7CE',   // hairline structure
-  pen: '#E8582C',    // the red pen (Achiote): annotation only
+  paper: '#F5F3F2',  // Lana (brand/RUECA.md §2)
+  card: '#FCFAF9',   // a surface sitting on the paper
+  sheet: '#E5E3E2',  // the blank sheet / empty slot
+  ink: '#171615',    // Nogal
+  muted: '#6C6A69',  // ink at roughly 60%
+  faint: '#A09E9D',
+  line: '#D9D7D6',   // hairline structure
+  pen: '#F6571C',    // the red pen (Achiote): annotation only
 } as const
 
 const MONO = "'Geist Mono Variable', 'Geist Mono', ui-monospace, Menlo, monospace"

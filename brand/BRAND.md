@@ -12,12 +12,31 @@ Renamed from Trompo (it read like "Trump"). *Rueca* is Spanish for spinning whee
 | Body | **IBM Plex Sans** (free, OFL), chosen 11 Oct for Lámina. It was born in IBM's engineering documentation, so it's the technical-manual voice under Signifier's engraved one. It replaced Libre Franklin, which read heavy under Signifier 400. Runner-up: Instrument Sans. Free fonts only for body. |
 | Handwriting | **La Belle Aurore** 400 (free, OFL), chosen 11 Oct for Lámina: a fine-nib period hand, the plate annotator’s pen. Used for labels, measurements, red-pen notes and the label above each heading; never body copy or buttons. It replaced Caveat (a felt-tip marker). |
 | Code | Geist Mono, for commands only |
-| Palette | "Figma made in the 90s": Lana paper (#F3F1EB), Platino chrome, Nogal walnut ink (#181411), Rubia oxblood, plus flat dyed brights Achiote · Cochinilla · Malva · Cielo · Hoja · Gualda, and Añil for lines. Ramps 50–900 per family in `brand/data.js` (`ruecaRamps`). |
-| Accent | Achiote with walnut text on it (never white on a bright). Product previews stay neutral; the tools stay blue. |
+| Palette | **Mora** (16 Oct, replaced the walnut-and-wool palette): near-neutral paper and ink, Achiote, Mora the plum, and accents Malva (lilac), Cielo (blue-violet), Gualda (yellow), Hoja (lime). Values and rules: `brand/RUECA.md` → Colour; history below under "Palette: Mora". |
+| Accent | Achiote "Clean" (#F6571C, #FF6A2C on dark) with ink text on it (never white on a bright). Product previews stay neutral; the tools stay blue. |
 | Mark | Rafael's two-wheel logo (`rueca-logo.svg`, in `src/landing/parts.tsx`), one colour for now; a dyed version is ready behind `LOGO_IN_COLOUR`. |
 | Hero texture | The logo's two wheels and drive band as faint contour rings (`src/landing/WheelField.tsx`), HEX-style pattern rather than an illustration. |
 
 The board's `#rueca` section has the research (Trove patterns, HEX/ayushsoni references), the options and the reasoning. Everything below is the Trompo-era record.
+
+## Palette: Mora (16 Oct 2026)
+
+**Why.** Rafael: the palette's vintage tint felt "too on the nose"; pull it back and modernise it while it still feels nostalgic. He kept Achiote.
+
+**How we got there (one session, 16 Oct).**
+1. Four directions on the same Achiote: A · Papel blanco (cool the neutrals), B · Naranja y añil, C · Risografía, D · Platino. Rafael picked **A** as the base.
+2. References: Planted (LIT), iFest (Maat Studio), Euphemia (Love + Money), MoMA Family Festival (Little Troop), Stack Overflow (Koto), all from brrranding.com. He narrowed them to Stack Overflow, iFest and MoMA. All three share one structure: a hot orange-red, a violet, a pink, a green, and one or two extras.
+3. Four blends on A's neutrals: Hilo (the midpoint), **Mora** (leans Stack Overflow), Eléctrico (iFest), Museo (MoMA). Rafael chose **Mora**, but with surfaces truer to neutral.
+4. On the site (as a `?palette=mora` trial): fully neutral greys, then "leave a very small tint" (chroma 0.0024 at hue 45). On the light theme, the darkened yellow, lime and plum read muddy, so their text values turn hue as they darken (marigold, clean green, raspberry). The hero's yellow loop read muddy too and became **Malva**.
+5. The logo race in Mora's colours read as a rainbow. Stack Overflow's rules fixed it: the **Stack** sequence (each shape's own two accents, then Achiote, then the plum, then ink).
+6. Achiote was the least saturated colour beside the new accents and read a touch brick, so it went **Clean**: the same hue, ~10% more chroma (#E8582C → #F6571C). "Vivid" (#FA5F00) was rejected because it lands on Stack Overflow's own orange.
+7. The kit section's six drawings each had a different bright (a rainbow). They now use three, Achiote, Cielo and Malva, with Achiote last on Hand-off.
+8. The shells' sample content followed (the shared demo palette, each shell's presets, the demo pictures re-tinted by `scripts/retint-demo.py`) and their thumbnails were reshot.
+
+**Stack Overflow audit** (official palette at stackoverflow.design/brand/color): orange #FF5E00, "Medium Orange" #6E1527 (the burgundy, named as orange's shade), pink #F39FFF, purple #9D9CFF, yellow #FFCC00, blue #5074EF, green #86AF25, neutrals and darks. What we borrowed: orange is in every composition (the top face of all 12 approved stack combinations), each piece uses two accents and never all of them, accents are never backgrounds, orange's share is set by surface (product 5%, poster 20%, campaign 50%), orange lands last as the punchline, and they avoid gradients, shadows and all-dark combinations. Not borrowed yet: a soft periwinkle like their #9D9CFF, the light cool accent Mora doesn't have. Pulling the plum toward #6E1527 would tie it closer to Achiote; it's an option, not done.
+
+**Changed in code:** `src/landing/landing.css`, `plate.css`, `LogoIntro.tsx` (Mora dyes and the Stack sequence), `LiveShell.tsx` (window dots), `parts.tsx` (colour E values), `brandArt.tsx`, `public/favicon.svg`, and the drawings (`brand/illustration-trials/anatomy/shared.mjs` → `src/landing/art/`). The shells' demo artwork keeps its own colours: it's sample client work, not Rueca's palette.
+
 
 ---
 

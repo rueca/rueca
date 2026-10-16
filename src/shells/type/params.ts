@@ -27,12 +27,12 @@ export const FORMATS: Record<string, { w: number; h: number; label: string }> = 
 
 export const PAIRS: { name: string; fg: string; bg: string }[] = [
   // Rueca's palette: ink on paper, and the brights with ink on them (never white on a bright)
-  { name: 'Ink on paper', fg: '#181411', bg: '#f3f1eb' },
-  { name: 'Paper on ink', fg: '#f3f1eb', bg: '#181411' },
-  { name: 'Achiote', fg: '#181411', bg: '#e8582c' },
-  { name: 'Gualda on Rubia', fg: '#f2c744', bg: '#5e2219' },
-  { name: 'Cielo', fg: '#181411', bg: '#5db4e8' },
-  { name: 'Malva', fg: '#181411', bg: '#a88bf6' },
+  { name: 'Ink on paper', fg: '#171615', bg: '#f5f3f2' },
+  { name: 'Paper on ink', fg: '#f5f3f2', bg: '#171615' },
+  { name: 'Achiote', fg: '#171615', bg: '#f6571c' },
+  { name: 'Gualda on Mora', fg: '#ffd000', bg: '#6e1a3e' },
+  { name: 'Cielo on paper', fg: '#3d5bd6', bg: '#f5f3f2' },
+  { name: 'Malva on ink', fg: '#f2b3ff', bg: '#171615' },
 ]
 
 export const schema = defineSchema({
@@ -104,8 +104,8 @@ export const schema = defineSchema({
   }),
 
   colour: folder('Colour', {
-    fg: p.color('#181411', { label: 'Text', alpha: false }),
-    bg: p.color('#f3f1eb', { label: 'Paper', alpha: false }),
+    fg: p.color('#171615', { label: 'Text', alpha: false }),
+    bg: p.color('#f5f3f2', { label: 'Paper', alpha: false }),
     contrast: p.monitor(() => contrastLabel(), { label: 'Contrast', hint: 'WCAG 2 contrast ratio of text on paper.' }),
   }),
 
@@ -148,10 +148,10 @@ export const params = createParams(schema, {
   id: 'type',
   version: 2, // v2: Newsreader and Rueca's palette; v1 was Inter on generic pairs
   presets: [
-    { name: 'Editorial serif', values: { family: 'newsreader', wght: 340, opsz: 72, size: 140, leading: 1.02, tracking: -0.02, fg: '#181411', bg: '#f3f1eb', italic: true } },
-    { name: 'Swiss poster', values: { family: 'inter', wght: 820, size: 196, leading: 0.9, tracking: -0.05, textCase: 'none', fg: '#181411', bg: '#e8582c', format: 'poster' } },
-    { name: 'Hairline', values: { family: 'inter', wght: 120, size: 168, leading: 1.02, tracking: -0.01, fg: '#f2c744', bg: '#5e2219' } },
-    { name: 'Terminal', values: { family: 'mono', wght: 500, size: 92, leading: 1.2, tracking: 0, textCase: 'upper', fg: '#5db4e8', bg: '#181411' } },
+    { name: 'Editorial serif', values: { family: 'newsreader', wght: 340, opsz: 72, size: 140, leading: 1.02, tracking: -0.02, fg: '#171615', bg: '#f5f3f2', italic: true } },
+    { name: 'Swiss poster', values: { family: 'inter', wght: 820, size: 196, leading: 0.9, tracking: -0.05, textCase: 'none', fg: '#171615', bg: '#f6571c', format: 'poster' } },
+    { name: 'Hairline', values: { family: 'inter', wght: 120, size: 168, leading: 1.02, tracking: -0.01, fg: '#ffd000', bg: '#6e1a3e' } },
+    { name: 'Terminal', values: { family: 'mono', wght: 500, size: 92, leading: 1.2, tracking: 0, textCase: 'upper', fg: '#7088ff', bg: '#171615' } },
   ],
 })
 export type V = ReturnType<typeof params.values>

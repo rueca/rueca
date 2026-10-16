@@ -13,23 +13,25 @@
    photographs are plain WebP. NOT part of the kit or the registry.
 --------------------------------------------------------------------------- */
 
-/** Rueca's palette (brand/RUECA.md §2). The shells' own UI stays neutral and blue; this is for their content. */
+/** Rueca's palette, Mora since 16 Oct (brand/RUECA.md → Colour). The shells' own UI stays neutral and blue; this is
+    for their content. The keys keep their old dye names: `rubia` is now Mora the plum, `cochinilla` its bright fill,
+    `anil` Cielo's deep blue. */
 export const DYE = {
-  lana: '#F3F1EB', // paper
-  card: '#FAF8F4', // a surface on the paper
-  platino: '#DCDAD5',
-  nogal: '#181411', // ink
-  mute: '#6E6A64',
-  faint: '#A39E96',
-  line: '#DCD7CE',
-  rubia: '#5E2219',
-  achiote: '#E8582C',
-  cochinilla: '#EE7A68',
-  malva: '#A88BF6',
-  cielo: '#5DB4E8',
-  hoja: '#2FA57C',
-  gualda: '#F2C744',
-  anil: '#3440C8',
+  lana: '#F5F3F2', // paper
+  card: '#FCFAF9', // a surface on the paper
+  platino: '#DCDAD9',
+  nogal: '#171615', // ink
+  mute: '#6C6A69',
+  faint: '#A09E9D',
+  line: '#D9D7D6',
+  rubia: '#6E1A3E',
+  achiote: '#F6571C',
+  cochinilla: '#B0006A',
+  malva: '#EFA6FF',
+  cielo: '#5070F0',
+  hoja: '#84C900',
+  gualda: '#FFD000',
+  anil: '#3D5BD6',
 } as const
 
 /** A demo picture's URL (works under any Vite base). */
@@ -81,12 +83,12 @@ export const AGALLA = {
   hero: demo('agalla/hero.webp'),
   still: demo('agalla/still.webp'),
   inks: [
-    { id: 'achiote', name: 'Achiote', dye: DYE.achiote, ground: '#F6D6C8', from: 'Annatto seed, Yucatán', line: 'The red of the annatto seed, warm as brick.', price: '€14', img: demo('agalla/ink-achiote.webp') },
-    { id: 'cochinilla', name: 'Cochinilla', dye: DYE.cochinilla, ground: '#FADCD6', from: 'Cochineal, Oaxaca', line: 'Crimson from a beetle that lives on cactus.', price: '€18', img: demo('agalla/ink-cochinilla.webp') },
-    { id: 'gualda', name: 'Gualda', dye: DYE.gualda, ground: '#FBEFC6', from: 'Weld, La Mancha', line: 'The yellow painters used for three hundred years.', price: '€14', img: demo('agalla/ink-gualda.webp') },
-    { id: 'anil', name: 'Añil', dye: DYE.cielo, ground: '#D7ECF8', from: 'Indigo, Guatemala', line: 'Blue that darkens as it dries.', price: '€16', img: demo('agalla/ink-anil.webp') },
+    { id: 'achiote', name: 'Achiote', dye: DYE.achiote, ground: '#F7D5CB', from: 'Annatto seed, Yucatán', line: 'The red of the annatto seed, warm as brick.', price: '€14', img: demo('agalla/ink-achiote.webp') },
+    { id: 'cochinilla', name: 'Cochinilla', dye: DYE.cochinilla, ground: '#F8DBE5', from: 'Cochineal, Oaxaca', line: 'Crimson from a beetle that lives on cactus.', price: '€18', img: demo('agalla/ink-cochinilla.webp') },
+    { id: 'gualda', name: 'Gualda', dye: DYE.gualda, ground: '#FCEFC6', from: 'Weld, La Mancha', line: 'The yellow painters used for three hundred years.', price: '€14', img: demo('agalla/ink-gualda.webp') },
+    { id: 'anil', name: 'Añil', dye: DYE.cielo, ground: '#E1E8FB', from: 'Indigo, Guatemala', line: 'Blue that darkens as it dries.', price: '€16', img: demo('agalla/ink-anil.webp') },
     { id: 'nogal', name: 'Nogal', dye: '#8A5A3A', ground: '#EDE0D2', from: 'Walnut husk, Navarra', line: 'Brown ink for letters that last.', price: '€12', img: demo('agalla/ink-nogal.webp') },
-    { id: 'hoja', name: 'Hoja', dye: DYE.hoja, ground: '#D2EDE2', from: 'Nettle and alum, Asturias', line: 'A green you can only get from leaves.', price: '€14', img: demo('agalla/ink-hoja.webp') },
+    { id: 'hoja', name: 'Hoja', dye: DYE.hoja, ground: '#DFEAD4', from: 'Nettle and alum, Asturias', line: 'A green you can only get from leaves.', price: '€14', img: demo('agalla/ink-hoja.webp') },
   ] as Ink[],
 } as const
 

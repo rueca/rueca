@@ -36,7 +36,7 @@ const LIB: { group: string; items: { label: string; kind: ClipKind; patch: Parti
     group: 'Text', items: [
       { label: 'Headline', kind: 'text', patch: { name: 'Headline', text: 'Big idea', font: 'display', weight: 800, size: 150, tracking: -0.04 }, preview: <span className="text-[15px] font-extrabold tracking-tight">Aa</span> },
       { label: 'Subtitle', kind: 'text', patch: { name: 'Subtitle', text: 'A line that explains it', font: 'sans', weight: 500, size: 56, color: WIRE.muted, tracking: -0.01, y: 0.55, enter: { preset: 'blur', dur: 600, ease: [0.16, 1, 0.3, 1] } }, preview: <span className="text-[12px] font-medium">Aa</span> },
-      { label: 'Caption', kind: 'text', patch: { name: 'Caption', text: 'say it in captions', font: 'sans', weight: 700, size: 64, color: WIRE.ink, highlight: WIRE.sheet, y: 0.7, tracking: -0.01, enter: { preset: 'pop', dur: 400, ease: [0.34, 1.56, 0.64, 1] } }, preview: <span className="rounded-[3px] bg-[#E8E1D6] px-1 text-[11px] font-bold text-[#1C1A19]">Aa</span> },
+      { label: 'Caption', kind: 'text', patch: { name: 'Caption', text: 'say it in captions', font: 'sans', weight: 700, size: 64, color: WIRE.ink, highlight: WIRE.sheet, y: 0.7, tracking: -0.01, enter: { preset: 'pop', dur: 400, ease: [0.34, 1.56, 0.64, 1] } }, preview: <span className="rounded-[3px] bg-[#E3E1E1] px-1 text-[11px] font-bold text-[#1C1A19]">Aa</span> },
       { label: 'Mono label', kind: 'text', patch: { name: 'Label', text: 'new · v2.0', font: 'mono', weight: 500, size: 38, tracking: 0.06, color: WIRE.muted, y: 0.3, enter: { preset: 'typewriter', dur: 600, ease: [0, 0, 1, 1] } }, preview: <span className="font-mono text-[11px]">a_</span> },
     ],
   },

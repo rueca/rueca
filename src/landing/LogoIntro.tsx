@@ -1,7 +1,8 @@
 /* The nav logo's entrance: E2, the approved logo animation (brand/logo/fan/, e2-approved.json,
    Rafael 11 Oct), redrawn in SVG for the header so the page doesn't load the kit's canvas tool.
-   - The mark's three shapes race to fill themselves: six folds of dye a beat apart, ink last, each
+   - The mark's three shapes race to fill themselves: folds of dye a beat apart, ink last, each
      shape from its own start (the band runs clockwise along its centreline, the discs sweep round).
+     Since Mora (16 Oct) each shape races four folds, the "Stack" sequence below, not E2's six.
    - At 82% of the race the word wipes in left to right.
    - In the header it all happens in place (Rafael): the mark races where the logo sits, flush left, at its
      final size, and the word's wipe is the only movement, horizontal. (E2 proper races the mark centred and
@@ -16,26 +17,31 @@ import { Logo } from './parts'
 
 // E2's values (ms), from brand/logo/fan/e2-approved.json
 const DELAY = 450 // ms after the nav mounts, so the page settles first
-const N = 6, STAGGER = 130, INK_GAP = 80, TYPE_AT = 0.82, WORD_DUR = 800
+const STAGGER = 130, INK_GAP = 80, TYPE_AT = 0.82, WORD_DUR = 800
 const RACE = { band: { delay: 240, dur: 700, start: 0 }, wheel: { delay: 120, dur: 600, start: 270 }, whorl: { delay: 0, dur: 500, start: 27 } }
 const ease = cubicBezier([0.33, 1, 0.68, 1]), wordEase = cubicBezier([0.45, 0, 0.2, 1])
 type Shape = keyof typeof RACE
 const SHAPES: Shape[] = ['band', 'wheel', 'whorl'] // drawn in this order, as in the tool
-// each shape's dyes from its last colour fold back to the first (the tool's DYES)
+/* Each shape's dyes in race order (first fold to last, ink after): the "Stack" sequence, after Stack
+   Overflow's colour rule (Koto). Each shape gets its own pair of accents, then every shape lands on
+   Achiote, then the plum, Achiote's shadow, then ink (Rafael, 16 Oct; E2 raced all six dyes through every
+   shape, which read as a rainbow in the Mora palette). */
 const DYES: Record<Shape, Dye[]> = {
-  band: ['gualda', 'malva', 'achiote', 'cielo', 'hoja', 'cochinilla'],
-  wheel: ['malva', 'gualda', 'achiote', 'cielo', 'cochinilla', 'hoja'],
-  whorl: ['achiote', 'malva', 'cielo', 'gualda', 'hoja', 'cochinilla'],
+  band: ['malva', 'cielo', 'achiote', 'cochinilla'],
+  wheel: ['gualda', 'malva', 'achiote', 'cochinilla'],
+  whorl: ['hoja', 'cielo', 'achiote', 'cochinilla'],
 }
+const N = 4 // dye folds per shape
 type Dye = 'achiote' | 'cielo' | 'gualda' | 'malva' | 'hoja' | 'cochinilla'
-const PAPER: Record<Dye, string> = { achiote: '#E8582C', cielo: '#5DB4E8', gualda: '#F2C744', malva: '#A88BF6', hoja: '#2FA57C', cochinilla: '#EE7A68' }
-const NIGHT: Record<Dye, string> = { achiote: '#F06A3E', cielo: '#6FC0EE', gualda: '#F5D05A', malva: '#B39AF8', hoja: '#3DB68B', cochinilla: '#F38B79' }
+// the Mora palette (brand/BRAND.md); Cochinilla is Mora, the plum
+const PAPER: Record<Dye, string> = { achiote: '#F6571C', cielo: '#5070F0', gualda: '#FFD000', malva: '#EFA6FF', hoja: '#84C900', cochinilla: '#B0006A' }
+const NIGHT: Record<Dye, string> = { achiote: '#FF6A2C', cielo: '#7088FF', gualda: '#FFD84D', malva: '#F2B3FF', hoja: '#9BD83A', cochinilla: '#D23A84' }
 
 const foldStart = (s: Shape, j: number) => RACE[s].delay + j * STAGGER + (j === N ? INK_GAP : 0)
 const inkEnd = (s: Shape) => foldStart(s, N) + RACE[s].dur
-const SETTLED = Math.max(...SHAPES.map(inkEnd)) // 1800
-const WORD_START = TYPE_AT * SETTLED // 1476
-const END = Math.max(SETTLED, WORD_START + WORD_DUR) // 2276
+const SETTLED = Math.max(...SHAPES.map(inkEnd)) // 1540
+const WORD_START = TYPE_AT * SETTLED // 1263
+const END = Math.max(SETTLED, WORD_START + WORD_DUR) // 2063
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x))
 
 /** The race geometry of a lockup cut, read off its mark paths (wheel, whorl, band). */
@@ -82,7 +88,7 @@ export function LogoIntro({ height }: { height: number }) {
     const folds = SHAPES.map((s) => [...root.querySelectorAll<SVGPathElement>(`[data-shape="${s}"] [data-fold]`)])
     const finals = SHAPES.map((s) => root.querySelector<SVGPathElement>(`[data-final="${s}"]`)!)
     folds.forEach((list, si) => list.forEach((p, j) => {
-      const colour = j === N ? 'currentColor' : dye[DYES[SHAPES[si]][(N - 1 - j) % 6]]
+      const colour = j === N ? 'currentColor' : dye[DYES[SHAPES[si]][j]]
       if (SHAPES[si] === 'band') p.setAttribute('stroke', colour)
       else p.setAttribute('fill', colour)
     }))

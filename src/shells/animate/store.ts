@@ -19,8 +19,8 @@ import { demoDoc } from './demo'
 
 export const schema = defineSchema({
   artboard: folder('Artboard', {
-    bgTop: p.color('#F3F1EB', { alpha: false, label: 'Background', hint: 'Top of the artboard gradient.' }),
-    bgBottom: p.color('#F3F1EB', { alpha: false, label: 'Background end', hint: 'Bottom of the artboard gradient.' }),
+    bgTop: p.color('#F5F3F2', { alpha: false, label: 'Background', hint: 'Top of the artboard gradient.' }),
+    bgBottom: p.color('#F5F3F2', { alpha: false, label: 'Background end', hint: 'Bottom of the artboard gradient.' }),
     onion: p.boolean(false, { label: 'Onion skin', hint: 'Ghost the selected object a few frames before and after the playhead.' }),
     onionSpan: p.number(120, { min: 20, max: 500, step: 10, unit: 'ms', label: 'Onion span', hint: 'Time between ghosts.', when: (v) => v.onion }),
   }),

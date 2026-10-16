@@ -1,20 +1,21 @@
 /* A brand pattern: Truchet tiles drawn as engraved thread. Every arc is a band of
    hairlines, so neighbouring tiles join into long runs of spun thread; a few bands are
-   dyed underneath (the one flat colour block). Palettes are Rueca's natural dyes
-   (brand/data.js ruecaRamps). Pure in (values, t). */
+   dyed underneath (the one flat colour block). Palettes are Rueca's dyes in the Mora palette
+   (brand/RUECA.md → Colour): Rubia became Mora, Añil became Cielo (16 Oct). Pure in (values, t). */
 import { defineSchema, folder, p, createParams, createClock } from '@kit'
 
 export const PALETTES: Record<string, { ground: string; line: string; dyes: string[] }> = {
-  Añil: { ground: '#F3F1EB', line: '#3440C8', dyes: ['#E8582C'] },
-  Nogal: { ground: '#F3F1EB', line: '#181411', dyes: ['#F2C744'] },
-  Rubia: { ground: '#5E2219', line: '#F3F1EB', dyes: ['#F2C744'] },
-  Noche: { ground: '#151210', line: '#D7CFCA', dyes: ['#5DB4E8'] },
-  Tintes: { ground: '#F3F1EB', line: '#181411', dyes: ['#E8582C', '#EE7A68', '#A88BF6', '#5DB4E8', '#2FA57C', '#F2C744'] },
+  Cielo: { ground: '#F5F3F2', line: '#3D5BD6', dyes: ['#F6571C'] },
+  Nogal: { ground: '#F5F3F2', line: '#171615', dyes: ['#FFD000'] },
+  Mora: { ground: '#6E1A3E', line: '#F5F3F2', dyes: ['#FFD000'] },
+  Noche: { ground: '#131211', line: '#D2D0CF', dyes: ['#F2B3FF'] },
+  // Achiote with two accents, never all of them (Mora's rule)
+  Tintes: { ground: '#F5F3F2', line: '#171615', dyes: ['#F6571C', '#EFA6FF', '#5070F0'] },
 }
 
 export const schema = defineSchema({
   pattern: folder('Pattern', {
-    palette: p.select('Rubia', Object.keys(PALETTES), { publish: true, hint: 'The dye set: ground, thread and the colour block.' }),
+    palette: p.select('Mora', Object.keys(PALETTES), { publish: true, hint: 'The dye set: ground, thread and the colour block.' }),
     scale: p.number(64, { min: 24, max: 160, step: 1, unit: 'px', publish: true, label: 'Tile size' }),
     seed: p.seed(11, { publish: true, label: 'Arrangement' }),
     threads: p.number(5, { min: 1, max: 9, step: 1, label: 'Threads', hint: 'Hairlines in each band.' }),
@@ -43,7 +44,7 @@ function rng(seed: number) {
 }
 
 export function draw(ctx: CanvasRenderingContext2D, v: V, t: number, w: number, h: number) {
-  const pal = PALETTES[v.palette] ?? PALETTES.Rubia
+  const pal = PALETTES[v.palette] ?? PALETTES.Mora
   ctx.fillStyle = pal.ground
   ctx.fillRect(0, 0, w, h)
   const s = v.scale, half = s / 2, band = s * v.band

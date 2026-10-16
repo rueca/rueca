@@ -30,7 +30,7 @@ function undone() {
 function well(c) { const plan = { x: c.x - 2, y: c.y - 2, w: KEY.w + 4, d: KEY.d + 4, r: 1 }; return floor(plan, MT, 3, "") + L(k.planOutline(plan, MT, P, 3), { tone: "mid" }) }
 function keycap(c, h, isBright, mark) {
   const plan = { x: c.x, y: c.y, w: KEY.w, d: KEY.d, r: 1 }, paths = k.slabOf(plan, MT, h, P, 4, 0.8);
-  const body = isBright ? bright(paths, "hoja") : S(paths, { tone: "hi", crease: "lo" });
+  const body = isBright ? bright(paths, "malva") : S(paths, { tone: "hi", crease: "lo" });
   return body + mark(c.x + KEY.w / 2, c.y + KEY.d / 2, MT + h);
 }
 // the key is neutral, so its mark takes the theme ink ("hi"); "ink" is fixed dark, for marks on a bright
@@ -47,7 +47,7 @@ const zKey = at([Z.x + KEY.w * 0.4, Z.y + KEY.d, MT + (KEY_H - PRESSED) * 0.5]);
 const zTop = at([Z.x + KEY.w * 0.62, Z.y + KEY.d * 0.82, MT + KEY_H - PRESSED]); // the pressed key's top, near its front edge
 const back = at([TILES_X[3] + TILE.w / 2, TILES_Y + TILE.d / 2, MT + 9]);
 emit({
-  name: "working", exportName: "WORKING_SVG", bright: "hoja",
+  name: "working", exportName: "WORKING_SVG", bright: "malva",
   label: "A command key and a pressed Z key on a plate, in front of a row of saved states, the last one undone.",
   art: [plate(), history(), `<g ${up(14, 0.1)}>${undone()}</g>`, well(CMD), well(Z), keycap(CMD, KEY_H, false, cmdMark), `<g ${up(PRESSED)}>${keycap(Z, KEY_H - PRESSED, true, zText)}</g>`],
   // desktop: the arrow comes up from the right, so it lands on the key's top by its front edge, clear of the shadow cast to the right

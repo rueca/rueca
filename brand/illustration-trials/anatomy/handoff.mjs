@@ -25,7 +25,7 @@ function icon(kind, [x, y], z) {
 function doc(i) {
   const o = origin(i), z = i * T, top = z + T, f = FILES[i], last = i === FILES.length - 1;
   const ring = page(o), paths = k.extrude(ring, z, T, P, { bevel: 0.3 });
-  const [x, y] = o, out = [last ? bright(paths, "cochinilla") : S(paths, { tone: "hi", crease: "lo" })];
+  const [x, y] = o, out = [last ? bright(paths, "achiote") : S(paths, { tone: "hi", crease: "lo" })];
   // the fold: the flap's crease and its turned-over corner
   out.push(L(k.onTop([[x + DOC.w - FOLD, y], [x + DOC.w - FOLD, y + FOLD], [x + DOC.w, y + FOLD]], top, P), { tone: last ? "ink" : "lo" }));
   // the top strip: icon, then the format, in mono
@@ -41,7 +41,7 @@ const F = frame([119, 155, 463, 396]); // its outline at rest and fanned apart, 
 const settings = origin(FILES.length - 1);
 const tip = F.map(at([settings[0] + DOC.w * 0.3, settings[1] + DOC.d, (FILES.length - 1) * T])); // the agent file's front edge
 emit({
-  name: "handoff", exportName: "HANDOFF_SVG", bright: "cochinilla",
+  name: "handoff", exportName: "HANDOFF_SVG", bright: "achiote",
   label: "A fanned hand of export files with folded corners: PNG, SVG, MP4 and, on top, the settings file to hand to an agent.",
   framed: F,
   // the agent file on top stays put and the others fan back behind it, so the arrow stays on it
