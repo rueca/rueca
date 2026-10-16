@@ -86,6 +86,8 @@ write(`${SKILL}/references/kit-api.md`, banner('docs/KIT.md') + kitNote + kitDoc
 write(`${SKILL}/references/kit-components.md`, banner('docs/KIT.md §6b–') + kitNote + kitDoc.slice(cut))
 write(`${SKILL}/assets/theme.css`, `/* Copied from src/kit/theme.css by \`npm run sync\`. */\n` + read('src/kit/theme.css'))
 write(`${SKILL}/assets/studio-bridge.js`, read('public/studio-bridge.js'))
+// the notes route for static pages: scripts/notes-server.mjs runs this copy with Node's own TypeScript stripping
+write(`${SKILL}/assets/notes-handler.ts`, `// Copied from src/kit/notes-server/handler.ts by \`npm run sync\`. Edit the source, not this file.\n` + read('src/kit/notes-server/handler.ts'))
 
 const metaField = (src, k) => src.match(new RegExp(`${k}:\\s*(['"\`])((?:\\\\.|(?!\\1).)*)\\1`))?.[2]
 // The <Studio layout> a shell actually uses, read from its source (meta copy is for people; this is for agents).

@@ -179,6 +179,29 @@ describe('notes handler', () => {
     await handle(post({ kind: 'comment', text: 'far away', anchor: { on: 'canvas', x: 999, y: 0 }, snapshot }), b.r)
     expect(b.out.status).toBe(400)
   })
+  it("with cors: 'local', answers pages on other localhost ports (and nothing else)", async () => {
+    const side = createNotesHandler({ dir, cors: 'local' })
+    // a page on localhost calling 127.0.0.1 is cross-site to the browser: only the Origin decides
+    const local = { host: '127.0.0.1:4388', origin: 'http://localhost:4387', 'sec-fetch-site': 'cross-site' }
+    const pre = res()
+    await side(req({ method: 'OPTIONS', headers: local }), pre.r)
+    expect(pre.out.status).toBe(204)
+    expect(pre.out.headers['access-control-allow-origin']).toBe('http://localhost:4387')
+    const a = res()
+    await side(post({ kind: 'values', snapshot }, local), a.r)
+    expect(a.out.status).toBe(201)
+    expect(a.out.headers['access-control-expose-headers']).toContain('x-rueca-notes')
+    const foreign: Record<string, string>[] = [{ host: '127.0.0.1:4388', origin: 'https://evil.example', 'sec-fetch-site': 'cross-site' }, { host: '127.0.0.1:4388', origin: 'http://evil.example' }]
+    for (const headers of foreign) {
+      const b = res()
+      await side(post({ kind: 'values', snapshot }, headers), b.r)
+      expect(b.out.status).toBe(403)
+    }
+    // the default handler still refuses another port
+    const c = res()
+    await handle(post({ kind: 'values', snapshot }, { origin: 'http://localhost:4387', 'sec-fetch-site': 'same-site' }), c.r)
+    expect(c.out.status).toBe(403)
+  })
   it('stores only the anchor fields the format defines', async () => {
     const a = res()
     await handle(post({ kind: 'comment', text: 'x', anchor: { on: 'artboard', x: 0.1, y: 0.2, extra: 'y'.repeat(1000) }, snapshot }), a.r)

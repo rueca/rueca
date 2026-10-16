@@ -28,8 +28,27 @@ note and act on it. That way nobody retypes values, or what they saw, into the c
 
 Another Node server (express, a bare `http` server): `createNotesHandler()` from
 `notes-server/handler`, called before your own routes and before any body parser. It answers only
-local hosts (loopback, `*.localhost`, IP addresses); name others in `allowedHosts`. Next.js and static
-HTML pages have no route yet: rely on "Copy as agent prompt".
+local hosts (loopback, `*.localhost`, IP addresses); name others in `allowedHosts`.
+
+**A page with no build or dev server of its own** (plain HTML, a static folder, the hand-built
+route C):
+- Add `assets/rueca-notes.js` to the page with a `<script>` tag. It's the no-build twin of the kit's
+  notes code and speaks the same format:
+  - `ruecaNotes.snapshot({ tool, values, defaults, labels?, hints?, t? })` builds a snapshot from the
+    tool's own state
+  - `ruecaNotes.send({ kind, text?, anchor?, snapshot, image? })` sends a note, and
+    `ruecaNotes.capture(el, anchor)` makes the thumbnail (call it in the frame you just drew)
+  - `ruecaNotes.watch(fn)` delivers replies; `ruecaNotes.endpoint()` resolves to null when there's no
+    server, so hide the buttons then
+  - The comment UI (pins, composer) is the page's own.
+- Run the notes route beside the page: `node <skill>/scripts/notes-server.mjs --root <project>`
+  (port 4388, Node 23.6 or later). The client finds it on its own. It answers pages on any localhost
+  port and nothing else.
+- Already serving the page with a Node script? Mount the handler there instead:
+  `import { createNotesHandler } from '<skill>/assets/notes-handler.ts'` and call it first in the
+  request handler.
+
+Next.js has no route yet: rely on "Copy as agent prompt".
 
 ## When to read notes
 

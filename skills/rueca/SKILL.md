@@ -170,3 +170,4 @@ so they undo, persist and share — never in `useState`.
 `assets/studio-bridge.js` lets the harness drive a page on another origin.
 `scripts/accent-check.mjs` checks the accent against the rendered artboard.
 `scripts/open-notes.mjs` is the hook that tells you about open notes from the tool (`references/notes.md`).
+`scripts/notes-server.mjs` + `assets/rueca-notes.js` bring notes to a page with no dev server (`references/notes.md`).
