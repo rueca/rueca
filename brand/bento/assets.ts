@@ -1,5 +1,5 @@
 /* Everything the bento draws that has to be prepared in the browser first, loaded once before the tool mounts:
-   - fonts for the canvas (Host Grotesk, Sorts Mill Goudy, La Belle Aurore) and the lockup's word;
+   - fonts for the canvas (IBM Plex Sans, Sorts Mill Goudy, La Belle Aurore) and the lockup's word;
    - the kit drawings (src/landing/art), each turned into a standalone SVG with its styles inlined and its
      handwritten notes hidden, then loaded as images the canvas can draw (rasterised crisply at any size).
      Their parts come apart with the landing card's progress (--kp, pure CSS), so each drawing is loaded at
@@ -14,12 +14,12 @@ import { TIME_SVG } from '@/landing/art/time'
 import { STRUCTURE_SVG } from '@/landing/art/structure'
 import { WORKING_SVG } from '@/landing/art/working'
 import { HANDOFF_SVG } from './art/handoff' // re-stacked portrait for the bento (art/handoff.build.mjs); the landing keeps its own
-import hostUrl from '../fonts/host-grotesk/HostGrotesk[wght].ttf?url'
+import plexUrl from '@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2?url' // the site's text face; Host Grotesk is for the logo only (Rafael, 16 Oct)
 import goudyUrl from '@/landing/fonts/sorts-mill-goudy-regular.woff2?url'
 import handUrl from '@fontsource/la-belle-aurore/files/la-belle-aurore-latin-400-normal.woff2?url'
 import { LOCKUP, FIG1 } from './lockups'
 
-export const FONT = { sans: '"Bento Host", sans-serif', serif: '"Bento Goudy", serif', hand: '"Bento Hand", cursive' }
+export const FONT = { sans: '"Bento Plex", sans-serif', serif: '"Bento Goudy", serif', hand: '"Bento Hand", cursive' }
 
 /** the kit cards in the landing's order, each on a sheet of a second palette colour paired with its one bright
     part (Rafael: accent on accent didn't work). The pairs come from the logo race's Stack (malva–cielo,
@@ -158,7 +158,7 @@ async function pen(text: string, size: number): Promise<Pen> {
 
 export async function loadAssets() {
   await Promise.all([
-    font('Bento Host', hostUrl, '300 800'),
+    font('Bento Plex', plexUrl, '100 700'),
     font('Bento Goudy', goudyUrl),
     font('Bento Hand', handUrl),
   ])

@@ -7,7 +7,7 @@
    Pure functions of (values, t); the studio never reaches in here. */
 import { defineSchema, folder, p, createParams, createClock } from '@kit'
 import { cubicBezier } from '@kit/core/ease'
-import hostUrl from '../fonts/host-grotesk/HostGrotesk[wght].ttf?url'
+import plexUrl from '@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2?url' // the site's text face; Host Grotesk is for the logo only (Rafael, 16 Oct)
 import goudyUrl from '@/landing/fonts/sorts-mill-goudy-regular.woff2?url'
 import goudyItalicUrl from '@/landing/fonts/sorts-mill-goudy-italic.woff2?url'
 import handUrl from '@fontsource/la-belle-aurore/files/la-belle-aurore-latin-400-normal.woff2?url'
@@ -15,7 +15,7 @@ import { LOCKUP } from '../bento/lockups'
 import { ENTRIES, onColour } from '../specimen/entries'
 import malacateUrl from './engravings/malacate.webp?url'
 
-const FONT = { sans: '"Cards Host", sans-serif', serif: '"Cards Goudy", serif', hand: '"Cards Hand", cursive' }
+const FONT = { sans: '"Cards Plex", sans-serif', serif: '"Cards Goudy", serif', hand: '"Cards Hand", cursive' }
 const INK = '#171615', TEXT = '#F7F5F4'
 
 // ── Grounds: the fields Mora allows (brand/RUECA.md → Colour, rule 2), with the ink and pens that go on each ──
@@ -95,7 +95,7 @@ async function art(url: string): Promise<Art> {
 }
 export async function loadAssets() {
   await Promise.all([
-    font('Cards Host', hostUrl, '300 800'), font('Cards Goudy', goudyUrl), font('Cards Goudy', goudyItalicUrl, '400', 'italic'), font('Cards Hand', handUrl),
+    font('Cards Plex', plexUrl, '100 700'), font('Cards Goudy', goudyUrl), font('Cards Goudy', goudyItalicUrl, '400', 'italic'), font('Cards Hand', handUrl),
   ])
   const urls = [...new Set([malacateUrl, ...ENTRIES.flatMap((e) => e.art)])]
   const list = await Promise.all(urls.map(art))

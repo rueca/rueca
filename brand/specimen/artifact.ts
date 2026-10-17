@@ -10,14 +10,14 @@
 import { defineSchema, folder, p, createParams, createClock } from '@kit'
 import { cubicBezier } from '@kit/core/ease'
 import { strokesOf, timeline } from '@/landing/handwrite'
-import hostUrl from '../fonts/host-grotesk/HostGrotesk[wght].ttf?url'
+import plexUrl from '@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2?url' // the site's text face; Host Grotesk is for the logo only (Rafael, 16 Oct)
 import goudyUrl from '@/landing/fonts/sorts-mill-goudy-regular.woff2?url'
 import goudyItalicUrl from '@/landing/fonts/sorts-mill-goudy-italic.woff2?url'
 import handUrl from '@fontsource/la-belle-aurore/files/la-belle-aurore-latin-400-normal.woff2?url'
 import { ENTRIES, onColour, type Entry } from './entries'
 
 const SHEET = '#FDFBFA', INK = '#171615', TEXT = '#F7F5F4', HAIRLINE = '#DCDAD9', MUTED = '#6B6866'
-const FONT = { sans: '"Specimen Host", sans-serif', serif: '"Specimen Goudy", serif', hand: '"Specimen Hand", cursive' }
+const FONT = { sans: '"Specimen Plex", sans-serif', serif: '"Specimen Goudy", serif', hand: '"Specimen Hand", cursive' }
 
 // ── Schema ─────────────────────────────────────────────────────────────────────
 const sec = (v: number) => `${(v / 1000).toFixed(2)}s`
@@ -106,7 +106,7 @@ function lines(text: string, size: number, maxW: number) {
 }
 export async function loadAssets() {
   await Promise.all([
-    font('Specimen Host', hostUrl, '300 800'),
+    font('Specimen Plex', plexUrl, '100 700'),
     font('Specimen Goudy', goudyUrl),
     font('Specimen Goudy', goudyItalicUrl, '400', 'italic'),
     font('Specimen Hand', handUrl),

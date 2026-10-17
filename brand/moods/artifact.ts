@@ -9,11 +9,11 @@
    Only the wheel turns (brand/RUECA.md §7, rule 6). Pure functions of (values, t). */
 import { defineSchema, folder, p, createParams, createClock } from '@kit'
 import { cubicBezier } from '@kit/core/ease'
-import hostUrl from '../fonts/host-grotesk/HostGrotesk[wght].ttf?url'
+import plexUrl from '@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2?url' // the site's text face; Host Grotesk is for the logo only (Rafael, 16 Oct)
 import goudyUrl from '@/landing/fonts/sorts-mill-goudy-regular.woff2?url'
 import goudyItalicUrl from '@/landing/fonts/sorts-mill-goudy-italic.woff2?url'
 
-const FONT = { sans: '"Moods Host", sans-serif', serif: '"Moods Goudy", serif' }
+const FONT = { sans: '"Moods Plex", sans-serif', serif: '"Moods Goudy", serif' }
 const DAY = { field: '#FDFBFA', ink: '#171615', muted: '#6B6866', gualda: '#FFD000', malva: '#EFA6FF', achiote: '#F6571C', cochinilla: '#B0006A', cielo: '#5070F0', hoja: '#84C900' }
 const NIGHT = { field: '#181716', ink: '#F7F5F4', muted: '#A8A4A1', gualda: '#FFD84D', malva: '#F2B3FF', achiote: '#FF6A2C', cochinilla: '#D23A84', cielo: '#7088FF', hoja: '#9BD83A' }
 type Pal = typeof DAY
@@ -52,7 +52,7 @@ export const sizeOf = (v: V) => (v.view === 'board' ? { w: 1800, h: 640 } : { w:
 
 export async function loadAssets() {
   const font = async (family: string, url: string, weight = '400', style = 'normal') => { const f = new FontFace(family, `url(${url})`, { weight, style }); await f.load(); document.fonts.add(f) }
-  await Promise.all([font('Moods Host', hostUrl, '300 800'), font('Moods Goudy', goudyUrl), font('Moods Goudy', goudyItalicUrl, '400', 'italic')])
+  await Promise.all([font('Moods Plex', plexUrl, '100 700'), font('Moods Goudy', goudyUrl), font('Moods Goudy', goudyItalicUrl, '400', 'italic')])
 }
 
 // ── The mark: Pulido geometry (brand/logo/pulido.json), as in brand/bento/artifact.ts ──
