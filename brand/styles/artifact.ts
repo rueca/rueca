@@ -10,7 +10,8 @@ import { STYLES, type StyleId } from './styles'
 import { DEFAULTS, SOURCES, MONO, loadSources, renderStyle, sources, type SourceId } from './render'
 import { markRelief, type Relief } from './tone'
 import { HANDS } from './wheel12'
-import { posterSpec, POSTER, INKS, SHEET, AT, PLATE, COATED, type El, type Font } from './posters'
+import { posterSpec, sheetSpec, POSTER, INKS, SHEET, AT, PLATE, COATED, type El, type Font } from './posters'
+import { RECIPES, compose } from './layers'
 
 export const FONT = { goudy: '"Styles Goudy", serif', plex: '"Styles Plex", sans-serif', hand: '"Styles Hand", cursive' }
 const LANA = '#FDFBFA'
@@ -18,6 +19,8 @@ const LANA = '#FDFBFA'
 export const schema = defineSchema({
   view: folder('View', {
     view: p.select('poster', [{ value: 'poster', label: 'Poster' }, { value: 'board', label: 'Sketchbook' }], { display: 'segmented', label: 'Show', hint: 'Poster: one wheel, twelve hands, the series. Sketchbook: the twelve styles side by side, each on a source of your choosing (photos, the Saxony plate, the mark).' }),
+    series: p.select('wheel', [{ value: 'wheel', label: 'One wheel' }, { value: 'images', label: 'Images' }, { value: 'layers', label: 'Layers' }], { display: 'segmented', label: 'Series', hint: 'One wheel: the mark at one crop through every style. Images: each style on its own subject. Layers: the hands stacked, overprinted, masked and screened.', when: (v) => v.view === 'poster' }),
+    recipe: p.select(RECIPES[0].id, RECIPES.map((r, i) => ({ value: r.id, label: `${i + 1}. ${r.name} · ${r.english}` })), { label: 'Layers', when: (v) => v.view === 'poster' && v.series === 'layers' }),
     style: p.select('engraving', STYLES.map((s) => ({ value: s.id, label: `${s.name} · ${s.english}` })), { label: 'Style', when: (v) => v.view === 'poster' }),
   }),
   art: folder('Art', {
@@ -64,23 +67,74 @@ export function draw(ctx: CanvasRenderingContext2D, v: V, w: number, h: number) 
 
 export const inkFor = (id: StyleId) => INKS[POSTER[id].ink].hex
 const inkOf = (id: StyleId, v: V) => (v.ink === 'default' ? INKS[POSTER[id].ink].hex : INKS[v.ink].hex)
-/** the plate, drawn by the style's hand at the series' one crop; returns the numbers it used */
+/** "Doce imágenes": each style on its own subject again (the v3 crops), for comparison with the one-wheel series */
+const IMAGES: Record<StyleId, { src: SourceId; zoom: number; fx: number; fy: number; scale: number; what: string }> = {
+  engraving: { src: 'hub', zoom: 1.35, fx: 0.42, fy: 0.5, scale: 6, what: 'the hub, photographed' },
+  wood: { src: 'wheelDark', zoom: 2.1, fx: 0.42, fy: 0.42, scale: 7, what: 'a dark wheel, photographed' },
+  stipple: { src: 'achiote', zoom: 1.55, fx: 0.42, fy: 0.62, scale: 4.4, what: 'achiote pods, photographed' },
+  lines: { src: 'mark', zoom: 1.55, fx: 0.62, fy: 0.5, scale: 6, what: 'the mark, lit as a relief' },
+  riso: { src: 'wheel', zoom: 1.5, fx: 0.62, fy: 0.5, scale: 11, what: 'the wheel side on, photographed' },
+  dither: { src: 'saxony', zoom: 1.45, fx: 0.38, fy: 0.5, scale: 4, what: 'the Saxony wheel plate' },
+  ascii: { src: 'wheelDark', zoom: 1.75, fx: 0.42, fy: 0.62, scale: 13, what: 'a dark wheel, photographed' },
+  guilloche: { src: 'mark', zoom: 1.75, fx: 0.32, fy: 0.5, scale: 7, what: 'the mark’s own geometry' },
+  moire: { src: 'mark', zoom: 1.65, fx: 0.72, fy: 0.5, scale: 9, what: 'the mark’s own geometry' },
+  plotter: { src: 'mark', zoom: 1.3, fx: 0.5, fy: 0.5, scale: 36, what: 'the mark, lit as a relief' },
+  contour: { src: 'hub', zoom: 0.95, fx: 0.5, fy: 0.5, scale: 7, what: 'the hub, photographed' },
+  cyanotype: { src: 'achiote', zoom: 1.0, fx: 0.5, fy: 0.5, scale: 4, what: 'achiote pods' },
+}
+const IMAGE_UNITS: Record<StyleId, (s: number) => string> = {
+  engraving: (s) => `line gap ${s} px · cross-hatch in the darks`, wood: (s) => `cut every ${s} px · block where the tone passes 10%`,
+  stipple: (s) => `dot ${s} px · jittered grid`, lines: (s) => `pitch ${s} px · angle 0°`, riso: (s) => `halftone ${s} px at 15° · drum grain`,
+  dither: (s) => `pixel ${s} px · Atkinson`, ascii: (s) => `cell ${s} px · ramp measured from the font`, guilloche: () => 'rose curves round both wheels · wave chain on the band',
+  moire: (s) => `rings every ${s} px · inside the mark`, plotter: (s) => `square ${s} px · disorder follows the tone`, contour: () => '22 levels · index every fifth',
+  cyanotype: () => 'grain 1.5 px · brushed coating',
+}
+/** the plate: the one-wheel series draws the relief at one crop; the image series draws each style's own subject.
+    Returns the settings line the sheet prints. */
 function drawPlate(ctx: CanvasRenderingContext2D, id: StyleId, v: V) {
   const pl = id === 'cyanotype' ? COATED : PLATE
+  if (v.series === 'images') {
+    const d = IMAGES[id], box = { ...pl }
+    renderStyle(ctx, id, box, d.src, { frame: box, zoom: d.zoom, fx: d.fx, fy: d.fy }, { ink: inkOf(id, v), paper: LANA, scale: d.scale, seed: v.seed, angle: DEFAULTS[id].angle })
+    return `from ${d.what} · ${IMAGE_UNITS[id](d.scale)}${['stipple', 'riso', 'plotter', 'cyanotype'].includes(id) ? ` · seed ${v.seed}` : ''}`
+  }
   return HANDS[id](ctx, pl, relief!, AT, { ink: inkOf(id, v), paper: LANA, seed: v.seed }, MONO)
 }
 const readouts = new Map<string, string>()
 /** the sheet's elements; the settings line is the renderer's own report (drawn once off-screen if not cached) */
 export function posterEls(id: StyleId, v: V) {
-  const key = `${id}:${v.seed}`
+  const key = `${v.series}:${id}:${v.seed}`
   if (!readouts.has(key)) { const c = document.createElement('canvas'); c.width = 1200; c.height = 1600; readouts.set(key, drawPlate(c.getContext('2d')!, id, v)) }
-  return posterSpec(id, readouts.get(key)!)
+  return posterSpec(id, readouts.get(key)!, v.series as 'wheel' | 'images')
+}
+
+const NAMES: Record<string, string> = { '#171615': 'Nogal #171615', '#F6571C': 'Achiote #F6571C', '#6E1A3E': 'Mora #6E1A3E', '#5070F0': 'Cielo #5070F0', '#EFA6FF': 'Malva #EFA6FF' }
+/** a layered sheet: the recipe composed on the plate, the type in Nogal (or the one ink, if there's only one) */
+export function layerEls(v: V, readout?: string) {
+  const i = Math.max(0, RECIPES.findIndex((r) => r.id === v.recipe)), r = RECIPES[i]
+  const key = `layers:${r.id}`
+  if (!readout && !readouts.has(key)) { const c = document.createElement('canvas'); c.width = 1200; c.height = 1600; readouts.set(key, compose(c.getContext('2d')!, r, { relief: relief!, at: AT, plate: PLATE, paper: LANA, mono: MONO })) }
+  const typeInk = r.inks.length > 1 ? '#171615' : r.inks[0]
+  return { ink: typeInk, els: sheetSpec({
+    n: i + 1, total: RECIPES.length, header: 'CAPAS, DOCE MANOS APILADAS', name: r.name, english: r.english, why: r.why, who: r.after,
+    inkLine: r.inks.length > 1 ? `${[...new Set(r.layers.map((l) => l.ink).reverse())].map((h) => NAMES[h] ?? h).join(' over ')} on Lana. Two inks; they multiply where they cross.` : `${NAMES[r.inks[0]]} on Lana #FDFBFA. One ink, screened.`,
+    light: typeInk !== '#171615' && typeInk !== '#6E1A3E', plate: PLATE,
+  }, readout ?? readouts.get(key)!) }
 }
 
 /** one poster at 1200 × 1600; `artOnly` leaves the type off (for Figma, where the type is live) */
 export function drawPoster(ctx: CanvasRenderingContext2D, id: StyleId, v: V, artOnly = false) {
+  if (v.series === 'layers') {
+    const r = RECIPES.find((x) => x.id === v.recipe) ?? RECIPES[0]
+    const readout = compose(ctx, r, { relief: relief!, at: AT, plate: PLATE, paper: LANA, mono: MONO })
+    readouts.set(`layers:${r.id}`, readout)
+    if (artOnly) return
+    const { ink, els } = layerEls(v, readout)
+    for (const e of els) if (e.kind !== 'art') drawEl(ctx, e, ink)
+    return
+  }
   const ink = inkOf(id, v)
-  readouts.set(`${id}:${v.seed}`, drawPlate(ctx, id, v))
+  readouts.set(`${v.series}:${id}:${v.seed}`, drawPlate(ctx, id, v))
   if (artOnly) return
   for (const e of posterEls(id, v)) if (e.kind !== 'art') drawEl(ctx, e, ink)
 }

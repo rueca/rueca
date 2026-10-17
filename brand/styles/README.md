@@ -28,9 +28,28 @@ No photo is involved. Each sheet prints in one ink: art, type, rules and the han
 
 The **Sketchbook** view shows the twelve styles side by side on other sources: Midjourney photographs of a spinning wheel, a hub, a spindle and achiote (`sources/`), Rafael's chosen Saxony plate, and the mark itself.
 
+## Two more series
+
+- **Images** ("Doce manos, doce imágenes"): the same sheets, but each style draws its own subject again, at the v3 crops. The subjects are photographs of a hub, a wheel or achiote, the Saxony plate, or the mark. Renders are in `renders/images/`.
+- **Layers** ("Capas, doce manos apiladas"): the hands stacked, after the layering devices in Rafael's Trove (`research/31-one-tone-styles/layering.md`). There are twelve recipes in `layers.ts`:
+  - ghost and line
+  - overprint
+  - a diagram over texture
+  - glyphs in the mark
+  - twelve hands in columns
+  - a resolution ladder
+  - type knocked out
+  - a veil
+  - and others
+
+  There's no transparency anywhere: a ghost is the same ink screened through a dither, and a second ink multiplies only where it crosses the first. Renders are in `renders/layers/`.
+
+Switch between the three with **Series** in the inspector. All three are on the Figma page, one section below the other.
+
 ## Files
 
 - `wheel12.ts`: the twelve renderers used on the posters
+- `layers.ts`: the layering recipes and compositor
 - `tone.ts`: tone maps, plus the mark's relief
 - `styles.ts` and `render.ts`: the Sketchbook renderers and sources
 - `posters.ts`: the master sheet as a list of elements, so the canvas and Figma build the same thing

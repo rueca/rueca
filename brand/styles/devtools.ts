@@ -30,17 +30,20 @@ export const art = (id: StyleId, name: string) => send(poster(id, {}, true, true
 export const spec = (id: StyleId) => A.posterEls(id, A.params.values() as A.V)
 
 /** the plate alone at `scale`×, cropped to its box, on transparent: for Figma's image fill */
-export async function plate(id: StyleId, name: string, scale = 2) {
-  const els = A.posterEls(id, A.params.values() as A.V), box = els.find((e) => e.kind === 'art')! as { x: number; y: number; w: number; h: number }
+export async function plate(id: StyleId, name: string, scale = 2, over: Partial<A.V> = {}) {
+  const v = { ...(A.params.values() as A.V), ...over } as A.V
+  const els = v.series === 'layers' ? A.layerEls(v).els : A.posterEls(id, v), box = els.find((e) => e.kind === 'art')! as { x: number; y: number; w: number; h: number }
   const c = document.createElement('canvas'); c.width = box.w * scale; c.height = box.h * scale
   const ctx = c.getContext('2d')!; ctx.scale(scale, scale); ctx.translate(-box.x, -box.y)
-  A.drawPoster(ctx, id, { ...(A.params.values() as A.V), view: 'poster', style: id } as A.V, true)
+  A.drawPoster(ctx, id, { ...v, view: 'poster', style: id } as A.V, true)
   return send(c, name)
 }
 
 /** the sheet's type and rules, resolved for Figma: final sizes, wrapped lines, and the top of each text box */
-export function figmaSpec(id: StyleId) {
-  const v = A.params.values() as A.V, els = A.posterEls(id, v)
+export function figmaSpec(id: StyleId, over: Partial<A.V> = {}) {
+  const v = { ...(A.params.values() as A.V), ...over } as A.V
+  const layered = v.series === 'layers' ? A.layerEls(v) : null
+  const els = layered ? layered.els : A.posterEls(id, v)
   const g = document.createElement('canvas').getContext('2d')!
   const out: unknown[] = []
   for (const e of els) {
@@ -55,5 +58,5 @@ export function figmaSpec(id: StyleId) {
     const top = e.y - ((lead - (asc + desc)) / 2 + asc)
     out.push({ kind: 'text', text: lines.join('\n'), font: e.font, size: Math.round(size * 100) / 100, x: e.x, top: Math.round(top * 10) / 10, lead: e.lead ?? null, align: e.align ?? 'left', rotate: e.rotate ? -e.rotate * (180 / Math.PI) : 0 })
   }
-  return { id, ink: A.inkFor(id), els: out }
+  return { id: layered ? v.recipe : id, ink: layered ? layered.ink : A.inkFor(id), els: out }
 }
