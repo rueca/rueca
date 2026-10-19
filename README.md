@@ -143,5 +143,5 @@ culori.
 ## License
 
 The code is [MIT](LICENSE) © 2026 [Rafael Cespedes](https://rafaelcespedes.com). The Rueca name, logo
-and brand (`brand/`, and the rueca.dev site's design and art) are not: see [NOTICE.md](NOTICE.md),
+and brand (the rueca.dev site's design and art, and the private brand work behind it) are not: see [NOTICE.md](NOTICE.md),
 including how you can and can't use the name.
