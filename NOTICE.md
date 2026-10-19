@@ -8,7 +8,8 @@ Rueca's **brand** is not. The MIT licence does not cover:
 
 - the name **Rueca** used as the name of a product, project or service;
 - the Rueca logo, mark and wordmark, in any file or form (including `src/landing/logo.generated.ts`);
-- everything in [`brand/`](brand/): the brand board, logo studies, palettes, type work and research;
+- the brand work behind them: the brand board, logo studies, palettes, type work and research (kept
+  privately, not in this repository);
 - the design, artwork and copy of the rueca.dev site (`src/landing/`), and its share image and icon
   (`public/og-*.jpg`, `public/favicon.svg`).
 
